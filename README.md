@@ -1,4 +1,4 @@
-# Portainer中文版
+# Portainer中文版，官方1.24汉化而来，只修改app目录里文件
 
 Docker好评率比较高的Portainer面板，完整汉化版，
 
