@@ -1,0 +1,74 @@
+<form class="form-horizontal">
+  <div class="col-sm-12 form-section-title">
+    Edge 群组
+  </div>
+  <div class="form-group">
+    <div class="col-sm-12">
+      <edge-groups-selector model="$ctrl.model.EdgeGroups" items="$ctrl.edgeGroups"></edge-groups-selector>
+    </div>
+  </div>
+
+  <!-- web-editor -->
+  <div class="col-sm-12 form-section-title">
+    Web editor
+  </div>
+  <div class="form-group">
+    <span class="col-sm-12 text-muted small">
+      您可以在 Compose 文件格式中获得更多信息
+    <a href="https://docs.docker.com/compose/compose-file/" target="_blank">
+         官方文档
+    </a>
+       .
+    </span>
+  </div>
+  <div class="form-group">
+    <div class="col-sm-12">
+      <code-editor
+        value="$ctrl.model.StackFileContent"
+        identifier="stack-creation-editor"
+        placeholder="# 在此处定义或粘贴 docker-compose 文件的内容"
+        yml="true"
+        on-change="($ctrl.editorUpdate)"
+      ></code-editor>
+    </div>
+  </div>
+  <!-- !web-editor -->
+
+  <div class="col-sm-12 form-section-title">
+    选项
+  </div>
+  <div class="form-group">
+    <div class="col-sm-12">
+      <label for="EnablePrune" class="control-label text-left">
+        精简服务
+        <portainer-tooltip position="bottom" message="精简堆栈文件中不再引用的服务。"></portainer-tooltip>
+      </label>
+      <label class="switch" style="margin-left: 20px;">
+        <input type="checkbox" name="EnablePrune" ng-model="$ctrl.model.Prune" />
+        <i></i>
+      </label>
+    </div>
+  </div>
+
+  <!-- actions -->
+  <div class="col-sm-12 form-section-title">
+    操作
+  </div>
+  <div class="form-group">
+    <div class="col-sm-12">
+      <button
+        type="button"
+        class="btn btn-primary btn-sm"
+        ng-disabled="$ctrl.actionInProgress
+                  || !$ctrl.model.EdgeGroups.length
+                  || !$ctrl.model.StackFileContent"
+        ng-click="$ctrl.submitAction()"
+        button-spinner="$ctrl.actionInProgress"
+      >
+        <span ng-hide="$ctrl.actionInProgress">更新堆栈</span>
+        <span ng-show="$ctrl.actionInProgress">正在更新...</span>
+      </button>
+    </div>
+  </div>
+  <!-- !actions -->
+</form>

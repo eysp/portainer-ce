@@ -1,0 +1,121 @@
+<div id="service-resources">
+  <rd-widget>
+    <rd-widget-header icon="fa-list-alt" title-text="Resource limits and reservations"> </rd-widget-header>
+    <rd-widget-body classes="no-padding">
+      <table class="table">
+        <tbody>
+          <tr>
+            <td style="vertical-align: middle;">
+              内存预留 (MB)
+            </td>
+            <td>
+              <input
+                class="input-sm"
+                type="number"
+                step="0.125"
+                min="0"
+                ng-model="service.ReservationMemoryBytes"
+                ng-change="updateServiceAttribute(service, 'ReservationMemoryBytes')"
+                disable-authorization="DockerServiceUpdate"
+              />
+            </td>
+            <td style="vertical-align: middle;">
+              <p class="small text-muted">
+                节点上可用于运行任务的最小内存（设置为 0 表示无限制）
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="vertical-align: middle;">
+              内存限制 (MB)
+            </td>
+            <td>
+              <input
+                class="input-sm"
+                type="number"
+                step="0.125"
+                min="0"
+                ng-model="service.LimitMemoryBytes"
+                ng-change="updateServiceAttribute(service, 'LimitMemoryBytes')"
+                disable-authorization="DockerServiceUpdate"
+              />
+            </td>
+            <td style="vertical-align: middle;">
+              <p class="small text-muted">
+                每个任务的最大内存使用量（设置为 0 表示无限制）
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="vertical-align: middle;">
+              <div>
+                CPU预留
+              </div>
+            </td>
+            <td>
+              <slider
+                model="service.ReservationNanoCPUs"
+                floor="0"
+                ceil="state.sliderMaxCpu"
+                step="0.25"
+                precision="2"
+                ng-if="service && state.sliderMaxCpu"
+                on-change="updateServiceAttribute(service, 'ReservationNanoCPUs')"
+                disable-authorization="DockerServiceUpdate"
+              ></slider>
+            </td>
+            <td style="vertical-align: middle;">
+              <p class="small text-muted">
+                节点上可用于运行任务的最低 CPU
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="vertical-align: middle;">
+              <div>
+                CPU限制
+              </div>
+            </td>
+            <td>
+              <slider
+                model="service.LimitNanoCPUs"
+                floor="0"
+                ceil="state.sliderMaxCpu"
+                step="0.25"
+                precision="2"
+                ng-if="service && state.sliderMaxCpu"
+                on-change="updateServiceAttribute(service, 'LimitNanoCPUs')"
+                disable-authorization="DockerServiceUpdate"
+              ></slider>
+            </td>
+            <td style="vertical-align: middle;">
+              <p class="small text-muted">
+                Maximum CPU usage per task
+              </p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </rd-widget-body>
+    <rd-widget-footer authorization="DockerServiceUpdate">
+      <div class="btn-toolbar" role="toolbar">
+        <div class="btn-group" role="group">
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            ng-disabled="!hasChanges(service, ['LimitNanoCPUs', 'LimitMemoryBytes', 'ReservationNanoCPUs', 'ReservationMemoryBytes'])"
+            ng-click="updateService(service)"
+            >应用更改</button
+          >
+          <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu">
+            <li><a ng-click="cancelChanges(service, ['LimitNanoCPUs', 'LimitMemoryBytes', 'ReservationNanoCPUs', 'ReservationMemoryBytes'])">重置更改</a></li>
+            <li><a ng-click="cancelChanges(service)">重置所有更改</a></li>
+          </ul>
+        </div>
+      </div>
+    </rd-widget-footer>
+  </rd-widget>
+</div>

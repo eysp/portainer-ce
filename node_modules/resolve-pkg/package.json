@@ -1,0 +1,46 @@
+{
+  "name": "resolve-pkg",
+  "version": "0.1.0",
+  "description": "Resolve the path of a package regardless of it having an entry",
+  "license": "MIT",
+  "repository": "sindresorhus/resolve-pkg",
+  "author": {
+    "name": "Sindre Sorhus",
+    "email": "sindresorhus@gmail.com",
+    "url": "sindresorhus.com"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "xo && ava"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "require",
+    "resolve",
+    "path",
+    "module",
+    "from",
+    "like",
+    "path",
+    "cwd",
+    "current",
+    "working",
+    "directory",
+    "grunt",
+    "main",
+    "entry",
+    "point"
+  ],
+  "dependencies": {
+    "resolve-from": "^2.0.0"
+  },
+  "devDependencies": {
+    "ava": "*",
+    "grunt-svgmin": "3.1.0",
+    "xo": "*"
+  }
+}

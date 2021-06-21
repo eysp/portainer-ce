@@ -1,0 +1,145 @@
+<rd-header>
+  <rd-header-title title-text="用户">
+    <a data-toggle="tooltip" title="刷新" ui-sref="portainer.users" ui-sref-opts="{reload: true}">
+      <i class="fa fa-sync" aria-hidden="true"></i>
+    </a>
+  </rd-header-title>
+  <rd-header-content>用户管理</rd-header-content>
+</rd-header>
+
+<div class="row">
+  <div class="col-lg-12 col-md-12 col-xs-12">
+    <rd-widget>
+      <rd-widget-header icon="fa-plus" title-text="添加新用户"> </rd-widget-header>
+      <rd-widget-body>
+        <form class="form-horizontal">
+          <!-- name-input -->
+          <div class="form-group">
+            <label for="username" class="col-sm-3 col-lg-2 control-label text-left">
+              名称
+              <portainer-tooltip
+                ng-if="AuthenticationMethod === 2"
+                position="bottom"
+                message="用户名必须与外部 LDAP 源中定义的用户名完全匹配。"
+              ></portainer-tooltip>
+            </label>
+            <div class="col-sm-8">
+              <div class="input-group">
+                <input type="text" class="form-control" id="username" ng-model="formValues.Username" ng-change="checkUsernameValidity()" placeholder="例如 jdoe" auto-focus />
+                <span class="input-group-addon"><i ng-class="{ true: 'fa fa-check green-icon', false: 'fa fa-times red-icon' }[state.validUsername]" aria-hidden="true"></i></span>
+              </div>
+            </div>
+          </div>
+          <!-- !name-input -->
+          <!-- new-password-input -->
+          <div class="form-group" ng-if="AuthenticationMethod === 1">
+            <label for="password" class="col-sm-3 col-lg-2 control-label text-left">密码</label>
+            <div class="col-sm-8">
+              <div class="input-group">
+                <span class="input-group-addon"><i class="fa fa-lock" aria-hidden="true"></i></span>
+                <input type="password" class="form-control" ng-model="formValues.Password" id="password" />
+              </div>
+            </div>
+          </div>
+          <!-- !new-password-input -->
+          <!-- confirm-password-input -->
+          <div class="form-group" ng-if="AuthenticationMethod === 1">
+            <label for="confirm_password" class="col-sm-3 col-lg-2 control-label text-left">确认密码</label>
+            <div class="col-sm-8">
+              <div class="input-group">
+                <span class="input-group-addon"><i class="fa fa-lock" aria-hidden="true"></i></span>
+                <input type="password" class="form-control" ng-model="formValues.ConfirmPassword" id="confirm_password" />
+                <span class="input-group-addon"
+                  ><i
+                    ng-class="{ true: 'fa fa-check green-icon', false: 'fa fa-times red-icon' }[formValues.Password !== '' && formValues.Password === formValues.ConfirmPassword]"
+                    aria-hidden="true"
+                  ></i
+                ></span>
+              </div>
+            </div>
+          </div>
+          <!-- !confirm-password-input -->
+          <!-- admin-checkbox -->
+          <div class="form-group" ng-if="isAdmin">
+            <div class="col-sm-12">
+              <label for="permissions" class="control-label text-left">
+                管理员
+                <portainer-tooltip
+                  position="bottom"
+                  message="管理员可以访问 Portainer 设置管理并完全控制所有定义的端点及其资源。"
+                ></portainer-tooltip>
+              </label>
+              <label class="switch" style="margin-left: 20px;"> <input type="checkbox" ng-model="formValues.Administrator" /><i></i> </label>
+            </div>
+          </div>
+          <!-- !admin-checkbox -->
+          <!-- teams -->
+          <div class="form-group" ng-if="!formValues.Administrator">
+            <div class="col-sm-12">
+              <label class="control-label text-left">
+                添加到团队
+              </label>
+              <span class="small text-muted" style="margin-left: 20px;" ng-if="teams.length === 0">
+                您似乎没有任何团队可以将用户添加到其中。 前往<a ui-sref="portainer.teams">团队视图</a>创建一些。
+              </span>
+              <span
+                isteven-multi-select
+                ng-if="teams.length > 0"
+                input-model="teams"
+                output-model="formValues.Teams"
+                button-label="Name"
+                item-label="Name"
+                tick-property="ticked"
+                helper-elements="filter"
+                search-property="Name"
+                translation="{nothingSelected: 'Select one or more teams', search: '搜索...'}"
+                style="margin-left: 20px;"
+              >
+              </span>
+            </div>
+          </div>
+          <!-- !teams -->
+          <div class="form-group" ng-if="isAdmin && !formValues.Administrator && formValues.Teams.length === 0">
+            <div class="col-sm-12">
+              <span class="small text-muted">
+                注意：默认情况下，不在团队中的非管理员用户无权访问任何端点。 前往
+                 <a ui-sref="portainer.endpoints">端点视图</a>来管理他们的访问。
+              </span>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-sm-12">
+              <button
+                type="button"
+                class="btn btn-primary btn-sm"
+                ng-disabled="state.actionInProgress || !state.validUsername || formValues.Username === '' || (AuthenticationMethod === 1 && formValues.Password === '') || (AuthenticationMethod === 1 && formValues.Password !== formValues.ConfirmPassword)"
+                ng-click="addUser()"
+                button-spinner="state.actionInProgress"
+              >
+                <span ng-hide="state.actionInProgress"><i class="fa fa-plus" aria-hidden="true"></i> 创建用户</span>
+                <span ng-show="state.actionInProgress">创建用户中...</span>
+              </button>
+              <span class="text-danger" ng-if="state.userCreationError" style="margin: 5px;">
+                <i class="fa fa-exclamation-circle" aria-hidden="true"></i> {{ state.userCreationError }}
+              </span>
+            </div>
+          </div>
+        </form>
+      </rd-widget-body>
+    </rd-widget>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-sm-12">
+    <users-datatable
+      title-text="用户"
+      title-icon="fa-user"
+      dataset="users"
+      table-key="users"
+      order-by="Username"
+      authentication-method="AuthenticationMethod"
+      remove-action="removeAction"
+    ></users-datatable>
+  </div>
+</div>

@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "stateParams.js",
+  "sourceRoot": "",
+  "sources": [
+    "@uirouter/core/params/stateParams.ts"
+  ],
+  "names": [],
+  "mappings": "AAAA;;;GAGG;AACH,MAAM;AACN,OAAO,EAAC,MAAM,EAAE,SAAS,EAAM,MAAM,kBAAkB,CAAC;AAGxD,mBAAmB;AACnB;IAGE,qBAAY,MAAgB;QAAhB,uBAAA,EAAA,WAAgB;QAC1B,MAAM,CAAC,IAAI,EAAE,MAAM,CAAC,CAAC;IACvB,CAAC;IAED;;;;;;;OAOG;IACH,8BAAQ,GAAR,UAAS,SAAc,EAAE,QAAqB,EAAE,GAAgB;QAC9D,IAAI,OAAO,GAAG,SAAS,CAAC,QAAQ,EAAE,GAAG,CAAC,EAClC,YAAsB,EACtB,SAAS,GAAQ,EAAE,EACnB,WAAW,GAAa,EAAE,CAAC;QAE/B,GAAG,CAAC,CAAC,IAAI,CAAC,IAAI,OAAO,CAAC,CAAC,CAAC;YACtB,EAAE,CAAC,CAAC,CAAC,OAAO,CAAC,CAAC,CAAC,IAAI,CAAC,OAAO,CAAC,CAAC,CAAC,CAAC,MAAM,CAAC;gBAAC,QAAQ,CAAC;YAChD,YAAY,GAAG,MAAM,CAAC,IAAI,CAAC,OAAO,CAAC,CAAC,CAAC,CAAC,MAAM,CAAC,CAAC;YAC9C,EAAE,CAAC,CAAC,CAAC,YAAY,CAAC,MAAM,CAAC;gBAAC,QAAQ,CAAC;YAEnC,GAAG,CAAC,CAAC,IAAI,CAAC,IAAI,YAAY,CAAC,CAAC,CAAC;gBAC3B,EAAE,CAAC,CAAC,WAAW,CAAC,OAAO,CAAC,YAAY,CAAC,CAAC,CAAC,CAAC,IAAI,CAAC,CAAC;oBAAC,QAAQ,CAAC;gBACxD,WAAW,CAAC,IAAI,CAAC,YAAY,CAAC,CAAC,CAAC,CAAC,CAAC;gBAClC,SAAS,CAAC,YAAY,CAAC,CAAC,CAAC,CAAC,GAAG,IAAI,CAAC,YAAY,CAAC,CAAC,CAAC,CAAC,CAAC;YACrD,CAAC;QACH,CAAC;QACD,MAAM,CAAC,MAAM,CAAC,EAAE,EAAE,SAAS,EAAE,SAAS,CAAC,CAAC;IAC1C,CAAC;IAAA,CAAC;IACJ,kBAAC;AAAD,CAAC,AAlCD,IAkCC",
+  "sourcesContent": [
+    "/**\n * @coreapi\n * @module params\n */\n/** */\nimport {extend, ancestors, Obj} from \"../common/common\";\nimport {StateObject} from \"../state/stateObject\";\n\n/** @internalapi */\nexport class StateParams {\n  [key: string]: any;\n\n  constructor(params: Obj = {}) {\n    extend(this, params);\n  }\n\n  /**\n   * Merges a set of parameters with all parameters inherited between the common parents of the\n   * current state and a given destination state.\n   *\n   * @param {Object} newParams The set of parameters which will be composited with inherited params.\n   * @param {Object} $current Internal definition of object representing the current state.\n   * @param {Object} $to Internal definition of object representing state to transition to.\n   */\n  $inherit(newParams: Obj, $current: StateObject, $to: StateObject) {\n    let parents = ancestors($current, $to),\n        parentParams: string[],\n        inherited: Obj = {},\n        inheritList: string[] = [];\n\n    for (let i in parents) {\n      if (!parents[i] || !parents[i].params) continue;\n      parentParams = Object.keys(parents[i].params);\n      if (!parentParams.length) continue;\n\n      for (let j in parentParams) {\n        if (inheritList.indexOf(parentParams[j]) >= 0) continue;\n        inheritList.push(parentParams[j]);\n        inherited[parentParams[j]] = this[parentParams[j]];\n      }\n    }\n    return extend({}, inherited, newParams);\n  };\n}\n\n"
+  ]
+}

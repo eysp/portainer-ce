@@ -1,0 +1,12 @@
+<rd-header>
+  <rd-header-title title-text="存储卷浏览"></rd-header-title>
+  <rd-header-content>
+    <a ui-sref="docker.volumes">存储卷</a> &gt; <a ui-sref="docker.volumes.volume({ id: volumeId })">{{ volumeId }}</a> &gt; 浏览
+  </rd-header-content>
+</rd-header>
+
+<div class="row">
+  <div class="col-sm-12">
+    <volume-browser volume-id="volumeId" node-name="nodeName" is-upload-enabled="agentApiVersion > 1"></volume-browser>
+  </div>
+</div>

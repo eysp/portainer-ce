@@ -1,0 +1,68 @@
+<form ng-if="applicationState.endpoint.apiVersion >= 1.3" id="service-configs" ng-submit="updateService(service)">
+  <rd-widget>
+    <rd-widget-header icon="fa-tasks" title-text="配置"> </rd-widget-header>
+    <rd-widget-body classes="no-padding">
+      <div class="form-inline" style="padding: 10px;" authorization="DockerServiceUpdate">
+        添加配置:
+        <select class="form-control" ng-options="config.Name for config in configs | orderBy: 'Name'" ng-model="newConfig">
+          <option selected disabled hidden value="">选择配置</option>
+        </select>
+        <a class="btn btn-default btn-sm" ng-click="addConfig(service, newConfig)"> <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加配置 </a>
+      </div>
+      <table class="table" style="margin-top: 5px;">
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>容器中的路径</th>
+            <th>UID</th>
+            <th>GID</th>
+            <th>模式</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="config in service.ServiceConfigs">
+            <td
+              ><a ui-sref="docker.configs.config({id: config.Id})">{{ config.Name }}</a></td
+            >
+            <td>
+              <input
+                class="form-control"
+                ng-model="config.FileName"
+                ng-change="updateConfig(service)"
+                placeholder="例如 /path/in/container"
+                required
+                disable-authorization="DockerServiceUpdate"
+              />
+            </td>
+            <td>{{ config.Uid }}</td>
+            <td>{{ config.Gid }}</td>
+            <td>{{ config.Mode }}</td>
+            <td authorization="DockerServiceUpdate">
+              <button class="btn btn-xs btn-danger pull-right" type="button" ng-click="removeConfig(service, $index)" ng-disabled="isUpdating">
+                <i class="fa fa-trash" aria-hidden="true"></i> 删除配置
+              </button>
+            </td>
+          </tr>
+          <tr ng-if="service.ServiceConfigs.length === 0">
+            <td colspan="6" class="text-center text-muted">没有与此服务关联的配置。</td>
+          </tr>
+        </tbody>
+      </table>
+    </rd-widget-body>
+    <rd-widget-footer authorization="DockerServiceUpdate">
+      <div class="btn-toolbar" role="toolbar">
+        <div class="btn-group" role="group">
+          <button type="submit" class="btn btn-primary btn-sm" ng-disabled="!hasChanges(service, ['ServiceConfigs'])">应用更改</button>
+          <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu">
+            <li><a ng-click="cancelChanges(service, ['ServiceConfigs'])">重置更改</a></li>
+            <li><a ng-click="cancelChanges(service)">重置所有更改</a></li>
+          </ul>
+        </div>
+      </div>
+    </rd-widget-footer>
+  </rd-widget>
+</form>

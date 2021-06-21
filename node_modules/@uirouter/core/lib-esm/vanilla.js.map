@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "vanilla.js",
+  "sourceRoot": "",
+  "sources": [
+    "@uirouter/core/vanilla.ts"
+  ],
+  "names": [],
+  "mappings": "AAAA;;;GAGG;AACH,MAAM;AACN,cAAc,iBAAiB,CAAC",
+  "sourcesContent": [
+    "/**\n * @internalapi\n * @module vanilla\n */\n/** */\nexport * from \"./vanilla/index\";\n"
+  ]
+}

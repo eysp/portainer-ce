@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "memoryLocationConfig.js",
+  "sourceRoot": "",
+  "sources": [
+    "@uirouter/core/vanilla/memoryLocationConfig.ts"
+  ],
+  "names": [],
+  "mappings": "AAMA,OAAO,EAAE,SAAS,EAAE,MAAM,sBAAsB,CAAC;AACjD,OAAO,EAAE,IAAI,EAAE,MAAM,kBAAkB,CAAC;AAExC,iFAAiF;AACjF;IAAA;QAAA,iBAcC;QAbC,cAAS,GAAG,EAAE,CAAC;QACf,UAAK,GAAG,EAAE,CAAC;QACX,cAAS,GAAG,MAAM,CAAC;QACnB,UAAK,GAAG,WAAW,CAAC;QACpB,gBAAW,GAAG,EAAE,CAAC;QAEjB,SAAI,GAAG,cAAM,OAAA,KAAI,CAAC,KAAK,EAAV,CAAU,CAAC;QACxB,aAAQ,GAAG,cAAM,OAAA,KAAI,CAAC,SAAS,EAAd,CAAc,CAAC;QAChC,SAAI,GAAG,cAAM,OAAA,KAAI,CAAC,KAAK,EAAV,CAAU,CAAC;QACxB,aAAQ,GAAG,cAAM,OAAA,KAAI,CAAC,SAAS,EAAd,CAAc,CAAC;QAChC,cAAS,GAAG,cAAM,OAAA,KAAK,EAAL,CAAK,CAAC;QACxB,eAAU,GAAG,UAAC,MAAO,IAAK,OAAA,SAAS,CAAC,MAAM,CAAC,CAAC,CAAC,CAAC,KAAI,CAAC,WAAW,GAAG,MAAM,CAAC,CAAC,CAAC,KAAI,CAAC,WAAW,EAAhE,CAAgE,CAAC;QAC3F,YAAO,GAAG,IAAI,CAAC;IACjB,CAAC;IAAD,2BAAC;AAAD,CAAC,AAdD,IAcC",
+  "sourcesContent": [
+    "/**\n * @internalapi\n * @module vanilla\n */\n/** */\nimport { LocationConfig } from \"../common/coreservices\";\nimport { isDefined } from \"../common/predicates\";\nimport { noop } from \"../common/common\";\n\n/** A `LocationConfig` mock that gets/sets all config from an in-memory object */\nexport class MemoryLocationConfig implements LocationConfig {\n  _baseHref = '';\n  _port = 80;\n  _protocol = \"http\";\n  _host = \"localhost\";\n  _hashPrefix = \"\";\n\n  port = () => this._port;\n  protocol = () => this._protocol;\n  host = () => this._host;\n  baseHref = () => this._baseHref;\n  html5Mode = () => false;\n  hashPrefix = (newval?) => isDefined(newval) ? this._hashPrefix = newval : this._hashPrefix;\n  dispose = noop;\n}"
+  ]
+}

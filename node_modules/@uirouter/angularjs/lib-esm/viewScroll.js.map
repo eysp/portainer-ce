@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "viewScroll.js",
+  "sourceRoot": "",
+  "sources": [
+    "@uirouter/angularjs/viewScroll.ts"
+  ],
+  "names": [],
+  "mappings": "AAAA,kBAAkB,CAAC,MAAM;AACzB,OAAO,EAAE,EAAE,IAAI,OAAO,EAAE,MAAM,WAAW,CAAC;AAgB1C,cAAc;AACd;IAEE,IAAI,eAAe,GAAG,KAAK,CAAC;IAE5B,IAAI,CAAC,eAAe,GAAG;QACrB,eAAe,GAAG,IAAI,CAAC;IACzB,CAAC,CAAC;IAEF,IAAI,CAAC,IAAI,GAAG,CAAC,eAAe,EAAE,UAAU,EAAE,UAAU,aAAmC,EAAE,QAAyB;YAChH,EAAE,CAAC,CAAC,eAAe,CAAC,CAAC,CAAC;gBACpB,MAAM,CAAC,aAAa,CAAC;YACvB,CAAC;YAED,MAAM,CAAC,UAAU,QAAgB;gBAC/B,MAAM,CAAC,QAAQ,CAAC;oBACd,QAAQ,CAAC,CAAC,CAAC,CAAC,cAAc,EAAE,CAAC;gBAC/B,CAAC,EAAE,CAAC,EAAE,KAAK,CAAC,CAAC;YACf,CAAC,CAAC;QACJ,CAAC,CAAC,CAAC;AACL,CAAC;AAED,OAAO,CAAC,MAAM,CAAC,iBAAiB,CAAC,CAAC,QAAQ,CAAC,eAAe,EAA4B,mBAAmB,CAAC,CAAC",
+  "sourcesContent": [
+    "/** @module ng1 */ /** */\nimport { ng as angular } from \"./angular\";\nimport { IServiceProviderFactory } from \"angular\";\nimport IAnchorScrollService = angular.IAnchorScrollService;\nimport ITimeoutService = angular.ITimeoutService;\n\nexport interface UIViewScrollProvider {\n  /**\n   * Uses standard anchorScroll behavior\n   *\n   * Reverts [[$uiViewScroll]] back to using the core [`$anchorScroll`](http://docs.angularjs.org/api/ng.$anchorScroll)\n   * service for scrolling based on the url anchor.\n   */\n  useAnchorScroll(): void;\n}\n\n\n/** @hidden */\nfunction $ViewScrollProvider() {\n\n  var useAnchorScroll = false;\n\n  this.useAnchorScroll = function () {\n    useAnchorScroll = true;\n  };\n\n  this.$get = ['$anchorScroll', '$timeout', function ($anchorScroll: IAnchorScrollService, $timeout: ITimeoutService): Function {\n    if (useAnchorScroll) {\n      return $anchorScroll;\n    }\n\n    return function ($element: JQuery) {\n      return $timeout(function () {\n        $element[0].scrollIntoView();\n      }, 0, false);\n    };\n  }];\n}\n\nangular.module('ui.router.state').provider('$uiViewScroll', <IServiceProviderFactory> $ViewScrollProvider);\n"
+  ]
+}

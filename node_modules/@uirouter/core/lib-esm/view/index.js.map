@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "index.js",
+  "sourceRoot": "",
+  "sources": [
+    "@uirouter/core/view/index.ts"
+  ],
+  "names": [],
+  "mappings": "AAKA,cAAc,QAAQ,CAAC",
+  "sourcesContent": [
+    "/**\n * @coreapi\n * @module view\n */ /** for typedoc */\nexport * from \"./interface\";\nexport * from \"./view\";\n"
+  ]
+}

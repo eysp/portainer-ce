@@ -1,0 +1,11 @@
+{
+	"compilerOptions": {
+		"target": "es3",
+		"outDir": "./dist",
+		"sourceMap": true,
+		"alwaysStrict": true
+	},
+	"exclude": [
+		"node_modules"
+	]
+}

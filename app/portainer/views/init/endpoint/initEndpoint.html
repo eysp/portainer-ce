@@ -1,0 +1,407 @@
+<div class="page-wrapper">
+  <!-- simple box -->
+  <div class="container simple-box">
+    <div class="col-sm-12">
+      <!-- simple box logo -->
+      <div class="row">
+        <img ng-if="logo" ng-src="{{ logo }}" class="simple-box-logo" />
+        <img ng-if="!logo" src="../../../../../assets/images/logo_alt.png" class="simple-box-logo" alt="Portainer" />
+      </div>
+      <!-- !simple box logo -->
+      <!-- init-endpoint panel -->
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <!-- init-endpoint form -->
+          <form class="simple-box-form form-horizontal">
+            <!-- note -->
+            <div class="form-group">
+              <div class="col-sm-12">
+                <span class="small text-muted">
+                  将 Portainer 连接到您要管理的 Docker 环境。
+                </span>
+              </div>
+            </div>
+            <!-- !note -->
+            <!-- endpoint-type -->
+            <div class="form-group" style="margin-bottom: 0;">
+              <div class="boxselector_wrapper">
+                <div>
+                  <input type="radio" id="local_endpoint" ng-model="formValues.EndpointType" value="local" />
+                  <label for="local_endpoint">
+                    <div class="boxselector_header">
+                      <i class="fab fa-docker" aria-hidden="true" style="margin-right: 2px;"></i>
+                      本地
+                    </div>
+                    <p>管理本地 Docker 环境</p>
+                  </label>
+                </div>
+                <div>
+                  <input type="radio" id="remote_endpoint" ng-model="formValues.EndpointType" value="remote" />
+                  <label for="remote_endpoint">
+                    <div class="boxselector_header">
+                      <i class="fab fa-docker" aria-hidden="true" style="margin-right: 2px;"></i>
+                      远程
+                    </div>
+                    <p>管理远程 Docker 环境</p>
+                  </label>
+                </div>
+                <div>
+                  <input type="radio" id="agent_endpoint" ng-model="formValues.EndpointType" value="agent" />
+                  <label for="agent_endpoint">
+                    <div class="boxselector_header">
+                      <i class="fa fa-bolt" aria-hidden="true" style="margin-right: 2px;"></i>
+                      Agent
+                    </div>
+                    <p>连接到 Portainer 代理</p>
+                  </label>
+                </div>
+                <div>
+                  <input type="radio" id="azure_endpoint" ng-model="formValues.EndpointType" value="azure" />
+                  <label for="azure_endpoint">
+                    <div class="boxselector_header">
+                      <i class="fab fa-microsoft" aria-hidden="true" style="margin-right: 2px;"></i>
+                      Azure
+                    </div>
+                    <p>连接到 Microsoft Azure ACI</p>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <!-- !endpoint-type  -->
+            <!-- local-endpoint -->
+            <div ng-if="formValues.EndpointType === 'local'">
+              <div class="col-sm-12 form-section-title">
+                Information
+              </div>
+              <div class="form-group">
+                <div class="col-sm-12">
+                  <span class="small">
+                    <p class="text-primary">
+                      管理运行 Portainer 的 Docker 环境。
+                    </p>
+                    <p class="text-muted">
+                      <i class="fa fa-exclamation-circle orange-icon" aria-hidden="true" style="margin-right: 2px;"></i>
+                      确保您已使用以下 Docker 标志启动 Portainer 容器：
+                    </p>
+                    <p class="text-muted"> <code>-v "/var/run/docker.sock:/var/run/docker.sock"</code> (Linux). </p>
+                    <p class="text-muted">
+                      or
+                    </p>
+                    <p class="text-muted"> <code>-v \\.\pipe\docker_engine:\\.\pipe\docker_engine</code> (Windows). </p>
+                  </span>
+                </div>
+              </div>
+              <!-- actions -->
+              <div class="form-group">
+                <div class="col-sm-12">
+                  <button
+                    type="submit"
+                    class="btn btn-primary btn-sm"
+                    ng-disabled="state.actionInProgress"
+                    ng-click="createLocalEndpoint()"
+                    button-spinner="state.actionInProgress"
+                  >
+                    <span ng-hide="state.actionInProgress"><i class="fa fa-bolt" aria-hidden="true"></i> 连接</span>
+                    <span ng-show="state.actionInProgress">连接中...</span>
+                  </button>
+                </div>
+              </div>
+              <!-- !actions -->
+            </div>
+            <!-- !local-endpoint -->
+            <!-- agent-endpoint -->
+            <div ng-if="formValues.EndpointType === 'agent'">
+              <div class="col-sm-12 form-section-title">
+                Information
+              </div>
+              <div class="form-group">
+                <div class="col-sm-12">
+                  <span class="small">
+                    <p class="text-primary">
+                      直接连接到在 Swarm 集群中运行的 Portainer 代理。
+                    </p>
+                    <p class="text-muted">
+                      <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
+                      如果您在与代理相同的覆盖网络中启动了 Portainer，您可以使用 <code>tasks.AGENT_SERVICE_NAME:AGENT_SERVICE_PORT</code> 作为端点
+                      URL 格式。
+                    </p>
+                  </span>
+                </div>
+              </div>
+              <div class="col-sm-12 form-section-title">
+                环境
+              </div>
+              <!-- name-input -->
+              <div class="form-group">
+                <label for="endpoint_name" class="col-sm-4 col-lg-3 control-label text-left">名称</label>
+                <div class="col-sm-8 col-lg-9">
+                  <input type="text" class="form-control" id="endpoint_name" ng-model="formValues.Name" placeholder="例如 docker-prod01" />
+                </div>
+              </div>
+              <!-- !name-input -->
+              <!-- endpoint-url-input -->
+              <div class="form-group">
+                <label for="endpoint_url" class="col-sm-4 col-lg-3 control-label text-left">
+                  Agent URL
+                  <portainer-tooltip position="bottom" message="Portainer 代理的 URL 或 IP 地址。"></portainer-tooltip>
+                </label>
+                <div class="col-sm-8 col-lg-9">
+                  <input type="text" class="form-control" id="endpoint_url" ng-model="formValues.URL" placeholder="例如 10.0.0.10:9001 or tasks.portainer_agent:9001" />
+                </div>
+              </div>
+              <!-- !endpoint-url-input -->
+              <!-- actions -->
+              <div class="form-group">
+                <div class="col-sm-12">
+                  <button
+                    type="submit"
+                    class="btn btn-primary btn-sm"
+                    ng-disabled="state.actionInProgress || !formValues.Name || !formValues.URL"
+                    ng-click="createAgentEndpoint()"
+                    button-spinner="state.actionInProgress"
+                  >
+                    <span ng-hide="state.actionInProgress"><i class="fa fa-bolt" aria-hidden="true"></i> 连接</span>
+                    <span ng-show="state.actionInProgress">连接中...</span>
+                  </button>
+                </div>
+              </div>
+              <!-- !actions -->
+            </div>
+            <!-- !agent-endpoint -->
+            <!-- azure-endpoint -->
+            <div ng-if="formValues.EndpointType === 'azure'">
+              <div class="col-sm-12 form-section-title">
+                信息
+              </div>
+              <div class="form-group">
+                <div class="col-sm-12">
+                  <span class="small">
+                    <p class="text-muted"> <i class="fa fa-flask orange-icon" aria-hidden="true" style="margin-right: 2px;"></i> 此功能是实验性的。 </p>
+                    <p class="text-primary">
+                      连接到 Microsoft Azure 以管理 Azure 容器实例 (ACI)。
+                    </p>
+                    <p class="text-muted">
+                      <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
+                      查看
+                      <a href="https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal" target="_blank"
+                        >Azure 文档</a
+                      >
+                      检索下面所需的凭据。
+                    </p>
+                  </span>
+                </div>
+              </div>
+              <div class="col-sm-12 form-section-title">
+                环境
+              </div>
+              <!-- name-input -->
+              <div class="form-group">
+                <label for="endpoint_name" class="col-sm-4 col-lg-3 control-label text-left">名称</label>
+                <div class="col-sm-8 col-lg-9">
+                  <input type="text" class="form-control" id="endpoint_name" ng-model="formValues.Name" placeholder="例如 azure-01" />
+                </div>
+              </div>
+              <!-- !name-input -->
+              <div class="col-sm-12 form-section-title">
+                Azure credentials
+              </div>
+              <!-- applicationId-input -->
+              <div class="form-group">
+                <label for="azure_credential_appid" class="col-sm-4 col-lg-3 control-label text-left">Application ID</label>
+                <div class="col-sm-8 col-lg-9">
+                  <input type="text" class="form-control" id="azure_credential_appid" ng-model="formValues.AzureApplicationId" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+                </div>
+              </div>
+              <!-- !applicationId-input -->
+              <!-- tenantId-input -->
+              <div class="form-group">
+                <label for="azure_credential_tenantid" class="col-sm-4 col-lg-3 control-label text-left">Tenant ID</label>
+                <div class="col-sm-8 col-lg-9">
+                  <input type="text" class="form-control" id="azure_credential_tenantid" ng-model="formValues.AzureTenantId" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+                </div>
+              </div>
+              <!-- !tenantId-input -->
+              <!-- authenticationkey-input -->
+              <div class="form-group">
+                <label for="azure_credential_authkey" class="col-sm-4 col-lg-3 control-label text-left">Authentication key</label>
+                <div class="col-sm-8 col-lg-9">
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="azure_credential_authkey"
+                    ng-model="formValues.AzureAuthenticationKey"
+                    placeholder="cOrXoK/1D35w8YQ8nH1/8ZGwzz45JIYD5jxHKXEQknk="
+                  />
+                </div>
+              </div>
+              <!-- !authenticationkey-input -->
+              <!-- actions -->
+              <div class="form-group">
+                <div class="col-sm-12">
+                  <button
+                    type="submit"
+                    class="btn btn-primary btn-sm"
+                    ng-disabled="state.actionInProgress || !formValues.Name || !formValues.AzureApplicationId || !formValues.AzureTenantId || !formValues.AzureAuthenticationKey"
+                    ng-click="createAzureEndpoint()"
+                    button-spinner="state.actionInProgress"
+                  >
+                    <span ng-hide="state.actionInProgress"><i class="fa fa-bolt" aria-hidden="true"></i> 连接</span>
+                    <span ng-show="state.actionInProgress"> 连接中...</span>
+                  </button>
+                </div>
+              </div>
+              <!-- !actions -->
+            </div>
+            <!-- !azure-endpoint -->
+            <!-- remote-endpoint -->
+            <div ng-if="formValues.EndpointType === 'remote'">
+              <div class="col-sm-12 form-section-title">
+                Information
+              </div>
+              <div class="form-group">
+                <div class="col-sm-12">
+                  <span class="small">
+                    <p class="text-primary">
+                      使用 Docker API 通过 TCP 将 Portainer 连接到远程 Docker 环境。
+                    </p>
+                    <p class="text-muted">
+                      <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
+                      Docker API 必须通过 TCP 公开。 您可以在
+                      <a href="https://docs.docker.com/engine/security/https/" target="_blank">Docker 文档中</a>找到有关如何通过 TCP 公开 Docker API 的更多信息。
+                    </p>
+                  </span>
+                </div>
+              </div>
+              <div class="col-sm-12 form-section-title">
+                Environment
+              </div>
+              <!-- name-input -->
+              <div class="form-group">
+                <label for="endpoint_name" class="col-sm-4 col-lg-3 control-label text-left">名称</label>
+                <div class="col-sm-8 col-lg-9">
+                  <input type="text" class="form-control" id="endpoint_name" ng-model="formValues.Name" placeholder="例如 docker-prod01" />
+                </div>
+              </div>
+              <!-- !name-input -->
+              <!-- endpoint-url-input -->
+              <div class="form-group">
+                <label for="endpoint_url" class="col-sm-4 col-lg-3 control-label text-left">
+                  Endpoint URL
+                  <portainer-tooltip position="bottom" message="通过 TCP 公开 API 的 Docker 主机的 URL 或 IP 地址。"></portainer-tooltip>
+                </label>
+                <div class="col-sm-8 col-lg-9">
+                  <input type="text" class="form-control" id="endpoint_url" ng-model="formValues.URL" placeholder="例如 10.0.0.10:2375 or mydocker.mydomain.com:2375" />
+                </div>
+              </div>
+              <!-- !endpoint-url-input -->
+              <!-- tls-checkbox -->
+              <div class="form-group">
+                <div class="col-sm-12">
+                  <label for="tls" class="control-label text-left">
+                    TLS
+                    <portainer-tooltip
+                      position="bottom"
+                      message="如果您需要指定 TLS 证书以连接到 Docker 端点，请启用此选项。"
+                    ></portainer-tooltip>
+                  </label>
+                  <label class="switch" style="margin-left: 20px;"> <input type="checkbox" ng-model="formValues.TLS" /><i></i> </label>
+                </div>
+              </div>
+              <!-- !tls-checkbox -->
+              <!-- tls-options -->
+              <div ng-if="formValues.TLS">
+                <!-- skip-server-verification -->
+                <div class="form-group">
+                  <div class="col-sm-10">
+                    <label for="tls_verify" class="control-label text-left">
+                      跳过服务器验证
+                      <portainer-tooltip position="bottom" message="如果您需要根据给定的 CA 验证服务器，请启用此选项。"></portainer-tooltip>
+                    </label>
+                    <label class="switch" style="margin-left: 20px;"> <input type="checkbox" ng-model="formValues.TLSSkipVerify" /><i></i> </label>
+                  </div>
+                </div>
+                <!-- !skip-server-verification -->
+                <!-- skip-client-verification -->
+                <div class="form-group">
+                  <div class="col-sm-10">
+                    <label for="tls_client_cert" class="control-label text-left">
+                      Skip client verification
+                      <portainer-tooltip position="bottom" message="如果您需要使用客户端证书进行身份验证，请启用此选项。"></portainer-tooltip>
+                    </label>
+                    <label class="switch" style="margin-left: 20px;"> <input type="checkbox" ng-model="formValues.TLSSKipClientVerify" /><i></i> </label>
+                  </div>
+                </div>
+                <!-- !skip-client-verification -->
+                <div class="col-sm-12 form-section-title" ng-if="!formValues.TLSSkipVerify || !formValues.TLSSKipClientVerify">
+                  所需的 TLS 文件
+                </div>
+                <!-- ca-input -->
+                <div class="form-group" ng-if="!formValues.TLSSkipVerify">
+                  <label class="col-sm-4 col-lg-3 control-label text-left">TLS CA certificate</label>
+                  <div class="col-sm-8 col-lg-9">
+                    <button class="btn btn-sm btn-primary" ngf-select ng-model="formValues.TLSCACert">选择文件</button>
+                    <span style="margin-left: 5px;">
+                      {{ formValues.TLSCACert.name }}
+                      <i class="fa fa-times red-icon" ng-if="!formValues.TLSCACert" aria-hidden="true"></i>
+                      <i class="fa fa-circle-notch fa-spin" ng-if="state.uploadInProgress"></i>
+                    </span>
+                  </div>
+                </div>
+                <!-- !ca-input -->
+                <div ng-if="!formValues.TLSSKipClientVerify">
+                  <!-- cert-input -->
+                  <div class="form-group">
+                    <label for="tls_cert" class="col-sm-4 col-lg-3 control-label text-left">TLS certificate</label>
+                    <div class="col-sm-8 col-lg-9">
+                      <button class="btn btn-sm btn-primary" ngf-select ng-model="formValues.TLSCert">选择文件</button>
+                      <span style="margin-left: 5px;">
+                        {{ formValues.TLSCert.name }}
+                        <i class="fa fa-times red-icon" ng-if="!formValues.TLSCert" aria-hidden="true"></i>
+                        <i class="fa fa-circle-notch fa-spin" ng-if="state.uploadInProgress"></i>
+                      </span>
+                    </div>
+                  </div>
+                  <!-- !cert-input -->
+                  <!-- key-input -->
+                  <div class="form-group">
+                    <label class="col-sm-4 col-lg-3 control-label text-left">TLS key</label>
+                    <div class="col-sm-8 col-lg-9">
+                      <button class="btn btn-sm btn-primary" ngf-select ng-model="formValues.TLSKey">选择文件</button>
+                      <span style="margin-left: 5px;">
+                        {{ formValues.TLSKey.name }}
+                        <i class="fa fa-times red-icon" ng-if="!formValues.TLSKey" aria-hidden="true"></i>
+                        <i class="fa fa-circle-notch fa-spin" ng-if="state.uploadInProgress"></i>
+                      </span>
+                    </div>
+                  </div>
+                  <!-- !key-input -->
+                </div>
+              </div>
+              <!-- !tls-options -->
+              <!-- actions -->
+              <div class="form-group">
+                <div class="col-sm-12">
+                  <button
+                    type="submit"
+                    class="btn btn-primary btn-sm"
+                    ng-disabled="state.actionInProgress || !formValues.Name || !formValues.URL || (formValues.TLS && ((formValues.TLSVerify && !formValues.TLSCACert) || (!formValues.TLSSKipClientVerify && (!formValues.TLSCert || !formValues.TLSKey))))"
+                    ng-click="createRemoteEndpoint()"
+                    button-spinner="state.actionInProgress"
+                  >
+                    <span ng-hide="state.actionInProgress"><i class="fa fa-bolt" aria-hidden="true"></i> 连接</span>
+                    <span ng-show="state.actionInProgress"> 连接中...</span>
+                  </button>
+                </div>
+              </div>
+              <!-- !actions -->
+            </div>
+            <!-- !remote-endpoint -->
+          </form>
+          <!-- !init-endpoint form -->
+        </div>
+      </div>
+      <!-- !init-endpoint panel -->
+    </div>
+  </div>
+  <!-- !simple box -->
+</div>

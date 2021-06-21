@@ -1,0 +1,80 @@
+<div class="page-wrapper">
+  <!-- login box -->
+  <div class="container simple-box">
+    <div class="col-sm-6 col-sm-offset-3">
+      <!-- login box logo -->
+      <div class="row">
+        <img ng-if="!ctrl.logo" src="../../../../assets/images/logo_alt.png" class="simple-box-logo" alt="Portainer" />
+        <img ng-if="ctrl.logo" ng-src="{{ ctrl.logo }}" class="simple-box-logo" />
+      </div>
+      <!-- !login box logo -->
+      <!-- login panel -->
+      <div class="panel panel-default" ng-show="!ctrl.state.loginInProgress">
+        <div class="panel-body">
+          <!-- login form -->
+          <form class="simple-box-form form-horizontal">
+            <!-- username input -->
+            <div class="input-group">
+              <span class="input-group-addon"><i class="fa fa-user" aria-hidden="true"></i></span>
+              <input id="username" type="text" class="form-control" name="username" ng-model="ctrl.formValues.Username" auto-focus />
+            </div>
+            <!-- !username input -->
+            <!-- password input -->
+            <div class="input-group">
+              <span class="input-group-addon"><i class="fa fa-lock" aria-hidden="true"></i></span>
+              <input id="password" type="password" class="form-control" name="password" ng-model="ctrl.formValues.Password" />
+            </div>
+            <!-- !password input -->
+            <!-- login button -->
+            <div class="form-group">
+              <div class="col-sm-12">
+                <a ng-href="{{ ctrl.OAuthLoginURI }}" ng-if="ctrl.AuthenticationMethod === 3">
+                  <div class="btn btn-primary btn-sm pull-left" style="margin-left: 2px;" ng-if="ctrl.state.OAuthProvider === 'Microsoft'">
+                    <i class="fab fa-microsoft" aria-hidden="true"></i> 使用 Microsoft 登陆
+                  </div>
+                  <div class="btn btn-primary btn-sm pull-left" style="margin-left: 2px;" ng-if="ctrl.state.OAuthProvider === 'Google'">
+                    <i class="fab fa-google" aria-hidden="true"></i> 使用 Google 登陆
+                  </div>
+                  <div class="btn btn-primary btn-sm pull-left" style="margin-left: 2px;" ng-if="ctrl.state.OAuthProvider === 'Github'">
+                    <i class="fab fa-github" aria-hidden="true"></i> 使用 Github 登陆
+                  </div>
+                  <div class="btn btn-primary btn-sm pull-left" style="margin-left: 2px;" ng-if="ctrl.state.OAuthProvider === 'OAuth'">
+                    <i class="fa fa-sign-in-alt" aria-hidden="true"></i> 使用 OAuth 登陆
+                  </div>
+                </a>
+
+                <button
+                  type="submit"
+                  class="btn btn-primary btn-sm pull-right"
+                  ng-click="ctrl.authenticateUser()"
+                  button-spinner="ctrl.state.loginInProgress"
+                  ng-disabled="ctrl.state.loginInProgress"
+                >
+                  <span ng-hide="ctrl.state.loginInProgress"><i class="fa fa-sign-in-alt" aria-hidden="true"></i> 登陆</span>
+                  <span ng-show="ctrl.state.loginInProgress">正在登录...</span>
+                </button>
+
+                <span class="pull-right" style="margin: 5px;" ng-if="ctrl.state.AuthenticationError">
+                  <i class="fa fa-exclamation-triangle red-icon" aria-hidden="true" style="margin-right: 2px;"></i>
+                  <span class="small text-danger">{{ ctrl.state.AuthenticationError }}</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- !login button -->
+          </form>
+          <!-- !login form -->
+        </div>
+      </div>
+      <!-- !login panel -->
+      <div class="panel panel-default" ng-show="ctrl.state.loginInProgress">
+        <div class="panel-body">
+          <div class="form-group text-center">
+            <span class="small text-muted">正在验证... <span button-spinner="true"></span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- !login box -->
+</div>

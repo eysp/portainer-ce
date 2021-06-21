@@ -1,0 +1,45 @@
+@cell-big-size:     60px;
+@cell-mid-size:     50px;
+@cell-def-size:     40px;
+@cell-min-size:     33px;
+@bg-gray:           #eee;
+@bg-dark-gray:      #e0e0e0;
+
+.moment-picker {
+    
+    .moment-picker-container {
+        text-shadow: none;
+        border-radius: 0;
+        padding: 0;
+    }
+    
+    .header-view {
+        border: 1px solid #fff;
+        th { background: @bg-gray; border-radius: 0; min-width: @cell-def-size; height: @cell-def-size; }
+    }
+    .header-view th, td {
+        &:hover { background-color: @bg-dark-gray; }
+    }
+    td { border-radius: @cell-big-size; }
+
+    .moment-picker-specific-views {
+        padding: 4px 8px;
+        table { border-collapse: separate; border-spacing: 3px; }
+        th { background: none; cursor: default; }
+    }
+
+    // specific view - custom sizes
+    .decade-view, .year-view {
+        td { min-width: @cell-big-size; height: @cell-big-size; }
+    }
+    .month-view {
+        td { min-width: @cell-min-size; height: @cell-min-size; }
+    }
+    .day-view, .hour-view {
+        td { min-width: @cell-big-size; height: @cell-def-size; }
+    }
+    .minute-view {
+        table { border-spacing: 2px; }
+        td { min-width: @cell-def-size; height: @cell-def-size; }
+    }
+}

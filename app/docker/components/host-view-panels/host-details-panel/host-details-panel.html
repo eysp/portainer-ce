@@ -1,0 +1,43 @@
+<div class="row">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <rd-widget>
+      <rd-widget-header icon="fa-code" title-text="宿主机细节"></rd-widget-header>
+      <rd-widget-body classes="no-padding">
+        <table class="table">
+          <tbody>
+            <tr>
+              <td>主机名称</td>
+              <td>{{ $ctrl.host.name }}</td>
+            </tr>
+            <tr ng-if="$ctrl.host.os">
+              <td>系统信息</td>
+              <td>{{ $ctrl.host.os.type }} {{ $ctrl.host.os.arch }} {{ $ctrl.host.os.name }}</td>
+            </tr>
+            <tr ng-if="$ctrl.host.kernelVersion">
+              <td>内核版本</td>
+              <td>{{ $ctrl.host.kernelVersion }}</td>
+            </tr>
+            <tr>
+              <td>总 CPU</td>
+              <td>{{ $ctrl.host.totalCPU }}</td>
+            </tr>
+            <tr>
+              <td>总内存</td>
+              <td>{{ $ctrl.host.totalMemory | humansize }}</td>
+            </tr>
+            <tr ng-if="$ctrl.isBrowseEnabled || $ctrl.isJobEnabled">
+              <td colspan="2">
+                <button class="btn btn-primary btn-sm" title="Browse" ng-if="$ctrl.isBrowseEnabled" ui-sref="{{ $ctrl.browseUrl }}">
+                  浏览
+                </button>
+                <button class="btn btn-primary btn-sm" title="Execute job" ng-if="$ctrl.isJobEnabled" ui-sref="{{ $ctrl.jobUrl }}">
+                  额外脚本
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </rd-widget-body>
+    </rd-widget>
+  </div>
+</div>

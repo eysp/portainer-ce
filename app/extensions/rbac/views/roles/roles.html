@@ -1,0 +1,36 @@
+<rd-header>
+  <rd-header-title title-text="角色">
+    <a data-toggle="tooltip" title="刷新" ui-sref="portainer.roles" ui-sref-opts="{reload: true}">
+      <i class="fa fa-sync" aria-hidden="true"></i>
+    </a>
+  </rd-header-title>
+  <rd-header-content>角色管理</rd-header-content>
+</rd-header>
+
+<information-panel ng-if="!ctrl.rbacEnabled" title-text="信息">
+  <span class="small">
+    <p class="text-muted">
+      <i class="fa fa-exclamation-circle orange-icon" aria-hidden="true" style="margin-right: 2px;"></i>
+      
+      <a
+        ui-sref="portainer.extensions.extension({id: 3})"
+        tooltip-append-to-body="true"
+        tooltip-placement="bottom"
+        tooltip-class="portainer-tooltip"
+        uib-tooltip="通过扩展可用的功能"
+        > 访问控制扩展 Role-Based</a
+       >
+       需要安装此功能。
+    </p>
+  </span>
+</information-panel>
+
+<div class="row">
+  <div class="col-sm-12">
+    <roles-datatable title-text="角色" title-icon="fa-file-code" dataset="ctrl.roles" table-key="roles" order-by="Name" rbac-enabled="ctrl.rbacEnabled"></roles-datatable>
+  </div>
+</div>
+
+<div class="row">
+  <access-viewer ng-if="ctrl.rbacEnabled"> </access-viewer>
+</div>

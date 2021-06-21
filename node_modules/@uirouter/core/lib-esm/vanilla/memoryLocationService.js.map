@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "memoryLocationService.js",
+  "sourceRoot": "",
+  "sources": [
+    "@uirouter/core/vanilla/memoryLocationService.ts"
+  ],
+  "names": [],
+  "mappings": ";;;;;;;;;;AAAA;;;GAGG;AACH,MAAM;AACN,OAAO,EAAE,oBAAoB,EAAE,MAAM,uBAAuB,CAAC;AAG7D,wFAAwF;AACxF;IAA2C,yCAAoB;IAG7D,+BAAY,MAAgB;eAC1B,kBAAM,MAAM,EAAE,IAAI,CAAC;IACrB,CAAC;IAED,oCAAI,GAAJ;QACE,MAAM,CAAC,IAAI,CAAC,IAAI,CAAC;IACnB,CAAC;IAED,oCAAI,GAAJ,UAAK,KAAU,EAAE,KAAa,EAAE,GAAW,EAAE,OAAgB;QAC3D,IAAI,CAAC,IAAI,GAAG,GAAG,CAAC;IAClB,CAAC;IACH,4BAAC;AAAD,CAAC,AAdD,CAA2C,oBAAoB,GAc9D",
+  "sourcesContent": [
+    "/**\n * @internalapi\n * @module vanilla\n */\n/** */\nimport { BaseLocationServices } from './baseLocationService';\nimport { UIRouter } from '../router';\n\n/** A `LocationServices` that gets/sets the current location from an in-memory object */\nexport class MemoryLocationService extends BaseLocationServices {\n  _url: string;\n\n  constructor(router: UIRouter) {\n    super(router, true);\n  }\n\n  _get() {\n    return this._url;\n  }\n\n  _set(state: any, title: string, url: string, replace: boolean) {\n    this._url = url;\n  }\n}\n"
+  ]
+}

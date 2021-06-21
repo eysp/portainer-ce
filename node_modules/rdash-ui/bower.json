@@ -1,0 +1,34 @@
+{
+    "name": "rdash-ui",
+    "description": "Bloat free responsive admin style dashboard.",
+    "version": "1.0.1",
+    "homepage": "https://rdash.github.io/rdash-ui/",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/rdash/rdash-ui.git"
+    },
+    "license": "MIT",
+    "keywords": [
+        "responsive",
+        "dashboard",
+        "admin"
+    ],
+    "main": [
+        "dist/css/rdash.css",
+        "dist/css/rdash.min.css",
+        "dist/fonts/montserrat-regular-webfont.eot",
+        "dist/fonts/montserrat-regular-webfont.svg",
+        "dist/fonts/montserrat-regular-webfont.ttf",
+        "dist/fonts/montserrat-regular-webfont.woff"
+    ],
+    "ignore": [
+        "**/**.*",
+        "!LICENSE",
+        "!bower.json",
+        "!README.md",
+        "!dist/css",
+        "!dist/fonts",
+        "!less/"
+    ],
+    "dependencies": {}
+}

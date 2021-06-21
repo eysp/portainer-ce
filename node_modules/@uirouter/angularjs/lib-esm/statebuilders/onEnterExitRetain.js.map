@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "onEnterExitRetain.js",
+  "sourceRoot": "",
+  "sources": [
+    "@uirouter/angularjs/statebuilders/onEnterExitRetain.ts"
+  ],
+  "names": [],
+  "mappings": "AAAA,kBAAkB,CAAC,MAAM;AACzB,OAAO,EACuD,QAAQ,EAAE,cAAc,EAAE,MAAM,EAC7F,MAAM,gBAAgB,CAAC;AACxB,OAAO,EAAE,SAAS,EAAE,MAAM,aAAa,CAAC;AAGxC;;;;;;GAMG;AACH,MAAM,CAAC,IAAM,mBAAmB,GAAG,UAAC,QAAuC;IAC3E,OAAA,0BAA0B,KAAkB,EAAE,QAAyB;QACrE,IAAI,IAAI,GAAG,KAAK,CAAC,QAAQ,CAAC,CAAC;QAC3B,IAAI,QAAQ,GAAG,QAAQ,KAAK,QAAQ,CAAC,CAAC,CAAC,MAAM,CAAC,CAAC,CAAC,IAAI,CAAC;QAErD,0BAA0B,KAAiB,EAAE,KAA0B;YACrE,IAAI,cAAc,GAAG,IAAI,cAAc,CAAC,KAAK,CAAC,WAAW,CAAC,QAAQ,CAAC,CAAC,CAAC;YACrE,IAAI,MAAM,GAAG,MAAM,CAAC,SAAS,CAAC,cAAc,CAAC,EAAE,EAAE,OAAO,EAAE,KAAK,EAAE,YAAY,EAAE,KAAK,EAAE,CAAC,CAAC;YACxF,MAAM,CAAC,QAAQ,CAAC,SAAS,CAAC,MAAM,CAAC,IAAI,EAAE,IAAI,EAAE,MAAM,CAAC,CAAC;QACvD,CAAC;QAED,MAAM,CAAC,IAAI,CAAC,CAAC,CAAC,gBAAgB,CAAC,CAAC,CAAC,SAAS,CAAC;IAC7C,CAAC;AAXD,CAWC,CAAC",
+  "sourcesContent": [
+    "/** @module ng1 */ /** */\nimport {\n  StateObject, TransitionStateHookFn, HookResult, Transition, services, ResolveContext, extend, BuilderFunction\n} from \"@uirouter/core\";\nimport { getLocals } from \"../services\";\nimport { Ng1StateDeclaration } from '../interface';\n\n/**\n * This is a [[StateBuilder.builder]] function for angular1 `onEnter`, `onExit`,\n * `onRetain` callback hooks on a [[Ng1StateDeclaration]].\n *\n * When the [[StateBuilder]] builds a [[StateObject]] object from a raw [[StateDeclaration]], this builder\n * ensures that those hooks are injectable for @uirouter/angularjs (ng1).\n */\nexport const getStateHookBuilder = (hookName: \"onEnter\"|\"onExit\"|\"onRetain\") =>\nfunction stateHookBuilder(state: StateObject, parentFn: BuilderFunction): TransitionStateHookFn {\n  let hook = state[hookName];\n  let pathname = hookName === 'onExit' ? 'from' : 'to';\n\n  function decoratedNg1Hook(trans: Transition, state: Ng1StateDeclaration): HookResult {\n    let resolveContext = new ResolveContext(trans.treeChanges(pathname));\n    let locals = extend(getLocals(resolveContext), { $state$: state, $transition$: trans });\n    return services.$injector.invoke(hook, this, locals);\n  }\n\n  return hook ? decoratedNg1Hook : undefined;\n};\n"
+  ]
+}

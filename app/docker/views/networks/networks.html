@@ -1,0 +1,25 @@
+<rd-header>
+  <rd-header-title title-text="网络列表">
+    <a data-toggle="tooltip" title="刷新" ui-sref="docker.networks" ui-sref-opts="{reload: true}">
+      <i class="fa fa-sync" aria-hidden="true"></i>
+    </a>
+  </rd-header-title>
+  <rd-header-content>网络</rd-header-content>
+</rd-header>
+<information-panel-offline ng-if="offlineMode"></information-panel-offline>
+<div class="row">
+  <div class="col-sm-12">
+    <networks-datatable
+      title-text="网络"
+      title-icon="fa-sitemap"
+      dataset="networks"
+      table-key="networks"
+      order-by="Name"
+      remove-action="removeAction"
+      show-ownership-column="applicationState.application.authentication"
+      show-host-column="applicationState.endpoint.mode.agentProxy && applicationState.endpoint.mode.provider === 'DOCKER_SWARM_MODE'"
+      offline-mode="offlineMode"
+      refresh-callback="getNetworks"
+    ></networks-datatable>
+  </div>
+</div>

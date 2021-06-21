@@ -1,0 +1,15 @@
+<rd-header>
+  <rd-header-title title-text="Service logs"></rd-header-title>
+  <rd-header-content>
+    <a ui-sref="docker.services">服务</a> > <a ui-sref="docker.services.service({id: service.Id})">{{ service.Name }}</a> &gt; 日记
+  </rd-header-content>
+</rd-header>
+
+<log-viewer
+  data="logs"
+  ng-if="logs"
+  log-collection-change="changeLogCollection"
+  display-timestamps="state.displayTimestamps"
+  line-count="state.lineCount"
+  since-timestamp="state.sinceTimestamp"
+></log-viewer>

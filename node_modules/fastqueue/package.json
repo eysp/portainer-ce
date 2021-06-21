@@ -1,0 +1,6 @@
+{
+  "name": "fastqueue",
+  "version": "0.1.0",
+  "description": "A fast push/shift sync queue",
+  "main": "queue.js"
+}

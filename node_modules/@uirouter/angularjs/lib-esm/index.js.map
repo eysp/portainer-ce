@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "index.js",
+  "sourceRoot": "",
+  "sources": [
+    "@uirouter/angularjs/index.ts"
+  ],
+  "names": [],
+  "mappings": "AAAA;;;GAGG,CAAC,MAAM;AAGV,cAAc,YAAY,CAAC;AAC3B,cAAc,uBAAuB,CAAC;AACtC,cAAc,iBAAiB,CAAC;AAChC,cAAc,qBAAqB,CAAC;AAEpC,OAAO,eAAe,CAAC;AACvB,OAAO,8BAA8B,CAAC;AACtC,OAAO,gBAAgB,CAAC;AACxB,OAAO,4BAA4B,CAAC;AACpC,OAAO,cAAc,CAAC;AAEtB,eAAe,WAAW,CAAC;AAE3B,OAAO,KAAK,IAAI,MAAM,gBAAgB,CAAC;AACvC,OAAO,EAAE,IAAI,EAAE,CAAC;AAChB,cAAc,gBAAgB,CAAC",
+  "sourcesContent": [
+    "/**\n * Main entry point for angular 1.x build\n * @module ng1\n */ /** */\n\nexport * from \"./interface\";\nexport * from \"./services\";\nexport * from \"./statebuilders/views\";\nexport * from \"./stateProvider\";\nexport * from \"./urlRouterProvider\";\n\nimport \"./injectables\";\nimport \"./directives/stateDirectives\";\nimport \"./stateFilters\";\nimport \"./directives/viewDirective\";\nimport \"./viewScroll\";\n\nexport default \"ui.router\";\n\nimport * as core from \"@uirouter/core\";\nexport { core };\nexport * from \"@uirouter/core\";\n\n"
+  ]
+}

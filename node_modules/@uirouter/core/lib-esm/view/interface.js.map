@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "interface.js",
+  "sourceRoot": "",
+  "sources": [
+    "@uirouter/core/view/interface.ts"
+  ],
+  "names": [],
+  "mappings": "",
+  "sourcesContent": [
+    "/** @module view */ /** for typedoc */\nimport {_ViewDeclaration} from \"../state/interface\";\nimport {PathNode} from \"../path/pathNode\";\n\n/**\n * The context ref can be anything that has a `name` and a `parent` reference to another IContextRef\n */\nexport interface ViewContext {\n  name: string;\n  parent: ViewContext;\n}\n\n/** @internalapi */\nexport interface ActiveUIView {\n  /** type of framework, e.g., \"ng1\" or \"ng2\" */\n  $type: string;\n  /** An auto-incremented id */\n  id: number;\n  /** The ui-view short name */\n  name: string;\n  /** The ui-view's fully qualified name */\n  fqn: string;\n  /** The ViewConfig that is currently loaded into the ui-view */\n  config: ViewConfig;\n  /** The state context in which the ui-view tag was created. */\n  creationContext: ViewContext;\n  /** A callback that should apply a ViewConfig (or clear the ui-view, if config is undefined) */\n  configUpdated: (config: ViewConfig) => void;\n}\n\n/**\n * This interface represents a [[_ViewDeclaration]] that is bound to a [[PathNode]].\n *\n * A `ViewConfig` is the runtime definition of a single view.\n *\n * During a transition, `ViewConfig`s are created for each [[_ViewDeclaration]] defined on each \"entering\" [[StateObject]].\n * Then, the [[ViewService]] finds any matching `ui-view`(s) in the DOM, and supplies the ui-view\n * with the `ViewConfig`.  The `ui-view` then loads itself using the information found in the `ViewConfig`.\n *\n * A `ViewConfig` if matched with a `ui-view` by finding all `ui-view`s which were created in the\n * context named by the `uiViewContextAnchor`, and finding the `ui-view` or child `ui-view` that matches\n * the `uiViewName` address.\n */\nexport interface ViewConfig {\n  /* The unique id for the ViewConfig instance */\n  $id: number;\n  /** The normalized view declaration from [[State.views]] */\n  viewDecl: _ViewDeclaration;\n\n  /** The node the ViewConfig is bound to */\n  path: PathNode[];\n\n  /** Fetches templates, runs dynamic (controller|template)Provider code, lazy loads Components, etc */\n  load(): Promise<ViewConfig>;\n  \n  loaded: boolean;\n}\n"
+  ]
+}

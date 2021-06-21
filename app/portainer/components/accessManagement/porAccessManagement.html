@@ -1,0 +1,81 @@
+<div class="row">
+  <div class="col-sm-12">
+    <rd-widget ng-if="ctrl.availableUsersAndTeams && ctrl.accessControlledEntity">
+      <rd-widget-header icon="fa-user-lock" title-text="Create access"></rd-widget-header>
+      <rd-widget-body>
+        <form class="form-horizontal">
+          <div class="form-group">
+            <label class="col-sm-3 col-lg-2 control-label text-left">
+              选择用户/或团队
+            </label>
+            <div class="col-sm-9 col-lg-4">
+              <span class="small text-muted" ng-if="ctrl.availableUsersAndTeams.length === 0">
+                没有可用的用户或团队
+              </span>
+              <span
+                isteven-multi-select
+                ng-if="ctrl.availableUsersAndTeams.length > 0"
+                input-model="ctrl.availableUsersAndTeams"
+                output-model="ctrl.formValues.multiselectOutput"
+                button-label="icon '-' Name"
+                item-label="icon '-' Name"
+                tick-property="ticked"
+                helper-elements="filter"
+                search-property="Name"
+                translation="{nothingSelected: 'Select one or more users and/or teams', search: '搜索...'}"
+              >
+              </span>
+            </div>
+          </div>
+
+          <div class="form-group" ng-if="ctrl.entityType !== 'registry'">
+            <label class="col-sm-3 col-lg-2 control-label text-left">
+              角色
+            </label>
+            <div class="col-sm-9 col-lg-4">
+              <select ng-if="ctrl.rbacEnabled" class="form-control" ng-model="ctrl.formValues.selectedRole" ng-options="role.Name for role in ctrl.roles"> </select>
+              <span class="small text-muted" ng-if="!ctrl.rbacEnabled">
+                <a ui-sref="portainer.extensions.extension({id: 3})">基于角色的访问控制扩展Role-Based</a> 是选择特定角色所必需的。
+              </span>
+            </div>
+          </div>
+
+          <!-- actions -->
+          <div class="form-group">
+            <div class="col-sm-12">
+              <button
+                type="submit"
+                class="btn btn-primary btn-sm"
+                ng-disabled="(ctrl.availableUsersAndTeams | filter:{ticked:true}).length === 0 || ctrl.actionInProgress"
+                ng-click="ctrl.authorizeAccess()"
+                button-spinner="ctrl.actionInProgress"
+              >
+                <span ng-hide="ctrl.state.actionInProgress"><i class="fa fa-plus" aria-hidden="true"></i> 创建访问权限</span>
+                <span ng-show="ctrl.state.actionInProgress">正在创建访问...</span>
+              </button>
+            </div>
+          </div>
+          <!-- !actions -->
+        </form>
+      </rd-widget-body>
+    </rd-widget>
+  </div>
+</div>
+<div class="row">
+  <div class="col-sm-12">
+    <access-datatable
+      ng-if="ctrl.authorizedUsersAndTeams"
+      title-text="Access"
+      title-icon="fa-user-lock"
+      table-key="{{ 'access_' + ctrl.entityType }}"
+      order-by="Name"
+      rbac-enabled="ctrl.rbacEnabled && ctrl.entityType !== 'registry'"
+      inherit-from="ctrl.inheritFrom"
+      dataset="ctrl.authorizedUsersAndTeams"
+      roles="ctrl.roles"
+      update-action="ctrl.updateAction"
+      remove-action="ctrl.unauthorizeAccess"
+    >
+    </access-datatable>
+  </div>
+</div>

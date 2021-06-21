@@ -1,0 +1,70 @@
+.b {
+  color: green;
+  color: red;
+  background: green;
+  color: blue;
+  background: black;
+}
+.b .c,
+.b .d {
+  background: gray;
+}
+.b .c + .b .c,
+.b .c + .b .d,
+.b .d + .b .c,
+.b .d + .b .d {
+  color: red;
+}
+.a,
+.b,
+.extend {
+  background: green;
+}
+.a .c,
+.b .c,
+.a .d,
+.b .d,
+.extend .c,
+.extend .d {
+  background: gray;
+}
+.a .c + .a .c,
+.a .c + .b .c,
+.a .c + .a .d,
+.a .c + .b .d,
+.b .c + .a .c,
+.b .c + .b .c,
+.b .c + .a .d,
+.b .c + .b .d,
+.a .d + .a .c,
+.a .d + .b .c,
+.a .d + .a .d,
+.a .d + .b .d,
+.b .d + .a .c,
+.b .d + .b .c,
+.b .d + .a .d,
+.b .d + .b .d,
+.extend .c + .extend .c,
+.extend .c + .b .c,
+.extend .c + .extend .d,
+.extend .c + .b .d,
+.b .c + .extend .c,
+.b .c + .extend .d,
+.extend .d + .extend .c,
+.extend .d + .b .c,
+.extend .d + .extend .d,
+.extend .d + .b .d,
+.b .d + .extend .c,
+.b .d + .extend .d {
+  color: red;
+}
+.extend {
+  color: pink;
+}
+/*comments*/
+.unused-css {
+    color: white;
+}
+.imported {
+    color: black;
+}

@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "index.js",
+  "sourceRoot": "",
+  "sources": [
+    "@uirouter/core/state/index.ts"
+  ],
+  "names": [],
+  "mappings": "AAuBA,cAAc,gBAAgB,CAAC;AAC/B,cAAc,eAAe,CAAC;AAC9B,cAAc,gBAAgB,CAAC;AAC/B,cAAc,qBAAqB,CAAC;AACpC,cAAc,iBAAiB,CAAC;AAChC,cAAc,gBAAgB,CAAC;AAC/B,cAAc,eAAe,CAAC",
+  "sourcesContent": [
+    "/**\n * # The state subsystem\n *\n * This subsystem implements the ui-router state tree\n *\n * - The [[StateService]] has state-related service methods such as:\n *   - [[StateService.get]]: Get a registered [[StateDeclaration]] object\n *   - [[StateService.go]]: Transition from the current state to a new state\n *   - [[StateService.reload]]: Reload the current state\n *   - [[StateService.target]]: Get a [[TargetState]] (useful when redirecting from a Transition Hook)\n *   - [[StateService.onInvalid]]: Register a callback for when a transition to an invalid state is started\n *   - [[StateService.defaultErrorHandler]]: Register a global callback for when a transition errors\n * - The [[StateDeclaration]] interface defines the shape of a state declaration\n * - The [[StateRegistry]] contains all the registered states\n *   - States can be added/removed using the [[StateRegistry.register]] and [[StateRegistry.deregister]]\n *     - Note: Bootstrap state registration differs by front-end framework.\n *   - Get notified of state registration/deregistration using [[StateRegistry.onStatesChanged]].\n *\n * @coreapi\n * @preferred\n * @module state\n */ /** for typedoc */\nexport * from \"./interface\";\nexport * from \"./stateBuilder\";\nexport * from \"./stateObject\";\nexport * from \"./stateMatcher\";\nexport * from \"./stateQueueManager\";\nexport * from \"./stateRegistry\";\nexport * from \"./stateService\";\nexport * from \"./targetState\";\n\n"
+  ]
+}

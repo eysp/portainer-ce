@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>angular-google-analytics</id>
+        <version>1.1.8</version>
+        <title>Angular Google Analytics module</title>
+        <authors>Julien Bouquillon,Justin Saunders (packaged Thomas Fuchs)</authors>
+        <licenseUrl>https://github.com/revolunet/angular-google-analytics/blob/master/LICENSE</licenseUrl>
+        <projectUrl>https://github.com/revolunet/angular-google-analytics</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>This service lets you integrate google analytics tracker in your AngularJS applications easily.</description>
+        <summary />
+        <copyright>Copyright (c) 2015 "Julien Bouquillon &lt;julien@bouquillon.com&gt;"</copyright>
+        <language>en-US</language>
+        <tags>angular google-analytics analytics</tags>
+        <dependencies>
+            <dependency id="AngularJS.Route" version="1.5.3" />
+            <dependency id="AngularJS.Core" version="1.5.3" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="dist\angular-google-analytics.js" target="content\scripts\angular-google-analytics.js" />
+        <file src="dist\angular-google-analytics.min.js" target="content\scripts\angular-google-analytics.min.js" />
+    </files>
+</package>

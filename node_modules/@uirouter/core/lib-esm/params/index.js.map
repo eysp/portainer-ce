@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "index.js",
+  "sourceRoot": "",
+  "sources": [
+    "@uirouter/core/params/index.ts"
+  ],
+  "names": [],
+  "mappings": "AAUA,cAAc,SAAS,CAAC;AACxB,cAAc,cAAc,CAAC;AAC7B,cAAc,eAAe,CAAC;AAC9B,cAAc,aAAa,CAAC",
+  "sourcesContent": [
+    "/**\n * This module contains code for State Parameters.\n *\n * See [[ParamDeclaration]]\n *\n * @coreapi\n * @preferred\n * @module params\n */ /** for typedoc */\nexport * from \"./interface\";\nexport * from \"./param\";\nexport * from \"./paramTypes\";\nexport * from \"./stateParams\";\nexport * from \"./paramType\";\n"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "name": "uid-safe",
+  "description": "URL and cookie safe UIDs",
+  "version": "2.0.0",
+  "contributors": [
+    "Douglas Christopher Wilson <doug@somethingdoug.com>",
+    "Jonathan Ong <me@jongleberry.com> (http://jongleberry.com)"
+  ],
+  "license": "MIT",
+  "repository": "crypto-utils/uid-safe",
+  "dependencies": {
+    "base64-url": "1.2.1"
+  },
+  "devDependencies": {
+    "bluebird": "2.9.25",
+    "istanbul": "0.3.9",
+    "mocha": "~2.2.4",
+    "proxyquire": "~1.2.0"
+  },
+  "files": [
+    "LICENSE",
+    "HISTORY.md",
+    "README.md",
+    "index.js"
+  ],
+  "engines": {
+    "node": ">= 0.8"
+  },
+  "scripts": {
+    "test": "mocha --trace-deprecation --reporter spec --bail --check-leaks test/",
+    "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- --trace-deprecation --reporter dot --check-leaks test/",
+    "test-travis": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --trace-deprecation --reporter spec --check-leaks test/"
+  },
+  "keywords": [
+    "random",
+    "generator",
+    "uid",
+    "safe"
+  ]
+}

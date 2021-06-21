@@ -1,0 +1,142 @@
+<div>
+  <div class="col-sm-12 form-section-title">
+    访问控制
+  </div>
+  <!-- access-control-switch -->
+  <div class="form-group">
+    <div class="col-sm-12">
+      <label for="ownership" class="control-label text-left">
+        启用访问控制
+        <portainer-tooltip position="bottom" message="启用后，您可以限制此资源的访问和管理。"></portainer-tooltip>
+      </label>
+      <label class="switch" style="margin-left: 20px;"> <input name="ownership" type="checkbox" ng-model="$ctrl.formData.AccessControlEnabled" /><i></i> </label>
+    </div>
+  </div>
+  <!-- !access-control-switch -->
+  <!-- restricted-access -->
+  <div class="form-group" ng-if="$ctrl.formData.AccessControlEnabled" style="margin-bottom: 0;">
+    <div class="boxselector_wrapper">
+      <div ng-if="$ctrl.isAdmin">
+        <input type="radio" id="access_administrators" ng-model="$ctrl.formData.Ownership" value="administrators" />
+        <label for="access_administrators">
+          <div class="boxselector_header">
+            <i ng-class="'administrators' | ownershipicon" aria-hidden="true" style="margin-right: 2px;"></i>
+            管理员
+          </div>
+          <p>我想将此资源的管理仅限于管理员</p>
+        </label>
+      </div>
+      <div ng-if="$ctrl.isAdmin">
+        <input type="radio" id="access_restricted" ng-model="$ctrl.formData.Ownership" value="restricted" />
+        <label for="access_restricted">
+          <div class="boxselector_header">
+            <i ng-class="'restricted' | ownershipicon" aria-hidden="true" style="margin-right: 2px;"></i>
+            受限制的
+          </div>
+          <p>
+            我想将此资源的管理限制为一组用户和/或团队
+          </p>
+        </label>
+      </div>
+      <div ng-if="!$ctrl.isAdmin">
+        <input type="radio" id="access_private" ng-model="$ctrl.formData.Ownership" value="private" />
+        <label for="access_private">
+          <div class="boxselector_header">
+            <i ng-class="'private' | ownershipicon" aria-hidden="true" style="margin-right: 2px;"></i>
+            私有的
+          </div>
+          <p>
+            我希望此资源只能由我自己管理
+          </p>
+        </label>
+      </div>
+      <div ng-if="!$ctrl.isAdmin && $ctrl.availableTeams.length > 0">
+        <input type="radio" id="access_restricted" ng-model="$ctrl.formData.Ownership" value="restricted" />
+        <label for="access_restricted">
+          <div class="boxselector_header">
+            <i ng-class="'restricted' | ownershipicon" aria-hidden="true" style="margin-right: 2px;"></i>
+            受限制的
+          </div>
+          <p ng-if="$ctrl.availableTeams.length === 1">
+            我想要我团队的任何成员 (<b>{{ $ctrl.availableTeams[0].Name }}</b
+            >)  能够管理此资源
+          </p>
+          <p ng-if="$ctrl.availableTeams.length > 1">
+            我想将此资源的管理限制为我的一个或多个团队
+          </p>
+        </label>
+      </div>
+    </div>
+  </div>
+  <!-- restricted-access -->
+  <!-- authorized-teams -->
+  <div
+    class="form-group"
+    ng-if="$ctrl.formData.AccessControlEnabled && $ctrl.formData.Ownership === $ctrl.RCO.RESTRICTED && ($ctrl.isAdmin || (!$ctrl.isAdmin && $ctrl.availableTeams.length > 1))"
+  >
+    <div class="col-sm-12">
+      <label for="group-access" class="control-label text-left">
+        授权团队
+        <portainer-tooltip
+          ng-if="$ctrl.isAdmin && $ctrl.availableTeams.length > 0"
+          position="bottom"
+          message="您可以选择哪些团队将能够管理此资源。"
+        ></portainer-tooltip>
+        <portainer-tooltip
+          ng-if="!$ctrl.isAdmin && $ctrl.availableTeams.length > 1"
+          position="bottom"
+          message="由于您是多个团队的成员，您可以选择哪些团队将能够管理此资源。"
+        ></portainer-tooltip>
+      </label>
+      <span ng-if="$ctrl.isAdmin && $ctrl.availableTeams.length === 0" class="small text-muted" style="margin-left: 20px;">
+        您尚未创建任何团队。 前往<a ui-sref="portainer.teams">团队视图</a>来管理团队。
+      </span>
+      <span
+        isteven-multi-select
+        ng-if="($ctrl.isAdmin && $ctrl.availableTeams.length > 0) || (!$ctrl.isAdmin && $ctrl.availableTeams.length > 1)"
+        input-model="$ctrl.availableTeams"
+        output-model="$ctrl.formData.AuthorizedTeams"
+        button-label="Name"
+        item-label="Name"
+        tick-property="selected"
+        helper-elements="filter"
+        search-property="Name"
+        translation="{nothingSelected: '选择一个或多个团队', search: '搜索...'}"
+        style="margin-left: 20px;"
+      >
+      </span>
+    </div>
+  </div>
+  <!-- !authorized-teams -->
+  <!-- authorized-users -->
+  <div class="form-group" ng-if="$ctrl.formData.AccessControlEnabled && $ctrl.formData.Ownership === $ctrl.RCO.RESTRICTED && $ctrl.isAdmin">
+    <div class="col-sm-12">
+      <label for="group-access" class="control-label text-left">
+        授权用户
+        <portainer-tooltip
+          ng-if="$ctrl.isAdmin && $ctrl.availableUsers.length > 0"
+          position="bottom"
+          message="您可以选择哪些用户将能够管理此资源。"
+        ></portainer-tooltip>
+      </label>
+      <span ng-if="$ctrl.availableUsers.length === 0" class="small text-muted" style="margin-left: 20px;">
+        您尚未创建任何用户。 转到<a ui-sref="portainer.users">用户视图</a>来管理用户。
+      </span>
+      <span
+        isteven-multi-select
+        ng-if="$ctrl.availableUsers.length > 0"
+        input-model="$ctrl.availableUsers"
+        output-model="$ctrl.formData.AuthorizedUsers"
+        button-label="Username"
+        item-label="Username"
+        tick-property="selected"
+        helper-elements="filter"
+        search-property="Username"
+        translation="{nothingSelected: '选择一个或多个用户', search: '搜索...'}"
+        style="margin-left: 20px;"
+      >
+      </span>
+    </div>
+  </div>
+  <!-- !authorized-users -->
+</div>

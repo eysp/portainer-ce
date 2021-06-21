@@ -1,0 +1,60 @@
+<div>
+  <rd-widget>
+    <rd-widget-header icon="fa-list-alt" title-text="容器规格"></rd-widget-header>
+    <rd-widget-body classes="no-padding">
+      <table class="table">
+        <tbody>
+          <tr>
+            <td>CMD</td>
+            <td
+              ><code ng-if="service.Command">{{ service.Command | command }}</code></td
+            >
+            <td>
+              <p class="small text-muted" style="margin-top: 10px;">
+                要执行的命令。
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td>参数</td>
+            <td
+              ><code ng-if="service.Arguments">{{ service.Arguments }}</code></td
+            >
+            <td>
+              <p class="small text-muted" style="margin-top: 10px;">
+                传递给容器中命令的参数。
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td>用户</td>
+            <td>{{ service.User }}</td>
+            <td>
+              <p class="small text-muted" style="margin-top: 10px;">
+                用户名或UID。
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td>工作目录</td>
+            <td>{{ service.Dir }}</td>
+            <td>
+              <p class="small text-muted" style="margin-top: 10px;">
+                容器内的工作目录。
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td>停止宽限期</td>
+            <td>{{ service.StopGracePeriod }}</td>
+            <td>
+              <p class="small text-muted" style="margin-top: 10px;">
+                强制终止容器之前等待的时间（默认无）。
+              </p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </rd-widget-body>
+  </rd-widget>
+</div>

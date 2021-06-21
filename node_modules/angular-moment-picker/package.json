@@ -1,0 +1,64 @@
+{
+  "name": "angular-moment-picker",
+  "version": "0.10.2",
+  "description": "Angular Moment Picker is an AngularJS directive for date and time picker using Moment.js",
+  "main": "dist/angular-moment-picker.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/indrimuska/angular-moment-picker.git"
+  },
+  "keywords": [
+    "datepicker",
+    "timepicker",
+    "datetime",
+    "picker",
+    "calendar",
+    "moment.js",
+    "angular"
+  ],
+  "author": "Indri Muska <indrimuska@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/indrimuska/angular-moment-picker/issues"
+  },
+  "homepage": "http://indrimuska.github.io/angular-moment-picker",
+  "scripts": {
+    "build": "webpack",
+    "minify": "webpack && webpack -p",
+    "release": "npm run test && webpack --define increase='patch' && webpack -p",
+    "test": "node ./node_modules/karma/bin/karma start"
+  },
+  "dependencies": {
+    "angular": "^1.3",
+    "moment": "^2.16.0"
+  },
+  "devDependencies": {
+    "@types/angular": "^1.5.21",
+    "@types/angular-mocks": "^1.5.8",
+    "@types/jasmine": "^2.5.38",
+    "@types/node": "^6.0.52",
+    "angular-mocks": "^1.6.1",
+    "autoprefixer": "^6.5.4",
+    "css-loader": "^0.28.1",
+    "extract-text-webpack-plugin": "^2.1.0",
+    "generate-json-webpack-plugin": "^0.2.1",
+    "html-loader": "^0.4.5",
+    "jasmine": "^2.6.0",
+    "jquery": "^3.1.1",
+    "karma": "^1.7.0",
+    "karma-jasmine": "^1.1.0",
+    "karma-phantomjs-launcher": "^1.0.4",
+    "karma-webpack": "^2.0.3",
+    "less": "^2.7.1",
+    "less-loader": "^4.0.3",
+    "postcss": "^5.2.6",
+    "postcss-loader": "^2.0.5",
+    "semver": "^5.3.0",
+    "style-loader": "^0.17.0",
+    "ts-loader": "^2.0.3",
+    "tslint": "^4.1.1",
+    "tslint-loader": "^3.5.3",
+    "typescript": "^2.1.4",
+    "webpack": "^2.5.1"
+  }
+}

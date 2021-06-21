@@ -1,0 +1,186 @@
+<rd-header>
+  <rd-header-title title-text="Stack details">
+    <a data-toggle="tooltip" title-text="Refresh" ui-sref="portainer.stacks.stack({id: stack.Id})" ui-sref-opts="{reload: true}">
+      <i class="fa fa-sync" aria-hidden="true"></i>
+    </a>
+  </rd-header-title>
+  <rd-header-content> <a ui-sref="portainer.stacks">堆栈</a> &gt; {{ stackName }} </rd-header-content>
+</rd-header>
+
+<div class="row">
+  <div class="col-sm-12">
+    <rd-widget>
+      <rd-widget-body>
+        <uib-tabset active="state.activeTab">
+          <!-- tab-info -->
+          <uib-tab index="0">
+            <uib-tab-heading> <i class="fa fa-th-list" aria-hidden="true"></i> 堆栈 </uib-tab-heading>
+            <div style="margin-top: 10px;">
+              <!-- stack-information -->
+              <div ng-if="state.externalStack">
+                <div class="col-sm-12 form-section-title">
+                  Information
+                </div>
+                <div class="form-group">
+                  <span class="small">
+                    <p class="text-muted">
+                      <i class="fa fa-exclamation-circle orange-icon" aria-hidden="true" style="margin-right: 2px;"></i>
+                      这个堆栈是在 Portainer 之外创建的。 对该堆栈的控制是有限的。
+                    </p>
+                  </span>
+                </div>
+              </div>
+              <!-- !stack-information -->
+              <!-- stack-details -->
+              <div>
+                <div class="col-sm-12 form-section-title">
+                  堆栈细节
+                </div>
+                <div class="form-group">
+                  {{ stackName }}
+                  <button authorization="PortainerStackDelete" class="btn btn-xs btn-danger" ng-click="removeStack()" ng-if="!state.externalStack || stack.Type === 1"
+                    ><i class="fa fa-trash-alt space-right" aria-hidden="true"></i>删除此堆栈</button
+                  >
+                </div>
+              </div>
+              <!-- !stack-details -->
+              <stack-duplication-form
+                ng-if="!state.externalStack && endpoints.length > 0"
+                endpoints="endpoints"
+                groups="groups"
+                current-endpoint-id="currentEndpointId"
+                on-duplicate="duplicateStack(name, endpointId)"
+                on-migrate="migrateStack(name, endpointId)"
+              >
+              </stack-duplication-form>
+            </div>
+          </uib-tab>
+          <!-- !tab-info -->
+          <!-- tab-file -->
+          <uib-tab index="1" ng-if="stackFileContent" select="showEditor()">
+            <uib-tab-heading> <i class="fa fa-pencil-alt space-right" aria-hidden="true"></i> 编辑 </uib-tab-heading>
+            <form class="form-horizontal" ng-if="state.showEditorTab" style="margin-top: 10px;">
+              <div class="form-group">
+                <span class="col-sm-12 text-muted small">
+                  您可以在<a href="https://docs.docker.com/compose/compose-file/" target="_blank">官方文档</a>中获取有关 Compose 文件格式的更多信息。
+                </span>
+              </div>
+              <div class="form-group">
+                <div class="col-sm-12">
+                  <code-editor
+                    identifier="stack-editor"
+                    placeholder="# 在此处定义或粘贴 docker-compose 文件的内容"
+                    yml="true"
+                    on-change="(editorUpdate)"
+                    value="stackFileContent"
+                  ></code-editor>
+                </div>
+              </div>
+              <!-- environment-variables -->
+              <div ng-if="stack && stack.Type === 1">
+                <div class="col-sm-12 form-section-title">
+                  Environment
+                </div>
+                <div class="form-group">
+                  <div class="col-sm-12" style="margin-top: 5px;" authorization="PortainerStackUpdate">
+                    <label class="control-label text-left">环境变量</label>
+                    <span class="label label-default interactive" style="margin-left: 10px;" ng-click="addEnvironmentVariable()">
+                      <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加环境变量
+                    </span>
+                  </div>
+                  <!-- environment-variable-input-list -->
+                  <div class="col-sm-12 form-inline" style="margin-top: 10px;">
+                    <div ng-repeat="variable in stack.Env" style="margin-top: 2px;">
+                      <div class="input-group col-sm-5 input-group-sm">
+                        <span class="input-group-addon">名称</span>
+                        <input type="text" class="form-control" ng-model="variable.name" placeholder="例如 FOO" />
+                      </div>
+                      <div class="input-group col-sm-5 input-group-sm">
+                        <span class="input-group-addon">value</span>
+                        <input type="text" class="form-control" ng-model="variable.value" placeholder="例如 bar" />
+                      </div>
+                      <button class="btn btn-sm btn-danger" type="button" ng-click="removeEnvironmentVariable($index)" authorization="PortainerStackUpdate">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <!-- !environment-variable-input-list -->
+                </div>
+              </div>
+              <!-- !environment-variables -->
+              <!-- options -->
+              <div ng-if="stack.Type === 1 && applicationState.endpoint.apiVersion >= 1.27" authorization="PortainerStackUpdate">
+                <div class="col-sm-12 form-section-title">
+                  选项
+                </div>
+                <div class="form-group">
+                  <div class="col-sm-12">
+                    <label for="prune" class="control-label text-left">
+                      精简服务
+                      <portainer-tooltip position="bottom" message="精简不再被引用的服务。"></portainer-tooltip>
+                    </label>
+                    <label class="switch" style="margin-left: 20px;"> <input name="prune" type="checkbox" ng-model="formValues.Prune" /><i></i> </label>
+                  </div>
+                </div>
+              </div>
+              <!-- !options -->
+              <div authorization="PortainerStackUpdate">
+                <div class="col-sm-12 form-section-title">
+                  操作
+                </div>
+                <div class="form-group">
+                  <div class="col-sm-12">
+                    <button type="button" class="btn btn-sm btn-primary" ng-disabled="state.actionInProgress" ng-click="deployStack()" button-spinner="state.actionInProgress">
+                      <span ng-hide="state.actionInProgress">更新堆栈</span>
+                      <span ng-show="state.actionInProgress">正在部署...</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </uib-tab>
+          <!-- !tab-file -->
+        </uib-tabset>
+      </rd-widget-body>
+    </rd-widget>
+  </div>
+</div>
+
+<div class="row" ng-if="containers">
+  <div class="col-sm-12">
+    <containers-datatable
+      title-text="Containers"
+      title-icon="fa-server"
+      dataset="containers"
+      table-key="stack-containers"
+      order-by="Status"
+      show-ownership-column="applicationState.application.authentication"
+      show-host-column="false"
+      show-add-action="false"
+    ></containers-datatable>
+  </div>
+</div>
+
+<div class="row" ng-if="services">
+  <div class="col-sm-12">
+    <services-datatable
+      title-text="Services"
+      title-icon="fa-list-alt"
+      dataset="services"
+      table-key="stack-services"
+      order-by="Name"
+      nodes="nodes"
+      agent-proxy="applicationState.endpoint.mode.agentProxy && applicationState.endpoint.mode.provider === 'DOCKER_SWARM_MODE'"
+      show-ownership-column="false"
+      show-update-action="applicationState.endpoint.apiVersion >= 1.25"
+      show-task-logs-button="applicationState.endpoint.apiVersion >= 1.30"
+      show-add-action="false"
+      show-stack-column="false"
+    ></services-datatable>
+  </div>
+</div>
+
+<!-- access-control-panel -->
+<por-access-control-panel ng-if="stack && applicationState.application.authentication" resource-id="stack.Name" resource-control="stack.ResourceControl" resource-type="'stack'">
+</por-access-control-panel>
+<!-- !access-control-panel -->

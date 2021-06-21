@@ -1,0 +1,9 @@
+language: node_js
+node_js:
+  - 8
+addons:
+  firefox: "41.0"
+before_install:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+after_script: "npm install coveralls@2.10.0 && cat ./coverage/**/lcov.info | coveralls"

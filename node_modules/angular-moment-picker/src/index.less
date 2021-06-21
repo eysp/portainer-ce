@@ -1,0 +1,113 @@
+@border-color:              #f0f3f4;
+@text-color:                #404040;
+@text-shadow:               fade(#fff, 90%);
+@background:                #fff;
+@box-shadow-color:          fade(#000, 7.5%);
+
+@today-fg:                  #404040;
+@today-fg-shadow:           fade(#fff, 90%);
+@today-bg:                  #e4eef5;
+
+@hover-bg-color:            #fafbfb;
+@hover-bg-image:            linear-gradient(#f0f3f4, @hover-bg-color);
+@disabled-fg:               #abbbc7;
+
+@highlighted-bg-image:      radial-gradient(transparent, fade(#000, 15%));
+
+@selected-fg:               #fff;
+@selected-fg-shadow:        0 -1px 0 fade(#000, 30%);
+@selected-bg-color:         #45b1e8;
+@selected-bg-image:         linear-gradient(#45b1e8, #3097de);
+@selected-border-color:     #3ca0dd;
+
+.moment-picker-input { cursor: pointer; }
+.moment-picker {
+    position: absolute;
+    z-index: 1060;
+
+    .moment-picker-container {
+        color: @text-color;
+        min-width: 15em;
+        background: @background;
+        padding: 4px;
+        border: 1px solid @border-color;
+        border-radius: 4px;
+        position: absolute;
+        margin-top: 4px;
+        margin-left: -.5em;
+        box-shadow: 0 2px 4px @box-shadow-color;
+        &:before, &:after { content: ''; display: block; width: 0; height: 0; border: 8px solid transparent; border-top: none; position: absolute; top: -9px; left: 15px; }
+        &:before { border-bottom-color: @border-color; border-width: 9px; }
+        &:after { border-bottom-color: @background; margin-top: 1px; margin-left: 1px; }
+    }
+
+    // inline picker
+    &.inline {
+        display: block;
+        position: relative;
+        .moment-picker-container {
+            position: relative;
+            margin: 0;
+            &:before, &:after { content: none; }
+        }
+    }
+
+    // picker on top
+    &.top .moment-picker-container {
+        bottom: 100%;
+        margin-top: auto;
+        margin-bottom: 4px;
+        &:before, &:after { border: 8px solid transparent; border-bottom: none; top: auto; bottom: -9px; }
+        &:before { border-top-color: @border-color; border-width: 9px; }
+        &:after { border-top-color: @background; margin-top: auto; margin-bottom: 1px; }
+    }
+
+    // picker on right
+    &.right .moment-picker-container {
+        right: 0;
+        margin-left: auto;
+        margin-right: -.5em;
+        &:before, &:after { left: auto; right: 15px; }
+        &:after { margin-left: auto; margin-right: 1px; }
+    }
+
+    // all views
+    table { border-collapse: collapse; border-spacing: 0; min-width: 100%; table-layout: fixed; }
+    th {
+        font-weight: bold;
+        &:first-child, &:last-child { width: 2em; }
+    }
+    th, td {
+        padding: 0;
+        text-align: center;
+        min-width: 2em;
+        height: 2em;
+        text-shadow: 0 1px 0 @text-shadow;
+        cursor: pointer;
+        border-radius: 4px;
+        &:hover { background-color: @hover-bg-color; background-image: @hover-bg-image; }
+        &.disabled, &.disabled:hover { color: @disabled-fg; background: none; cursor: default; }
+    }
+    td {
+        &.today { background: @today-bg; color: @today-fg; text-shadow: 0 1px 0 @today-fg-shadow; }
+        &.selected { color: @selected-fg; text-shadow: @selected-fg-shadow; border-color: @selected-border-color; background-color: @selected-bg-color; background-image: @selected-bg-image; }
+        &.highlighted { background-image: @highlighted-bg-image; }
+    }
+
+    // decade view, year view
+    .decade-view td,
+    .year-view td { height: 3.4em; }
+
+    // month view
+    .month-view {
+        .moment-picker-specific-views th { background: none; cursor: default; }
+        td { width: 1.4285714286em; }
+    }
+
+    // day view, hour view
+    .day-view td,
+    .hour-view td { height: 2.3333333333em; }
+
+    // minute view
+    .minute-view td { height: 1.8em; }
+}

@@ -1,0 +1,219 @@
+<div class="row">
+  <div class="col-sm-12" ng-if="$ctrl.state.displayAccessControlPanel">
+    <rd-widget>
+      <rd-widget-header icon="fa-eye" title-text="访问控制"></rd-widget-header>
+      <rd-widget-body classes="no-padding">
+        <table class="table">
+          <tbody>
+            <!-- ownership -->
+            <tr>
+              <td>所有权</td>
+              <td>
+                <i ng-class="$ctrl.resourceControl.Ownership | ownershipicon" aria-hidden="true" style="margin-right: 2px;"></i>
+                <span ng-if="!$ctrl.resourceControl">
+                  管理员
+                  <portainer-tooltip message="此资源只能由管理员管理。" position="bottom" style="margin-left: -3px;"></portainer-tooltip>
+                </span>
+                <span ng-if="$ctrl.resourceControl">
+                  {{ $ctrl.resourceControl.Ownership }}
+                  <portainer-tooltip
+                    ng-if="$ctrl.resourceControl.Ownership === $ctrl.RCO.PUBLIC"
+                    message="任何有权访问此端点的用户都可以管理此资源。"
+                    position="bottom"
+                    style="margin-left: -3px;"
+                  ></portainer-tooltip>
+                  <portainer-tooltip
+                    ng-if="$ctrl.resourceControl.Ownership === $ctrl.RCO.PRIVATE"
+                    message="此资源的管理仅限于单个用户。"
+                    position="bottom"
+                    style="margin-left: -3px;"
+                  ></portainer-tooltip>
+                  <portainer-tooltip
+                    ng-if="$ctrl.resourceControl.Ownership === $ctrl.RCO.RESTRICTED"
+                    message="此资源可由一组受限的用户和/或团队管理。"
+                    position="bottom"
+                    style="margin-left: -3px;"
+                  ></portainer-tooltip>
+                </span>
+              </td>
+            </tr>
+            <!-- !ownership -->
+            <tr ng-if="$ctrl.resourceControl.Type === $ctrl.RCTI.SERVICE && $ctrl.resourceType === $ctrl.RCTS.CONTAINER">
+              <td colspan="2">
+                <i class="fa fa-info-circle" aria-hidden="true" style="margin-right: 2px;"></i>
+                此资源的访问控制继承自以下服务：
+                <a ui-sref="docker.services.service({ id: $ctrl.resourceControl.ResourceId })">{{ $ctrl.resourceControl.ResourceId | truncate }}</a>
+                <portainer-tooltip
+                  message="应用于服务的访问控制也应用于该服务的每个容器。"
+                  position="bottom"
+                  style="margin-left: 2px;"
+                ></portainer-tooltip>
+              </td>
+            </tr>
+            <tr ng-if="$ctrl.resourceControl.Type === $ctrl.RCTI.CONTAINER && $ctrl.resourceType === $ctrl.RCTS.VOLUME">
+              <td colspan="2">
+                <i class="fa fa-info-circle" aria-hidden="true" style="margin-right: 2px;"></i>
+                此资源的访问控制继承自以下容器：
+                <a ui-sref="docker.containers.container({ id: $ctrl.resourceControl.ResourceId })">{{ $ctrl.resourceControl.ResourceId | truncate }}</a>
+                <portainer-tooltip
+                  message="应用于使用模板创建的容器的访问控制也应用于与容器关联的每个存储卷。"
+                  position="bottom"
+                  style="margin-left: 2px;"
+                ></portainer-tooltip>
+              </td>
+            </tr>
+            <tr ng-if="$ctrl.resourceControl.Type === $ctrl.RCTI.STACK && $ctrl.resourceType !== $ctrl.RCTS.STACK">
+              <td colspan="2">
+                <i class="fa fa-info-circle" aria-hidden="true" style="margin-right: 2px;"></i>
+                此资源的访问控制继承自以下堆栈：{{ $ctrl.resourceControl.ResourceId }}
+                <portainer-tooltip
+                  message="应用于堆栈的访问控制也应用于堆栈中的每个资源。"
+                  position="bottom"
+                  style="margin-left: 2px;"
+                ></portainer-tooltip>
+              </td>
+            </tr>
+            <!-- authorized-users -->
+            <tr ng-if="$ctrl.resourceControl.UserAccesses.length > 0">
+              <td>授权用户</td>
+              <td>
+                <span ng-repeat="user in $ctrl.authorizedUsers">{{ user.Username }}{{ $last ? '' : ', ' }} </span>
+              </td>
+            </tr>
+            <!-- !authorized-users -->
+            <!-- authorized-teams -->
+            <tr ng-if="$ctrl.resourceControl.TeamAccesses.length > 0">
+              <td>授权团队</td>
+              <td>
+                <span ng-repeat="team in $ctrl.authorizedTeams">{{ team.Name }}{{ $last ? '' : ', ' }} </span>
+              </td>
+            </tr>
+            <!-- !authorized-teams -->
+            <!-- edit-ownership -->
+            <tr ng-if="$ctrl.canEditOwnership();">
+              <td colspan="2">
+                <a ng-click="$ctrl.state.editOwnership = true"><i class="fa fa-edit space-right" aria-hidden="true"></i>更改所有权</a>
+              </td>
+            </tr>
+            <!-- !edit-ownership -->
+            <!-- edit-ownership-choices -->
+            <tr ng-if="$ctrl.state.editOwnership">
+              <td colspan="2" style="white-space: inherit;">
+                <div class="boxselector_wrapper">
+                  <div ng-if="$ctrl.isAdmin">
+                    <input type="radio" id="access_administrators" ng-model="$ctrl.formValues.Ownership" ng-value="$ctrl.RCO.ADMINISTRATORS" />
+                    <label for="access_administrators">
+                      <div class="boxselector_header">
+                        <i ng-class="'administrators' | ownershipicon" aria-hidden="true" style="margin-right: 2px;"></i>
+                        管理员
+                      </div>
+                      <p>我想将此资源的管理仅限于管理员</p>
+                    </label>
+                  </div>
+                  <div ng-if="$ctrl.isAdmin">
+                    <input type="radio" id="access_restricted" ng-model="$ctrl.formValues.Ownership" ng-value="$ctrl.RCO.RESTRICTED" />
+                    <label for="access_restricted">
+                      <div class="boxselector_header">
+                        <i ng-class="'restricted' | ownershipicon" aria-hidden="true" style="margin-right: 2px;"></i>
+                        受限制的
+                      </div>
+                      <p>
+                        我想将此资源的管理限制为一组用户和/或团队
+                      </p>
+                    </label>
+                  </div>
+                  <div ng-if="!$ctrl.isAdmin && $ctrl.state.canChangeOwnershipToTeam && $ctrl.availableTeams.length > 0">
+                    <input type="radio" id="access_restricted" ng-model="$ctrl.formValues.Ownership" ng-value="$ctrl.RCO.RESTRICTED" />
+                    <label for="access_restricted">
+                      <div class="boxselector_header">
+                        <i ng-class="'restricted' | ownershipicon" aria-hidden="true" style="margin-right: 2px;"></i>
+                        受限制的
+                      </div>
+                      <p ng-if="$ctrl.availableTeams.length === 1">
+                        我想要我团队的任何成员 (<b>{{ $ctrl.availableTeams[0].Name }}</b
+                         >) 能够管理此资源
+                      </p>
+                      <p ng-if="$ctrl.availableTeams.length > 1">
+                        我想将此资源的管理限制为我的一个或多个团队
+                      </p>
+                    </label>
+                  </div>
+                  <div>
+                    <input type="radio" id="access_public" ng-model="$ctrl.formValues.Ownership" ng-value="$ctrl.RCO.PUBLIC" />
+                    <label for="access_public">
+                      <div class="boxselector_header">
+                        <i ng-class="'public' | ownershipicon" aria-hidden="true" style="margin-right: 2px;"></i>
+                        公开
+                      </div>
+                      <p>我希望任何有权访问此端点的用户都能够管理此资源</p>
+                    </label>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <!-- edit-ownership-choices -->
+            <!-- select-teams -->
+            <tr ng-if="$ctrl.state.editOwnership && $ctrl.formValues.Ownership === $ctrl.RCO.RESTRICTED && ($ctrl.isAdmin || (!$ctrl.isAdmin && $ctrl.availableTeams.length > 1))">
+              <td colspan="2">
+                <span>团队</span>
+                <span ng-if="$ctrl.isAdmin && $ctrl.availableTeams.length === 0" class="small text-muted" style="margin-left: 10px;">
+					您尚未创建任何团队。前往<a ui-sref="portainer.teams">团队视图</a>来管理团队。
+                </span>
+                <span
+                  isteven-multi-select
+                  ng-if="($ctrl.isAdmin && $ctrl.availableTeams.length > 0) || (!$ctrl.isAdmin && $ctrl.availableTeams.length > 1)"
+                  input-model="$ctrl.availableTeams"
+                  output-model="$ctrl.formValues.Ownership_Teams"
+                  button-label="Name"
+                  item-label="Name"
+                  tick-property="selected"
+                  helper-elements="filter"
+                  search-property="Name"
+                  max-labels="3"
+                  translation="{nothingSelected: '选择一支或多支团队', search: '搜索...'}"
+                >
+                </span>
+              </td>
+            </tr>
+            <!-- !select-teams -->
+            <!-- select-users -->
+            <tr ng-if="$ctrl.isAdmin && $ctrl.state.editOwnership && $ctrl.formValues.Ownership === $ctrl.RCO.RESTRICTED">
+              <td colspan="2">
+                <span>用户</span>
+                <span ng-if="$ctrl.availableUsers.length === 0" class="small text-muted" style="margin-left: 10px;">
+                  您尚未创建任何用户。转到<a ui-sref="portainer.users">用户视图</a>来管理用户。
+                </span>
+                <span
+                  isteven-multi-select
+                  ng-if="$ctrl.availableUsers.length > 0"
+                  input-model="$ctrl.availableUsers"
+                  output-model="$ctrl.formValues.Ownership_Users"
+                  button-label="Username"
+                  item-label="Username"
+                  tick-property="selected"
+                  helper-elements="filter"
+                  search-property="Username"
+                  max-labels="3"
+                  translation="{nothingSelected: 'Select one or more users', search: '搜索...'}"
+                >
+                </span>
+              </td>
+            </tr>
+            <!-- !select-users -->
+            <!-- ownership-actions -->
+            <tr ng-if="$ctrl.state.editOwnership">
+              <td colspan="2">
+                <div>
+                  <a type="button" class="btn btn-default btn-sm" ng-click="$ctrl.state.editOwnership = false">取消</a>
+                  <a type="button" class="btn btn-primary btn-sm" ng-click="$ctrl.confirmUpdateOwnership()">更改所有权</a>
+                  <span class="text-danger" ng-if="$ctrl.state.formValidationError" style="margin-left: 5px;">{{ $ctrl.state.formValidationError }}</span>
+                </div>
+              </td>
+            </tr>
+            <!-- !ownership-actions -->
+          </tbody>
+        </table>
+      </rd-widget-body>
+    </rd-widget>
+  </div>
+</div>

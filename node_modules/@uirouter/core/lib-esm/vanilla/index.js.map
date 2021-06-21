@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "index.js",
+  "sourceRoot": "",
+  "sources": [
+    "@uirouter/core/vanilla/index.ts"
+  ],
+  "names": [],
+  "mappings": "AAUA,cAAc,KAAK,CAAC;AACpB,cAAc,YAAY,CAAC;AAE3B,cAAc,uBAAuB,CAAC;AACtC,cAAc,uBAAuB,CAAC;AACtC,cAAc,yBAAyB,CAAC;AACxC,cAAc,4BAA4B,CAAC;AAE3C,cAAc,wBAAwB,CAAC;AACvC,cAAc,yBAAyB,CAAC;AAExC,cAAc,SAAS,CAAC;AACxB,cAAc,WAAW,CAAC",
+  "sourcesContent": [
+    "/**\n * Naive, pure JS implementation of core ui-router services\n *\n *\n * @internalapi\n * @module vanilla\n */\n/** */\nexport * from \"./interface\";\n\nexport * from \"./q\";\nexport * from \"./injector\";\n\nexport * from \"./baseLocationService\";\nexport * from \"./hashLocationService\";\nexport * from \"./memoryLocationService\";\nexport * from \"./pushStateLocationService\";\n\nexport * from \"./memoryLocationConfig\";\nexport * from \"./browserLocationConfig\";\n\nexport * from \"./utils\";\nexport * from \"./plugins\";\n"
+  ]
+}

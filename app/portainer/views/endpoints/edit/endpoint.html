@@ -1,0 +1,173 @@
+<rd-header>
+  <rd-header-title title-text="端点详细信息">
+    <a data-toggle="tooltip" title="刷新" ui-sref="portainer.endpoints.endpoint({id: endpoint.Id})" ui-sref-opts="{reload: true}">
+      <i class="fa fa-sync" aria-hidden="true"></i>
+    </a>
+  </rd-header-title>
+  <rd-header-content>
+    <a ui-sref="portainer.endpoints">端点</a> &gt; <a ui-sref="portainer.endpoints.endpoint({id: endpoint.Id})">{{ endpoint.Name }}</a>
+  </rd-header-content>
+</rd-header>
+
+<div class="row">
+  <information-panel ng-if="endpoint.Type === 4 && endpoint.EdgeID" title-text="Edge information">
+    <span class="small text-muted">
+      <p>
+        <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
+        此 Edge 端点与 Edge 环境相关联。
+      </p>
+      <p>
+        Edge key: <code>{{ endpoint.EdgeKey }}</code>
+      </p>
+      <p>
+        Edge identifier: <code>{{ endpoint.EdgeID }}</code>
+      </p>
+    </span>
+  </information-panel>
+  <information-panel ng-if="endpoint.Type === 4 && !endpoint.EdgeID" title-text="Deploy an agent">
+    <span class="small text-muted">
+      <p>
+        <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
+        使用以下命令在远程 Docker 环境中部署 Edge 代理
+      </p>
+      <p>
+        代理将通过以下方式与 Portainer 通信 <u>{{ edgeKeyDetails.instanceURL }}</u> 和 <u>tcp://{{ edgeKeyDetails.tunnelServerAddr }}</u>
+      </p>
+      <div style="margin-top: 10px;">
+        <uib-tabset active="state.deploymentTab">
+          <uib-tab index="0" heading="Standalone">
+            <code style="display: block; white-space: pre-wrap; padding: 16px 90px;">{{dockerCommands.standalone}}</code>
+          </uib-tab>
+          <uib-tab index="1" heading="Swarm">
+            <code style="display: block; white-space: pre-wrap; padding: 16px 90px;">{{dockerCommands.swarm}}</code>
+          </uib-tab>
+        </uib-tabset>
+        <div style="margin-top: 10px;">
+          <span class="btn btn-primary btn-sm" ng-click="copyEdgeAgentDeploymentCommand()"><i class="fa fa-copy space-right" aria-hidden="true"></i>Copy command</span>
+          <span id="copyNotificationDeploymentCommand" style="margin-left: 7px; display: none; color: #23ae89;"> <i class="fa fa-check" aria-hidden="true"></i> copied </span>
+        </div>
+      </div>
+      <div class="col-sm-12 form-section-title" style="margin-top: 25px;">
+        Join token
+      </div>
+      <p>
+        <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
+        对于那些预留边的缘代理，请使用以下连接令牌将边缘代理与此端点相关联。
+      </p>
+      <p> 您可以在可用的用户指南中阅读更多关于预转移的信息，点 <a href="https://downloads.portainer.io/edge_agent_guide.pdf">这里</a> </p>
+      <div style="margin-top: 10px; overflow-wrap: break-word;">
+        <code>
+          {{ endpoint.EdgeKey }}
+        </code>
+        <div style="margin-top: 10px;">
+          <span class="btn btn-primary btn-sm" ng-click="copyEdgeAgentKey()"><i class="fa fa-copy space-right" aria-hidden="true"></i>复制 token</span>
+          <span id="copyNotificationEdgeKey" style="margin-left: 7px; display: none; color: #23ae89;"> <i class="fa fa-check" aria-hidden="true"></i> copied </span>
+        </div>
+      </div>
+    </span>
+  </information-panel>
+</div>
+
+<div class="row">
+  <div class="col-lg-12 col-md-12 col-xs-12">
+    <rd-widget>
+      <rd-widget-body>
+        <form class="form-horizontal">
+          <div class="col-sm-12 form-section-title">
+            配置
+          </div>
+          <!-- name-input -->
+          <div class="form-group">
+            <label for="container_name" class="col-sm-3 col-lg-2 control-label text-left">名称</label>
+            <div class="col-sm-9 col-lg-10">
+              <input type="text" class="form-control" id="container_name" ng-model="endpoint.Name" placeholder="例如 docker-prod01" />
+            </div>
+          </div>
+          <!-- !name-input -->
+          <!-- endpoint-url-input -->
+          <div class="form-group" ng-if="endpoint.Type !== 4">
+            <label for="endpoint_url" class="col-sm-3 col-lg-2 control-label text-left">
+              端点 URL
+              <portainer-tooltip
+                position="bottom"
+                message="Docker 主机的 URL 或 IP 地址。 Docker API 必须通过 TCP 端口公开。 请参考 Docker 文档进行配置。"
+              ></portainer-tooltip>
+            </label>
+            <div class="col-sm-9 col-lg-10">
+              <input
+                ng-disabled="endpointType === 'local' || endpoint.Type === 3"
+                type="text"
+                class="form-control"
+                id="endpoint_url"
+                ng-model="endpoint.URL"
+                placeholder="例如 10.0.0.10:2375 or mydocker.mydomain.com:2375"
+              />
+            </div>
+          </div>
+          <!-- !endpoint-url-input -->
+          <!-- endpoint-public-url-input -->
+          <div class="form-group" ng-if="endpoint.Type !== 3">
+            <label for="endpoint_public_url" class="col-sm-3 col-lg-2 control-label text-left">
+              公共 IP
+              <portainer-tooltip
+                position="bottom"
+                message="可以访问公开容器的 URL 或 IP 地址。 此字段是可选的，默认为端点 URL。"
+              ></portainer-tooltip>
+            </label>
+            <div class="col-sm-9 col-lg-10">
+              <input type="text" class="form-control" id="endpoint_public_url" ng-model="endpoint.PublicURL" placeholder="例如 10.0.0.10 or mydocker.mydomain.com" />
+            </div>
+          </div>
+          <azure-endpoint-config
+            ng-if="endpoint.Type === 3"
+            application-id="endpoint.AzureCredentials.ApplicationID"
+            tenant-id="endpoint.AzureCredentials.TenantID"
+            authentication-key="endpoint.AzureCredentials.AuthenticationKey"
+          ></azure-endpoint-config>
+          <!-- !endpoint-public-url-input -->
+          <div class="col-sm-12 form-section-title">
+            Metadata
+          </div>
+          <!-- group -->
+          <div class="form-group">
+            <label for="endpoint_group" class="col-sm-3 col-lg-2 control-label text-left">
+              群组
+            </label>
+            <div class="col-sm-9 col-lg-10">
+              <select ng-options="group.Id as group.Name for group in groups" ng-model="endpoint.GroupId" id="endpoint_group" class="form-control"></select>
+            </div>
+          </div>
+          <!-- !group -->
+          <!-- tags -->
+          <div class="form-group">
+            <tag-selector ng-if="endpoint && availableTags" tags="availableTags" model="endpoint.TagIds" on-create="(onCreateTag)" allow-create="state.allowCreate"></tag-selector>
+          </div>
+          <!-- !tags -->
+          <!-- endpoint-security -->
+          <div ng-if="endpointType === 'remote' && endpoint.Type !== 3 && endpoint.Type !== 4">
+            <div class="col-sm-12 form-section-title">
+              安全
+            </div>
+            <por-endpoint-security form-data="formValues.SecurityFormData" endpoint="endpoint"></por-endpoint-security>
+          </div>
+          <!-- !endpoint-security -->
+          <div class="form-group">
+            <div class="col-sm-12">
+              <button
+                type="button"
+                class="btn btn-primary btn-sm"
+                ng-disabled="state.actionInProgress || !endpoint.Name || !endpoint.URL || (endpoint.TLS && ((endpoint.TLSVerify && !formValues.TLSCACert) || (endpoint.TLSClientCert && (!formValues.TLSCert || !formValues.TLSKey))))"
+                ng-click="updateEndpoint()"
+                button-spinner="state.actionInProgress"
+              >
+                <span ng-hide="state.actionInProgress">更新 端点</span>
+                <span ng-show="state.actionInProgress">更新端点中...</span>
+              </button>
+              <a type="button" class="btn btn-default btn-sm" ui-sref="portainer.endpoints">取消</a>
+            </div>
+          </div>
+        </form>
+      </rd-widget-body>
+    </rd-widget>
+  </div>
+</div>

@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "coreResolvables.js",
+  "sourceRoot": "",
+  "sources": [
+    "@uirouter/core/hooks/coreResolvables.ts"
+  ],
+  "names": [],
+  "mappings": "AAAA,oBAAoB,CAAC,MAAM;AAC3B,OAAO,EAAE,UAAU,EAAE,MAAM,0BAA0B,CAAC;AACtD,OAAO,EAAE,QAAQ,EAAE,MAAM,WAAW,CAAC;AAGrC,4BAA4B,KAAiB;IAC3C,KAAK,CAAC,aAAa,CAAC,EAAE,KAAK,EAAE,QAAQ,EAAQ,IAAI,EAAE,EAAE,EAAE,SAAS,EAAE,cAAM,OAAA,KAAK,CAAC,MAAM,EAAZ,CAAY,EAAI,IAAI,EAAE,KAAK,CAAC,MAAM,EAAE,EAAI,EAAE,CAAC,CAAC;IACpH,KAAK,CAAC,aAAa,CAAC,EAAE,KAAK,EAAE,UAAU,EAAM,IAAI,EAAE,EAAE,EAAE,SAAS,EAAE,cAAM,OAAA,KAAK,EAAL,CAAK,EAAW,IAAI,EAAE,KAAK,EAAE,EAAW,EAAE,CAAC,CAAC;IACpH,KAAK,CAAC,aAAa,CAAC,EAAE,KAAK,EAAE,cAAc,EAAE,IAAI,EAAE,EAAE,EAAE,SAAS,EAAE,cAAM,OAAA,KAAK,EAAL,CAAK,EAAW,IAAI,EAAE,KAAK,EAAE,EAAW,EAAE,CAAC,CAAC;IACpH,KAAK,CAAC,aAAa,CAAC,EAAE,KAAK,EAAE,cAAc,EAAE,IAAI,EAAE,EAAE,EAAE,SAAS,EAAE,cAAM,OAAA,KAAK,CAAC,MAAM,EAAE,EAAd,CAAc,EAAE,IAAI,EAAE,KAAK,CAAC,MAAM,EAAE,EAAE,EAAE,EAAE,CAAC,CAAC;IAEpH,KAAK,CAAC,QAAQ,EAAE,CAAC,OAAO,CAAC,UAAA,KAAK;QAC5B,KAAK,CAAC,aAAa,CAAC,EAAE,KAAK,EAAE,SAAS,EAAK,IAAI,EAAE,EAAE,EAAE,SAAS,EAAE,cAAM,OAAA,KAAK,EAAL,CAAK,EAAW,IAAI,EAAE,KAAK,EAAE,EAAQ,KAAK,CAAC,CAAC;IACpH,CAAC,CAAC,CAAC;AACL,CAAC;AAED,MAAM,CAAC,IAAM,0BAA0B,GAAG,UAAC,iBAAoC;IAC3E,OAAA,iBAAiB,CAAC,QAAQ,CAAC,EAAE,EAAE,kBAAkB,CAAC;AAAlD,CAAkD,CAAC",
+  "sourcesContent": [
+    "/** @module hooks */ /** */\nimport { Transition } from \"../transition/transition\";\nimport { UIRouter } from \"../router\";\nimport { TransitionService } from \"../transition/transitionService\";\n\nfunction addCoreResolvables(trans: Transition) {\n  trans.addResolvable({ token: UIRouter,       deps: [], resolveFn: () => trans.router,   data: trans.router },   \"\");\n  trans.addResolvable({ token: Transition,     deps: [], resolveFn: () => trans,          data: trans },          \"\");\n  trans.addResolvable({ token: '$transition$', deps: [], resolveFn: () => trans,          data: trans },          \"\");\n  trans.addResolvable({ token: '$stateParams', deps: [], resolveFn: () => trans.params(), data: trans.params() }, \"\");\n\n  trans.entering().forEach(state => {\n    trans.addResolvable({ token: '$state$',    deps: [], resolveFn: () => state,          data: state },       state);\n  });\n}\n\nexport const registerAddCoreResolvables = (transitionService: TransitionService) =>\n    transitionService.onCreate({}, addCoreResolvables);\n"
+  ]
+}

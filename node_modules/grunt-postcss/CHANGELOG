@@ -1,0 +1,66 @@
+v0.8.0
+    date: 2016-03-03
+    changes:
+      - Drop nodejs 0.10 support
+v0.7.2
+    date: 2016-02-16
+    changes:
+      - Update Grunt dependency (#pull/86)
+v0.7.1
+    date: 2015-11-06
+    changes:
+      - Fix #70
+v0.7.0
+    date: 2015-10-21
+    changes:
+      - New `failOnError` option
+      - New `writeDest` option
+      - Better npm@3 flat dependencies compatibility
+v0.6.0
+    date: 2015-08-23
+    changes:
+      - PostCSS 5.0
+v0.5.5
+    date: 2015-07-12
+    changes:
+      - Handle async PostCSS API properly
+v0.5.4
+    date: 2015-06-28
+    changes:
+      - Fix annotation URL for Windows
+v0.5.3
+    date: 2015-06-25
+    changes:
+      - Fix annotation paths
+v0.5.2
+    date: 2015-06-20
+    changes:
+      - Fix `annotation` option
+v0.5.1
+    date: 2015-06-10
+    changes:
+      - Fix process hanging when no source files found
+v0.5.0
+    date: 2015-06-07
+    changes:
+      - PostCSS `safe` option support
+      - Less verbose output in standard mode, `silent` option is removed
+      - Log no source files found, not fail
+v0.4.0
+    date: 2015-05-04
+    changes:
+      - Pass PostCSS Runner Guidelines
+v0.3.0:
+    date: 2015-01-18
+    changes:
+      - PostCSS 4.0
+      - Use a new PostCSS instance for each Grunt target (#12)
+v0.2.0:
+    date: 2014-11-14
+    changes:
+      - PostCSS 3.0
+      - Maps now inline and containing sourcesContent by default
+v0.1.0:
+    date: 2014-09-25
+    changes:
+      - First release

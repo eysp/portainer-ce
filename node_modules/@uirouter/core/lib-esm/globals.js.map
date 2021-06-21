@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "globals.js",
+  "sourceRoot": "",
+  "sources": [
+    "@uirouter/core/globals.ts"
+  ],
+  "names": [],
+  "mappings": "AAAA;;;GAGG,CAAC,MAAM;AACV,OAAO,EAAC,WAAW,EAAC,MAAM,sBAAsB,CAAC;AAIjD,OAAO,EAAC,KAAK,EAAC,MAAM,gBAAgB,CAAC;AAGrC;;;;;GAKG;AACH;IAAA;QACE;;;;WAIG;QACH,WAAM,GAAgB,IAAI,WAAW,EAAE,CAAC;QAuBxC,mBAAmB;QACnB,4BAAuB,GAAW,CAAC,CAAC,CAAC;QAErC,mBAAmB;QACnB,sBAAiB,GAAG,IAAI,KAAK,CAAa,EAAE,EAAE,CAAC,CAAC,CAAC;QAEjD,mBAAmB;QACnB,0BAAqB,GAAG,IAAI,KAAK,CAAa,EAAE,EAAE,CAAC,CAAC,CAAC;IAOvD,CAAC;IALC,iCAAO,GAAP;QACE,IAAI,CAAC,iBAAiB,CAAC,KAAK,EAAE,CAAC;QAC/B,IAAI,CAAC,qBAAqB,CAAC,KAAK,EAAE,CAAC;QACnC,IAAI,CAAC,UAAU,GAAG,IAAI,CAAC;IACzB,CAAC;IACH,sBAAC;AAAD,CAAC,AA3CD,IA2CC",
+  "sourcesContent": [
+    "/**\n * @coreapi\n * @module core\n */ /** */\nimport {StateParams} from \"./params/stateParams\";\nimport {StateDeclaration} from \"./state/interface\";\nimport {StateObject} from \"./state/stateObject\";\nimport {Transition} from \"./transition/transition\";\nimport {Queue} from \"./common/queue\";\nimport { Disposable } from './interface';\n\n/**\n * Global router state\n *\n * This is where we hold the global mutable state such as current state, current\n * params, current transition, etc.\n */\nexport class UIRouterGlobals implements Disposable {\n  /**\n   * Current parameter values\n   *\n   * The parameter values from the latest successful transition\n   */\n  params: StateParams = new StateParams();\n\n  /**\n   * Current state\n   *\n   * The to-state from the latest successful transition\n   */\n  current: StateDeclaration;\n\n  /**\n   * Current state (internal object)\n   *\n   * The to-state from the latest successful transition\n   * @internalapi\n   */\n  $current: StateObject;\n\n  /**\n   * The current started/running transition.\n   * This transition has reached at least the onStart phase, but is not yet complete\n   */\n  transition: Transition;\n\n  /** @internalapi */\n  lastStartedTransitionId: number = -1;\n\n  /** @internalapi */\n  transitionHistory = new Queue<Transition>([], 1);\n\n  /** @internalapi */\n  successfulTransitions = new Queue<Transition>([], 1);\n\n  dispose() {\n    this.transitionHistory.clear();\n    this.successfulTransitions.clear();\n    this.transition = null;\n  }\n}\n"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "index.js",
+  "sourceRoot": "",
+  "sources": [
+    "@uirouter/core/path/index.ts"
+  ],
+  "names": [],
+  "mappings": "AAAA,mBAAmB,CAAC,kBAAkB;AACtC,cAAc,YAAY,CAAC;AAC3B,cAAc,eAAe,CAAC",
+  "sourcesContent": [
+    "/** @module path */ /** for typedoc */\nexport * from \"./pathNode\";\nexport * from \"./pathFactory\";"
+  ]
+}

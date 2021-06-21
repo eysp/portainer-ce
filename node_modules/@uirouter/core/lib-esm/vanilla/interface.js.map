@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "interface.js",
+  "sourceRoot": "",
+  "sources": [
+    "@uirouter/core/vanilla/interface.ts"
+  ],
+  "names": [],
+  "mappings": "",
+  "sourcesContent": [
+    "/**\n * @internalapi\n * @module vanilla\n */\n/** */\nimport { LocationConfig, LocationServices } from \"../common/coreservices\";\nimport { UIRouterPlugin } from \"../interface\";\nimport { $InjectorLike, $QLike } from \"../common/index\";\n\nexport interface LocationPlugin extends UIRouterPlugin {\n  service: LocationServices;\n  configuration: LocationConfig;\n}\n\nexport interface ServicesPlugin extends UIRouterPlugin {\n  $q: $QLike,\n  $injector: $InjectorLike\n}\n\nexport interface LocationLike {\n  hash: string;\n  pathname: string;\n  search: string;\n}\n\nexport interface HistoryLike {\n  back(distance?: any): void;\n  forward(distance?: any): void;\n  pushState(statedata: any, title?: string, url?: string): void;\n  replaceState(statedata: any, title?: string, url?: string): void;\n}\n"
+  ]
+}
