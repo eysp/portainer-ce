@@ -22,3 +22,16 @@ arm-64架构CPU一键安装
 docker run -d --restart=always --name=portainer -p 9999:9000 -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data 6053537/portainer:linux-arm64
 ```
 
+**附上编译教程
+```
+apk add nodejs npm go git yarn autoconf automake libtool pkgconf build-base
+git clone https://github.com/yspcn/portainer
+cd portainer
+yarn
+npm install -g grunt-cli
+grunt build
+```
+**docker构建
+```
+docker build -t 6053537/portainer ./
+```
