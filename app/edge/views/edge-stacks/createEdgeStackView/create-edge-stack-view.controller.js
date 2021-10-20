@@ -76,7 +76,7 @@ export default class CreateEdgeStackViewController {
       this.edgeGroups = await this.EdgeGroupService.groups();
       this.noGroups = this.edgeGroups.length === 0;
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve Edge groups');
+      this.Notifications.error('失败', err, 'Unable to retrieve Edge groups');
     }
 
     this.$window.onbeforeunload = () => {

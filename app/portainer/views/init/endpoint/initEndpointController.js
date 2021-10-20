@@ -61,7 +61,7 @@ class InitEndpointController {
       case PortainerEndpointConnectionTypes.AGENT:
         return this.createAgentEndpoint();
       default:
-        this.Notifications.error('Failure', 'Unable to determine which action to do to create environment');
+        this.Notifications.error('失败', '无法确定要执行哪些操作来创建环境');
     }
   }
 
@@ -78,7 +78,7 @@ class InitEndpointController {
       await this.EndpointService.createLocalEndpoint();
       this.$state.go('portainer.home');
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to connect to the Docker environment');
+      this.Notifications.error('失败', err, '无法连接到Docker环境');
     } finally {
       this.state.actionInProgress = false;
     }
@@ -97,7 +97,7 @@ class InitEndpointController {
       const endpoint = await this.EndpointService.createLocalKubernetesEndpoint();
       this.$state.go('portainer.endpoints.endpoint.kubernetesConfig', { id: endpoint.Id });
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to connect to the Kubernetes environment');
+      this.Notifications.error('失败', err, '无法连接到Kubernetes环境');
     } finally {
       this.state.actionInProgress = false;
     }
@@ -134,7 +134,7 @@ class InitEndpointController {
       const routeName = endpoint.Type === PortainerEndpointTypes.AgentOnKubernetesEnvironment ? 'portainer.endpoints.endpoint.kubernetesConfig' : 'portainer.home';
       this.$state.go(routeName, { id: endpoint.Id });
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to connect to the Docker environment');
+      this.Notifications.error('失败', err, '无法连接到Docker环境');
     } finally {
       this.state.actionInProgress = false;
     }

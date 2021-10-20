@@ -179,10 +179,10 @@ class KubernetesResourcePoolController {
     try {
       this.checkDefaults();
       await this.KubernetesResourcePoolService.patch(oldFormValues, newFormValues);
-      this.Notifications.success('Namespace successfully updated', this.pool.Namespace.Name);
+      this.Notifications.success('Namespace 成功更新', this.pool.Namespace.Name);
       this.$state.reload(this.$state.current);
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to create namespace');
+      this.Notifications.error('失败', err, '无法创建 namespace');
     } finally {
       this.state.actionInProgress = false;
     }
@@ -200,15 +200,15 @@ class KubernetesResourcePoolController {
     if (warnings.quota || warnings.ingress || warnings.registries) {
       const messages = {
         quota:
-          'Reducing the quota assigned to an "in-use" namespace may have unintended consequences, including preventing running applications from functioning correctly and potentially even blocking them from running at all.',
-        ingress: 'Deactivating ingresses may cause applications to be unaccessible. All ingress configurations from affected applications will be removed.',
+          '减少分配给“使用中”namespace的配额可能会产生意想不到的后果，包括阻止正在运行的应用程序正常运行，甚至可能完全阻止它们运行。',
+        ingress: '停用入口可能会导致应用程序无法访问。 来自受影响应用程序的所有入口配置都将被删除。',
         registries:
-          'Some registries you removed might be used by one or more applications inside this environment. Removing the registries access could lead to a service interruption for these applications.',
+          '您删除的某些注册表可能会被此环境中的一个或多个应用程序使用。 删除注册表访问可能会导致这些应用程序的服务中断。',
       };
       const displayedMessage = `${warnings.quota ? messages.quota + '<br/><br/>' : ''}
       ${warnings.ingress ? messages.ingress + '<br/><br/>' : ''}
       ${warnings.registries ? messages.registries + '<br/><br/>' : ''}
-      Do you wish to continue?`;
+      你想继续吗？`;
       this.ModalService.confirmUpdate(displayedMessage, (confirmed) => {
         if (confirmed) {
           return this.$async(this.updateResourcePoolAsync, this.savedFormValues, this.formValues);
@@ -221,8 +221,8 @@ class KubernetesResourcePoolController {
 
   async confirmMarkUnmarkAsSystem() {
     const message = this.isSystem
-      ? 'Unmarking this namespace as system will allow non administrator users to manage it and the resources in contains depending on the access control settings. Are you sure?'
-      : 'Marking this namespace as a system namespace will prevent non administrator users from managing it and the resources it contains. Are you sure?';
+      ? '取消将此命名空间标记为系统将允许非管理员用户根据访问控制设置管理它和包含的资源。 你确定吗？'
+      : '将此命名空间标记为系统命名空间将阻止非管理员用户管理它及其包含的资源。 你确定吗？';
 
     return new Promise((resolve) => {
       this.ModalService.confirmUpdate(message, resolve);
@@ -241,10 +241,10 @@ class KubernetesResourcePoolController {
         }
         await this.KubernetesResourcePoolService.toggleSystem(this.endpoint.Id, namespaceName, !this.isSystem);
 
-        this.Notifications.success('Namespace successfully updated', namespaceName);
+        this.Notifications.success('Namespace 成功更新', namespaceName);
         this.$state.reload(this.$state.current);
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to create namespace');
+        this.Notifications.error('失败', err, '无法创建 namespace');
       } finally {
         this.state.actionInProgress = false;
       }
@@ -264,7 +264,7 @@ class KubernetesResourcePoolController {
         this.events = await this.KubernetesEventService.get(this.pool.Namespace.Name);
         this.state.eventWarningCount = KubernetesEventHelper.warningCount(this.events);
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to retrieve namespace related events');
+        this.Notifications.error('失败', err, '无法检索namespace相关事件');
       } finally {
         this.state.eventsLoading = false;
       }
@@ -289,7 +289,7 @@ class KubernetesResourcePoolController {
           await this.getResourceUsage(this.pool.Namespace.Name);
         }
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to retrieve applications.');
+        this.Notifications.error('失败', err, '无法检索应用程序。');
       } finally {
         this.state.applicationsLoading = false;
       }
@@ -313,7 +313,7 @@ class KubernetesResourcePoolController {
           });
         });
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to retrieve ingresses.');
+        this.Notifications.error('失败', err, '无法检索入口。');
       } finally {
         this.state.ingressesLoading = false;
       }
@@ -343,7 +343,7 @@ class KubernetesResourcePoolController {
         const registries = await this.EndpointService.registries(this.endpoint.Id, namespace);
         this.selectedRegistries = registries.map((r) => r.Name).join(', ');
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to retrieve registries');
+        this.Notifications.error('失败', err, '无法检索注册表');
       }
     });
   }
@@ -361,7 +361,7 @@ class KubernetesResourcePoolController {
       }, new KubernetesResourceReservation());
       this.state.resourceUsage = namespaceResourceUsage;
     } catch (err) {
-      this.Notifications.error('Failure', 'Unable to retrieve namespace resource usage', err);
+      this.Notifications.error('失败', '无法检索 amespace 资源使用情况', err);
     }
   }
 
@@ -442,7 +442,7 @@ class KubernetesResourcePoolController {
 
         this.savedFormValues = angular.copy(this.formValues);
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to load view data');
+        this.Notifications.error('失败', err, '无法加载视图数据');
       } finally {
         this.state.viewReady = true;
       }

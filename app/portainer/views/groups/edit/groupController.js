@@ -9,11 +9,11 @@ angular.module('portainer.app').controller('GroupController', function GroupCont
     $scope.state.actionInProgress = true;
     GroupService.updateGroup(model)
       .then(function success() {
-        Notifications.success('Group successfully updated');
+        Notifications.success('群组更新成功');
         $state.go('portainer.groups', {}, { reload: true });
       })
       .catch(function error(err) {
-        Notifications.error('Failure', err, 'Unable to update group');
+        Notifications.error('失败', err, '无法更新群组');
       })
       .finally(function final() {
         $scope.state.actionInProgress = false;
@@ -30,7 +30,7 @@ angular.module('portainer.app').controller('GroupController', function GroupCont
       $scope.availableTags = $scope.availableTags.concat(tag);
       $scope.group.TagIds = $scope.group.TagIds.concat(tag.Id);
     } catch (err) {
-      Notifications.error('Failue', err, 'Unable to create tag');
+      Notifications.error('失败', err, '无法创建标签');
     }
   }
 
@@ -47,7 +47,7 @@ angular.module('portainer.app').controller('GroupController', function GroupCont
         $scope.loaded = true;
       })
       .catch(function error(err) {
-        Notifications.error('Failure', err, 'Unable to load group details');
+        Notifications.error('失败', err, '无法加载组详细信息');
       });
   }
 

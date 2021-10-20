@@ -32,7 +32,7 @@ class KubeEditCustomTemplateViewController {
         this.formValues.ResourceControl = new ResourceControlViewModel(template.ResourceControl);
         this.formValues.AccessControlData = new AccessControlFormData();
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to retrieve custom template data');
+        this.Notifications.error('失败', err, 'Unable to retrieve custom template data');
       }
     });
   }
@@ -84,7 +84,7 @@ class KubeEditCustomTemplateViewController {
         this.state.isEditorDirty = false;
         this.$state.go('kubernetes.templates.custom');
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to update custom template');
+        this.Notifications.error('失败', err, 'Unable to update custom template');
       } finally {
         this.actionInProgress = false;
       }

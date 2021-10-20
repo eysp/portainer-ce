@@ -3,19 +3,19 @@
     <rd-widget-header icon="fa-tasks" title-text="Service labels">
       <div class="nopadding" authorization="DockerServiceUpdate">
         <a class="btn btn-default btn-sm pull-right" ng-click="isUpdating || addLabel(service)" ng-disabled="isUpdating">
-          <i class="fa fa-plus-circle" aria-hidden="true"></i> label
+          <i class="fa fa-plus-circle" aria-hidden="true"></i> 标签
         </a>
       </div>
     </rd-widget-header>
     <rd-widget-body ng-if="service.ServiceLabels.length === 0">
-      <p>There are no labels for this service.</p>
+      <p>此服务没有标签。</p>
     </rd-widget-body>
     <rd-widget-body classes="no-padding" ng-if="service.ServiceLabels.length > 0">
       <table class="table">
         <thead>
           <tr>
             <th>
-              Label
+              标签
             </th>
             <th>
               Value
@@ -31,7 +31,7 @@
                   type="text"
                   class="form-control"
                   ng-model="label.key"
-                  placeholder="e.g. com.example.foo"
+                  placeholder="例如 com.example.foo"
                   ng-change="updateLabel(service, label)"
                   ng-disabled="isUpdating"
                   disable-authorization="DockerServiceUpdate"
@@ -45,7 +45,7 @@
                   type="text"
                   class="form-control"
                   ng-model="label.value"
-                  placeholder="e.g. bar"
+                  placeholder="例如 bar"
                   ng-change="updateLabel(service, label)"
                   ng-disabled="isUpdating"
                   disable-authorization="DockerServiceUpdate"
@@ -64,13 +64,13 @@
     <rd-widget-footer authorization="DockerServiceUpdate">
       <div class="btn-toolbar" role="toolbar">
         <div class="btn-group" role="group">
-          <button type="button" class="btn btn-primary btn-sm" ng-disabled="!hasChanges(service, ['ServiceLabels'])" ng-click="updateService(service)">Apply changes</button>
+          <button type="button" class="btn btn-primary btn-sm" ng-disabled="!hasChanges(service, ['ServiceLabels'])" ng-click="updateService(service)">应用更改</button>
           <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu">
-            <li><a ng-click="cancelChanges(service, ['ServiceLabels'])">Reset changes</a></li>
-            <li><a ng-click="cancelChanges(service)">Reset all changes</a></li>
+            <li><a ng-click="cancelChanges(service, ['ServiceLabels'])">重置更改</a></li>
+            <li><a ng-click="cancelChanges(service)">重置所有更改</a></li>
           </ul>
         </div>
       </div>

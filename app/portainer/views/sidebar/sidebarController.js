@@ -34,7 +34,7 @@ function SidebarController($rootScope, $scope, $transitions, StateManager, Notif
         const memberships = await UserService.userMemberships(userDetails.ID);
         checkPermissions(memberships);
       } catch (err) {
-        Notifications.error('Failure', err, 'Unable to retrieve user memberships');
+        Notifications.error('失败', err, '无法检索用户成员资格');
       }
     }
   }

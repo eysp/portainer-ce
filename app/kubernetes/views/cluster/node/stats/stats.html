@@ -1,4 +1,4 @@
-<kubernetes-view-header title="Node stats" state="kubernetes.cluster.node.stats" view-ready="ctrl.state.viewReady">
+<kubernetes-view-header title="节点统计" state="kubernetes.cluster.node.stats" view-ready="ctrl.state.viewReady">
   <a ui-sref="kubernetes.cluster">Cluster</a> &gt; <a ui-sref="kubernetes.cluster.node({name: ctrl.state.transition.nodeName})"> {{ ctrl.state.transition.nodeName }} </a> >
   {{ ctrl.state.transition.nodeName }}
 </kubernetes-view-header>
@@ -9,26 +9,26 @@
   <information-panel ng-if="!ctrl.state.getMetrics" title-text="Unable to retrieve node metrics">
     <span class="small text-muted">
       <i class="fa fa-exclamation-circle orange-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-      Portainer was unable to retrieve any metrics associated to that node. Please contact your administrator to ensure that the Kubernetes metrics feature is properly configured.
+      Portainer 无法检索与该节点关联的任何指标。 请联系您的管理员以确保正确配置 Kubernetes 指标功能。
     </span>
   </information-panel>
   <div class="row" ng-if="ctrl.state.getMetrics">
     <div class="col-md-12">
       <rd-widget>
-        <rd-widget-header icon="fa-info-circle" title-text="About statistics"> </rd-widget-header>
+        <rd-widget-header icon="fa-info-circle" title-text="关于统计"> </rd-widget-header>
         <rd-widget-body>
           <form class="form-horizontal">
             <div class="form-group">
               <div class="col-sm-12">
                 <span class="small text-muted">
-                  This view displays real-time statistics about the node <b>{{ ctrl.state.transition.nodeName }}</b
+                  此视图显示有关节点的实时统计信息 <b>{{ ctrl.state.transition.nodeName }}</b
                   >.
                 </span>
               </div>
             </div>
             <div class="form-group">
               <label for="refreshRate" class="col-sm-3 col-md-2 col-lg-2 margin-sm-top control-label text-left">
-                Refresh rate
+                刷新频率
               </label>
               <div class="col-sm-3 col-md-2">
                 <select id="refreshRate" ng-model="ctrl.state.refreshRate" ng-change="ctrl.changeUpdateRepeater()" class="form-control">

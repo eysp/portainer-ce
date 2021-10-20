@@ -18,7 +18,7 @@ class SliderController {
 
   translate(value, sliderId, label) {
     if ((label === 'floor' && this.floor === 0) || value === 0) {
-      return 'unlimited';
+      return '无限制';
     }
     return value;
   }

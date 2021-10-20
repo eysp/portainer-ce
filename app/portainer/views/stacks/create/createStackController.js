@@ -224,7 +224,7 @@ angular
       var isAdmin = Authentication.isAdmin();
 
       if (method === 'editor' && $scope.formValues.StackFileContent === '') {
-        $scope.state.formValidationError = 'Stack file content must not be empty';
+        $scope.state.formValidationError = '堆栈文件内容不能为空';
         return;
       }
 
@@ -248,12 +248,12 @@ angular
           return ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl);
         })
         .then(function success() {
-          Notifications.success('Stack successfully deployed');
+          Notifications.success('堆栈部署成功');
           $scope.state.isEditorDirty = false;
           $state.go('docker.stacks');
         })
         .catch(function error(err) {
-          Notifications.error('Deployment error', err, 'Unable to deploy stack');
+          Notifications.error('部署错误', err, '无法部署堆栈');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -294,7 +294,7 @@ angular
           const fileContent = await CustomTemplateService.customTemplateFile(templateId);
           $scope.onChangeFileContent(fileContent);
         } catch (err) {
-          this.Notifications.error('Failure', err, 'Unable to retrieve Custom Template file');
+          this.Notifications.error('失败', err, '无法检索自定义模板文件');
         }
       });
     }
@@ -310,14 +310,14 @@ angular
         const endpoint = EndpointProvider.currentEndpoint();
         $scope.composeSyntaxMaxVersion = endpoint.ComposeSyntaxMaxVersion;
       } catch (err) {
-        Notifications.error('Failure', err, 'Unable to retrieve the ComposeSyntaxMaxVersion');
+        Notifications.error('失败', err, '无法检索 ComposeSyntaxMaxVersion');
       }
 
       try {
         const containers = await ContainerService.containers(true);
         $scope.containerNames = ContainerHelper.getContainerNames(containers);
       } catch (err) {
-        Notifications.error('Failure', err, 'Unable to retrieve Containers');
+        Notifications.error('失败', err, '无法检索容器');
       }
     }
 

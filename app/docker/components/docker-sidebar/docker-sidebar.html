@@ -5,12 +5,12 @@
   class-name="sidebar-list"
   data-cy="dockerSidebar-dashboard"
 >
-  Dashboard
+  仪表盘
 </sidebar-menu-item>
 
 <sidebar-menu
   ng-if="!$ctrl.offlineMode"
-  label="App Templates"
+  label="应用程序模板"
   icon-class="fa-rocket fa-fw"
   path="docker.templates"
   path-params="{ endpointId: $ctrl.endpointId }"
@@ -18,7 +18,7 @@
   children-paths="[]"
 >
   <sidebar-menu-item path="docker.templates.custom" path-params="{ endpointId: $ctrl.endpointId }" class-name="sidebar-sublist" data-cy="dockerSidebar-customTemplates">
-    Custom Templates
+    自定义模板
   </sidebar-menu-item>
 </sidebar-menu>
 
@@ -30,7 +30,7 @@
   class-name="sidebar-list"
   data-cy="dockerSidebar-stacks"
 >
-  Stacks
+  堆栈
 </sidebar-menu-item>
 
 <sidebar-menu-item
@@ -41,23 +41,23 @@
   class-name="sidebar-list"
   data-cy="dockerSidebar-services"
 >
-  Services
+  服务
 </sidebar-menu-item>
 
 <sidebar-menu-item path="docker.containers" path-params="{ endpointId: $ctrl.endpointId }" icon-class="fa-cubes fa-fw" class-name="sidebar-list" data-cy="dockerSidebar-containers">
-  Containers
+  容器
 </sidebar-menu-item>
 
 <sidebar-menu-item path="docker.images" path-params="{ endpointId: $ctrl.endpointId }" icon-class="fa-clone fa-fw" class-name="sidebar-list" data-cy="dockerSidebar-images">
-  Images
+  镜像
 </sidebar-menu-item>
 
 <sidebar-menu-item path="docker.networks" path-params="{ endpointId: $ctrl.endpointId }" icon-class="fa-sitemap fa-fw" class-name="sidebar-list" data-cy="dockerSidebar-networks">
-  Networks
+  网络
 </sidebar-menu-item>
 
 <sidebar-menu-item path="docker.volumes" path-params="{ endpointId: $ctrl.endpointId }" icon-class="fa-hdd fa-fw" class-name="sidebar-list" data-cy="dockerSidebar-volumes">
-  Volumes
+  存储卷
 </sidebar-menu-item>
 
 <sidebar-menu-item
@@ -68,7 +68,7 @@
   class-name="sidebar-list"
   data-cy="dockerSidebar-configs"
 >
-  Configs
+  配置
 </sidebar-menu-item>
 
 <sidebar-menu-item
@@ -90,12 +90,12 @@
   class-name="sidebar-list"
   data-cy="dockerSidebar-events"
 >
-  Events
+  事件
 </sidebar-menu-item>
 
 <sidebar-menu
   ng-if="$ctrl.standaloneManagement"
-  label="Host"
+  label="主机"
   icon-class="fa-th fa-fw"
   path="docker.host"
   path-params="{ endpointId: $ctrl.endpointId }"
@@ -110,7 +110,7 @@
       class-name="sidebar-sublist"
       data-cy="dockerSidebar-setup"
     >
-      Setup
+      配置
     </sidebar-menu-item>
 
     <sidebar-menu-item
@@ -120,7 +120,7 @@
       class-name="sidebar-sublist"
       data-cy="dockerSidebar-registries"
     >
-      Registries
+      注册表
     </sidebar-menu-item>
   </div>
 </sidebar-menu>
@@ -142,7 +142,7 @@
       class-name="sidebar-sublist"
       data-cy="swarmSidebar-setup"
     >
-      Setup
+      安装
     </sidebar-menu-item>
 
     <sidebar-menu-item
@@ -152,7 +152,7 @@
       class-name="sidebar-sublist"
       data-cy="swarmSidebar-registries"
     >
-      Registries
+      注册表
     </sidebar-menu-item>
   </div>
 </sidebar-menu>

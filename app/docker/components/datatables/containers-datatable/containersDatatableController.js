@@ -38,39 +38,39 @@ angular.module('portainer.docker').controller('ContainersDatatableController', [
     this.columnVisibility = {
       columns: {
         state: {
-          label: 'State',
+          label: '状态',
           display: true,
         },
         actions: {
-          label: 'Quick Actions',
+          label: '快速操作',
           display: true,
         },
         stack: {
-          label: 'Stack',
+          label: '堆栈',
           display: true,
         },
         image: {
-          label: 'Image',
+          label: '镜像',
           display: true,
         },
         created: {
-          label: 'Created',
+          label: '创建',
           display: true,
         },
         ip: {
-          label: 'IP Address',
+          label: 'IP 地址',
           display: true,
         },
         host: {
-          label: 'Host',
+          label: '主机',
           display: true,
         },
         ports: {
-          label: 'Published Ports',
+          label: '已发布端口',
           display: true,
         },
         ownership: {
-          label: 'Ownership',
+          label: '所有权',
           display: true,
         },
       },

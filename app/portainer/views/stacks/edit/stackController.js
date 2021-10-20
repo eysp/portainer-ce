@@ -93,7 +93,7 @@ angular.module('portainer.app').controller('StackController', [
       }
 
       function notifyOnError(err) {
-        Notifications.error('Failure', err, 'Unable to duplicate stack');
+        Notifications.error('失败', err, 'Unable to duplicate stack');
       }
     };
 
@@ -104,9 +104,9 @@ angular.module('portainer.app').controller('StackController', [
     $scope.migrateStack = function (name, endpointId) {
       return $q(function (resolve) {
         ModalService.confirm({
-          title: 'Are you sure?',
+          title: '你确定吗？',
           message:
-            'This action will deploy a new instance of this stack on the target environment, please note that this does NOT relocate the content of any persistent volumes that may be attached to this stack.',
+            '此操作将在目标环境上部署此堆栈的新实例，请注意，这不会重新定位可能附加到此堆栈的任何持久卷的内容。',
           buttons: {
             confirm: {
               label: 'Migrate',
@@ -124,7 +124,7 @@ angular.module('portainer.app').controller('StackController', [
     };
 
     $scope.removeStack = function () {
-      ModalService.confirmDeletion('Do you want to remove the stack? Associated services will be removed as well.', function onConfirm(confirmed) {
+      ModalService.confirmDeletion('是否要删除堆栈？相关服务也将被删除。', function onConfirm(confirmed) {
         if (!confirmed) {
           return;
         }
@@ -153,11 +153,11 @@ angular.module('portainer.app').controller('StackController', [
       $scope.state.migrationInProgress = true;
       return migrateRequest(stack, targetEndpointId, name)
         .then(function success() {
-          Notifications.success('Stack successfully migrated', stack.Name);
+          Notifications.success('堆栈已成功迁移', stack.Name);
           $state.go('docker.stacks', {}, { reload: true });
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to migrate stack');
+          Notifications.error('失败', err, '无法迁移堆栈');
         })
         .finally(function final() {
           $scope.state.migrationInProgress = false;
@@ -170,11 +170,11 @@ angular.module('portainer.app').controller('StackController', [
 
       StackService.remove(stack, $transition$.params().external, endpointId)
         .then(function success() {
-          Notifications.success('Stack successfully removed', stack.Name);
+          Notifications.success('堆栈已成功删除', stack.Name);
           $state.go('docker.stacks');
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to remove stack ' + stack.Name);
+          Notifications.error('失败', err, '无法删除堆栈 ' + stack.Name);
         });
     }
 
@@ -192,11 +192,11 @@ angular.module('portainer.app').controller('StackController', [
           return ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl);
         })
         .then(function success() {
-          Notifications.success('Stack successfully associated', stack.Name);
+          Notifications.success('堆栈已成功关联', stack.Name);
           $state.go('docker.stacks');
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to associate stack ' + stack.Name);
+          Notifications.error('失败', err, '无法关联堆栈 ' + stack.Name);
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -221,12 +221,12 @@ angular.module('portainer.app').controller('StackController', [
       $scope.state.actionInProgress = true;
       StackService.updateStack(stack, stackFile, env, prune)
         .then(function success() {
-          Notifications.success('Stack successfully deployed');
+          Notifications.success('堆栈已成功部署');
           $scope.state.isEditorDirty = false;
           $state.reload();
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to create stack');
+          Notifications.error('失败', err, '无法创建堆栈');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -247,9 +247,9 @@ angular.module('portainer.app').controller('StackController', [
     }
     async function stopStackAsync() {
       const confirmed = await ModalService.confirmAsync({
-        title: 'Are you sure?',
-        message: 'Are you sure you want to stop this stack?',
-        buttons: { confirm: { label: 'Stop', className: 'btn-danger' } },
+        title: '你确定吗？',
+        message: '是否确实要停止此堆栈？',
+        buttons: { confirm: { label: '停止', className: 'btn-danger' } },
       });
       if (!confirmed) {
         return;
@@ -260,7 +260,7 @@ angular.module('portainer.app').controller('StackController', [
         await StackService.stop($scope.stack.Id);
         $state.reload();
       } catch (err) {
-        Notifications.error('Failure', err, 'Unable to stop stack');
+        Notifications.error('失败', err, '无法停止堆栈');
       }
       $scope.state.actionInProgress = false;
     }
@@ -276,7 +276,7 @@ angular.module('portainer.app').controller('StackController', [
         await StackService.start(id);
         $state.reload();
       } catch (err) {
-        Notifications.error('Failure', err, 'Unable to start stack');
+        Notifications.error('失败', err, '无法启动堆栈');
       }
       $scope.state.actionInProgress = false;
     }
@@ -289,7 +289,7 @@ angular.module('portainer.app').controller('StackController', [
           $scope.endpoints = data.value;
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve environments');
+          Notifications.error('失败', err, '无法检索环境');
         });
 
       $q.all({
@@ -334,7 +334,7 @@ angular.module('portainer.app').controller('StackController', [
           $scope.state.yamlError = StackHelper.validateYAML($scope.stackFileContent, $scope.containerNames);
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve stack details');
+          Notifications.error('失败', err, '无法检索堆栈详细信息');
         });
     }
 
@@ -390,7 +390,7 @@ angular.module('portainer.app').controller('StackController', [
     function loadExternalStack(name) {
       var stackType = $transition$.params().type;
       if (!stackType || (stackType !== '1' && stackType !== '2')) {
-        Notifications.error('Failure', null, 'Invalid type URL parameter.');
+        Notifications.error('失败', null, '无效的类型URL参数。');
         return;
       }
 
@@ -409,7 +409,7 @@ angular.module('portainer.app').controller('StackController', [
           assignSwarmStackResources(data, agentProxy);
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve stack details');
+          Notifications.error('失败', err, '无法检索堆栈详细信息');
         });
     }
 
@@ -419,7 +419,7 @@ angular.module('portainer.app').controller('StackController', [
           assignComposeStackResources(data);
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve stack details');
+          Notifications.error('失败', err, '无法检索堆栈详细信息');
         });
     }
 
@@ -460,7 +460,7 @@ angular.module('portainer.app').controller('StackController', [
         const endpoint = EndpointProvider.currentEndpoint();
         $scope.composeSyntaxMaxVersion = endpoint.ComposeSyntaxMaxVersion;
       } catch (err) {
-        Notifications.error('Failure', err, 'Unable to retrieve the ComposeSyntaxMaxVersion');
+        Notifications.error('失败', err, '无法检索 ComposeSyntaxMaxVersion');
       }
 
       $scope.stackType = $transition$.params().type;

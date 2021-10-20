@@ -1,14 +1,14 @@
 <div class="row">
   <div class="col-sm-12">
     <rd-widget ng-if="ctrl.availableUsersAndTeams && ctrl.accessControlledEntity">
-      <rd-widget-header icon="fa-user-lock" title-text="Create access"></rd-widget-header>
+      <rd-widget-header icon="fa-user-lock" title-text="创建访问权限"></rd-widget-header>
       <rd-widget-body>
         <form class="form-horizontal">
           <div ng-if="ctrl.entityType !== 'registry'" class="form-group">
             <span class="col-sm-12 small text-warning">
               <p>
                 <i class="fa fa-exclamation-circle orange-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                Adding user access will require the affected user(s) to logout and login for the changes to be taken into account.
+                添加用户访问权限将要求受影响的用户注销并登录，以便考虑更改。
               </p>
             </span>
           </div>
@@ -17,7 +17,7 @@
 
           <div class="form-group" ng-if="ctrl.entityType !== 'registry'">
             <label class="col-sm-3 col-lg-2 control-label text-left">
-              Role
+              角色
             </label>
             <div class="col-sm-9 col-lg-6">
               <div class="flex items-center">
@@ -43,8 +43,8 @@
                 button-spinner="ctrl.actionInProgress"
                 data-cy="access-createAccess"
               >
-                <span ng-hide="ctrl.state.actionInProgress"><i class="fa fa-plus" aria-hidden="true"></i> Create access</span>
-                <span ng-show="ctrl.state.actionInProgress">Creating access...</span>
+                <span ng-hide="ctrl.state.actionInProgress"><i class="fa fa-plus" aria-hidden="true"></i> 创建访问权限</span>
+                <span ng-show="ctrl.state.actionInProgress">创建访问权限中...</span>
               </button>
             </div>
           </div>
@@ -58,7 +58,7 @@
   <div class="col-sm-12">
     <access-datatable
       ng-if="ctrl.authorizedUsersAndTeams"
-      title-text="Access"
+      title-text="访问"
       title-icon="fa-user-lock"
       table-key="{{ 'access_' + ctrl.entityType }}"
       order-by="Name"

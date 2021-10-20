@@ -78,7 +78,7 @@ class KubernetesResourcePoolAccessController {
       }
       this.availableUsersAndTeams = _.without(endpointAccesses.authorizedUsersAndTeams, ...this.authorizedUsersAndTeams);
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve namespace information');
+      this.Notifications.error('失败', err, '无法检索namespace信息');
     } finally {
       this.state.viewReady = true;
     }
@@ -97,10 +97,10 @@ class KubernetesResourcePoolAccessController {
       const newAccesses = _.concat(this.authorizedUsersAndTeams, this.formValues.multiselectOutput);
       const accessConfigMap = KubernetesConfigMapHelper.modifiyNamespaceAccesses(angular.copy(this.accessConfigMap), this.pool.Namespace.Name, newAccesses);
       await this.KubernetesConfigMapService.updateAccess(accessConfigMap);
-      this.Notifications.success('Access successfully created');
+      this.Notifications.success('已成功创建访问权限');
       this.$state.reload(this.$state.current);
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to create accesses');
+      this.Notifications.error('失败', err, '无法创建访问权限');
     }
   }
 
@@ -117,10 +117,10 @@ class KubernetesResourcePoolAccessController {
       const newAccesses = _.without(this.authorizedUsersAndTeams, ...selectedItems);
       const accessConfigMap = KubernetesConfigMapHelper.modifiyNamespaceAccesses(angular.copy(this.accessConfigMap), this.pool.Namespace.Name, newAccesses);
       await this.KubernetesConfigMapService.updateAccess(accessConfigMap);
-      this.Notifications.success('Access successfully removed');
+      this.Notifications.success('已成功删除访问权限');
       this.$state.reload(this.$state.current);
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to remove accesses');
+      this.Notifications.error('失败', err, '无法删除访问权限');
     } finally {
       this.state.actionInProgress = false;
     }

@@ -58,7 +58,7 @@ class CreateConfigController {
       this.formValues.displayCodeEditor = true;
     } catch (err) {
       this.formValues.displayCodeEditor = true;
-      this.Notifications.error('Failure', err, 'Unable to clone config');
+      this.Notifications.error('失败', err, '无法克隆配置');
     }
   }
 
@@ -125,7 +125,7 @@ class CreateConfigController {
     const isAdmin = this.Authentication.isAdmin();
 
     if (this.formValues.ConfigContent === '') {
-      this.state.formValidationError = 'Config content must not be empty';
+      this.state.formValidationError = '配置内容不能为空';
       return;
     }
 
@@ -140,11 +140,11 @@ class CreateConfigController {
       const resourceControl = data.Portainer.ResourceControl;
       const userId = userDetails.ID;
       await this.ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl);
-      this.Notifications.success('Config successfully created');
+      this.Notifications.success('配置成功创建');
       this.state.isEditorDirty = false;
       this.$state.go('docker.configs', {}, { reload: true });
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to create config');
+      this.Notifications.error('失败', err, '无法创建配置');
     }
   }
 

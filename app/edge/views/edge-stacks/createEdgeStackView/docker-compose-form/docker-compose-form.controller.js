@@ -35,7 +35,7 @@ class DockerComposeFormController {
         const fileContent = await this.EdgeTemplateService.edgeTemplate(template);
         this.formValues.StackFileContent = fileContent;
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to retrieve Template');
+        this.Notifications.error('失败', err, '无法检索模板');
       }
     });
   }
@@ -55,7 +55,7 @@ class DockerComposeFormController {
         const templates = await this.EdgeTemplateService.edgeTemplates();
         this.templates = templates.map((template) => ({ ...template, label: `${template.title} - ${template.description}` }));
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to retrieve Templates');
+        this.Notifications.error('失败', err, '无法检索模板');
       }
     });
   }

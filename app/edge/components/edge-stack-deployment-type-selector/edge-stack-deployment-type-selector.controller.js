@@ -13,7 +13,7 @@ export default class EdgeStackDeploymentTypeSelectorController {
           return this.hasDockerEndpoint();
         },
         tooltip: () => {
-          return this.hasDockerEndpoint() ? 'Cannot use this option with Edge Docker endpoints' : '';
+          return this.hasDockerEndpoint() ? '无法对Edge Docker端点使用此选项' : '';
         },
       },
     ];

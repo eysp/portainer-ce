@@ -75,7 +75,7 @@ export default class HelmTemplatesController {
       this.state.values = values;
       this.state.originalvalues = values;
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve helm chart values.');
+      this.Notifications.error('失败', err, 'Unable to retrieve helm chart values.');
     } finally {
       this.state.loadingValues = false;
     }
@@ -102,7 +102,7 @@ export default class HelmTemplatesController {
       this.state.repos = uniqueHelmRepos;
       return uniqueHelmRepos;
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve helm repo urls.');
+      this.Notifications.error('失败', err, 'Unable to retrieve helm repo urls.');
     } finally {
       this.state.reposLoading = false;
     }
@@ -129,7 +129,7 @@ export default class HelmTemplatesController {
 
       this.state.charts = latestCharts;
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve helm repo charts.');
+      this.Notifications.error('失败', err, 'Unable to retrieve helm repo charts.');
     } finally {
       this.state.chartsLoading = false;
     }
@@ -144,7 +144,7 @@ export default class HelmTemplatesController {
       this.state.resourcePools = nonSystemNamespaces;
       this.state.resourcePool = nonSystemNamespaces[0];
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve initial helm data.');
+      this.Notifications.error('失败', err, 'Unable to retrieve initial helm data.');
     } finally {
       this.state.resourcePoolsLoading = false;
     }

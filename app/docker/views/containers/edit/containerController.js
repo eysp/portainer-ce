@@ -126,7 +126,7 @@ angular.module('portainer.docker').controller('ContainerController', [
           $scope.displayRecreateButton = !inSwarm && !autoRemove && (admin || !settingRestrictsRegularUsers);
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve container info');
+          Notifications.error('失败', err, '无法检索容器信息');
         });
     };
 
@@ -137,43 +137,43 @@ angular.module('portainer.docker').controller('ContainerController', [
           update();
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, errorMessage);
+          Notifications.error('失败', err, errorMessage);
         });
     }
 
     $scope.start = function () {
-      var successMessage = 'Container successfully started';
-      var errorMessage = 'Unable to start container';
+      var successMessage = '容器已成功启动';
+      var errorMessage = '无法启动容器';
       executeContainerAction($transition$.params().id, ContainerService.startContainer, successMessage, errorMessage);
     };
 
     $scope.stop = function () {
-      var successMessage = 'Container successfully stopped';
-      var errorMessage = 'Unable to stop container';
+      var successMessage = '容器已成功停止';
+      var errorMessage = '无法停止容器r';
       executeContainerAction($transition$.params().id, ContainerService.stopContainer, successMessage, errorMessage);
     };
 
     $scope.kill = function () {
-      var successMessage = 'Container successfully killed';
-      var errorMessage = 'Unable to kill container';
+      var successMessage = '成功终止容器';
+      var errorMessage = '无法终止容器';
       executeContainerAction($transition$.params().id, ContainerService.killContainer, successMessage, errorMessage);
     };
 
     $scope.pause = function () {
-      var successMessage = 'Container successfully paused';
-      var errorMessage = 'Unable to pause container';
+      var successMessage = '容器已成功暂停';
+      var errorMessage = '无法暂停容器';
       executeContainerAction($transition$.params().id, ContainerService.pauseContainer, successMessage, errorMessage);
     };
 
     $scope.unpause = function () {
-      var successMessage = 'Container successfully resumed';
-      var errorMessage = 'Unable to resume container';
+      var successMessage = '容器已成功恢复';
+      var errorMessage = '无法恢复容器';
       executeContainerAction($transition$.params().id, ContainerService.resumeContainer, successMessage, errorMessage);
     };
 
     $scope.restart = function () {
-      var successMessage = 'Container successfully restarted';
-      var errorMessage = 'Unable to restart container';
+      var successMessage = '容器已成功重新启动';
+      var errorMessage = '无法重新启动容器';
       executeContainerAction($transition$.params().id, ContainerService.restartContainer, successMessage, errorMessage);
     };
 
@@ -182,11 +182,11 @@ angular.module('portainer.docker').controller('ContainerController', [
       ContainerService.renameContainer($transition$.params().id, container.newContainerName)
         .then(function success() {
           container.Name = container.newContainerName;
-          Notifications.success('Container successfully renamed', container.Name);
+          Notifications.success('容器已成功重命名', container.Name);
         })
         .catch(function error(err) {
           container.newContainerName = container.Name;
-          Notifications.error('Failure', err, 'Unable to rename container');
+          Notifications.error('失败', err, '无法重命名容器');
         })
         .finally(function final() {
           $scope.container.edit = false;
@@ -201,7 +201,7 @@ angular.module('portainer.docker').controller('ContainerController', [
           $state.reload();
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to disconnect container from network');
+          Notifications.error('失败', err, '无法断开容器与网络的连接');
         })
         .finally(function final() {
           $scope.state.leaveNetworkInProgress = false;
@@ -212,11 +212,11 @@ angular.module('portainer.docker').controller('ContainerController', [
       $scope.state.joinNetworkInProgress = true;
       NetworkService.connectContainer(networkId, container.Id)
         .then(function success() {
-          Notifications.success('Container joined network', container.Id);
+          Notifications.success('容器连接网络', container.Id);
           $state.reload();
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to connect container to network');
+          Notifications.error('失败', err, '无法将容器连接到网络');
         })
         .finally(function final() {
           $scope.state.joinNetworkInProgress = false;
@@ -232,7 +232,7 @@ angular.module('portainer.docker').controller('ContainerController', [
         Notifications.success('Image created', $transition$.params().id);
         $state.reload();
       } catch (err) {
-        Notifications.error('Failure', err, 'Unable to create image');
+        Notifications.error('失败', err, '无法创建镜像');
         $scope.config.commitInProgress = false;
       }
     }
@@ -242,9 +242,9 @@ angular.module('portainer.docker').controller('ContainerController', [
     };
 
     $scope.confirmRemove = function () {
-      var title = 'You are about to remove a container.';
+      var title = '您即将删除一个容器。';
       if ($scope.container.State.Running) {
-        title = 'You are about to remove a running container.';
+        title = '您即将删除正在运行的容器。';
       }
       ModalService.confirmContainerDeletion(title, function (result) {
         if (!result) {
@@ -261,11 +261,11 @@ angular.module('portainer.docker').controller('ContainerController', [
     function removeContainer(cleanAssociatedVolumes) {
       ContainerService.remove($scope.container, cleanAssociatedVolumes)
         .then(function success() {
-          Notifications.success('Container successfully removed');
+          Notifications.success('容器成功删除');
           $state.go('docker.containers', {}, { reload: true });
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to remove container');
+          Notifications.error('失败', err, '无法删除容器');
         });
     }
 
@@ -351,12 +351,12 @@ angular.module('portainer.docker').controller('ContainerController', [
       }
 
       function notifyAndChangeView() {
-        Notifications.success('Container successfully re-created');
+        Notifications.success('容器重新创建成功');
         $state.go('docker.containers', {}, { reload: true });
       }
 
       function notifyOnError(err) {
-        Notifications.error('Failure', err, 'Unable to re-create container');
+        Notifications.error('失败', err, '无法重新创建容器');
         $scope.state.recreateContainerInProgress = false;
       }
     }
@@ -384,11 +384,11 @@ angular.module('portainer.docker').controller('ContainerController', [
           Name: restartPolicy,
           MaximumRetryCount: maximumRetryCount,
         };
-        Notifications.success('Restart policy updated');
+        Notifications.success('重启策略已更新');
       }
 
       function notifyOnError(err) {
-        Notifications.error('Failure', err, 'Unable to update restart policy');
+        Notifications.error('失败', err, '无法更新重启策略');
         return $q.reject(err);
       }
     }
@@ -401,7 +401,7 @@ angular.module('portainer.docker').controller('ContainerController', [
         $scope.availableNetworks = networks;
       })
       .catch(function error(err) {
-        Notifications.error('Failure', err, 'Unable to retrieve networks');
+        Notifications.error('失败', err, '无法检索网络');
       });
 
     update();

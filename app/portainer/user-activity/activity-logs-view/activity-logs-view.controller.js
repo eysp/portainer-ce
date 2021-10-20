@@ -67,7 +67,7 @@ export default class ActivityLogsViewController {
       try {
         await this.UserActivityService.saveLogsAsCSV(this.state.sort, this.state.keyword, this.state.date, this.state.contextFilter);
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Failed loading user activity logs csv');
+        this.Notifications.error('失败', err, '加载用户活动日志 csv 失败');
       }
     });
   }
@@ -80,7 +80,7 @@ export default class ActivityLogsViewController {
         this.state.logs = logs;
         this.state.totalItems = totalCount;
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Failed loading user activity logs');
+        this.Notifications.error('失败', err, '加载用户活动日志失败');
       }
     });
   }

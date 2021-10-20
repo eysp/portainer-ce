@@ -1,7 +1,7 @@
-<kubernetes-view-header title="Volume details" state="kubernetes.volumes.volume" view-ready="ctrl.state.viewReady">
+<kubernetes-view-header title="存储卷详情" state="kubernetes.volumes.volume" view-ready="ctrl.state.viewReady">
   <a ui-sref="kubernetes.resourcePools">Namespaces</a> &gt;
   <a ui-sref="kubernetes.resourcePools.resourcePool({ id: ctrl.volume.ResourcePool.Namespace.Name })">{{ ctrl.volume.ResourcePool.Namespace.Name }}</a> &gt;
-  <a ui-sref="kubernetes.volumes">Volumes</a> &gt; {{ ctrl.volume.PersistentVolumeClaim.Name }}
+  <a ui-sref="kubernetes.volumes">存储卷</a> &gt; {{ ctrl.volume.PersistentVolumeClaim.Name }}
 </kubernetes-view-header>
 
 <kubernetes-view-loading view-ready="ctrl.state.viewReady"></kubernetes-view-loading>
@@ -19,7 +19,7 @@
                 <table class="table">
                   <tbody>
                     <tr>
-                      <td>Name</td>
+                      <td>名称</td>
                       <td data-cy="k8sVolDetail-volName">
                         {{ ctrl.volume.PersistentVolumeClaim.Name }}
                         <span class="label label-primary image-tag label-margins" ng-if="!ctrl.isSystemNamespace() && ctrl.isExternalVolume()">external</span>
@@ -116,7 +116,7 @@
                           <div class="form-inline">
                             <div class="small text-warning" style="margin-top: 5px;" ng-show="ctrl.state.errors.volumeSize || kubernetesVolumeUpdateForm.size.$invalid">
                               <div ng-messages="kubernetesVolumeUpdateForm.size.$error">
-                                <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This field is required.</p>
+                                <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此字段是必需的。</p>
                               </div>
                               <p ng-show="ctrl.state.errors.volumeSize && !kubernetesVolumeUpdateForm.size.$invalid"
                                 ><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> The new size must be greater than the actual size.</p

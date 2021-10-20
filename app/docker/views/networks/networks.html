@@ -1,16 +1,16 @@
 <rd-header>
-  <rd-header-title title-text="Network list">
-    <a data-toggle="tooltip" title="Refresh" ui-sref="docker.networks" ui-sref-opts="{reload: true}">
+  <rd-header-title title-text="网络列表">
+    <a data-toggle="tooltip" title="刷新" ui-sref="docker.networks" ui-sref-opts="{reload: true}">
       <i class="fa fa-sync" aria-hidden="true"></i>
     </a>
   </rd-header-title>
-  <rd-header-content>Networks</rd-header-content>
+  <rd-header-content>网络</rd-header-content>
 </rd-header>
 <information-panel-offline ng-if="offlineMode"></information-panel-offline>
 <div class="row">
   <div class="col-sm-12">
     <networks-datatable
-      title-text="Networks"
+      title-text="网络"
       title-icon="fa-sitemap"
       dataset="networks"
       table-key="networks"

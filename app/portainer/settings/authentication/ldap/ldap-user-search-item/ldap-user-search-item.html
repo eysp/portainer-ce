@@ -2,7 +2,7 @@
   <rd-widget-body>
     <div ng-if="$ctrl.index > 0" style="margin-bottom: 10px;">
       <span class="text-muted small">
-        Extra search configuration
+        额外的搜索配置
       </span>
       <button
         ng-if="$ctrl.index > 0"
@@ -18,7 +18,7 @@
 
     <div class="form-group" ng-if="$ctrl.showUsernameFormat">
       <div class="col-sm-4" style="margin-bottom: 5px;">
-        <label class="control-label text-left">Username Format</label>
+        <label class="control-label text-left">用户名格式</label>
       </div>
       <div class="col-sm-8">
         <div class="input-group">
@@ -30,7 +30,7 @@
               style="margin-left: 0px;"
               limited-feature-dir="{{::$ctrl.limitedFeatureId}}"
               limited-feature-tabindex="-1"
-              >username</button
+              >用户名</button
             >
             <button
               class="btn btn-primary"
@@ -47,7 +47,7 @@
 
     <div class="form-group">
       <label class="col-sm-4 control-label text-left">
-        Root Domain
+        根域名
       </label>
       <div class="col-sm-8">
         {{ $ctrl.config.BaseDN }}
@@ -64,7 +64,7 @@
 
     <div class="form-group no-margin-last-child">
       <div class="col-sm-12" style="margin-bottom: 5px;">
-        <label class="control-label text-left">Allowed Groups (optional)</label>
+        <label class="control-label text-left">允许的组（可选）</label>
         <button
           type="button"
           class="label label-default interactive"
@@ -73,7 +73,7 @@
           limited-feature-dir="{{::$ctrl.limitedFeatureId}}"
           limited-feature-tabindex="-1"
         >
-          <i class="fa fa-plus-circle" aria-hidden="true"></i> add another group
+          <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加另一个组
         </button>
       </div>
       <div class="col-sm-12">
@@ -96,7 +96,7 @@
 
     <div class="form-group">
       <label class="col-sm-4 control-label text-left">
-        User Filter
+        用户筛选
       </label>
       <div class="col-sm-8">
         {{ $ctrl.config.Filter }}

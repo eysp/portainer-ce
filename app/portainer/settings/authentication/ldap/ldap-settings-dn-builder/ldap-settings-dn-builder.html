@@ -9,7 +9,7 @@
       limited-feature-dir="{{::$ctrl.limitedFeatureId}}"
       limited-feature-tabindex="-1"
     >
-      <i class="fa fa-plus-circle" aria-hidden="true"></i> add another entry
+      <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加另一个条目
     </button>
   </div>
   <div class="col-sm-12" ng-if="$ctrl.entries.length">
@@ -18,8 +18,8 @@
         <div class="form-group no-margin-last-child" ng-repeat="entry in $ctrl.entries">
           <div class="col-sm-4">
             <select class="form-control" ng-model="entry.type" ng-change="$ctrl.onEntriesChange()" limited-feature-dir="{{::$ctrl.limitedFeatureId}}" limited-feature-tabindex="-1">
-              <option value="ou">OU Name</option>
-              <option value="cn">Folder Name</option>
+              <option value="ou">OU 名称</option>
+              <option value="cn">文件夹名称</option>
             </select>
           </div>
           <div class="col-sm-5">

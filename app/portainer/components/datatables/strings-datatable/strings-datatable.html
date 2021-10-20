@@ -4,7 +4,7 @@
     <rd-widget-body classes="no-padding">
       <div class="actionBar">
         <button type="button" class="btn btn-sm btn-danger" ng-disabled="$ctrl.state.selectedItemCount === 0" ng-click="$ctrl.onRemove($ctrl.state.selectedItems)">
-          <i class="fa fa-trash-alt space-right" aria-hidden="true"></i>Remove
+          <i class="fa fa-trash-alt space-right" aria-hidden="true"></i>删除
         </button>
       </div>
       <div class="searchBar">
@@ -14,7 +14,7 @@
           class="searchInput"
           ng-model="$ctrl.state.textFilter"
           ng-change="$ctrl.onTextFilterChange()"
-          placeholder="Search..."
+          placeholder="搜索..."
           ng-model-options="{ debounce: 300 }"
         />
       </div>

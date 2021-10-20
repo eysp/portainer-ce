@@ -12,25 +12,25 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
     actionInProgress: false,
     availableUserSessionTimeoutOptions: [
       {
-        key: '1 hour',
+        key: '1 小时',
         value: '1h',
       },
       {
-        key: '4 hours',
+        key: '4 小时',
         value: '4h',
       },
       {
-        key: '8 hours',
+        key: '8 小时',
         value: '8h',
       },
       {
-        key: '24 hours',
+        key: '24 小时',
         value: '24h',
       },
-      { key: '1 week', value: `${24 * 7}h` },
-      { key: '1 month', value: `${24 * 30}h` },
-      { key: '6 months', value: `${24 * 30 * 6}h` },
-      { key: '1 year', value: `${24 * 30 * 12}h` },
+      { key: '1 周', value: `${24 * 7}h` },
+      { key: '1 月', value: `${24 * 30}h` },
+      { key: '6 月', value: `${24 * 30 * 6}h` },
+      { key: '1 年', value: `${24 * 30 * 12}h` },
     ],
   };
 
@@ -45,10 +45,10 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
   };
 
   $scope.authOptions = [
-    { id: 'auth_internal', icon: 'fa fa-users', label: 'Internal', description: 'Internal authentication mechanism', value: 1 },
-    { id: 'auth_ldap', icon: 'fa fa-users', label: 'LDAP', description: 'LDAP authentication', value: 2 },
-    { id: 'auth_ad', icon: 'fab fa-microsoft', label: 'Microsoft Active Directory', description: 'AD authentication', value: 4, feature: HIDE_INTERNAL_AUTH },
-    { id: 'auth_oauth', icon: 'fa fa-users', label: 'OAuth', description: 'OAuth authentication', value: 3 },
+    { id: 'auth_internal', icon: 'fa fa-users', label: 'Internal', description: '内部认证机制', value: 1 },
+    { id: 'auth_ldap', icon: 'fa fa-users', label: 'LDAP', description: 'LDAP 认证', value: 2 },
+    { id: 'auth_ad', icon: 'fab fa-microsoft', label: 'Microsoft Active Directory', description: 'AD 认证', value: 4, feature: HIDE_INTERNAL_AUTH },
+    { id: 'auth_oauth', icon: 'fa fa-users', label: 'OAuth', description: 'OAuth 认证', value: 3 },
   ];
 
   $scope.onChangeAuthMethod = function onChangeAuthMethod(value) {
@@ -104,12 +104,12 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
       .then(function success() {
         $scope.state.failedConnectivityCheck = false;
         $scope.state.successfulConnectivityCheck = true;
-        Notifications.success('Connection to LDAP successful');
+        Notifications.success('连接到 LDAP 成功');
       })
       .catch(function error(err) {
         $scope.state.failedConnectivityCheck = true;
         $scope.state.successfulConnectivityCheck = false;
-        Notifications.error('Failure', err, 'Connection to LDAP failed');
+        Notifications.error('失败', err, '连接到 LDAP 失败');
       })
       .finally(function final() {
         $scope.state.uploadInProgress = false;
@@ -131,10 +131,10 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
         return SettingsService.update(settings);
       })
       .then(function success() {
-        Notifications.success('Authentication settings updated');
+        Notifications.success('身份验证设置已更新');
       })
       .catch(function error(err) {
-        Notifications.error('Failure', err, 'Unable to update authentication settings');
+        Notifications.error('失败', err, '无法更新身份验证设置');
       })
       .finally(function final() {
         $scope.state.uploadInProgress = false;
@@ -238,7 +238,7 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
         }
       })
       .catch(function error(err) {
-        Notifications.error('Failure', err, 'Unable to retrieve application settings');
+        Notifications.error('失败', err, '无法检索应用程序设置');
       });
   }
 

@@ -1,10 +1,10 @@
 <rd-header id="view-top">
-  <rd-header-title title-text="Application templates list">
-    <a data-toggle="tooltip" title="Refresh" ui-sref="docker.templates" ui-sref-opts="{reload: true}">
+  <rd-header-title title-text="应用程序模板列表">
+    <a data-toggle="tooltip" title="刷新" ui-sref="docker.templates" ui-sref-opts="{reload: true}">
       <i class="fa fa-sync" aria-hidden="true"></i>
     </a>
   </rd-header-title>
-  <rd-header-content>Templates</rd-header-content>
+  <rd-header-content>模板</rd-header-content>
 </rd-header>
 
 <div class="row">
@@ -28,7 +28,7 @@
           <!-- description -->
           <div ng-if="state.selectedTemplate.Note">
             <div class="col-sm-12 form-section-title">
-              Information
+              信息
             </div>
             <div class="form-group">
               <div class="col-sm-12">
@@ -38,22 +38,22 @@
           </div>
           <!-- !description -->
           <div class="col-sm-12 form-section-title">
-            Configuration
+            配置
           </div>
           <!-- name-input -->
           <div class="form-group">
-            <label for="container_name" class="col-sm-2 control-label text-left">Name</label>
+            <label for="container_name" class="col-sm-2 control-label text-left">名称</label>
             <div class="col-sm-10">
-              <input type="text" name="container_name" class="form-control" ng-model="formValues.name" placeholder="e.g. web (optional)" />
+              <input type="text" name="container_name" class="form-control" ng-model="formValues.name" placeholder="例如 web (optional)" />
             </div>
           </div>
           <!-- !name-input -->
           <!-- network-input -->
           <div class="form-group">
-            <label for="container_network" class="col-sm-2 control-label text-left">Network</label>
+            <label for="container_network" class="col-sm-2 control-label text-left">网络</label>
             <div class="col-sm-10">
               <select class="form-control" ng-options="net.Name for net in availableNetworks | orderBy: 'Name'" ng-model="formValues.network">
-                <option disabled hidden value="">Select a network</option>
+                <option disabled hidden value="">选择网络</option>
               </select>
             </div>
           </div>
@@ -67,7 +67,7 @@
             <div class="col-sm-10">
               <input type="text" class="form-control" ng-if="!var.select" ng-model="var.value" id="field_{{ $index }}" />
               <select class="form-control" ng-if="var.select" ng-model="var.value" id="field_{{ $index }}">
-                <option selected disabled hidden value="">Select value</option>
+                <option selected disabled hidden value="">选择value</option>
                 <option ng-repeat="choice in var.select" value="{{ choice.value }}">{{ choice.text }}</option>
               </select>
             </div>
@@ -79,10 +79,10 @@
           <div class="form-group">
             <div class="col-sm-12">
               <a class="small interactive" ng-if="!state.showAdvancedOptions" ng-click="state.showAdvancedOptions = true;">
-                <i class="fa fa-plus space-right" aria-hidden="true"></i> Show advanced options
+                <i class="fa fa-plus space-right" aria-hidden="true"></i> 显示高级选项
               </a>
               <a class="small interactive" ng-if="state.showAdvancedOptions" ng-click="state.showAdvancedOptions = false;">
-                <i class="fa fa-minus space-right" aria-hidden="true"></i> Hide advanced options
+                <i class="fa fa-minus space-right" aria-hidden="true"></i> 隐藏高级选项
               </a>
             </div>
           </div>
@@ -90,13 +90,13 @@
             <!-- port-mapping -->
             <div class="form-group">
               <div class="col-sm-12" style="margin-top: 5px;">
-                <label class="control-label text-left">Port mapping</label>
+                <label class="control-label text-left">端口映射</label>
                 <span class="label label-default interactive" style="margin-left: 10px;" ng-click="addPortBinding()">
-                  <i class="fa fa-plus-circle" aria-hidden="true"></i> map additional port
+                  <i class="fa fa-plus-circle" aria-hidden="true"></i> 映射附加端口
                 </span>
               </div>
               <div class="col-sm-12" style="margin-top: 10px;" ng-if="state.selectedTemplate.Ports.length > 0">
-                <span class="small text-muted">Portainer will automatically assign a port if you leave the host port empty.</span>
+                <span class="small text-muted">如果主机端口为空，Portainer将自动分配端口。</span>
               </div>
               <!-- !port-mapping -->
               <!-- port-mapping-input-list -->
@@ -106,7 +106,7 @@
                     <!-- host-port -->
                     <div class="input-group col-sm-4 input-group-sm">
                       <span class="input-group-addon">host</span>
-                      <input type="text" class="form-control" ng-model="portBinding.hostPort" placeholder="e.g. 80 or 1.2.3.4:80 (optional)" />
+                      <input type="text" class="form-control" ng-model="portBinding.hostPort" placeholder="例如 80 or 1.2.3.4:80 (optional)" />
                     </div>
                     <!-- !host-port -->
                     <span style="margin: 0 10px 0 10px;">
@@ -114,8 +114,8 @@
                     </span>
                     <!-- container-port -->
                     <div class="input-group col-sm-4 input-group-sm">
-                      <span class="input-group-addon">container</span>
-                      <input type="text" class="form-control" ng-model="portBinding.containerPort" placeholder="e.g. 80" />
+                      <span class="input-group-addon">容器</span>
+                      <input type="text" class="form-control" ng-model="portBinding.containerPort" placeholder="例如 80" />
                     </div>
                     <!-- !container-port -->
                     <!-- protocol-actions -->
@@ -137,13 +137,13 @@
             <!-- volume-mapping -->
             <div class="form-group">
               <div class="col-sm-12" style="margin-top: 5px;">
-                <label class="control-label text-left">Volume mapping</label>
+                <label class="control-label text-left">存储卷映射</label>
                 <span class="label label-default interactive" style="margin-left: 10px;" ng-click="addVolume()">
-                  <i class="fa fa-plus-circle" aria-hidden="true"></i> map additional volume
+                  <i class="fa fa-plus-circle" aria-hidden="true"></i> 映射附加存储卷
                 </span>
               </div>
               <div class="col-sm-12" style="margin-top: 10px;" ng-if="state.selectedTemplate.Volumes.length > 0">
-                <span class="small text-muted">Portainer will automatically create and map a local volume when using the <b>auto</b> option.</span>
+                <span class="small text-muted">使用 <b>auto</b> 选项时，Portainer 将自动创建和映射本地卷。</span>
               </div>
               <div ng-repeat="volume in state.selectedTemplate.Volumes">
                 <div class="col-sm-12" style="margin-top: 10px;">
@@ -151,15 +151,15 @@
                   <div class="col-sm-12 form-inline">
                     <!-- container-path -->
                     <div class="input-group input-group-sm col-sm-6">
-                      <span class="input-group-addon">container</span>
-                      <input type="text" class="form-control" ng-model="volume.container" placeholder="e.g. /path/in/container" />
+                      <span class="input-group-addon">容器</span>
+                      <input type="text" class="form-control" ng-model="volume.container" placeholder="例如 /path/in/container" />
                     </div>
                     <!-- !container-path -->
                     <!-- volume-type -->
                     <div class="input-group col-sm-5" style="margin-left: 5px;">
                       <div class="btn-group btn-group-sm">
                         <label class="btn btn-primary" ng-model="volume.type" uib-btn-radio="'auto'" ng-click="volume.bind = ''">Auto</label>
-                        <label class="btn btn-primary" ng-model="volume.type" uib-btn-radio="'volume'" ng-click="volume.bind = ''">Volume</label>
+                        <label class="btn btn-primary" ng-model="volume.type" uib-btn-radio="'volume'" ng-click="volume.bind = ''">存储卷</label>
                         <label class="btn btn-primary" ng-model="volume.type" uib-btn-radio="'bind'" ng-click="volume.bind = ''" ng-if="isAdmin || allowBindMounts">Bind</label>
                       </div>
                       <button class="btn btn-sm btn-danger" type="button" ng-click="removeVolume($index)">
@@ -175,10 +175,10 @@
                     <!-- volume -->
                     <div class="input-group input-group-sm col-sm-6" ng-if="volume.type === 'volume'">
                       <div class="col-sm-12 input-group">
-                        <span class="input-group-addon">volume</span>
+                        <span class="input-group-addon">存储卷</span>
                         <div class="col-sm-12 input-group">
                           <select class="form-control" ng-model="volume.bind" ng-options="vol.Name as vol.Name for vol in availableVolumes">
-                            <option value="" disabled selected>Select a volume</option>
+                            <option value="" disabled selected>选择一个存储卷</option>
                           </select>
                         </div>
                       </div>
@@ -186,15 +186,15 @@
                     <!-- !volume -->
                     <!-- bind -->
                     <div class="input-group input-group-sm col-sm-6" ng-if="volume.type === 'bind'">
-                      <span class="input-group-addon">host</span>
-                      <input type="text" class="form-control" ng-model="volume.bind" placeholder="e.g. /path/on/host" />
+                      <span class="input-group-addon">主机</span>
+                      <input type="text" class="form-control" ng-model="volume.bind" placeholder="例如 /path/on/host" />
                     </div>
                     <!-- !bind -->
                     <!-- read-only -->
                     <div class="input-group input-group-sm col-sm-5" style="margin-left: 5px;">
                       <div class="btn-group btn-group-sm">
-                        <label class="btn btn-primary" ng-model="volume.readonly" uib-btn-radio="false">Writable</label>
-                        <label class="btn btn-primary" ng-model="volume.readonly" uib-btn-radio="true">Read-only</label>
+                        <label class="btn btn-primary" ng-model="volume.readonly" uib-btn-radio="false">读写</label>
+                        <label class="btn btn-primary" ng-model="volume.readonly" uib-btn-radio="true">只读</label>
                       </div>
                     </div>
                     <!-- !read-only -->
@@ -207,9 +207,9 @@
             <!-- extra-host -->
             <div class="form-group">
               <div class="col-sm-12" style="margin-top: 5px;">
-                <label class="control-label text-left">Hosts file entries</label>
+                <label class="control-label text-left">主机文件条目</label>
                 <span class="label label-default interactive" style="margin-left: 10px;" ng-click="addExtraHost()">
-                  <i class="fa fa-plus-circle" aria-hidden="true"></i> add additional entry
+                  <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加额外的条目
                 </span>
               </div>
               <!-- extra-host-input-list -->
@@ -218,7 +218,7 @@
                   <div ng-repeat="(idx, host) in state.selectedTemplate.Hosts track by $index" style="margin-top: 2px;">
                     <div class="input-group col-sm-5 input-group-sm">
                       <span class="input-group-addon">value</span>
-                      <input type="text" class="form-control" ng-model="state.selectedTemplate.Hosts[idx]" placeholder="e.g. host:IP" />
+                      <input type="text" class="form-control" ng-model="state.selectedTemplate.Hosts[idx]" placeholder="例如 host:IP" />
                     </div>
                     <button class="btn btn-sm btn-danger" type="button" ng-click="removeExtraHost($index)">
                       <i class="fa fa-trash" aria-hidden="true"></i>
@@ -231,9 +231,9 @@
             <!-- labels -->
             <div class="form-group">
               <div class="col-sm-12" style="margin-top: 5px;">
-                <label class="control-label text-left">Labels</label>
+                <label class="control-label text-left">标签</label>
                 <span class="label label-default interactive" style="margin-left: 10px;" ng-click="addLabel()">
-                  <i class="fa fa-plus-circle" aria-hidden="true"></i> add label
+                  <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加标签
                 </span>
               </div>
               <!-- labels-input-list -->
@@ -242,11 +242,11 @@
                   <div ng-repeat="label in state.selectedTemplate.Labels" style="margin-top: 2px;">
                     <div class="input-group col-sm-5 input-group-sm">
                       <span class="input-group-addon">name</span>
-                      <input type="text" class="form-control" ng-model="label.name" placeholder="e.g. com.example.foo" />
+                      <input type="text" class="form-control" ng-model="label.name" placeholder="例如 com.example.foo" />
                     </div>
                     <div class="input-group col-sm-5 input-group-sm">
                       <span class="input-group-addon">value</span>
-                      <input type="text" class="form-control" ng-model="label.value" placeholder="e.g. bar" />
+                      <input type="text" class="form-control" ng-model="label.value" placeholder="例如 bar" />
                     </div>
                     <button class="btn btn-sm btn-danger" type="button" ng-click="removeLabel($index)">
                       <i class="fa fa-trash" aria-hidden="true"></i>
@@ -259,9 +259,9 @@
             <!-- !labels -->
             <!-- hostname -->
             <div class="form-group">
-              <label for="container_hostname" class="col-sm-2 control-label text-left">Hostname</label>
+              <label for="container_hostname" class="col-sm-2 control-label text-left">主机名</label>
               <div class="col-sm-10">
-                <input type="text" name="container_hostname" class="form-control" ng-model="state.selectedTemplate.Hostname" placeholder="leave empty to use docker default" />
+                <input type="text" name="container_hostname" class="form-control" ng-model="state.selectedTemplate.Hostname" placeholder="保留为空以使用docker默认值" />
               </div>
             </div>
             <!-- !hostname -->
@@ -269,7 +269,7 @@
           <!-- !advanced-options -->
           <!-- actions -->
           <div class="col-sm-12 form-section-title">
-            Actions
+            操作
           </div>
           <div class="form-group">
             <div class="col-sm-12">
@@ -280,10 +280,10 @@
                 ng-click="createTemplate()"
                 button-spinner="state.actionInProgress"
               >
-                <span ng-hide="state.actionInProgress">Deploy the container</span>
-                <span ng-show="state.actionInProgress">Deployment in progress...</span>
+                <span ng-hide="state.actionInProgress">部署容器</span>
+                <span ng-show="state.actionInProgress">正在部署...</span>
               </button>
-              <button type="button" class="btn btn-sm btn-default" ng-click="unselectTemplate(state.selectedTemplate)">Hide</button>
+              <button type="button" class="btn btn-sm btn-default" ng-click="unselectTemplate(state.selectedTemplate)">隐藏</button>
               <span class="text-danger" ng-if="state.formValidationError" style="margin-left: 5px;">{{ state.formValidationError }}</span>
             </div>
           </div>
@@ -299,7 +299,7 @@
   <div class="col-sm-12">
     <template-list
       ng-if="templates"
-      title-text="Templates"
+      title-text="模板"
       title-icon="fa-rocket"
       templates="templates"
       table-key="templates"

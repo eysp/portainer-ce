@@ -97,7 +97,7 @@ angular.module('portainer.docker').controller('VolumeStoridgeInfoController', [
           $state.reload();
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to update volume');
+          Notifications.error('失败', err, 'Unable to update volume');
           ctrl.state.isUpdating = false;
         });
     };

@@ -82,7 +82,7 @@ angular.module('portainer.app').controller('porAccessControlPanelController', [
           $state.reload();
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to update access control');
+          Notifications.error('失败', err, 'Unable to update access control');
         });
     }
 
@@ -136,7 +136,7 @@ angular.module('portainer.app').controller('porAccessControlPanelController', [
           ctrl.state.displayAccessControlPanel = true;
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve access control information');
+          Notifications.error('失败', err, 'Unable to retrieve access control information');
         });
     }
   },

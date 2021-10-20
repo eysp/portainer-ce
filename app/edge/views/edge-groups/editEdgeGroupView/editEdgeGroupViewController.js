@@ -41,7 +41,7 @@ export class EditEdgeGroupController {
       this.Notifications.success('Edge group successfully updated');
       this.$state.go('edge.groups');
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to update edge group');
+      this.Notifications.error('失败', err, 'Unable to update edge group');
     } finally {
       this.state.actionInProgress = false;
     }

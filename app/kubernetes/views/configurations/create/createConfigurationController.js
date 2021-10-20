@@ -52,7 +52,7 @@ class KubernetesCreateConfigurationController {
       this.state.isEditorDirty = false;
       this.$state.go('kubernetes.configurations');
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to create configuration');
+      this.Notifications.error('失败', err, 'Unable to create configuration');
     } finally {
       this.state.actionInProgress = false;
     }
@@ -66,7 +66,7 @@ class KubernetesCreateConfigurationController {
     try {
       this.configurations = await this.KubernetesConfigurationService.get();
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve configurations');
+      this.Notifications.error('失败', err, 'Unable to retrieve configurations');
     }
   }
 
@@ -99,7 +99,7 @@ class KubernetesCreateConfigurationController {
       this.formValues.ResourcePool = this.resourcePools[0];
       await this.getConfigurations();
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to load view data');
+      this.Notifications.error('失败', err, 'Unable to load view data');
     } finally {
       this.state.viewReady = true;
     }

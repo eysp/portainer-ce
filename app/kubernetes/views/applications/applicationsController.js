@@ -52,7 +52,7 @@ class KubernetesApplicationsController {
         this.Notifications.success('Stack successfully removed', stack.Name);
         _.remove(this.state.stacks, { Name: stack.Name });
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to remove stack');
+        this.Notifications.error('失败', err, 'Unable to remove stack');
       } finally {
         --actionCount;
         if (actionCount === 0) {
@@ -94,7 +94,7 @@ class KubernetesApplicationsController {
         const index = this.state.applications.indexOf(application);
         this.state.applications.splice(index, 1);
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to remove application');
+        this.Notifications.error('失败', err, 'Unable to remove application');
       } finally {
         --actionCount;
         if (actionCount === 0) {
@@ -134,7 +134,7 @@ class KubernetesApplicationsController {
       this.state.stacks = KubernetesStackHelper.stacksFromApplications(applications);
       this.state.ports = KubernetesApplicationHelper.portMappingsFromApplications(applications);
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve applications');
+      this.Notifications.error('失败', err, 'Unable to retrieve applications');
     }
   }
 

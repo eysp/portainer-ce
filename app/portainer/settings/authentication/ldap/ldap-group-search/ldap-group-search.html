@@ -1,5 +1,5 @@
 <div class="col-sm-12 form-section-title" style="float: initial;">
-  Group search configurations
+  群组搜索配置
 </div>
 
 <div style="margin-top: 10px;" ng-repeat="config in $ctrl.settings | limitTo: (1 - $ctrl.settings)">
@@ -22,18 +22,18 @@
       limited-feature-dir="{{::$ctrl.limitedFeatureId}}"
       limited-feature-tabindex="-1"
     >
-      <i class="fa fa-plus-circle" aria-hidden="true"></i> add group search configuration
+      <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加群组搜索配置
     </button>
   </div>
   <div class="col-sm-12" style="margin-top: 10px;">
     <button class="btn btm-sm btn-primary" type="button" ng-click="$ctrl.search()" limited-feature-dir="{{::$ctrl.limitedFeatureId}}" limited-feature-tabindex="-1">
-      Display User/Group matching
+      显示用户/群组匹配
     </button>
   </div>
 </div>
 
 <div ng-if="$ctrl.showTable">
   <div class="form-group">
-    <ldap-groups-datatable dataset="$ctrl.groups" title-text="Groups" title-icon="fa-users" table-key="ldapGroups"></ldap-groups-datatable>
+    <ldap-groups-datatable dataset="$ctrl.groups" title-text="群组" title-icon="fa-users" table-key="ldapGroups"></ldap-groups-datatable>
   </div>
 </div>

@@ -10,7 +10,7 @@
           ng-click="$ctrl.removeAction($ctrl.state.selectedItems)"
           data-cy="edgeGroup-removeEdgeGroupButton"
         >
-          <i class="fa fa-trash-alt space-right" aria-hidden="true"></i>Remove
+          <i class="fa fa-trash-alt space-right" aria-hidden="true"></i>删除
         </button>
         <button type="button" class="btn btn-sm btn-primary" ui-sref="edge.groups.new" data-cy="edgeGroup-addEdgeGroupButton">
           <i class="fa fa-plus space-right" aria-hidden="true"></i>Add Edge group
@@ -23,7 +23,7 @@
           class="searchInput"
           ng-model="$ctrl.state.textFilter"
           ng-change="$ctrl.onTextFilterChange()"
-          placeholder="Search..."
+          placeholder="搜索..."
           ng-model-options="{ debounce: 300 }"
           data-cy="edgeGroup-searchInput"
         />
@@ -76,7 +76,7 @@
               <td>{{ item.Dynamic ? 'Dynamic' : 'Static' }}</td>
             </tr>
             <tr ng-if="!$ctrl.dataset">
-              <td colspan="4" class="text-center text-muted">Loading...</td>
+              <td colspan="4" class="text-center text-muted">加载中...</td>
             </tr>
             <tr ng-if="$ctrl.state.filteredDataSet.length === 0">
               <td colspan="4" class="text-center text-muted">
@@ -87,12 +87,12 @@
         </table>
       </div>
       <div class="footer" ng-if="$ctrl.dataset">
-        <div class="infoBar" ng-if="$ctrl.state.selectedItemCount !== 0"> {{ $ctrl.state.selectedItemCount }} item(s) selected </div>
+        <div class="infoBar" ng-if="$ctrl.state.selectedItemCount !== 0"> {{ $ctrl.state.selectedItemCount }} 所选项目 </div>
         <div class="paginationControls">
           <form class="form-inline">
             <span class="limitSelector">
               <span style="margin-right: 5px;">
-                Items per page
+                每页项目数
               </span>
               <select class="form-control" ng-model="$ctrl.state.paginatedItemLimit" ng-change="$ctrl.changePaginationLimit()" data-cy="component-paginationSelect">
                 <option value="0">All</option>

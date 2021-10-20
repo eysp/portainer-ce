@@ -22,11 +22,11 @@ angular.module('portainer.app').controller('RegistryController', [
       $scope.state.actionInProgress = true;
       RegistryService.updateRegistry(registry)
         .then(function success() {
-          Notifications.success('Registry successfully updated');
+          Notifications.success('注册表已成功更新');
           $state.go('portainer.registries');
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to update registry');
+          Notifications.error('失败', err, '无法更新注册表');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -40,7 +40,7 @@ angular.module('portainer.app').controller('RegistryController', [
           $scope.registry = data;
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve registry details');
+          Notifications.error('失败', err, '无法检索注册表详细信息');
         });
     }
 

@@ -44,7 +44,7 @@
     analytics-event="kubernetes-application-edit-git-pull"
   >
     <span ng-show="!$ctrl.state.redeployInProgress"> <i class="fa fa-sync space-right" aria-hidden="true"></i> Pull and update application </span>
-    <span ng-show="$ctrl.state.redeployInProgress">In progress...</span>
+    <span ng-show="$ctrl.state.redeployInProgress">进行中...</span>
   </button>
   <button
     class="btn btn-sm btn-primary"
@@ -53,7 +53,7 @@
     style="margin-top: 7px; margin-left: 0;"
     button-spinner="$ctrl.state.saveGitSettingsInProgress"
   >
-    <span ng-show="!$ctrl.state.saveGitSettingsInProgress"> Save settings </span>
-    <span ng-show="$ctrl.state.saveGitSettingsInProgress">In progress...</span>
+    <span ng-show="!$ctrl.state.saveGitSettingsInProgress"> 保存设置 </span>
+    <span ng-show="$ctrl.state.saveGitSettingsInProgress">进行中...</span>
   </button>
 </form>

@@ -80,7 +80,7 @@ class CreateRegistryController {
       try {
         this.gitlabProjects = await this.RegistryGitlabService.projects(this.model.Gitlab.InstanceURL, this.model.Token);
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to retrieve projects');
+        this.Notifications.error('失败', err, '无法检索项目');
       } finally {
         this.state.actionInProgress = false;
       }
@@ -92,10 +92,10 @@ class CreateRegistryController {
       try {
         this.state.actionInProgress = true;
         await this.RegistryService.createGitlabRegistries(this.model, this.state.gitlab.selectedItems);
-        this.Notifications.success('Registries successfully created');
+        this.Notifications.success('已成功创建注册表');
         this.$state.go(this.state.originViewReference, { endpointId: this.EndpointProvider.endpointID() });
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to create registries');
+        this.Notifications.error('失败', err, '无法创建注册表');
         this.state.actionInProgress = false;
       }
     });
@@ -106,10 +106,10 @@ class CreateRegistryController {
       try {
         this.state.actionInProgress = true;
         await this.RegistryService.createRegistry(this.model);
-        this.Notifications.success('Registry successfully created');
+        this.Notifications.success('注册表已成功创建');
         this.$state.go(this.state.originViewReference, { endpointId: this.EndpointProvider.endpointID() });
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to create registry');
+        this.Notifications.error('失败', err, '无法创建注册表');
         this.state.actionInProgress = false;
       }
     });

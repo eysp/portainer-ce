@@ -87,11 +87,11 @@ class CreateCustomTemplateViewController {
       const userId = userDetails.ID;
       await this.ResourceControlService.applyResourceControl(userId, accessControlData, customTemplate.ResourceControl);
 
-      this.Notifications.success('Custom template successfully created');
+      this.Notifications.success('已成功创建自定义模板');
       this.state.isEditorDirty = false;
       this.$state.go('docker.templates.custom');
     } catch (err) {
-      this.Notifications.error('Failure', err, 'A template with the same name already exists');
+      this.Notifications.error('失败', err, '具有相同名称的模板已存在');
     } finally {
       this.state.actionInProgress = false;
     }
@@ -101,14 +101,14 @@ class CreateCustomTemplateViewController {
     this.state.formValidationError = '';
 
     if (method === 'editor' && this.formValues.FileContent === '') {
-      this.state.formValidationError = 'Template file content must not be empty';
+      this.state.formValidationError = '模板文件内容不能为空';
       return false;
     }
 
     const title = this.formValues.Title;
     const isNotUnique = _.some(this.templates, (template) => template.Title === title);
     if (isNotUnique) {
-      this.state.formValidationError = 'A template with the same name already exists';
+      this.state.formValidationError = '具有相同名称的模板已存在';
       return false;
     }
 
@@ -178,7 +178,7 @@ class CreateCustomTemplateViewController {
     try {
       this.templates = await this.CustomTemplateService.customTemplates([1, 2]);
     } catch (err) {
-      this.Notifications.error('Failure loading', err, 'Failed loading custom templates');
+      this.Notifications.error('加载失败', err, '加载自定义模板失败');
     }
 
     this.state.loading = false;

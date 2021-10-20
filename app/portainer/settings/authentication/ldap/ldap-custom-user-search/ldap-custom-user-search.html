@@ -1,27 +1,27 @@
 <div class="col-sm-12 form-section-title" style="float: initial;">
-  User search configurations
+  用户搜索配置
 </div>
 
 <rd-widget ng-repeat="config in $ctrl.settings | limitTo: (1 - $ctrl.settings)" style="display: block; margin-bottom: 10px;">
   <rd-widget-body>
     <div class="form-group" ng-if="$index > 0" style="margin-bottom: 10px;">
       <span class="col-sm-12 text-muted small">
-        Extra search configuration
+        额外搜索配置
       </span>
     </div>
 
     <div class="form-group">
       <label for="ldap_basedn_{{ $index }}" class="col-sm-4 col-md-2 control-label text-left">
         Base DN
-        <portainer-tooltip position="bottom" message="The distinguished name of the element from which the LDAP server will search for users."></portainer-tooltip>
+        <portainer-tooltip position="bottom" message="TLDAP服务器将从中搜索用户的元素的可分辨名称。"></portainer-tooltip>
       </label>
       <div class="col-sm-8 col-md-4">
         <input type="text" class="form-control" id="ldap_basedn_{{ $index }}" ng-model="config.BaseDN" placeholder="dc=ldap,dc=domain,dc=tld" />
       </div>
 
       <label for="ldap_username_att_{{ $index }}" class="col-sm-4 col-md-3 col-lg-2 control-label text-left">
-        Username attribute
-        <portainer-tooltip position="bottom" message="LDAP attribute which denotes the username."></portainer-tooltip>
+        用户名属性
+        <portainer-tooltip position="bottom" message="表示用户名的LDAP属性。"></portainer-tooltip>
       </label>
       <div class="col-sm-8 col-md-3 col-lg-4">
         <input type="text" class="form-control" id="ldap_username_att_{{ $index }}" ng-model="config.UserNameAttribute" placeholder="uid" />
@@ -29,8 +29,8 @@
     </div>
     <div class="form-group">
       <label for="ldap_filter_{{ $index }}" class="col-sm-4 col-md-2 control-label text-left">
-        Filter
-        <portainer-tooltip position="bottom" message="The LDAP search filter used to select user elements, optional."></portainer-tooltip>
+        筛选
+        <portainer-tooltip position="bottom" message="用于选择用户元素的LDAP搜索筛选（可选）。"></portainer-tooltip>
       </label>
       <div ng-class="{ 'col-sm-7 col-md-9': $index, 'col-sm-8 col-md-10': !$index }">
         <input type="text" class="form-control" id="ldap_filter_{{ $index }}" ng-model="config.Filter" placeholder="(objectClass=account)" />
@@ -47,7 +47,7 @@
 <div class="form-group" style="margin-top: 10px;">
   <div class="col-sm-12">
     <button class="label label-default interactive" style="border: 0;" ng-click="$ctrl.onAddClick()">
-      <i class="fa fa-plus-circle" aria-hidden="true"></i> add user search configuration
+      <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加用户搜索配置
     </button>
   </div>
   <div class="col-sm-12" style="margin-top: 10px;">
@@ -60,7 +60,7 @@
       limited-feature-class="limited-be"
       limited-feature-tabindex="-1"
     >
-      Display Users
+      显示用户
     </button>
     <be-feature-indicator feature="$ctrl.limitedFeatureId" class="space-left"></be-feature-indicator>
   </div>
@@ -68,6 +68,6 @@
 
 <div ng-if="$ctrl.showTable">
   <div class="form-group">
-    <ldap-users-datatable dataset="$ctrl.users" title-text="Users" title-icon="fa-users" table-key="ldapUsers" order-by="" reverse-order=""></ldap-users-datatable>
+    <ldap-users-datatable dataset="$ctrl.users" title-text="用户" title-icon="fa-users" table-key="ldapUsers" order-by="" reverse-order=""></ldap-users-datatable>
   </div>
 </div>

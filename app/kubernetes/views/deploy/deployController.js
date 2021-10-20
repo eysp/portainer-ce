@@ -165,7 +165,7 @@ class KubernetesDeployController {
         const fileContent = await this.CustomTemplateService.customTemplateFile(templateId);
         this.onChangeFileContent(fileContent);
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to load template file');
+        this.Notifications.error('失败', err, 'Unable to load template file');
       }
     });
   }
@@ -272,7 +272,7 @@ class KubernetesDeployController {
         this.formValues.Namespace = this.namespaces[0].Name;
       }
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to load namespaces data');
+      this.Notifications.error('失败', err, 'Unable to load namespaces data');
     }
   }
 

@@ -6,13 +6,13 @@
       </div>
       <div class="actionBar">
         <button type="button" class="btn btn-sm btn-danger" ng-disabled="$ctrl.state.selectedItemCount === 0" ng-click="$ctrl.removeAction($ctrl.state.selectedItems)">
-          <i class="fa fa-trash-alt space-right" aria-hidden="true"></i>Remove
+          <i class="fa fa-trash-alt space-right" aria-hidden="true"></i>删除
         </button>
         <button type="button" class="btn btn-sm btn-primary" ui-sref="edge.jobs.new"> <i class="fa fa-plus space-right" aria-hidden="true"></i>Add Edge job </button>
       </div>
       <div class="searchBar">
         <i class="fa fa-search searchIcon" aria-hidden="true"></i>
-        <input type="text" class="searchInput" ng-model="$ctrl.state.textFilter" placeholder="Search..." auto-focus ng-model-options="{ debounce: 300 }" />
+        <input type="text" class="searchInput" ng-model="$ctrl.state.textFilter" placeholder="搜索..." auto-focus ng-model-options="{ debounce: 300 }" />
       </div>
       <div class="table-responsive">
         <table class="table table-hover nowrap-cells">
@@ -63,7 +63,7 @@
               <td>{{ item.Created | getisodatefromtimestamp }}</td>
             </tr>
             <tr ng-if="!$ctrl.dataset">
-              <td colspan="3" class="text-center text-muted">Loading...</td>
+              <td colspan="3" class="text-center text-muted">加载中...</td>
             </tr>
             <tr ng-if="$ctrl.state.filteredDataSet.length === 0">
               <td colspan="3" class="text-center text-muted">No Edge job available.</td>
@@ -72,12 +72,12 @@
         </table>
       </div>
       <div class="footer" ng-if="$ctrl.dataset">
-        <div class="infoBar" ng-if="$ctrl.state.selectedItemCount !== 0"> {{ $ctrl.state.selectedItemCount }} item(s) selected </div>
+        <div class="infoBar" ng-if="$ctrl.state.selectedItemCount !== 0"> {{ $ctrl.state.selectedItemCount }} 所选项目 </div>
         <div class="paginationControls">
           <form class="form-inline">
             <span class="limitSelector">
               <span style="margin-right: 5px;">
-                Items per page
+                每页项目数
               </span>
               <select class="form-control" ng-model="$ctrl.state.paginatedItemLimit" ng-change="$ctrl.changePaginationLimit()" data-cy="component-paginationSelect">
                 <option value="0">All</option>

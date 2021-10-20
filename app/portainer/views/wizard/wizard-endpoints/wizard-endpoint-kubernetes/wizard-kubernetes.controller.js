@@ -33,7 +33,7 @@ export default class WizardKubernetesController {
       // Check name is duplicated or not
       let nameUsed = await this.NameValidator.validateEnvironmentName(name);
       if (nameUsed) {
-        this.Notifications.error('Failure', true, 'This name is been used, please try another one');
+        this.Notifications.error('失败', true, '此名称已被使用，请尝试另一个');
         return;
       }
       await this.addRemoteEndpoint(name, creationType, url, publicUrl, groupId, tagIds, tls, tlsSkipVerify, tlsSkipClientVerify, tlsCaFile, tlsCertFile, tlsKeyFile);
@@ -57,12 +57,12 @@ export default class WizardKubernetesController {
         tlsCertFile,
         tlsKeyFile
       );
-      this.Notifications.success('Environment connected', name);
+      this.Notifications.success('环境连接', name);
       this.clearForm();
       this.onUpdate();
       this.onAnalytics('kubernetes-agent');
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to conect your environment');
+      this.Notifications.error('失败', err, 'U无法连接您的环境');
     } finally {
       this.state.actionInProgress = false;
     }

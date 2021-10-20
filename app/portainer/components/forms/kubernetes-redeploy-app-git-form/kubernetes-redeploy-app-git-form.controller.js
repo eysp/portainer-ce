@@ -71,11 +71,11 @@ class KubernetesRedeployAppGitFormController {
     return this.$async(async () => {
       try {
         const confirmed = await this.ModalService.confirmAsync({
-          title: 'Are you sure?',
-          message: 'Any changes to this application will be overriden by the definition in git and may cause a service interruption. Do you wish to continue?',
+          title: '你确定吗？',
+          message: '对该应用程序的任何更改都将被git中的定义覆盖，并可能导致服务中断。你想继续吗？',
           buttons: {
             confirm: {
-              label: 'Update',
+              label: '更新',
               className: 'btn-warning',
             },
           },
@@ -85,10 +85,10 @@ class KubernetesRedeployAppGitFormController {
         }
         this.state.redeployInProgress = true;
         await this.StackService.updateKubeGit(this.stack.Id, this.stack.EndpointId, this.namespace, this.formValues);
-        this.Notifications.success('Pulled and redeployed stack successfully');
+        this.Notifications.success('已成功拉取并重新部署堆栈');
         await this.$state.reload();
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Failed redeploying application');
+        this.Notifications.error('失败', err, '重新部署应用程序失败');
       } finally {
         this.state.redeployInProgress = false;
       }
@@ -102,9 +102,9 @@ class KubernetesRedeployAppGitFormController {
         await this.StackService.updateKubeStack({ EndpointId: this.stack.EndpointId, Id: this.stack.Id }, null, this.formValues);
         this.savedFormValues = angular.copy(this.formValues);
         this.state.hasUnsavedChanges = false;
-        this.Notifications.success('Save stack settings successfully');
+        this.Notifications.success('成功保存堆栈设置');
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to save application settings');
+        this.Notifications.error('失败', err, '无法保存应用程序设置');
       } finally {
         this.state.saveGitSettingsInProgress = false;
       }

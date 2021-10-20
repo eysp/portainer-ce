@@ -20,7 +20,7 @@ export default class WizardAciController {
         // Check name is duplicated or not
         let nameUsed = await this.NameValidator.validateEnvironmentName(name);
         if (nameUsed) {
-          this.Notifications.error('Failure', true, 'This name is been used, please try another one');
+          this.Notifications.error('失败', true, '此名称已被使用，请尝试另一个');
           return;
         }
         await this.EndpointService.createAzureEndpoint(name, azureApplicationId, azureTenantId, azureAuthenticationKey, groupId, tagIds);
@@ -29,7 +29,7 @@ export default class WizardAciController {
         this.onUpdate();
         this.onAnalytics('aci-api');
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to connect your environment');
+        this.Notifications.error('失败', err, '无法连接您的环境');
       } finally {
         this.state.actionInProgress = false;
       }

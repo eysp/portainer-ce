@@ -110,7 +110,7 @@ class KubernetesConfigurationController {
         this.$state.reload(this.$state.current);
       }
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to update configuration');
+      this.Notifications.error('失败', err, 'Unable to update configuration');
     } finally {
       this.state.actionInProgress = false;
     }
@@ -157,7 +157,7 @@ class KubernetesConfigurationController {
 
       return this.configuration;
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve configuration');
+      this.Notifications.error('失败', err, 'Unable to retrieve configuration');
     } finally {
       this.state.configurationLoading = false;
     }
@@ -174,7 +174,7 @@ class KubernetesConfigurationController {
       this.configuration.Applications = KubernetesConfigurationHelper.getUsingApplications(this.configuration, applications);
       KubernetesConfigurationHelper.setConfigurationUsed(this.configuration);
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve applications');
+      this.Notifications.error('失败', err, 'Unable to retrieve applications');
     } finally {
       this.state.applicationsLoading = false;
     }
@@ -195,7 +195,7 @@ class KubernetesConfigurationController {
       this.events = _.filter(this.events, (event) => event.Involved.uid === this.configuration.Id);
       this.state.eventWarningCount = KubernetesEventHelper.warningCount(this.events);
     } catch (err) {
-      this.Notifications('Failure', err, 'Unable to retrieve events');
+      this.Notifications('失败', err, 'Unable to retrieve events');
     } finally {
       this.state.eventsLoading = false;
     }
@@ -209,7 +209,7 @@ class KubernetesConfigurationController {
     try {
       this.configurations = await this.KubernetesConfigurationService.get();
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve configurations');
+      this.Notifications.error('失败', err, 'Unable to retrieve configurations');
     }
   }
 
@@ -269,7 +269,7 @@ class KubernetesConfigurationController {
       }
       this.tagUsedDataKeys();
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to load view data');
+      this.Notifications.error('失败', err, 'Unable to load view data');
     } finally {
       this.state.viewReady = true;
     }

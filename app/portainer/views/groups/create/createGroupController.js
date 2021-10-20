@@ -17,11 +17,11 @@ angular.module('portainer.app').controller('CreateGroupController', function Cre
     $scope.state.actionInProgress = true;
     GroupService.createGroup(model, associatedEndpoints)
       .then(function success() {
-        Notifications.success('Group successfully created');
+        Notifications.success('组已成功创建');
         $state.go('portainer.groups', {}, { reload: true });
       })
       .catch(function error(err) {
-        Notifications.error('Failure', err, 'Unable to create group');
+        Notifications.error('失败', err, '无法创建组');
       })
       .finally(function final() {
         $scope.state.actionInProgress = false;
@@ -38,7 +38,7 @@ angular.module('portainer.app').controller('CreateGroupController', function Cre
       $scope.availableTags = $scope.availableTags.concat(tag);
       $scope.model.TagIds = $scope.model.TagIds.concat(tag.Id);
     } catch (err) {
-      Notifications.error('Failue', err, 'Unable to create tag');
+      Notifications.error('Failue', err, '无法创建标签');
     }
   }
 
@@ -51,7 +51,7 @@ angular.module('portainer.app').controller('CreateGroupController', function Cre
         $scope.loaded = true;
       })
       .catch((err) => {
-        Notifications.error('Failure', err, 'Unable to retrieve tags');
+        Notifications.error('失败', err, '无法检索标签');
       });
   }
 

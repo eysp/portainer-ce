@@ -15,45 +15,45 @@ angular.module('portainer.app').controller('SettingsController', [
   function ($scope, $state, Notifications, SettingsService, StateManager, BackupService, FileSaver) {
     $scope.s3BackupFeatureId = S3_BACKUP_SETTING;
     $scope.backupOptions = [
-      buildOption('backup_file', 'fa fa-download', 'Download backup file', '', 'file'),
-      buildOption('backup_s3', 'fa fa-upload', 'Store in S3', 'Define a cron schedule', 's3', S3_BACKUP_SETTING),
+      buildOption('backup_file', 'fa fa-download', '下载备份文件', '', 'file'),
+      buildOption('backup_s3', 'fa fa-upload', 'Store in S3', '定义cron计划', 's3', S3_BACKUP_SETTING),
     ];
 
     $scope.state = {
       actionInProgress: false,
       availableEdgeAgentCheckinOptions: [
         {
-          key: '5 seconds',
+          key: '5 秒',
           value: 5,
         },
         {
-          key: '10 seconds',
+          key: '10 秒',
           value: 10,
         },
         {
-          key: '30 seconds',
+          key: '30 秒',
           value: 30,
         },
       ],
       availableKubeconfigExpiryOptions: [
         {
-          key: '1 day',
+          key: '1 天',
           value: '24h',
         },
         {
-          key: '7 days',
+          key: '7 天',
           value: `${24 * 7}h`,
         },
         {
-          key: '30 days',
+          key: '30 天',
           value: `${24 * 30}h`,
         },
         {
-          key: '1 year',
+          key: '1 年',
           value: `${24 * 30 * 12}h`,
         },
         {
-          key: 'No expiry',
+          key: '不过期',
           value: '0',
         },
       ],
@@ -109,10 +109,10 @@ angular.module('portainer.app').controller('SettingsController', [
         .then(function success(data) {
           const downloadData = new Blob([data.file], { type: 'application/gzip' });
           FileSaver.saveAs(downloadData, data.name);
-          Notifications.success('Backup successfully downloaded');
+          Notifications.success('备份已成功下载');
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to download backup');
+          Notifications.error('失败', err, '无法下载备份');
         })
         .finally(function final() {
           $scope.state.backupInProgress = false;
@@ -144,7 +144,7 @@ angular.module('portainer.app').controller('SettingsController', [
           $state.reload();
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to update settings');
+          Notifications.error('失败', err, '无法更新设置');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -164,7 +164,7 @@ angular.module('portainer.app').controller('SettingsController', [
           $scope.formValues.enableTelemetry = settings.EnableTelemetry;
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve application settings');
+          Notifications.error('失败', err, '无法检索应用程序设置');
         });
     }
 

@@ -71,7 +71,7 @@ class KubernetesDashboardController {
         this.configurations = configurations;
       }
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to load dashboard data');
+      this.Notifications.error('失败', err, '无法加载仪表盘数据');
     }
   }
 

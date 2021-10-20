@@ -46,7 +46,7 @@ export default class KubernetesRegistryAccessController {
         });
         this.$state.reload(this.$state.current);
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Failed saving registry access');
+        this.Notifications.error('失败', err, 'Failed saving registry access');
       }
     });
   }
@@ -62,7 +62,7 @@ export default class KubernetesRegistryAccessController {
           this.savedResourcePools = this.registry.RegistryAccesses[this.endpoint.Id].Namespaces.map((value) => ({ value }));
         }
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to retrieve registry details');
+        this.Notifications.error('失败', err, 'Unable to retrieve registry details');
       }
 
       try {
@@ -72,7 +72,7 @@ export default class KubernetesRegistryAccessController {
           .filter((pool) => !KubernetesNamespaceHelper.isSystemNamespace(pool.Namespace.Name) && !this.savedResourcePools.find(({ value }) => value === pool.Namespace.Name))
           .map((pool) => ({ name: pool.Namespace.Name, id: pool.Namespace.Id }));
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to retrieve namespaces');
+        this.Notifications.error('失败', err, 'Unable to retrieve namespaces');
       }
     });
   }

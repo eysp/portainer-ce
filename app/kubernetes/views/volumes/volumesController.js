@@ -60,11 +60,11 @@ class KubernetesVolumesController {
     for (const volume of selectedItems) {
       try {
         await this.KubernetesVolumeService.delete(volume);
-        this.Notifications.success('Volume successfully removed', volume.PersistentVolumeClaim.Name);
+        this.Notifications.success('已成功删除存储卷', volume.PersistentVolumeClaim.Name);
         const index = this.volumes.indexOf(volume);
         this.volumes.splice(index, 1);
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to remove volume');
+        this.Notifications.error('失败', err, '无法删除存储卷');
       } finally {
         --actionCount;
         if (actionCount === 0) {
@@ -75,7 +75,7 @@ class KubernetesVolumesController {
   }
 
   removeAction(selectedItems) {
-    this.ModalService.confirmDeletion('Do you want to remove the selected volume(s)?', (confirmed) => {
+    this.ModalService.confirmDeletion('是否要删除所选存储卷？', (confirmed) => {
       if (confirmed) {
         return this.$async(this.removeActionAsync, selectedItems);
       }
@@ -96,7 +96,7 @@ class KubernetesVolumesController {
       });
       this.storages = buildStorages(storages, volumes);
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retreive namespaces');
+      this.Notifications.error('失败', err, '无法检索 namespaces');
     }
   }
 

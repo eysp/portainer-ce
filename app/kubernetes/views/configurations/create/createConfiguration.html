@@ -12,7 +12,7 @@
           <form class="form-horizontal" name="kubernetesConfigurationCreationForm" autocomplete="off">
             <!-- name -->
             <div class="form-group">
-              <label for="configuration_name" class="col-sm-1 control-label text-left">Name</label>
+              <label for="configuration_name" class="col-sm-1 control-label text-left">名称</label>
               <div class="col-sm-11">
                 <input
                   type="text"
@@ -31,7 +31,7 @@
             <div class="form-group" ng-show="kubernetesConfigurationCreationForm.configuration_name.$invalid || ctrl.state.alreadyExist">
               <div class="col-sm-12 small text-warning">
                 <div ng-messages="kubernetesConfigurationCreationForm.configuration_name.$error">
-                  <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This field is required.</p>
+                  <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此字段是必需的。</p>
                   <p ng-message="pattern"
                     ><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This field must consist of lower case alphanumeric characters, '-' or '.', and must start and end
                     with an alphanumeric character.</p

@@ -60,7 +60,7 @@ angular.module('portainer.docker').factory('NetworkService', [
           deferred.resolve(filteredNetworks);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve networks', err: err });
+          deferred.reject({ msg: '无法检索网络', err: err });
         });
 
       return deferred.promise;

@@ -38,7 +38,7 @@ class KubernetesApplicationConsoleController {
 
     socket.onerror = function (err) {
       this.disconnect();
-      this.Notifications.error('Failure', err, 'Websocket connection error');
+      this.Notifications.error('失败', err, 'Websocket connection error');
     }.bind(this);
 
     this.state.socket.onclose = function () {
@@ -100,7 +100,7 @@ class KubernetesApplicationConsoleController {
     try {
       this.application = await this.KubernetesApplicationService.get(namespace, applicationName);
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve application logs');
+      this.Notifications.error('失败', err, 'Unable to retrieve application logs');
     } finally {
       this.state.viewReady = true;
     }

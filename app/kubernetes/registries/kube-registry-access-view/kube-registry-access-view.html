@@ -1,6 +1,6 @@
 <rd-header>
-  <rd-header-title title-text="Registry access"></rd-header-title>
-  <rd-header-content> <a ui-sref="kubernetes.registries">Registries</a> &gt; {{ $ctrl.registry.Name }} &gt; Access management </rd-header-content>
+  <rd-header-title title-text="注册表访问"></rd-header-title>
+  <rd-header-content> <a ui-sref="kubernetes.registries">注册表</a> &gt; {{ $ctrl.registry.Name }} &gt; 访问管理 </rd-header-content>
 </rd-header>
 
 <registry-details registry="$ctrl.registry" ng-if="$ctrl.registry"></registry-details>
@@ -13,11 +13,11 @@
         <form class="form-horizontal">
           <div class="form-group">
             <label class="col-sm-3 col-lg-2 control-label text-left" style="padding-top: 0;">
-              Select namespaces
+              选择 namespaces
             </label>
             <div class="col-sm-9 col-lg-4">
               <span class="small text-muted" ng-if="!$ctrl.resourcePools.length">
-                No namespaces available.
+                没有 namespaces 可用.
               </span>
               <span
                 isteven-multi-select
@@ -29,7 +29,7 @@
                 tick-property="ticked"
                 helper-elements="filter"
                 search-property="name"
-                translation="{nothingSelected: 'Select one or more namespaces', search: 'Search...'}"
+                translation="{nothingSelected: '选择一个或多个 namespaces', search: '搜索...'}"
               >
               </span>
             </div>
@@ -45,8 +45,8 @@
                 ng-click="$ctrl.submit()"
                 button-spinner="$ctrl.state.actionInProgress"
               >
-                <span ng-hide="$ctrl.state.actionInProgress"><i class="fa fa-plus" aria-hidden="true"></i> Create access</span>
-                <span ng-show="$ctrl.state.actionInProgress">Creating access...</span>
+                <span ng-hide="$ctrl.state.actionInProgress"><i class="fa fa-plus" aria-hidden="true"></i> 创建访问权限</span>
+                <span ng-show="$ctrl.state.actionInProgress">创建访问权限中...</span>
               </button>
             </div>
           </div>

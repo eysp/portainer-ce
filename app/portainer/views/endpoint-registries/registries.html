@@ -1,15 +1,15 @@
 <rd-header>
-  <rd-header-title title-text="Environment registries">
-    <a data-toggle="tooltip" title="Refresh" ui-sref="docker.registries" ui-sref-opts="{reload: true}">
+  <rd-header-title title-text="环境注册表">
+    <a data-toggle="tooltip" title="刷新" ui-sref="docker.registries" ui-sref-opts="{reload: true}">
       <i class="fa fa-sync" aria-hidden="true"></i>
     </a>
   </rd-header-title>
-  <rd-header-content>Manage registry access inside this environment</rd-header-content>
+  <rd-header-content>在此环境中管理注册表访问</rd-header-content>
 </rd-header>
 <div class="row">
   <div class="col-sm-12">
     <registries-datatable
-      title-text="Registries"
+      title-text="注册表"
       title-icon="fa-database"
       dataset="$ctrl.registries"
       table-key="endpointRegistries"

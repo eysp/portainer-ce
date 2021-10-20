@@ -3,34 +3,34 @@
     <rd-widget-header icon="fa-tasks" title-text="Published ports">
       <div class="nopadding" authorization="DockerServiceUpdate">
         <a class="btn btn-default btn-sm pull-right" ng-click="isUpdating ||addPublishedPort(service)" ng-disabled="isUpdating">
-          <i class="fa fa-plus-circle" aria-hidden="true"></i> port mapping
+          <i class="fa fa-plus-circle" aria-hidden="true"></i> 端口映射
         </a>
       </div>
     </rd-widget-header>
     <rd-widget-body ng-if="!service.Ports || service.Ports.length === 0">
-      <p>This service has no ports published.</p>
+      <p>此服务未发布任何端口。</p>
     </rd-widget-body>
     <rd-widget-body ng-if="service.Ports && service.Ports.length > 0" classes="no-padding">
       <table class="table">
         <thead>
           <tr>
-            <th>Host port</th>
-            <th>Container port</th>
-            <th>Protocol</th>
-            <th>Publish mode</th>
-            <th authorization="DockerServiceUpdate">Actions</th>
+            <th>主机端口</th>
+            <th>容器端口</th>
+            <th>协议</th>
+            <th>发布模式</th>
+            <th authorization="DockerServiceUpdate">操作</th>
           </tr>
         </thead>
         <tbody>
           <tr ng-repeat="portBinding in service.Ports">
             <td>
               <div class="input-group input-group-sm">
-                <span class="input-group-addon">host</span>
+                <span class="input-group-addon">主机</span>
                 <input
                   type="number"
                   class="form-control"
                   ng-model="portBinding.PublishedPort"
-                  placeholder="e.g. 8080"
+                  placeholder="例如 8080"
                   ng-change="updatePublishedPort(service, mapping)"
                   ng-disabled="isUpdating"
                   disable-authorization="DockerServiceUpdate"
@@ -39,12 +39,12 @@
             </td>
             <td>
               <div class="input-group input-group-sm">
-                <span class="input-group-addon">container</span>
+                <span class="input-group-addon">容器</span>
                 <input
                   type="number"
                   class="form-control"
                   ng-model="portBinding.TargetPort"
-                  placeholder="e.g. 80"
+                  placeholder="例如 80"
                   ng-change="updatePublishedPort(service, mapping)"
                   ng-disabled="isUpdating"
                   disable-authorization="DockerServiceUpdate"
@@ -75,7 +75,7 @@
                   disable-authorization="DockerServiceUpdate"
                 >
                   <option value="ingress">ingress</option>
-                  <option value="host">host</option>
+                  <option value="host">主机</option>
                 </select>
               </div>
             </td>
@@ -93,13 +93,13 @@
     <rd-widget-footer authorization="DockerServiceUpdate">
       <div class="btn-toolbar" role="toolbar">
         <div class="btn-group" role="group">
-          <button type="button" class="btn btn-primary btn-sm" ng-disabled="!hasChanges(service, ['Ports'])" ng-click="updateService(service)">Apply changes</button>
+          <button type="button" class="btn btn-primary btn-sm" ng-disabled="!hasChanges(service, ['Ports'])" ng-click="updateService(service)">应用更改</button>
           <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu">
-            <li><a ng-click="cancelChanges(service, ['Ports'])">Reset changes</a></li>
-            <li><a ng-click="cancelChanges(service)">Reset all changes</a></li>
+            <li><a ng-click="cancelChanges(service, ['Ports'])">重置更改</a></li>
+            <li><a ng-click="cancelChanges(service)">重置所有更改</a></li>
           </ul>
         </div>
       </div>

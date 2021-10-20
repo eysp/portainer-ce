@@ -45,7 +45,7 @@ class SslCertificateController {
         location.reload();
         this.state.reloadingPage = true;
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Failed applying changes');
+        this.Notifications.error('失败', err, '应用更改失败');
       }
       this.state.actionInProgress = false;
     });
@@ -63,7 +63,7 @@ class SslCertificateController {
         this.formValues.forceHTTPS = !certInfo.httpEnabled;
         this.originalValues.forceHTTPS = this.formValues.forceHTTPS;
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Failed loading certificate info');
+        this.Notifications.error('失败', err, '加载证书信息失败');
       }
     });
   }

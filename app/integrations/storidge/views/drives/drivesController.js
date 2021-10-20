@@ -18,7 +18,7 @@ angular.module('portainer.integrations.storidge').controller('StoridgeDrivesCont
           $state.reload();
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to add drive');
+          Notifications.error('失败', err, 'Unable to add drive');
         })
         .finally(function final() {
           $scope.state.additionInProgress[idx] = false;
@@ -32,7 +32,7 @@ angular.module('portainer.integrations.storidge').controller('StoridgeDrivesCont
           $state.reload();
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to scan drives');
+          Notifications.error('失败', err, 'Unable to scan drives');
         });
     };
 
@@ -42,7 +42,7 @@ angular.module('portainer.integrations.storidge').controller('StoridgeDrivesCont
           $scope.drives = data;
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve drives');
+          Notifications.error('失败', err, 'Unable to retrieve drives');
         });
     }
 

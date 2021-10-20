@@ -1,14 +1,14 @@
 <rd-header>
-  <rd-header-title title-text="Image details"></rd-header-title>
+  <rd-header-title title-text="镜像详情"></rd-header-title>
   <rd-header-content>
-    <a ui-sref="docker.images">Images</a> &gt; <a ui-sref="docker.images.image({id: image.Id})">{{ image.Id }}</a>
+    <a ui-sref="docker.images">镜像</a> &gt; <a ui-sref="docker.images.image({id: image.Id})">{{ image.Id }}</a>
   </rd-header-content>
 </rd-header>
 
 <div class="row" ng-if="image.RepoTags.length > 0">
   <div class="col-lg-12 col-md-12 col-xs-12">
     <rd-widget>
-      <rd-widget-header icon="fa fa-tags" title-text="Image tags"></rd-widget-header>
+      <rd-widget-header icon="fa fa-tags" title-text="镜像标签"></rd-widget-header>
       <rd-widget-body>
         <form class="form-horizontal">
           <div class="form-group">
@@ -17,13 +17,13 @@
                 <div class="input-group col-md-1" style="padding: 0 15px;">
                   <span class="input-group-addon">{{ tag }}</span>
                   <span class="input-group-btn" authorization="DockerImagePush, DockerImageCreate, DockerImageDelete">
-                    <a data-toggle="tooltip" class="btn btn-primary interactive" title="Push to registry" ng-click="pushTag(tag)" authorization="DockerImagePush">
+                    <a data-toggle="tooltip" class="btn btn-primary interactive" title="推送到注册表" ng-click="pushTag(tag)" authorization="DockerImagePush">
                       <span class="fa fa-upload white-icon" aria-hidden="true"></span>
                     </a>
-                    <a data-toggle="tooltip" class="btn btn-primary interactive" title="Pull from registry" ng-click="pullTag(tag)" authorization="DockerImageCreate">
+                    <a data-toggle="tooltip" class="btn btn-primary interactive" title="从注册表中拉取" ng-click="pullTag(tag)" authorization="DockerImageCreate">
                       <span class="fa fa-download white-icon" aria-hidden="true"></span>
                     </a>
-                    <a data-toggle="tooltip" class="btn btn-primary interactive" title="Remove tag" ng-click="removeTag(tag)" authorization="DockerImageDelete">
+                    <a data-toggle="tooltip" class="btn btn-primary interactive" title="删除标签" ng-click="removeTag(tag)" authorization="DockerImageDelete">
                       <span class="fa fa-trash-alt white-icon" aria-hidden="true"></span>
                     </a>
                   </span>
@@ -34,18 +34,18 @@
           <div class="form-group">
             <div class="col-sm-12">
               <span class="small text-muted">
-                Note: you can click on the upload icon <span class="fa fa-upload" aria-hidden="true"></span> to push an image or on the download icon
-                <span class="fa fa-download" aria-hidden="true"></span> to pull an image or on the trash icon <span class="fa fa-trash-alt" aria-hidden="true"></span> to delete a
-                tag.
+                注意：您可以点击上传图标 <span class="fa fa-upload" aria-hidden="true"></span> 推送镜像或点击下载图标
+                 <span class="fa fa-download" aria-hidden="true"></span> 拉取镜像或在垃圾桶图标上 <span class="fa fa-trash-alt" aria-hidden="true"></span> 删除一个
+                 标签。
               </span>
             </div>
             <div class="col-sm-12">
               <span id="downloadResourceHint" class="createResource" style="display: none; margin-left: 0;">
-                Download in progress...
+                正在下载....
                 <i class="fa fa-circle-notch fa-spin" aria-hidden="true" style="margin-left: 2px;"></i>
               </span>
               <span id="uploadResourceHint" class="createResource" style="display: none; margin-left: 0;">
-                Upload in progress...
+                正在上传...
                 <i class="fa fa-circle-notch fa-spin" aria-hidden="true" style="margin-left: 2px;"></i>
               </span>
             </div>
@@ -59,7 +59,7 @@
 <div class="row" authorization="DockerImageCreate">
   <div class="col-lg-12 col-md-12 col-xs-12">
     <rd-widget>
-      <rd-widget-header icon="fa-tag" title-text="Tag the image"></rd-widget-header>
+      <rd-widget-header icon="fa-tag" title-text="标记镜像"></rd-widget-header>
       <rd-widget-body>
         <form class="form-horizontal">
           <!-- image-and-registry -->
@@ -76,13 +76,13 @@
           <!-- tag-note -->
           <div class="form-group">
             <div class="col-sm-12">
-              <span class="small text-muted">Note: if you don't specify the tag in the image name, <span class="label label-default">latest</span> will be used.</span>
+              <span class="small text-muted">注意：如果镜像名称中没有指定标签，将默认使用<span class="label label-default">latest</span>。</span>
             </div>
           </div>
           <!-- !tag-note -->
           <div class="form-group">
             <div class="col-sm-12">
-              <button type="button" class="btn btn-primary btn-sm" ng-disabled="!state.pullImageValidity || !formValues.RegistryModel.Image" ng-click="tagImage()">Tag</button>
+              <button type="button" class="btn btn-primary btn-sm" ng-disabled="!state.pullImageValidity || !formValues.RegistryModel.Image" ng-click="tagImage()">标签</button>
             </div>
           </div>
         </form>
@@ -94,7 +94,7 @@
 <div class="row">
   <div class="col-lg-12 col-md-12 col-xs-12">
     <rd-widget>
-      <rd-widget-header icon="fa-clone" title-text="Image details"></rd-widget-header>
+      <rd-widget-header icon="fa-clone" title-text="镜像详情"></rd-widget-header>
       <rd-widget-body classes="no-padding">
         <table class="table">
           <tbody>
@@ -103,7 +103,7 @@
               <td>
                 {{ image.Id }}
                 <button authorization="DockerImageDelete" class="btn btn-xs btn-danger" ng-click="removeImage(image.Id)"
-                  ><i class="fa fa-trash-alt space-right" aria-hidden="true"></i>Delete this image</button
+                  ><i class="fa fa-trash-alt space-right" aria-hidden="true"></i>删除此镜像</button
                 >
                 <button
                   authorization="DockerImageGet"
@@ -113,31 +113,31 @@
                   ng-disabled="state.exportInProgress"
                 >
                   <i class="fa fa-download space-right" aria-hidden="true"></i>
-                  <span ng-hide="state.exportInProgress">Export this image</span>
-                  <span ng-show="state.exportInProgress">Export in progress...</span>
+                  <span ng-hide="state.exportInProgress">导出此镜像</span>
+                  <span ng-show="state.exportInProgress">正在导出...</span>
                 </button>
               </td>
             </tr>
             <tr ng-if="image.Parent">
-              <td>Parent</td>
+              <td>父镜像</td>
               <td
                 ><a ui-sref="docker.images.image({id: image.Parent})">{{ image.Parent }}</a></td
               >
             </tr>
             <tr>
-              <td>Size</td>
+              <td>大小</td>
               <td>{{ image.VirtualSize | humansize }}</td>
             </tr>
             <tr>
-              <td>Created</td>
+              <td>创建</td>
               <td>{{ image.Created | getisodate }}</td>
             </tr>
             <tr>
-              <td>Build</td>
+              <td>构建</td>
               <td>Docker {{ image.DockerVersion }} on {{ image.Os }}, {{ image.Architecture }}</td>
             </tr>
             <tr ng-if="!(image.Labels | emptyobject)">
-              <td>Labels</td>
+              <td>标签</td>
               <td>
                 <table class="table table-bordered table-condensed">
                   <tr ng-repeat="(k, v) in image.Labels">
@@ -148,7 +148,7 @@
               </td>
             </tr>
             <tr ng-if="image.Author">
-              <td>Author</td>
+              <td>作者</td>
               <td>{{ image.Author }}</td>
             </tr>
           </tbody>
@@ -161,7 +161,7 @@
 <div class="row">
   <div class="col-lg-12 col-md-12 col-xs-12">
     <rd-widget>
-      <rd-widget-header icon="fa-clone" title-text="Dockerfile details"></rd-widget-header>
+      <rd-widget-header icon="fa-clone" title-text="Dockerfile 详情"></rd-widget-header>
       <rd-widget-body classes="no-padding">
         <table class="table">
           <tbody>
@@ -172,13 +172,13 @@
               >
             </tr>
             <tr ng-if="image.Entrypoint">
-              <td>ENTRYPOINT</td>
+              <td>入口点</td>
               <td
                 ><code>{{ image.Entrypoint | command }}</code></td
               >
             </tr>
             <tr ng-if="image.ExposedPorts.length > 0">
-              <td>EXPOSE</td>
+              <td>映射端口</td>
               <td>
                 <span class="label label-default space-right" ng-repeat="port in image.ExposedPorts">
                   {{ port }}
@@ -186,7 +186,7 @@
               </td>
             </tr>
             <tr ng-if="image.Volumes.length > 0">
-              <td>VOLUME</td>
+              <td>存储卷</td>
               <td>
                 <span class="label label-default space-right" ng-repeat="volume in image.Volumes">
                   {{ volume }}
@@ -194,7 +194,7 @@
               </td>
             </tr>
             <tr ng-if="image.Env.length > 0">
-              <td>ENV</td>
+              <td>环境</td>
               <td>
                 <table class="table table-bordered table-condensed">
                   <tr ng-repeat="var in image.Env">
@@ -213,27 +213,27 @@
 <div class="row" ng-if="history.length > 0">
   <div class="col-lg-12 col-md-12 col-xs-12">
     <rd-widget>
-      <rd-widget-header icon="fa-clone" title-text="Image layers"></rd-widget-header>
+      <rd-widget-header icon="fa-clone" title-text="镜像层"></rd-widget-header>
       <rd-widget-body classes="no-padding">
         <table id="image-layers" class="table">
           <thead>
             <th style="white-space: nowrap;">
               <a ng-click="order('Order')">
-                Order
+                序号
                 <span ng-show="sortType == 'Order' && !sortReverse" class="glyphicon glyphicon-chevron-down"></span>
                 <span ng-show="sortType == 'Order' && sortReverse" class="glyphicon glyphicon-chevron-up"></span>
               </a>
             </th>
             <th>
               <a ng-click="order('Size')">
-                Size
+                大小
                 <span ng-show="sortType == 'Size' && !sortReverse" class="glyphicon glyphicon-chevron-down"></span>
                 <span ng-show="sortType == 'Size' && sortReverse" class="glyphicon glyphicon-chevron-up"></span>
               </a>
             </th>
             <th>
               <a ng-click="order('CreatedBy')">
-                Layer
+                镜像层
                 <span ng-show="sortType == 'CreatedBy' && !sortReverse" class="glyphicon glyphicon-chevron-down"></span>
                 <span ng-show="sortType == 'CreatedBy' && sortReverse" class="glyphicon glyphicon-chevron-up"></span>
               </a>

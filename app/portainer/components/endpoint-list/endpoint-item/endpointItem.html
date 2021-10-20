@@ -20,9 +20,9 @@
           </span>
           <span class="space-left blocklist-item-subtitle">
             <span ng-if="$ctrl.isEdgeEndpoint()">
-              <span ng-if="!$ctrl.model.EdgeID" class="label label-default"><s>associated</s></span>
+              <span ng-if="!$ctrl.model.EdgeID" class="label label-default"><s>相关</s></span>
               <span ng-if="$ctrl.model.EdgeID">
-                <span class="label" ng-class="{ 'label-danger': !$ctrl.isCheckInValid, 'label-success': $ctrl.isCheckInValid }">heartbeat</span>
+                <span class="label" ng-class="{ 'label-danger': !$ctrl.isCheckInValid, 'label-success': $ctrl.isCheckInValid }">中心</span>
                 <span class="space-left small text-muted" ng-if="$ctrl.model.LastCheckInDate">
                   {{ $ctrl.model.LastCheckInDate | getisodatefromtimestamp }}
                 </span>
@@ -43,7 +43,7 @@
           </span>
         </span>
         <span>
-          <span class="small" ng-if="$ctrl.model.GroupName"> Group: {{ $ctrl.model.GroupName }} </span>
+          <span class="small" ng-if="$ctrl.model.GroupName"> 群组: {{ $ctrl.model.GroupName }} </span>
           <button ng-if="$ctrl.isAdmin" class="btn btn-link btn-xs" ng-click="$ctrl.editEndpoint($event)"><i class="fa fa-pencil-alt"></i> </button>
         </span>
       </div>
@@ -53,15 +53,15 @@
           <span>
             <span style="padding: 0 7px 0 0;">
               <i class="fa fa-th-list space-right" aria-hidden="true"></i>{{ $ctrl.model.Snapshots[0].StackCount }}
-              {{ $ctrl.model.Snapshots[0].StackCount === 1 ? 'stack' : 'stacks' }}
+              {{ $ctrl.model.Snapshots[0].StackCount === 1 ? '堆栈' : '堆栈' }}
             </span>
             <span style="padding: 0 7px 0 7px;" ng-if="$ctrl.model.Snapshots[0].Swarm">
               <i class="fa fa-list-alt space-right" aria-hidden="true"></i>{{ $ctrl.model.Snapshots[0].ServiceCount }}
-              {{ $ctrl.model.Snapshots[0].ServiceCount === 1 ? 'service' : 'services' }}
+              {{ $ctrl.model.Snapshots[0].ServiceCount === 1 ? '服务' : '服务' }}
             </span>
             <span style="padding: 0 7px 0 7px;">
               <i class="fa fa-cubes space-right" aria-hidden="true"></i>{{ $ctrl.model.Snapshots[0].RunningContainerCount + $ctrl.model.Snapshots[0].StoppedContainerCount }}
-              {{ $ctrl.model.Snapshots[0].RunningContainerCount + $ctrl.model.Snapshots[0].StoppedContainerCount === 1 ? 'container' : 'containers' }}
+              {{ $ctrl.model.Snapshots[0].RunningContainerCount + $ctrl.model.Snapshots[0].StoppedContainerCount === 1 ? '容器' : '容器' }}
               <span ng-if="$ctrl.model.Snapshots[0].RunningContainerCount > 0 || $ctrl.model.Snapshots[0].StoppedContainerCount > 0">
                 -
                 <i class="fa fa-power-off green-icon" aria-hidden="true"></i> {{ $ctrl.model.Snapshots[0].RunningContainerCount }}
@@ -73,27 +73,27 @@
             </span>
             <span style="padding: 0 7px 0 7px;">
               <i class="fa fa-hdd space-right" aria-hidden="true"></i>{{ $ctrl.model.Snapshots[0].VolumeCount }}
-              {{ $ctrl.model.Snapshots[0].VolumeCount === 1 ? 'volume' : 'volumes' }}
+              {{ $ctrl.model.Snapshots[0].VolumeCount === 1 ? '存储卷' : '存储卷' }}
             </span>
             <span style="padding: 0 7px 0 7px;">
               <i class="fa fa-clone space-right" aria-hidden="true"></i>{{ $ctrl.model.Snapshots[0].ImageCount }}
-              {{ $ctrl.model.Snapshots[0].ImageCount === 1 ? 'image' : 'images' }}
+              {{ $ctrl.model.Snapshots[0].ImageCount === 1 ? '镜像' : '镜像' }}
             </span>
           </span>
         </span>
         <span class="small text-muted">
-          {{ $ctrl.model.Snapshots[0].Swarm ? 'Swarm' : 'Standalone' }} {{ $ctrl.model.Snapshots[0].DockerVersion }}
-          <span ng-if="$ctrl.model.Type === 2">+ <i class="fa fa-bolt" aria-hidden="true"></i> Agent</span>
+          {{ $ctrl.model.Snapshots[0].Swarm ? '集群' : '独立' }} {{ $ctrl.model.Snapshots[0].DockerVersion }}
+          <span ng-if="$ctrl.model.Type === 2">+ <i class="fa fa-bolt" aria-hidden="true"></i> 代理</span>
           <span style="padding: 0 7px 0 0;" ng-if="$ctrl.model.Snapshots[0].Swarm">
             <i class="fa fa-hdd space-left space-right" aria-hidden="true"></i>{{ $ctrl.model.Snapshots[0].NodeCount }}
-            {{ $ctrl.model.Snapshots[0].NodeCount === 1 ? 'node' : 'nodes' }}
+            {{ $ctrl.model.Snapshots[0].NodeCount === 1 ? '节点' : '节点' }}
           </span>
         </span>
       </div>
 
       <div class="blocklist-item-line endpoint-item" ng-if="!$ctrl.model.Snapshots[0] && $ctrl.model.Type !== 5 && $ctrl.model.Type !== 6 && $ctrl.model.Type !== 7">
         <span class="blocklist-item-desc">
-          No snapshot available
+          没有可用的快照
         </span>
       </div>
 
@@ -110,7 +110,7 @@
           Kubernetes {{ $ctrl.model.Kubernetes.Snapshots[0].KubernetesVersion }}
           <span style="padding: 0 0 0 7px;">
             <i class="fa fa-hdd space-left space-right" aria-hidden="true"></i>
-            {{ $ctrl.model.Kubernetes.Snapshots[0].NodeCount }} {{ $ctrl.model.Kubernetes.Snapshots[0].NodeCount === 1 ? 'node' : 'nodes' }}
+            {{ $ctrl.model.Kubernetes.Snapshots[0].NodeCount }} {{ $ctrl.model.Kubernetes.Snapshots[0].NodeCount === 1 ? '节点' : '节点' }}
           </span>
         </span>
       </div>
@@ -129,7 +129,7 @@
             </span>
             <span class="space-left space-right">-</span>
           </span>
-          <span ng-if="$ctrl.endpointTags.length === 0"> <i class="fa fa-tags" aria-hidden="true"></i> No tags </span>
+          <span ng-if="$ctrl.endpointTags.length === 0"> <i class="fa fa-tags" aria-hidden="true"></i> 没有标签 </span>
           <span ng-if="$ctrl.endpointTags.length > 0">
             <i class="fa fa-tags" aria-hidden="true"></i>
             {{ $ctrl.endpointTags }}

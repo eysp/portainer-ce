@@ -1,10 +1,10 @@
 <rd-header>
-  <rd-header-title title-text="Edit Custom Template">
-    <a data-toggle="tooltip" title="Refresh" ui-sref="docker.templates.custom.edit({id:$ctrl.formValues.Id})" ui-sref-opts="{reload: true}">
+  <rd-header-title title-text="编辑自定义模板">
+    <a data-toggle="tooltip" title="刷新" ui-sref="docker.templates.custom.edit({id:$ctrl.formValues.Id})" ui-sref-opts="{reload: true}">
       <i class="fa fa-sync" aria-hidden="true"></i>
     </a>
   </rd-header-title>
-  <rd-header-content> <a ui-sref="docker.templates.custom">Custom templates</a> &gt; {{ $ctrl.formValues.Title }} </rd-header-content>
+  <rd-header-content> <a ui-sref="docker.templates.custom">自定义模板</a> &gt; {{ $ctrl.formValues.Title }} </rd-header-content>
 </rd-header>
 
 <div class="row" ng-if="$ctrl.formValues">
@@ -16,22 +16,22 @@
 
           <!-- web-editor -->
           <div class="col-sm-12 form-section-title">
-            Web editor
+            网页编辑
           </div>
           <div class="form-group">
             <span class="col-sm-12 text-muted small">
-              You can get more information about Compose file format in the
+              您可以在
               <a href="https://docs.docker.com/compose/compose-file/" target="_blank">
-                official documentation
+                官方文档
               </a>
-              .
+        中获得有关撰写文件格式的更多信息。
             </span>
           </div>
           <div class="form-group">
             <div class="col-sm-12">
               <code-editor
                 identifier="custom-template-creation-editor"
-                placeholder="# Define or paste the content of your docker-compose file here"
+                placeholder="# 定义或粘贴 docker-compose 文件的内容 here"
                 yml="true"
                 value="$ctrl.formValues.FileContent"
                 on-change="($ctrl.editorUpdate)"
@@ -43,7 +43,7 @@
           <por-access-control-form form-data="$ctrl.formValues.AccessControlData" resource-control="$ctrl.formValues.ResourceControl"></por-access-control-form>
 
           <div class="col-sm-12 form-section-title">
-            Actions
+            操作
           </div>
           <div class="form-group">
             <div class="col-sm-12">
@@ -56,8 +56,8 @@
                 ng-click="$ctrl.submitAction()"
                 button-spinner="$ctrl.actionInProgress"
               >
-                <span ng-hide="$ctrl.actionInProgress">Update the template</span>
-                <span ng-show="$ctrl.actionInProgress">Update in progress...</span>
+                <span ng-hide="$ctrl.actionInProgress">更新模板</span>
+                <span ng-show="$ctrl.actionInProgress">正在更新。。。</span>
               </button>
               <span class="text-danger" ng-if="$ctrl.state.formValidationError" style="margin-left: 5px;">
                 {{ $ctrl.state.formValidationError }}

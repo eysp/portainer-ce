@@ -49,7 +49,7 @@ export class EdgeJobController {
       this.state.isEditorDirty = false;
       this.$state.go('edge.jobs', {}, { reload: true });
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to update Edge job');
+      this.Notifications.error('失败', err, 'Unable to update Edge job');
     }
 
     this.state.actionInProgress = false;
@@ -67,7 +67,7 @@ export class EdgeJobController {
       const logFileName = `job_${this.edgeJob.Id}_task_${endpointId}.log`;
       this.FileSaver.saveAs(downloadData, logFileName);
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to download file');
+      this.Notifications.error('失败', err, 'Unable to download file');
     }
   }
 
@@ -89,7 +89,7 @@ export class EdgeJobController {
       const result = _.find(this.results, (result) => result.EndpointId === endpointId);
       result.LogsStatus = 2;
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to collect logs');
+      this.Notifications.error('失败', err, 'Unable to collect logs');
     }
   }
 
@@ -102,7 +102,7 @@ export class EdgeJobController {
       const result = _.find(this.results, (result) => result.EndpointId === endpointId);
       result.LogsStatus = 1;
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to clear logs');
+      this.Notifications.error('失败', err, 'Unable to clear logs');
     }
   }
 
@@ -161,7 +161,7 @@ export class EdgeJobController {
         this.results = results;
       }
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve environment list');
+      this.Notifications.error('失败', err, 'Unable to retrieve environment list');
     }
 
     this.$window.onbeforeunload = () => {

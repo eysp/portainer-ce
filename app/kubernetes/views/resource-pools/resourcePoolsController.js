@@ -25,7 +25,7 @@ class KubernetesResourcePoolsController {
         const index = this.resourcePools.indexOf(pool);
         this.resourcePools.splice(index, 1);
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to remove namespace');
+        this.Notifications.error('失败', err, 'Unable to remove namespace');
       } finally {
         --actionCount;
         if (actionCount === 0) {
@@ -50,7 +50,7 @@ class KubernetesResourcePoolsController {
     try {
       this.resourcePools = await this.KubernetesResourcePoolService.get();
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retreive namespaces');
+      this.Notifications.error('失败', err, 'Unable to retreive namespaces');
     }
   }
 

@@ -60,7 +60,7 @@ angular.module('portainer.app').controller('TeamController', [
           Notifications.success('User is now team leader', user.Username);
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to update user role');
+          Notifications.error('失败', err, 'Unable to update user role');
         });
     };
 
@@ -72,7 +72,7 @@ angular.module('portainer.app').controller('TeamController', [
           Notifications.success('User is now team member', user.Username);
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to update user role');
+          Notifications.error('失败', err, 'Unable to update user role');
         });
     };
 
@@ -94,7 +94,7 @@ angular.module('portainer.app').controller('TeamController', [
           Notifications.success('All users successfully added');
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to update team members');
+          Notifications.error('失败', err, 'Unable to update team members');
         });
     };
 
@@ -108,7 +108,7 @@ angular.module('portainer.app').controller('TeamController', [
           Notifications.success('User added to team', user.Username);
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to update team members');
+          Notifications.error('失败', err, 'Unable to update team members');
         });
     };
 
@@ -125,7 +125,7 @@ angular.module('portainer.app').controller('TeamController', [
           Notifications.success('All users successfully removed');
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to update team members');
+          Notifications.error('失败', err, 'Unable to update team members');
         });
     };
 
@@ -140,7 +140,7 @@ angular.module('portainer.app').controller('TeamController', [
           Notifications.success('User removed from team', user.Username);
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to update team members');
+          Notifications.error('失败', err, 'Unable to update team members');
         });
     };
 
@@ -151,7 +151,7 @@ angular.module('portainer.app').controller('TeamController', [
           $state.go('portainer.teams');
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to remove team');
+          Notifications.error('失败', err, 'Unable to remove team');
         });
     }
 
@@ -202,7 +202,7 @@ angular.module('portainer.app').controller('TeamController', [
           assignUsersAndMembers(users, data.memberships);
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve team details');
+          Notifications.error('失败', err, 'Unable to retrieve team details');
         });
     }
 

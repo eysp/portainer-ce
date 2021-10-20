@@ -1,11 +1,11 @@
 <kubernetes-view-header title="Application stats" state="kubernetes.applications.application.stats" view-ready="ctrl.state.viewReady">
   <a ui-sref="kubernetes.resourcePools">Namespaces</a> &gt;
   <a ui-sref="kubernetes.resourcePools.resourcePool({ id: ctrl.state.transition.namespace })">{{ ctrl.state.transition.namespace }}</a> &gt;
-  <a ui-sref="kubernetes.applications">Applications</a> &gt;
+  <a ui-sref="kubernetes.applications">应用</a> &gt;
   <a ui-sref="kubernetes.applications.application({ name: ctrl.state.transition.applicationName, namespace: ctrl.state.transition.namespace })">{{
     ctrl.state.transition.applicationName
   }}</a>
-  &gt; Pods &gt; {{ ctrl.state.transition.podName }} &gt; Containers &gt; {{ ctrl.state.transition.containerName }} &gt; Stats
+  &gt; Pods &gt; {{ ctrl.state.transition.podName }} &gt; 容器 &gt; {{ ctrl.state.transition.containerName }} &gt; 状态
 </kubernetes-view-header>
 
 <kubernetes-view-loading view-ready="ctrl.state.viewReady"></kubernetes-view-loading>
@@ -14,27 +14,26 @@
   <information-panel ng-if="!ctrl.state.getMetrics" title-text="Unable to retrieve container metrics">
     <span class="small text-muted">
       <i class="fa fa-exclamation-circle orange-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-      Portainer was unable to retrieve any metrics associated to that container. Please contact your administrator to ensure that the Kubernetes metrics feature is properly
-      configured.
+      Portainer 无法检索与该容器关联的任何指标。 请联系您的管理员以确保正确配置 Kubernetes 指标功能。
     </span>
   </information-panel>
   <div class="row" ng-if="ctrl.state.getMetrics">
     <div class="col-md-12">
       <rd-widget>
-        <rd-widget-header icon="fa-info-circle" title-text="About statistics"> </rd-widget-header>
+        <rd-widget-header icon="fa-info-circle" title-text="关于统计"> </rd-widget-header>
         <rd-widget-body>
           <form class="form-horizontal">
             <div class="form-group">
               <div class="col-sm-12">
                 <span class="small text-muted">
-                  This view displays real-time statistics about the container <b>{{ ctrl.state.transition.containerName | trimcontainername }}</b
+                  此视图显示有关容器的实时统计信息 <b>{{ ctrl.state.transition.containerName | trimcontainername }}</b
                   >.
                 </span>
               </div>
             </div>
             <div class="form-group">
               <label for="refreshRate" class="col-sm-3 col-md-2 col-lg-2 margin-sm-top control-label text-left">
-                Refresh rate
+                刷新频率
               </label>
               <div class="col-sm-3 col-md-2">
                 <select id="refreshRate" ng-model="ctrl.state.refreshRate" ng-change="ctrl.changeUpdateRepeater()" class="form-control">
@@ -48,7 +47,7 @@
             </div>
             <div class="form-group" ng-if="ctrl.state.networkStatsUnavailable">
               <div class="col-sm-12">
-                <span class="small text-muted"> <i class="fa fa-exclamation-triangle orange-icon" aria-hidden="true"></i> Network stats are unavailable for this container. </span>
+                <span class="small text-muted"> <i class="fa fa-exclamation-triangle orange-icon" aria-hidden="true"></i> 此容器的网络统计信息不可用。 </span>
               </div>
             </div>
           </form>
@@ -60,7 +59,7 @@
   <div class="row" ng-if="ctrl.state.getMetrics">
     <div class="col-lg-6 col-md-12 col-sm-12">
       <rd-widget>
-        <rd-widget-header icon="fa-chart-area" title-text="Memory usage"></rd-widget-header>
+        <rd-widget-header icon="fa-chart-area" title-text="内存使用情况"></rd-widget-header>
         <rd-widget-body>
           <div class="chart-container" style="position: relative;">
             <canvas id="memoryChart" width="770" height="300"></canvas>

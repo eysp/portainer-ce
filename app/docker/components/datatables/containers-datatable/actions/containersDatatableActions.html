@@ -10,7 +10,7 @@
       ng-click="$ctrl.startAction($ctrl.selectedItems)"
       ng-disabled="$ctrl.selectedItemCount === 0 || $ctrl.noStoppedItemsSelected"
     >
-      <i class="fa fa-play space-right" aria-hidden="true"></i>Start
+      <i class="fa fa-play space-right" aria-hidden="true"></i>启动
     </button>
     <button
       authorization="DockerContainerStop"
@@ -19,7 +19,7 @@
       ng-click="$ctrl.stopAction($ctrl.selectedItems)"
       ng-disabled="$ctrl.selectedItemCount === 0 || $ctrl.noRunningItemsSelected"
     >
-      <i class="fa fa-stop space-right" aria-hidden="true"></i>Stop
+      <i class="fa fa-stop space-right" aria-hidden="true"></i>停止
     </button>
     <button
       authorization="DockerContainerKill"
@@ -28,7 +28,7 @@
       ng-click="$ctrl.killAction($ctrl.selectedItems)"
       ng-disabled="$ctrl.selectedItemCount === 0"
     >
-      <i class="fa fa-bomb space-right" aria-hidden="true"></i>Kill
+      <i class="fa fa-bomb space-right" aria-hidden="true"></i>终止
     </button>
     <button
       authorization="DockerContainerRestart"
@@ -37,7 +37,7 @@
       ng-click="$ctrl.restartAction($ctrl.selectedItems)"
       ng-disabled="$ctrl.selectedItemCount === 0"
     >
-      <i class="fa fa-sync space-right" aria-hidden="true"></i>Restart
+      <i class="fa fa-sync space-right" aria-hidden="true"></i>重启
     </button>
     <button
       authorization="DockerContainerPause"
@@ -46,7 +46,7 @@
       ng-click="$ctrl.pauseAction($ctrl.selectedItems)"
       ng-disabled="$ctrl.selectedItemCount === 0 || $ctrl.noRunningItemsSelected"
     >
-      <i class="fa fa-pause space-right" aria-hidden="true"></i>Pause
+      <i class="fa fa-pause space-right" aria-hidden="true"></i>暂停
     </button>
     <button
       authorization="DockerContainerUnpause"
@@ -55,7 +55,7 @@
       ng-click="$ctrl.resumeAction($ctrl.selectedItems)"
       ng-disabled="$ctrl.selectedItemCount === 0 || $ctrl.noPausedItemsSelected"
     >
-      <i class="fa fa-play space-right" aria-hidden="true"></i>Resume
+      <i class="fa fa-play space-right" aria-hidden="true"></i>恢复
     </button>
     <button
       authorization="DockerContainerDelete"
@@ -64,10 +64,10 @@
       ng-disabled="$ctrl.selectedItemCount === 0"
       ng-click="$ctrl.removeAction($ctrl.selectedItems)"
     >
-      <i class="fa fa-trash-alt space-right" aria-hidden="true"></i>Remove
+      <i class="fa fa-trash-alt space-right" aria-hidden="true"></i>删除
     </button>
   </div>
   <button authorization="DockerContainerCreate" type="button" class="btn btn-sm btn-primary" ui-sref="docker.containers.new" ng-if="$ctrl.showAddAction">
-    <i class="fa fa-plus space-right" aria-hidden="true"></i>Add container
+    <i class="fa fa-plus space-right" aria-hidden="true"></i>添加容器
   </button>
 </div>

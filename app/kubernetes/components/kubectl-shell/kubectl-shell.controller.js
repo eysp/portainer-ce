@@ -53,7 +53,7 @@ export default class KubectlShellController {
       term.focus();
       term.fit();
       term.writeln('#Run kubectl commands inside here');
-      term.writeln('#e.g. kubectl get all');
+      term.writeln('#例如 kubectl get all');
       term.writeln('');
     };
 
@@ -68,7 +68,7 @@ export default class KubectlShellController {
     socket.onerror = (err) => {
       this.disconnect();
       if (err.target.readyState !== WebSocket.CLOSED) {
-        this.Notifications.error('Failure', err, 'Websocket connection error');
+        this.Notifications.error('失败', err, 'Websocket connection error');
       }
     };
 

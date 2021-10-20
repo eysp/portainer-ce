@@ -212,10 +212,10 @@ class KubernetesConfigureController {
         this.assignFormValuesToEndpoint(modifiedEndpoint, storageClasses, ingressClasses);
         this.EndpointProvider.setEndpoints(endpoints);
       }
-      this.Notifications.success('Configuration successfully applied');
+      this.Notifications.success('配置成功应用');
       this.$state.go('portainer.home');
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to apply configuration');
+      this.Notifications.error('失败', err, '无法应用配置');
     } finally {
       this.state.actionInProgress = false;
     }
@@ -225,7 +225,7 @@ class KubernetesConfigureController {
     const toDel = _.filter(this.formValues.IngressClasses, { NeedsDeletion: true });
     if (toDel.length) {
       this.ModalService.confirmUpdate(
-        `Removing ingress controllers may cause applications to be unaccessible. All ingress configurations from affected applications will be removed.<br/><br/>Do you wish to continue?`,
+        `删除入口控制器可能会导致应用程序无法访问。 来自受影响应用的所有入口配置都将被删除。<br/><br/>是否要继续？`,
         (confirmed) => {
           if (confirmed) {
             return this.$async(this.configureAsync);
@@ -295,7 +295,7 @@ class KubernetesConfigureController {
 
       this.oldFormValues = Object.assign({}, this.formValues);
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve environment configuration');
+      this.Notifications.error('失败', err, '无法检索环境配置');
     } finally {
       this.state.viewReady = true;
     }

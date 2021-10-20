@@ -43,7 +43,7 @@ export class CreateEdgeJobViewController {
       this.state.isEditorDirty = false;
       this.$state.go('edge.jobs', {}, { reload: true });
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to create Edge job');
+      this.Notifications.error('失败', err, 'Unable to create Edge job');
     }
 
     this.state.actionInProgress = false;
@@ -68,7 +68,7 @@ export class CreateEdgeJobViewController {
       this.groups = groups;
       this.tags = tags;
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve page data');
+      this.Notifications.error('失败', err, 'Unable to retrieve page data');
     }
 
     this.$window.onbeforeunload = () => {

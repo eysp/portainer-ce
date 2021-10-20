@@ -1,8 +1,8 @@
 <rd-header>
-  <rd-header-title title-text="Task details"></rd-header-title>
+  <rd-header-title title-text="任务详情"></rd-header-title>
   <rd-header-content ng-if="task && service">
-    <a ui-sref="docker.services">Services</a> &gt; <a ui-sref="docker.services.service({id: service.Id })">{{ service.Name }}</a> &gt;
-    <a ui-sref="docker.tasks.task({id: task.Id })">{{ task.Id }}</a> &gt; Logs
+    <a ui-sref="docker.services">服务</a> &gt; <a ui-sref="docker.services.service({id: service.Id })">{{ service.Name }}</a> &gt;
+    <a ui-sref="docker.tasks.task({id: task.Id })">{{ task.Id }}</a> &gt; 日志
   </rd-header-content>
 </rd-header>
 

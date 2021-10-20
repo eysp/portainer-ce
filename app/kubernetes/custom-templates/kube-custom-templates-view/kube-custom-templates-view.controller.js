@@ -64,7 +64,7 @@ export default class KubeCustomTemplatesViewController {
         await this.CustomTemplateService.remove(templateId);
         _.remove(this.templates, { Id: templateId });
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Failed to delete template');
+        this.Notifications.error('失败', err, 'Failed to delete template');
       }
     });
   }

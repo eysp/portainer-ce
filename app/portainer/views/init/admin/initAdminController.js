@@ -60,7 +60,7 @@ angular.module('portainer.app').controller('InitAdminController', [
           }
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to create administrator user');
+          Notifications.error('失败', err, '无法创建管理员用户');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -75,7 +75,7 @@ angular.module('portainer.app').controller('InitAdminController', [
           }
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to verify administrator account existence');
+          Notifications.error('失败', err, '无法验证管理员帐户是否存在');
         });
     }
 
@@ -94,7 +94,7 @@ angular.module('portainer.app').controller('InitAdminController', [
       try {
         await restoreAsyncFn();
       } catch (err) {
-        Notifications.error('Failure', err, 'Unable to restore the backup');
+        Notifications.error('失败', err, '无法恢复备份');
         $scope.state.backupInProgress = false;
 
         return;
@@ -102,10 +102,10 @@ angular.module('portainer.app').controller('InitAdminController', [
 
       try {
         await waitPortainerRestart();
-        Notifications.success('The backup has successfully been restored');
+        Notifications.success('备份已成功恢复');
         $state.go('portainer.auth');
       } catch (err) {
-        Notifications.error('Failure', err, 'Unable to check for status');
+        Notifications.error('失败', err, '无法检查状态');
         await wait(2);
         location.reload();
       }
@@ -125,7 +125,7 @@ angular.module('portainer.app').controller('InitAdminController', [
           // pass
         }
       }
-      throw new Error('Timeout to wait for Portainer restarting');
+      throw new Error('等待Portainer重新启动超时');
     }
   },
 ]);

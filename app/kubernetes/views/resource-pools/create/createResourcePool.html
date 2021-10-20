@@ -1,5 +1,5 @@
 <kubernetes-view-header title="Create a namespace" state="kubernetes.resourcePools.new" view-ready="$ctrl.state.viewReady">
-  <a ui-sref="kubernetes.resourcePools">Namespaces</a> &gt; Create a namespace
+  <a ui-sref="kubernetes.resourcePools">Namespaces</a> &gt; 创建 namespace
 </kubernetes-view-header>
 
 <kubernetes-view-loading view-ready="$ctrl.state.viewReady"></kubernetes-view-loading>
@@ -12,7 +12,7 @@
           <form class="form-horizontal" autocomplete="off" name="resourcePoolCreationForm">
             <!-- #region NAME INPUT -->
             <div class="form-group">
-              <label for="pool_name" class="col-sm-1 control-label text-left">Name</label>
+              <label for="pool_name" class="col-sm-1 control-label text-left">名称</label>
               <div class="col-sm-11">
                 <input
                   type="text"
@@ -31,19 +31,18 @@
             <div class="form-group" ng-show="resourcePoolCreationForm.pool_name.$invalid || $ctrl.state.isAlreadyExist">
               <div class="col-sm-12 small text-warning">
                 <div ng-messages="resourcePoolCreationForm.pool_name.$error">
-                  <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This field is required.</p>
+                  <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此字段是必需的。</p>
                   <p ng-message="pattern"
-                    ><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This field must consist of lower case alphanumeric characters, '-' or '.', and must start and end
-                    with an alphanumeric character.</p
+                    ><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此字段必须由小写字母数字字符、“-”或“.”组成，并且必须以字母数字字符开头和结尾。</p
                   >
                 </div>
-                <p ng-if="$ctrl.state.isAlreadyExist"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> A namespace with the same name already exists.</p>
+                <p ng-if="$ctrl.state.isAlreadyExist"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 已存在同名的 namespace.</p>
               </div>
             </div>
             <!-- #endregion -->
 
             <div class="col-sm-12 form-section-title">
-              Quota
+              引用
             </div>
             <!-- #region QUOTA -->
             <!-- quotas-switch -->
@@ -51,13 +50,12 @@
               <div class="col-sm-12 small text-muted">
                 <p>
                   <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                  A namespace segments the underlying physical Kubernetes cluster into smaller virtual clusters. You should assign a capped limit of resources to this namespace or
-                  disable for the safe operation of your platform.
+                  namespace将底层物理 Kubernetes 集群划分为更小的虚拟集群。 您应该为此namespace分配资源上限或禁用以确保平台的安全运行。
                 </p>
               </div>
               <div class="col-sm-12">
                 <label class="control-label text-left">
-                  Resource assignment
+                  资源分配
                 </label>
                 <label class="switch" style="margin-left: 20px;">
                   <input type="checkbox" ng-model="$ctrl.formValues.HasQuota" /><i data-cy="k8sNamespaceCreate-resourceAssignmentToggle"></i>
@@ -66,19 +64,19 @@
             </div>
             <div class="form-group" ng-if="$ctrl.formValues.HasQuota && !$ctrl.isQuotaValid()">
               <span class="col-sm-12 text-warning small">
-                <p> <i class="fa fa-exclamation-triangle" aria-hidden="true" style="margin-right: 2px;"></i> At least a single limit must be set for the quota to be valid. </p>
+                <p> <i class="fa fa-exclamation-triangle" aria-hidden="true" style="margin-right: 2px;"></i> 必须至少设置一个限制才能使配额有效。 </p>
               </span>
             </div>
             <!-- !quotas-switch -->
             <div ng-if="$ctrl.formValues.HasQuota">
               <div class="col-sm-12 form-section-title">
-                Resource limits
+                资源限制
               </div>
               <div>
                 <!-- memory-limit-input -->
                 <div class="form-group">
                   <label for="memory-limit" class="col-sm-3 col-lg-2 control-label text-left" style="margin-top: 20px;">
-                    Memory
+                    内存
                   </label>
                   <div class="col-sm-3">
                     <slider
@@ -106,7 +104,7 @@
                   </div>
                   <div class="col-sm-4">
                     <p class="small text-muted" style="margin-top: 7px;">
-                      Maximum memory usage (<b>MB</b>)
+                      最大内存使用量 (<b>MB</b>)
                     </p>
                   </div>
                 </div>
@@ -114,7 +112,7 @@
                   <div class="col-sm-12 small text-warning">
                     <div ng-messages="resourcePoolCreationForm.pool_name.$error">
                       <p
-                        ><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Value must be between {{ $ctrl.defaults.MemoryLimit }} and {{ $ctrl.state.sliderMaxMemory }}
+                        ><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 值必须介于 {{ $ctrl.defaults.MemoryLimit }} 和 {{ $ctrl.state.sliderMaxMemory }}
                       </p>
                     </div>
                   </div>
@@ -139,7 +137,7 @@
                   </div>
                   <div class="col-sm-4" style="margin-top: 20px;">
                     <p class="small text-muted">
-                      Maximum CPU usage
+                      最大 CPU 使用率
                     </p>
                   </div>
                 </div>
@@ -150,14 +148,13 @@
 
             <!-- #region LOAD-BALANCERS -->
             <div class="col-sm-12 form-section-title">
-              Load balancers
+              负载均衡器
             </div>
 
             <div class="form-group">
               <span class="col-sm-12 text-muted small">
                 <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                You can set a quota on the amount of external load balancers that can be created inside this namespace. Set this quota to 0 to effectively disable the use of load
-                balancers in this namespace.
+                您可以为可以在此namespace内创建的外部负载均衡器的数量设置配额。 将此配额设置为 0 以有效禁用此namespace中的负载平衡器。
               </span>
             </div>
             <div class="form-group">
@@ -181,13 +178,12 @@
             <div class="form-group">
               <span class="col-sm-12 text-muted small">
                 <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                Quotas can be set on each storage option to prevent users from exceeding a specific threshold when deploying applications. You can set a quota to 0 to effectively
-                prevent the usage of a specific storage option inside this namespace.
+                可以在每个存储选项上设置配额，以防止用户在部署应用程序时超过特定阈值。 您可以将配额设置为 0 以有效防止使用此namespace内的特定存储选项。
               </span>
             </div>
             <div class="col-sm-12 form-section-title">
               <i class="fa fa-route" aria-hidden="true" style="margin-right: 2px;"></i>
-              standard
+              标准
             </div>
             <div class="form-group">
               <div class="col-sm-12">
@@ -204,14 +200,13 @@
 
             <div ng-if="$ctrl.state.canUseIngress">
               <div class="col-sm-12 form-section-title">
-                Ingresses
+                入口
               </div>
               <!-- #region INGRESSES -->
               <div class="form-group" ng-if="$ctrl.formValues.IngressClasses.length === 0">
                 <div class="col-sm-12 small text-muted">
-                  The ingress feature must be enabled in the
-                  <a ui-sref="portainer.endpoints.endpoint.kubernetesConfig({id: $ctrl.endpoint.Id})">environment configuration view</a> to be able to register ingresses inside
-                  this namespace.
+                  必须在
+                  <a ui-sref="portainer.endpoints.endpoint.kubernetesConfig({id: $ctrl.endpoint.Id})">环境配置视图</a> 中启用入口功能才能在此namespace内注册入口。
                 </div>
               </div>
 
@@ -219,7 +214,7 @@
                 <div class="col-sm-12 small text-muted">
                   <p>
                     <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                    Enable and configure ingresses available to users when deploying applications.
+                    在部署应用程序时启用和配置用户可用的入口。
                   </p>
                 </div>
               </div>
@@ -233,7 +228,7 @@
 
                 <div class="col-sm-12" style="margin-top: 10px;">
                   <label class="control-label text-left">
-                    Allow users to use this ingress
+                    允许用户使用此入口
                   </label>
                   <label class="switch" style="margin-left: 20px;">
                     <input type="checkbox" ng-model="ic.Selected" /><i data-cy="namespaceCreate-ingressToggle{{ ic.IngressClass.Name }}"></i>
@@ -245,10 +240,10 @@
                 <div class="form-group">
                   <div class="col-sm-12">
                     <label class="control-label text-left">
-                      Hostnames
+                      主机名
                       <portainer-tooltip
                         position="bottom"
-                        message="Hostnames associated to the ingress inside this namespace. Users will be able to expose and access their applications over the ingress via one of these hostname."
+                        message="与此namespace内的入口关联的主机名。 用户将能够通过这些主机名之一通过入口公开和访问他们的应用程序。"
                       >
                       </portainer-tooltip>
                     </label>
@@ -258,14 +253,14 @@
                       ng-click="$ctrl.addHostname(ic)"
                       data-cy="namespaceCreate-addHostButton{{ ic.IngressClass.Name }}"
                     >
-                      <i class="fa fa-plus-circle" aria-hidden="true"></i> add hostname
+                      <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加主机名
                     </span>
                   </div>
                   <div class="col-sm-12" style="margin-top: 10px;">
                     <div ng-repeat="item in ic.Hosts track by $index" style="margin-top: 2px;">
                       <div class="form-inline">
                         <div class="col-sm-10 input-group input-group-sm">
-                          <span class="input-group-addon">Hostname</span>
+                          <span class="input-group-addon">主机名</span>
                           <input
                             type="text"
                             class="form-control"
@@ -293,14 +288,14 @@
                         "
                       >
                         <ng-messages for="resourcePoolCreationForm['hostname_' + ic.IngressClass.Name + '_' + $index].$error">
-                          <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Hostname is required.</p>
+                          <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 主机名是必需的。</p>
                           <p ng-message="pattern">
                             <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-                            This field must consist of lower case alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character (e.g. 'example.com').
+                            此字段必须由小写字母数字字符、'-'或'.'组成，并且必须以字母数字字符开头和结尾 (例如 'example.com').
                           </p>
                         </ng-messages>
                         <p ng-if="$ctrl.state.duplicates.ingressHosts.refs[ic.IngressClass.Name][$index] !== undefined">
-                          <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This hostname is already used.
+                          <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此主机名已被使用。
                         </p>
                       </div>
                     </div>
@@ -309,10 +304,10 @@
                 <div class="form-group" ng-if="ic.IngressClass.Type === $ctrl.IngressClassTypes.NGINX">
                   <div class="col-sm-12">
                     <label class="control-label text-left">
-                      Redirect published routes to / in application
+                      将发布的路由重定向到/在应用程序中
                       <portainer-tooltip
                         position="bottom"
-                        message="Enables the redirection of any route published via ingress to the root path of the application, e.g. /path remaps to /"
+                        message="启用将通过入口发布的任何路由重定向到应用程序的根路径, 例如 /path remaps to /"
                       >
                       </portainer-tooltip>
                     </label>
@@ -326,10 +321,10 @@
                 <div class="col-sm-12">
                   <p>
                     <a class="small interactive" ng-if="!ic.AdvancedConfig" ng-click="ic.AdvancedConfig = true" data-cy="namespaceCreate-advancedConfig{{ ic.IngressClass.Name }}">
-                      <i class="fa fa-plus space-right" aria-hidden="true"></i> Advanced configuration
+                      <i class="fa fa-plus space-right" aria-hidden="true"></i> 高级配置
                     </a>
                     <a class="small interactive" ng-if="ic.AdvancedConfig" ng-click="ic.AdvancedConfig = false" data-cy="namespaceCreate-hideConfig{{ ic.IngressClass.Name }}">
-                      <i class="fa fa-minus space-right" aria-hidden="true"></i> Hide configuration
+                      <i class="fa fa-minus space-right" aria-hidden="true"></i> 隐藏配置
                     </a>
                   </p>
                 </div>
@@ -337,19 +332,19 @@
                 <div class="col-sm-12 small text-muted" ng-if="ic.AdvancedConfig" style="margin-top: 5px;">
                   <p>
                     <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                    You can specify a list of annotations that will be associated to the ingress.
+                    您可以指定将与入口关联的注释列表。
                   </p>
                 </div>
 
                 <div class="col-sm-12" ng-if="ic.AdvancedConfig">
-                  <label class="control-label text-left">Annotations</label>
+                  <label class="control-label text-left">注释</label>
                   <span
                     class="label label-default interactive"
                     style="margin-left: 10px;"
                     ng-click="$ctrl.addAnnotation(ic)"
                     data-cy="namespaceCreate-addAnnotation{{ ic.IngressClass.Name }}"
                   >
-                    <i class="fa fa-plus-circle" aria-hidden="true"></i> add annotation
+                    <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加注释
                   </span>
                 </div>
 
@@ -395,27 +390,27 @@
 
             <!-- #region REGISTRIES -->
             <div class="col-sm-12 form-section-title">
-              Registries
+              注册表
             </div>
             <div class="form-group">
               <div class="col-sm-12 small text-muted">
                 <p>
                   <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                  Define which registry can be used by users who have access to this namespace.
+                  定义有权访问此namespace的用户可以使用哪个注册表。
                 </p>
               </div>
             </div>
 
             <div class="form-group">
               <label class="col-sm-3 col-lg-2 control-label text-left" style="padding-top: 0;">
-                Select registries
+                选择注册表
               </label>
               <div class="col-sm-9 col-lg-4">
                 <span class="small text-muted" ng-if="!$ctrl.registries.length && $ctrl.state.isAdmin">
-                  No registries available. Head over <a ui-sref="portainer.registries">registry view</a> to define container registry.
+                  没有可用的注册表。 在 <a ui-sref="portainer.registries">注册表视图</a> 上定义容器注册表。
                 </span>
                 <span class="small text-muted" ng-if="!$ctrl.registries.length && !$ctrl.state.isAdmin">
-                  No registries available. Contact your administrator to create a container registry.
+                  没有可用的注册表。 请联系您的管理员以创建容器注册表。
                 </span>
                 <span
                   isteven-multi-select
@@ -427,7 +422,7 @@
                   tick-property="Checked"
                   helper-elements="filter"
                   search-property="Name"
-                  translation="{nothingSelected: 'Select one or more registry', search: 'Search...'}"
+                  translation="{nothingSelected: '选择一个或多个注册表', search: '搜索...'}"
                   data-cy="namespaceCreate-registrySelect"
                 >
                 </span>
@@ -440,7 +435,7 @@
             <!-- !summary -->
 
             <div class="col-sm-12 form-section-title">
-              Actions
+              操作
             </div>
             <!-- #region ACTIONS -->
             <div class="form-group">
@@ -452,8 +447,8 @@
                   ng-click="$ctrl.createResourcePool()"
                   button-spinner="$ctrl.state.actionInProgress"
                 >
-                  <span ng-hide="$ctrl.state.actionInProgress" data-cy="k8sNamespace-createNamespaceButton">Create namespace</span>
-                  <span ng-show="$ctrl.state.actionInProgress">Creation in progress...</span>
+                  <span ng-hide="$ctrl.state.actionInProgress" data-cy="k8sNamespace-createNamespaceButton">创建 namespace</span>
+                  <span ng-show="$ctrl.state.actionInProgress">正在创建...</span>
                 </button>
               </div>
             </div>

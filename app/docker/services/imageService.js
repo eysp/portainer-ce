@@ -142,7 +142,7 @@ angular.module('portainer.docker').factory('ImageService', [
           }
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to pull image', err: err });
+          deferred.reject({ msg: '无法拉取镜像', err: err });
         });
 
       return deferred.promise;
@@ -195,7 +195,7 @@ angular.module('portainer.docker').factory('ImageService', [
           }
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to remove image', err: err });
+          deferred.reject({ msg: '无法删除镜像', err: err });
         });
       return deferred.promise;
     };

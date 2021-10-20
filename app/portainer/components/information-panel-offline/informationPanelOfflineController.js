@@ -18,7 +18,7 @@ angular.module('portainer.app').controller('InformationPanelOfflineController', 
           $state.reload();
         })
         .catch(function onError(err) {
-          Notifications.error('Failure', err, 'An error occured during environment snapshot');
+          Notifications.error('失败', err, 'An error occured during environment snapshot');
         });
     }
 
@@ -31,7 +31,7 @@ angular.module('portainer.app').controller('InformationPanelOfflineController', 
           ctrl.snapshotTime = data.Snapshots[0].Time;
         })
         .catch(function onError(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve environment information');
+          Notifications.error('失败', err, 'Unable to retrieve environment information');
         });
     }
   },

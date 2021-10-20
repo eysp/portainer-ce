@@ -40,7 +40,7 @@ export class VolumeBrowserController {
       this.Notifications.success('File successfully renamed', newFilePath);
       this.files = await this.VolumeBrowserService.ls(this.volumeId, this.state.path);
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to rename file');
+      this.Notifications.error('失败', err, 'Unable to rename file');
     }
   }
 
@@ -66,7 +66,7 @@ export class VolumeBrowserController {
       const downloadData = new Blob([data.file]);
       this.FileSaver.saveAs(downloadData, file);
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to download file');
+      this.Notifications.error('失败', err, 'Unable to download file');
     }
   }
 
@@ -89,7 +89,7 @@ export class VolumeBrowserController {
       this.Notifications.success('File successfully deleted', file);
       this.files = await this.VolumeBrowserService.ls(this.volumeId, this.state.path);
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to delete file');
+      this.Notifications.error('失败', err, 'Unable to delete file');
     }
   }
 
@@ -102,7 +102,7 @@ export class VolumeBrowserController {
       this.state.path = path;
       this.files = files;
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to browse volume');
+      this.Notifications.error('失败', err, 'Unable to browse volume');
     }
   }
 
@@ -114,7 +114,7 @@ export class VolumeBrowserController {
       await this.VolumeBrowserService.upload(this.state.path, file, this.volumeId);
       this.onFileUploaded();
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to upload file');
+      this.Notifications.error('失败', err, 'Unable to upload file');
     }
   }
 
@@ -147,7 +147,7 @@ export class VolumeBrowserController {
     try {
       this.files = await this.VolumeBrowserService.ls(this.volumeId, this.state.path);
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to browse volume');
+      this.Notifications.error('失败', err, 'Unable to browse volume');
     }
   }
 }

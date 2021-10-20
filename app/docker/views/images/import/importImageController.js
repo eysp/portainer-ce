@@ -22,10 +22,10 @@ angular.module('portainer.docker').controller('ImportImageController', [
       var file = $scope.formValues.UploadFile;
       ImageService.uploadImage(file)
         .then(function success() {
-          Notifications.success('Images successfully uploaded');
+          Notifications.success('镜像上传成功');
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to upload image');
+          Notifications.error('失败', err, '无法上传镜像');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;

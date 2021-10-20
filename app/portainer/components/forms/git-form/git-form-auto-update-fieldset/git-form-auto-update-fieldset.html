@@ -6,7 +6,7 @@
   </div>
   <div class="small text-warning" style="margin: 5px 0 10px 0;" ng-if="$ctrl.model.RepositoryAutomaticUpdates">
     <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
-    <span class="text-muted">Any changes to this stack made locally in Portainer will be overriden by the definition in git and may cause service interruption.</span>
+    <span class="text-muted">在 Portainer 本地对此堆栈进行的任何更改都将被 git 中的定义覆盖，并可能导致服务中断。</span>
   </div>
   <div class="form-group" ng-if="$ctrl.model.RepositoryAutomaticUpdates">
     <label for="repository_mechanism" class="col-sm-1 control-label text-left">
@@ -33,7 +33,7 @@
     <div class="col-sm-11">
       <span class="text-muted"> {{ $ctrl.model.RepositoryWebhookURL | truncatelr }} </span>
       <button type="button" class="btn btn-sm btn-primary btn-sm space-left" ng-if="$ctrl.model.RepositoryWebhookURL" ng-click="$ctrl.copyWebhook()">
-        <span><i class="fa fa-copy space-right" aria-hidden="true"></i>Copy link</span>
+        <span><i class="fa fa-copy space-right" aria-hidden="true"></i>复制链接</span>
       </button>
       <span>
         <i id="copyNotification" class="fa fa-check green-icon" aria-hidden="true" style="margin-left: 7px; display: none;"></i>
@@ -42,7 +42,7 @@
   </div>
   <div class="form-group" ng-if="$ctrl.model.RepositoryAutomaticUpdates && $ctrl.model.RepositoryMechanism === 'Interval'">
     <label for="repository_fetch_interval" class="col-sm-1 control-label text-left">
-      Fetch interval
+      获取间隔
     </label>
     <div class="col-sm-11">
       <input
@@ -60,9 +60,9 @@
   <div class="form-group col-md-12" ng-show="autoUpdateForm.repository_fetch_interval.$touched && autoUpdateForm.repository_fetch_interval.$invalid">
     <div class="small text-warning">
       <div ng-messages="autoUpdateForm.repository_fetch_interval.$error">
-        <p ng-message="required"> <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This field is required.</p>
-        <p ng-message="invalidIntervalFormat"> <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Please enter a valid time interval.</p>
-        <p ng-message="minimumInterval"> <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Minimum interval is 1m</p>
+        <p ng-message="required"> <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此字段是必需的。</p>
+        <p ng-message="invalidIntervalFormat"> <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 请输入有效的时间间隔。</p>
+        <p ng-message="minimumInterval"> <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 最小间隔为 1m</p>
       </div>
     </div>
   </div>

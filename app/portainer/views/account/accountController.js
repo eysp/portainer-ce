@@ -18,11 +18,11 @@ angular.module('portainer.app').controller('AccountController', [
     $scope.updatePassword = function () {
       UserService.updateUserPassword($scope.userID, $scope.formValues.currentPassword, $scope.formValues.newPassword)
         .then(function success() {
-          Notifications.success('Success', 'Password successfully updated');
+          Notifications.success('成功', '密码已成功更改');
           $state.reload();
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, err.msg);
+          Notifications.error('失败', err, err.msg);
         });
     };
 
@@ -36,11 +36,11 @@ angular.module('portainer.app').controller('AccountController', [
     $scope.updateTheme = function () {
       UserService.updateUserTheme($scope.userID, $scope.formValues.userTheme)
         .then(function success() {
-          Notifications.success('Success', 'User theme successfully updated');
+          Notifications.success('成功', '用户主题已成功更新');
           $state.reload();
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, err.msg);
+          Notifications.error('失败', err, err.msg);
         });
     };
 
@@ -55,7 +55,7 @@ angular.module('portainer.app').controller('AccountController', [
           $scope.AuthenticationMethod = data.AuthenticationMethod;
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve application settings');
+          Notifications.error('失败', err, '无法检索应用程序设置');
         });
     }
 

@@ -1,6 +1,6 @@
 <div class="form-group">
   <label for="ldap_password" class="col-sm-3 control-label text-left">
-    Connectivity check
+    连通性检查
     <i class="fa fa-check green-icon" style="margin-left: 5px;" ng-if="$ctrl.state.successfulConnectivityCheck"></i>
     <i class="fa fa-times red-icon" style="margin-left: 5px;" ng-if="$ctrl.state.failedConnectivityCheck"></i>
   </label>
@@ -14,8 +14,8 @@
       limited-feature-dir="{{::$ctrl.limitedFeatureId}}"
       limited-feature-tabindex="-1"
     >
-      <span ng-hide="$ctrl.state.connectivityCheckInProgress">Test connectivity</span>
-      <span ng-show="$ctrl.state.connectivityCheckInProgress">Testing connectivity...</span>
+      <span ng-hide="$ctrl.state.connectivityCheckInProgress">测试连通性</span>
+      <span ng-show="$ctrl.state.connectivityCheckInProgress">测试连通性中...</span>
     </button>
   </div>
 </div>

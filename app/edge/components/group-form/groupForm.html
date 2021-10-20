@@ -12,14 +12,14 @@
       <div ng-messages="EdgeGroupForm.group_name.$error">
         <p ng-message="required">
           <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-          This field is required.
+          此字段是必需的。
         </p>
       </div>
     </div>
   </div>
 
   <div class="col-sm-12 form-section-title">
-    Group type
+    群组类型
   </div>
   <div class="form-group col-sm-12">
     <div class="boxselector_wrapper">
@@ -30,7 +30,7 @@
             <i class="fa fa-list-ol" aria-hidden="true" style="margin-right: 2px;"></i>
             Static
           </div>
-          <p>Manually select Edge environments</p>
+          <p>手动选择Edge环境</p>
         </label>
       </div>
       <div class="boxselector">
@@ -40,7 +40,7 @@
             <i class="fa fa-tags" aria-hidden="true" style="margin-right: 2px;"></i>
             Dynamic
           </div>
-          <p>Automatically associate environments via tags</p>
+          <p>通过标签自动关联环境</p>
         </label>
       </div>
     </div>
@@ -51,7 +51,7 @@
     <div ng-if="!$ctrl.noEndpoints">
       <!-- environments -->
       <div class="col-sm-12 form-section-title">
-        Associated environments
+        相关环境
       </div>
       <div class="form-group">
         <associated-endpoints-selector
@@ -66,7 +66,7 @@
     </div>
     <div class="form-group" ng-if="$ctrl.noEndpoints">
       <div class="col-sm-12 small text-muted">
-        No Edge environments are available. Head over to the <a ui-sref="portainer.endpoints">Environments view</a> to add environments.
+        没有可用的 Edge 环境。 前往 <a ui-sref="portainer.endpoints">环境视图</a>添加环境。
       </div>
     </div>
   </div>
@@ -75,7 +75,7 @@
   <!-- DynamicGroup -->
   <div ng-if="$ctrl.model.Dynamic">
     <div class="col-sm-12 form-section-title">
-      Tags
+      标签
     </div>
     <div ng-if="$ctrl.tags.length" class="form-group col-sm-12">
       <div class="boxselector_wrapper">
@@ -86,7 +86,7 @@
               <i class="fa fa-tag" aria-hidden="true" style="margin-right: 2px;"></i>
               Partial match
             </div>
-            <p>Associate any environment matching at least one of the selected tags</p>
+            <p>关联与至少一个选定标记匹配的任何环境</p>
           </label>
         </div>
         <div class="boxselector">
@@ -96,7 +96,7 @@
               <i class="fa fa-tag" aria-hidden="true" style="margin-right: 2px;"></i>
               Full match
             </div>
-            <p>Associate any environment matching all of the selected tags</p>
+            <p>关联与所有选定标记匹配的任何环境</p>
           </label>
         </div>
       </div>
@@ -118,7 +118,7 @@
         retrieve-page="$ctrl.getDynamicEndpoints"
         dataset="$ctrl.endpoints.value"
         pagination-state="$ctrl.endpoints.state"
-        empty-dataset-message="No associated endpoint"
+        empty-dataset-message="没有关联的端点"
         tags="$ctrl.tags"
         show-tags="true"
         groups="$ctrl.groups"
@@ -131,7 +131,7 @@
 
   <!-- actions -->
   <div class="col-sm-12 form-section-title">
-    Actions
+    操作
   </div>
   <div class="form-group">
     <div class="col-sm-12">
@@ -143,7 +143,7 @@
         data-cy="edgeGroupCreate-addGroupButton"
       >
         <span ng-hide="$ctrl.actionInProgress">{{ $ctrl.formActionLabel }}</span>
-        <span ng-show="$ctrl.actionInProgress">In progress...</span>
+        <span ng-show="$ctrl.actionInProgress">进行中...</span>
       </button>
     </div>
   </div>

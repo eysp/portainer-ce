@@ -7,7 +7,7 @@
           <thead>
             <tr>
               <th>Vendor</th>
-              <th>Size</th>
+              <th>大小</th>
             </tr>
           </thead>
           <tbody>
@@ -16,11 +16,11 @@
               <td>{{ disk.Size | humansize }}</td>
             </tr>
             <tr ng-if="!$ctrl.disks">
-              <td colspan="2" class="text-center text-muted">Loading...</td>
+              <td colspan="2" class="text-center text-muted">加载中...</td>
             </tr>
             <tr ng-if="$ctrl.disks.length === 0">
               <td colspan="2" class="text-center text-muted">
-                No disks available.
+                没有可用的磁盘。
               </td>
             </tr>
           </tbody>

@@ -15,7 +15,7 @@ class EndpointItemController {
 
   joinTags() {
     if (!this.tags) {
-      return 'Loading tags...';
+      return '加载标签...';
     }
 
     if (!this.model.TagIds || !this.model.TagIds.length) {

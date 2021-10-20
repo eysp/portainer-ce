@@ -5,7 +5,7 @@
         <div class="toolBarTitle"> <i class="fa" ng-class="$ctrl.titleIcon" aria-hidden="true" style="margin-right: 2px;"></i> {{ $ctrl.titleText }} </div>
       </div>
       <div class="actionBar">
-        <button type="button" class="btn btn-sm btn-primary" ui-state="$ctrl.createPath"> <i class="fa fa-plus space-right" aria-hidden="true"></i>Add Custom Template </button>
+        <button type="button" class="btn btn-sm btn-primary" ui-state="$ctrl.createPath"> <i class="fa fa-plus space-right" aria-hidden="true"></i>添加自定义模板 </button>
       </div>
 
       <div class="searchBar">
@@ -15,7 +15,7 @@
           class="searchInput"
           ng-model="$ctrl.state.textFilter"
           ng-change="$ctrl.onTextFilterChange()"
-          placeholder="Search..."
+          placeholder="搜索..."
           auto-focus
           ng-model-options="{ debounce: 300 }"
         />
@@ -31,17 +31,17 @@
           <template-item-actions>
             <div ng-if="$ctrl.isEditAllowed(template)" style="display: flex;">
               <a ui-state="$ctrl.editPath" ui-state-params="{id: template.Id}" ng-click="$event.stopPropagation();" class="btn btn-primary btn-xs" style="margin-right: 10px;">
-                Edit
+                编辑
               </a>
-              <button class="btn btn-danger btn-xs" ng-click="$ctrl.onDeleteClick(template.Id); $event.stopPropagation();">Delete</button>
+              <button class="btn btn-danger btn-xs" ng-click="$ctrl.onDeleteClick(template.Id); $event.stopPropagation();">删除</button>
             </div>
           </template-item-actions>
         </template-item>
         <div ng-if="!$ctrl.templates" class="text-center text-muted">
-          Loading...
+          加载中...
         </div>
         <div ng-if="($ctrl.templates | filter: $ctrl.state.textFilter).length === 0" class="text-center text-muted">
-          No templates available.
+          没有可用的模板。
         </div>
       </div>
     </rd-widget-body>

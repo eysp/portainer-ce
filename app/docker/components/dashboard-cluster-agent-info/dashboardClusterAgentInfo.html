@@ -1,16 +1,16 @@
 <rd-widget>
-  <rd-widget-header icon="fa-tachometer-alt" title-text="Cluster information"></rd-widget-header>
+  <rd-widget-header icon="fa-tachometer-alt" title-text="集群信息"></rd-widget-header>
   <rd-widget-body classes="no-padding">
     <table class="table">
       <tbody>
         <tr>
-          <td>Nodes in the cluster</td>
+          <td>集群中的节点</td>
           <td>{{ $ctrl.agentCount }}</td>
         </tr>
         <tr>
           <td colspan="2">
             <div class="btn-group" role="group" aria-label="...">
-              <a ui-sref="docker.swarm.visualizer"><i class="fa fa-object-group space-right" aria-hidden="true"></i>Go to cluster visualizer</a>
+              <a ui-sref="docker.swarm.visualizer"><i class="fa fa-object-group space-right" aria-hidden="true"></i>转到集群可视化工具</a>
             </div>
           </td>
         </tr>

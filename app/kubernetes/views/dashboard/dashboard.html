@@ -1,5 +1,5 @@
-<kubernetes-view-header title="Dashboard" state="kubernetes.dashboard" view-ready="ctrl.state.viewReady">
-  Environment summary
+<kubernetes-view-header title="仪表盘" state="kubernetes.dashboard" view-ready="ctrl.state.viewReady">
+  环境总结
 </kubernetes-view-header>
 
 <kubernetes-view-loading view-ready="ctrl.state.viewReady"></kubernetes-view-loading>
@@ -13,7 +13,7 @@
           <table class="table">
             <tbody>
               <tr>
-                <td>Environment</td>
+                <td>环境</td>
                 <td>
                   {{ ctrl.endpoint.Name }}
                 </td>
@@ -23,7 +23,7 @@
                 <td>{{ ctrl.endpoint.URL | stripprotocol }}</td>
               </tr>
               <tr>
-                <td>Tags</td>
+                <td>标签</td>
                 <td>{{ ctrl.endpointTags }}</td>
               </tr>
             </tbody>

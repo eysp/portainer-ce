@@ -1,4 +1,4 @@
-<kubernetes-view-header title="Application details" state="kubernetes.applications.application" view-ready="ctrl.state.viewReady">
+<kubernetes-view-header title="应用详情" state="kubernetes.applications.application" view-ready="ctrl.state.viewReady">
   <a ui-sref="kubernetes.resourcePools">Namespaces</a> &gt;
   <a ui-sref="kubernetes.resourcePools.resourcePool({ id: ctrl.application.ResourcePool })">{{ ctrl.application.ResourcePool }}</a> &gt;
   <a ui-sref="kubernetes.applications">Applications</a> &gt; {{ ctrl.application.Name }}
@@ -13,19 +13,19 @@
         <rd-widget-body classes="no-padding">
           <uib-tabset active="ctrl.state.activeTab" justified="true" type="pills">
             <uib-tab index="0" classes="btn-sm" select="ctrl.selectTab(0)">
-              <uib-tab-heading> <i class="fa fa-laptop-code space-right" aria-hidden="true"></i> Application </uib-tab-heading>
+              <uib-tab-heading> <i class="fa fa-laptop-code space-right" aria-hidden="true"></i> 应用 </uib-tab-heading>
               <div style="padding: 20px;">
                 <table class="table">
                   <tbody>
                     <tr>
-                      <td>Name</td>
+                      <td>名称</td>
                       <td data-cy="k8sAppDetail-appName">
                         {{ ctrl.application.Name }}
                         <span class="label label-primary image-tag label-margins" ng-if="!ctrl.isSystemNamespace() && ctrl.isExternalApplication()">external</span>
                       </td>
                     </tr>
                     <tr>
-                      <td>Stack</td>
+                      <td>堆栈</td>
                       <td data-cy="k8sAppDetail-stackName">{{ ctrl.application.StackName || '-' }}</td>
                     </tr>
                     <tr>
@@ -36,16 +36,16 @@
                       </td>
                     </tr>
                     <tr>
-                      <td>Application Type</td>
+                      <td>应用程序类型</td>
                       <td data-cy="k8sAppDetail-appType">
                         {{ ctrl.application.ApplicationType | kubernetesApplicationTypeText }}
                       </td>
                     </tr>
                     <tr>
-                      <td>Status</td>
+                      <td>状态</td>
                       <td ng-if="ctrl.application.ApplicationType !== ctrl.KubernetesApplicationTypes.POD">
-                        <span ng-if="ctrl.application.DeploymentType === ctrl.KubernetesApplicationDeploymentTypes.REPLICATED" data-cy="k8sAppDetail-deployType">Replicated</span>
-                        <span ng-if="ctrl.application.DeploymentType === ctrl.KubernetesApplicationDeploymentTypes.GLOBAL" data-cy="k8sAppDetail-appType">Global</span>
+                        <span ng-if="ctrl.application.DeploymentType === ctrl.KubernetesApplicationDeploymentTypes.REPLICATED" data-cy="k8sAppDetail-deployType">复制</span>
+                        <span ng-if="ctrl.application.DeploymentType === ctrl.KubernetesApplicationDeploymentTypes.GLOBAL" data-cy="k8sAppDetail-appType">全局</span>
                         <code data-cy="k8sAppDetail-runningPods">{{ ctrl.application.RunningPodsCount }}</code> /
                         <code data-cy="k8sAppDetail-totalPods">{{ ctrl.application.TotalPodsCount }}</code>
                       </td>
@@ -55,23 +55,23 @@
                     </tr>
                     <tr ng-if="ctrl.application.Requests.Cpu || ctrl.application.Requests.Memory">
                       <td>
-                        <div>Resource reservations</div>
-                        <div ng-if="ctrl.application.ApplicationType !== ctrl.KubernetesApplicationTypes.POD" class="text-muted small"> per instance </div>
+                        <div>资源保留</div>
+                        <div ng-if="ctrl.application.ApplicationType !== ctrl.KubernetesApplicationTypes.POD" class="text-muted small"> 每个实例 </div>
                       </td>
                       <td>
                         <div ng-if="ctrl.application.Requests.Cpu" data-cy="k8sAppDetail-cpuReservation"
                           >CPU {{ ctrl.application.Requests.Cpu | kubernetesApplicationCPUValue }}</div
                         >
-                        <div ng-if="ctrl.application.Requests.Memory" data-cy="k8sAppDetail-memoryReservation">Memory {{ ctrl.application.Requests.Memory | humansize }}</div>
+                        <div ng-if="ctrl.application.Requests.Memory" data-cy="k8sAppDetail-memoryReservation">内存 {{ ctrl.application.Requests.Memory | humansize }}</div>
                       </td>
                     </tr>
                     <tr>
-                      <td>Creation</td>
+                      <td>创建</td>
                       <td>
                         <span ng-if="ctrl.application.ApplicationOwner" style="margin-right: 5px;"> <i class="fas fa-user"></i> {{ ctrl.application.ApplicationOwner }} </span>
                         <span> <i class="fas fa-clock"></i> {{ ctrl.application.CreationDate | getisodate }}</span>
                         <span ng-if="ctrl.application.ApplicationOwner">
-                          <i class="fa fa-file-code space-left space-right" aria-hidden="true"></i> Deployed from {{ ctrl.state.appType }}</span
+                          <i class="fa fa-file-code space-left space-right" aria-hidden="true"></i> 部署自 {{ ctrl.state.appType }}</span
                         >
                       </td>
                     </tr>
@@ -80,7 +80,7 @@
                         <form class="form-horizontal" name="kubernetesApplicationNoteForm">
                           <div class="form-group">
                             <div class="col-sm-12">
-                              <i class="fa fa-edit" aria-hidden="true"></i> Note
+                              <i class="fa fa-edit" aria-hidden="true"></i> 注释
                               <button class="btn btn-xs btn-primary" ng-click="ctrl.state.expandedNote = !ctrl.state.expandedNote;" data-cy="k8sAppDetail-expandNoteButton"
                                 >{{ ctrl.state.expandedNote ? 'Collapse' : 'Expand' }}
                                 <i class="fas {{ ctrl.state.expandedNote ? 'fa-angle-up' : 'fa-angle-down' }}" aria-hidden="true"></i
@@ -95,7 +95,7 @@
                                 id="application_note"
                                 ng-model="ctrl.formValues.Note"
                                 rows="5"
-                                placeholder="Enter a note about this application..."
+                                placeholder="输入有关此应用程序的注释..."
                               ></textarea>
                             </div>
                           </div>
@@ -108,7 +108,7 @@
                                 ng-click="ctrl.updateApplication()"
                                 ng-disabled="ctrl.formValues.Note === ctrl.application.Note"
                                 data-cy="k8sAppDetail-saveNoteButton"
-                                >{{ ctrl.application.Note ? 'Update' : 'Save' }} note</button
+                                >{{ ctrl.application.Note ? '更新' : '保存' }} 注释</button
                               >
                             </div>
                           </div>
@@ -142,12 +142,12 @@
                 <i class="fas fa-compress-arrows-alt space-right" aria-hidden="true"></i> Placement
                 <div ng-if="ctrl.state.placementWarning">
                   <i class="fa fa-exclamation-circle orange-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                  warning
+                  警告
                 </div>
               </uib-tab-heading>
               <div class="small text-muted" style="padding: 20px;">
                 <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                The placement component helps you understand whether or not this application can be deployed on a specific node.
+                placement组件帮助您了解此应用程序是否可以部署在特定节点上。
               </div>
               <kubernetes-application-placements-datatable
                 title-text="Placement constraints/preferences"
@@ -163,7 +163,7 @@
 
             <uib-tab index="2" classes="btn-sm" select="ctrl.selectTab(2)">
               <uib-tab-heading>
-                <i class="fa fa-history space-right" aria-hidden="true"></i> Events
+                <i class="fa fa-history space-right" aria-hidden="true"></i> 事件
                 <div ng-if="ctrl.hasEventWarnings()">
                   <i class="fa fa-exclamation-circle orange-icon" aria-hidden="true" style="margin-right: 2px;"></i>
                   {{ ctrl.state.eventWarningCount }} warning(s)
@@ -206,7 +206,7 @@
               style="margin-left: 0;"
               data-cy="k8sAppDetail-editAppButton"
             >
-              <i class="fa fa-file-code space-right" aria-hidden="true"></i>Edit this application
+              <i class="fa fa-file-code space-right" aria-hidden="true"></i>编辑此应用程序
             </button>
             <button
               ng-if="ctrl.application.ApplicationType !== ctrl.KubernetesApplicationTypes.POD"
@@ -216,7 +216,7 @@
               ng-click="ctrl.redeployApplication()"
               data-cy="k8sAppDetail-redeployButton"
             >
-              <i class="fa fa-redo space-right" aria-hidden="true"></i>Redeploy
+              <i class="fa fa-redo space-right" aria-hidden="true"></i>重新部署
             </button>
             <button
               ng-if="!ctrl.isExternalApplication()"
@@ -227,25 +227,25 @@
               ng-disabled="ctrl.application.Revisions.length < 2 || ctrl.state.appType !== ctrl.KubernetesDeploymentTypes.APPLICATION_FORM"
               data-cy="k8sAppDetail-rollbackButton"
             >
-              <i class="fas fa-history space-right" aria-hidden="true"></i>Rollback to previous configuration
+              <i class="fas fa-history space-right" aria-hidden="true"></i>回滚到以前的配置
             </button>
             <a
               ng-if="ctrl.isStack() && ctrl.stackFileContent"
               class="btn btn-sm btn-primary space-left"
               ui-sref="kubernetes.templates.custom.new({fileContent: ctrl.stackFileContent})"
             >
-              <i class="fas fa-plus space-right" aria-hidden="true"></i>Create template from application
+              <i class="fas fa-plus space-right" aria-hidden="true"></i>从应用程序创建模板
             </a>
           </div>
 
           <!-- ACCESSING APPLICATION -->
           <div class="text-muted" style="margin-bottom: 15px;">
-            <i class="fa fa-external-link-alt" aria-hidden="true" style="margin-right: 2px;"></i> Accessing the application
+            <i class="fa fa-external-link-alt" aria-hidden="true" style="margin-right: 2px;"></i> 访问应用程序
           </div>
 
           <div class="small text-muted" ng-if="ctrl.application.PublishedPorts.length === 0" style="margin-bottom: 15px;">
             <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-            This application is not exposing any port.
+            此应用程序未公开任何端口。
           </div>
 
           <div ng-if="ctrl.application.PublishedPorts.length > 0">
@@ -253,30 +253,30 @@
             <div ng-if="ctrl.application.ServiceType === ctrl.KubernetesServiceTypes.LOAD_BALANCER">
               <div class="small text-muted">
                 <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                This application is exposed through a service of type <span class="bold">{{ ctrl.application.ServiceType }}</span
-                >. Refer to the port configuration below to access it.
+                此应用程序通过类型的服务公开 <span class="bold">{{ ctrl.application.ServiceType }}</span
+                >. 请参考下面的端口配置来访问它。
               </div>
               <div style="margin-top: 10px;" class="small text-muted">
                 <span ng-if="!ctrl.application.LoadBalancerIPAddress">
-                  <p> Load balancer status: <i class="fa fa-cog fa-spin" style="margin-left: 2px;"></i> pending </p>
+                  <p> 负载均衡器状态： <i class="fa fa-cog fa-spin" style="margin-left: 2px;"></i> 挂起 </p>
                   <p>
-                    <u>what does the "pending" status means?</u>
+                    <u>“挂起”状态意味着什么？</u>
                     <portainer-tooltip
                       position="bottom"
-                      message="A pending status means that Portainer delegated the request to the provider responsible for creating the external load balancer. If it stays in pending state for long, this means that this capability might not be supported or you might have an issue with your cluster provider. Contact your cluster administrator for more information."
+                      message="挂起状态表示Portainer将请求委托给负责创建外部负载平衡器的提供程序。如果它长时间处于挂起状态，这意味着该功能可能不受支持，或者您的群集提供程序可能存在问题。有关详细信息，请与群集管理员联系。"
                     >
                     </portainer-tooltip>
                   </p>
                 </span>
                 <span ng-if="ctrl.application.LoadBalancerIPAddress">
-                  <p> Load balancer status: <i class="fa fa-check green-icon" style="margin-left: 2px;"></i> available </p>
+                  <p> 负载均衡器状态： <i class="fa fa-check green-icon" style="margin-left: 2px;"></i> 可用的 </p>
                   <p>
-                    Load balancer IP address: {{ ctrl.application.LoadBalancerIPAddress }}
+                    负载均衡器 IP 地址： {{ ctrl.application.LoadBalancerIPAddress }}
                     <span class="btn btn-primary btn-xs" ng-click="ctrl.copyLoadBalancerIP()" style="margin-left: 5px;">
                       <i class="fa fa-copy space-right" aria-hidden="true"></i>Copy
                     </span>
                     <span id="copyNotificationLB" style="margin-left: 7px; display: none; color: #23ae89;" class="small">
-                      <i class="fa fa-check" aria-hidden="true"></i> copied
+                      <i class="fa fa-check" aria-hidden="true"></i> 复制的
                     </span>
                   </p>
                 </span>
@@ -287,8 +287,8 @@
             <div ng-if="ctrl.application.ServiceType === ctrl.KubernetesServiceTypes.NODE_PORT">
               <div class="small text-muted">
                 <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                This application is exposed through a service of type <span class="bold">{{ ctrl.application.ServiceType }}</span
-                >. It can be reached using the IP address of any node in your cluster using the port configuration below.
+                此应用程序通过类型的服务公开 <span class="bold">{{ ctrl.application.ServiceType }}</span
+                >. 可以使用集群中任何节点的 IP 地址使用下面的端口配置访问它。
               </div>
             </div>
 
@@ -296,11 +296,11 @@
             <div ng-if="ctrl.application.ServiceType === ctrl.KubernetesServiceTypes.CLUSTER_IP && !ctrl.state.useIngress">
               <div class="small text-muted">
                 <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                This application is exposed through a service of type <span class="bold">{{ ctrl.application.ServiceType }}</span
-                >. It can be reached via the application name <code>{{ ctrl.application.ServiceName }}</code> and the port configuration below.
-                <span class="btn btn-primary btn-xs" ng-click="ctrl.copyApplicationName()"><i class="fa fa-copy space-right" aria-hidden="true"></i>Copy</span>
+                此应用程序通过类型的服务公开 <span class="bold">{{ ctrl.application.ServiceType }}</span
+                >. 可以通过下面的应用程序名称 <code>{{ ctrl.application.ServiceName }}</code> 和端口配置访问它。
+                <span class="btn btn-primary btn-xs" ng-click="ctrl.copyApplicationName()"><i class="fa fa-copy space-right" aria-hidden="true"></i>复制</span>
                 <span id="copyNotificationApplicationName" style="margin-left: 7px; display: none; color: #23ae89;" class="small"
-                  ><i class="fa fa-check" aria-hidden="true"></i> copied</span
+                  ><i class="fa fa-check" aria-hidden="true"></i> 复制的</span
                 >
               </div>
             </div>
@@ -310,14 +310,14 @@
               <div class="small text-muted">
                 <p>
                   <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                  This application is exposed through a service of type <span class="bold">{{ ctrl.application.ServiceType }}</span
-                  >. It can be reached via the application name <code>{{ ctrl.application.ServiceName }}</code> and the port configuration below.
-                  <span class="btn btn-primary btn-xs" ng-click="ctrl.copyApplicationName()"><i class="fa fa-copy space-right" aria-hidden="true"></i>Copy</span>
+                  此应用程序通过类型的服务公开 <span class="bold">{{ ctrl.application.ServiceType }}</span
+                  >. 可以通过下面的应用程序名称 <code>{{ ctrl.application.ServiceName }}</code> 和端口配置访问它。
+                  <span class="btn btn-primary btn-xs" ng-click="ctrl.copyApplicationName()"><i class="fa fa-copy space-right" aria-hidden="true"></i>复制</span>
                   <span id="copyNotificationApplicationName" style="margin-left: 7px; display: none; color: #23ae89;" class="small"
-                    ><i class="fa fa-check" aria-hidden="true"></i> copied</span
+                    ><i class="fa fa-check" aria-hidden="true"></i> 复制的</span
                   >
                 </p>
-                <p>It is also associated to an <span class="bold">Ingress</span> and can be accessed via specific HTTP route(s).</p>
+                <p>它也与 <span class="bold">Ingress</span> 相关联，可以通过特定的 HTTP 路由访问。</p>
               </div>
             </div>
 
@@ -326,9 +326,9 @@
               <table class="table">
                 <tbody>
                   <tr class="text-muted">
-                    <td style="width: 25%;">Container port</td>
-                    <td style="width: 25%;">Service port</td>
-                    <td style="width: 50%;">HTTP route</td>
+                    <td style="width: 25%;">容器端口</td>
+                    <td style="width: 25%;">服务端口</td>
+                    <td style="width: 50%;">HTTP路由</td>
                   </tr>
                   <tr ng-repeat-start="port in ctrl.application.PublishedPorts">
                     <td ng-if="!ctrl.portHasIngressRules(port)" data-cy="k8sAppDetail-containerPort">{{ port.TargetPort }}/{{ port.Protocol }}</td>
@@ -346,7 +346,7 @@
                         style="margin-left: 5px;"
                         data-cy="k8sAppDetail-accessLink"
                       >
-                        <i class="fa fa-external-link-alt" aria-hidden="true"></i> access
+                        <i class="fa fa-external-link-alt" aria-hidden="true"></i> 访问
                       </a>
                     </td>
                     <td ng-if="!ctrl.portHasIngressRules(port)">-</td>
@@ -366,7 +366,7 @@
                         target="_blank"
                         style="margin-left: 5px;"
                       >
-                        <i class="fa fa-external-link-alt" aria-hidden="true"></i> access
+                        <i class="fa fa-external-link-alt" aria-hidden="true"></i> 访问
                       </a>
                     </td>
                     <td>
@@ -378,7 +378,7 @@
                         tooltip-class="portainer-tooltip"
                         uib-tooltip="Ingress controller IP address not available yet"
                         style="cursor: pointer;"
-                        >pending
+                        >挂起
                       </span>
                       <span ng-if="ctrl.ruleCanBeDisplayed(rule)">
                         <a ng-href="{{ ctrl.buildIngressRuleURL(rule) }}" target="_blank" data-cy="k8sAppDetail-httpRouteLink">
@@ -393,11 +393,11 @@
           </div>
           <!-- !ACCESSING APPLICATION -->
           <!-- AUTO SCALING -->
-          <div class="text-muted" style="margin-bottom: 15px;"> <i class="fa fa-expand-arrows-alt" aria-hidden="true" style="margin-right: 2px;"></i> Auto-scaling</div>
+          <div class="text-muted" style="margin-bottom: 15px;"> <i class="fa fa-expand-arrows-alt" aria-hidden="true" style="margin-right: 2px;"></i> 自动缩放</div>
 
           <div class="small text-muted" ng-if="!ctrl.application.AutoScaler" style="margin-bottom: 15px;">
             <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-            This application does not have an autoscaling policy defined.
+            此应用程序未定义自动缩放策略。
           </div>
 
           <div ng-if="ctrl.application.AutoScaler">
@@ -405,11 +405,11 @@
               <table class="table">
                 <tbody>
                   <tr class="text-muted">
-                    <td style="width: 33%;">Minimum instances</td>
-                    <td style="width: 33%;">Maximum instances</td>
+                    <td style="width: 33%;">最小实例</td>
+                    <td style="width: 33%;">最大实例</td>
                     <td style="width: 33%;">
-                      Target CPU usage
-                      <portainer-tooltip position="bottom" message="The autoscaler will ensure enough instances are running to maintain an average CPU usage across all instances.">
+                      目标CPU使用率
+                      <portainer-tooltip position="bottom" message="自动缩放器将确保有足够多的实例在运行，以维持所有实例的平均 CPU 使用率。">
                       </portainer-tooltip>
                     </td>
                   </tr>
@@ -425,19 +425,19 @@
           <!-- !AUTO SCALING -->
 
           <!-- CONFIGURATIONS -->
-          <div class="text-muted" style="margin-bottom: 15px; margin-top: 25px;"> <i class="fa fa-file-code" aria-hidden="true" style="margin-right: 2px;"></i> Configuration </div>
+          <div class="text-muted" style="margin-bottom: 15px; margin-top: 25px;"> <i class="fa fa-file-code" aria-hidden="true" style="margin-right: 2px;"></i> 配置 </div>
 
           <div class="small text-muted" ng-if="!ctrl.application.Env.length > 0 && !ctrl.hasVolumeConfiguration()" style="margin-bottom: 15px;">
             <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-            This application is not using any environment variable or configuration.
+            此应用程序未使用任何环境变量或配置。
           </div>
 
           <table class="table" ng-if="ctrl.application.Env.length > 0">
             <tr class="text-muted">
-              <td style="width: 25%;">Container</td>
-              <td style="width: 25%;">Environment variable</td>
+              <td style="width: 25%;">容器</td>
+              <td style="width: 25%;">环境变量</td>
               <td style="width: 25%;">Value</td>
-              <td style="width: 25%;">Configuration</td>
+              <td style="width: 25%;">配置</td>
             </tr>
             <tbody ng-repeat="container in ctrl.application.Containers" style="border-top: 0;">
               <tr ng-repeat="envvar in container.Env | orderBy: 'name'">
@@ -447,7 +447,7 @@
                     ><i class="fa fa-asterisk" aria-hidden="true"></i> {{ envvar.valueFrom.fieldRef.fieldPath }} (<a
                       href="https://kubernetes.io/docs/concepts/workloads/pods/init-containers/"
                       target="_blank"
-                      >init container</a
+                      >初始化容器</a
                     >)</span
                   >
                 </td>
@@ -488,10 +488,10 @@
 
           <table class="table" ng-if="ctrl.hasVolumeConfiguration()">
             <tr class="text-muted">
-              <td style="width: 25%;">Container</td>
-              <td style="width: 25%;">Configuration path</td>
+              <td style="width: 25%;">容器</td>
+              <td style="width: 25%;">配置路径</td>
               <td style="width: 25%;">Value</td>
-              <td style="width: 25%;">Configuration</td>
+              <td style="width: 25%;">配置</td>
             </tr>
             <tbody ng-repeat="container in ctrl.application.Containers" style="border-top: 0;">
               <tr ng-repeat="volume in container.ConfigurationVolumes track by $index" style="border-top: 0;">
@@ -501,7 +501,7 @@
                     ><i class="fa fa-asterisk" aria-hidden="true"></i> {{ envvar.valueFrom.fieldRef.fieldPath }} (<a
                       href="https://kubernetes.io/docs/concepts/workloads/pods/init-containers/"
                       target="_blank"
-                      >init container</a
+                      >初始化容器</a
                     >)</span
                   >
                 </td>
@@ -521,25 +521,25 @@
 
           <!-- DATA PERSISTENCE -->
           <div class="text-muted" style="margin-bottom: 15px; margin-top: 25px;">
-            <i class="fa fa-database" aria-hidden="true" style="margin-right: 2px;"></i> Data persistence
+            <i class="fa fa-database" aria-hidden="true" style="margin-right: 2px;"></i> 数据持久化
           </div>
 
           <div class="small text-muted" ng-if="!ctrl.hasPersistedFolders()">
             <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-            This application has no persisted folders.
+            此应用程序没有持久文件夹。
           </div>
 
           <div ng-if="ctrl.hasPersistedFolders()">
             <div class="small text-muted" style="margin-bottom: 15px;">
-              Data access policy: <i class="fa {{ ctrl.application.DataAccessPolicy | kubernetesApplicationDataAccessPolicyIcon }}" aria-hidden="true"></i>
+              数据访问政策： <i class="fa {{ ctrl.application.DataAccessPolicy | kubernetesApplicationDataAccessPolicyIcon }}" aria-hidden="true"></i>
               {{ ctrl.application.DataAccessPolicy | kubernetesApplicationDataAccessPolicyText }}
               <portainer-tooltip position="right" message="{{ ctrl.application.DataAccessPolicy | kubernetesApplicationDataAccessPolicyTooltip }}"> </portainer-tooltip>
             </div>
 
             <table class="table" ng-if="ctrl.application.DataAccessPolicy === ctrl.ApplicationDataAccessPolicies.SHARED">
               <tr class="text-muted">
-                <td style="width: 33%;">Persisted folder</td>
-                <td style="width: 66%;">Persistence</td>
+                <td style="width: 33%;">持久化文件夹</td>
+                <td style="width: 66%;">持久</td>
               </tr>
               <tbody ng-repeat="container in ctrl.application.Containers" style="border-top: 0;">
                 <tr ng-repeat="volume in container.PersistedFolders track by $index">
@@ -559,10 +559,10 @@
             <table class="table" ng-if="ctrl.application.DataAccessPolicy === ctrl.ApplicationDataAccessPolicies.ISOLATED">
               <thead>
                 <tr class="text-muted">
-                  <td style="width: 25%;">Container name</td>
+                  <td style="width: 25%;">容器名称</td>
                   <td style="width: 25%;">Pod name</td>
-                  <td style="width: 25%;">Persisted folder</td>
-                  <td style="width: 25%;">Persistence</td>
+                  <td style="width: 25%;">持久化文件夹</td>
+                  <td style="width: 25%;">持久</td>
                 </tr>
               </thead>
               <tbody ng-repeat="container in ctrl.allContainers track by $index" style="border-top: none;">
@@ -573,7 +573,7 @@
                       ><i class="fa fa-asterisk" aria-hidden="true"></i> {{ envvar.valueFrom.fieldRef.fieldPath }} (<a
                         href="https://kubernetes.io/docs/concepts/workloads/pods/init-containers/"
                         target="_blank"
-                        >init container</a
+                        >初始化容器</a
                       >)</span
                     >
                   </td>
@@ -586,7 +586,7 @@
                       <i class="fa fa-database" aria-hidden="true"></i> {{ volume.PersistentVolumeClaimName + '-' + container.PodName }}</a
                     >
                   </td>
-                  <td ng-if="volume.HostPath"> {{ volume.HostPath }} on host filesystem </td>
+                  <td ng-if="volume.HostPath"> {{ volume.HostPath }} 在主机文件系统上 </td>
                 </tr>
               </tbody>
             </table>

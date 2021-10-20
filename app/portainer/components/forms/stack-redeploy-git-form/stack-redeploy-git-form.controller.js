@@ -89,11 +89,11 @@ class StackRedeployGitFormController {
     return this.$async(async () => {
       try {
         const confirmed = await this.ModalService.confirmAsync({
-          title: 'Are you sure?',
-          message: 'Any changes to this stack made locally in Portainer will be overridden by the definition in git and may cause a service interruption. Do you wish to continue',
+          title: '你确定吗？',
+          message: '在Portainer中本地对此堆栈所做的任何更改都将被git中的定义覆盖，并可能导致服务中断。你想继续吗',
           buttons: {
             confirm: {
-              label: 'Update',
+              label: '更新',
               className: 'btn-warning',
             },
           },
@@ -105,10 +105,10 @@ class StackRedeployGitFormController {
         this.state.redeployInProgress = true;
 
         await this.StackService.updateGit(this.stack.Id, this.stack.EndpointId, this.FormHelper.removeInvalidEnvVars(this.formValues.Env), false, this.formValues);
-        this.Notifications.success('Pulled and redeployed stack successfully');
+        this.Notifications.success('已成功拉取并重新部署堆栈');
         await this.$state.reload();
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Failed redeploying stack');
+        this.Notifications.error('失败', err, '重新部署堆栈失败');
       } finally {
         this.state.redeployInProgress = false;
       }
@@ -127,11 +127,11 @@ class StackRedeployGitFormController {
         );
         this.savedFormValues = angular.copy(this.formValues);
         this.state.hasUnsavedChanges = false;
-        this.Notifications.success('Save stack settings successfully');
+        this.Notifications.success('成功保存堆栈设置');
 
         this.stack = stack;
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to save stack settings');
+        this.Notifications.error('失败', err, '无法保存堆栈设置');
       } finally {
         this.state.inProgress = false;
       }

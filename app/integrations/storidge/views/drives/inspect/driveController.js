@@ -10,11 +10,11 @@ angular.module('portainer.integrations.storidge').controller('StoridgeDriveContr
 
     $scope.removeDrive = function () {
       ModalService.confirm({
-        title: 'Are you sure?',
-        message: 'Do you want really want to remove this drive from the storage pool?',
+        title: '你确定吗？',
+        message: '您真的要从存储池中删除此驱动器吗？',
         buttons: {
           confirm: {
-            label: 'Remove',
+            label: '删除',
             className: 'btn-danger',
           },
         },
@@ -25,11 +25,11 @@ angular.module('portainer.integrations.storidge').controller('StoridgeDriveContr
           $scope.actionInProgress = true;
           StoridgeDriveService.remove($scope.drive.Id)
             .then(function () {
-              Notifications.success('Success', 'Drive removed from storage pool');
+              Notifications.success('成功', '从存储池中删除驱动器');
               $state.go('storidge.drives', {}, { reload: true });
             })
             .catch(function error(err) {
-              Notifications.error('Failure', err, 'Unable to remove drive from storage pool');
+              Notifications.error('失败', err, '无法从存储池中删除驱动器');
             })
             .finally(function final() {
               $scope.actionInProgress = false;
@@ -46,7 +46,7 @@ angular.module('portainer.integrations.storidge').controller('StoridgeDriveContr
           $scope.drive = data;
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve drive details');
+          Notifications.error('失败', err, '无法检索驱动器详细信息');
         });
     }
 

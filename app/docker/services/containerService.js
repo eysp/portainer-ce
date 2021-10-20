@@ -19,7 +19,7 @@ angular.module('portainer.docker').factory('ContainerService', [
           deferred.resolve(container);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve container information', err: err });
+          deferred.reject({ msg: '无法检索容器信息rmation', err: err });
         });
 
       return deferred.promise;
@@ -35,7 +35,7 @@ angular.module('portainer.docker').factory('ContainerService', [
           deferred.resolve(containers);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve containers', err: err });
+          deferred.reject({ msg: '无法检索容器', err: err });
         });
 
       return deferred.promise;
@@ -137,7 +137,7 @@ angular.module('portainer.docker').factory('ContainerService', [
           }
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to remove container', err: err });
+          deferred.reject({ msg: '无法删除容器', err: err });
         });
 
       return deferred.promise;

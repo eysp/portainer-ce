@@ -88,7 +88,7 @@ class CustomTemplatesViewController {
     try {
       this.templates = await this.CustomTemplateService.customTemplates([1, 2]);
     } catch (err) {
-      this.Notifications.error('Failed loading templates', err, 'Unable to load custom templates');
+      this.Notifications.error('加载模板失败', err, '无法加载自定义模板');
     }
   }
 
@@ -99,10 +99,10 @@ class CustomTemplatesViewController {
     for (let template of templates) {
       try {
         await this.CustomTemplateService.remove(template.id);
-        this.Notifications.success('Removed template successfully');
+        this.Notifications.success('已成功删除模板');
         _.remove(this.templates, template);
       } catch (err) {
-        this.Notifications.error('Failed removing template', err, 'Unable to remove custom template');
+        this.Notifications.error('删除模板失败', err, '无法删除自定义模板');
       }
     }
   }
@@ -139,10 +139,10 @@ class CustomTemplatesViewController {
       const createAction = this.state.selectedTemplate.Type === 1 ? this.StackService.createSwarmStackFromFileContent : this.StackService.createComposeStackFromFileContent;
       const { ResourceControl: resourceControl } = await createAction(stackName, file, [], endpointId);
       await this.ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl);
-      this.Notifications.success('Stack successfully deployed');
+      this.Notifications.success('堆栈已成功部署');
       this.$state.go('docker.stacks');
     } catch (err) {
-      this.Notifications.error('Deployment error', err, 'Failed to deploy stack');
+      this.Notifications.error('部署错误', err, '未能部署堆栈');
     } finally {
       this.state.actionInProgress = false;
     }
@@ -199,7 +199,7 @@ class CustomTemplatesViewController {
       );
       this.availableNetworks = networks;
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Failed to load networks.');
+      this.Notifications.error('失败', err, '无法加载网络。');
     }
   }
 
@@ -207,7 +207,7 @@ class CustomTemplatesViewController {
     return this.$async(this.confirmDeleteAsync, templateId);
   }
   async confirmDeleteAsync(templateId) {
-    const confirmed = await this.ModalService.confirmDeletionAsync('Are you sure that you want to delete this template?');
+    const confirmed = await this.ModalService.confirmDeletionAsync('是否确实要删除此模板？');
     if (!confirmed) {
       return;
     }
@@ -216,7 +216,7 @@ class CustomTemplatesViewController {
       await this.CustomTemplateService.remove(templateId);
       _.remove(this.templates, { Id: templateId });
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Failed to delete template');
+      this.Notifications.error('失败', err, '无法删除模板');
     }
   }
 

@@ -18,9 +18,9 @@ export default class ThemeSettingsController {
     try {
       await this.UserService.updateUserTheme(this.state.userId, this.state.userTheme);
       this.state.themeInProgress = false;
-      this.Notifications.success('Success', 'User theme successfully updated');
+      this.Notifications.success('成功', '用户主题更新成功');
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to update user theme');
+      this.Notifications.error('失败', err, '无法更新用户主题');
     }
   }
 
@@ -57,7 +57,7 @@ export default class ThemeSettingsController {
         this.state.userTheme = data.UserTheme || this.state.defaultTheme;
         this.state.initTheme = this.state.userTheme;
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to get user details');
+        this.Notifications.error('失败', err, '无法获取用户详细信息');
       }
     });
   }

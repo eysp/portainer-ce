@@ -6,7 +6,7 @@
         <tbody>
           <tr>
             <td style="vertical-align: middle;">
-              Memory reservation (MB)
+              内存保留 (MB)
             </td>
             <td>
               <input
@@ -21,13 +21,13 @@
             </td>
             <td style="vertical-align: middle;">
               <p class="small text-muted">
-                Minimum memory available on a node to run a task (set to 0 for unlimited)
+                节点上可用于运行任务的最小内存（设置为0表示无限制）
               </p>
             </td>
           </tr>
           <tr>
             <td style="vertical-align: middle;">
-              Memory limit (MB)
+              内存限制 (MB)
             </td>
             <td>
               <input
@@ -42,14 +42,14 @@
             </td>
             <td style="vertical-align: middle;">
               <p class="small text-muted">
-                Maximum memory usage per task (set to 0 for unlimited)
+                每个任务的最大内存使用量（设置为0表示无限制）
               </p>
             </td>
           </tr>
           <tr>
             <td style="vertical-align: middle;">
               <div>
-                CPU reservation
+                CPU 保留
               </div>
             </td>
             <td>
@@ -66,14 +66,14 @@
             </td>
             <td style="vertical-align: middle;">
               <p class="small text-muted">
-                Minimum CPU available on a node to run a task
+                节点上运行任务可用的最小CPU数
               </p>
             </td>
           </tr>
           <tr>
             <td style="vertical-align: middle;">
               <div>
-                CPU limit
+                CPU 限制
               </div>
             </td>
             <td>
@@ -90,7 +90,7 @@
             </td>
             <td style="vertical-align: middle;">
               <p class="small text-muted">
-                Maximum CPU usage per task
+                每个任务的最大CPU使用率
               </p>
             </td>
           </tr>
@@ -105,14 +105,14 @@
             class="btn btn-primary btn-sm"
             ng-disabled="!hasChanges(service, ['LimitNanoCPUs', 'LimitMemoryBytes', 'ReservationNanoCPUs', 'ReservationMemoryBytes'])"
             ng-click="updateService(service)"
-            >Apply changes</button
+            >应用更改</button
           >
           <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu">
-            <li><a ng-click="cancelChanges(service, ['LimitNanoCPUs', 'LimitMemoryBytes', 'ReservationNanoCPUs', 'ReservationMemoryBytes'])">Reset changes</a></li>
-            <li><a ng-click="cancelChanges(service)">Reset all changes</a></li>
+            <li><a ng-click="cancelChanges(service, ['LimitNanoCPUs', 'LimitMemoryBytes', 'ReservationNanoCPUs', 'ReservationMemoryBytes'])">重置更改</a></li>
+            <li><a ng-click="cancelChanges(service)">重置所有更改</a></li>
           </ul>
         </div>
       </div>

@@ -60,7 +60,7 @@ angular.module('portainer.integrations.storidge').controller('StoridgeMonitorCon
           })
           .catch(function error(err) {
             stopRepeater();
-            Notifications.error('Failure', err, 'Unable to retrieve cluster information');
+            Notifications.error('失败', err, 'Unable to retrieve cluster information');
           });
       }, refreshRate);
     }
@@ -81,7 +81,7 @@ angular.module('portainer.integrations.storidge').controller('StoridgeMonitorCon
         })
         .catch(function error(err) {
           stopRepeater();
-          Notifications.error('Failure', err, 'Unable to retrieve cluster information');
+          Notifications.error('失败', err, 'Unable to retrieve cluster information');
         });
     }
 

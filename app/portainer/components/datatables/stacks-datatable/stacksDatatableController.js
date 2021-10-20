@@ -21,7 +21,7 @@ angular.module('portainer.app').controller('StacksDatatableController', [
       },
       columns: {
         updated: {
-          label: 'Updated',
+          label: '更新',
           display: false,
         },
       },

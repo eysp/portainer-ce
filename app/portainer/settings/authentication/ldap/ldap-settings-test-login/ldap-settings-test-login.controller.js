@@ -23,7 +23,7 @@ export default class LdapSettingsTestLogin {
         const response = await this.LDAPService.testLogin(this.settings, username, password);
         this.state.testStatus = response.valid ? TEST_STATUS.SUCCESS : TEST_STATUS.FAILURE;
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to test login');
+        this.Notifications.error('失败', err, 'Unable to test login');
         this.state.testStatus = TEST_STATUS.FAILURE;
       }
     });

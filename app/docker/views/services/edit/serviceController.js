@@ -332,7 +332,7 @@ angular.module('portainer.docker').controller('ServiceController', [
             $scope.WebhookExists = false;
           })
           .catch(function error(err) {
-            Notifications.error('Failure', err, 'Unable to delete webhook');
+            Notifications.error('失败', err, '无法删除 webhook');
           });
       } else {
         WebhookService.createServiceWebhook(service.Id, endpoint.Id)
@@ -342,7 +342,7 @@ angular.module('portainer.docker').controller('ServiceController', [
             $scope.webhookURL = WebhookHelper.returnWebhookUrl(data.Token);
           })
           .catch(function error(err) {
-            Notifications.error('Failure', err, 'Unable to create webhook');
+            Notifications.error('失败', err, '无法创建 webhook');
           });
       }
     };
@@ -503,16 +503,16 @@ angular.module('portainer.docker').controller('ServiceController', [
           if (data.message && data.message.match(/^rpc error:/)) {
             Notifications.error(data.message, 'Error');
           } else {
-            Notifications.success('Success', 'Service successfully rolled back');
+            Notifications.success('成功', '服务回滚成功');
             $scope.cancelChanges({});
             initView();
           }
         })
         .catch(function (e) {
-          if (e.data.message && e.data.message.includes('does not have a previous spec')) {
-            Notifications.error('Failure', { message: 'No previous config to rollback to.' });
+          if (e.data.message && e.data.message.includes('没有以前的规格')) {
+            Notifications.error('失败', { message: '没有以前要回滚到的配置。' });
           } else {
-            Notifications.error('Failure', e, 'Unable to rollback service');
+            Notifications.error('失败', e, '无法回滚服务');
           }
         })
         .finally(function () {
@@ -522,11 +522,11 @@ angular.module('portainer.docker').controller('ServiceController', [
 
     $scope.rollbackService = function (service) {
       ModalService.confirm({
-        title: 'Rollback service',
-        message: 'Are you sure you want to rollback?',
+        title: '回滚服务',
+        message: '您确定要回滚吗？',
         buttons: {
           confirm: {
-            label: 'Yes',
+            label: '是的',
             className: 'btn-danger',
           },
         },
@@ -552,19 +552,19 @@ angular.module('portainer.docker').controller('ServiceController', [
           if (data.message && data.message.match(/^rpc error:/)) {
             Notifications.error(data.message, 'Error');
           } else {
-            Notifications.success('Service successfully updated', 'Service updated');
+            Notifications.success('服务已成功更新', '服务已更新');
           }
           $scope.cancelChanges({});
           initView();
         },
         function (e) {
-          Notifications.error('Failure', e, 'Unable to update service');
+          Notifications.error('失败', e, '无法更新服务');
         }
       );
     };
 
     $scope.removeService = function () {
-      ModalService.confirmDeletion('Do you want to remove this service? All the containers associated to this service will be removed too.', function onConfirm(confirmed) {
+      ModalService.confirmDeletion('是否要删除此服务？与此服务关联的所有容器也将被删除。', function onConfirm(confirmed) {
         if (!confirmed) {
           return;
         }
@@ -579,11 +579,11 @@ angular.module('portainer.docker').controller('ServiceController', [
           return $q.when($scope.webhookID && WebhookService.deleteWebhook($scope.webhookID));
         })
         .then(function success() {
-          Notifications.success('Service successfully deleted');
+          Notifications.success('服务已成功删除');
           $state.go('docker.services', {});
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to remove service');
+          Notifications.error('失败', err, '无法删除服务');
         })
         .finally(function final() {
           $scope.state.deletionInProgress = false;
@@ -591,7 +591,7 @@ angular.module('portainer.docker').controller('ServiceController', [
     }
 
     $scope.forceUpdateService = function (service) {
-      ModalService.confirmServiceForceUpdate('Do you want to force an update of the service? All the tasks associated to the service will be recreated.', function (result) {
+      ModalService.confirmServiceForceUpdate('是否要强制更新服务？将重新创建与服务关联的所有任务。', function (result) {
         if (!result) {
           return;
         }
@@ -615,12 +615,12 @@ angular.module('portainer.docker').controller('ServiceController', [
       $scope.state.updateInProgress = true;
       ServiceService.update(service, config)
         .then(function success() {
-          Notifications.success('Service successfully updated', service.Name);
+          Notifications.success('服务已成功更新', service.Name);
           $scope.cancelChanges({});
           initView();
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to force update service', service.Name);
+          Notifications.error('失败', err, '无法强制更新服务', service.Name);
         })
         .finally(function final() {
           $scope.state.updateInProgress = false;
@@ -773,7 +773,7 @@ angular.module('portainer.docker').controller('ServiceController', [
         .catch(function error(err) {
           $scope.secrets = [];
           $scope.configs = [];
-          Notifications.error('Failure', err, 'Unable to retrieve service details');
+          Notifications.error('失败', err, '无法检索服务详细信息');
         });
     }
 

@@ -4,15 +4,15 @@
       <div class="toolBar">
         <div class="toolBarTitle">
           <i class="fa" ng-class="$ctrl.titleIcon" aria-hidden="true" style="margin-right: 2px;"></i>
-          Edge Stacks
+          Edge 堆栈
         </div>
         <div class="settings" data-cy="edgeStack-stackTableSettings">
           <span class="setting" ng-class="{ 'setting-active': $ctrl.settings.open }" uib-dropdown dropdown-append-to-body auto-close="disabled" is-open="$ctrl.settings.open">
-            <span uib-dropdown-toggle> <i class="fa fa-cog" aria-hidden="true"></i> Settings </span>
+            <span uib-dropdown-toggle> <i class="fa fa-cog" aria-hidden="true"></i> 设置 </span>
             <div class="dropdown-menu dropdown-menu-right" uib-dropdown-menu>
               <div class="tableMenu">
                 <div class="menuHeader">
-                  Table settings
+                  表格设置
                 </div>
                 <div class="menuContent">
                   <div>
@@ -24,11 +24,11 @@
                         ng-change="$ctrl.onSettingsRepeaterChange()"
                         data-cy="edgeStack-autoRefreshCheckbox"
                       />
-                      <label for="setting_auto_refresh">Auto refresh</label>
+                      <label for="setting_auto_refresh">自动刷新</label>
                     </div>
                     <div ng-if="$ctrl.settings.repeater.autoRefresh">
                       <label for="settings_refresh_rate">
-                        Refresh rate
+                        刷新频率
                       </label>
                       <select id="settings_refresh_rate" ng-model="$ctrl.settings.repeater.refreshRate" ng-change="$ctrl.onSettingsRepeaterChange()" class="small-select">
                         <option value="10">10s</option>
@@ -45,7 +45,7 @@
                 </div>
                 <div>
                   <a type="button" class="btn btn-default btn-sm" ng-click="$ctrl.settings.open = false;">
-                    Close
+                    关闭
                   </a>
                 </div>
               </div>
@@ -61,10 +61,10 @@
           ng-click="$ctrl.removeAction($ctrl.state.selectedItems)"
           data-cy="edgeStack-removeStackButton"
         >
-          <i class="fa fa-trash-alt space-right" aria-hidden="true"></i>Remove
+          <i class="fa fa-trash-alt space-right" aria-hidden="true"></i>删除
         </button>
         <button type="button" class="btn btn-sm btn-primary" ui-sref="edge.stacks.new" data-cy="edgeStack-addStackButton">
-          <i class="fa fa-plus space-right" aria-hidden="true"></i>Add stack
+          <i class="fa fa-plus space-right" aria-hidden="true"></i>添加堆栈
         </button>
       </div>
       <div class="searchBar">
@@ -74,7 +74,7 @@
           class="searchInput"
           ng-model="$ctrl.state.textFilter"
           ng-change="$ctrl.onTextFilterChange()"
-          placeholder="Search..."
+          placeholder="搜索..."
           auto-focus
           ng-model-options="{ debounce: 300 }"
         />
@@ -89,17 +89,17 @@
                   <label for="select_all"></label>
                 </span>
                 <a ng-click="$ctrl.changeOrderBy('Name')">
-                  Name
+                  名称
                   <i class="fa fa-sort-alpha-down" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Name' && !$ctrl.state.reverseOrder"></i>
                   <i class="fa fa-sort-alpha-up" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Name' && $ctrl.state.reverseOrder"></i>
                 </a>
               </th>
               <th>
-                Status
+                状态
               </th>
               <th>
                 <a ng-click="$ctrl.changeOrderBy('CreationDate')">
-                  Creation Date
+                  创建日期
                   <i class="fa fa-sort-alpha-down" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'CreationDate' && !$ctrl.state.reverseOrder"></i>
                   <i class="fa fa-sort-alpha-up" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'CreationDate' && $ctrl.state.reverseOrder"></i>
                 </a>
@@ -124,23 +124,23 @@
               <td>{{ item.CreationDate | getisodatefromtimestamp }}</td>
             </tr>
             <tr ng-if="!$ctrl.dataset" data-cy="edgeStack-loadingRow">
-              <td colspan="4" class="text-center text-muted">Loading...</td>
+              <td colspan="4" class="text-center text-muted">加载中...</td>
             </tr>
             <tr ng-if="$ctrl.state.filteredDataSet.length === 0" data-cy="edgeStack-noStackRow">
               <td colspan="4" class="text-center text-muted">
-                No stack available.
+                没有可用的堆栈。
               </td>
             </tr>
           </tbody>
         </table>
       </div>
       <div class="footer" ng-if="$ctrl.dataset">
-        <div class="infoBar" ng-if="$ctrl.state.selectedItemCount !== 0"> {{ $ctrl.state.selectedItemCount }} item(s) selected </div>
+        <div class="infoBar" ng-if="$ctrl.state.selectedItemCount !== 0"> {{ $ctrl.state.selectedItemCount }} 所选项目 </div>
         <div class="paginationControls">
           <form class="form-inline">
             <span class="limitSelector">
               <span style="margin-right: 5px;">
-                Items per page
+                每页项目数
               </span>
               <select class="form-control" ng-model="$ctrl.state.paginatedItemLimit" ng-change="$ctrl.changePaginationLimit()" data-cy="component-paginationSelect">
                 <option value="0">All</option>

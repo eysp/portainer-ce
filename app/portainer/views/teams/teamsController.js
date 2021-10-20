@@ -40,11 +40,11 @@ angular.module('portainer.app').controller('TeamsController', [
       $scope.state.actionInProgress = true;
       TeamService.createTeam(teamName, leaderIds)
         .then(function success() {
-          Notifications.success('Team successfully created', teamName);
+          Notifications.success('团队成功创建', teamName);
           $state.reload();
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to create team');
+          Notifications.error('失败', err, '无法创建团队');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -52,7 +52,7 @@ angular.module('portainer.app').controller('TeamsController', [
     };
 
     $scope.removeAction = function (selectedItems) {
-      ModalService.confirmDeletion('Do you want to delete the selected team(s)? Users in the team(s) will not be deleted.', function onConfirm(confirmed) {
+      ModalService.confirmDeletion('是否要删除所选团队？团队中的用户将不会被删除。', function onConfirm(confirmed) {
         if (!confirmed) {
           return;
         }
@@ -65,12 +65,12 @@ angular.module('portainer.app').controller('TeamsController', [
       angular.forEach(selectedItems, function (team) {
         TeamService.deleteTeam(team.Id)
           .then(function success() {
-            Notifications.success('Team successfully removed', team.Name);
+            Notifications.success('团队已成功删除', team.Name);
             var index = $scope.teams.indexOf(team);
             $scope.teams.splice(index, 1);
           })
           .catch(function error(err) {
-            Notifications.error('Failure', err, 'Unable to remove team');
+            Notifications.error('失败', err, '无法删除团队成员');
           })
           .finally(function final() {
             --actionCount;
@@ -97,7 +97,7 @@ angular.module('portainer.app').controller('TeamsController', [
         .catch(function error(err) {
           $scope.teams = [];
           $scope.users = [];
-          Notifications.error('Failure', err, 'Unable to retrieve teams');
+          Notifications.error('失败', err, '无法检索团队');
         });
     }
 

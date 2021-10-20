@@ -1,11 +1,11 @@
-<kubernetes-view-header ng-if="!ctrl.state.isEdit" title="Create application" state="kubernetes.applications.new" view-ready="ctrl.state.viewReady">
-  <a ui-sref="kubernetes.applications">Applications</a> &gt; Create an application
+<kubernetes-view-header ng-if="!ctrl.state.isEdit" title="创建应用程序" state="kubernetes.applications.new" view-ready="ctrl.state.viewReady">
+  <a ui-sref="kubernetes.applications">应用</a> &gt; 创建应用程序
 </kubernetes-view-header>
-<kubernetes-view-header ng-if="ctrl.state.isEdit" title="Edit application" state="kubernetes.applications.application.edit" view-ready="ctrl.state.viewReady">
+<kubernetes-view-header ng-if="ctrl.state.isEdit" title="编辑应用" state="kubernetes.applications.application.edit" view-ready="ctrl.state.viewReady">
   <a ui-sref="kubernetes.resourcePools">Namespaces</a> &gt;
   <a ui-sref="kubernetes.resourcePools.resourcePool({ id: ctrl.application.ResourcePool })">{{ ctrl.application.ResourcePool }}</a> &gt;
-  <a ui-sref="kubernetes.applications">Applications</a> &gt;
-  <a ui-sref="kubernetes.applications.application({ name: ctrl.application.Name, namespace: ctrl.application.ResourcePool })">{{ ctrl.application.Name }}</a> &gt; Edit
+  <a ui-sref="kubernetes.applications">应用</a> &gt;
+  <a ui-sref="kubernetes.applications.application({ name: ctrl.application.Name, namespace: ctrl.application.ResourcePool })">{{ ctrl.application.Name }}</a> &gt; 编辑
 </kubernetes-view-header>
 
 <kubernetes-view-loading view-ready="ctrl.state.viewReady"></kubernetes-view-loading>
@@ -45,14 +45,13 @@
             <div class="form-group" ng-if="ctrl.state.resourcePoolHasQuota && ctrl.resourceQuotaCapacityExceeded() && ctrl.formValues.ResourcePool">
               <div class="col-sm-12 small text-danger">
                 <i class="fa fa-exclamation-circle red-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                This namespace has exhausted its resource capacity and you will not be able to deploy the application. Contact your administrator to expand the capacity of the
-                namespace.
+                此namespace已耗尽其资源容量，您将无法部署应用程序。 请联系您的管理员以扩展namespace的容量。
               </div>
             </div>
             <div class="form-group" ng-if="!ctrl.formValues.ResourcePool">
               <div class="col-sm-12 small text-muted">
                 <i class="fa fa-exclamation-circle orange-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                You do not have access to any namespace. Contact your administrator to get access to a namespace.
+                您无权访问任何namespace。 请联系您的管理员以访问namespace。
               </div>
             </div>
             <!-- #endregion -->
@@ -71,29 +70,28 @@
               value="ctrl.stackFileContent"
               yml="true"
               identifier="kubernetes-deploy-editor"
-              placeholder="# Define or paste the content of your manifest file here"
+              placeholder="# 在此处定义或粘贴清单文件的内容"
               on-change="(ctrl.onChangeFileContent)"
             >
               <editor-description>
                 <span class="text-muted small" ng-show="ctrl.stack.IsComposeFormat">
                   <p>
                     <i class="fa fa-exclamation-circle orange-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                    Portainer uses <a href="https://kompose.io/" target="_blank">Kompose</a> to convert your Compose manifest to a Kubernetes compliant manifest. Be wary that not
-                    all the Compose format options are supported by Kompose at the moment.
+                    Portainer 使用 <a href="https://kompose.io/" target="_blank">Kompose</a> 将您的 Compose 清单转换为符合 Kubernetes 的清单。 请注意，目前并非所有 Compose 格式选项都受 Kompose 支持。
                   </p>
                   <p>
-                    You can get more information about Compose file format in the
-                    <a href="https://docs.docker.com/compose/compose-file/" target="_blank">official documentation</a>.
+                    您可以在
+                    <a href="https://docs.docker.com/compose/compose-file/" target="_blank">官方文档</a>中了解更多详细信息。
                   </p>
                 </span>
                 <span class="text-muted small" ng-show="!ctrl.stack.IsComposeFormat">
                   <p>
                     <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                    This feature allows you to deploy any kind of Kubernetes resource in this environment (Deployment, Secret, ConfigMap...).
+                    此功能允许您在此环境中部署任何类型的 Kubernetes 资源（Deployment、Secret、ConfigMap...）。
                   </p>
                   <p>
-                    You can get more information about Kubernetes file format in the
-                    <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/" target="_blank">official documentation</a>.
+                    您可以在
+                    <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/" target="_blank">官方文档</a>中获取更多关于 Kubernetes 文件格式的信息。
                   </p>
                 </span>
               </editor-description>
@@ -101,11 +99,11 @@
             <!-- #endregion -->
             <div ng-if="ctrl.state.appType === ctrl.KubernetesDeploymentTypes.APPLICATION_FORM">
               <div class="col-sm-12 form-section-title">
-                Application
+                应用
               </div>
               <!-- #region NAME FIELD -->
               <div class="form-group">
-                <label for="application_name" class="col-sm-1 control-label text-left">Name</label>
+                <label for="application_name" class="col-sm-1 control-label text-left">名称</label>
                 <div class="col-sm-11">
                   <input
                     type="text"
@@ -125,14 +123,14 @@
               <div class="form-group" ng-show="kubernetesApplicationCreationForm.application_name.$invalid || ctrl.state.alreadyExists">
                 <div class="col-sm-12 small text-warning">
                   <div ng-messages="kubernetesApplicationCreationForm.application_name.$error">
-                    <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This field is required.</p>
+                    <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此字段是必需的。</p>
                     <p ng-message="pattern"
-                      ><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This field must consist of lower case alphanumeric characters or '-', start with an alphabetic
-                      character, and end with an alphanumeric character (e.g. 'my-name', or 'abc-123').</p
+                      ><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This 字段必须由小写字母数字字符或“-”组成，以字母开头
+                       字符，并以字母数字字符结尾 (例如 'my-name', 或 'abc-123').</p
                     >
                   </div>
                   <p ng-if="ctrl.state.alreadyExists"
-                    ><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> An application with the same name already exists inside the selected namespace.</p
+                    ><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> An 所选namespace中已存在同名应用程序。</p
                   >
                 </div>
               </div>
@@ -158,19 +156,18 @@
               </div>
               <div ng-if="ctrl.formValues.ResourcePool">
                 <div class="col-sm-12 form-section-title">
-                  Stack
+                  堆栈
                 </div>
                 <!-- #region STACK -->
                 <div class="form-group">
                   <div class="col-sm-12 small text-muted">
                     <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                    Portainer can automatically bundle multiple applications inside a stack. Enter a name of a new stack or select an existing stack in the list. Leave empty to use
-                    the application name.
+                    Portainer 可以自动将多个应用程序捆绑在一个堆栈中。 输入新堆栈的名称或在列表中选择现有堆栈。 留空以使用应用程序名称。
                   </div>
                 </div>
 
                 <div class="form-group">
-                  <label for="stack_name" class="col-sm-1 control-label text-left">Stack</label>
+                  <label for="stack_name" class="col-sm-1 control-label text-left">堆栈</label>
                   <div class="col-sm-11">
                     <input
                       type="text"
@@ -188,12 +185,12 @@
                 <!-- #endregion -->
 
                 <div class="col-sm-12 form-section-title">
-                  Environment
+                  环境
                 </div>
                 <!-- #region ENVIRONMENT VARIABLES -->
                 <div class="form-group">
                   <div class="col-sm-12">
-                    <label class="control-label text-left">Environment variables</label>
+                    <label class="control-label text-left">环境变量</label>
                     <span
                       ng-if="ctrl.formValues.Containers.length <= 1"
                       class="label label-default interactive"
@@ -201,7 +198,7 @@
                       ng-click="ctrl.addEnvironmentVariable()"
                       data-cy="k8sAppCreate-addEnvVarButton"
                     >
-                      <i class="fa fa-plus-circle" aria-hidden="true"></i> add environment variable
+                      <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加环境变量
                     </span>
                   </div>
 
@@ -269,14 +266,13 @@
                             "
                           >
                             <ng-messages for="kubernetesApplicationCreationForm['environment_variable_name_' + $index].$error">
-                              <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Environment variable name is required.</p>
+                              <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 环境变量名称是必需的。</p>
                               <p ng-message="pattern"
-                                ><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This field must consist of alphabetic characters, digits, '_', '-', or '.', and must
-                                not start with a digit (e.g. 'my.env-name', or 'MY_ENV.NAME', or 'MyEnvName1'.</p
+                                ><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此字段必须由字母字符、数字、“_”、“-”或“.”组成，并且不得以数字开头 (例如 'my.env-name', 或 'MY_ENV.NAME', 或 'MyEnvName1'.</p
                               >
                             </ng-messages>
                             <p ng-if="ctrl.state.duplicates.environmentVariables.refs[$index] !== undefined"
-                              ><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This environment variable is already defined.</p
+                              ><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此环境变量已定义。</p
                             >
                           </div>
                         </div>
@@ -289,12 +285,12 @@
                 <!-- #endregion -->
 
                 <div class="col-sm-12 form-section-title">
-                  Configurations
+                  配置
                 </div>
                 <!-- #region CONFIGURATIONS -->
                 <div class="form-group">
                   <div class="col-sm-12">
-                    <label class="control-label text-left">Configurations</label>
+                    <label class="control-label text-left">配置</label>
                     <span
                       class="label label-default interactive"
                       style="margin-left: 10px;"
@@ -302,19 +298,18 @@
                       ng-if="ctrl.formValues.Containers.length <= 1"
                       data-cy="k8sAppCreate-addConfigButton"
                     >
-                      <i class="fa fa-plus-circle" aria-hidden="true"></i> add configuration
+                      <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加配置
                     </span>
                   </div>
                   <div class="col-sm-12 small text-muted" style="margin-top: 15px;" ng-if="ctrl.formValues.Configurations.length">
                     <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                    Portainer will automatically expose all the keys of a configuration as environment variables. This behavior can be overriden to filesystem mounts for each key
-                    via the override button.
+                    Portainer 将自动将配置的所有键公开为环境变量。 这种行为可以通过覆盖按钮覆盖到每个键的文件系统挂载。
                   </div>
                 </div>
 
                 <!-- config-element -->
                 <div class="form-group" ng-repeat="(index, config) in ctrl.formValues.Configurations">
-                  <label for="stack_name" class="col-md-1 col-sm-2 control-label text-left">Configuration</label>
+                  <label for="stack_name" class="col-md-1 col-sm-2 control-label text-left">配置</label>
                   <div class="col-sm-5">
                     <select
                       class="form-control"
@@ -334,7 +329,7 @@
                       ng-disabled="!config.SelectedConfiguration || ctrl.formValues.Containers.length > 1"
                       data-cy="k8sAppCreate-configOverrideButton_{{ $index }}"
                     >
-                      <i class="fa fa-list" aria-hidden="true"></i> Override
+                      <i class="fa fa-list" aria-hidden="true"></i> 覆盖
                     </button>
                     <button
                       class="btn btn-sm btn-primary"
@@ -344,7 +339,7 @@
                       ng-disabled="ctrl.formValues.Containers.length > 1"
                       data-cy="k8sAppCreate-configAutoButton_{{ $index }}"
                     >
-                      <i class="fa fa-undo" aria-hidden="true"></i> Auto
+                      <i class="fa fa-undo" aria-hidden="true"></i> 自动
                     </button>
                     <button
                       class="btn btn-sm btn-danger"
@@ -353,14 +348,14 @@
                       ng-if="ctrl.formValues.Containers.length <= 1"
                       data-cy="k8sAppCreate-configRemoveButton"
                     >
-                      <i class="fa fa-trash-alt" aria-hidden="true"></i> Remove
+                      <i class="fa fa-trash-alt" aria-hidden="true"></i> 删除
                     </button>
                   </div>
                   <!-- no-override -->
                   <div class="col-sm-12" style="margin-top: 10px;" ng-if="config.SelectedConfiguration && !config.Overriden">
                     <div class="col-md-1 col-sm-2"></div>
                     <div class="col-md-11 col-sm-10 small text-muted" style="padding-left: 5px;">
-                      The following keys will be loaded from the <code>{{ config.SelectedConfiguration.Name }}</code> configuration as environment variables:
+                      以下键将从 <code>{{ config.SelectedConfiguration.Name }}</code> 配置中加载为环境变量：
                       <span ng-repeat="(key, _) in config.SelectedConfiguration.Data">
                         <code>{{ key }}</code
                         >{{ $last ? '' : ', ' }}
@@ -375,13 +370,13 @@
                       <div style="margin-top: 2px;">
                         <div class="col-sm-1 input-group input-group-sm" style="margin-left: 3px;"></div>
                         <div class="col-sm-3 input-group input-group-sm">
-                          <span class="input-group-addon">configuration key</span>
+                          <span class="input-group-addon">配置 key</span>
                           <input type="text" class="form-control" ng-value="overridenKey.Key" disabled />
                         </div>
 
                         <div class="col-sm-3 input-group input-group-sm" ng-if="overridenKey.Type === ctrl.ApplicationConfigurationFormValueOverridenKeyTypes.FILESYSTEM">
                           <div class="col-sm-12 input-group input-group-sm">
-                            <span class="input-group-addon">path on disk</span>
+                            <span class="input-group-addon">磁盘路径</span>
                             <input
                               type="text"
                               class="form-control"
@@ -398,10 +393,10 @@
 
                         <div class="input-group col-sm-4 btn-group btn-group-sm">
                           <label class="btn btn-primary" ng-model="overridenKey.Type" uib-btn-radio="ctrl.ApplicationConfigurationFormValueOverridenKeyTypes.ENVIRONMENT">
-                            <i class="fa fa-list" aria-hidden="true"></i> Environment
+                            <i class="fa fa-list" aria-hidden="true"></i> 环境
                           </label>
                           <label class="btn btn-primary" ng-model="overridenKey.Type" uib-btn-radio="ctrl.ApplicationConfigurationFormValueOverridenKeyTypes.FILESYSTEM">
-                            <i class="fa fa-file" aria-hidden="true"></i> Filesystem
+                            <i class="fa fa-file" aria-hidden="true"></i> 文件系统
                           </label>
                         </div>
                       </div>
@@ -424,10 +419,10 @@
                             "
                           >
                             <ng-messages for="kubernetesApplicationCreationForm['overriden_key_path_' + index + '_' + keyIndex].$error">
-                              <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Path is required.</p>
+                              <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 路径是必需的。</p>
                             </ng-messages>
                             <p ng-if="ctrl.state.duplicates.configurationPaths.refs[index + '_' + keyIndex] !== undefined"
-                              ><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This path is already used.</p
+                              ><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此路径已被使用。</p
                             >
                           </div>
                         </div>
@@ -441,19 +436,19 @@
                 <!-- #endregion -->
 
                 <div class="col-sm-12 form-section-title">
-                  Persisting data
+                  持久化数据
                 </div>
                 <!-- #region PERSISTED FOLDERS -->
                 <div class="form-group" ng-if="!ctrl.storageClassAvailable()">
                   <div class="col-sm-12 small text-muted">
                     <i class="fa fa-exclamation-circle orange-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                    No storage option is available to persist data, contact your administrator to enable a storage option.
+                    没有存储选项可用于持久化数据，请联系您的管理员以启用存储选项。
                   </div>
                 </div>
 
                 <div class="form-group" ng-if="ctrl.storageClassAvailable()">
                   <div class="col-sm-12" style="margin-top: 5px;">
-                    <label class="control-label text-left">Persisted folders</label>
+                    <label class="control-label text-left">持久化文件夹</label>
                     <span
                       class="label label-default interactive"
                       style="margin-left: 10px;"
@@ -461,14 +456,14 @@
                       ng-if="ctrl.isAddPersistentFolderButtonShowed()"
                       data-cy="k8sAppCreate-addPersistentFolderButton"
                     >
-                      <i class="fa fa-plus-circle" aria-hidden="true"></i> add persisted folder
+                      <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加持久化文件夹
                     </span>
                   </div>
 
                   <div class="col-sm-12 form-inline" style="margin-top: 10px;" ng-repeat="persistedFolder in ctrl.formValues.PersistedFolders">
                     <div style="margin-top: 2px;">
                       <div class="input-group col-sm-3 input-group-sm" ng-class="{ striked: persistedFolder.NeedsDeletion }">
-                        <span class="input-group-addon">path in container</span>
+                        <span class="input-group-addon">容器中的路径</span>
                         <input
                           type="text"
                           class="form-control"
@@ -498,7 +493,7 @@
                             uib-btn-radio="true"
                             ng-change="ctrl.useNewVolume($index)"
                             ng-disabled="ctrl.isNewVolumeButtonDisabled($index)"
-                            >New volume</label
+                            >新建存储卷</label
                           >
                           <label
                             class="btn btn-primary"
@@ -506,13 +501,13 @@
                             uib-btn-radio="false"
                             ng-change="ctrl.useExistingVolume($index)"
                             ng-disabled="ctrl.isExistingVolumeButtonDisabled()"
-                            >Existing volume</label
+                            >现有存储卷</label
                           >
                         </span>
                       </div>
 
                       <div class="input-group col-sm-3 input-group-sm" ng-class="{ striked: persistedFolder.NeedsDeletion }" ng-if="persistedFolder.UseNewVolume">
-                        <span class="input-group-addon">requested size</span>
+                        <span class="input-group-addon">要求的大小</span>
                         <input
                           type="number"
                           class="form-control"
@@ -534,7 +529,7 @@
                       </div>
 
                       <div class="input-group col-sm-2 input-group-sm" ng-class="{ striked: persistedFolder.NeedsDeletion }" ng-if="persistedFolder.UseNewVolume">
-                        <span class="input-group-addon">storage</span>
+                        <span class="input-group-addon">存储</span>
                         <select
                           ng-if="ctrl.hasMultipleStorageClassesAvailable()"
                           class="form-control"
@@ -554,7 +549,7 @@
                       </div>
 
                       <div class="input-group col-sm-5 input-group-sm" ng-if="!persistedFolder.UseNewVolume" ng-class="{ striked: persistedFolder.NeedsDeletion }">
-                        <span class="input-group-addon">volume</span>
+                        <span class="input-group-addon">存储卷</span>
                         <select
                           class="form-control"
                           name="existing_volumes_{{ $index }}"
@@ -564,7 +559,7 @@
                           ng-disabled="ctrl.isEditAndExistingPersistedFolder($index) || ctrl.formValues.Containers.length > 1"
                           required
                         >
-                          <option selected disabled hidden value="">Select a volume</option>
+                          <option selected disabled hidden value="">选择一个存储卷</option>
                         </select>
                       </div>
 
@@ -610,10 +605,10 @@
                           "
                         >
                           <ng-messages for="kubernetesApplicationCreationForm['persisted_folder_path_' + $index].$error">
-                            <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Path is required.</p>
+                            <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 路径是必需的。</p>
                           </ng-messages>
                           <p ng-if="ctrl.state.duplicates.persistedFolders.refs[$index] !== undefined"
-                            ><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This path is already defined.</p
+                            ><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此路径已定义。</p
                           >
                         </div>
                       </div>
@@ -623,8 +618,8 @@
                       <div class="input-group col-sm-5 input-group-sm">
                         <div class="small text-warning" style="margin-top: 5px;" ng-show="kubernetesApplicationCreationForm['persisted_folder_size_' + $index].$invalid">
                           <ng-messages for="kubernetesApplicationCreationForm['persisted_folder_size_' + $index].$error">
-                            <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Size is required.</p>
-                            <p ng-message="min"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This value must be greater than zero.</p>
+                            <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 大小是必需的。</p>
+                            <p ng-message="min"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 该值必须大于零。</p>
                           </ng-messages>
                         </div>
                         <div
@@ -632,10 +627,10 @@
                           ng-show="kubernetesApplicationCreationForm['existing_volumes_' + $index].$invalid || ctrl.state.duplicates.existingVolumes.refs[$index] !== undefined"
                         >
                           <ng-messages for="kubernetesApplicationCreationForm['existing_volumes_' + $index].$error">
-                            <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Volume is required.</p>
+                            <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 存储卷是必须的。</p>
                           </ng-messages>
                           <p ng-if="ctrl.state.duplicates.existingVolumes.refs[$index] !== undefined"
-                            ><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This volume is already used.</p
+                            ><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此存储卷已被使用。</p
                           >
                         </div>
                       </div>
@@ -650,13 +645,13 @@
                 <div ng-if="ctrl.showDataAccessPolicySection()">
                   <div class="form-group">
                     <div class="col-sm-12">
-                      <label class="control-label text-left">Data access policy</label>
+                      <label class="control-label text-left">数据访问政策</label>
                     </div>
                   </div>
 
                   <div class="form-group">
                     <div class="col-sm-12 small text-muted">
-                      Specify how the data will be used across instances.
+                      指定如何跨实例使用数据。
                     </div>
                   </div>
 
@@ -681,7 +676,7 @@
                             <i class="fa fa-cubes" aria-hidden="true" style="margin-right: 2px;"></i>
                             Isolated
                           </div>
-                          <p>Application will be deployed as a StatefulSet with each instantiating their own data</p>
+                          <p>应用程序将作为 StatefulSet 部署，每个应用程序实例化自己的数据</p>
                         </label>
                       </div>
                       <div
@@ -703,7 +698,7 @@
                             <i class="fa fa-cubes" aria-hidden="true" style="margin-right: 2px;"></i>
                             Isolated
                           </div>
-                          <p>Application will be deployed as a StatefulSet with each instantiating their own data</p>
+                          <p>应用程序将作为 StatefulSet 部署，每个应用程序实例化自己的数据</p>
                         </label>
                       </div>
                       <div ng-if="!ctrl.state.isEdit || (ctrl.state.isEdit && ctrl.formValues.DataAccessPolicy === ctrl.ApplicationDataAccessPolicies.SHARED)">
@@ -717,9 +712,9 @@
                         <label for="data_access_shared">
                           <div class="boxselector_header">
                             <i class="fa fa-cube" aria-hidden="true" style="margin-right: 2px;"></i>
-                            Shared
+                            共享
                           </div>
-                          <p>Application will be deployed as a Deployment with a shared storage access</p>
+                          <p>应用程序将部署为具有共享存储访问权限的部署</p>
                         </label>
                       </div>
                       <div style="color: #767676;" ng-if="ctrl.state.isEdit && ctrl.formValues.DataAccessPolicy === ctrl.ApplicationDataAccessPolicies.ISOLATED">
@@ -734,9 +729,9 @@
                         >
                           <div class="boxselector_header">
                             <i class="fa fa-cube" aria-hidden="true" style="margin-right: 2px;"></i>
-                            Shared
+                            共享
                           </div>
-                          <p>Application will be deployed as a Deployment with a shared storage access</p>
+                          <p>应用程序将部署为具有共享存储访问权限的部署</p>
                         </label>
                       </div>
                     </div>
@@ -746,29 +741,27 @@
                 <!-- #endregion -->
 
                 <div class="col-sm-12 form-section-title">
-                  Resource reservations
+                  资源预留
                 </div>
                 <!-- #region RESOURCE RESERVATIONS -->
                 <div class="form-group" ng-if="!ctrl.state.resourcePoolHasQuota">
                   <div class="col-sm-12 small text-muted">
                     <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                    Resource reservations are applied per instance of the application.
+                    每个应用程序实例都应用资源预留。
                   </div>
                 </div>
 
                 <div class="form-group" ng-if="ctrl.state.resourcePoolHasQuota && !ctrl.resourceQuotaCapacityExceeded()">
                   <div class="col-sm-12 small text-muted">
                     <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                    A resource quota is set on this namespace, you must specify resource reservations. Resource reservations are applied per instance of the application. Maximums
-                    are inherited from the namespace quota.
+                    在此namespace上设置了资源配额，您必须指定资源预留。 每个应用程序实例都应用资源预留。 最大值继承自namespace配额。
                   </div>
                 </div>
 
                 <div class="form-group" ng-if="ctrl.state.resourcePoolHasQuota && ctrl.resourceQuotaCapacityExceeded()">
                   <div class="col-sm-12 small text-danger">
                     <i class="fa fa-exclamation-circle red-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                    This namespace has exhausted its resource capacity and you will not be able to deploy the application. Contact your administrator to expand the capacity of the
-                    namespace.
+                    此namespace已耗尽其资源容量，您将无法部署应用程序。 请联系您的管理员以扩展namespace的容量。
                   </div>
                 </div>
 
@@ -778,10 +771,10 @@
                   ng-if="(!ctrl.state.resourcePoolHasQuota || (ctrl.state.resourcePoolHasQuota && !ctrl.resourceQuotaCapacityExceeded())) && ctrl.formValues.Containers.length <= 1"
                 >
                   <label for="memory-limit" class="col-sm-3 col-lg-2 control-label text-left" style="margin-top: 20px;">
-                    Memory
+                    内存
                     <portainer-tooltip
                       position="bottom"
-                      message="An instance of this application will reserve this amount of memory. If the instance memory usage exceeds the reservation, it might be subject to OOM."
+                      message="此应用程序的实例将保留此内存量。 如果实例内存使用量超过预留，则可能会出现OOM。"
                     >
                     </portainer-tooltip>
                   </label>
@@ -803,7 +796,7 @@
                   </div>
                   <div class="col-sm-4">
                     <p class="small text-muted" style="margin-top: 7px;">
-                      Maximum memory usage (<b>MB</b>)
+                     最大内存使用量 (<b>MB</b>)
                     </p>
                   </div>
                 </div>
@@ -811,7 +804,7 @@
                   <div class="col-sm-12 small text-warning">
                     <div ng-messages="kubernetesApplicationCreationForm.memory_limit.$error">
                       <p
-                        ><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Value must be between {{ ctrl.state.sliders.memory.min }} and
+                        ><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 值必须介于 {{ ctrl.state.sliders.memory.min }} 和
                         {{ ctrl.state.sliders.memory.max }}
                       </p>
                     </div>
@@ -836,7 +829,7 @@
                   </div>
                   <div class="col-sm-4" style="margin-top: 20px;">
                     <p class="small text-muted">
-                      Maximum CPU usage
+                      最大 CPU 使用率
                     </p>
                   </div>
                 </div>
@@ -844,19 +837,19 @@
                 <div class="form-group" ng-if="ctrl.nodeLimitsOverflow()">
                   <div class="col-sm-12 small text-danger">
                     <i class="fa fa-exclamation-circle red-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                    These reservations would exceed the resources currently available in the cluster.
+                    这些预留将超过集群中当前可用的资源。
                   </div>
                 </div>
                 <!-- !cpu-limit-input -->
                 <!-- #endregion -->
 
                 <div class="col-sm-12 form-section-title">
-                  Deployment
+                  部署
                 </div>
                 <!-- #region DEPLOYMENT -->
                 <div class="form-group">
                   <div class="col-sm-12 small text-muted">
-                    Select how you want to deploy your application inside the cluster.
+                    选择您希望如何在集群内部署应用程序。
                   </div>
                 </div>
 
@@ -874,9 +867,9 @@
                       <label for="deployment_replicated">
                         <div class="boxselector_header">
                           <i class="fa fa-cube" aria-hidden="true" style="margin-right: 2px;"></i>
-                          Replicated
+                          复制的
                         </div>
-                        <p>Run one or multiple instances of this container</p>
+                        <p>运行此容器的一个或多个实例</p>
                       </label>
                     </div>
                     <div style="color: #767676;" ng-if="!ctrl.supportGlobalDeployment()">
@@ -891,9 +884,9 @@
                       >
                         <div class="boxselector_header">
                           <i class="fa fa-cubes" aria-hidden="true" style="margin-right: 2px;"></i>
-                          Global
+                          全局
                         </div>
-                        <p>Application will be deployed as a DaemonSet with an instance on each node of the cluster</p>
+                        <p>应用程序将部署为 DaemonSet，在集群的每个节点上都有一个实例</p>
                       </label>
                     </div>
                     <div ng-if="ctrl.supportGlobalDeployment()">
@@ -908,9 +901,9 @@
                       <label for="deployment_global">
                         <div class="boxselector_header">
                           <i class="fa fa-cubes" aria-hidden="true" style="margin-right: 2px;"></i>
-                          Global
+                          全局
                         </div>
-                        <p>Application will be deployed as a DaemonSet with an instance on each node of the cluster</p>
+                        <p>应用程序将作为守护程序部署，在集群的每个节点上都有一个实例</p>
                       </label>
                     </div>
                   </div>
@@ -921,7 +914,7 @@
                 <div class="form-group form-inline" ng-if="ctrl.formValues.DeploymentType === ctrl.ApplicationDeploymentTypes.REPLICATED">
                   <div class="col-sm-12">
                     <label class="control-label text-left">
-                      Instance count
+                      实例计数
                     </label>
                     <input
                       type="number"
@@ -942,8 +935,8 @@
                 <div class="form-group" ng-if="kubernetesApplicationCreationForm['replica_count'].$invalid">
                   <div class="col-sm-12 small text-warning">
                     <ng-messages for="kubernetesApplicationCreationForm['replica_count'].$error">
-                      <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Instance count is required.</p>
-                      <p ng-message="min"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Instance count must be greater than 0.</p>
+                      <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 实例计数是必需的。</p>
+                      <p ng-message="min"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 实例计数必须大于0。</p>
                     </ng-messages>
                   </div>
                 </div>
@@ -955,37 +948,37 @@
                 >
                   <div class="col-sm-12 small text-muted">
                     <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                    This application will reserve the following resources:
-                    <b>{{ ctrl.formValues.CpuLimit * ctrl.formValues.ReplicaCount | kubernetesApplicationCPUValue }} CPU</b> and
-                    <b>{{ ctrl.formValues.MemoryLimit * ctrl.formValues.ReplicaCount }} MB</b> of memory.
+                    此应用程序将保留以下资源：
+                    <b>{{ ctrl.formValues.CpuLimit * ctrl.formValues.ReplicaCount | kubernetesApplicationCPUValue }} CPU</b> 和
+                    <b>{{ ctrl.formValues.MemoryLimit * ctrl.formValues.ReplicaCount }} MB</b> 内存。
                   </div>
                 </div>
 
                 <div class="form-group" ng-if="ctrl.resourceReservationsOverflow()">
                   <div class="col-sm-12 small text-danger">
                     <i class="fa fa-exclamation-circle red-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                    This application would exceed available resources. Please review resource reservations or the instance count.
+                    此应用程序将超过可用资源。请查看资源保留或实例计数。
                   </div>
                 </div>
 
                 <div class="form-group" ng-if="!ctrl.supportScalableReplicaDeployment()">
                   <div class="col-sm-12 small text-muted">
                     <i class="fa fa-exclamation-circle orange-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                    The following storage option(s) do not support concurrent access from multiples instances: <code>{{ ctrl.getNonScalableStorage() }}</code
-                    >. You will not be able to scale that application.
+                    以下存储选项不支持从多个实例进行并发访问： <code>{{ ctrl.getNonScalableStorage() }}</code
+                    >. 您将无法扩展该应用程序。
                   </div>
                 </div>
                 <!-- #endregion -->
 
                 <!-- #region AUTO SCALING -->
                 <div class="col-sm-12 form-section-title" ng-if="ctrl.formValues.DeploymentType !== ctrl.ApplicationDeploymentTypes.GLOBAL">
-                  Auto-scaling
+                  自动缩放
                 </div>
 
                 <div class="form-group" ng-if="ctrl.formValues.DeploymentType !== ctrl.ApplicationDeploymentTypes.GLOBAL && ctrl.state.useServerMetrics">
                   <div class="col-sm-12">
                     <label for="enable_auto_scaling" class="control-label text-left">
-                      Enable auto scaling for this application
+                      为此应用程序启用自动缩放
                     </label>
                     <label class="switch" style="margin-left: 20px;">
                       <input
@@ -1003,11 +996,11 @@
                 <div class="form-group" ng-if="ctrl.formValues.DeploymentType !== ctrl.ApplicationDeploymentTypes.GLOBAL && !ctrl.state.useServerMetrics">
                   <div class="col-sm-12 small text-muted">
                     <p ng-if="!ctrl.isAdmin">
-                      This feature is currently disabled and must be enabled by an administrator user.
+                      此功能当前已禁用，必须由管理员用户启用。
                     </p>
                     <p ng-if="ctrl.isAdmin">
-                      Server metrics features must be enabled in the
-                      <a ui-sref="portainer.endpoints.endpoint.kubernetesConfig({id: ctrl.endpoint.Id})" class="ctrl.isAdmin">environment configuration view</a>.
+                      必须在
+                      <a ui-sref="portainer.endpoints.endpoint.kubernetesConfig({id: ctrl.endpoint.Id})" class="ctrl.isAdmin">环境配置视图</a>中启用服务器度量功能。
                     </p>
                   </div>
                 </div>
@@ -1016,13 +1009,13 @@
                   <table class="table" style="margin-bottom: 0px;">
                     <tbody>
                       <tr class="small">
-                        <td style="width: 33%; border: none; padding: 2px 0 2px 0;">Minimum instances</td>
-                        <td style="width: 33%; border: none; padding: 2px 0 2px 0;">Maximum instances</td>
+                        <td style="width: 33%; border: none; padding: 2px 0 2px 0;">最小实例</td>
+                        <td style="width: 33%; border: none; padding: 2px 0 2px 0;">最大实例</td>
                         <td style="width: 33%; border: none; padding: 2px 0 2px 0;">
-                          Target CPU usage (<b>%</b>)
+                          目标CPU使用率 (<b>%</b>)
                           <portainer-tooltip
                             position="bottom"
-                            message="The autoscaler will ensure enough instances are running to maintain an average CPU usage across all instances."
+                            message="自动缩放器将确保有足够多的实例在运行，以维持所有实例的平均 CPU 使用率。"
                           >
                           </portainer-tooltip>
                         </td>
@@ -1044,9 +1037,9 @@
                           <div class="input-group input-group-sm" ng-show="kubernetesApplicationCreationForm['auto_scaler_min'].$invalid">
                             <div class="small text-warning" style="margin-top: 5px;">
                               <ng-messages for="kubernetesApplicationCreationForm['auto_scaler_min'].$error">
-                                <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Minimum instances is required.</p>
-                                <p ng-message="min"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Minimum instances must be greater than 0.</p>
-                                <p ng-message="max"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Minimum instances must be smaller than maximum instances.</p>
+                                <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 需要最少的实例。</p>
+                                <p ng-message="min"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 最小实例数必须大于0。</p>
+                                <p ng-message="max"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 最小实例必须小于最大实例。</p>
                               </ng-messages>
                             </div>
                           </div>
@@ -1064,8 +1057,8 @@
                           <div class="input-group input-group-sm" ng-show="kubernetesApplicationCreationForm['auto_scaler_max'].$invalid || ctrl.autoScalerOverflow()">
                             <div class="small text-warning" style="margin-top: 5px;">
                               <ng-messages for="kubernetesApplicationCreationForm['auto_scaler_max'].$error">
-                                <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Maximum instances is required.</p>
-                                <p ng-message="min"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Maximum instances must be greater than minimum instances.</p>
+                                <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 最大实例数是必需的。</p>
+                                <p ng-message="min"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 最大实例数必须大于最小实例数。</p>
                               </ng-messages>
                             </div>
                           </div>
@@ -1086,9 +1079,9 @@
                           <div class="input-group input-group-sm" ng-show="kubernetesApplicationCreationForm['auto_scaler_cpu'].$invalid">
                             <div class="small text-warning" style="margin-top: 5px;">
                               <ng-messages for="kubernetesApplicationCreationForm['auto_scaler_cpu'].$error">
-                                <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Target CPU usage is required.</p>
-                                <p ng-message="min"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Target CPU usage must be greater than 0.</p>
-                                <p ng-message="max"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Target CPU usage must be smaller than 100.</p>
+                                <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 需要目标CPU使用率。</p>
+                                <p ng-message="min"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 目标CPU使用率必须大于0。</p>
+                                <p ng-message="max"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 目标CPU使用率必须小于100。</p>
                               </ng-messages>
                             </div>
                           </div>
@@ -1100,7 +1093,7 @@
                   <div class="form-group" ng-if="ctrl.autoScalerOverflow()" style="margin-bottom: 10px;">
                     <div class="col-sm-12 small text-danger">
                       <i class="fa fa-exclamation-circle red-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                      This application would exceed available resources. Please review resource reservations or the maximum instance count of the auto-scaling policy.
+                      此应用程序将超过可用资源。请查看资源保留或自动缩放策略的最大实例数。
                     </div>
                   </div>
                 </div>
@@ -1108,21 +1101,21 @@
 
                 <div ng-if="ctrl.formValues.DeploymentType === ctrl.ApplicationDeploymentTypes.REPLICATED">
                   <div class="col-sm-12 form-section-title">
-                    Placement preferences and constraints
+                    放置首选项和约束
                   </div>
 
                   <!-- #region PLACEMENTS -->
                   <div class="form-group">
                     <div class="col-sm-12">
-                      <label class="control-label text-left">Placement rules</label>
+                      <label class="control-label text-left">放置规则</label>
                       <span class="label label-default interactive" style="margin-left: 10px;" ng-click="ctrl.addPlacement()">
-                        <i class="fa fa-plus-circle" aria-hidden="true"></i> add rule
+                        <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加规则
                       </span>
                     </div>
 
                     <div class="col-sm-12 small text-muted" ng-if="ctrl.formValues.Placements.length > 0" style="margin-top: 10px;">
                       <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                      Deploy this application on nodes that respect <b>ALL</b> of the following placement rules. Placement rules are based on node labels.
+                      在遵守以下所有放置规则的节点上部署此应用程序。放置规则基于节点标签。
                     </div>
 
                     <div class="col-sm-12 form-inline" style="margin-top: 10px;">
@@ -1174,7 +1167,7 @@
                         <div class="col-sm-5 input-group">
                           <div class="small text-warning" style="margin-top: 5px;" ng-if="ctrl.state.duplicates.placements.refs[$index] !== undefined">
                             <p ng-if="ctrl.state.duplicates.placements.refs[$index] !== undefined">
-                              <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This label is already defined.
+                              <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此标签已定义。
                             </p>
                           </div>
                         </div>
@@ -1190,7 +1183,7 @@
 
                     <div class="form-group">
                       <div class="col-sm-12 small text-muted">
-                        Specify the policy associated to the placement rules.
+                        指定与放置规则关联的策略。
                       </div>
                     </div>
 
@@ -1210,7 +1203,7 @@
                               <i class="fa fa-tasks" aria-hidden="true" style="margin-right: 2px;"></i>
                               Mandatory
                             </div>
-                            <p>Schedule this application <b>ONLY</b> on nodes that match <b>ALL</b> Rules</p>
+                            <p>在匹配 <b>ALL</b> 规则的节点上<b>ONLY</b>调度此应用程序</p>
                           </label>
                         </div>
                         <div>
@@ -1226,7 +1219,7 @@
                               <i class="fa fa-list" aria-hidden="true" style="margin-right: 2px;"></i>
                               Preferred
                             </div>
-                            <p>Schedule this application on nodes that match the rules if possible</p>
+                            <p>如果可能，在匹配规则的节点上调度此应用程序</p>
                           </label>
                         </div>
                       </div>
@@ -1237,13 +1230,13 @@
                 </div>
 
                 <div class="col-sm-12 form-section-title">
-                  Publishing the application
+                  发布应用程序
                 </div>
                 <!-- #region PUBLISHING OPTIONS -->
                 <div class="form-group">
                   <div class="col-sm-12">
                     <label for="enable_port_publishing" class="control-label text-left">
-                      Enable publishing for this application
+                      为此应用程序启用发布
                     </label>
                     <label class="switch" style="margin-left: 20px;">
                       <input type="checkbox" class="form-control" name="enable_port_publishing" ng-model="ctrl.formValues.IsPublishingService" />
@@ -1255,7 +1248,7 @@
                 <span ng-if="ctrl.formValues.IsPublishingService">
                   <div class="form-group">
                     <div class="col-sm-12 small text-muted">
-                      Select how you want to publish your application.
+                      选择您希望如何发布您的应用程序。
                     </div>
                   </div>
 
@@ -1283,7 +1276,7 @@
                             <i class="fa fa-list-alt" aria-hidden="true" style="margin-right: 2px;"></i>
                             ClusterIP
                           </div>
-                          <p>Internal communications inside the cluster only</p>
+                          <p>仅限集群内部的内部通信</p>
                         </label>
                         <label
                           for="publishing_internal"
@@ -1298,7 +1291,7 @@
                             <i class="fa fa-list-alt" aria-hidden="true" style="margin-right: 2px;"></i>
                             ClusterIP
                           </div>
-                          <p>Internal communications inside the cluster only</p>
+                          <p>仅限集群内部的内部通信</p>
                         </label>
                       </div>
 
@@ -1323,7 +1316,7 @@
                             <i class="fa fa-list" aria-hidden="true" style="margin-right: 2px;"></i>
                             NodePort
                           </div>
-                          <p>Publish this application via a port on all nodes of the cluster</p>
+                          <p>通过集群所有节点上的端口发布此应用程序</p>
                         </label>
                         <label
                           for="publishing_cluster"
@@ -1338,7 +1331,7 @@
                             <i class="fa fa-list" aria-hidden="true" style="margin-right: 2px;"></i>
                             NodePort
                           </div>
-                          <p>Publish this application via a port on all nodes of the cluster</p>
+                          <p>通过集群所有节点上的端口发布此应用程序</p>
                         </label>
                       </div>
                       <div ng-if="ctrl.publishViaIngressEnabled()" ng-style="{ color: ctrl.isPublishingTypeEditDisabled() ? '#767676' : '' }">
@@ -1362,7 +1355,7 @@
                             <i class="fa fa-route" aria-hidden="true" style="margin-right: 2px;"></i>
                             Ingress
                           </div>
-                          <p>Publish this application via a HTTP route</p>
+                          <p>通过 HTTP 路由发布此应用程序</p>
                         </label>
                         <label
                           for="publishing_ingress"
@@ -1377,7 +1370,7 @@
                             <i class="fa fa-route" aria-hidden="true" style="margin-right: 2px;"></i>
                             Ingress
                           </div>
-                          <p>Publish this application via a HTTP route</p>
+                          <p>通过 HTTP 路由发布此应用程序</p>
                         </label>
                       </div>
                       <div ng-if="ctrl.publishViaLoadBalancerEnabled()" ng-style="{ color: ctrl.isPublishingTypeEditDisabled() ? '#767676' : '' }">
@@ -1399,9 +1392,9 @@
                         >
                           <div class="boxselector_header">
                             <i class="fa fa-project-diagram" aria-hidden="true" style="margin-right: 2px;"></i>
-                            Load balancer
+                            负载均衡器
                           </div>
-                          <p>Publish this application via a load balancer</p>
+                          <p>通过负载均衡器发布此应用程序</p>
                         </label>
                         <label
                           for="publishing_loadbalancer"
@@ -1414,9 +1407,9 @@
                         >
                           <div class="boxselector_header">
                             <i class="fa fa-project-diagram" aria-hidden="true" style="margin-right: 2px;"></i>
-                            Load balancer
+                            负载均衡器
                           </div>
-                          <p>Publish this application via a load balancer</p>
+                          <p>通过负载均衡器发布此应用程序</p>
                         </label>
                       </div>
                     </div>
@@ -1426,9 +1419,9 @@
                   <!-- #region PUBLISHED PORTS -->
                   <div class="form-group">
                     <div class="col-sm-12" style="margin-top: 5px;">
-                      <label class="control-label text-left">Published ports</label>
+                      <label class="control-label text-left">已发布的端口</label>
                       <span class="label label-default interactive" style="margin-left: 10px;" ng-click="ctrl.addPublishedPort()" data-cy="k8sAppCreate-addNewPortButton">
-                        <i class="fa fa-plus-circle" aria-hidden="true"></i> publish a new port
+                        <i class="fa fa-plus-circle" aria-hidden="true"></i> 发布一个新端口
                       </span>
                     </div>
 
@@ -1438,11 +1431,10 @@
                       ng-if="ctrl.formValues.PublishingType === ctrl.ApplicationPublishingTypes.NODE_PORT && ctrl.formValues.PublishedPorts.length > 0"
                     >
                       <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                      When publishing a port in cluster mode, the node port is optional. If left empty Kubernetes will use a random port number. If you wish to specify a port, use
-                      a port number inside the default range <code>30000-32767</code>.
+                      在集群模式下发布端口时，节点端口是可选的。 如果留空，Kubernetes 将使用随机端口号。 如果要指定端口，请使用默认范围内的端口号 <code>30000-32767</code>.
                     </div>
                     <div ng-if="ctrl.hasNoPublishedPorts()" class="col-sm-12 small text-warning" style="margin-top: 12px;">
-                      <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> At least one published port must be defined.
+                      <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 必须至少定义一个已发布的端口。
                     </div>
 
                     <div class="col-sm-12 form-inline" style="margin-top: 10px;">
@@ -1464,7 +1456,7 @@
                             'col-sm-3': ctrl.formValues.PublishingType !== ctrl.ApplicationPublishingTypes.INGRESS
                           }"
                         >
-                          <span class="input-group-addon">container port</span>
+                          <span class="input-group-addon">容器端口</span>
                           <input
                             type="number"
                             class="form-control"
@@ -1488,7 +1480,7 @@
                             (!publishedPort.IsNew && ctrl.savedFormValues.PublishingType === ctrl.ApplicationPublishingTypes.NODE_PORT)
                           "
                         >
-                          <span class="input-group-addon">node port</span>
+                          <span class="input-group-addon">节点端口</span>
                           <input
                             name="published_node_port_{{ $index }}"
                             type="number"
@@ -1511,7 +1503,7 @@
                             (!publishedPort.IsNew && ctrl.savedFormValues.PublishingType === ctrl.ApplicationPublishingTypes.LOAD_BALANCER)
                           "
                         >
-                          <span class="input-group-addon">load balancer port</span>
+                          <span class="input-group-addon">负载均衡器端口</span>
                           <input
                             type="number"
                             class="form-control"
@@ -1536,7 +1528,7 @@
                             (!publishedPort.IsNew && ctrl.savedFormValues.PublishingType === ctrl.ApplicationPublishingTypes.INGRESS)
                           "
                         >
-                          <span class="input-group-addon">ingress</span>
+                          <span class="input-group-addon">入口</span>
                           <select
                             class="form-control"
                             name="ingress_class_{{ $index }}"
@@ -1547,7 +1539,7 @@
                             ng-disabled="ctrl.disableLoadBalancerEdit() || ctrl.isEditAndNotNewPublishedPort($index)"
                             data-cy="k8sAppCreate-ingressSelect_{{ $index }}"
                           >
-                            <option selected disabled hidden value="">Select an ingress</option>
+                            <option selected disabled hidden value="">选择入口</option>
                           </select>
                         </div>
 
@@ -1559,7 +1551,7 @@
                             (!publishedPort.IsNew && ctrl.savedFormValues.PublishingType === ctrl.ApplicationPublishingTypes.INGRESS)
                           "
                         >
-                          <span class="input-group-addon">hostname</span>
+                          <span class="input-group-addon">主机名</span>
                           <select
                             class="form-control"
                             name="ingress_hostname_{{ $index }}"
@@ -1569,7 +1561,7 @@
                             ng-disabled="ctrl.disableLoadBalancerEdit() || ctrl.isEditAndNotNewPublishedPort($index)"
                             data-cy="k8sAppCreate-hostnameSelect_{{ $index }}"
                           >
-                            <option selected disabled hidden value="">Select a hostname</option>
+                            <option selected disabled hidden value="">选择主机名</option>
                           </select>
                         </div>
 
@@ -1666,12 +1658,12 @@
                             "
                           >
                             <div ng-messages="kubernetesApplicationCreationForm['container_port_'+$index].$error">
-                              <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Container port number is required.</p>
-                              <p ng-message="min"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Container port number must be inside the range 1-65535.</p>
-                              <p ng-message="max"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Container port number must be inside the range 1-65535.</p>
+                              <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 需要容器端口号。</p>
+                              <p ng-message="min"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 容器端口号必须在范围内 1-65535.</p>
+                              <p ng-message="max"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 容器端口号必须在范围内 1-65535.</p>
                             </div>
                             <p ng-if="ctrl.state.duplicates.publishedPorts.containerPorts.refs[$index] !== undefined">
-                              <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This port is already used.
+                              <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此端口已被使用。
                             </p>
                           </div>
                         </div>
@@ -1686,11 +1678,11 @@
                             "
                           >
                             <div ng-messages="kubernetesApplicationCreationForm['published_node_port_'+$index].$error">
-                              <p ng-message="min"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Node port number must be inside the range 30000-32767.</p>
-                              <p ng-message="max"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Node port number must be inside the range 30000-32767.</p>
+                              <p ng-message="min"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 节点端口号必须在范围内 30000-32767.</p>
+                              <p ng-message="max"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 节点端口号必须在范围内 30000-32767.</p>
                             </div>
                             <p ng-if="ctrl.state.duplicates.publishedPorts.nodePorts.refs[$index] !== undefined">
-                              <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This port is already used.
+                              <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此端口已被使用。
                             </p>
                           </div>
                         </div>
@@ -1698,7 +1690,7 @@
                         <div class="col-sm-3 input-group input-group-sm" ng-if="ctrl.formValues.PublishingType === ctrl.ApplicationPublishingTypes.INGRESS">
                           <div class="small text-warning" style="margin-top: 5px;" ng-if="kubernetesApplicationCreationForm['ingress_class_' + $index].$invalid">
                             <div ng-messages="kubernetesApplicationCreationForm['ingress_class_'+$index].$error">
-                              <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Ingress selection is required.</p>
+                              <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 需要选择入口</p>
                             </div>
                           </div>
                         </div>
@@ -1711,14 +1703,13 @@
                             "
                           >
                             <div ng-messages="kubernetesApplicationCreationForm['ingress_route_'+$index].$error">
-                              <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Route is required.</p>
+                              <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 路线是必需的。</p>
                               <p ng-message="pattern"
-                                ><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This field must consist of alphanumeric characters or the special characters: '-',
-                                '_' or '/'. It must start and end with an alphanumeric character (e.g. 'my-route', or 'route-123').</p
+                                ><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此字段必须由字母数字字符或特殊字符组成：“-”、“_”或“/”。 它必须以字母数字字符开头和结尾 (例如 'my-route', 或 'route-123').</p
                               >
                             </div>
                             <p ng-if="ctrl.state.duplicates.publishedPorts.ingressRoutes.refs[$index] !== undefined">
-                              <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This route is already used.
+                              <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此路线已被使用
                             </p>
                           </div>
                         </div>
@@ -1733,13 +1724,13 @@
                             "
                           >
                             <div ng-messages="kubernetesApplicationCreationForm['load_balancer_port_'+$index].$error">
-                              <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Load balancer port number is required.</p>
-                              <p ng-message="min"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Load balancer port number must be inside the range 1-65535.</p>
-                              <p ng-message="max"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Load balancer port number must be inside the range 1-65535.</p>
+                              <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 负载平衡器端口号是必需的。</p>
+                              <p ng-message="min"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 负载均衡器端口号必须在范围内 1-65535.</p>
+                              <p ng-message="max"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 负载均衡器端口号必须在范围内 1-65535.</p>
                             </div>
                             <p ng-if="ctrl.state.duplicates.publishedPorts.loadBalancerPorts.refs[$index] !== undefined">
                               <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-                              This port is already used.
+                              此端口已被使用。
                             </p>
                           </div>
                         </div>
@@ -1762,7 +1753,7 @@
             </div>
 
             <div class="col-sm-12 form-section-title" ng-if="ctrl.state.appType !== ctrl.KubernetesDeploymentTypes.GIT">
-              Actions
+              操作
             </div>
             <!-- #region ACTIONS -->
             <div class="form-group">
@@ -1776,10 +1767,10 @@
                   button-spinner="ctrl.state.actionInProgress"
                   data-cy="k8sAppCreate-deployButton"
                 >
-                  <span ng-show="!ctrl.state.isEdit && !ctrl.state.actionInProgress">Deploy application</span>
-                  <span ng-show="!ctrl.state.isEdit && ctrl.state.actionInProgress">Deployment in progress...</span>
-                  <span ng-show="ctrl.state.isEdit && !ctrl.state.actionInProgress">Update application</span>
-                  <span ng-show="ctrl.state.isEdit && ctrl.state.actionInProgress">Update in progress...</span>
+                  <span ng-show="!ctrl.state.isEdit && !ctrl.state.actionInProgress">部署应用</span>
+                  <span ng-show="!ctrl.state.isEdit && ctrl.state.actionInProgress">正在部署...</span>
+                  <span ng-show="ctrl.state.isEdit && !ctrl.state.actionInProgress">更新应用</span>
+                  <span ng-show="ctrl.state.isEdit && ctrl.state.actionInProgress">正在更新...</span>
                 </button>
                 <button
                   ng-if="ctrl.state.isEdit && !ctrl.state.actionInProgress && ctrl.state.appType === ctrl.KubernetesDeploymentTypes.APPLICATION_FORM"
@@ -1788,7 +1779,7 @@
                   ui-sref="kubernetes.applications.application({ name: ctrl.application.Name, namespace: ctrl.application.ResourcePool })"
                   data-cy="k8sAppCreate-appCancelButton"
                 >
-                  Cancel
+                  取消
                 </button>
                 <!-- #Web editor buttons -->
                 <button
@@ -1799,8 +1790,8 @@
                   style="margin-top: 7px; margin-left: 0;"
                   button-spinner="ctrl.state.updateWebEditorInProgress"
                 >
-                  <span ng-show="!ctrl.state.updateWebEditorInProgress">Update the application</span>
-                  <span ng-show="ctrl.state.updateWebEditorInProgress">Update in progress...</span>
+                  <span ng-show="!ctrl.state.updateWebEditorInProgress">更新应用程序</span>
+                  <span ng-show="ctrl.state.updateWebEditorInProgress">正在更新...</span>
                 </button>
               </div>
             </div>

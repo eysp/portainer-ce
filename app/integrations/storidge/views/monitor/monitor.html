@@ -1,10 +1,10 @@
 <rd-header>
   <rd-header-title title-text="Storidge monitor">
-    <a data-toggle="tooltip" title="Refresh" ui-sref="storidge.monitor" ui-sref-opts="{reload: true}">
+    <a data-toggle="tooltip" title="刷新" ui-sref="storidge.monitor" ui-sref-opts="{reload: true}">
       <i class="fa fa-sync" aria-hidden="true"></i>
     </a>
   </rd-header-title>
-  <rd-header-content> <a ui-sref="storidge.cluster">Storidge</a> &gt; <a ui-sref="storidge.monitor">Cluster monitoring</a> </rd-header-content>
+  <rd-header-content> <a ui-sref="storidge.cluster">Storidge</a> &gt; <a ui-sref="storidge.monitor">集群监控</a> </rd-header-content>
 </rd-header>
 
 <div class="row">
@@ -32,7 +32,7 @@
                 </td>
               </tr>
               <tr>
-                <td>Total capacity</td>
+                <td>总容量</td>
                 <td>{{ info.TotalCapacity | humansize }}</td>
               </tr>
             </tbody>
@@ -43,7 +43,7 @@
   </div>
   <div class="col-md-4 col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="fa-chart-area" title-text="IOPS usage"></rd-widget-header>
+      <rd-widget-header icon="fa-chart-area" title-text="IOPS 使用"></rd-widget-header>
       <rd-widget-body>
         <div class="chart-container" style="position: relative;">
           <canvas id="iopsChart" width="770" height="400"></canvas>
@@ -52,11 +52,11 @@
           <table class="table">
             <tbody>
               <tr>
-                <td>IOPS available</td>
+                <td>可用 IOPS</td>
                 <td>{{ ((info.FreeIOPS * 100) / info.TotalIOPS).toFixed(1) }}%</td>
               </tr>
               <tr>
-                <td>Provisioned IOPS</td>
+                <td>预分配 IOPS</td>
                 <td>
                   {{ info.ProvisionedIOPS | number }}
                   <span ng-if="+info.ProvisionedIOPS >= +info.TotalIOPS">
@@ -65,7 +65,7 @@
                 </td>
               </tr>
               <tr>
-                <td>Total IOPS</td>
+                <td>全部 IOPS</td>
                 <td>{{ info.TotalIOPS | number }}</td>
               </tr>
             </tbody>
@@ -76,7 +76,7 @@
   </div>
   <div class="col-md-4 col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="fa-chart-area" title-text="Bandwith usage"></rd-widget-header>
+      <rd-widget-header icon="fa-chart-area" title-text="宽带使用"></rd-widget-header>
       <rd-widget-body>
         <div class="chart-container" style="position: relative;">
           <canvas id="bandwithChart" width="770" height="400"></canvas>
@@ -85,11 +85,11 @@
           <table class="table">
             <tbody>
               <tr>
-                <td>Bandwidth available</td>
+                <td>可用带宽</td>
                 <td>{{ ((info.FreeBandwidth * 100) / info.TotalBandwidth).toFixed(1) }}%</td>
               </tr>
               <tr>
-                <td>Provisioned bandwidth</td>
+                <td>调配带宽</td>
                 <td>
                   {{ info.ProvisionedBandwidth | humansize }}
                   <span ng-if="+info.ProvisionedBandwidth >= +info.TotalBandwidth">
@@ -98,7 +98,7 @@
                 </td>
               </tr>
               <tr>
-                <td>Total bandwidth</td>
+                <td>总带宽</td>
                 <td>{{ info.TotalBandwidth | humansize }} /s</td>
               </tr>
             </tbody>
@@ -127,9 +127,9 @@
     <rd-widget>
       <rd-widget-header icon="fa-history" title-text="Cluster events">
         <div class="pull-right">
-          Items per page:
+          每页项目：
           <select ng-model="state.pagination_count" ng-change="changePaginationCount()">
-            <option value="0">All</option>
+            <option value="0">全部</option>
             <option value="10">10</option>
             <option value="25">25</option>
             <option value="50">50</option>
@@ -185,7 +185,7 @@
                 <td>{{ event.Content }}</td>
               </tr>
               <tr ng-if="!events">
-                <td colspan="4" class="text-center text-muted">Loading...</td>
+                <td colspan="4" class="text-center text-muted">加载中...</td>
               </tr>
               <tr ng-if="events.length === 0">
                 <td colspan="4" class="text-center text-muted">No events available.</td>

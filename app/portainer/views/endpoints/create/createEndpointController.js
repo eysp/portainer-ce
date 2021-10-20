@@ -27,22 +27,22 @@ angular
       deploymentTab: 0,
       allowCreateTag: Authentication.isAdmin(),
       availableEdgeAgentCheckinOptions: [
-        { key: 'Use default interval', value: 0 },
+        { key: '使用默认间隔', value: 0 },
         {
-          key: '5 seconds',
+          key: '5 秒',
           value: 5,
         },
         {
-          key: '10 seconds',
+          key: '10 秒',
           value: 10,
         },
         {
-          key: '30 seconds',
+          key: '30 秒',
           value: 30,
         },
-        { key: '5 minutes', value: 300 },
-        { key: '1 hour', value: 3600 },
-        { key: '1 day', value: 86400 },
+        { key: '5 秒', value: 300 },
+        { key: '1 小时', value: 3600 },
+        { key: '1 天', value: 86400 },
       ],
     };
 
@@ -101,7 +101,7 @@ angular
         $scope.availableTags = $scope.availableTags.concat(tag);
         $scope.formValues.TagIds = $scope.formValues.TagIds.concat(tag.Id);
       } catch (err) {
-        Notifications.error('Failure', err, 'Unable to create tag');
+        Notifications.error('失败', err, '无法创建标签');
       }
     }
 
@@ -117,11 +117,11 @@ angular
         $scope.state.actionInProgress = true;
         EndpointService.createLocalEndpoint(name, URL, publicURL, groupId, tagIds)
           .then(function success() {
-            Notifications.success('Environment created', name);
+            Notifications.success('环境创建', name);
             $state.go('portainer.endpoints', {}, { reload: true });
           })
           .catch(function error(err) {
-            Notifications.error('Failure', err, 'Unable to create environment');
+            Notifications.error('失败', err, '无法创建环境');
           })
           .finally(function final() {
             $scope.state.actionInProgress = false;
@@ -163,11 +163,11 @@ angular
       $scope.state.actionInProgress = true;
       EndpointService.createLocalKubernetesEndpoint(name, tagIds)
         .then(function success(result) {
-          Notifications.success('Environment created', name);
+          Notifications.success('环境创建', name);
           $state.go('portainer.endpoints.endpoint.kubernetesConfig', { id: result.Id });
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to create environment');
+          Notifications.error('失败', err, '无法创建环境');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -225,11 +225,11 @@ angular
       $scope.state.actionInProgress = true;
       EndpointService.createAzureEndpoint(name, applicationId, tenantId, authenticationKey, groupId, tagIds)
         .then(function success() {
-          Notifications.success('Environment created', name);
+          Notifications.success('环境创建', name);
           $state.go('portainer.endpoints', {}, { reload: true });
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to create environment');
+          Notifications.error('失败', err, '无法创建环境');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -256,7 +256,7 @@ angular
             CheckinInterval
           );
 
-          Notifications.success('Environment created', name);
+          Notifications.success('环境创建', name);
           switch (endpoint.Type) {
             case PortainerEndpointTypes.EdgeAgentOnDockerEnvironment:
             case PortainerEndpointTypes.EdgeAgentOnKubernetesEnvironment:
@@ -272,7 +272,7 @@ angular
 
           return endpoint;
         } catch (err) {
-          Notifications.error('Failure', err, 'Unable to create environment');
+          Notifications.error('失败', err, '无法创建环境');
         } finally {
           $scope.state.actionInProgress = false;
         }
@@ -293,7 +293,7 @@ angular
           $scope.state.availableEdgeAgentCheckinOptions[0].key += ` (${settings.EdgeAgentCheckinInterval} seconds)`;
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to load groups');
+          Notifications.error('失败', err, '无法加载组');
         });
     }
 

@@ -1,7 +1,7 @@
 <div class="datatable datatable-empty">
   <rd-widget>
     <rd-widget-body classes="no-padding">
-      <datatable-titlebar title="Authentication Events" icon="fa-history" feature="{{::$ctrl.feature}}"></datatable-titlebar>
+      <datatable-titlebar title="身份验证事件" icon="fa-history" feature="{{::$ctrl.feature}}"></datatable-titlebar>
       <datatable-searchbar on-change="($ctrl.onChangeKeyword)" ng-model="$ctrl.keyword"></datatable-searchbar>
       <div class="table-responsive">
         <table class="table table-hover nowrap-cells">
@@ -9,31 +9,31 @@
             <tr>
               <th>
                 <a>
-                  Time
+                  时间
                   <datatable-sort-icon key="Timestamp" selected-sort-key="{{ $ctrl.sort.key }}" reverse-order="$ctrl.sort.desc"></datatable-sort-icon>
                 </a>
               </th>
               <th>
                 <a>
-                  Origin
+                  来源
                   <datatable-sort-icon key="Origin" selected-sort-key="{{ $ctrl.sort.key }}" reverse-order="$ctrl.sort.desc"></datatable-sort-icon>
                 </a>
               </th>
               <th>
                 <a>
-                  Context
+                  上下文
                   <datatable-sort-icon key="Context" selected-sort-key="{{ $ctrl.sort.key }}" reverse-order="$ctrl.sort.desc"></datatable-sort-icon>
                 </a>
                 <datatable-filter labels="$ctrl.contextFilterLabels" filter-key="context" state="$ctrl.contextFilter" on-change="($ctrl.onChangeContextFilter)"> </datatable-filter>
               </th>
               <th>
                 <a>
-                  User
+                  用户
                   <datatable-sort-icon key="Username" selected-sort-key="{{ $ctrl.sort.key }}" reverse-order="$ctrl.sort.desc"></datatable-sort-icon>
                 </a>
               </th>
               <th>
-                Result
+                结果
               </th>
             </tr>
           </thead>
@@ -46,11 +46,11 @@
               <td></td>
             </tr>
             <tr ng-if="!$ctrl.logs">
-              <td class="text-center text-muted" colspan="5">Loading...</td>
+              <td class="text-center text-muted" colspan="5">加载中...</td>
             </tr>
             <tr ng-if="$ctrl.state.logs.length === 0">
               <td class="text-center text-muted" colspan="8">
-                No logs available.
+                没有可用的日志。
               </td>
             </tr>
           </tbody>

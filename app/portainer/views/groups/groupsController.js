@@ -15,10 +15,10 @@ function GroupsController($scope, $state, $async, GroupService, Notifications) {
       try {
         await GroupService.deleteGroup(group.Id);
 
-        Notifications.success('Environment group successfully removed', group.Name);
+        Notifications.success('成功删除环境组', group.Name);
         _.remove($scope.groups, group);
       } catch (err) {
-        Notifications.error('Failure', err, 'Unable to remove group');
+        Notifications.error('失败', err, '无法删除群组');
       }
     }
 
@@ -31,7 +31,7 @@ function GroupsController($scope, $state, $async, GroupService, Notifications) {
         $scope.groups = data;
       })
       .catch(function error(err) {
-        Notifications.error('Failure', err, 'Unable to retrieve environment groups');
+        Notifications.error('失败', err, '无法检索环境组');
         $scope.groups = [];
       });
   }

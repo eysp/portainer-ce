@@ -1,10 +1,10 @@
 <rd-header>
-  <rd-header-title title-text="User Activity">
-    <a data-toggle="tooltip" title="Refresh" ui-sref="portainer.authLogs" ui-sref-opts="{reload: true}">
+  <rd-header-title title-text="用户活动">
+    <a data-toggle="tooltip" title="刷新" ui-sref="portainer.authLogs" ui-sref-opts="{reload: true}">
       <i class="fa fa-sync" aria-hidden="true"></i>
     </a>
   </rd-header-title>
-  <rd-header-content>User authentication activity</rd-header-content>
+  <rd-header-content>用户身份验证活动</rd-header-content>
 </rd-header>
 
 <div class="be-indicator-container">
@@ -12,7 +12,7 @@
     <rd-widget-body>
       <div class="form-horizontal">
         <div class="form-group">
-          <label for="dateRangeInput" class="col-sm-2 control-label text-left">Date Range</label>
+          <label for="dateRangeInput" class="col-sm-2 control-label text-left">日期范围</label>
           <div class="col-sm-6">
             <input type="text" class="form-control" disabled />
           </div>
@@ -21,11 +21,11 @@
 
       <p class="text-muted small">
         <i class="fa fa-info-circle blue-icon space-right" aria-hidden="true"></i>
-        Portainer user authentication activity logs have a maximum retention of 7 days.
+        Portainer用户身份验证活动日志的最大保留期为7天。
       </p>
 
       <div>
-        <button type="button" class="btn btn-sm btn-primary" style="margin-right: 10px;"><i class="fa fa-download space-right" aria-hidden="true"></i>Export as CSV </button>
+        <button type="button" class="btn btn-sm btn-primary" style="margin-right: 10px;"><i class="fa fa-download space-right" aria-hidden="true"></i>导出为CSV </button>
         <be-feature-indicator feature="$ctrl.limitedFeature"></be-feature-indicator>
       </div>
     </rd-widget-body>

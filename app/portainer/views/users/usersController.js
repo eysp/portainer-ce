@@ -35,7 +35,7 @@ angular.module('portainer.app').controller('UsersController', [
         }
       }
       $scope.state.validUsername = valid;
-      $scope.state.userCreationError = valid ? '' : 'Username already taken';
+      $scope.state.userCreationError = valid ? '' : '用户名已被占用';
     };
 
     $scope.addUser = function () {
@@ -50,11 +50,11 @@ angular.module('portainer.app').controller('UsersController', [
       });
       UserService.createUser(username, password, role, teamIds)
         .then(function success() {
-          Notifications.success('User successfully created', username);
+          Notifications.success('用户已成功创建', username);
           $state.reload();
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to create user');
+          Notifications.error('失败', err, '无法创建用户');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -66,12 +66,12 @@ angular.module('portainer.app').controller('UsersController', [
       angular.forEach(selectedItems, function (user) {
         UserService.deleteUser(user.Id)
           .then(function success() {
-            Notifications.success('User successfully removed', user.Username);
+            Notifications.success('用户已成功删除', user.Username);
             var index = $scope.users.indexOf(user);
             $scope.users.splice(index, 1);
           })
           .catch(function error(err) {
-            Notifications.error('Failure', err, 'Unable to remove user');
+            Notifications.error('失败', err, '无法删除用户');
           })
           .finally(function final() {
             --actionCount;
@@ -83,7 +83,7 @@ angular.module('portainer.app').controller('UsersController', [
     }
 
     $scope.removeAction = function (selectedItems) {
-      ModalService.confirmDeletion('Do you want to remove the selected users? They will not be able to login into Portainer anymore.', function onConfirm(confirmed) {
+      ModalService.confirmDeletion('是否要删除所选用户？他们将无法再登录到Portainer。', function onConfirm(confirmed) {
         if (!confirmed) {
           return;
         }
@@ -124,7 +124,7 @@ angular.module('portainer.app').controller('UsersController', [
           $scope.AuthenticationMethod = data.settings.AuthenticationMethod;
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve users and teams');
+          Notifications.error('失败', err, '无法检索用户和团队');
           $scope.users = [];
           $scope.teams = [];
         });

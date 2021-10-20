@@ -1,19 +1,19 @@
 <rd-header>
-  <rd-header-title title-text="Network details"></rd-header-title>
+  <rd-header-title title-text="网络详情"></rd-header-title>
   <rd-header-content>
-    <a ui-sref="docker.networks">Networks</a> &gt; <a ui-sref="docker.networks.network({id: network.Id})">{{ network.Name }}</a>
+    <a ui-sref="docker.networks">网络</a> &gt; <a ui-sref="docker.networks.network({id: network.Id})">{{ network.Name }}</a>
   </rd-header-content>
 </rd-header>
 
 <div class="row">
   <div class="col-lg-12 col-md-12 col-xs-12">
     <rd-widget>
-      <rd-widget-header icon="fa-sitemap" title-text="Network details"></rd-widget-header>
+      <rd-widget-header icon="fa-sitemap" title-text="网络详情"></rd-widget-header>
       <rd-widget-body classes="no-padding">
         <table class="table">
           <tbody>
             <tr>
-              <td>Name</td>
+              <td>名称</td>
               <td>{{ network.Name }}</td>
             </tr>
             <tr>
@@ -21,44 +21,44 @@
               <td>
                 {{ network.Id }}
                 <button authorization="DockerNetworkDelete" ng-if="allowRemove()" class="btn btn-xs btn-danger" ng-click="removeNetwork(network.Id)"
-                  ><i class="fa fa-trash-alt space-right" aria-hidden="true"></i>Delete this network</button
+                  ><i class="fa fa-trash-alt space-right" aria-hidden="true"></i>删除此网络</button
                 >
               </td>
             </tr>
             <tr>
-              <td>Driver</td>
+              <td>驱动</td>
               <td>{{ network.Driver }}</td>
             </tr>
             <tr>
-              <td>Scope</td>
+              <td>范围</td>
               <td>{{ network.Scope }}</td>
             </tr>
             <tr>
-              <td>Attachable</td>
+              <td>可附加</td>
               <td>{{ network.Attachable }}</td>
             </tr>
             <tr>
-              <td>Internal</td>
+              <td>内部</td>
               <td>{{ network.Internal }}</td>
             </tr>
             <tr ng-if="network.IPAM.IPV4Configs.length > 0" ng-repeat-start="config in network.IPAM.IPV4Configs">
-              <td>IPV4 Subnet - {{ config.Subnet }}</td>
-              <td>IPV4 Gateway - {{ config.Gateway }}</td>
+              <td>IPV4 子网 - {{ config.Subnet }}</td>
+              <td>IPV4 网关 - {{ config.Gateway }}</td>
             </tr>
             <tr ng-if="network.IPAM.IPV4Configs.length > 0" ng-repeat-end>
-              <td>IPV4 IP range - {{ config.IPRange }}</td>
+              <td>IPV4 IP 范围 - {{ config.IPRange }}</td>
               <td
-                >IPV4 Excluded Ips<span ng-repeat="auxAddress in config.AuxiliaryAddresses"> - {{ auxAddress }}</span></td
+                >IPV4 排除IP<span ng-repeat="auxAddress in config.AuxiliaryAddresses"> - {{ auxAddress }}</span></td
               >
             </tr>
             <tr ng-if="network.IPAM.IPV6Configs.length > 0" ng-repeat-start="config in network.IPAM.IPV6Configs">
-              <td>IPV6 Subnet - {{ config.Subnet }}</td>
-              <td>IPV6 Gateway - {{ config.Gateway }}</td>
+              <td>IPV6 子网 - {{ config.Subnet }}</td>
+              <td>IPV6 网关 - {{ config.Gateway }}</td>
             </tr>
             <tr ng-if="network.IPAM.IPV6Configs.length > 0" ng-repeat-end>
-              <td>IPV6 IP range - {{ config.IPRange }}</td>
+              <td>IPV6 IP 范围 - {{ config.IPRange }}</td>
               <td
-                >IPV6 Excluded Ips<span ng-repeat="auxAddress in config.AuxiliaryAddresses"> - {{ auxAddress }}</span></td
+                >IPV6 排除IP<span ng-repeat="auxAddress in config.AuxiliaryAddresses"> - {{ auxAddress }}</span></td
               >
             </tr>
           </tbody>
@@ -82,7 +82,7 @@
 <div class="row" ng-if="!(network.Options | emptyobject)">
   <div class="col-lg-12 col-md-12 col-xs-12">
     <rd-widget>
-      <rd-widget-header icon="fa-cogs" title-text="Network options"></rd-widget-header>
+      <rd-widget-header icon="fa-cogs" title-text="网络选项"></rd-widget-header>
       <rd-widget-body classes="no-padding">
         <table class="table">
           <tbody>
@@ -100,15 +100,15 @@
 <div class="row" ng-if="containersInNetwork.length > 0">
   <div class="col-lg-12 col-md-12 col-xs-12">
     <rd-widget>
-      <rd-widget-header icon="fa-server" title-text="Containers in network"></rd-widget-header>
+      <rd-widget-header icon="fa-server" title-text="网络中的容器"></rd-widget-header>
       <rd-widget-body classes="no-padding">
         <table class="table">
           <thead>
-            <th>Container Name</th>
-            <th>IPv4 Address</th>
-            <th>IPv6 Address</th>
-            <th>MacAddress</th>
-            <th authorization="DockerNetworkDisconnect">Actions</th>
+            <th>容器名称</th>
+            <th>IPv4 地址</th>
+            <th>IPv6 地址</th>
+            <th>Mac 地址</th>
+            <th authorization="DockerNetworkDisconnect">操作</th>
           </thead>
           <tbody>
             <tr ng-repeat="container in containersInNetwork">
@@ -120,7 +120,7 @@
               <td>{{ container.MacAddress || '-' }}</td>
               <td authorization="DockerNetworkDisconnect">
                 <button type="button" class="btn btn-xs btn-danger" ng-click="containerLeaveNetwork(network, container)"
-                  ><i class="fa fa-trash-alt space-right" aria-hidden="true"></i>Leave Network</button
+                  ><i class="fa fa-trash-alt space-right" aria-hidden="true"></i>断开网络</button
                 >
               </td>
             </tr>

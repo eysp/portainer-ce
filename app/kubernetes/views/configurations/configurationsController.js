@@ -28,7 +28,7 @@ class KubernetesConfigurationsController {
       this.configurations = await this.KubernetesConfigurationService.get();
       KubernetesConfigurationHelper.setConfigurationsUsed(this.configurations, this.applications);
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve configurations');
+      this.Notifications.error('失败', err, 'Unable to retrieve configurations');
     } finally {
       this.state.configurationsLoading = false;
     }
@@ -47,7 +47,7 @@ class KubernetesConfigurationsController {
         const index = this.configurations.indexOf(configuration);
         this.configurations.splice(index, 1);
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to remove configuration');
+        this.Notifications.error('失败', err, 'Unable to remove configuration');
       } finally {
         --actionCount;
         if (actionCount === 0) {
@@ -70,7 +70,7 @@ class KubernetesConfigurationsController {
       this.state.applicationsLoading = true;
       this.applications = await this.KubernetesApplicationService.get();
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve applications');
+      this.Notifications.error('失败', err, 'Unable to retrieve applications');
     } finally {
       this.state.applicationsLoading = false;
     }

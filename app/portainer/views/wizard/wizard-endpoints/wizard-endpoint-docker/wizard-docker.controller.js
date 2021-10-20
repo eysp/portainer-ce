@@ -65,7 +65,7 @@ export default class WizardDockerController {
       // Check name is duplicated or not
       const nameUsed = await this.NameValidator.validateEnvironmentName(name);
       if (nameUsed) {
-        this.Notifications.error('Failure', true, 'This name is been used, please try another one');
+        this.Notifications.error('失败', true, '此名称已被使用，请尝试另一个');
         return;
       }
       switch (type) {
@@ -114,7 +114,7 @@ export default class WizardDockerController {
       this.clearForm();
       this.onUpdate();
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to connect your environment');
+      this.Notifications.error('失败', err, '无法连接您的环境');
     } finally {
       this.state.actionInProgress = false;
     }
@@ -149,7 +149,7 @@ export default class WizardDockerController {
         this.onAnalytics('docker-api');
       }
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to connect your environment');
+      this.Notifications.error('失败', err, '无法连接您的环境');
     } finally {
       this.state.actionInProgress = false;
     }

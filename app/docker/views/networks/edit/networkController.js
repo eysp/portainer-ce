@@ -18,7 +18,7 @@ angular.module('portainer.docker').controller('NetworkController', [
           $state.go('docker.networks', {});
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to remove network');
+          Notifications.error('失败', err, '无法删除网络');
         });
     };
 
@@ -30,7 +30,7 @@ angular.module('portainer.docker').controller('NetworkController', [
           $state.go('docker.networks.network', { id: network.Id }, { reload: true });
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to disconnect container from network');
+          Notifications.error('失败', err, '无法断开容器与网络的连接');
         });
     };
 
@@ -73,7 +73,7 @@ angular.module('portainer.docker').controller('NetworkController', [
               filterContainersInNetwork(network, containersInNetwork);
             },
             function error(err) {
-              Notifications.error('Failure', err, 'Unable to retrieve containers in network');
+              Notifications.error('失败', err, '无法检索网络中的容器');
             }
           );
         } else {
@@ -85,7 +85,7 @@ angular.module('portainer.docker').controller('NetworkController', [
               filterContainersInNetwork(network, data);
             },
             function error(err) {
-              Notifications.error('Failure', err, 'Unable to retrieve containers in network');
+              Notifications.error('失败', err, '无法检索网络中的容器');
             }
           );
         }
@@ -104,7 +104,7 @@ angular.module('portainer.docker').controller('NetworkController', [
           $scope.network.IPAM.IPV6Configs = DockerNetworkHelper.getIPV6Configs($scope.network.IPAM.Config);
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve network info');
+          Notifications.error('失败', err, '无法检索网络信息');
         });
     }
 

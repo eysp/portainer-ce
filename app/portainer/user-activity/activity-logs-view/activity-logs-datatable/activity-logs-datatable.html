@@ -1,7 +1,7 @@
 <div class="datatable datatable-empty">
   <rd-widget>
     <rd-widget-body classes="no-padding">
-      <datatable-titlebar title="Activity Logs" icon="fa-history" feature="{{::$ctrl.feature}}"></datatable-titlebar>
+      <datatable-titlebar title="活动日志" icon="fa-history" feature="{{::$ctrl.feature}}"></datatable-titlebar>
       <datatable-searchbar on-change="($ctrl.onChangeKeyword)" ng-model="$ctrl.keyword"></datatable-searchbar>
       <div class="table-responsive">
         <table class="table table-hover">
@@ -9,28 +9,28 @@
             <tr>
               <th class="small-column">
                 <a ng-click="$ctrl.changeSort('Timestamp')">
-                  Time
+                  时间
                   <datatable-sort-icon key="Timestamp" selected-sort-key="{{ $ctrl.sort.key }}" reverse-order="$ctrl.sort.desc"></datatable-sort-icon>
                 </a>
               </th>
               <th class="small-column">
                 <a ng-click="$ctrl.changeSort('Username')">
-                  User
+                  用户
                   <datatable-sort-icon key="Username" selected-sort-key="{{ $ctrl.sort.key }}" reverse-order="$ctrl.sort.desc"></datatable-sort-icon>
                 </a>
               </th>
               <th class="small-column">
                 <a ng-click="$ctrl.changeSort('Context')">
-                  Environment
+                  环境
                   <datatable-sort-icon key="Context" selected-sort-key="{{ $ctrl.sort.key }}" reverse-order="$ctrl.sort.desc"></datatable-sort-icon>
                 </a>
               </th>
 
               <th>
-                Action
+                操作
               </th>
               <th>
-                Payload
+                负载
               </th>
             </tr>
           </thead>
@@ -48,11 +48,11 @@
               </td>
             </tr>
             <tr ng-if="!$ctrl.logs">
-              <td class="text-center text-muted" colspan="5">Loading...</td>
+              <td class="text-center text-muted" colspan="5">加载中...</td>
             </tr>
             <tr ng-if="$ctrl.logs.length === 0">
               <td class="text-center text-muted" colspan="8">
-                No logs available.
+                没有可用的日志。
               </td>
             </tr>
           </tbody>

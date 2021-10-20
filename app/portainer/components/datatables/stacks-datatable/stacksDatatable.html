@@ -6,25 +6,25 @@
         <div class="settings">
           <datatable-columns-visibility columns="$ctrl.columnVisibility.columns" on-change="($ctrl.onColumnVisibilityChange)"></datatable-columns-visibility>
           <span class="setting" ng-class="{ 'setting-active': $ctrl.settings.open }" uib-dropdown dropdown-append-to-body auto-close="disabled" is-open="$ctrl.settings.open">
-            <span uib-dropdown-toggle><i class="fa fa-cog" aria-hidden="true"></i> Settings</span>
+            <span uib-dropdown-toggle><i class="fa fa-cog" aria-hidden="true"></i> 设置</span>
             <div class="dropdown-menu dropdown-menu-right" uib-dropdown-menu>
               <div class="tableMenu">
                 <div class="menuHeader">
-                  Table settings
+                  表格设置
                 </div>
                 <div class="menuContent">
                   <div>
                     <div class="md-checkbox" ng-if="$ctrl.isAdmin">
                       <input id="setting_all_orphaned_stacks" type="checkbox" ng-model="$ctrl.settings.allOrphanedStacks" ng-change="$ctrl.onSettingsAllOrphanedStacksChange()" />
-                      <label for="setting_all_orphaned_stacks">Show all orphaned stacks</label>
+                      <label for="setting_all_orphaned_stacks">显示所有孤立堆栈</label>
                     </div>
                     <div class="md-checkbox">
                       <input id="setting_auto_refresh" type="checkbox" ng-model="$ctrl.settings.repeater.autoRefresh" ng-change="$ctrl.onSettingsRepeaterChange()" />
-                      <label for="setting_auto_refresh">Auto refresh</label>
+                      <label for="setting_auto_refresh">自动刷新</label>
                     </div>
                     <div ng-if="$ctrl.settings.repeater.autoRefresh">
                       <label for="settings_refresh_rate">
-                        Refresh rate
+                        刷新频率
                       </label>
                       <select id="settings_refresh_rate" ng-model="$ctrl.settings.repeater.refreshRate" ng-change="$ctrl.onSettingsRepeaterChange()" class="small-select">
                         <option value="10">10s</option>
@@ -40,7 +40,7 @@
                   </div>
                 </div>
                 <div>
-                  <a type="button" class="btn btn-default btn-sm" ng-click="$ctrl.settings.open = false;">Close</a>
+                  <a type="button" class="btn btn-default btn-sm" ng-click="$ctrl.settings.open = false;">关闭</a>
                 </div>
               </div>
             </div>
@@ -56,7 +56,7 @@
           ng-click="$ctrl.removeAction($ctrl.state.selectedItems)"
           data-cy="stack-removeStackButton"
         >
-          <i class="fa fa-trash-alt space-right" aria-hidden="true"></i>Remove
+          <i class="fa fa-trash-alt space-right" aria-hidden="true"></i>删除
         </button>
         <button
           ng-disabled="!$ctrl.createEnabled"
@@ -66,7 +66,7 @@
           authorization="PortainerStackCreate"
           data-cy="stack-addStackButton"
         >
-          <i class="fa fa-plus space-right" aria-hidden="true"></i>Add stack
+          <i class="fa fa-plus space-right" aria-hidden="true"></i>添加堆栈
         </button>
       </div>
       <div class="searchBar">
@@ -76,7 +76,7 @@
           class="searchInput"
           ng-model="$ctrl.state.textFilter"
           ng-change="$ctrl.onTextFilterChange()"
-          placeholder="Search..."
+          placeholder="搜索..."
           auto-focus
           ng-model-options="{ debounce: 300 }"
           data-cy="stack-searchInput"
@@ -92,62 +92,62 @@
                   <label for="select_all"></label>
                 </span>
                 <a ng-click="$ctrl.changeOrderBy('Name')">
-                  Name
+                  名称
                   <i class="fa fa-sort-alpha-down" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Name' && !$ctrl.state.reverseOrder"></i>
                   <i class="fa fa-sort-alpha-up" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Name' && $ctrl.state.reverseOrder"></i>
                 </a>
                 <div>
                   <span uib-dropdown-toggle ng-class="['table-filter', { 'filter-active': $ctrl.filters.state.enabled }]">
-                    Filter
+                    筛选
                     <i ng-class="['fa', { 'fa-filter': !$ctrl.filters.state.enabled, 'fa-check': $ctrl.filters.state.enabled }]" aria-hidden="true"></i>
                   </span>
                 </div>
                 <div class="dropdown-menu" uib-dropdown-menu>
                   <div class="tableMenu">
                     <div class="menuHeader">
-                      Filter by activity
+                      按活动筛选
                     </div>
                     <div class="menuContent">
                       <div class="md-checkbox">
                         <input id="filter_usage_activeStacks" type="checkbox" ng-model="$ctrl.filters.state.showActiveStacks" ng-change="$ctrl.onFilterChange()" />
-                        <label for="filter_usage_activeStacks">Active stacks</label>
+                        <label for="filter_usage_activeStacks">活动堆栈</label>
                       </div>
                       <div class="md-checkbox">
                         <input id="filter_usage_unactiveStacks" type="checkbox" ng-model="$ctrl.filters.state.showUnactiveStacks" ng-change="$ctrl.onFilterChange()" />
-                        <label for="filter_usage_unactiveStacks">Inactive stacks</label>
+                        <label for="filter_usage_unactiveStacks">非活动堆栈</label>
                       </div>
                     </div>
                     <div>
-                      <a type="button" class="btn btn-default btn-sm" ng-click="$ctrl.filters.state.open = false;">Close</a>
+                      <a type="button" class="btn btn-default btn-sm" ng-click="$ctrl.filters.state.open = false;">关闭</a>
                     </div>
                   </div>
                 </div>
               </th>
               <th>
                 <a ng-click="$ctrl.changeOrderBy('Type')">
-                  Type
+                  类型
                   <i class="fa fa-sort-alpha-down" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Type' && !$ctrl.state.reverseOrder"></i>
                   <i class="fa fa-sort-alpha-up" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Type' && $ctrl.state.reverseOrder"></i>
                 </a>
               </th>
-              <th>Control</th>
+              <th>控制</th>
               <th>
                 <a ng-click="$ctrl.changeOrderBy('ResourceControl.CreationDate')">
-                  Created
+                  创建
                   <i class="fa fa-sort-alpha-down" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'ResourceControl.CreationDate' && !$ctrl.state.reverseOrder"></i>
                   <i class="fa fa-sort-alpha-up" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'ResourceControl.CreationDate' && $ctrl.state.reverseOrder"></i>
                 </a>
               </th>
               <th ng-if="$ctrl.columnVisibility.columns.updated.display">
                 <a ng-click="$ctrl.changeOrderBy('ResourceControl.UpdateDate')">
-                  Updated
+                  更新
                   <i class="fa fa-sort-alpha-down" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'ResourceControl.UpdateDate' && !$ctrl.state.reverseOrder"></i>
                   <i class="fa fa-sort-alpha-up" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'ResourceControl.UpdateDate' && $ctrl.state.reverseOrder"></i>
                 </a>
               </th>
               <th>
                 <a ng-click="$ctrl.changeOrderBy('ResourceControl.Ownership')">
-                  Ownership
+                  所有权
                   <i class="fa fa-sort-alpha-down" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'ResourceControl.Ownership' && !$ctrl.state.reverseOrder"></i>
                   <i class="fa fa-sort-alpha-up" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'ResourceControl.Ownership' && $ctrl.state.reverseOrder"></i>
                 </a>
@@ -170,7 +170,7 @@
                   >{{ item.Name }}</a
                 >
                 <span ng-if="$ctrl.offlineMode">{{ item.Name }}</span>
-                <span ng-if="item.Regular && item.Status == 2" style="margin-left: 10px;" class="label label-warning image-tag space-left">Inactive</span>
+                <span ng-if="item.Regular && item.Status == 2" style="margin-left: 10px;" class="label label-warning image-tag space-left">未激活</span>
               </td>
               <td>{{ item.Type === 1 ? 'Swarm' : 'Compose' }}</td>
               <td>
@@ -182,7 +182,7 @@
                   tooltip-class="portainer-tooltip"
                   uib-tooltip="This stack was created inside an environment that is no longer registered inside Portainer."
                 >
-                  Orphaned <i class="fa fa-exclamation-circle orange-icon" aria-hidden="true" style="margin-left: 2px;"></i>
+                  孤立 <i class="fa fa-exclamation-circle orange-icon" aria-hidden="true" style="margin-left: 2px;"></i>
                 </span>
                 <span
                   ng-if="item.External"
@@ -192,9 +192,9 @@
                   tooltip-class="portainer-tooltip"
                   uib-tooltip="This stack was created outside of Portainer. Control over this stack is limited."
                 >
-                  Limited <i class="fa fa-exclamation-circle orange-icon" aria-hidden="true" style="margin-left: 2px;"></i>
+                  受限制的 <i class="fa fa-exclamation-circle orange-icon" aria-hidden="true" style="margin-left: 2px;"></i>
                 </span>
-                <span ng-if="item.Regular">Total</span>
+                <span ng-if="item.Regular">全部</span>
               </td>
               <td>
                 <span ng-if="item.CreationDate">{{ item.CreationDate | getisodatefromtimestamp }} {{ item.CreatedBy ? 'by ' + item.CreatedBy : '' }}</span>
@@ -212,10 +212,10 @@
               </td>
             </tr>
             <tr ng-if="!$ctrl.dataset" data-cy="stacks-loadingTableRow">
-              <td colspan="6" class="text-center text-muted">Loading...</td>
+              <td colspan="6" class="text-center text-muted">加载中...</td>
             </tr>
             <tr ng-if="$ctrl.state.filteredDataSet.length === 0" data-cy="stacks-noStackTableRow">
-              <td colspan="6" class="text-center text-muted">No stack available.</td>
+              <td colspan="6" class="text-center text-muted">没有可用的堆栈。</td>
             </tr>
           </tbody>
         </table>
@@ -223,13 +223,13 @@
       <div class="footer" ng-if="$ctrl.dataset">
         <div class="infoBar" ng-if="$ctrl.state.selectedItemCount !== 0">
           {{ $ctrl.state.selectedItemCount }}
-          item(s) selected
+          所选项目
         </div>
         <div class="paginationControls">
           <form class="form-inline">
             <span class="limitSelector">
               <span style="margin-right: 5px;">
-                Items per page
+                每页项目数
               </span>
               <select class="form-control" ng-model="$ctrl.state.paginatedItemLimit" ng-change="$ctrl.changePaginationLimit()" data-cy="component-paginationSelect">
                 <option value="0">All</option>

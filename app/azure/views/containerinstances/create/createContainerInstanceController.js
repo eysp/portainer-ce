@@ -51,7 +51,7 @@ angular.module('portainer.azure').controller('AzureCreateContainerInstanceContro
           $state.go('azure.containerinstances');
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to create container');
+          Notifications.error('失败', err, 'Unable to create container');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -113,7 +113,7 @@ angular.module('portainer.azure').controller('AzureCreateContainerInstanceContro
           updateResourceGroupsAndLocations(selectedSubscription, resourceGroups, containerInstancesProviders);
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve Azure resources');
+          Notifications.error('失败', err, 'Unable to retrieve Azure resources');
         });
     }
 

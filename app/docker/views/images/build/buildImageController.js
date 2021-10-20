@@ -58,7 +58,7 @@ function BuildImageController($scope, $async, $window, ModalService, BuildServic
       var buildType = $scope.state.BuildType;
 
       if (buildType === 'editor' && $scope.formValues.DockerFileContent === '') {
-        $scope.state.formValidationError = 'Dockerfile content must not be empty';
+        $scope.state.formValidationError = 'Dockerfile 内容不能为空';
         return;
       }
 
@@ -78,13 +78,13 @@ function BuildImageController($scope, $async, $window, ModalService, BuildServic
         $scope.buildLogs = data.buildLogs;
         $scope.state.activeTab = 1;
         if (data.hasError) {
-          Notifications.error('An error occurred during build', { msg: 'Please check build logs output' });
+          Notifications.error('构建过程中发生错误', { msg: '请检查构建日志输出' });
         } else {
-          Notifications.success('Image successfully built');
+          Notifications.success('镜像构建成功');
           $scope.state.isEditorDirty = false;
         }
       } catch (err) {
-        Notifications.error('Failure', err, 'Unable to build image');
+        Notifications.error('失败', err, '无法构建镜像');
       } finally {
         $scope.state.actionInProgress = false;
       }

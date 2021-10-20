@@ -1,14 +1,14 @@
 <ng-form name="$ctrl.oauthSettingsForm">
   <div class="col-sm-12 form-section-title">
-    Single Sign-On
+    单点登录
   </div>
 
   <!-- SSO -->
   <div class="form-group">
     <div class="col-sm-12">
       <por-switch-field
-        label="Use SSO"
-        tooltip="When using SSO the OAuth provider is not forced to prompt for credentials."
+        label="使用SSO"
+        tooltip="使用 SSO 时，不会强制 OAuth 提供程序提示输入凭据。"
         name="use-sso"
         ng-model="$ctrl.settings.SSO"
         on-change="$ctrl.updateSSO()"
@@ -32,32 +32,30 @@
 
   <auto-user-provision-toggle ng-model="$ctrl.settings.OAuthAutoCreateUsers">
     <field-description>
-      With automatic user provisioning enabled, Portainer will create user(s) automatically with the standard user role. If disabled, users must be created beforehand in Portainer
-      in order to login.
+      启用自动用户配置后，Portainer 将自动创建具有标准用户角色的用户。 如果禁用，则必须事先在 Portainer 中创建用户才能登录。
     </field-description>
   </auto-user-provision-toggle>
 
   <div ng-if="$ctrl.settings.OAuthAutoCreateUsers">
     <div class="form-group">
       <span class="col-sm-12 text-muted small">
-        <p>The users created by the automatic provisioning feature can be added to a default team on creation.</p>
+        <p>通过自动配置功能创建的用户可以在创建时添加到默认团队。</p>
         <p>
-          By assigning newly created users to a team, they will be able to access the environments associated to that team. This setting is optional and if not set, newly created
-          users won't be able to access any environments.
+          通过将新创建的用户分配给团队，他们将能够访问与该团队关联的环境。 此设置是可选的，如果未设置，新创建的用户将无法访问任何环境。
         </p>
       </span>
     </div>
     <div class="form-group">
-      <label class="col-sm-3 col-lg-2 control-label text-left">Default team</label>
+      <label class="col-sm-3 col-lg-2 control-label text-left">默认团队</label>
       <span class="small text-muted" style="margin-left: 20px;" ng-if="$ctrl.teams.length === 0">
-        You have not yet created any teams. Head over to the <a ui-sref="portainer.teams">Teams view</a> to manage teams.
+        您尚未创建任何团队。 前往<a ui-sref="portainer.teams">团队视图</a>来管理团队。
       </span>
 
       <div class="col-sm-9" ng-if="$ctrl.teams.length > 0">
         <div class="col-sm-12 small text-muted">
           <p>
             <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-            The default team option will be disabled when automatic team membership is enabled
+            启用自动团队成员资格后，默认团队选项将被禁用
           </p>
         </div>
         <div class="col-xs-11">
@@ -67,7 +65,7 @@
             ng-model="$ctrl.settings.DefaultTeamID"
             ng-options="team.Id as team.Name for team in $ctrl.teams"
           >
-            <option value="">No team</option>
+            <option value="">没有团队</option>
           </select>
         </div>
         <button
@@ -84,11 +82,11 @@
   </div>
 
   <div class="col-sm-12 form-section-title">
-    Team membership
+    团队成员
   </div>
   <div class="form-group">
     <div class="col-sm-12 text-muted small">
-      Automatic team membership synchronizes the team membership based on a custom claim in the token from the OAuth provider.
+      自动团队成员资格根据来自 OAuth 提供程序的token中的自定义声明同步团队成员资格.
     </div>
   </div>
   <div class="form-group">
@@ -101,7 +99,7 @@
     <div class="form-group">
       <label class="col-sm-3 col-lg-2 control-label text-left">
         Claim name
-        <portainer-tooltip position="bottom" message="The OpenID Connect UserInfo Claim name that contains the team identifier the user belongs to."></portainer-tooltip>
+        <portainer-tooltip position="bottom" message="包含用户所属团队标识符的OpenID Connect UserInfo声明名称。"></portainer-tooltip>
       </label>
       <div class="col-sm-9 col-lg-10">
         <div class="col-xs-11 col-lg-10">
@@ -112,34 +110,34 @@
 
     <div class="form-group">
       <label class="col-sm-3 col-lg-2 control-label text-left">
-        Statically assigned teams
+        静态分配的团队
       </label>
       <div class="col-sm-9 col-lg-10">
         <span class="label label-default interactive" style="margin-left: 1.4em;" ng-click="$ctrl.addTeamMembershipMapping()">
-          <i class="fa fa-plus-circle" aria-hidden="true"></i> add team mapping
+          <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加团队映射
         </span>
 
         <div class="col-sm-12 form-inline" ng-repeat="mapping in $ctrl.settings.TeamMemberships.OAuthClaimMappings" style="margin-top: 0.75em;">
           <div class="input-group input-group-sm col-sm-5">
-            <span class="input-group-addon">claim value regex</span>
+            <span class="input-group-addon">值正则表达式</span>
             <input type="text" class="form-control" ng-model="mapping.ClaimValRegex" />
           </div>
-          <span style="margin: 0px 0.5em;">maps to</span>
+          <span style="margin: 0px 0.5em;">映射</span>
           <div class="input-group input-group-sm col-sm-3 col-lg-4">
-            <span class="input-group-addon">team</span>
+            <span class="input-group-addon">团队</span>
             <select
               class="form-control"
               ng-init="mapping.Team = mapping.Team || $ctrl.settings.DefaultTeamID"
               ng-model="mapping.Team"
               ng-options="team.Id as team.Name for team in $ctrl.teams"
             >
-              <option selected value="">Select a team</option>
+              <option selected value="">选择一个团队</option>
             </select>
           </div>
           <button type="button" class="btn btn-sm btn-danger" ng-click="$ctrl.removeTeamMembership($index)"> <i class="fa fa-trash" aria-hidden="true"> </i></button>
 
           <div class="small text-warning" ng-show="!mapping.ClaimValRegex" style="margin-top: 0.4em;">
-            <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Claim value regex is required.
+            <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 值正则表达式是必需的。
           </div>
         </div>
       </div>
@@ -147,17 +145,17 @@
 
     <div class="form-group">
       <div class="col-sm-12 text-muted small" style="margin-bottom: 0.5em;">
-        The default team will be assigned when the user does not belong to any other team
+        当用户不属于任何其他团队时，将分配
       </div>
-      <label class="col-sm-3 col-lg-2 control-label text-left">Default team</label>
+      <label class="col-sm-3 col-lg-2 control-label text-left">默认团队</label>
       <span class="small text-muted" style="margin-left: 20px;" ng-if="$ctrl.teams.length === 0">
-        You have not yet created any teams. Head over to the <a ui-sref="portainer.teams">Teams view</a> to manage teams.
+        您尚未创建任何团队。 前往<a ui-sref="portainer.teams">团队视图</a>来管理团队。
       </span>
 
       <div class="col-sm-9" ng-if="$ctrl.teams.length > 0">
         <div class="col-xs-11">
           <select class="form-control" ng-model="$ctrl.settings.DefaultTeamID" ng-options="team.Id as team.Name for team in $ctrl.teams">
-            <option value="">No team</option>
+            <option value="">没有团队</option>
           </select>
         </div>
       </div>
@@ -166,12 +164,12 @@
 
   <oauth-providers-selector on-change="($ctrl.onSelectProvider)" value="$ctrl.state.provider"></oauth-providers-selector>
 
-  <div class="col-sm-12 form-section-title">OAuth Configuration</div>
+  <div class="col-sm-12 form-section-title">OAuth 配置</div>
 
   <div class="form-group" ng-if="$ctrl.state.provider == 'microsoft'">
     <label for="oauth_microsoft_tenant_id" class="col-sm-3 col-lg-2 control-label text-left">
       Tenant ID
-      <portainer-tooltip position="bottom" message="ID of the Azure Directory you wish to authenticate against. Also known as the Directory ID"></portainer-tooltip>
+      <portainer-tooltip position="bottom" message="您希望对其进行身份验证的 Azure 目录的 ID。 也称为目录 ID"></portainer-tooltip>
     </label>
     <div class="col-sm-9 col-lg-10">
       <input
@@ -192,8 +190,8 @@
 
   <div class="form-group">
     <label for="oauth_client_id" class="col-sm-3 col-lg-2 control-label text-left">
-      {{ $ctrl.state.provider == 'microsoft' ? 'Application ID' : 'Client ID' }}
-      <portainer-tooltip position="bottom" message="Public identifier of the OAuth application"></portainer-tooltip>
+      {{ $ctrl.state.provider == 'microsoft' ? '应用ID' : '客户端ID' }}
+      <portainer-tooltip position="bottom" message="OAuth 应用程序的公共标识符"></portainer-tooltip>
     </label>
     <div class="col-sm-9 col-lg-10">
       <input
@@ -210,7 +208,7 @@
 
   <div class="form-group">
     <label for="oauth_client_secret" class="col-sm-3 col-lg-2 control-label text-left">
-      {{ $ctrl.state.provider == 'microsoft' ? 'Application key' : 'Client secret' }}
+      {{ $ctrl.state.provider == 'microsoft' ? '应用key' : '客户端secret' }}
     </label>
     <div class="col-sm-9 col-lg-10">
       <input
@@ -230,10 +228,10 @@
   <div ng-if="$ctrl.state.provider == 'custom' || $ctrl.state.overrideConfiguration">
     <div class="form-group">
       <label for="oauth_authorization_uri" class="col-sm-3 col-lg-2 control-label text-left">
-        Authorization URL
+        授权 URL
         <portainer-tooltip
           position="bottom"
-          message="URL used to authenticate against the OAuth provider. Will redirect the user to the OAuth provider login view"
+          message="用于针对 OAuth 提供程序进行身份验证的 URL。 将用户重定向到 OAuth 提供者登录视图"
         ></portainer-tooltip>
       </label>
       <div class="col-sm-9 col-lg-10">
@@ -251,8 +249,8 @@
 
     <div class="form-group">
       <label for="oauth_access_token_uri" class="col-sm-3 col-lg-2 control-label text-left">
-        Access token URL
-        <portainer-tooltip position="bottom" message="URL used by Portainer to exchange a valid OAuth authentication code for an access token"></portainer-tooltip>
+        访问token URL
+        <portainer-tooltip position="bottom" message="Portainer 用于为访问token交换有效 OAuth 身份验证代码的 URL"></portainer-tooltip>
       </label>
       <div class="col-sm-9 col-lg-10">
         <input
@@ -269,8 +267,8 @@
 
     <div class="form-group">
       <label for="oauth_resource_uri" class="col-sm-3 col-lg-2 control-label text-left">
-        Resource URL
-        <portainer-tooltip position="bottom" message="URL used by Portainer to retrieve information about the authenticated user"></portainer-tooltip>
+        资源URL
+        <portainer-tooltip position="bottom" message="Portainer 用于检索有关已验证用户的信息的 URL"></portainer-tooltip>
       </label>
       <div class="col-sm-9 col-lg-10">
         <input
@@ -287,10 +285,10 @@
 
     <div class="form-group">
       <label for="oauth_redirect_uri" class="col-sm-3 col-lg-2 control-label text-left">
-        Redirect URL
+        重定向URL
         <portainer-tooltip
           position="bottom"
-          message="URL used by the OAuth provider to redirect the user after successful authentication. Should be set to your Portainer instance URL"
+          message="OAuth 提供程序用于在成功验证后重定向用户的 URL。 应设置为您的 Portainer 实例 URL"
         ></portainer-tooltip>
       </label>
       <div class="col-sm-9 col-lg-10">
@@ -308,10 +306,10 @@
 
     <div class="form-group">
       <label for="oauth_logout_url" class="col-sm-3 col-lg-2 control-label text-left">
-        Logout URL
+        登出URL
         <portainer-tooltip
           position="bottom"
-          message="URL used by Portainer to redirect the user to the OAuth provider in order to log the user out of the identity provider session."
+          message="Portainer 使用的 URL 将用户重定向到 OAuth 提供程序，以便将用户从身份提供程序会话中注销。"
         ></portainer-tooltip>
       </label>
       <div class="col-sm-9 col-lg-10">
@@ -328,10 +326,10 @@
 
     <div class="form-group">
       <label for="oauth_user_identifier" class="col-sm-3 col-lg-2 control-label text-left">
-        User identifier
+        用户标识符
         <portainer-tooltip
           position="bottom"
-          message="Identifier that will be used by Portainer to create an account for the authenticated user. Retrieved from the resource server specified via the Resource URL field"
+          message="Portainer 将使用的标识符为经过身份验证的用户创建帐户。 从通过资源 URL 字段指定的资源服务器检索"
         ></portainer-tooltip>
       </label>
       <div class="col-sm-9 col-lg-10">
@@ -349,10 +347,10 @@
 
     <div class="form-group">
       <label for="oauth_scopes" class="col-sm-3 col-lg-2 control-label text-left">
-        Scopes
+        范围
         <portainer-tooltip
           position="bottom"
-          message="Scopes required by the OAuth provider to retrieve information about the authenticated user. Refer to your OAuth provider documentation for more information about this"
+          message="OAuth 提供者检索有关经过身份验证的用户的信息所需的范围。 有关这方面的更多信息，请参阅您的 OAuth 提供程序文档"
         ></portainer-tooltip>
       </label>
       <div class="col-sm-9 col-lg-10">
@@ -372,10 +370,10 @@
   <div class="form-group" ng-if="$ctrl.state.provider != 'custom'">
     <div class="col-sm-12">
       <a class="small interactive" ng-if="!$ctrl.state.overrideConfiguration" ng-click="$ctrl.state.overrideConfiguration = true;">
-        <i class="fa fa-wrench space-right" aria-hidden="true"></i> Override default configuration
+        <i class="fa fa-wrench space-right" aria-hidden="true"></i> 覆盖默认配置
       </a>
       <a class="small interactive" ng-if="$ctrl.state.overrideConfiguration" ng-click="$ctrl.useDefaultProviderConfiguration($ctrl.state.provider)">
-        <i class="fa fa-cogs space-right" aria-hidden="true"></i> Use default configuration
+        <i class="fa fa-cogs space-right" aria-hidden="true"></i> 使用默认配置
       </a>
     </div>
   </div>

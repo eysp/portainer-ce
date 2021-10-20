@@ -117,11 +117,11 @@ angular.module('portainer.app').controller('TemplatesController', [
           return ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl, generatedVolumeIds);
         })
         .then(function success() {
-          Notifications.success('Container successfully created');
+          Notifications.success('容器创建成功');
           $state.go('docker.containers', {}, { reload: true });
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, err.msg);
+          Notifications.error('失败', err, err.msg);
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -150,11 +150,11 @@ angular.module('portainer.app').controller('TemplatesController', [
           return ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl);
         })
         .then(function success() {
-          Notifications.success('Stack successfully deployed');
+          Notifications.success('堆栈部署成功');
           $state.go('docker.stacks');
         })
         .catch(function error(err) {
-          Notifications.error('Deployment error', err);
+          Notifications.error('部署错误', err);
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -188,7 +188,7 @@ angular.module('portainer.app').controller('TemplatesController', [
           return ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl);
         })
         .then(function success() {
-          Notifications.success('Stack successfully deployed');
+          Notifications.success('堆栈部署成功');
           $state.go('docker.stacks');
         })
         .catch(function error(err) {
@@ -294,7 +294,7 @@ angular.module('portainer.app').controller('TemplatesController', [
         })
         .catch(function error(err) {
           $scope.templates = [];
-          Notifications.error('Failure', err, 'An error occured during apps initialization.');
+          Notifications.error('失败', err, '应用初始化期间发生错误。');
         });
     }
 

@@ -6,38 +6,38 @@ angular.module('portainer.docker').controller('ContainersDatatableActionsControl
   'HttpRequestHelper',
   function ($state, ContainerService, ModalService, Notifications, HttpRequestHelper) {
     this.startAction = function (selectedItems) {
-      var successMessage = 'Container successfully started';
-      var errorMessage = 'Unable to start container';
+      var successMessage = '容器已成功启动';
+      var errorMessage = '无法启动容器';
       executeActionOnContainerList(selectedItems, ContainerService.startContainer, successMessage, errorMessage);
     };
 
     this.stopAction = function (selectedItems) {
-      var successMessage = 'Container successfully stopped';
-      var errorMessage = 'Unable to stop container';
+      var successMessage = '容器已成功停止';
+      var errorMessage = '无法停止容器r';
       executeActionOnContainerList(selectedItems, ContainerService.stopContainer, successMessage, errorMessage);
     };
 
     this.restartAction = function (selectedItems) {
-      var successMessage = 'Container successfully restarted';
-      var errorMessage = 'Unable to restart container';
+      var successMessage = '容器已成功重新启动';
+      var errorMessage = '无法重新启动容器';
       executeActionOnContainerList(selectedItems, ContainerService.restartContainer, successMessage, errorMessage);
     };
 
     this.killAction = function (selectedItems) {
-      var successMessage = 'Container successfully killed';
-      var errorMessage = 'Unable to kill container';
+      var successMessage = '成功终止容器';
+      var errorMessage = '无法终止容器';
       executeActionOnContainerList(selectedItems, ContainerService.killContainer, successMessage, errorMessage);
     };
 
     this.pauseAction = function (selectedItems) {
-      var successMessage = 'Container successfully paused';
-      var errorMessage = 'Unable to pause container';
+      var successMessage = '容器已成功暂停';
+      var errorMessage = '无法暂停容器';
       executeActionOnContainerList(selectedItems, ContainerService.pauseContainer, successMessage, errorMessage);
     };
 
     this.resumeAction = function (selectedItems) {
-      var successMessage = 'Container successfully resumed';
-      var errorMessage = 'Unable to resume container';
+      var successMessage = '容器已成功恢复';
+      var errorMessage = '无法恢复容器';
       executeActionOnContainerList(selectedItems, ContainerService.resumeContainer, successMessage, errorMessage);
     };
 
@@ -51,9 +51,9 @@ angular.module('portainer.docker').controller('ContainersDatatableActionsControl
         }
       }
 
-      var title = 'You are about to remove one or more container.';
+      var title = '您将要删除一个或多个容器。';
       if (isOneContainerRunning) {
-        title = 'You are about to remove one or more running container.';
+        title = '您将要删除一个或多个正在运行的容器。';
       }
 
       ModalService.confirmContainerDeletion(title, function (result) {
@@ -78,7 +78,7 @@ angular.module('portainer.docker').controller('ContainersDatatableActionsControl
           })
           .catch(function error(err) {
             errorMessage = errorMessage + ':' + container.Names[0];
-            Notifications.error('Failure', err, errorMessage);
+            Notifications.error('失败', err, errorMessage);
           })
           .finally(function final() {
             --actionCount;
@@ -95,10 +95,10 @@ angular.module('portainer.docker').controller('ContainersDatatableActionsControl
         HttpRequestHelper.setPortainerAgentTargetHeader(container.NodeName);
         ContainerService.remove(container, cleanVolumes)
           .then(function success() {
-            Notifications.success('Container successfully removed', container.Names[0]);
+            Notifications.success('容器成功删除', container.Names[0]);
           })
           .catch(function error(err) {
-            Notifications.error('Failure', err, 'Unable to remove container');
+            Notifications.error('失败', err, '无法删除容器');
           })
           .finally(function final() {
             --actionCount;

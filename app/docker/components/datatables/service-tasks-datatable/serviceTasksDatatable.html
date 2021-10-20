@@ -4,18 +4,18 @@
       <tr>
         <th uib-dropdown dropdown-append-to-body auto-close="disabled" is-open="$ctrl.filters.state.open" style="width: 10%;">
           <a ng-click="$ctrl.changeOrderBy('Status.State')">
-            Status
+            状态
             <i class="fa fa-sort-alpha-down" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Status.State' && !$ctrl.state.reverseOrder"></i>
             <i class="fa fa-sort-alpha-up" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Status.State' && $ctrl.state.reverseOrder"></i>
           </a>
           <span class="space-left">
-            <span uib-dropdown-toggle class="table-filter" ng-if="!$ctrl.filters.state.enabled">Filter <i class="fa fa-filter" aria-hidden="true"></i></span>
-            <span uib-dropdown-toggle class="table-filter filter-active" ng-if="$ctrl.filters.state.enabled">Filter <i class="fa fa-check" aria-hidden="true"></i></span>
+            <span uib-dropdown-toggle class="table-filter" ng-if="!$ctrl.filters.state.enabled">筛选 <i class="fa fa-filter" aria-hidden="true"></i></span>
+            <span uib-dropdown-toggle class="table-filter filter-active" ng-if="$ctrl.filters.state.enabled">筛选 <i class="fa fa-check" aria-hidden="true"></i></span>
           </span>
           <div class="dropdown-menu" uib-dropdown-menu>
             <div class="tableMenu">
               <div class="menuHeader">
-                Filter by state
+                按状态筛选
               </div>
               <div class="menuContent">
                 <div class="md-checkbox" ng-repeat="filter in $ctrl.filters.state.values track by $index">
@@ -24,13 +24,13 @@
                 </div>
               </div>
               <div>
-                <a type="button" class="btn btn-default btn-sm" ng-click="$ctrl.filters.state.open = false;">Close</a>
+                <a type="button" class="btn btn-default btn-sm" ng-click="$ctrl.filters.state.open = false;">关闭</a>
               </div>
             </div>
           </div>
         </th>
-        <th style="width: 22%;">Task</th>
-        <th>Actions</th>
+        <th style="width: 22%;">任务</th>
+        <th>操作</th>
         <th>
           <a ng-click="$ctrl.changeOrderBy('Slot')">
             Slot
@@ -40,14 +40,14 @@
         </th>
         <th>
           <a ng-click="$ctrl.changeOrderBy('NodeId')">
-            Node
+            节点
             <i class="fa fa-sort-alpha-down" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'NodeId' && !$ctrl.state.reverseOrder"></i>
             <i class="fa fa-sort-alpha-up" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'NodeId' && $ctrl.state.reverseOrder"></i>
           </a>
         </th>
         <th>
           <a ng-click="$ctrl.changeOrderBy('Updated')">
-            Last Update
+            最后更新
             <i class="fa fa-sort-alpha-down" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Updated' && !$ctrl.state.reverseOrder"></i>
             <i class="fa fa-sort-alpha-up" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Updated' && $ctrl.state.reverseOrder"></i>
           </a>
@@ -88,7 +88,7 @@
         <td>{{ item.Updated | getisodate }}</td>
       </tr>
       <tr ng-if="$ctrl.state.filteredDataSet.length === 0">
-        <td colspan="5" class="text-center text-muted">No task matching filter.</td>
+        <td colspan="5" class="text-center text-muted">没有任务匹配的筛选。</td>
       </tr>
     </tbody>
   </table>

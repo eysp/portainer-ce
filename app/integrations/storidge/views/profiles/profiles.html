@@ -1,6 +1,6 @@
 <rd-header>
   <rd-header-title title-text="Storidge profiles">
-    <a data-toggle="tooltip" title="Refresh" ui-sref="storidge.profiles" ui-sref-opts="{reload: true}">
+    <a data-toggle="tooltip" title="刷新" ui-sref="storidge.profiles" ui-sref-opts="{reload: true}">
       <i class="fa fa-sync" aria-hidden="true"></i>
     </a>
   </rd-header-title>
@@ -10,21 +10,21 @@
 <div class="row">
   <div class="col-md-12">
     <rd-widget>
-      <rd-widget-header icon="fa-plus" title-text="Add a profile"> </rd-widget-header>
+      <rd-widget-header icon="fa-plus" title-text="添加Profile"> </rd-widget-header>
       <rd-widget-body>
         <form class="form-horizontal">
           <!-- name-input -->
           <div class="form-group">
-            <label for="profile_name" class="col-sm-1 control-label text-left">Name</label>
+            <label for="profile_name" class="col-sm-1 control-label text-left">名称</label>
             <div class="col-sm-11">
-              <input type="text" class="form-control" ng-model="formValues.Name" id="profile_name" placeholder="e.g. myProfile" />
+              <input type="text" class="form-control" ng-model="formValues.Name" id="profile_name" placeholder="例如 myProfile" />
             </div>
           </div>
           <!-- !name-input -->
           <!-- tag-note -->
           <div class="form-group">
             <div class="col-sm-12">
-              <span class="small text-muted">Note: The profile will be created using the default properties.</span>
+              <span class="small text-muted">注意：Profile将使用默认属性创建。</span>
             </div>
           </div>
           <!-- !tag-note -->
@@ -37,11 +37,11 @@
                 ng-disabled="state.actionInProgress || !formValues.Name"
                 button-spinner="state.actionInProgress"
               >
-                <span ng-hide="state.actionInProgress">Create the profile</span>
-                <span ng-show="state.actionInProgress">Creating profile...</span>
+                <span ng-hide="state.actionInProgress">创建Profile</span>
+                <span ng-show="state.actionInProgress">创建Profile中...</span>
               </button>
               <button type="button" class="btn btn-primary btn-sm" ng-disabled="!formValues.Name" ui-sref="storidge.profiles.new({ profileName: formValues.Name })"
-                >Modify defaults...</button
+                >修改默认值...</button
               >
             </div>
           </div>
@@ -67,11 +67,11 @@
 <!-- <div class="row">
   <div class="col-md-12">
     <rd-widget>
-      <rd-widget-header icon="fa-sticky-note" title-text="Profiles">
+      <rd-widget-header icon="fa-sticky-note" title-text="简介">
         <div class="pull-right">
-          Items per page:
+          每页项目：
           <select ng-model="state.pagination_count" ng-change="changePaginationCount()">
-            <option value="0">All</option>
+            <option value="0">全部</option>
             <option value="10">10</option>
             <option value="25">25</option>
             <option value="50">50</option>
@@ -112,10 +112,10 @@
                 </td>
               </tr>
               <tr ng-if="!profiles">
-                <td colspan="3" class="text-center text-muted">Loading...</td>
+                <td colspan="3" class="text-center text-muted">加载中...</td>
               </tr>
               <tr ng-if="state.filteredProfiles.length == 0">
-                <td colspan="3" class="text-center text-muted">No profiles available.</td>
+                <td colspan="3" class="text-center text-muted">没有可用的Profile。</td>
               </tr>
             </tbody>
           </table>

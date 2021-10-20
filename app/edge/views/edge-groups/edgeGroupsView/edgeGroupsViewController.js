@@ -17,7 +17,7 @@ export class EdgeGroupsController {
       this.items = await this.EdgeGroupService.groups();
     } catch (err) {
       this.items = [];
-      this.Notifications.error('Failure', err, 'Unable to retrieve Edge groups');
+      this.Notifications.error('失败', err, 'Unable to retrieve Edge groups');
     }
   }
 
@@ -33,7 +33,7 @@ export class EdgeGroupsController {
         this.Notifications.success('Edge Group successfully removed', item.Name);
         _.remove(this.items, item);
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to remove Edge Group');
+        this.Notifications.error('失败', err, 'Unable to remove Edge Group');
       }
     }
 

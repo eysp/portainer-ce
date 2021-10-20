@@ -18,11 +18,11 @@ class DockerRegistryAccessController {
       this.state.actionInProgress = true;
       try {
         await this.EndpointService.updateRegistryAccess(this.state.endpointId, this.state.registryId, this.registryEndpointAccesses);
-        this.Notifications.success('Access successfully updated');
+        this.Notifications.success('已成功更新访问权限');
         this.$state.reload();
       } catch (err) {
         this.state.actionInProgress = false;
-        this.Notifications.error('Failure', err, 'Unable to update accesses');
+        this.Notifications.error('失败', err, '无法更新访问');
       }
     });
   }
@@ -55,7 +55,7 @@ class DockerRegistryAccessController {
         this.registryEndpointAccesses = this.registry.RegistryAccesses[this.state.endpointId] || {};
         this.endpointGroup = await this.GroupService.group(this.endpoint.GroupId);
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to retrieve registry details');
+        this.Notifications.error('失败', err, '无法检索注册表详细信息');
       } finally {
         this.state.viewReady = true;
       }

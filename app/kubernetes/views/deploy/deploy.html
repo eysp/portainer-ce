@@ -1,5 +1,5 @@
-<kubernetes-view-header title="Advanced deployment" state="kubernetes.deploy" view-ready="ctrl.state.viewReady">
-  Deploy Kubernetes resources
+<kubernetes-view-header title="高级部署" state="kubernetes.deploy" view-ready="ctrl.state.viewReady">
+  部署 Kubernetes 资源
 </kubernetes-view-header>
 
 <kubernetes-view-loading view-ready="ctrl.state.viewReady"></kubernetes-view-loading>
@@ -13,7 +13,7 @@
         <rd-widget-body>
           <uib-tabset active="ctrl.state.activeTab" justified="true" type="pills">
             <uib-tab index="0">
-              <uib-tab-heading> <i class="fa fa-code space-right" aria-hidden="true"></i> Deploy </uib-tab-heading>
+              <uib-tab-heading> <i class="fa fa-code space-right" aria-hidden="true"></i> 部署 </uib-tab-heading>
 
               <form class="form-horizontal" style="margin-top: 20px;">
                 <div class="form-group" ng-if="ctrl.formValues.Namespace">
@@ -25,25 +25,25 @@
                 <div class="form-group" ng-if="!ctrl.formValues.Namespace">
                   <div class="col-sm-12 small text-muted">
                     <i class="fa fa-exclamation-circle orange-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                    You do not have access to any namespace. Contact your administrator to get access to a namespace.
+                    您无权访问任何Namespace。 请联系您的管理员以访问Namespace。
                   </div>
                 </div>
 
                 <div class="form-group">
-                  <label for="stack_name" class="col-sm-1 control-label text-left">Name</label>
+                  <label for="stack_name" class="col-sm-1 control-label text-left">名称</label>
                   <div class="col-lg-11 col-sm-10">
                     <input type="text" class="form-control" ng-model="ctrl.formValues.StackName" id="stack_name" placeholder="my-app" auto-focus />
                   </div>
                 </div>
 
                 <div class="col-sm-12 form-section-title">
-                  Build method
+                  构建方法
                 </div>
                 <box-selector radio-name="method" ng-model="ctrl.state.BuildMethod" options="ctrl.methodOptions" data-cy="k8sAppDeploy-buildSelector"></box-selector>
 
                 <div ng-if="ctrl.state.BuildMethod !== ctrl.BuildMethods.CUSTOM_TEMPLATE">
                   <div class="col-sm-12 form-section-title">
-                    Deployment type
+                    部署类型
                   </div>
                   <box-selector radio-name="deploy" ng-model="ctrl.state.DeployType" options="ctrl.deployOptions" data-cy="k8sAppDeploy-deploymentSelector"></box-selector>
                 </div>
@@ -77,18 +77,17 @@
                   on-change="(ctrl.onChangeFileContent)"
                   ng-required="true"
                   yml="true"
-                  placeholder="# Define or paste the content of your manifest file here"
+                  placeholder="# 在此处定义或粘贴清单文件的内容"
                 >
                   <editor-description>
                     <span class="col-sm-12 text-muted small" ng-show="ctrl.state.DeployType === ctrl.ManifestDeployTypes.COMPOSE">
                       <p>
                         <i class="fa fa-exclamation-circle orange-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                        Portainer uses <a href="https://kompose.io/" target="_blank">Kompose</a> to convert your Compose manifest to a Kubernetes compliant manifest. Be wary that
-                        not all the Compose format options are supported by Kompose at the moment.
+                        Portainer 使用 <a href="https://kompose.io/" target="_blank">Kompose</a> 将您的 Compose 清单转换为符合 Kubernetes 的清单。请注意，目前并非所有 Compose 格式选项都受 Kompose 支持。
                       </p>
                       <p>
-                        You can get more information about Compose file format in the
-                        <a href="https://docs.docker.com/compose/compose-file/" target="_blank">official documentation</a>.
+                        您可以在
+                        <a href="https://docs.docker.com/compose/compose-file/" target="_blank">官方文档</a>中获取更多关于compose-file文件格式的信息。
                       </p>
                     </span>
                     <span
@@ -97,11 +96,11 @@
                     >
                       <p>
                         <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-                        This feature allows you to deploy any kind of Kubernetes resource in this environment (Deployment, Secret, ConfigMap...).
+                        此功能允许您在此环境中部署任何类型的 Kubernetes 资源（Deployment、Secret、ConfigMap...）。
                       </p>
                       <p>
-                        You can get more information about Kubernetes file format in the
-                        <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/" target="_blank">official documentation</a>.
+                        您可以在
+                        <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/" target="_blank">官方文档</a>中获取更多关于 Kubernetes 文件格式的信息。
                       </p>
                     </span>
                   </editor-description>
@@ -116,7 +115,7 @@
                   </div>
                   <div class="form-group">
                     <span class="col-sm-12 text-muted small">
-                      Indicate the URL to the manifest.
+                      指明清单的 URL。
                     </span>
                   </div>
                   <div class="form-group">
@@ -137,7 +136,7 @@
 
                 <!-- actions -->
                 <div class="col-sm-12 form-section-title">
-                  Actions
+                  操作
                 </div>
                 <div class="form-group">
                   <div class="col-sm-12">
@@ -153,8 +152,8 @@
                       analytics-event="kubernetes-application-advanced-deployment"
                       analytics-properties="ctrl.buildAnalyticsProperties()"
                     >
-                      <span ng-hide="ctrl.state.actionInProgress">Deploy</span>
-                      <span ng-show="ctrl.state.actionInProgress">Deployment in progress...</span>
+                      <span ng-hide="ctrl.state.actionInProgress">部署</span>
+                      <span ng-show="ctrl.state.actionInProgress">正在部署...</span>
                     </button>
                   </div>
                 </div>
@@ -163,7 +162,7 @@
             </uib-tab>
 
             <uib-tab index="1" disable="ctrl.state.tabLogsDisabled">
-              <uib-tab-heading> <i class="fa fa-file space-right" aria-hidden="true"></i> Logs </uib-tab-heading>
+              <uib-tab-heading> <i class="fa fa-file space-right" aria-hidden="true"></i> 日志 </uib-tab-heading>
               <form class="form-horizontal" style="margin-top: 20px;">
                 <div class="form-group" ng-if="ctrl.state.activeTab === 1">
                   <div class="col-sm-12">

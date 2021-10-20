@@ -85,7 +85,7 @@ angular.module('portainer.integrations.storidge').controller('StoridgeProfileCon
           $state.go('storidge.profiles');
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to update profile');
+          Notifications.error('失败', err, 'Unable to update profile');
         })
         .finally(function final() {
           $scope.state.updateInProgress = false;
@@ -111,7 +111,7 @@ angular.module('portainer.integrations.storidge').controller('StoridgeProfileCon
           $state.go('storidge.profiles');
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to delete profile');
+          Notifications.error('失败', err, 'Unable to delete profile');
         })
         .finally(function final() {
           $scope.state.deleteInProgress = false;
@@ -136,7 +136,7 @@ angular.module('portainer.integrations.storidge').controller('StoridgeProfileCon
           $scope.profile = profile;
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve profile details');
+          Notifications.error('失败', err, 'Unable to retrieve profile details');
         });
     }
 

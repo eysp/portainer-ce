@@ -1,6 +1,6 @@
 <kubernetes-view-header title="Namespace access management" state="kubernetes.resourcePools.resourcePool.access" view-ready="ctrl.state.viewReady">
   <a ui-sref="kubernetes.resourcePools">Namespaces</a> &gt;
-  <a ui-sref="kubernetes.resourcePools.resourcePool({id: ctrl.pool.Namespace.Name})">{{ ctrl.pool.Namespace.Name }}</a> &gt; Access management
+  <a ui-sref="kubernetes.resourcePools.resourcePool({id: ctrl.pool.Namespace.Name})">{{ ctrl.pool.Namespace.Name }}</a> &gt; 访问管理
 </kubernetes-view-header>
 
 <kubernetes-view-loading view-ready="ctrl.state.viewReady"></kubernetes-view-loading>
@@ -14,7 +14,7 @@
           <table class="table">
             <tbody>
               <tr>
-                <td>Name</td>
+                <td>名称</td>
                 <td>
                   {{ ctrl.pool.Namespace.Name }}
                 </td>
@@ -34,12 +34,12 @@
           <form class="form-horizontal">
             <div class="form-group">
               <label class="col-sm-3 col-lg-2 control-label text-left">
-                Select user(s) and/or team(s)
+                选择用户和/或团队
               </label>
               <div class="col-sm-9 col-lg-4">
                 <span class="small text-muted" ng-if="ctrl.availableUsersAndTeams.length === 0">
-                  No user nor team access has been set on the environment. Head over to the
-                  <a ui-sref="portainer.endpoints.endpoint.access({id: ctrl.endpointId})">environment access view</a> to manage them.
+                  未在环境中设置用户或团队访问权限。 前往
+                  <a ui-sref="portainer.endpoints.endpoint.access({id: ctrl.endpointId})">环境访问视图</a> 来管理它们。
                 </span>
                 <span
                   isteven-multi-select
@@ -51,7 +51,7 @@
                   tick-property="ticked"
                   helper-elements="filter"
                   search-property="Name"
-                  translation="{nothingSelected: 'Select one or more users and/or teams', search: 'Search...'}"
+                  translation="{nothingSelected: '选择一个或多个用户和/或团队', search: '搜索...'}"
                 >
                 </span>
               </div>
@@ -67,8 +67,8 @@
                   ng-click="ctrl.authorizeAccess()"
                   button-spinner="ctrl.actionInProgress"
                 >
-                  <span ng-hide="ctrl.state.actionInProgress"><i class="fa fa-plus" aria-hidden="true"></i> Create access</span>
-                  <span ng-show="ctrl.state.actionInProgress">Creating access...</span>
+                  <span ng-hide="ctrl.state.actionInProgress"><i class="fa fa-plus" aria-hidden="true"></i> 创建访问权限</span>
+                  <span ng-show="ctrl.state.actionInProgress">创建访问权限...</span>
                 </button>
               </div>
             </div>

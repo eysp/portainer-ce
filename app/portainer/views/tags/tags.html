@@ -1,22 +1,22 @@
 <rd-header>
-  <rd-header-title title-text="Tags">
-    <a data-toggle="tooltip" title="Refresh" ui-sref="portainer.tags" ui-sref-opts="{reload: true}">
+  <rd-header-title title-text="标签">
+    <a data-toggle="tooltip" title="刷新" ui-sref="portainer.tags" ui-sref-opts="{reload: true}">
       <i class="fa fa-sync" aria-hidden="true"></i>
     </a>
   </rd-header-title>
-  <rd-header-content>Tag management</rd-header-content>
+  <rd-header-content>标签管理</rd-header-content>
 </rd-header>
 
 <div class="row">
   <div class="col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="fa-plus" title-text="Add a new tag"> </rd-widget-header>
+      <rd-widget-header icon="fa-plus" title-text="添加新标签"> </rd-widget-header>
       <rd-widget-body>
         <form class="form-horizontal" name="tagCreationForm" ng-submit="createTag()">
           <!-- name-input -->
           <div class="form-group">
             <label for="name" class="col-sm-2 control-label text-left">
-              Name
+              名称
             </label>
             <div class="col-sm-10">
               <input
@@ -34,8 +34,8 @@
           <div class="form-group" ng-show="tagCreationForm.name.$invalid">
             <div class="col-sm-12 small text-warning">
               <div ng-messages="tagCreationForm.name.$error">
-                <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This field is required.</p>
-                <p ng-message="validName"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This tag already exists.</p>
+                <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此字段是必需的。</p>
+                <p ng-message="validName"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此标签已存在。</p>
               </div>
             </div>
           </div>
@@ -49,8 +49,8 @@
                 ng-click="createTag()"
                 button-spinner="state.actionInProgress"
               >
-                <span ng-hide="state.actionInProgress"><i class="fa fa-plus" aria-hidden="true"></i> Create tag</span>
-                <span ng-show="state.actionInProgress">Creating tag...</span>
+                <span ng-hide="state.actionInProgress"><i class="fa fa-plus" aria-hidden="true"></i> 创建标签</span>
+                <span ng-show="state.actionInProgress">正在创建标签...</span>
               </button>
             </div>
           </div>
@@ -62,6 +62,6 @@
 
 <div class="row">
   <div class="col-sm-12">
-    <tags-datatable title-text="Tags" title-icon="fa-tags" dataset="tags" table-key="tags" order-by="Name" remove-action="removeAction"></tags-datatable>
+    <tags-datatable title-text="标签" title-icon="fa-tags" dataset="tags" table-key="tags" order-by="Name" remove-action="removeAction"></tags-datatable>
   </div>
 </div>

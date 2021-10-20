@@ -15,9 +15,9 @@ function EndpointsController($q, $scope, $state, $async, EndpointService, GroupS
       try {
         await EndpointService.deleteEndpoint(endpoint.Id);
 
-        Notifications.success('Environment successfully removed', endpoint.Name);
+        Notifications.success('已成功删除环境', endpoint.Name);
       } catch (err) {
-        Notifications.error('Failure', err, 'Unable to remove environment');
+        Notifications.error('失败', err, '无法删除环境');
       }
     }
 
@@ -38,7 +38,7 @@ function EndpointsController($q, $scope, $state, $async, EndpointService, GroupS
         deferred.resolve({ endpoints: endpoints, totalCount: data.endpoints.totalCount });
       })
       .catch(function error(err) {
-        Notifications.error('Failure', err, 'Unable to retrieve environment information');
+        Notifications.error('失败', err, '无法检索环境信息');
       });
     return deferred.promise;
   }

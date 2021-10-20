@@ -2,19 +2,19 @@
   <rd-widget>
     <rd-widget-header icon="fa-user-lock">
       <header-title>
-        Effective access viewer
+        有效访问查看器
         <be-feature-indicator feature="$ctrl.limitedFeature" class="space-left"></be-feature-indicator>
       </header-title>
     </rd-widget-header>
     <rd-widget-body>
       <form class="form-horizontal">
         <div class="col-sm-12 form-section-title">
-          User
+          用户
         </div>
         <div class="form-group">
           <div class="col-sm-12">
             <span class="small text-muted" ng-if="$ctrl.users.length === 0">
-              No user available
+              没有可用的用户
             </span>
             <ui-select ng-if="$ctrl.users.length > 0" ng-model="$ctrl.selectedUser" ng-change="$ctrl.onUserSelect()">
               <ui-select-match placeholder="Select a user">
@@ -28,12 +28,12 @@
         </div>
 
         <div class="col-sm-12 form-section-title">
-          Access
+          访问
         </div>
         <div>
           <div class="small text-muted" style="margin-bottom: 15px;">
             <i class="fa fa-info-circle blue-icon space-right" aria-hidden="true"></i>
-            Effective role for each environment will be displayed for the selected user
+            将为所选用户显示每个环境的有效角色
           </div>
         </div>
         <access-viewer-datatable table-key="access_viewer" dataset="$ctrl.userRoles" order-by="EndpointName"> </access-viewer-datatable>

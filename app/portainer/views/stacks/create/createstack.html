@@ -1,6 +1,6 @@
 <rd-header>
-  <rd-header-title title-text="Create stack"></rd-header-title>
-  <rd-header-content> <a ui-sref="docker.stacks">Stacks</a> &gt; Add stack </rd-header-content>
+  <rd-header-title title-text="创建堆栈"></rd-header-title>
+  <rd-header-content> <a ui-sref="docker.stacks">堆栈</a> &gt; 添加堆栈 </rd-header-content>
 </rd-header>
 
 <div class="row">
@@ -10,7 +10,7 @@
         <form class="form-horizontal" name="createStackForm">
           <!-- name-input -->
           <div class="form-group">
-            <label for="stack_name" class="col-sm-1 control-label text-left">Name</label>
+            <label for="stack_name" class="col-sm-1 control-label text-left">名称</label>
             <div class="col-sm-11">
               <input
                 type="text"
@@ -18,7 +18,7 @@
                 ng-model="formValues.Name"
                 id="stack_name"
                 name="stack_name"
-                placeholder="e.g. mystack"
+                placeholder="例如 mystack"
                 auto-focus
                 ng-pattern="STACK_NAME_VALIDATION_REGEX"
               />
@@ -29,7 +29,7 @@
               <div ng-messages="createStackForm.stack_name.$error">
                 <p ng-message="pattern">
                   <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-                  <span>This field must consist of lower case alphanumeric characters, '_' or '-' (e.g. 'my-name', or 'abc-123').</span>
+                  <span>此字段必须由小写字母数字字符组成, '_' 或 '-' (例如 'my-name', or 'abc-123').</span>
                 </p>
               </div>
             </div>
@@ -37,22 +37,22 @@
           <!-- !name-input -->
           <div class="form-group">
             <span class="col-sm-12 text-muted small" ng-if="state.StackType === 1">
-              This stack will be deployed using the equivalent of the <code>docker stack deploy</code> command.
+              该堆栈将使用等效的 <code>docker stack deploy</code> 命令进行部署。
             </span>
             <div class="col-sm-12 text-muted small" ng-if="state.StackType === 2 && composeSyntaxMaxVersion == 2">
               <div style="margin-bottom: 7px;">
-                This stack will be deployed using the equivalent of <code>docker-compose</code>. Only Compose file format version <b>2</b> is supported at the moment.
+                该堆栈将使用等效的 <code>docker-compose</code> 进行部署。 目前仅支持 Compose 文件格式版本 <b>2</b>。
               </div>
               <i class="fa fa-exclamation-circle orange-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-              Note: Due to a limitation of libcompose, the name of the stack will be standardized to remove all special characters and uppercase letters.
+              注意：由于libcompose的限制，栈名会被标准化，去掉所有特殊字符和大写字母。
             </div>
             <span class="col-sm-12 text-muted small" ng-if="state.StackType === 2 && composeSyntaxMaxVersion > 2">
-              This stack will be deployed using <code>docker-compose</code>.
+              该堆栈将使用 <code>docker-compose</code> 进行部署。
             </span>
           </div>
           <!-- build-method -->
           <div class="col-sm-12 form-section-title">
-            Build method
+            构建方法
           </div>
           <div class="form-group"></div>
           <div class="form-group" style="margin-bottom: 0;">
@@ -62,9 +62,9 @@
                 <label for="method_editor">
                   <div class="boxselector_header">
                     <i class="fa fa-edit" aria-hidden="true" style="margin-right: 2px;"></i>
-                    Web editor
+                    网页编辑器
                   </div>
-                  <p>Use our Web editor</p>
+                  <p>使用我们的网页编辑器</p>
                 </label>
               </div>
               <div>
@@ -72,9 +72,9 @@
                 <label for="method_upload">
                   <div class="boxselector_header">
                     <i class="fa fa-upload" aria-hidden="true" style="margin-right: 2px;"></i>
-                    Upload
+                    上传
                   </div>
-                  <p>Upload from your computer</p>
+                  <p>从您的计算机上传</p>
                 </label>
               </div>
               <div>
@@ -82,9 +82,9 @@
                 <label for="method_repository">
                   <div class="boxselector_header">
                     <i class="fab fa-git" aria-hidden="true" style="margin-right: 2px;"></i>
-                    Repository
+                    仓库
                   </div>
-                  <p>Use a git repository</p>
+                  <p>使用 git 仓库</p>
                 </label>
               </div>
               <div>
@@ -92,9 +92,9 @@
                 <label for="method_template">
                   <div class="boxselector_header">
                     <i class="fa fa-rocket" aria-hidden="true" style="margin-right: 2px;"></i>
-                    Custom template
+                    自定义模板
                   </div>
-                  <p>Use a custom template</p>
+                  <p>使用自定义模板</p>
                 </label>
               </div>
             </div>
@@ -104,11 +104,11 @@
           <!-- upload -->
           <div ng-show="state.Method === 'upload'">
             <div class="col-sm-12 form-section-title">
-              Upload
+              上传
             </div>
             <div class="form-group">
               <span class="col-sm-12 text-muted small">
-                You can upload a Compose file from your computer.
+                您可以从计算机上传 Compose 文件。
               </span>
               <div class="col-sm-12" ng-if="state.uploadYamlValidationError"
                 ><span class="text-danger small">{{ state.uploadYamlValidationError }}</span></div
@@ -116,7 +116,7 @@
             </div>
             <div class="form-group">
               <div class="col-sm-12">
-                <button type="button" class="btn btn-sm btn-primary" ngf-select="uploadFile($file)">Select file</button>
+                <button type="button" class="btn btn-sm btn-primary" ngf-select="uploadFile($file)">选择文件</button>
                 <span style="margin-left: 5px;">
                   {{ formValues.StackFile.name }}
                   <i class="fa fa-times red-icon" ng-if="!formValues.StackFile" aria-hidden="true"></i>
@@ -132,7 +132,7 @@
             additional-file="true"
             auto-update="true"
             show-auth-explanation="true"
-            path-text-title="Compose path"
+            path-text-title="Compose 路径"
             path-placeholder="docker-compose.yml"
           ></git-form>
 
@@ -151,11 +151,11 @@
             on-change="(onChangeFileContent)"
             ng-required="true"
             yml="true"
-            placeholder="# Define or paste the content of your docker-compose file here"
+            placeholder="# 在此处定义或粘贴 docker-compose 文件的内容"
           >
             <editor-description>
               <span class="col-sm-12 text-muted small">
-                You can get more information about Compose file format in the <a href="https://docs.docker.com/compose/compose-file/" target="_blank">official documentation</a>.
+                您可以在 <a href="https://docs.docker.com/compose/compose-file/" target="_blank">官方文档</a>中了解更多详细信息。
               </span>
               <div class="col-sm-12" ng-if="state.editorYamlValidationError">
                 <span class="text-danger small">{{ state.editorYamlValidationError }}</span>
@@ -164,13 +164,13 @@
           </web-editor-form>
 
           <!-- environment-variables -->
-          <environment-variables-panel ng-model="formValues.Env" explanation="These values will be used as substitutions in the stack file" on-change="(handleEnvVarChange)">
+          <environment-variables-panel ng-model="formValues.Env" explanation="这些值将用作堆栈文件中的替换" on-change="(handleEnvVarChange)">
           </environment-variables-panel>
           <!-- !environment-variables -->
           <por-access-control-form form-data="formValues.AccessControlData"></por-access-control-form>
           <!-- actions -->
           <div class="col-sm-12 form-section-title">
-            Actions
+            操作
           </div>
           <div class="form-group">
             <div class="col-sm-12">
@@ -190,8 +190,8 @@
                 analytics-event="docker-stack-create"
                 analytics-properties="buildAnalyticsProperties()"
               >
-                <span ng-hide="state.actionInProgress">Deploy the stack</span>
-                <span ng-show="state.actionInProgress">Deployment in progress...</span>
+                <span ng-hide="state.actionInProgress">部署堆栈</span>
+                <span ng-show="state.actionInProgress">正在部署...</span>
               </button>
               <span class="text-danger" ng-if="state.formValidationError" style="margin-left: 5px;">{{ state.formValidationError }}</span>
             </div>

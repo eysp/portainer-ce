@@ -16,11 +16,11 @@ angular.module('portainer.docker').controller('VolumeController', [
 
     $scope.removeSnapshot = function (selectedItems) {
       ModalService.confirm({
-        title: 'Are you sure?',
-        message: 'Do you want really want to remove this snapshot?',
+        title: '你确定吗？',
+        message: '是否确实要删除此快照？?',
         buttons: {
           confirm: {
-            label: 'Remove',
+            label: '删除',
             className: 'btn-danger',
           },
         },
@@ -32,12 +32,12 @@ angular.module('portainer.docker').controller('VolumeController', [
           angular.forEach(selectedItems, function (item) {
             StoridgeSnapshotService.remove(item.Id)
               .then(function success() {
-                Notifications.success('Snapshot successfully removed', item.Id);
+                Notifications.success('快照已成功删除', item.Id);
                 var index = $scope.storidgeSnapshots.indexOf(item);
                 $scope.storidgeSnapshots.splice(index, 1);
               })
               .catch(function error(err) {
-                Notifications.error('Failure', err, 'Unable to remove snapshot');
+                Notifications.error('失败', err, '无法删除快照');
               })
               .finally(function final() {
                 --actionCount;
@@ -51,15 +51,15 @@ angular.module('portainer.docker').controller('VolumeController', [
     };
 
     $scope.removeVolume = function removeVolume() {
-      ModalService.confirmDeletion('Do you want to remove this volume?', (confirmed) => {
+      ModalService.confirmDeletion('是否要删除此卷？', (confirmed) => {
         if (confirmed) {
           VolumeService.remove($scope.volume)
             .then(function success() {
-              Notifications.success('Volume successfully removed', $transition$.params().id);
+              Notifications.success('已成功删除存储卷', $transition$.params().id);
               $state.go('docker.volumes', {});
             })
             .catch(function error(err) {
-              Notifications.error('Failure', err, 'Unable to remove volume');
+              Notifications.error('失败', err, '无法删除存储卷');
             });
         }
       });
@@ -110,7 +110,7 @@ angular.module('portainer.docker').controller('VolumeController', [
           $scope.storidgeSnapshots = data;
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve volume details');
+          Notifications.error('失败', err, '无法检索存储卷详细信息');
         });
     }
 

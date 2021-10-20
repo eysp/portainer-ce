@@ -1,19 +1,19 @@
 <rd-header>
-  <rd-header-title title-text="Environment access"></rd-header-title>
+  <rd-header-title title-text="环境访问权限"></rd-header-title>
   <rd-header-content>
-    <a ui-sref="portainer.endpoints">Environments</a> &gt; <a ui-sref="portainer.endpoints.endpoint({id: ctrl.endpoint.Id})">{{ ctrl.endpoint.Name }}</a> &gt; Access management
+    <a ui-sref="portainer.endpoints">环境</a> &gt; <a ui-sref="portainer.endpoints.endpoint({id: ctrl.endpoint.Id})">{{ ctrl.endpoint.Name }}</a> &gt; 访问管理
   </rd-header-content>
 </rd-header>
 
 <div class="row" ng-if="ctrl.endpoint">
   <div class="col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="fa-plug" title-text="Environment"></rd-widget-header>
+      <rd-widget-header icon="fa-plug" title-text="环境"></rd-widget-header>
       <rd-widget-body classes="no-padding">
         <table class="table">
           <tbody>
             <tr>
-              <td>Name</td>
+              <td>名称</td>
               <td>
                 {{ ctrl.endpoint.Name }}
               </td>
@@ -25,7 +25,7 @@
               </td>
             </tr>
             <tr>
-              <td>Group</td>
+              <td>群组</td>
               <td>
                 <a ui-sref="portainer.groups.group({ id: ctrl.group.Id })">{{ ctrl.group.Name }}</a>
               </td>

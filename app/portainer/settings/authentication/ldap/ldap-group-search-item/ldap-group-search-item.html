@@ -2,7 +2,7 @@
   <rd-widget-body>
     <div ng-if="$ctrl.index > 0" style="margin-bottom: 10px;">
       <span class="text-muted small">
-        Extra search configuration
+        额外的搜索配置
       </span>
       <button
         class="btn btn-sm btn-danger"
@@ -34,9 +34,9 @@
 
     <div class="form-group">
       <div class="col-sm-12" style="margin-bottom: 5px;">
-        <label class="control-label text-left">Groups</label>
+        <label class="control-label text-left">群组</label>
         <span class="label label-default interactive" style="margin-left: 10px;" ng-click="$ctrl.addGroup()">
-          <i class="fa fa-plus-circle" aria-hidden="true"></i> add another group
+          <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加另一个组
         </span>
       </div>
       <div class="col-sm-12" ng-if="$ctrl.groups.length">
@@ -52,7 +52,7 @@
                   limited-feature-tabindex="-1"
                 >
                   <option value="ou">OU Name</option>
-                  <option value="cn">Folder Name</option>
+                  <option value="cn">文件夹名</option>
                 </select>
               </div>
               <div class="col-sm-5">
@@ -83,7 +83,7 @@
 
     <div class="form-group no-margin-last-child">
       <label class="col-sm-4 col-md-2 control-label text-left">
-        Group Filter
+        群组筛选
       </label>
       <div class="col-sm-8 col-md-10">
         {{ $ctrl.config.GroupFilter }}

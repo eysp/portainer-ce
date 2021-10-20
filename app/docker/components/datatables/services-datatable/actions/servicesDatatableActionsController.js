@@ -18,7 +18,7 @@ angular.module('portainer.docker').controller('ServicesDatatableActionsControlle
           $state.reload();
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to scale service');
+          Notifications.error('失败', err, 'Unable to scale service');
           service.Scale = false;
           service.Replicas = service.ReplicaCount;
         });
@@ -68,7 +68,7 @@ angular.module('portainer.docker').controller('ServicesDatatableActionsControlle
             Notifications.success('Service successfully updated', service.Name);
           })
           .catch(function error(err) {
-            Notifications.error('Failure', err, 'Unable to force update service', service.Name);
+            Notifications.error('失败', err, 'Unable to force update service', service.Name);
           })
           .finally(function final() {
             --actionCount;
@@ -93,7 +93,7 @@ angular.module('portainer.docker').controller('ServicesDatatableActionsControlle
             Notifications.success('Service successfully removed', service.Name);
           })
           .catch(function error(err) {
-            Notifications.error('Failure', err, 'Unable to remove service');
+            Notifications.error('失败', err, 'Unable to remove service');
           })
           .finally(function final() {
             --actionCount;

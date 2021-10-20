@@ -31,7 +31,7 @@ class KubernetesDeploymentHistoryHelper {
       // returns true if two given template.spec are equal, ignoring the diff in value of Labels[pod-template-hash]
       // We ignore pod-template-hash because:
       // 1. The hash result would be different upon podTemplateSpec API changes
-      //    (e.g. the addition of a new field will cause the hash code to change)
+      //    (例如 the addition of a new field will cause the hash code to change)
       // 2. The deployment template won't have hash labels
       delete item.spec.template.metadata.labels[KubernetesSystem_DefaultDeploymentUniqueLabelKey];
       return _.isEqual(deployment.spec.template, item.spec.template);

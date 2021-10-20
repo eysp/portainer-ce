@@ -26,7 +26,7 @@ angular.module('portainer.integrations.storidge').controller('StoridgeProfilesCo
             $scope.profiles.splice(index, 1);
           })
           .catch(function error(err) {
-            Notifications.error('Failure', err, 'Unable to remove profile');
+            Notifications.error('失败', err, 'Unable to remove profile');
           })
           .finally(function final() {
             --actionCount;
@@ -54,7 +54,7 @@ angular.module('portainer.integrations.storidge').controller('StoridgeProfilesCo
           $state.reload();
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to create profile');
+          Notifications.error('失败', err, 'Unable to create profile');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -67,7 +67,7 @@ angular.module('portainer.integrations.storidge').controller('StoridgeProfilesCo
           $scope.profiles = data;
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve profiles');
+          Notifications.error('失败', err, 'Unable to retrieve profiles');
         });
     }
 

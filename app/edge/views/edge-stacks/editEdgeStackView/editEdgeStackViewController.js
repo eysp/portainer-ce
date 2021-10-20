@@ -43,7 +43,7 @@ export class EditEdgeStackViewController {
       };
       this.oldFileContent = this.formValues.StackFileContent;
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve stack data');
+      this.Notifications.error('失败', err, 'Unable to retrieve stack data');
     }
 
     this.$window.onbeforeunload = () => {
@@ -108,7 +108,7 @@ export class EditEdgeStackViewController {
       });
       return { endpoints, totalCount };
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve environment information');
+      this.Notifications.error('失败', err, 'Unable to retrieve environment information');
     }
   }
 }

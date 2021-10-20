@@ -5,29 +5,29 @@
         <div class="toolBarTitle"> <i class="fa" ng-class="$ctrl.titleIcon" aria-hidden="true" style="margin-right: 2px;"></i> {{ $ctrl.titleText }} </div>
         <span class="small text-muted" style="float: left; margin-top: 5px;" ng-if="$ctrl.isAdmin && !$ctrl.settings.showSystem">
           <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-          System resources are hidden, this can be changed in the table settings.
+          系统资源被隐藏，这可以在表设置中更改。
         </span>
         <div class="settings">
           <span class="setting" ng-class="{ 'setting-active': $ctrl.settings.open }" uib-dropdown dropdown-append-to-body auto-close="disabled" is-open="$ctrl.settings.open">
-            <span uib-dropdown-toggle><i class="fa fa-cog" aria-hidden="true"></i> Table settings</span>
+            <span uib-dropdown-toggle><i class="fa fa-cog" aria-hidden="true"></i> 表格设置</span>
             <div class="dropdown-menu dropdown-menu-right" uib-dropdown-menu>
               <div class="tableMenu">
                 <div class="menuHeader">
-                  Table settings
+                  表格设置
                 </div>
                 <div class="menuContent">
                   <div>
                     <div class="md-checkbox" ng-if="$ctrl.isAdmin">
                       <input id="stacks_setting_show_system" type="checkbox" ng-model="$ctrl.settings.showSystem" ng-change="$ctrl.onSettingsShowSystemChange()" />
-                      <label for="stacks_setting_show_system">Show system resources</label>
+                      <label for="stacks_setting_show_system">显示系统资源</label>
                     </div>
                     <div class="md-checkbox">
                       <input id="setting_auto_refresh" type="checkbox" ng-model="$ctrl.settings.repeater.autoRefresh" ng-change="$ctrl.onSettingsRepeaterChange()" />
-                      <label for="setting_auto_refresh">Auto refresh</label>
+                      <label for="setting_auto_refresh">自动刷新</label>
                     </div>
                     <div ng-if="$ctrl.settings.repeater.autoRefresh">
                       <label for="settings_refresh_rate">
-                        Refresh rate
+                        刷新频率
                       </label>
                       <select id="settings_refresh_rate" ng-model="$ctrl.settings.repeater.refreshRate" ng-change="$ctrl.onSettingsRepeaterChange()" class="small-select">
                         <option value="10">10s</option>
@@ -43,7 +43,7 @@
                   </div>
                 </div>
                 <div>
-                  <a type="button" class="btn btn-default btn-sm" ng-click="$ctrl.settings.open = false;">Close</a>
+                  <a type="button" class="btn btn-default btn-sm" ng-click="$ctrl.settings.open = false;">关闭</a>
                 </div>
               </div>
             </div>
@@ -52,7 +52,7 @@
       </div>
       <div class="actionBar">
         <button type="button" class="btn btn-sm btn-danger" ng-disabled="$ctrl.state.selectedItemCount === 0" ng-click="$ctrl.removeAction($ctrl.state.selectedItems)">
-          <i class="fa fa-trash-alt space-right" aria-hidden="true"></i>Remove
+          <i class="fa fa-trash-alt space-right" aria-hidden="true"></i>删除
         </button>
       </div>
       <div class="searchBar">
@@ -62,7 +62,7 @@
           class="searchInput"
           ng-model="$ctrl.state.textFilter"
           ng-change="$ctrl.onTextFilterChange()"
-          placeholder="Search..."
+          placeholder="搜索..."
           auto-focus
           ng-model-options="{ debounce: 300 }"
         />
@@ -82,7 +82,7 @@
               </th>
               <th>
                 <a ng-click="$ctrl.changeOrderBy('Name')">
-                  Stack
+                  堆栈
                   <i class="fa fa-sort-alpha-down" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Name' && !$ctrl.state.reverseOrder"></i>
                   <i class="fa fa-sort-alpha-up" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Name' && $ctrl.state.reverseOrder"></i>
                 </a>
@@ -96,13 +96,13 @@
               </th>
               <th>
                 <a ng-click="$ctrl.changeOrderBy('Applications.length')">
-                  Applications
+                  应用
                   <i class="fa fa-sort-numeric-down" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Applications.length' && !$ctrl.state.reverseOrder"></i>
                   <i class="fa fa-sort-numeric-up" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Applications.length' && $ctrl.state.reverseOrder"></i>
                 </a>
               </th>
               <th>
-                Actions
+                操作
               </th>
             </tr>
           </thead>
@@ -133,11 +133,11 @@
               </td>
               <td>
                 <a ui-sref="kubernetes.resourcePools.resourcePool({ id: item.ResourcePool })" ng-click="$event.stopPropagation();">{{ item.ResourcePool }}</a>
-                <span class="label label-info image-tag label-margins" ng-if="$ctrl.isSystemNamespace(item.ResourcePool)">system</span>
+                <span class="label label-info image-tag label-margins" ng-if="$ctrl.isSystemNamespace(item.ResourcePool)">系统</span>
               </td>
               <td>{{ item.Applications.length }}</td>
               <td>
-                <a ui-sref="kubernetes.stacks.stack.logs({ namespace: item.ResourcePool, name: item.Name })"> <i class="fa fa-file-alt" aria-hidden="true"></i> Logs </a>
+                <a ui-sref="kubernetes.stacks.stack.logs({ namespace: item.ResourcePool, name: item.Name })"> <i class="fa fa-file-alt" aria-hidden="true"></i> 日志 </a>
               </td>
             </tr>
             <tr
@@ -150,26 +150,26 @@
               <td colspan="4">
                 <a ui-sref="kubernetes.applications.application({ name: app.Name, namespace: app.ResourcePool })">{{ app.Name }}</a>
                 <span style="margin-left: 5px;" class="label label-primary image-tag" ng-if="!$ctrl.isSystemNamespace(app.ResourcePool) && $ctrl.isExternalApplication(app)"
-                  >external</span
+                  >外部的</span
                 >
               </td>
             </tr>
             <tr ng-if="!$ctrl.dataset">
-              <td colspan="5" class="text-center text-muted">Loading...</td>
+              <td colspan="5" class="text-center text-muted">加载中...</td>
             </tr>
             <tr ng-if="$ctrl.state.filteredDataSet.length === 0">
-              <td colspan="5" class="text-center text-muted">No stack available.</td>
+              <td colspan="5" class="text-center text-muted">没有可用的堆栈。</td>
             </tr>
           </tbody>
         </table>
       </div>
       <div class="footer" ng-if="$ctrl.dataset">
-        <div class="infoBar" ng-if="$ctrl.state.selectedItemCount !== 0"> {{ $ctrl.state.selectedItemCount }} item(s) selected </div>
+        <div class="infoBar" ng-if="$ctrl.state.selectedItemCount !== 0"> {{ $ctrl.state.selectedItemCount }} 所选项目 </div>
         <div class="paginationControls">
           <form class="form-inline">
             <span class="limitSelector">
               <span style="margin-right: 5px;">
-                Items per page
+                每页项目数
               </span>
               <select class="form-control" ng-model="$ctrl.state.paginatedItemLimit" ng-change="$ctrl.changePaginationLimit()" data-cy="component-paginationSelect">
                 <option value="0">All</option>

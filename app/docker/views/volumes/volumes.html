@@ -1,16 +1,16 @@
 <rd-header>
-  <rd-header-title title-text="Volume list">
-    <a data-toggle="tooltip" title="Refresh" ui-sref="docker.volumes" ui-sref-opts="{reload: true}">
+  <rd-header-title title-text="存储卷列表">
+    <a data-toggle="tooltip" title="刷新" ui-sref="docker.volumes" ui-sref-opts="{reload: true}">
       <i class="fa fa-sync" aria-hidden="true"></i>
     </a>
   </rd-header-title>
-  <rd-header-content>Volumes</rd-header-content>
+  <rd-header-content>存储卷</rd-header-content>
 </rd-header>
 <information-panel-offline ng-if="offlineMode"></information-panel-offline>
 <div class="row">
   <div class="col-sm-12">
     <volumes-datatable
-      title-text="Volumes"
+      title-text="存储卷"
       title-icon="fa-hdd"
       dataset="volumes"
       table-key="volumes"

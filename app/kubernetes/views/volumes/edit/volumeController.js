@@ -98,7 +98,7 @@ class KubernetesVolumeController {
 
       this.$state.reload(this.$state.current);
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to update volume.');
+      this.Notifications.error('失败', err, 'Unable to update volume.');
     }
   }
 
@@ -128,7 +128,7 @@ class KubernetesVolumeController {
       this.state.volumeSizeUnit = volume.PersistentVolumeClaim.Storage.slice(-2);
       this.state.oldVolumeSize = filesizeParser(volume.PersistentVolumeClaim.Storage, { base: 10 });
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve volume');
+      this.Notifications.error('失败', err, 'Unable to retrieve volume');
     }
   }
 
@@ -150,7 +150,7 @@ class KubernetesVolumeController {
       this.events = _.filter(events, (event) => event.Involved.uid === this.volume.PersistentVolumeClaim.Id);
       this.state.eventWarningCount = KubernetesEventHelper.warningCount(this.events);
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve application related events');
+      this.Notifications.error('失败', err, 'Unable to retrieve application related events');
     } finally {
       this.state.eventsLoading = false;
     }
@@ -200,7 +200,7 @@ class KubernetesVolumeController {
         });
       }
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to load view data');
+      this.Notifications.error('失败', err, 'Unable to load view data');
     } finally {
       this.state.viewReady = true;
     }

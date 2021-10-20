@@ -1,19 +1,19 @@
 <rd-header>
-  <rd-header-title title-text="Settings"></rd-header-title>
-  <rd-header-content>Settings</rd-header-content>
+  <rd-header-title title-text="设置"></rd-header-title>
+  <rd-header-content>设置</rd-header-content>
 </rd-header>
 
 <div class="row">
   <div class="col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="fa-cogs" title-text="Application settings"></rd-widget-header>
+      <rd-widget-header icon="fa-cogs" title-text="应用程序设置"></rd-widget-header>
       <rd-widget-body>
         <form class="form-horizontal">
           <!-- snapshot-interval -->
           <div class="form-group">
-            <label for="snapshot_interval" class="col-sm-2 control-label text-left">Snapshot interval</label>
+            <label for="snapshot_interval" class="col-sm-2 control-label text-left">快照间隔</label>
             <div class="col-sm-10">
-              <input type="text" class="form-control" ng-model="settings.SnapshotInterval" id="snapshot_interval" placeholder="e.g. 15m" />
+              <input type="text" class="form-control" ng-model="settings.SnapshotInterval" id="snapshot_interval" placeholder="例如 15m" />
             </div>
           </div>
           <!-- !snapshot-interval -->
@@ -21,7 +21,7 @@
           <div class="form-group">
             <div class="col-sm-12">
               <label for="toggle_logo" class="control-label text-left">
-                Use custom logo
+                使用自定义logo
               </label>
               <label class="switch" style="margin-left: 20px;"> <input type="checkbox" name="toggle_logo" ng-model="formValues.customLogo" /><i></i> </label>
             </div>
@@ -29,19 +29,19 @@
           <div class="form-group">
             <div class="col-sm-12">
               <label for="toggle_enableTelemetry" class="control-label text-left">
-                Allow the collection of anonymous statistics
+                允许收集匿名统计信息
               </label>
               <label class="switch" style="margin-left: 20px;"> <input type="checkbox" name="toggle_enableTelemetry" ng-model="formValues.enableTelemetry" /><i></i> </label>
             </div>
             <div class="col-sm-12 text-muted small" style="margin-top: 10px;">
-              You can find more information about this in our
-              <a href="https://www.portainer.io/documentation/in-app-analytics-and-privacy-policy/" target="_blank">privacy policy</a>.
+              您可以在我们的
+              <a href="https://www.portainer.io/documentation/in-app-analytics-and-privacy-policy/" target="_blank">隐私政策</a>中找到更多相关信息。
             </div>
           </div>
           <div ng-if="formValues.customLogo">
             <div class="form-group">
               <span class="col-sm-12 text-muted small">
-                You can specify the URL to your logo here. For an optimal display, logo dimensions should be 155px by 55px.
+                您可以在此处指定logo的 URL。 为获得最佳显示效果，logo尺寸应为 155 像素 x 55 像素
               </span>
             </div>
             <div class="form-group">
@@ -56,13 +56,13 @@
           <!-- !logo -->
           <!-- templates -->
           <div class="col-sm-12 form-section-title">
-            App Templates
+            应用模板
           </div>
           <div>
             <div class="form-group">
               <span class="col-sm-12 text-muted small">
-                You can specify the URL to your own template definitions file here. See
-                <a href="https://documentation.portainer.io/v2.0/settings/apps/#build-and-host-your-own-templates" target="_blank">Portainer documentation</a> for more details.
+                您可以在此处指定您自己的模板定义文件的 URL。 见
+                <a href="https://documentation.portainer.io/v2.0/settings/apps/#build-and-host-your-own-templates" target="_blank">Portainer 文档</a> 了解更多详情。
               </span>
             </div>
             <div class="form-group">
@@ -90,8 +90,8 @@
           <div>
             <div class="form-group">
               <span class="col-sm-12 text-muted small">
-                You can specify the URL to your own helm repository here. See the
-                <a href="https://helm.sh/docs/topics/chart_repository/" target="_blank">official documentation</a> for more details.
+                您可以在此处指定您自己的 helm 仓库的 URL。见
+                <a href="https://helm.sh/docs/topics/chart_repository/" target="_blank">官方文档</a> 了解更多详情。
               </span>
             </div>
             <div class="form-group">
@@ -108,14 +108,14 @@
 
           <!-- edge -->
           <div class="col-sm-12 form-section-title">
-            Edge Compute
+            Edge 计算
           </div>
           <div class="form-group">
             <label for="edge_checkin" class="col-sm-2 control-label text-left">
-              Edge agent default poll frequency
+              Edge 代理默认轮询频率
               <portainer-tooltip
                 position="bottom"
-                message="Interval used by default by each Edge agent to check in with the Portainer instance. Affects Edge environment management and Edge compute features."
+                message="默认情况下，每个 Edge 代理使用的时间间隔与 Portainer 实例签入。 影响Edge环境管理和Edge计算功能。"
               ></portainer-tooltip>
             </label>
             <div class="col-sm-10">
@@ -131,7 +131,7 @@
           <div class="form-group">
             <div class="col-sm-12">
               <label for="toggle_enableEdgeComputeFeatures" class="control-label text-left">
-                Enable edge compute features
+                启用 edge 计算功能
               </label>
               <label class="switch" style="margin-left: 20px;" data-cy="settings-edgeToggle">
                 <input type="checkbox" name="toggle_enableEdgeComputeFeatures" ng-model="formValues.enableEdgeComputeFeatures" /><i></i>
@@ -168,8 +168,8 @@
                 button-spinner="state.actionInProgress"
                 data-cy="settings-saveSettingsButton"
               >
-                <span ng-hide="state.actionInProgress">Save settings</span>
-                <span ng-show="state.actionInProgress">Saving...</span>
+                <span ng-hide="state.actionInProgress">保存设置</span>
+                <span ng-show="state.actionInProgress">保存中...</span>
               </button>
             </div>
           </div>
@@ -185,25 +185,25 @@
 <div class="row">
   <div class="col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="fa-tags" title-text="Hidden containers"></rd-widget-header>
+      <rd-widget-header icon="fa-tags" title-text="隐藏容器"></rd-widget-header>
       <rd-widget-body>
         <form class="form-horizontal" ng-submit="addFilteredContainerLabel()" name="addTagForm">
           <div class="form-group">
             <span class="col-sm-12 text-muted small">
-              You can hide containers with specific labels from Portainer UI. You need to specify the label name and value.
+              您可以在 Portainer UI 中隐藏带有特定标签的容器。 您需要指定标签名称和值。
             </span>
           </div>
           <div class="form-group">
-            <label for="header_name" class="col-sm-1 control-label text-left">Name</label>
+            <label for="header_name" class="col-sm-1 control-label text-left">名称</label>
             <div class="col-sm-11 col-md-4">
-              <input type="text" required class="form-control" id="header_name" name="label_name" ng-model="formValues.labelName" placeholder="e.g. com.example.foo" />
+              <input type="text" required class="form-control" id="header_name" name="label_name" ng-model="formValues.labelName" placeholder="例如 com.example.foo" />
             </div>
-            <label for="header_value" class="col-sm-1 margin-sm-top control-label text-left">Value</label>
+            <label for="header_value" class="col-sm-1 margin-sm-top control-label text-left">值</label>
             <div class="col-sm-11 col-md-4 margin-sm-top">
-              <input type="text" class="form-control" id="header_value" ng-model="formValues.labelValue" placeholder="e.g. bar" />
+              <input type="text" class="form-control" id="header_value" ng-model="formValues.labelValue" placeholder="例如 bar" />
             </div>
             <div class="col-sm-12 col-md-2 margin-sm-top">
-              <button type="submit" class="btn btn-primary btn-sm" ng-disabled="!formValues.labelName"><i class="fa fa-plus space-right" aria-hidden="true"></i>Add filter</button>
+              <button type="submit" class="btn btn-primary btn-sm" ng-disabled="!formValues.labelName"><i class="fa fa-plus space-right" aria-hidden="true"></i>添加过滤</button>
             </div>
           </div>
           <div class="form-group">
@@ -211,7 +211,7 @@
               <table class="table table-hover">
                 <thead>
                   <tr>
-                    <th>Name</th>
+                    <th>名称</th>
                     <th>Value</th>
                     <th></th>
                   </tr>
@@ -222,15 +222,15 @@
                     <td>{{ label.value }}</td>
                     <td
                       ><button type="button" class="btn btn-danger btn-xs" ng-click="removeFilteredContainerLabel($index)"
-                        ><i class="fa fa-trash-alt space-right" aria-hidden="true"></i>Remove</button
+                        ><i class="fa fa-trash-alt space-right" aria-hidden="true"></i>删除</button
                       ></td
                     >
                   </tr>
                   <tr ng-if="settings.BlackListedLabels.length === 0">
-                    <td colspan="3" class="text-center text-muted">No filter available.</td>
+                    <td colspan="3" class="text-center text-muted">没有可用的过滤。</td>
                   </tr>
                   <tr ng-if="!settings.BlackListedLabels">
-                    <td colspan="3" class="text-center text-muted">Loading...</td>
+                    <td colspan="3" class="text-center text-muted">正在加载...</td>
                   </tr>
                 </tbody>
               </table>
@@ -246,11 +246,11 @@
 <div class="row">
   <div class="col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="fa-download" title-text="Backup Portainer"></rd-widget-header>
+      <rd-widget-header icon="fa-download" title-text="备份 Portainer"></rd-widget-header>
       <rd-widget-body>
         <form class="form-horizontal" ng-submit="backupPortainer()" name="backupPortainerForm">
           <div class="col-sm-12 form-section-title">
-            Backup configuration
+            备份配置
           </div>
           <box-selector options="backupOptions" ng-model="formValues.backupFormType" on-change="(onBackupOptionsChange)"></box-selector>
           <div ng-if="formValues.backupFormType === BACKUP_FORM_TYPES.S3">
@@ -361,11 +361,11 @@
             </div>
             <!-- !Bucket name -->
             <div class="col-sm-12 form-section-title">
-              Security settings
+              安全设定
             </div>
             <!-- Password protect S3 -->
             <div class="form-group">
-              <label for="password_protect" class="col-sm-1 control-label text-left">Password protect</label>
+              <label for="password_protect" class="col-sm-1 control-label text-left">密码保护</label>
               <div class="col-sm-1">
                 <label class="switch">
                   <input type="checkbox" id="password_protect_s3" name="password_protect_s3" ng-model="formValues.passwordProtectS3" disabled /><i></i>
@@ -375,7 +375,7 @@
             <!-- !Password protect S3 -->
             <!-- Password S3 -->
             <div class="form-group" ng-if="formValues.passwordProtectS3">
-              <label for="password" class="col-sm-1 control-label text-left">Password</label>
+              <label for="password" class="col-sm-1 control-label text-left">密码</label>
               <div class="col-sm-3">
                 <input type="password" class="form-control" ng-model="formValues.passwordS3" id="password_S3" name="password_S3" required />
               </div>
@@ -383,7 +383,7 @@
             <div class="form-group col-md-12" ng-show="backupPortainerForm.password_S3.$invalid">
               <div class="small text-warning">
                 <div ng-messages="backupPortainerForm.password_S3.$error">
-                  <p ng-message="required"> <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This field is required.</p>
+                  <p ng-message="required"> <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此字段是必需的。</p>
                 </div>
               </div>
             </div>
@@ -399,7 +399,7 @@
                   limited-feature-disabled
                   limited-feature-class="limited-be"
                 >
-                  <span><i class="fa fa-upload" aria-hidden="true"></i> Export backup</span>
+                  <span><i class="fa fa-upload" aria-hidden="true"></i> 导出备份</span>
                 </button>
               </div>
             </div>
@@ -415,18 +415,18 @@
                   limited-feature-disabled
                   limited-feature-class="limited-be"
                 >
-                  <span>Save backup settings</span>
+                  <span>保存备份设置</span>
                 </button>
               </div>
             </div>
           </div>
           <div ng-if="formValues.backupFormType === BACKUP_FORM_TYPES.FILE">
             <div class="col-sm-12 form-section-title">
-              Security settings
+              安全设定
             </div>
             <!-- Password protect -->
             <div class="form-group">
-              <label for="password_protect" class="col-sm-1 control-label text-left">Password protect</label>
+              <label for="password_protect" class="col-sm-1 control-label text-left">密码保护</label>
               <div class="col-sm-1">
                 <label class="switch"> <input type="checkbox" id="password_protect" name="password_protect" ng-model="formValues.passwordProtect" /><i></i> </label>
               </div>
@@ -435,7 +435,7 @@
 
             <!-- Password -->
             <div class="form-group" ng-if="formValues.passwordProtect">
-              <label for="password" class="col-sm-1 control-label text-left">Password</label>
+              <label for="password" class="col-sm-1 control-label text-left">密码</label>
               <div class="col-sm-3">
                 <input type="password" class="form-control" ng-model="formValues.password" id="password" name="password" required />
               </div>
@@ -443,7 +443,7 @@
             <div class="form-group col-md-12" ng-show="backupPortainerForm.password.$invalid">
               <div class="small text-warning">
                 <div ng-messages="backupPortainerForm.password.$error">
-                  <p ng-message="required"> <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> This field is required.</p>
+                  <p ng-message="required"> <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此字段是必需的。</p>
                 </div>
               </div>
             </div>
@@ -459,8 +459,8 @@
                   ng-disabled="backupPortainerForm.$invalid || state.backupInProgress || state.featureLimited"
                   button-spinner="state.backupInProgress"
                 >
-                  <span ng-hide="state.backupInProgress">Download backup</span>
-                  <span ng-show="state.backupInProgress">Downloading backup</span>
+                  <span ng-hide="state.backupInProgress">下载备份</span>
+                  <span ng-show="state.backupInProgress">下载备份中</span>
                 </button>
               </div>
             </div>

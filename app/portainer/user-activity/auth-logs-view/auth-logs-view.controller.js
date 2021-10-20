@@ -86,7 +86,7 @@ export default class AuthLogsViewController {
         this.state.logs = decorateLogs(logs);
         this.state.totalItems = totalCount;
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Failed loading auth activity logs');
+        this.Notifications.error('失败', err, '加载身份验证活动日志失败');
       }
     });
   }

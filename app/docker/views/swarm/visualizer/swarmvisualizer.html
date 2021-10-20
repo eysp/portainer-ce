@@ -1,46 +1,46 @@
 <rd-header>
-  <rd-header-title title-text="Swarm visualizer">
-    <a data-toggle="tooltip" title="Refresh" ui-sref="docker.swarm.visualizer" ui-sref-opts="{reload: true}">
+  <rd-header-title title-text="群集可视化">
+    <a data-toggle="tooltip" title="刷新" ui-sref="docker.swarm.visualizer" ui-sref-opts="{reload: true}">
       <i class="fa fa-sync" aria-hidden="true"></i>
     </a>
   </rd-header-title>
-  <rd-header-content> <a ui-sref="docker.swarm">Swarm</a> &gt; <a ui-sref="docker.swarm.visualizer">Cluster visualizer</a> </rd-header-content>
+  <rd-header-content> <a ui-sref="docker.swarm">集群</a> &gt; <a ui-sref="docker.swarm.visualizer">群集可视化</a> </rd-header-content>
 </rd-header>
 
 <div class="row">
   <div class="col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="fa-object-group" title-text="Cluster information">
+      <rd-widget-header icon="fa-object-group" title-text="集群信息">
         <div class="pull-right">
-          <button type="button" class="btn btn-sm btn-primary" ng-click="changeShowInformationPanel(true)" ng-if="!state.ShowInformationPanel">Show</button>
-          <button type="button" class="btn btn-sm btn-primary" ng-click="changeShowInformationPanel(false)" ng-if="state.ShowInformationPanel">Hide</button>
+          <button type="button" class="btn btn-sm btn-primary" ng-click="changeShowInformationPanel(true)" ng-if="!state.ShowInformationPanel">显示</button>
+          <button type="button" class="btn btn-sm btn-primary" ng-click="changeShowInformationPanel(false)" ng-if="state.ShowInformationPanel">隐藏</button>
         </div>
       </rd-widget-header>
       <rd-widget-body ng-if="state.ShowInformationPanel">
         <table class="table">
           <tbody>
             <tr>
-              <td>Nodes</td>
+              <td>节点</td>
               <td>{{ nodes.length }}</td>
             </tr>
             <tr>
-              <td>Services</td>
+              <td>服务</td>
               <td>{{ services.length }}</td>
             </tr>
             <tr>
-              <td>Tasks</td>
+              <td>任务</td>
               <td>{{ tasks.length }}</td>
             </tr>
           </tbody>
         </table>
         <form class="form-horizontal">
           <div class="col-sm-12 form-section-title">
-            Options
+            选项
           </div>
           <div class="form-group">
             <div class="col-sm-12">
               <label class="control-label text-left">
-                Only display running tasks
+                仅显示正在运行的任务
               </label>
               <label class="switch" style="margin-left: 20px;">
                 <input type="checkbox" ng-model="state.DisplayOnlyRunningTasks" ng-change="changeDisplayOnlyRunningTasks()" /><i></i>
@@ -48,7 +48,7 @@
             </div>
             <div class="col-sm-12">
               <label class="control-label text-left">
-                Display node labels
+                显示节点标签
               </label>
               <label class="switch" style="margin-left: 20px;"> <input type="checkbox" ng-model="state.DisplayNodeLabels" ng-change="changeDisplayNodeLabels()" /><i></i> </label>
             </div>
@@ -56,11 +56,10 @@
         </form>
         <form class="form-horizontal">
           <div class="col-sm-12 form-section-title">
-            Refresh
-          </div>
+            刷新</div>
           <div class="form-group">
             <label for="refreshRate" class="col-sm-1 margin-sm-top control-label text-left">
-              Rate
+              速度
               <i id="refreshRateChange" class="fa fa-check green-icon" aria-hidden="true" style="display: none;"></i>
             </label>
             <div class="col-sm-2">
@@ -81,7 +80,7 @@
 <div class="row" ng-if="visualizerData">
   <div class="col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="fa-object-group" title-text="Cluster visualizer"></rd-widget-header>
+      <rd-widget-header icon="fa-object-group" title-text="群集可视化"></rd-widget-header>
       <rd-widget-body>
         <div class="visualizer_container">
           <div class="node" ng-repeat="node in visualizerData.nodes | orderBy : ['Role', 'Hostname'] track by $index">
@@ -102,7 +101,7 @@
                 ><span class="label label-{{ node.Status | nodestatusbadge }}">{{ node.Status }}</span></div
               >
               <div class="node_labels" ng-if="node.Labels.length > 0 && state.DisplayNodeLabels">
-                <div>Labels</div>
+                <div>标签</div>
                 <div class="node_label" ng-repeat="label in node.Labels">
                   <span class="label_key">
                     {{ label.key }}
@@ -118,11 +117,11 @@
                 ng-repeat="task in node.Tasks | orderBy: 'ServiceName' | filter: (state.DisplayOnlyRunningTasks || '') && { Status: { State: 'running' } }"
               >
                 <div class="service_name">{{ task.ServiceName }}</div>
-                <div>Image: {{ task.Spec.ContainerSpec.Image | hideshasum }}</div>
-                <div>Status: {{ task.Status.State }}</div>
-                <div>Update: {{ task.Updated | getisodate }}</div>
-                <div ng-if="task.Spec.Resources.Limits.MemoryBytes">Memory limit: {{ task.Spec.Resources.Limits.MemoryBytes | humansize: 2:2 }}</div>
-                <div ng-if="task.Spec.Resources.Limits.NanoCPUs">CPU limit: {{ task.Spec.Resources.Limits.NanoCPUs / 1000000000 }}</div>
+                <div>镜像: {{ task.Spec.ContainerSpec.Image | hideshasum }}</div>
+                <div>状态: {{ task.Status.State }}</div>
+                <div>更新: {{ task.Updated | getisodate }}</div>
+                <div ng-if="task.Spec.Resources.Limits.MemoryBytes">内存限制: {{ task.Spec.Resources.Limits.MemoryBytes | humansize: 2:2 }}</div>
+                <div ng-if="task.Spec.Resources.Limits.NanoCPUs">CPU 限制: {{ task.Spec.Resources.Limits.NanoCPUs / 1000000000 }}</div>
               </div>
             </div>
           </div>

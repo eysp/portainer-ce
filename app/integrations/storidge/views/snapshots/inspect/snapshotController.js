@@ -8,11 +8,11 @@ angular.module('portainer.integrations.storidge').controller('StoridgeSnapshotCo
   function ($scope, $state, $transition$, Notifications, ModalService, StoridgeSnapshotService) {
     $scope.removeSnapshot = function () {
       ModalService.confirm({
-        title: 'Are you sure?',
-        message: 'Do you want really want to remove this snapshot?',
+        title: '你确定吗？',
+        message: '您真的要删除此快照吗？?',
         buttons: {
           confirm: {
-            label: 'Remove',
+            label: '删除',
             className: 'btn-danger',
           },
         },
@@ -22,11 +22,11 @@ angular.module('portainer.integrations.storidge').controller('StoridgeSnapshotCo
           }
           StoridgeSnapshotService.remove($scope.snapshot.Id)
             .then(function () {
-              Notifications.success('Success', 'Snapshot removed');
+              Notifications.success('成功', '快照已删除');
               $state.go('portainer.volumes.volume', { id: $scope.volumeId });
             })
             .catch(function error(err) {
-              Notifications.error('Failure', err, 'Unable to remove snapshot');
+              Notifications.error('失败', err, '无法删除快照');
             });
         },
       });
@@ -41,7 +41,7 @@ angular.module('portainer.integrations.storidge').controller('StoridgeSnapshotCo
           $scope.snapshot = data;
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve snapshot details');
+          Notifications.error('失败', err, '无法检索快照详细信息');
         });
     }
 

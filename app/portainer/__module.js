@@ -14,7 +14,7 @@ async function initAuthentication(authManager, Authentication, $rootScope, $stat
   // to have more controls on which URL should trigger the unauthenticated state.
   $rootScope.$on('unauthenticated', function (event, data) {
     if (!_.includes(data.config.url, '/v2/') && !_.includes(data.config.url, '/api/v4/') && isTransitionRequiresAuthentication($state.transition)) {
-      $state.go('portainer.logout', { error: 'Your session has expired' });
+      $state.go('portainer.logout', { error: '您的会话已过期' });
     }
   });
 
@@ -43,7 +43,7 @@ angular.module('portainer.app', ['portainer.oauth', 'portainer.rbac', components
               return Promise.reject('Unauthenticated');
             }
           } catch (err) {
-            Notifications.error('Failure', err, 'Unable to retrieve application settings');
+            Notifications.error('失败', err, '无法检索应用程序设置');
             throw err;
           }
         });
@@ -60,7 +60,7 @@ angular.module('portainer.app', ['portainer.oauth', 'portainer.rbac', components
             try {
               await featureService.init();
             } catch (e) {
-              Notifications.error('Failed initializing features service', e);
+              Notifications.error('初始化功能服务失败', e);
               throw e;
             }
           });
@@ -87,7 +87,7 @@ angular.module('portainer.app', ['portainer.oauth', 'portainer.rbac', components
 
               return endpoint;
             } catch (e) {
-              Notifications.error('Failed loading environment', e);
+              Notifications.error('加载环境失败', e);
               $state.go('portainer.home', {}, { reload: true });
               return;
             }

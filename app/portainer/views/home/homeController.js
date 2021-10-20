@@ -64,11 +64,11 @@ angular
     function triggerSnapshot() {
       EndpointService.snapshotEndpoints()
         .then(function success() {
-          Notifications.success('Success', 'Environments updated');
+          Notifications.success('成功', 'Environments updated');
           $state.reload();
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'An error occured during environment snapshot');
+          Notifications.error('失败', err, '环境快照期间发生错误');
         });
     }
 
@@ -87,7 +87,7 @@ angular
           deferred.resolve({ endpoints: endpoints, totalCount: data.endpoints.totalCount });
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve environment information');
+          Notifications.error('失败', err, '无法检索环境信息');
         });
       return deferred.promise;
     }
@@ -111,7 +111,7 @@ angular
           $scope.endpoints = endpoints;
         }
       } catch (err) {
-        Notifications.error('Failed loading page data', err);
+        Notifications.error('加载页面数据失败', err);
       }
     }
 

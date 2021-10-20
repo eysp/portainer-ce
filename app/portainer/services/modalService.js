@@ -22,7 +22,7 @@ angular.module('portainer.app').factory('ModalService', [
           className: $sanitize(options.buttons.confirm.className),
         },
         cancel: {
-          label: options.buttons.cancel && options.buttons.cancel.label ? $sanitize(options.buttons.cancel.label) : 'Cancel',
+          label: options.buttons.cancel && options.buttons.cancel.label ? $sanitize(options.buttons.cancel.label) : '取消',
         },
       };
       return buttons;
@@ -40,11 +40,11 @@ angular.module('portainer.app').factory('ModalService', [
     service.confirmWebEditorDiscard = confirmWebEditorDiscard;
     function confirmWebEditorDiscard() {
       const options = {
-        title: 'Are you sure ?',
-        message: 'You currently have unsaved changes in the editor. Are you sure you want to leave?',
+        title: '你确定吗 ？',
+        message: '编辑器中当前有未保存的更改。你确定要离开吗？',
         buttons: {
           confirm: {
-            label: 'Yes',
+            label: '是的',
             className: 'btn-danger',
           },
         },
@@ -97,11 +97,11 @@ angular.module('portainer.app').factory('ModalService', [
 
     service.confirmAccessControlUpdate = function (callback) {
       service.confirm({
-        title: 'Are you sure ?',
-        message: 'Changing the ownership of this resource will potentially restrict its management to some users.',
+        title: '你确定吗 ？',
+        message: '更改这个资源的所有权可能会将其管理限制为某些用户',
         buttons: {
           confirm: {
-            label: 'Change ownership',
+            label: '变更所有权',
             className: 'btn-primary',
           },
         },
@@ -111,11 +111,11 @@ angular.module('portainer.app').factory('ModalService', [
 
     service.confirmImageForceRemoval = function (callback) {
       service.confirm({
-        title: 'Are you sure?',
-        message: 'Forcing the removal of the image will remove the image even if it has multiple tags or if it is used by stopped containers.',
+        title: '你确定吗？',
+        message: '强制删除镜像将删除镜像，即使该镜像有多个标记或被停止的容器使用。',
         buttons: {
           confirm: {
-            label: 'Remove the image',
+            label: '删除镜像',
             className: 'btn-danger',
           },
         },
@@ -125,11 +125,11 @@ angular.module('portainer.app').factory('ModalService', [
 
     service.cancelRegistryRepositoryAction = function (callback) {
       service.confirm({
-        title: 'Are you sure?',
-        message: 'WARNING: interrupting this operation before it has finished will result in the loss of all tags. Are you sure you want to do this?',
+        title: '你确定吗？',
+        message: '警告：在操作完成之前中断此操作将导致所有标签丢失。你确定要这样做吗？',
         buttons: {
           confirm: {
-            label: 'Stop',
+            label: '停止',
             className: 'btn-danger',
           },
         },
@@ -140,11 +140,11 @@ angular.module('portainer.app').factory('ModalService', [
     service.confirmDeletion = function (message, callback) {
       message = $sanitize(message);
       service.confirm({
-        title: 'Are you sure ?',
+        title: '你确定吗 ？',
         message: message,
         buttons: {
           confirm: {
-            label: 'Remove',
+            label: '删除',
             className: 'btn-danger',
           },
         },
@@ -154,15 +154,15 @@ angular.module('portainer.app').factory('ModalService', [
 
     service.confirmDeassociate = function (callback) {
       const message =
-        '<p>De-associating this Edge environment will mark it as non associated and will clear the registered Edge ID.</p>' +
-        '<p>Any agent started with the Edge key associated to this environment will be able to re-associate with this environment.</p>' +
-        '<p>You can re-use the Edge ID and Edge key that you used to deploy the existing Edge agent to associate a new Edge device to this environment.</p>';
+        '<p>解除此Edge环境的关联将其标记为非关联，并将清除已注册的EdgeID。</p>' +
+        '<p>使用与此环境关联的Edge key启动的任何代理都将能够与此环境重新关联。</p>' +
+        '<p>可以重复使用用于部署现有Edge代理的Edge ID和Edge密钥，以将新Edge设备与此环境关联。</p>';
       service.confirm({
-        title: 'About de-associating',
+        title: '关于解除关联',
         message: $sanitize(message),
         buttons: {
           confirm: {
-            label: 'De-associate',
+            label: '解除关联',
             className: 'btn-primary',
           },
         },
@@ -173,11 +173,11 @@ angular.module('portainer.app').factory('ModalService', [
     service.confirmUpdate = function (message, callback) {
       message = $sanitize(message);
       service.confirm({
-        title: 'Are you sure ?',
+        title: '你确定吗 ？',
         message: message,
         buttons: {
           confirm: {
-            label: 'Update',
+            label: '更新',
             className: 'btn-warning',
           },
         },
@@ -192,11 +192,11 @@ angular.module('portainer.app').factory('ModalService', [
         message: message,
         buttons: {
           confirm: {
-            label: 'Redeploy the applications',
+            label: '重新部署应用程序',
             className: 'btn-primary',
           },
           cancel: {
-            label: "I'll do it later",
+            label: "我稍后再做",
           },
         },
         callback: callback,
@@ -216,13 +216,13 @@ angular.module('portainer.app').factory('ModalService', [
         inputType: 'checkbox',
         inputOptions: [
           {
-            text: 'Automatically remove non-persistent volumes<i></i>',
+            text: '自动删除非持久存储卷<i></i>',
             value: '1',
           },
         ],
         buttons: {
           confirm: {
-            label: 'Remove',
+            label: '删除',
             className: 'btn-danger',
           },
         },
@@ -233,19 +233,19 @@ angular.module('portainer.app').factory('ModalService', [
     service.confirmContainerRecreation = function (callback) {
       customPrompt(
         {
-          title: 'Are you sure?',
+          title: '你确定吗？',
           message:
-            "You're about to re-create this container, any non-persisted data will be lost. This container will be removed and another one will be created using the same configuration.",
+            "您将要重新创建此容器，任何非持久化数据都将丢失。将删除此容器，并使用相同的配置创建另一个容器。",
           inputType: 'checkbox',
           inputOptions: [
             {
-              text: 'Pull latest image<i></i>',
+              text: '获取最新镜像<i></i>',
               value: '1',
             },
           ],
           buttons: {
             confirm: {
-              label: 'Recreate',
+              label: '重新创建',
               className: 'btn-danger',
             },
           },
@@ -257,11 +257,11 @@ angular.module('portainer.app').factory('ModalService', [
 
     service.confirmEndpointSnapshot = function (callback) {
       service.confirm({
-        title: 'Are you sure?',
-        message: 'Triggering a manual refresh will poll each environment to retrieve its information, this may take a few moments.',
+        title: '你确定吗？',
+        message: '触发手动刷新将轮询每个环境以检索其信息，这可能需要一些时间。',
         buttons: {
           confirm: {
-            label: 'Continue',
+            label: '继续',
             className: 'btn-primary',
           },
         },
@@ -271,11 +271,11 @@ angular.module('portainer.app').factory('ModalService', [
 
     service.confirmImageExport = function (callback) {
       service.confirm({
-        title: 'Caution',
-        message: 'The export may take several minutes, do not navigate away whilst the export is in progress.',
+        title: '警告',
+        message: '导出可能需要几分钟的时间，在导出过程中请勿离开。',
         buttons: {
           confirm: {
-            label: 'Continue',
+            label: '继续',
             className: 'btn-primary',
           },
         },
@@ -287,18 +287,18 @@ angular.module('portainer.app').factory('ModalService', [
       message = $sanitize(message);
       customPrompt(
         {
-          title: 'Are you sure ?',
+          title: '你确定吗 ？',
           message: message,
           inputType: 'checkbox',
           inputOptions: [
             {
-              text: 'Pull latest image version<i></i>',
+              text: '拉取最新的镜像版本<i></i>',
               value: '1',
             },
           ],
           buttons: {
             confirm: {
-              label: 'Update',
+              label: '更新',
               className: 'btn-primary',
             },
           },

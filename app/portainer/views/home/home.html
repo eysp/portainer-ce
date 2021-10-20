@@ -1,10 +1,10 @@
 <rd-header>
-  <rd-header-title title-text="Home">
-    <a data-toggle="tooltip" title="Refresh" ui-sref="portainer.home" ui-sref-opts="{reload: true}">
+  <rd-header-title title-text="首页">
+    <a data-toggle="tooltip" title="刷新" ui-sref="portainer.home" ui-sref-opts="{reload: true}">
       <i class="fa fa-sync" aria-hidden="true"></i>
     </a>
   </rd-header-title>
-  <rd-header-content>Environments</rd-header-content>
+  <rd-header-content>环境</rd-header-content>
 </rd-header>
 
 <motd-panel ng-if="motd && motd.Message !== '' && applicationState.UI.dismissedInfoHash !== motd.Hash" motd="motd" dismiss-action="dismissImportantInformation(motd.Hash)">
@@ -16,7 +16,7 @@
   <span class="small text-muted">
     <p>
       <i class="fa fa-exclamation-circle orange-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-      You do not have access to any environment. Please contact your administrator.
+      您无权访问任何环境。 请联系您的管理员。
     </p>
   </span>
 </information-panel>
@@ -26,17 +26,17 @@
   style="width: 100%; height: 100%; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;"
   ng-if="state.connectingToEdgeEndpoint"
 >
-  Connecting to the Edge environment...
+  正在连接到 Edge 环境...
   <i class="fa fa-cog fa-spin" style="margin-left: 5px;"></i>
 </div>
 
-<information-panel ng-if="isAdmin && endpoints.length === 0" title-text="Information">
+<information-panel ng-if="isAdmin && endpoints.length === 0" title-text="信息">
   <span class="small text-muted">
     <p>
       <i class="fa fa-exclamation-circle orange-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-      No environment available for management. Please head over the
-      <a ui-sref="portainer.endpoints.new"> environments view </a>
-      to add an environment.
+      没有可供管理的环境。 请通过
+      <a ui-sref="portainer.endpoints.new"> 环境视图 </a>
+      添加环境。
     </p>
   </span>
 </information-panel>
@@ -44,7 +44,7 @@
 <div class="row" ng-if="!state.connectingToEdgeEndpoint">
   <div class="col-sm-12">
     <endpoint-list
-      title-text="Environments"
+      title-text="环境"
       title-icon="fa-plug"
       endpoints="endpoints"
       table-key="home_endpoints"

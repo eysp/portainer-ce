@@ -1,11 +1,11 @@
 <div id="service-update-config">
   <rd-widget>
-    <rd-widget-header icon="fa-list-alt" title-text="Update configuration"> </rd-widget-header>
+    <rd-widget-header icon="fa-list-alt" title-text="更新并行性"> </rd-widget-header>
     <rd-widget-body classes="no-padding">
       <table class="table">
         <tbody>
           <tr>
-            <td>Update Parallelism</td>
+            <td>更新并行性</td>
             <td>
               <input
                 class="input-sm"
@@ -17,12 +17,12 @@
             </td>
             <td>
               <p class="small text-muted" style="margin-top: 10px;">
-                Maximum number of tasks to be updated simultaneously (0 to update all at once).
+                同时更新的最大任务数（0表示一次更新所有任务）。
               </p>
             </td>
           </tr>
           <tr>
-            <td>Update Delay</td>
+            <td>更新延迟</td>
             <td>
               <input
                 class="input-sm"
@@ -35,12 +35,12 @@
             </td>
             <td>
               <p class="small text-muted" style="margin-top: 10px;">
-                Amount of time between updates expressed by a number followed by unit (ns|us|ms|s|m|h). Example: 1m.
+                更新之间的时间量，以数字后跟单位表示 (ns|us|ms|s|m|h). 示例: 1m.
               </p>
             </td>
           </tr>
           <tr>
-            <td>Update Failure Action</td>
+            <td>更新失败操作</td>
             <td>
               <div class="form-group">
                 <label class="radio-inline">
@@ -52,7 +52,7 @@
                     ng-change="updateServiceAttribute(service, 'UpdateFailureAction')"
                     disable-authorization="DockerServiceUpdate"
                   />
-                  Continue
+                  继续
                 </label>
                 <label class="radio-inline">
                   <input
@@ -63,18 +63,18 @@
                     ng-change="updateServiceAttribute(service, 'UpdateFailureAction')"
                     disable-authorization="DockerServiceUpdate"
                   />
-                  Pause
+                  暂停
                 </label>
               </div>
             </td>
             <td>
               <p class="small text-muted" style="margin-top: 10px;">
-                Action taken on failure to start after update.
+                更新后启动失败时采取的操作。
               </p>
             </td>
           </tr>
           <tr ng-if="applicationState.endpoint.apiVersion >= 1.29">
-            <td>Order</td>
+            <td>排序</td>
             <td>
               <div class="form-group">
                 <label class="radio-inline">
@@ -86,7 +86,7 @@
                     ng-change="updateServiceAttribute(service, 'UpdateOrder')"
                     disable-authorization="DockerServiceUpdate"
                   />
-                  start-first
+                  先开始
                 </label>
                 <label class="radio-inline">
                   <input
@@ -97,13 +97,13 @@
                     ng-change="updateServiceAttribute(service, 'UpdateOrder')"
                     disable-authorization="DockerServiceUpdate"
                   />
-                  stop-first
+                  先停止
                 </label>
               </div>
             </td>
             <td>
               <p class="small text-muted" style="margin-top: 10px;">
-                Operation order on failure.
+                故障时的操作指令。
               </p>
             </td>
           </tr>
@@ -118,14 +118,14 @@
             class="btn btn-primary btn-sm"
             ng-disabled="!hasChanges(service, ['UpdateFailureAction', 'UpdateDelay', 'UpdateParallelism', 'UpdateOrder'])"
             ng-click="updateService(service)"
-            >Apply changes</button
+            >应用更改</button
           >
           <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu">
-            <li><a ng-click="cancelChanges(service, ['UpdateFailureAction', 'UpdateDelay', 'UpdateParallelism', 'UpdateOrder'])">Reset changes</a></li>
-            <li><a ng-click="cancelChanges(service)">Reset all changes</a></li>
+            <li><a ng-click="cancelChanges(service, ['UpdateFailureAction', 'UpdateDelay', 'UpdateParallelism', 'UpdateOrder'])">重置更改</a></li>
+            <li><a ng-click="cancelChanges(service)">重置所有更改</a></li>
           </ul>
         </div>
       </div>

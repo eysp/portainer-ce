@@ -14,11 +14,11 @@ angular.module('portainer.integrations.storidge').controller('StoridgeClusterCon
 
     $scope.rebootCluster = function () {
       ModalService.confirm({
-        title: 'Are you sure?',
-        message: 'All the nodes in the cluster will reboot during the process. Do you want to reboot the Storidge cluster?',
+        title: '你确定吗？',
+        message: '在此过程中，集群中的所有节点都将重新启动。 是否要重新启动 Storridge 集群？',
         buttons: {
           confirm: {
-            label: 'Reboot',
+            label: '重启',
             className: 'btn-danger',
           },
         },
@@ -35,18 +35,18 @@ angular.module('portainer.integrations.storidge').controller('StoridgeClusterCon
       $scope.state.rebootInProgress = true;
       StoridgeClusterService.reboot().finally(function final() {
         $scope.state.rebootInProgress = false;
-        Notifications.success('Cluster successfully rebooted');
+        Notifications.success('集群成功重启');
         $state.reload();
       });
     }
 
     $scope.shutdownCluster = function () {
       ModalService.confirm({
-        title: 'Are you sure?',
-        message: 'All the nodes in the cluster will shutdown. Do you want to shutdown the Storidge cluster?',
+        title: '你确定吗？',
+        message: '集群中的所有节点都将关闭。 您要关闭存储集群吗？',
         buttons: {
           confirm: {
-            label: 'Shutdown',
+            label: '关闭',
             className: 'btn-danger',
           },
         },
@@ -63,7 +63,7 @@ angular.module('portainer.integrations.storidge').controller('StoridgeClusterCon
       $scope.state.shutdownInProgress = true;
       StoridgeClusterService.shutdown().finally(function final() {
         $scope.state.shutdownInProgress = false;
-        Notifications.success('Cluster successfully shutdown');
+        Notifications.success('集群成功关闭');
         $state.go('docker.dashboard');
       });
     }
@@ -80,7 +80,7 @@ angular.module('portainer.integrations.storidge').controller('StoridgeClusterCon
           $scope.clusterNodes = data.nodes;
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve cluster information');
+          Notifications.error('失败', err, '无法检索集群信息');
         });
     }
 

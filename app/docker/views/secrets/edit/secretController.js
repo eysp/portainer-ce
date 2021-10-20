@@ -12,7 +12,7 @@ angular.module('portainer.docker').controller('SecretController', [
           $state.go('docker.secrets', {});
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to remove secret');
+          Notifications.error('失败', err, 'Unable to remove secret');
         });
     };
 
@@ -22,7 +22,7 @@ angular.module('portainer.docker').controller('SecretController', [
           $scope.secret = data;
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve secret details');
+          Notifications.error('失败', err, 'Unable to retrieve secret details');
         });
     }
 

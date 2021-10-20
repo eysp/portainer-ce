@@ -70,7 +70,7 @@ class KubeCreateCustomTemplateViewController {
         this.state.isEditorDirty = false;
         this.$state.go('kubernetes.templates.custom');
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Failed creating custom template');
+        this.Notifications.error('失败', err, 'Failed creating custom template');
       } finally {
         this.state.actionInProgress = false;
       }

@@ -1,16 +1,16 @@
 <div ng-if="!$ctrl.labels.length">
-  There are no labels for this node.
+  此节点没有标签。
 </div>
 
 <div class="col-sm-12 form-inline" style="padding: 0px;" ng-if="$ctrl.labels.length">
   <div ng-repeat="label in $ctrl.labels" style="margin-top: 2px;">
     <div class="input-group col-sm-5 input-group-sm">
-      <span class="input-group-addon">name</span>
-      <input type="text" class="form-control" ng-model="label.key" placeholder="e.g. com.example.foo" ng-change="$ctrl.updateLabel(label)" />
+      <span class="input-group-addon">名称</span>
+      <input type="text" class="form-control" ng-model="label.key" placeholder="例如 com.example.foo" ng-change="$ctrl.updateLabel(label)" />
     </div>
     <div class="input-group col-sm-5 input-group-sm">
       <span class="input-group-addon">value</span>
-      <input type="text" class="form-control" ng-model="label.value" placeholder="e.g. bar" ng-change="$ctrl.updateLabel(label)" />
+      <input type="text" class="form-control" ng-model="label.value" placeholder="例如 bar" ng-change="$ctrl.updateLabel(label)" />
     </div>
     <button class="btn btn-sm btn-danger" type="button" ng-click="$ctrl.removeLabel($index)">
       <i class="fa fa-trash" aria-hidden="true"></i>

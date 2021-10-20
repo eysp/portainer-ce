@@ -56,7 +56,7 @@ export class HostBrowserController {
       this.state.path = path;
       this.files = files;
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to browse');
+      this.Notifications.error('失败', err, 'Unable to browse');
     }
   }
 
@@ -72,7 +72,7 @@ export class HostBrowserController {
       const files = await this.HostBrowserService.ls(this.state.path);
       this.files = files;
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to rename file');
+      this.Notifications.error('失败', err, 'Unable to rename file');
     }
   }
 
@@ -88,7 +88,7 @@ export class HostBrowserController {
       });
       this.FileSaver.saveAs(downloadData, fileName);
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to download file');
+      this.Notifications.error('失败', err, 'Unable to download file');
     }
   }
 
@@ -113,7 +113,7 @@ export class HostBrowserController {
       const files = await this.HostBrowserService.ls(this.state.path);
       this.files = files;
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to delete file');
+      this.Notifications.error('失败', err, 'Unable to delete file');
     }
   }
 
@@ -145,7 +145,7 @@ export class HostBrowserController {
       await this.HostBrowserService.upload(this.state.path, file);
       this.onFileUploaded();
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to upload file');
+      this.Notifications.error('失败', err, 'Unable to upload file');
     }
   }
 

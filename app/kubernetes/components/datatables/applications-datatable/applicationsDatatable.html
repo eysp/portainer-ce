@@ -5,21 +5,21 @@
         <div class="toolBarTitle"> <i class="fa" ng-class="$ctrl.titleIcon" aria-hidden="true" style="margin-right: 2px;"></i> {{ $ctrl.titleText }} </div>
         <span class="small text-muted" style="float: left; margin-top: 5px;" ng-if="$ctrl.isAdmin && !$ctrl.settings.showSystem">
           <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-          System resources are hidden, this can be changed in the table settings.
+          系统资源被隐藏，这可以在表设置中更改。
         </span>
         <div class="settings" data-cy="k8sApp-tableSettings">
           <span class="setting" ng-class="{ 'setting-active': $ctrl.settings.open }" uib-dropdown dropdown-append-to-body auto-close="disabled" is-open="$ctrl.settings.open">
-            <span uib-dropdown-toggle><i class="fa fa-cog" aria-hidden="true"></i> Table settings</span>
+            <span uib-dropdown-toggle><i class="fa fa-cog" aria-hidden="true"></i> 表格设置</span>
             <div class="dropdown-menu dropdown-menu-right" uib-dropdown-menu>
               <div class="tableMenu">
                 <div class="menuHeader">
-                  Table settings
+                  表格设置
                 </div>
                 <div class="menuContent">
                   <div>
                     <div class="md-checkbox" ng-if="$ctrl.isAdmin">
                       <input id="applications_setting_show_system" type="checkbox" ng-model="$ctrl.settings.showSystem" ng-change="$ctrl.onSettingsShowSystemChange()" />
-                      <label for="applications_setting_show_system">Show system resources</label>
+                      <label for="applications_setting_show_system">显示系统资源</label>
                     </div>
                     <div class="md-checkbox">
                       <input
@@ -29,11 +29,11 @@
                         ng-change="$ctrl.onSettingsRepeaterChange()"
                         data-cy="k8sApp-autoRefreshCheckbox"
                       />
-                      <label for="setting_auto_refresh">Auto refresh</label>
+                      <label for="setting_auto_refresh">自动刷新</label>
                     </div>
                     <div ng-if="$ctrl.settings.repeater.autoRefresh">
                       <label for="settings_refresh_rate">
-                        Refresh rate
+                        刷新频率
                       </label>
                       <select
                         id="settings_refresh_rate"
@@ -55,7 +55,7 @@
                   </div>
                 </div>
                 <div>
-                  <a type="button" class="btn btn-default btn-sm" ng-click="$ctrl.settings.open = false;" data-cy="k8sApp-tableSettingsCloseButton">Close</a>
+                  <a type="button" class="btn btn-default btn-sm" ng-click="$ctrl.settings.open = false;" data-cy="k8sApp-tableSettingsCloseButton">关闭</a>
                 </div>
               </div>
             </div>
@@ -70,13 +70,13 @@
           ng-click="$ctrl.removeAction($ctrl.state.selectedItems)"
           data-cy="k8sApp-removeAppButton"
         >
-          <i class="fa fa-trash-alt space-right" aria-hidden="true"></i>Remove
+          <i class="fa fa-trash-alt space-right" aria-hidden="true"></i>删除
         </button>
         <button type="button" class="btn btn-sm btn-primary" ui-sref="kubernetes.applications.new" data-cy="k8sApp-addApplicationButton">
-          <i class="fa fa-plus space-right" aria-hidden="true"></i>Add application with form
+          <i class="fa fa-plus space-right" aria-hidden="true"></i>用表格添加申请
         </button>
         <button type="button" class="btn btn-sm btn-primary" ui-sref="kubernetes.deploy" data-cy="k8sApp-deployFromManifestButton">
-          <i class="fa fa-plus space-right" aria-hidden="true"></i>Create from manifest
+          <i class="fa fa-plus space-right" aria-hidden="true"></i>从清单创建
         </button>
       </div>
       <div ng-if="$ctrl.isPrimary" class="searchBar">
@@ -86,7 +86,7 @@
           class="searchInput"
           ng-model="$ctrl.state.textFilter"
           ng-change="$ctrl.onTextFilterChange()"
-          placeholder="Search..."
+          placeholder="搜索..."
           auto-focus
           ng-model-options="{ debounce: 300 }"
           data-cy="k8sApp-searchApplicationsInput"
@@ -109,14 +109,14 @@
               </th>
               <th>
                 <a ng-click="$ctrl.changeOrderBy('Name')">
-                  Name
+                  名称
                   <i class="fa fa-sort-alpha-down" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Name' && !$ctrl.state.reverseOrder"></i>
                   <i class="fa fa-sort-alpha-up" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Name' && $ctrl.state.reverseOrder"></i>
                 </a>
               </th>
               <th>
                 <a ng-click="$ctrl.changeOrderBy('StackName')">
-                  Stack
+                  堆栈
                   <i class="fa fa-sort-alpha-down" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'StackName' && !$ctrl.state.reverseOrder"></i>
                   <i class="fa fa-sort-alpha-up" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'StackName' && $ctrl.state.reverseOrder"></i>
                 </a>
@@ -130,25 +130,25 @@
               </th>
               <th>
                 <a ng-click="$ctrl.changeOrderBy('Image')">
-                  Image
+                  镜像
                   <i class="fa fa-sort-alpha-down" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Image' && !$ctrl.state.reverseOrder"></i>
                   <i class="fa fa-sort-alpha-up" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Image' && $ctrl.state.reverseOrder"></i>
                 </a>
               </th>
               <th uib-dropdown dropdown-append-to-body auto-close="disabled" is-open="$ctrl.filters.state.open">
                 <a ng-click="$ctrl.changeOrderBy('ApplicationType')">
-                  Application Type
+                  应用程序类型
                   <i class="fa fa-sort-alpha-down" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'ApplicationType' && !$ctrl.state.reverseOrder"></i>
                   <i class="fa fa-sort-alpha-up" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'ApplicationType' && $ctrl.state.reverseOrder"></i>
                 </a>
                 <div>
-                  <span uib-dropdown-toggle class="table-filter" ng-if="!$ctrl.filters.state.enabled">Filter <i class="fa fa-filter" aria-hidden="true"></i></span>
-                  <span uib-dropdown-toggle class="table-filter filter-active" ng-if="$ctrl.filters.state.enabled">Filter <i class="fa fa-check" aria-hidden="true"></i></span>
+                  <span uib-dropdown-toggle class="table-filter" ng-if="!$ctrl.filters.state.enabled">筛选 <i class="fa fa-filter" aria-hidden="true"></i></span>
+                  <span uib-dropdown-toggle class="table-filter filter-active" ng-if="$ctrl.filters.state.enabled">筛选 <i class="fa fa-check" aria-hidden="true"></i></span>
                 </div>
                 <div class="dropdown-menu" uib-dropdown-menu>
                   <div class="tableMenu">
                     <div class="menuHeader">
-                      Filter by application type
+                      按应用程序类型筛选
                     </div>
                     <div class="menuContent">
                       <div class="md-checkbox" ng-repeat="filter in $ctrl.filters.state.values track by $index">
@@ -157,20 +157,20 @@
                       </div>
                     </div>
                     <div>
-                      <a type="button" class="btn btn-default btn-sm" ng-click="$ctrl.filters.state.open = false;">Close</a>
+                      <a type="button" class="btn btn-default btn-sm" ng-click="$ctrl.filters.state.open = false;">关闭</a>
                     </div>
                   </div>
                 </div>
               </th>
               <th>
-                Status
+                状态
               </th>
               <th>
-                Publishing mode
+                发布方式
               </th>
               <th>
                 <a ng-click="$ctrl.changeOrderBy('CreationDate')">
-                  Created
+                  已创建
                   <i class="fa fa-sort-numeric-down" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'CreationDate' && !$ctrl.state.reverseOrder"></i>
                   <i class="fa fa-sort-numeric-up" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'CreationDate' && $ctrl.state.reverseOrder"></i>
                 </a>
@@ -209,8 +209,8 @@
                   ng-click="$event.stopPropagation()"
                   >{{ item.Name }}
                 </a>
-                <span class="label label-info image-tag label-margins" ng-if="$ctrl.isSystemNamespace(item)">system</span>
-                <span class="label label-primary image-tag label-margins" ng-if="!$ctrl.isSystemNamespace(item) && $ctrl.isExternalApplication(item)">external</span>
+                <span class="label label-info image-tag label-margins" ng-if="$ctrl.isSystemNamespace(item)">系统</span>
+                <span class="label label-primary image-tag label-margins" ng-if="!$ctrl.isSystemNamespace(item) && $ctrl.isExternalApplication(item)">外部的</span>
               </td>
               <td>{{ item.StackName || '-' }}</td>
               <td>
@@ -222,8 +222,8 @@
               <td>{{ item.ApplicationType | kubernetesApplicationTypeText }}</td>
               <td ng-if="item.ApplicationType !== $ctrl.KubernetesApplicationTypes.POD">
                 <status-indicator ok="(item.TotalPodsCount > 0 && item.TotalPodsCount === item.RunningPodsCount) || item.Status === 'Ready'"></status-indicator>
-                <span ng-if="item.DeploymentType === $ctrl.KubernetesApplicationDeploymentTypes.REPLICATED">Replicated</span>
-                <span ng-if="item.DeploymentType === $ctrl.KubernetesApplicationDeploymentTypes.GLOBAL">Global</span>
+                <span ng-if="item.DeploymentType === $ctrl.KubernetesApplicationDeploymentTypes.REPLICATED">复制的</span>
+                <span ng-if="item.DeploymentType === $ctrl.KubernetesApplicationDeploymentTypes.GLOBAL">全局</span>
                 <span ng-if="item.RunningPodsCount >= 0 && item.TotalPodsCount >= 0">
                   <code>{{ item.RunningPodsCount }}</code> / <code>{{ item.TotalPodsCount }}</code>
                 </span>
@@ -274,21 +274,21 @@
               </td>
             </tr>
             <tr ng-if="!$ctrl.dataset">
-              <td colspan="8" class="text-center text-muted">Loading...</td>
+              <td colspan="8" class="text-center text-muted">加载中...</td>
             </tr>
             <tr ng-if="$ctrl.state.filteredDataSet.length === 0">
-              <td colspan="8" class="text-center text-muted">No application available.</td>
+              <td colspan="8" class="text-center text-muted">没有可用的应用程序。</td>
             </tr>
           </tbody>
         </table>
       </div>
       <div ng-if="$ctrl.isPrimary" class="footer" ng-if="$ctrl.dataset">
-        <div class="infoBar" ng-if="$ctrl.state.selectedItemCount !== 0"> {{ $ctrl.state.selectedItemCount }} item(s) selected </div>
+        <div class="infoBar" ng-if="$ctrl.state.selectedItemCount !== 0"> {{ $ctrl.state.selectedItemCount }} 所选项目 </div>
         <div class="paginationControls">
           <form class="form-inline">
             <span class="limitSelector">
               <span style="margin-right: 5px;">
-                Items per page
+                每页项目数
               </span>
               <select class="form-control" ng-model="$ctrl.state.paginatedItemLimit" ng-change="$ctrl.changePaginationLimit()" data-cy="component-paginationSelect">
                 <option value="0">All</option>

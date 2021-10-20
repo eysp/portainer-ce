@@ -1,11 +1,11 @@
 <div id="service-restart-policy">
   <rd-widget>
-    <rd-widget-header icon="fa-list-alt" title-text="Restart policy"> </rd-widget-header>
+    <rd-widget-header icon="fa-list-alt" title-text="重启策略"> </rd-widget-header>
     <rd-widget-body classes="no-padding">
       <table class="table">
         <tbody>
           <tr>
-            <td>Restart condition</td>
+            <td>重启条件</td>
             <td>
               <div class="input-group input-group-sm">
                 <select
@@ -22,12 +22,12 @@
             </td>
             <td>
               <p class="small text-muted" style="margin-top: 10px;">
-                Condition for restart.
+                重新启动的条件。
               </p>
             </td>
           </tr>
           <tr>
-            <td>Restart delay</td>
+            <td>重启延迟</td>
             <td>
               <input
                 class="input-sm"
@@ -40,12 +40,12 @@
             </td>
             <td>
               <p class="small text-muted" style="margin-top: 10px;">
-                Delay between restart attempts expressed by a number followed by unit (ns|us|ms|s|m|h). Default value is 5s, 5 seconds.
+                重启尝试之间的延迟，用数字后跟单位表示(ns|us|ms|s|m|h). 默认值为 5s, 5秒.
               </p>
             </td>
           </tr>
           <tr>
-            <td>Restart max attempts</td>
+            <td>重新启动最大尝试次数</td>
             <td>
               <input
                 class="input-sm"
@@ -57,12 +57,12 @@
             </td>
             <td>
               <p class="small text-muted" style="margin-top: 10px;">
-                Maximum attempts to restart a given task before giving up (default value is 0, which means unlimited).
+                放弃前重新启动给定任务的最大尝试次数（默认值为0，表示无限制）。
               </p>
             </td>
           </tr>
           <tr>
-            <td>Restart window</td>
+            <td>重新启动窗口</td>
             <td>
               <input
                 class="input-sm"
@@ -75,7 +75,7 @@
             </td>
             <td>
               <p class="small text-muted" style="margin-top: 10px;">
-                Time window to evaluate restart attempts expressed by a number followed by unit (ns|us|ms|s|m|h). Default value is 0 seconds, which is unbounded.
+                评估重启尝试的时间窗口，用数字后跟单位表示（ns | us | ms | s | m | h）。默认值为0秒，无限制。
               </p>
             </td>
           </tr>
@@ -90,14 +90,14 @@
             class="btn btn-primary btn-sm"
             ng-disabled="!hasChanges(service, ['RestartCondition', 'RestartDelay', 'RestartMaxAttempts', 'RestartWindow'])"
             ng-click="updateService(service)"
-            >Apply changes</button
+            >应用更改</button
           >
           <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu">
-            <li><a ng-click="cancelChanges(service, ['RestartCondition', 'RestartDelay', 'RestartMaxAttempts', 'RestartWindow'])">Reset changes</a></li>
-            <li><a ng-click="cancelChanges(service)">Reset all changes</a></li>
+            <li><a ng-click="cancelChanges(service, ['RestartCondition', 'RestartDelay', 'RestartMaxAttempts', 'RestartWindow'])">重置更改</a></li>
+            <li><a ng-click="cancelChanges(service)">重置所有更改</a></li>
           </ul>
         </div>
       </div>

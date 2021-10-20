@@ -8,7 +8,7 @@
         <uib-tabset>
           <uib-tab index="0" heading="Linux">
             <code style="display: block; white-space: pre-wrap; padding: 16px 10px;"
-              ><h6 style="color: #000;">CLI script for installing agent on your Linux environment with Docker Swarm</h6>{{ $ctrl.command.linuxCommand
+              ><h6 style="color: #000;">使用 Docker Swarm 在 Linux 环境中安装代理的 CLI 脚本</h6>{{ $ctrl.command.linuxCommand
               }}<i class="fas fa-copy wizard-copy-button" ng-click="$ctrl.copyLinuxCommand()"></i
               ><i id="linuxCommandNotification" class="fa fa-check green-icon" aria-hidden="true" style="margin-left: 7px; display: none;"></i
             ></code>
@@ -16,7 +16,7 @@
 
           <uib-tab index="1" heading="Windows">
             <code style="display: block; white-space: pre-wrap; padding: 16px 10px;"
-              ><h6 style="color: #000;">CLI script for installing agent on your Windows environment with Docker Swarm</h6>{{ $ctrl.command.winCommand
+              ><h6 style="color: #000;">使用 Docker Swarm 在 Windows 环境中安装代理的 CLI 脚本</h6>{{ $ctrl.command.winCommand
               }}<i class="fas fa-copy wizard-copy-button" ng-click="$ctrl.copyWinCommand()"></i
               ><i id="winCommandNotification" class="fa fa-check green-icon" aria-hidden="true" style="margin-left: 7px; display: none;"></i
             ></code>
@@ -28,7 +28,7 @@
         <uib-tabset active="state.deploymentTab">
           <uib-tab index="0" heading="Linux">
             <code style="display: block; white-space: pre-wrap; padding: 16px 10px;"
-              ><h6 style="color: #000;">When using the socket, ensure that you have started the Portainer container with the following Docker flag on Linux</h6
+              ><h6 style="color: #000;">使用socket字时，请确保您已在 Linux 上使用以下 Docker 标志启动 Portainer 容器</h6
               >{{ $ctrl.command.linuxSocket }}<i class="fas fa-copy wizard-copy-button" ng-click="$ctrl.copyLinuxSocket()"></i
               ><i id="linuxSocketNotification" class="fa fa-check green-icon" aria-hidden="true" style="margin-left: 7px; display: none;"></i
             ></code>
@@ -36,7 +36,7 @@
 
           <uib-tab index="1" heading="Windows">
             <code style="display: block; white-space: pre-wrap; padding: 16px 10px;"
-              ><h6 style="color: #000;">When using the socket, ensure that you have started the Portainer container with the following Docker flag on Windows</h6
+              ><h6 style="color: #000;">使用socket时，请确保您已在 Windows 上使用以下 Docker 标志启动 Portainer 容器</h6
               >{{ $ctrl.command.winSocket }}<i class="fas fa-copy wizard-copy-button" ng-click="$ctrl.copyWinSocket()"></i
               ><i id="winSocketNotification" class="fa fa-check green-icon" aria-hidden="true" style="margin-left: 7px; display: none;"></i
             ></code>
@@ -48,14 +48,14 @@
 
   <!-- docker form section-->
   <div class="form-group wizard-form">
-    <label for="endpoint_name" class="col-sm-3 col-lg-2 control-label text-left">Name<span class="wizard-form-required">*</span></label>
+    <label for="endpoint_name" class="col-sm-3 col-lg-2 control-label text-left">名称<span class="wizard-form-required">*</span></label>
     <div class="col-sm-9 col-lg-10">
-      <input type="text" class="form-control" name="endpoint_name" ng-model="$ctrl.formValues.name" placeholder="e.g. docker-prod01 / kubernetes-cluster01" auto-focus />
+      <input type="text" class="form-control" name="endpoint_name" ng-model="$ctrl.formValues.name" placeholder="例如 docker-prod01 / kubernetes-cluster01" auto-focus />
     </div>
   </div>
 
   <div ng-if="$ctrl.state.endpointType === 'agent'" class="form-group">
-    <label for="endpoint_url" class="col-sm-3 col-lg-2 control-label text-left"> Environments URL<span class="wizard-form-required">*</span> </label>
+    <label for="endpoint_url" class="col-sm-3 col-lg-2 control-label text-left"> 环境 URL<span class="wizard-form-required">*</span> </label>
 
     <div class="col-sm-9 col-lg-10" style="margin-bottom: 15px;">
       <input
@@ -64,7 +64,7 @@
         class="form-control"
         name="endpoint_url"
         ng-model="$ctrl.formValues.url"
-        placeholder="e.g. 10.0.0.10:9001 or tasks.portainer_agent:9001"
+        placeholder="例如 10.0.0.10:9001 or tasks.portainer_agent:9001"
       />
     </div>
   </div>
@@ -80,7 +80,7 @@
           class="form-control"
           name="dockerapi_url"
           ng-model="$ctrl.formValues.url"
-          placeholder="e.g. 10.0.0.10:2375 or mydocker.mydomain.com:2375"
+          placeholder="例如 10.0.0.10:2375 or mydocker.mydomain.com:2375"
         />
       </div>
     </div>
@@ -107,7 +107,7 @@
   <div ng-if="$ctrl.state.endpointType === 'socket'" class="form-group" style="padding-left: 15px;">
     <div class="form-group" style="padding-left: 15px;">
       <label for="override_socket" class="col-sm_12 control-label text-left">
-        Override default socket path
+        覆盖默认socket路径
       </label>
       <label class="switch" style="margin-left: 20px;"> <input type="checkbox" ng-model="$ctrl.formValues.overrideSocket" /><i></i></label>
     </div>
@@ -115,7 +115,7 @@
     <div ng-if="$ctrl.formValues.overrideSocket">
       <div class="form-group">
         <label for="socket_path" class="col-sm-3 col-lg-2 control-label text-left">
-          Socket path
+          Socket 路径
           <portainer-tooltip position="bottom" message="Path to the Docker socket. Remember to bind-mount the socket, see the important notice above for more information.">
           </portainer-tooltip>
         </label>
@@ -125,7 +125,7 @@
             class="form-control"
             name="socket_path"
             ng-model="$ctrl.formValues.socketPath"
-            placeholder="e.g. /var/run/docker.sock (on Linux) or //./pipe/docker_engine (on Windows)"
+            placeholder="例如 /var/run/docker.sock (on Linux) or //./pipe/docker_engine (on Windows)"
           />
         </div>
       </div>
@@ -142,8 +142,8 @@
         ng-click="$ctrl.connectEnvironment('agent')"
         button-spinner="$ctrl.state.actionInProgress"
       >
-        <span ng-hide="$ctrl.state.actionInProgress"><i class="fa fa-plug" style="margin-right: 5px;"></i>Connect </span>
-        <span ng-show="$ctrl.state.actionInProgress">Connecting environment...</span>
+        <span ng-hide="$ctrl.state.actionInProgress"><i class="fa fa-plug" style="margin-right: 5px;"></i>连接 </span>
+        <span ng-show="$ctrl.state.actionInProgress">连接环境...</span>
       </button>
       <button
         ng-if="$ctrl.state.endpointType === 'api'"
@@ -153,8 +153,8 @@
         ng-click="$ctrl.connectEnvironment('api')"
         button-spinner="$ctrl.state.actionInProgress"
       >
-        <span ng-hide="$ctrl.state.actionInProgress"><i class="fa fa-plug" style="margin-right: 5px;"></i>Connect </span>
-        <span ng-show="$ctrl.state.actionInProgress">Connecting environment...</span>
+        <span ng-hide="$ctrl.state.actionInProgress"><i class="fa fa-plug" style="margin-right: 5px;"></i>连接 </span>
+        <span ng-show="$ctrl.state.actionInProgress">连接环境...</span>
       </button>
       <button
         ng-if="$ctrl.state.endpointType === 'socket'"
@@ -164,8 +164,8 @@
         ng-click="$ctrl.connectEnvironment('socket')"
         button-spinner="$ctrl.state.actionInProgress"
       >
-        <span ng-hide="$ctrl.state.actionInProgress"><i class="fa fa-plug" style="margin-right: 5px;"></i>Connect </span>
-        <span ng-show="$ctrl.state.actionInProgress">Connecting environment...</span>
+        <span ng-hide="$ctrl.state.actionInProgress"><i class="fa fa-plug" style="margin-right: 5px;"></i>连接 </span>
+        <span ng-show="$ctrl.state.actionInProgress">连接环境...</span>
       </button>
     </div>
   </div>

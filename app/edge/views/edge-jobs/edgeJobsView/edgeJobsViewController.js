@@ -34,7 +34,7 @@ export class EdgeJobsViewController {
         this.Notifications.success('Stack successfully removed', edgeJob.Name);
         _.remove(this.edgeJobs, edgeJob);
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to remove Edge job ' + edgeJob.Name);
+        this.Notifications.error('失败', err, 'Unable to remove Edge job ' + edgeJob.Name);
       }
     }
 
@@ -46,7 +46,7 @@ export class EdgeJobsViewController {
       const edgeJobs = await this.EdgeJobService.edgeJobs();
       this.edgeJobs = edgeJobs;
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve Edge jobs');
+      this.Notifications.error('失败', err, 'Unable to retrieve Edge jobs');
       this.edgeJobs = [];
     }
   }

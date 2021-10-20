@@ -14,7 +14,7 @@ angular.module('portainer.azure').controller('AzureDashboardController', [
           $scope.resourceGroups = AzureService.aggregate(data);
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to load dashboard data');
+          Notifications.error('失败', err, 'Unable to load dashboard data');
         });
     }
 

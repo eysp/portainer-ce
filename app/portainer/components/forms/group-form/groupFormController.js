@@ -38,10 +38,10 @@ class GroupFormController {
     } else if (this.pageType === 'edit') {
       this.GroupService.addEndpoint(this.model.Id, endpoint)
         .then(() => {
-          this.Notifications.success('Success', 'Environment successfully added to group');
+          this.Notifications.success('成功', '环境已成功添加到组');
           this.reloadTablesContent();
         })
-        .catch((err) => this.Notifications.error('Error', err, 'Unable to add environment to group'));
+        .catch((err) => this.Notifications.error('Error', err, '无法将环境添加到组'));
     }
   }
 
@@ -51,10 +51,10 @@ class GroupFormController {
     } else if (this.pageType === 'edit') {
       this.GroupService.removeEndpoint(this.model.Id, endpoint.Id)
         .then(() => {
-          this.Notifications.success('Success', 'Environment successfully removed from group');
+          this.Notifications.success('成功', '环境已成功从组中删除');
           this.reloadTablesContent();
         })
-        .catch((err) => this.Notifications.error('Error', err, 'Unable to remove environment from group'));
+        .catch((err) => this.Notifications.error('Error', err, '无法从组中删除环境'));
     }
   }
 

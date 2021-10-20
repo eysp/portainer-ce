@@ -496,11 +496,11 @@ angular.module('portainer.docker').controller('CreateServiceController', [
           return $q.all([rcPromise, webhookPromise]);
         })
         .then(function success() {
-          Notifications.success('Service successfully created');
+          Notifications.success('服务创建成功');
           $state.go('docker.services', {}, { reload: true });
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to create service');
+          Notifications.error('失败', err, '无法创建服务');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -583,7 +583,7 @@ angular.module('portainer.docker').controller('CreateServiceController', [
           $scope.allowBindMounts = data.allowBindMounts;
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to initialize view');
+          Notifications.error('失败', err, '无法初始化视图');
         });
     }
 

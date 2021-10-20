@@ -18,16 +18,16 @@
               <div class="col-sm-12" style="display: flex; justify-content: center;" ng-if="ctrl.state.showOAuthLogin">
                 <a ng-href="{{ ctrl.OAuthLoginURI }}">
                   <div class="btn btn-primary pull-left" style="font-size: 120%; margin-left: 2px;" ng-if="ctrl.state.OAuthProvider === 'Microsoft'">
-                    <i class="fab fa-microsoft" aria-hidden="true"></i> Login with Microsoft
+                    <i class="fab fa-microsoft" aria-hidden="true"></i> 使用Microsoft登录
                   </div>
                   <div class="btn btn-primary pull-left" style="font-size: 120%; margin-left: 2px;" ng-if="ctrl.state.OAuthProvider === 'Google'">
-                    <i class="fab fa-google" aria-hidden="true"></i> Login with Google
+                    <i class="fab fa-google" aria-hidden="true"></i> 使用google登录
                   </div>
                   <div class="btn btn-primary pull-left" style="font-size: 120%; margin-left: 2px;" ng-if="ctrl.state.OAuthProvider === 'Github'">
-                    <i class="fab fa-github" aria-hidden="true"></i> Login with Github
+                    <i class="fab fa-github" aria-hidden="true"></i> 使用GitHub登录
                   </div>
                   <div class="btn btn-primary pull-left" style="font-size: 120%; margin-left: 2px;" ng-if="ctrl.state.OAuthProvider === 'OAuth'">
-                    <i class="fa fa-sign-in-alt" aria-hidden="true"></i> Login with OAuth
+                    <i class="fa fa-sign-in-alt" aria-hidden="true"></i> 使用OAuth登录
                   </div>
                 </a>
               </div>
@@ -36,7 +36,7 @@
             <!-- divider -->
             <div class="form-group" ng-if="ctrl.state.showOAuthLogin">
               <div class="col-sm-12" style="display: flex; align-items: center; justify-content: center;">
-                <div class="striketext small text-muted" style="display: flex; align-items: center; justify-content: center; width: 90%;">or</div>
+                <div class="striketext small text-muted" style="display: flex; align-items: center; justify-content: center; width: 90%;">或者</div>
               </div>
             </div>
 
@@ -44,7 +44,7 @@
             <div class="form-group" ng-if="ctrl.state.showOAuthLogin && !ctrl.state.showStandardLogin">
               <div class="col-sm-12" style="display: flex; justify-content: center;">
                 <div class="btn btn-sm btn-primary pull-left" style="margin-left: 2px;" ng-click="ctrl.toggleStandardLogin()">
-                  Use internal authentication
+                  使用内部身份验证
                 </div>
               </div>
             </div>
@@ -72,8 +72,8 @@
                   ng-disabled="ctrl.state.loginInProgress"
                   data-cy="auth-loginButton"
                 >
-                  <span ng-hide="ctrl.state.loginInProgress"><i class="fa fa-sign-in-alt" aria-hidden="true"></i> Login</span>
-                  <span ng-show="ctrl.state.loginInProgress">Login in progress...</span>
+                  <span ng-hide="ctrl.state.loginInProgress"><i class="fa fa-sign-in-alt" aria-hidden="true"></i> 登陆</span>
+                  <span ng-show="ctrl.state.loginInProgress">正在登录。。。</span>
                 </button>
               </div>
             </div>
@@ -92,7 +92,7 @@
       <div class="panel panel-default" ng-show="ctrl.state.loginInProgress">
         <div class="panel-body">
           <div class="form-group text-center">
-            <span class="small text-muted">Authentication in progress... <span button-spinner="true"></span></span>
+            <span class="small text-muted">正在进行身份验证。。。 <span button-spinner="true"></span></span>
           </div>
         </div>
       </div>

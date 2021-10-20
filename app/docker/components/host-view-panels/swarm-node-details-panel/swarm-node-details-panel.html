@@ -1,20 +1,20 @@
 <div class="row">
   <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
     <rd-widget>
-      <rd-widget-header icon="fa-code" title-text="Node Details"></rd-widget-header>
+      <rd-widget-header icon="fa-code" title-text="节点详情"></rd-widget-header>
       <rd-widget-body classes="no-padding">
         <table class="table">
           <tbody>
             <tr ng-if="$ctrl.details.name">
-              <td>Node name</td>
+              <td>节点名</td>
               <td>{{ $ctrl.details.name }}</td>
             </tr>
             <tr>
-              <td>Role</td>
+              <td>角色</td>
               <td>{{ $ctrl.details.role }} {{ $ctrl.state.managerAddress }}</td>
             </tr>
             <tr>
-              <td>Availability</td>
+              <td>利用率</td>
               <td>
                 <node-availability-select
                   on-save="$ctrl.updateNodeAvailability(availability)"
@@ -25,7 +25,7 @@
               </td>
             </tr>
             <tr>
-              <td>Status</td>
+              <td>状态</td>
               <td
                 ><span class="label label-{{ $ctrl.details.status | nodestatusbadge }}">{{ $ctrl.details.status }}</span></td
               >
@@ -33,9 +33,9 @@
             <tr>
               <td>
                 <div class="nopadding">
-                  <a class="btn btn-default btn-sm pull-right" ng-click="$ctrl.addLabel(node)"> <i class="fa fa-plus-circle" aria-hidden="true"></i> label </a>
+                  <a class="btn btn-default btn-sm pull-right" ng-click="$ctrl.addLabel(node)"> <i class="fa fa-plus-circle" aria-hidden="true"></i> 标签 </a>
                 </div>
-                Node Labels
+                节点标签
               </td>
               <td></td>
             </tr>
@@ -49,13 +49,13 @@
                 <div class="btn-toolbar" role="toolbar">
                   <div class="btn-group" role="group">
                     <button type="button" class="btn btn-primary btn-sm" ng-disabled="!$ctrl.state.hasChanges" ng-click="$ctrl.saveChanges()">
-                      Apply changes
+                      应用更改
                     </button>
                     <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                       <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu">
-                      <li><a ng-click="$ctrl.cancelChanges()">Reset changes</a></li>
+                      <li><a ng-click="$ctrl.cancelChanges()">重置更改</a></li>
                     </ul>
                   </div>
                 </div>

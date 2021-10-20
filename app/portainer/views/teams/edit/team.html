@@ -1,32 +1,32 @@
 <rd-header>
-  <rd-header-title title-text="Team details"></rd-header-title>
+  <rd-header-title title-text="团队详情"></rd-header-title>
   <rd-header-content>
-    <a ui-sref="portainer.teams">Teams</a> &gt; <a ui-sref="portainer.teams.team({id: team.Id})">{{ team.Name }}</a>
+    <a ui-sref="portainer.teams">团队</a> &gt; <a ui-sref="portainer.teams.team({id: team.Id})">{{ team.Name }}</a>
   </rd-header-content>
 </rd-header>
 
 <div class="row">
   <div class="col-lg-12 col-md-12 col-xs-12">
     <rd-widget>
-      <rd-widget-header icon="fa-users" title-text="Team details"></rd-widget-header>
+      <rd-widget-header icon="fa-users" title-text="团队详情"></rd-widget-header>
       <rd-widget-body classes="no-padding">
         <table class="table">
           <tbody>
             <tr>
-              <td>Name</td>
+              <td>名称</td>
               <td>
                 {{ team.Name }}
                 <button class="btn btn-xs btn-danger" ng-if="isAdmin" ng-click="deleteTeam()"
-                  ><i class="fa fa-trash-alt space-right" aria-hidden="true"></i>Delete this team</button
+                  ><i class="fa fa-trash-alt space-right" aria-hidden="true"></i>删除此团队</button
                 >
               </td>
             </tr>
             <tr>
-              <td>Leaders</td>
+              <td>领导</td>
               <td>{{ leaderCount }}</td>
             </tr>
             <tr>
-              <td>Total users in team</td>
+              <td>团队中的总用户数</td>
               <td>{{ teamMembers.length }}</td>
             </tr>
           </tbody>
@@ -39,11 +39,11 @@
 <div class="row" ng-if="team">
   <div class="col-sm-6">
     <rd-widget>
-      <rd-widget-header classes="col-sm-12 col-md-6 nopadding" icon="fa-users" title-text="Users">
+      <rd-widget-header classes="col-sm-12 col-md-6 nopadding" icon="fa-users" title-text="用户">
         <div class="pull-md-right pull-lg-right">
-          Items per page:
+          每页项目：
           <select ng-model="state.pagination_count_users" ng-change="changePaginationCountUsers()">
-            <option value="0">All</option>
+            <option value="0">全部</option>
             <option value="10">10</option>
             <option value="25">25</option>
             <option value="50">50</option>
@@ -54,7 +54,7 @@
       <rd-widget-taskbar classes="col-sm-12 nopadding">
         <div class="col-sm-12 col-md-6 nopadding">
           <button class="btn btn-primary btn-sm" ng-click="addAllUsers()" ng-if="isAdmin" ng-disabled="users.length ===  0 || filteredUsers.length === 0"
-            ><i class="fa fa-user-plus space-right" aria-hidden="true"></i>Add all users</button
+            ><i class="fa fa-user-plus space-right" aria-hidden="true"></i>添加所有用户</button
           >
         </div>
         <div class="col-sm-12 col-md-6 nopadding">
@@ -68,7 +68,7 @@
               <tr>
                 <th>
                   <a ng-click="orderUsers('Username')">
-                    Name
+                    名称
                     <span ng-show="sortTypeUsers == 'Username' && !sortReverseUsers" class="glyphicon glyphicon-chevron-down"></span>
                     <span ng-show="sortTypeUsers == 'Username' && sortReverseUsers" class="glyphicon glyphicon-chevron-up"></span>
                   </a>
@@ -83,15 +83,15 @@
                 <td>
                   {{ user.Username }}
                   <span style="margin-left: 5px;">
-                    <a ng-click="addUser(user)"><i class="fa fa-plus-circle space-right" aria-hidden="true"></i>Add</a>
+                    <a ng-click="addUser(user)"><i class="fa fa-plus-circle space-right" aria-hidden="true"></i>添加</a>
                   </span>
                 </td>
               </tr>
               <tr ng-if="!users">
-                <td colspan="2" class="text-center text-muted">Loading...</td>
+                <td colspan="2" class="text-center text-muted">加载中...</td>
               </tr>
               <tr ng-if="users.length === 0 || (users | filter: state.filterUsers).length === 0">
-                <td colspan="2" class="text-center text-muted">No users.</td>
+                <td colspan="2" class="text-center text-muted">没有用户。</td>
               </tr>
             </tbody>
           </table>
@@ -104,11 +104,11 @@
   </div>
   <div class="col-sm-6">
     <rd-widget>
-      <rd-widget-header classes="col-sm-12 col-md-6 nopadding" icon="fa-users" title-text="Team members">
+      <rd-widget-header classes="col-sm-12 col-md-6 nopadding" icon="fa-users" title-text="团队成员">
         <div class="pull-md-right pull-lg-right">
-          Items per page:
+          每页项目：
           <select ng-model="state.pagination_count_members" ng-change="changePaginationCountGroupMembers()">
-            <option value="0">All</option>
+            <option value="0">全部</option>
             <option value="10">10</option>
             <option value="25">25</option>
             <option value="50">50</option>
@@ -119,11 +119,11 @@
       <rd-widget-taskbar classes="col-sm-12 nopadding">
         <div class="col-sm-12 col-md-6 nopadding">
           <button class="btn btn-primary btn-sm" ng-click="removeAllUsers()" ng-if="isAdmin" ng-disabled="teamMembers.length ===  0 || filteredGroupMembers.length === 0"
-            ><i class="fa fa-user-times space-right" aria-hidden="true"></i>Remove all users</button
+            ><i class="fa fa-user-times space-right" aria-hidden="true"></i>删除所有用户</button
           >
         </div>
         <div class="col-sm-12 col-md-6 nopadding">
-          <input type="text" id="filter-group" ng-model="state.filterGroupMembers" placeholder="Filter..." class="form-control input-sm" />
+          <input type="text" id="filter-group" ng-model="state.filterGroupMembers" placeholder="过滤..." class="form-control input-sm" />
         </div>
       </rd-widget-taskbar>
       <rd-widget-body classes="no-padding">
@@ -133,14 +133,14 @@
               <tr>
                 <th>
                   <a ng-click="orderGroupMembers('Username')">
-                    Name
+                    名称
                     <span ng-show="sortTypeGroupMembers == 'Username' && !sortReverseGroupMembers" class="glyphicon glyphicon-chevron-down"></span>
                     <span ng-show="sortTypeGroupMembers == 'Username' && sortReverseGroupMembers" class="glyphicon glyphicon-chevron-up"></span>
                   </a>
                 </th>
                 <th>
                   <a ng-click="orderGroupMembers('TeamRole')">
-                    Team Role
+                    团队角色
                     <span ng-show="sortTypeGroupMembers == 'TeamRole' && !sortReverseGroupMembers" class="glyphicon glyphicon-chevron-down"></span>
                     <span ng-show="sortTypeGroupMembers == 'TeamRole' && sortReverseGroupMembers" class="glyphicon glyphicon-chevron-up"></span>
                   </a>
@@ -155,7 +155,7 @@
                 <td>
                   {{ user.Username }}
                   <span style="margin-left: 5px;" ng-if="isAdmin || user.TeamRole === 'Member'">
-                    <a ng-click="removeUser(user)"><i class="fa fa-minus-circle space-right" aria-hidden="true"></i>Remove</a>
+                    <a ng-click="removeUser(user)"><i class="fa fa-minus-circle space-right" aria-hidden="true"></i>删除</a>
                   </span>
                 </td>
                 <td>
@@ -164,19 +164,19 @@
                   {{ user.TeamRole }}
                   <span style="margin-left: 5px;" ng-if="isAdmin">
                     <a style="margin-left: 5px;" ng-click="promoteToLeader(user)" ng-if="user.TeamRole === 'Member'"
-                      ><i class="fa fa-user-plus space-right" aria-hidden="true"></i>Leader</a
+                      ><i class="fa fa-user-plus space-right" aria-hidden="true"></i>领导</a
                     >
                     <a style="margin-left: 5px;" ng-click="demoteToMember(user)" ng-if="user.TeamRole === 'Leader'"
-                      ><i class="fa fa-user-times space-right" aria-hidden="true"></i>Member</a
+                      ><i class="fa fa-user-times space-right" aria-hidden="true"></i>成员</a
                     >
                   </span>
                 </td>
               </tr>
               <tr ng-if="!teamMembers">
-                <td colspan="2" class="text-center text-muted">Loading...</td>
+                <td colspan="2" class="text-center text-muted">加载中...</td>
               </tr>
               <tr ng-if="teamMembers.length === 0 || (teamMembers | filter: state.filterGroupMembers).length === 0">
-                <td colspan="2" class="text-center text-muted">No team members.</td>
+                <td colspan="2" class="text-center text-muted">没有团队成员。</td>
               </tr>
             </tbody>
           </table>

@@ -80,7 +80,7 @@ angular.module('portainer.integrations.storidge').controller('StoridgeCreateProf
           $state.go('storidge.profiles');
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to create profile');
+          Notifications.error('失败', err, 'Unable to create profile');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;

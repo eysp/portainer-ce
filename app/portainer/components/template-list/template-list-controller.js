@@ -62,7 +62,7 @@ function TemplateListController($async, $state, DatatableService, Notifications,
       }
       $state.go('docker.templates.custom.new', { fileContent, type });
     } catch (err) {
-      Notifications.error('Failure', err, 'Failed to duplicate template');
+      Notifications.error('失败', err, '复制模板失败');
     }
   }
 

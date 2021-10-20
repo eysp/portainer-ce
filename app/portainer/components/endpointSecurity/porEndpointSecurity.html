@@ -4,7 +4,7 @@
     <div class="col-sm-12">
       <label for="tls" class="control-label text-left">
         TLS
-        <portainer-tooltip position="bottom" message="Enable this option if you need to connect to the Docker environment with TLS."></portainer-tooltip>
+        <portainer-tooltip position="bottom" message="如果您需要使用 TLS 连接到 Docker 环境，请启用此选项."></portainer-tooltip>
       </label>
       <label class="switch" style="margin-left: 20px;"> <input type="checkbox" ng-model="$ctrl.formData.TLS" /><i></i> </label>
     </div>
@@ -17,8 +17,8 @@
   <div class="form-group" ng-if="$ctrl.formData.TLS">
     <div class="col-sm-12">
       <span class="small text-muted">
-        You can find out more information about how to protect a Docker environment with TLS in the
-        <a href="https://docs.docker.com/engine/security/https/" target="_blank">Docker documentation</a>.
+        您可以在
+        <a href="https://docs.docker.com/engine/security/https/" target="_blank">Docker 文档</a>中找到有关如何使用 TLS 保护 Docker 环境的更多信息。
       </span>
     </div>
   </div>
@@ -31,9 +31,9 @@
         <label for="tls_client_ca">
           <div class="boxselector_header">
             <i class="fa fa-shield-alt" aria-hidden="true" style="margin-right: 2px;"></i>
-            TLS with server and client verification
+            具有服务器和客户端验证的 TLS
           </div>
-          <p>Use client certificates and server verification</p>
+          <p>使用客户端证书和服务器验证</p>
         </label>
       </div>
       <div>
@@ -41,9 +41,9 @@
         <label for="tls_client_noca">
           <div class="boxselector_header">
             <i class="fa fa-shield-alt" aria-hidden="true" style="margin-right: 2px;"></i>
-            TLS with client verification only
+            仅带客户端验证的 TLS
           </div>
-          <p>Use client certificates without server verification</p>
+          <p>使用客户端证书而无需服务器验证</p>
         </label>
       </div>
       <div>
@@ -51,9 +51,9 @@
         <label for="tls_ca">
           <div class="boxselector_header">
             <i class="fa fa-shield-alt" aria-hidden="true" style="margin-right: 2px;"></i>
-            TLS with server verification only
+            仅带服务器验证的 TLS
           </div>
-          <p>Only verify the server certificate</p>
+          <p>只验证服务器证书</p>
         </label>
       </div>
       <div>
@@ -63,14 +63,14 @@
             <i class="fa fa-shield-alt" aria-hidden="true" style="margin-right: 2px;"></i>
             TLS only
           </div>
-          <p>No server/client verification</p>
+          <p>没有服务器/客户端验证</p>
         </label>
       </div>
     </div>
   </div>
   <!-- !endpoint-tls-mode -->
   <div class="col-sm-12 form-section-title" ng-if="$ctrl.formData.TLS && $ctrl.formData.TLSMode !== 'tls_only'">
-    Required TLS files
+    所需的 TLS 文件
   </div>
   <!-- tls-file-upload -->
   <div ng-if="$ctrl.formData.TLS">
@@ -78,7 +78,7 @@
     <div class="form-group" ng-if="$ctrl.formData.TLSMode === 'tls_client_ca' || $ctrl.formData.TLSMode === 'tls_ca'">
       <label class="col-sm-3 col-lg-2 control-label text-left">TLS CA certificate</label>
       <div class="col-sm-9 col-lg-10">
-        <button type="button" class="btn btn-sm btn-primary" ngf-select ng-model="$ctrl.formData.TLSCACert">Select file</button>
+        <button type="button" class="btn btn-sm btn-primary" ngf-select ng-model="$ctrl.formData.TLSCACert">选择文件</button>
         <span style="margin-left: 5px;">
           {{ $ctrl.formData.TLSCACert.name }}
           <i class="fa fa-check green-icon" ng-if="$ctrl.formData.TLSCACert && $ctrl.formData.TLSCACert === $ctrl.endpoint.TLSConfig.TLSCACert" aria-hidden="true"></i>
@@ -93,7 +93,7 @@
       <div class="form-group">
         <label for="tls_cert" class="col-sm-3 col-lg-2 control-label text-left">TLS certificate</label>
         <div class="col-sm-9 col-lg-10">
-          <button type="button" class="btn btn-sm btn-primary" ngf-select ng-model="$ctrl.formData.TLSCert">Select file</button>
+          <button type="button" class="btn btn-sm btn-primary" ngf-select ng-model="$ctrl.formData.TLSCert">选择文件</button>
           <span style="margin-left: 5px;">
             {{ $ctrl.formData.TLSCert.name }}
             <i class="fa fa-check green-icon" ng-if="$ctrl.formData.TLSCert && $ctrl.formData.TLSCert === $ctrl.endpoint.TLSConfig.TLSCert" aria-hidden="true"></i>
@@ -106,7 +106,7 @@
       <div class="form-group">
         <label class="col-sm-3 col-lg-2 control-label text-left">TLS key</label>
         <div class="col-sm-9 col-lg-10">
-          <button type="button" class="btn btn-sm btn-primary" ngf-select ng-model="$ctrl.formData.TLSKey">Select file</button>
+          <button type="button" class="btn btn-sm btn-primary" ngf-select ng-model="$ctrl.formData.TLSKey">选择文件</button>
           <span style="margin-left: 5px;">
             {{ $ctrl.formData.TLSKey.name }}
             <i class="fa fa-check green-icon" ng-if="$ctrl.formData.TLSKey && $ctrl.formData.TLSKey === $ctrl.endpoint.TLSConfig.TLSKey" aria-hidden="true"></i>

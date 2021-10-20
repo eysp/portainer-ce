@@ -3,7 +3,7 @@ angular.module('portainer.app').controller('StacksController', StacksController)
 /* @ngInject */
 function StacksController($scope, $state, Notifications, StackService, ModalService, EndpointProvider, Authentication, endpoint) {
   $scope.removeAction = function (selectedItems) {
-    ModalService.confirmDeletion('Do you want to remove the selected stack(s)? Associated services will be removed as well.', function onConfirm(confirmed) {
+    ModalService.confirmDeletion('您要删除选定的堆栈吗？ 相关服务也将被删除。', function onConfirm(confirmed) {
       if (!confirmed) {
         return;
       }
@@ -17,12 +17,12 @@ function StacksController($scope, $state, Notifications, StackService, ModalServ
     angular.forEach(stacks, function (stack) {
       StackService.remove(stack, stack.External, endpointId)
         .then(function success() {
-          Notifications.success('Stack successfully removed', stack.Name);
+          Notifications.success('堆栈成功删除', stack.Name);
           var index = $scope.stacks.indexOf(stack);
           $scope.stacks.splice(index, 1);
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to remove stack ' + stack.Name);
+          Notifications.error('失败', err, '无法删除堆栈 ' + stack.Name);
         })
         .finally(function final() {
           --actionCount;
@@ -51,7 +51,7 @@ function StacksController($scope, $state, Notifications, StackService, ModalServ
       })
       .catch(function error(err) {
         $scope.stacks = [];
-        Notifications.error('Failure', err, 'Unable to retrieve stacks');
+        Notifications.error('失败', err, '无法检索堆栈');
       });
   }
 

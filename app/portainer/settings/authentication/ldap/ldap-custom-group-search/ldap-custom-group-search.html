@@ -1,12 +1,12 @@
 <div class="col-sm-12 form-section-title" style="float: initial;">
-  Group search configurations
+   群组搜索配置
 </div>
 
 <rd-widget ng-repeat="config in $ctrl.settings | limitTo: (1 - $ctrl.settings)" style="display: block; margin-bottom: 10px;">
   <rd-widget-body>
     <div class="form-group" ng-if="$index > 0" style="margin-bottom: 10px;">
       <span class="col-sm-12 text-muted small">
-        Extra search configuration
+        额外搜索配置
       </span>
     </div>
 
@@ -20,7 +20,7 @@
       </div>
 
       <label for="ldap_group_att_{{ $index }}" class="col-sm-4 col-md-2 control-label text-left">
-        Group Membership Attribute
+        群组成员属性
         <portainer-tooltip position="bottom" message="LDAP attribute which denotes the group membership."></portainer-tooltip>
       </label>
       <div class="col-sm-8 col-md-4">
@@ -29,7 +29,7 @@
     </div>
     <div class="form-group">
       <label for="ldap_group_filter_{{ $index }}" class="col-sm-4 col-md-2 control-label text-left">
-        Group Filter
+        群组筛选
         <portainer-tooltip position="bottom" message="The LDAP search filter used to select group elements, optional."></portainer-tooltip>
       </label>
       <div ng-class="{ 'col-sm-7 col-md-9': $index, 'col-sm-8 col-md-10': !$index }">
@@ -47,7 +47,7 @@
 <div class="form-group" style="margin-top: 10px;">
   <div class="col-sm-12">
     <button class="label label-default interactive" style="border: 0;" ng-click="$ctrl.onAddClick()">
-      <i class="fa fa-plus-circle" aria-hidden="true"></i> add group search configuration
+      <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加群组搜索配置
     </button>
   </div>
   <div class="col-sm-12" style="margin-top: 10px;">
@@ -60,7 +60,7 @@
       limited-feature-disabled
       limited-feature-class="limited-be"
     >
-      Display User/Group matching
+      显示用户/群组匹配
     </button>
     <be-feature-indicator feature="$ctrl.limitedFeatureId" class="space-left"></be-feature-indicator>
   </div>
@@ -68,6 +68,6 @@
 
 <div ng-if="$ctrl.showTable">
   <div class="form-group">
-    <ldap-groups-datatable dataset="$ctrl.groups" title-text="Groups" title-icon="fa-users" table-key="ldapGroups"></ldap-groups-datatable>
+    <ldap-groups-datatable dataset="$ctrl.groups" title-text="群组" title-icon="fa-users" table-key="ldapGroups"></ldap-groups-datatable>
   </div>
 </div>

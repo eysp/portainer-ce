@@ -39,13 +39,13 @@ angular.module('portainer.docker').controller('ImagesController', [
         .then(function success(data) {
           var err = data[data.length - 1].errorDetail;
           if (err) {
-            return Notifications.error('Failure', err, 'Unable to pull image');
+            return Notifications.error('失败', err, '无法拉取镜像');
           }
-          Notifications.success('Image successfully pulled', registryModel.Image);
+          Notifications.success('镜像成功拉取', registryModel.Image);
           $state.reload();
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to pull image');
+          Notifications.error('失败', err, '无法拉取镜像');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -70,13 +70,13 @@ angular.module('portainer.docker').controller('ImagesController', [
         });
 
         if (untagged) {
-          Notifications.warning('', 'Cannot download a untagged image');
+          Notifications.warning('', '无法下载未标记的镜像');
           return false;
         }
       }
 
       if (_.uniqBy(selectedItems, 'NodeName').length > 1) {
-        Notifications.warning('', 'Cannot download images from different nodes at the same time');
+        Notifications.warning('', '不能同时下载不同节点的镜像');
         return false;
       }
 
@@ -90,10 +90,10 @@ angular.module('portainer.docker').controller('ImagesController', [
         .then(function success(data) {
           var downloadData = new Blob([data.file], { type: 'application/x-tar' });
           FileSaver.saveAs(downloadData, 'images.tar');
-          Notifications.success('Image(s) successfully downloaded');
+          Notifications.success('镜像已成功下载');
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to download image(s)');
+          Notifications.error('失败', err, '无法下载镜像');
         })
         .finally(function final() {
           $scope.state.exportInProgress = false;
@@ -119,12 +119,12 @@ angular.module('portainer.docker').controller('ImagesController', [
         HttpRequestHelper.setPortainerAgentTargetHeader(image.NodeName);
         ImageService.deleteImage(image.Id, force)
           .then(function success() {
-            Notifications.success('Image successfully removed', image.Id);
+            Notifications.success('镜像已成功删除', image.Id);
             var index = $scope.images.indexOf(image);
             $scope.images.splice(index, 1);
           })
           .catch(function error(err) {
-            Notifications.error('Failure', err, 'Unable to remove image');
+            Notifications.error('失败', err, '无法删除镜像');
           })
           .finally(function final() {
             --actionCount;
@@ -145,7 +145,7 @@ angular.module('portainer.docker').controller('ImagesController', [
           $scope.offlineMode = EndpointProvider.offlineMode();
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve images');
+          Notifications.error('失败', err, '无法检索镜像');
           $scope.images = [];
         });
     }

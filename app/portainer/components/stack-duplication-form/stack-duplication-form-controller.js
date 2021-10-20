@@ -34,7 +34,7 @@ angular.module('portainer.app').controller('StackDuplicationFormController', [
 
     function duplicateStack() {
       if (!ctrl.formValues.newName) {
-        Notifications.error('Failure', null, 'Stack name is required for duplication');
+        Notifications.error('失败', null, '复制需要堆栈名称');
         return;
       }
       ctrl.state.duplicationInProgress = true;

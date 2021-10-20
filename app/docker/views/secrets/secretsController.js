@@ -14,7 +14,7 @@ angular.module('portainer.docker').controller('SecretsController', [
             $scope.secrets.splice(index, 1);
           })
           .catch(function error(err) {
-            Notifications.error('Failure', err, 'Unable to remove secret');
+            Notifications.error('失败', err, 'Unable to remove secret');
           })
           .finally(function final() {
             --actionCount;
@@ -34,7 +34,7 @@ angular.module('portainer.docker').controller('SecretsController', [
         })
         .catch(function error(err) {
           $scope.secrets = [];
-          Notifications.error('Failure', err, 'Unable to retrieve secrets');
+          Notifications.error('失败', err, 'Unable to retrieve secrets');
         });
     }
 

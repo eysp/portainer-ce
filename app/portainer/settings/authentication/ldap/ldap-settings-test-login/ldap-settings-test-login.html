@@ -1,17 +1,17 @@
 <div class="col-sm-12 form-section-title">
-  Test login
+  测试登录
 </div>
 <div class="form-inline">
   <div class="form-group" style="margin: 0;">
     <label for="ldap_test_username" style="font-size: 0.9em; margin-right: 5px;">
-      Username
+      用户名
     </label>
     <input type="text" class="form-control" id="ldap_test_username" ng-model="$ctrl.username" limited-feature-dir="{{::$ctrl.limitedFeatureId}}" limited-feature-tabindex="-1" />
   </div>
 
   <div class="form-group" style="margin: 0;">
     <label for="ldap_test_password" style="font-size: 0.9em; margin-right: 5px;">
-      Password
+      密码
     </label>
     <input
       type="password"
@@ -34,8 +34,8 @@
       limited-feature-disabled
       limited-feature-tabindex="-1"
     >
-      <span ng-if="$ctrl.state.testStatus !== $ctrl.TEST_STATUS.LOADING">Test</span>
-      <span ng-if="$ctrl.state.testStatus === $ctrl.TEST_STATUS.LOADING">Testing...</span>
+      <span ng-if="$ctrl.state.testStatus !== $ctrl.TEST_STATUS.LOADING">测试</span>
+      <span ng-if="$ctrl.state.testStatus === $ctrl.TEST_STATUS.LOADING">测试中...</span>
     </button>
     <i ng-if="$ctrl.state.testStatus === $ctrl.TEST_STATUS.SUCCESS" class="fa fa-check green-icon"></i>
     <i ng-if="$ctrl.state.testStatus === $ctrl.TEST_STATUS.FAILURE" class="fa fa-times red-icon"></i>

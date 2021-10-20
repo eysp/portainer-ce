@@ -1,6 +1,6 @@
 <rd-header>
-  <rd-header-title title-text="Docker features configuration"></rd-header-title>
-  <rd-header-content>Docker configuration</rd-header-content>
+  <rd-header-title title-text="Docker 功能配置"></rd-header-title>
+  <rd-header-content>Docker 配置</rd-header-content>
 </rd-header>
 
 <div class="row">
@@ -9,12 +9,12 @@
       <rd-widget-body>
         <form class="form-horizontal" name="$ctrl.form">
           <div class="col-sm-12 form-section-title">
-            Host and Filesystem
+            主机和文件系统
           </div>
           <div ng-if="!$ctrl.isAgent" class="form-group">
             <span class="col-sm-12 text-muted small">
               <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-              These features are only available for an Agent enabled environments.
+              这些功能仅适用于启用了代理的环境。
             </span>
           </div>
           <div class="form-group">
@@ -22,8 +22,8 @@
               <por-switch-field
                 ng-model="$ctrl.formValues.enableHostManagementFeatures"
                 name="enableHostManagementFeatures"
-                label="Enable host management features"
-                tooltip="Enable host management features: host system browsing and advanced host details."
+                label="启用主机管理功能"
+                tooltip="启用主机管理功能：主机系统浏览和高级主机详细信息。"
                 disabled="!$ctrl.isAgent"
                 label-class="col-sm-7 col-lg-4"
               ></por-switch-field>
@@ -34,8 +34,8 @@
               <por-switch-field
                 ng-model="$ctrl.formValues.allowVolumeBrowserForRegularUsers"
                 name="allowVolumeBrowserForRegularUsers"
-                label="Enable volume management for non-administrators"
-                tooltip="When enabled, regular users will be able to use Portainer volume management features."
+                label="为非管理员启用存储卷管理"
+                tooltip="启用后，普通用户将能够使用 Portainer 存储卷管理功能。"
                 disabled="!$ctrl.isAgent"
                 label-class="col-sm-7 col-lg-4"
               ></por-switch-field>
@@ -43,15 +43,15 @@
           </div>
           <!-- security -->
           <div class="col-sm-12 form-section-title">
-            Docker Security Settings
+            Docker 安全设定
           </div>
           <div class="form-group">
             <div class="col-sm-12">
               <por-switch-field
                 ng-model="$ctrl.formValues.disableBindMountsForRegularUsers"
                 name="disableBindMountsForRegularUsers"
-                label="Disable bind mounts for non-administrators"
-                tooltip="When enabled, regular users will not be able to use bind mounts when creating containers."
+                label="为非管理员禁用绑定挂载"
+                tooltip="启用后，普通用户在创建容器时将无法使用绑定安装。"
                 label-class="col-sm-7 col-lg-4"
               ></por-switch-field>
             </div>
@@ -61,8 +61,8 @@
               <por-switch-field
                 ng-model="$ctrl.formValues.disablePrivilegedModeForRegularUsers"
                 name="disablePrivilegedModeForRegularUsers"
-                label="Disable privileged mode for non-administrators"
-                tooltip="When enabled, regular users will not be able to use privileged mode when creating containers."
+                label="为非管理员禁用特权模式"
+                tooltip="启用后，普通用户在创建容器时将无法使用特权模式。."
                 label-class="col-sm-7 col-lg-4"
               ></por-switch-field>
             </div>
@@ -72,8 +72,8 @@
               <por-switch-field
                 ng-model="$ctrl.formValues.disableHostNamespaceForRegularUsers"
                 name="disableHostNamespaceForRegularUsers"
-                label="Disable the use of host PID 1 for non-administrators"
-                tooltip="Prevent users from accessing the host filesystem through the host PID namespace."
+                label="禁止非管理员使用主机 PID 1"
+                tooltip="防止用户通过主机 PID 命名空间访问主机文件系统。"
                 label-class="col-sm-7 col-lg-4"
               ></por-switch-field>
             </div>
@@ -83,7 +83,7 @@
               <por-switch-field
                 ng-model="$ctrl.formValues.disableStackManagementForRegularUsers"
                 name="disableStackManagementForRegularUsers"
-                label="Disable the use of Stacks for non-administrators"
+                label="禁止非管理员使用堆栈"
                 label-class="col-sm-7 col-lg-4"
               ></por-switch-field>
             </div>
@@ -93,7 +93,7 @@
               <por-switch-field
                 ng-model="$ctrl.formValues.disableDeviceMappingForRegularUsers"
                 name="disableDeviceMappingForRegularUsers"
-                label="Disable device mappings for non-administrators"
+                label="为非管理员禁用设备映射"
                 label-class="col-sm-7 col-lg-4"
               ></por-switch-field>
             </div>
@@ -103,7 +103,7 @@
               <por-switch-field
                 ng-model="$ctrl.formValues.disableContainerCapabilitiesForRegularUsers"
                 name="disableContainerCapabilitiesForRegularUsers"
-                label="Disable container capabilities for non-administrators"
+                label="为非管理员禁用容器功能"
                 label-class="col-sm-7 col-lg-4"
               ></por-switch-field>
             </div>
@@ -113,7 +113,7 @@
               <por-switch-field
                 ng-model="$ctrl.formValues.disableSysctlSettingForRegularUsers"
                 name="disableSysctlSettingForRegularUsers"
-                label="Disable sysctl settings for non-administrators"
+                label="禁用非管理员的 sysctl 设置"
                 label-class="col-sm-7 col-lg-4"
               ></por-switch-field>
             </div>
@@ -122,20 +122,20 @@
           <div class="form-group" ng-if="$ctrl.isContainerEditDisabled()">
             <span class="col-sm-12 text-muted small">
               <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-              Note: The recreate/duplicate/edit feature is currently disabled (for non-admin users) by one or more security settings.
+              注意：重建/复制/编辑功能当前被一项或多项安全设置禁用（对于非管理员用户）。
             </span>
           </div>
           <!-- !security -->
 
           <!-- actions -->
           <div class="col-sm-12 form-section-title">
-            Actions
+            操作
           </div>
           <div class="form-group">
             <div class="col-sm-12">
               <button type="button" class="btn btn-primary btn-sm" ng-click="$ctrl.save()" ng-disabled="$ctrl.state.actionInProgress" button-spinner="$ctrl.state.actionInProgress">
-                <span ng-hide="$ctrl.state.actionInProgress">Save configuration</span>
-                <span ng-show="$ctrl.state.actionInProgress">Saving...</span>
+                <span ng-hide="$ctrl.state.actionInProgress">保存配置</span>
+                <span ng-show="$ctrl.state.actionInProgress">保存中...</span>
               </button>
             </div>
           </div>

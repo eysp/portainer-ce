@@ -1,6 +1,6 @@
 <rd-header>
-  <rd-header-title title-text="Create config"></rd-header-title>
-  <rd-header-content> <a ui-sref="docker.configs">Configs</a> &gt; Add config </rd-header-content>
+  <rd-header-title title-text="创建配置"></rd-header-title>
+  <rd-header-content> <a ui-sref="docker.configs">配置</a> &gt; 添加配置 </rd-header-content>
 </rd-header>
 
 <div class="row">
@@ -10,9 +10,9 @@
         <form class="form-horizontal">
           <!-- name-input -->
           <div class="form-group">
-            <label for="config_name" class="col-sm-1 control-label text-left">Name</label>
+            <label for="config_name" class="col-sm-1 control-label text-left">名称</label>
             <div class="col-sm-11">
-              <input type="text" class="form-control" ng-model="ctrl.formValues.Name" id="config_name" placeholder="e.g. myConfig" />
+              <input type="text" class="form-control" ng-model="ctrl.formValues.Name" id="config_name" placeholder="例如 myConfig" />
             </div>
           </div>
           <!-- !name-input -->
@@ -21,7 +21,7 @@
             <div class="col-sm-12" ng-if="ctrl.formValues.displayCodeEditor">
               <code-editor
                 identifier="config-creation-editor"
-                placeholder="Define or paste the content of your config here"
+                placeholder="在此处定义或粘贴您的配置内容"
                 yml="false"
                 on-change="(ctrl.editorUpdate)"
                 value="ctrl.formValues.Data"
@@ -32,21 +32,21 @@
           <!-- labels -->
           <div class="form-group">
             <div class="col-sm-12" style="margin-top: 5px;">
-              <label class="control-label text-left">Labels</label>
+              <label class="control-label text-left">标签</label>
               <span class="label label-default interactive" style="margin-left: 10px;" ng-click="ctrl.addLabel()">
-                <i class="fa fa-plus-circle" aria-hidden="true"></i> add label
+                <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加标签
               </span>
             </div>
             <!-- labels-input-list -->
             <div class="col-sm-12 form-inline" style="margin-top: 10px;">
               <div ng-repeat="label in ctrl.formValues.Labels" style="margin-top: 2px;">
                 <div class="input-group col-sm-5 input-group-sm">
-                  <span class="input-group-addon">name</span>
-                  <input type="text" class="form-control" ng-model="label.name" placeholder="e.g. com.example.foo" />
+                  <span class="input-group-addon">名称</span>
+                  <input type="text" class="form-control" ng-model="label.name" placeholder="例如 com.example.foo" />
                 </div>
                 <div class="input-group col-sm-5 input-group-sm">
                   <span class="input-group-addon">value</span>
-                  <input type="text" class="form-control" ng-model="label.value" placeholder="e.g. bar" />
+                  <input type="text" class="form-control" ng-model="label.value" placeholder="例如 bar" />
                 </div>
                 <button class="btn btn-sm btn-danger" type="button" ng-click="ctrl.removeLabel($index)">
                   <i class="fa fa-trash" aria-hidden="true"></i>
@@ -61,11 +61,11 @@
           <!-- !access-control -->
           <!-- actions -->
           <div class="col-sm-12 form-section-title">
-            Actions
+            操作
           </div>
           <div class="form-group">
             <div class="col-sm-12">
-              <button type="button" class="btn btn-primary btn-sm" ng-disabled="!ctrl.formValues.Name" ng-click="ctrl.create()">Create config</button>
+              <button type="button" class="btn btn-primary btn-sm" ng-disabled="!ctrl.formValues.Name" ng-click="ctrl.create()">创建配置</button>
               <span class="text-danger" ng-if="ctrl.state.formValidationError" style="margin-left: 5px;">{{ ctrl.state.formValidationError }}</span>
             </div>
           </div>

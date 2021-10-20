@@ -118,7 +118,7 @@ function EndpointController(
       $scope.availableTags = $scope.availableTags.concat(tag);
       $scope.endpoint.TagIds = $scope.endpoint.TagIds.concat(tag.Id);
     } catch (err) {
-      Notifications.error('Failue', err, 'Unable to create tag');
+      Notifications.error('Failue', err, '无法创建标签');
     }
   }
 
@@ -139,7 +139,7 @@ function EndpointController(
       Notifications.success('Environment de-associated', $scope.endpoint.Name);
       $state.reload();
     } catch (err) {
-      Notifications.error('Failure', err, 'Unable to de-associate environment');
+      Notifications.error('失败', err, 'Unable to de-associate environment');
     } finally {
       $scope.state.actionInProgress = false;
     }
@@ -195,7 +195,7 @@ function EndpointController(
         $state.go('portainer.endpoints', {}, { reload: true });
       },
       function error(err) {
-        Notifications.error('Failure', err, 'Unable to update environment');
+        Notifications.error('失败', err, 'Unable to update environment');
         $scope.state.actionInProgress = false;
       },
       function update(evt) {
@@ -275,7 +275,7 @@ function EndpointController(
 
         configureState();
       } catch (err) {
-        Notifications.error('Failure', err, 'Unable to retrieve environment details');
+        Notifications.error('失败', err, 'Unable to retrieve environment details');
       }
     });
   }

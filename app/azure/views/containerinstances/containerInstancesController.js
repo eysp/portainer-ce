@@ -14,7 +14,7 @@ angular.module('portainer.azure').controller('AzureContainerInstancesController'
           $scope.containerGroups = AzureService.aggregate(data);
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to load container groups');
+          Notifications.error('失败', err, 'Unable to load container groups');
         });
     }
 
@@ -28,7 +28,7 @@ angular.module('portainer.azure').controller('AzureContainerInstancesController'
             $scope.containerGroups.splice(index, 1);
           })
           .catch(function error(err) {
-            Notifications.error('Failure', err, 'Unable to remove container group');
+            Notifications.error('失败', err, '无法删除容器 group');
           })
           .finally(function final() {
             --actionCount;

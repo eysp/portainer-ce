@@ -122,7 +122,7 @@ export default class AccessViewerController {
       this.teams = _.keyBy(await this.TeamService.teams(), 'Id');
       this.teamMemberships = await this.TeamMembershipService.memberships();
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve accesses');
+      this.Notifications.error('失败', err, '无法检索访问');
     }
   }
 }

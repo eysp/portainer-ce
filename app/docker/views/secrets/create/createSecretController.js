@@ -85,7 +85,7 @@ angular.module('portainer.docker').controller('CreateSecretController', [
           $state.go('docker.secrets', {}, { reload: true });
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to create secret');
+          Notifications.error('失败', err, 'Unable to create secret');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;

@@ -179,9 +179,9 @@ class KubernetesNodeController {
     for (const pod of pods) {
       try {
         await this.KubernetesPodService.eviction(pod);
-        this.Notifications.success('Pod successfully evicted', pod.Name);
+        this.Notifications.success('Pod 成功驱逐', pod.Name);
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to evict pod');
+        this.Notifications.error('失败', err, '无法驱逐 pod');
         this.formValues.Availability = this.availabilities.PAUSE;
         await this.KubernetesNodeService.patch(this.node, this.formValues);
       } finally {
@@ -238,7 +238,7 @@ class KubernetesNodeController {
         });
       }
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve environments');
+      this.Notifications.error('失败', err, '无法检索环境');
     }
   }
 
@@ -252,10 +252,10 @@ class KubernetesNodeController {
       if (this.formValues.Availability === 'Drain') {
         await this.drainNode();
       }
-      this.Notifications.success('Node updated successfully');
+      this.Notifications.success('节点更新成功');
       this.$state.reload(this.$state.current);
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to update node');
+      this.Notifications.error('失败', err, '无法更新节点');
     }
   }
 
@@ -267,7 +267,7 @@ class KubernetesNodeController {
 
     if (taintsWarning && !labelsWarning) {
       this.ModalService.confirmUpdate(
-        'Changes to taints will immediately deschedule applications running on this node without the corresponding tolerations. Do you wish to continue?',
+        '对污点的更改将立即取消调度在此节点上运行的应用程序，而没有相应的容忍度。 你想继续吗？',
         (confirmed) => {
           if (confirmed) {
             return this.$async(this.updateNodeAsync);
@@ -276,7 +276,7 @@ class KubernetesNodeController {
       );
     } else if (!taintsWarning && labelsWarning) {
       this.ModalService.confirmUpdate(
-        'Removing or changing a label that is used might prevent applications from being scheduled on this node in the future. Do you wish to continue?',
+        '删除或更改使用的标签可能会阻止应用程序将来在此节点上调度。 你想继续吗？',
         (confirmed) => {
           if (confirmed) {
             return this.$async(this.updateNodeAsync);
@@ -285,7 +285,7 @@ class KubernetesNodeController {
       );
     } else if (taintsWarning && labelsWarning) {
       this.ModalService.confirmUpdate(
-        'Changes to taints will immediately deschedule applications running on this node without the corresponding tolerations.<br/></br/>Removing or changing a label that is used might prevent applications from scheduling on this node in the future.\n\nDo you wish to continue?',
+        '对污点的更改将立即取消在此节点上运行的应用程序的调度，而没有相应的容忍度。<br/></br/>删除或更改所使用的标签可能会阻止应用程序将来在此节点上调度。\n\n您是吗？ 想继续吗？',
         (confirmed) => {
           if (confirmed) {
             return this.$async(this.updateNodeAsync);
@@ -294,7 +294,7 @@ class KubernetesNodeController {
       );
     } else if (cordonWarning) {
       this.ModalService.confirmUpdate(
-        'Marking this node as unschedulable will effectively cordon the node and prevent any new workload from being scheduled on that node. Are you sure?',
+        '将此节点标记为不可调度将有效地封锁该节点并防止在该节点上调度任何新的工作负载。 你确定吗？',
         (confirmed) => {
           if (confirmed) {
             return this.$async(this.updateNodeAsync);
@@ -303,7 +303,7 @@ class KubernetesNodeController {
       );
     } else if (drainWarning) {
       this.ModalService.confirmUpdate(
-        'Draining this node will cause all workloads to be evicted from that node. This might lead to some service interruption. Are you sure?',
+        '耗尽此节点将导致所有工作负载从该节点驱逐。 这可能会导致某些服务中断。 你确定吗？',
         (confirmed) => {
           if (confirmed) {
             return this.$async(this.updateNodeAsync);
@@ -323,7 +323,7 @@ class KubernetesNodeController {
       this.node = _.find(this.nodes, { Name: nodeName });
       this.state.isDrainOperation = _.find(this.nodes, { Availability: this.availabilities.DRAIN });
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve node');
+      this.Notifications.error('失败', err, '无法检索节点');
     } finally {
       this.state.dataLoading = false;
     }
@@ -345,7 +345,7 @@ class KubernetesNodeController {
       this.resourceUsage.CPU = KubernetesResourceReservationHelper.parseCPU(node.usage.cpu);
       this.resourceUsage.Memory = KubernetesResourceReservationHelper.megaBytesValue(node.usage.memory);
     } catch (err) {
-      this.Notifications.error('Failure', 'Unable to retrieve node resource usage', err);
+      this.Notifications.error('失败', '无法检索节点资源使用情况', err);
     }
   }
 
@@ -364,7 +364,7 @@ class KubernetesNodeController {
       this.events = events.filter((item) => item.Involved.kind === 'Node');
       this.state.eventWarningCount = KubernetesEventHelper.warningCount(this.events);
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve node events');
+      this.Notifications.error('失败', err, '无法检索节点事件');
     } finally {
       this.state.eventsLoading = false;
     }
@@ -406,7 +406,7 @@ class KubernetesNodeController {
         await this.getNodeUsage();
       }
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve applications');
+      this.Notifications.error('失败', err, '无法检索应用程序');
     } finally {
       this.state.applicationsLoading = false;
     }

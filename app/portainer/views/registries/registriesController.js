@@ -22,7 +22,7 @@ angular.module('portainer.app').controller('RegistriesController', [
     $scope.removeAction = function (selectedItems) {
       const regAttrMsg = selectedItems.length > 1 ? 'hese' : 'his';
       const registriesMsg = selectedItems.length > 1 ? 'registries' : 'registry';
-      const msg = `T${regAttrMsg} ${registriesMsg} might be used by applications inside one or more environments. Removing the ${registriesMsg} could lead to a service interruption for the applications using t${regAttrMsg} ${registriesMsg}. Do you want to remove the selected ${registriesMsg}?`;
+      const msg = `T${regAttrMsg} ${registriesMsg}可能被一个或多个环境中的应用程序使用。 删除 ${registriesMsg} 可能会导致使用 t${regAttrMsg} ${registriesMsg}的应用程序的服务中断。 您要删除选定的 ${registriesMsg}吗？`;
 
       ModalService.confirmDeletion(msg, function onConfirm(confirmed) {
         if (!confirmed) {
@@ -37,12 +37,12 @@ angular.module('portainer.app').controller('RegistriesController', [
       angular.forEach(selectedItems, function (registry) {
         RegistryService.deleteRegistry(registry.Id)
           .then(function success() {
-            Notifications.success('Registry successfully removed', registry.Name);
+            Notifications.success('注册表已成功删除', registry.Name);
             var index = $scope.registries.indexOf(registry);
             $scope.registries.splice(index, 1);
           })
           .catch(function error(err) {
-            Notifications.error('Failure', err, 'Unable to remove registry');
+            Notifications.error('失败', err, '无法删除注册表');
           })
           .finally(function final() {
             --actionCount;
@@ -62,7 +62,7 @@ angular.module('portainer.app').controller('RegistriesController', [
         })
         .catch(function error(err) {
           $scope.registries = [];
-          Notifications.error('Failure', err, 'Unable to retrieve registries');
+          Notifications.error('失败', err, '无法检索注册表');
         });
     }
 

@@ -1,7 +1,7 @@
 <div>
   <div class="form-group">
     <label for="stack_template" class="col-sm-1 control-label text-left">
-      Template
+      模板
     </label>
     <div class="col-sm-11">
       <select
@@ -13,14 +13,14 @@
       >
         <option value="" label="Select a Custom template" disabled selected="selected"> </option>
       </select>
-      <span ng-if="!$ctrl.templates.length"> No custom templates are available. Head over to the <a ui-state="$ctrl.newTemplatePath">custom template view</a> to create one. </span>
+      <span ng-if="!$ctrl.templates.length"> 没有可用的自定义模板。 前往<a ui-state="$ctrl.newTemplatePath">自定义模板视图</a> 创建一个。 </span>
     </div>
   </div>
 
   <!-- description -->
   <div ng-if="$ctrl.selectedTemplate.note">
     <div class="col-sm-12 form-section-title">
-      Information
+      信息
     </div>
     <div class="form-group">
       <div class="col-sm-12">

@@ -11,7 +11,7 @@ angular.module('portainer.integrations.storidge').controller('StoridgeProfileSel
           ctrl.profiles = data;
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve Storidge profiles');
+          Notifications.error('失败', err, 'Unable to retrieve Storidge profiles');
         });
     }
   },

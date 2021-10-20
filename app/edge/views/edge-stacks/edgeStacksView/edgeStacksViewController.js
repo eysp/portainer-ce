@@ -31,7 +31,7 @@ export class EdgeStacksViewController {
         this.Notifications.success('Stack successfully removed', stack.Name);
         _.remove(this.stacks, stack);
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to remove stack ' + stack.Name);
+        this.Notifications.error('失败', err, 'Unable to remove stack ' + stack.Name);
       }
     }
 
@@ -43,7 +43,7 @@ export class EdgeStacksViewController {
       this.stacks = await this.EdgeStackService.stacks();
     } catch (err) {
       this.stacks = [];
-      this.Notifications.error('Failure', err, 'Unable to retrieve stacks');
+      this.Notifications.error('失败', err, 'Unable to retrieve stacks');
     }
   }
 }

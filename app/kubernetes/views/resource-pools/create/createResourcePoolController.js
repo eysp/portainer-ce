@@ -122,10 +122,10 @@ class KubernetesCreateResourcePoolController {
         this.checkDefaults();
         this.formValues.Owner = this.Authentication.getUserDetails().username;
         await this.KubernetesResourcePoolService.create(this.formValues);
-        this.Notifications.success('Namespace successfully created', this.formValues.Name);
+        this.Notifications.success('Namespace 已成功创建', this.formValues.Name);
         this.$state.go('kubernetes.resourcePools');
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to create namespace');
+        this.Notifications.error('失败', err, '无法创建 namespace');
       } finally {
         this.state.actionInProgress = false;
       }
@@ -139,7 +139,7 @@ class KubernetesCreateResourcePoolController {
       try {
         this.allIngresses = await this.KubernetesIngressService.get();
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to retrieve ingresses.');
+        this.Notifications.error('失败', err, '无法检索入口。');
       }
     });
   }
@@ -151,7 +151,7 @@ class KubernetesCreateResourcePoolController {
       try {
         this.resourcePools = await this.KubernetesResourcePoolService.get();
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to retrieve namespaces');
+        this.Notifications.error('失败', err, '无法检索 namespaces');
       }
     });
   }
@@ -163,7 +163,7 @@ class KubernetesCreateResourcePoolController {
       try {
         this.registries = await this.EndpointService.registries(this.endpoint.Id);
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to retrieve registries');
+        this.Notifications.error('失败', err, '无法检索注册表');
       }
     });
   }
@@ -213,7 +213,7 @@ class KubernetesCreateResourcePoolController {
 
         await this.getRegistries();
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to load view data');
+        this.Notifications.error('失败', err, '无法加载视图数据');
       } finally {
         this.state.viewReady = true;
       }

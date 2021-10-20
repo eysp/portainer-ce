@@ -49,7 +49,7 @@ class KubernetesClusterController {
         });
       }
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve environments');
+      this.Notifications.error('失败', err, 'Unable to retrieve environments');
     }
   }
 
@@ -65,7 +65,7 @@ class KubernetesClusterController {
       this.CPULimit = _.reduce(this.nodes, (acc, node) => node.CPU + acc, 0);
       this.MemoryLimit = _.reduce(this.nodes, (acc, node) => KubernetesResourceReservationHelper.megaBytesValue(node.Memory) + acc, 0);
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve nodes');
+      this.Notifications.error('失败', err, 'Unable to retrieve nodes');
     }
   }
 
@@ -95,7 +95,7 @@ class KubernetesClusterController {
         await this.getResourceUsage(this.endpoint.Id);
       }
     } catch (err) {
-      this.Notifications.error('Failure', 'Unable to retrieve applications', err);
+      this.Notifications.error('失败', 'Unable to retrieve applications', err);
     } finally {
       this.state.applicationsLoading = false;
     }
@@ -116,7 +116,7 @@ class KubernetesClusterController {
       }, new KubernetesResourceReservation());
       this.resourceUsage = clusterResourceUsage;
     } catch (err) {
-      this.Notifications.error('Failure', 'Unable to retrieve cluster resource usage', err);
+      this.Notifications.error('失败', 'Unable to retrieve cluster resource usage', err);
     }
   }
 
