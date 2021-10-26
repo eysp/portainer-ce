@@ -16,7 +16,7 @@ angular.module('portainer.docker').factory('SecretService', [
           deferred.resolve(secret);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve secret details', err: err });
+          deferred.reject({ msg: '无法检索secret详细信息', err: err });
         });
 
       return deferred.promise;
@@ -33,7 +33,7 @@ angular.module('portainer.docker').factory('SecretService', [
           deferred.resolve(secrets);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve secrets', err: err });
+          deferred.reject({ msg: '无法检索secrets', err: err });
         });
 
       return deferred.promise;
@@ -51,7 +51,7 @@ angular.module('portainer.docker').factory('SecretService', [
           }
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to remove secret', err: err });
+          deferred.reject({ msg: '无法删除secret', err: err });
         });
 
       return deferred.promise;

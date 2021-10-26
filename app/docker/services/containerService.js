@@ -48,13 +48,13 @@ angular.module('portainer.docker').factory('ContainerService', [
         Container.resize({}, { id: id, height: height, width: width })
           .$promise.then(function success(data) {
             if (data.message) {
-              deferred.reject({ msg: 'Unable to resize tty of container ' + id, err: data.message });
+              deferred.reject({ msg: '无法调整容器的tty大小 ' + id, err: data.message });
             } else {
               deferred.resolve(data);
             }
           })
           .catch(function error(err) {
-            deferred.reject({ msg: 'Unable to resize tty of container ' + id, err: err });
+            deferred.reject({ msg: '无法调整容器的tty大小 ' + id, err: err });
           });
       }, timeout);
 
@@ -102,7 +102,7 @@ angular.module('portainer.docker').factory('ContainerService', [
           deferred.resolve(data);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to create container', err: err });
+          deferred.reject({ msg: '无法创建容器r', err: err });
         });
       return deferred.promise;
     };

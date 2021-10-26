@@ -22,7 +22,7 @@ angular.module('portainer.docker').factory('ServiceService', [
           deferred.resolve(services);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve services', err: err });
+          deferred.reject({ msg: '无法检索服务', err: err });
         });
 
       return deferred.promise;
@@ -37,7 +37,7 @@ angular.module('portainer.docker').factory('ServiceService', [
           deferred.resolve(service);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve service details', err: err });
+          deferred.reject({ msg: '无法检索服务详细信息', err: err });
         });
 
       return deferred.promise;
@@ -55,7 +55,7 @@ angular.module('portainer.docker').factory('ServiceService', [
           }
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to remove service', err: err });
+          deferred.reject({ msg: '无法删除服务', err: err });
         });
 
       return deferred.promise;

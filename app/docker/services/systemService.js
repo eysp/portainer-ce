@@ -16,7 +16,7 @@ angular.module('portainer.docker').factory('SystemService', [
           deferred.resolve(plugins);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve plugins information from system', err: err });
+          deferred.reject({ msg: '无法从系统中检索插件信息', err: err });
         });
       return deferred.promise;
     };
@@ -44,7 +44,7 @@ angular.module('portainer.docker').factory('SystemService', [
           deferred.resolve(events);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve engine events', err: err });
+          deferred.reject({ msg: '无法检索引擎事件', err: err });
         });
 
       return deferred.promise;

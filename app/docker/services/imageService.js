@@ -27,7 +27,7 @@ angular.module('portainer.docker').factory('ImageService', [
           }
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve image details', err: err });
+          deferred.reject({ msg: '无法检索镜像详细信息', err: err });
         });
       return deferred.promise;
     };
@@ -56,7 +56,7 @@ angular.module('portainer.docker').factory('ImageService', [
           deferred.resolve(images);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve images', err: err });
+          deferred.reject({ msg: '无法检索镜像', err: err });
         });
       return deferred.promise;
     };
@@ -78,7 +78,7 @@ angular.module('portainer.docker').factory('ImageService', [
           }
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve image details', err: err });
+          deferred.reject({ msg: '无法检索镜像详细信息', err: err });
         });
       return deferred.promise;
     };
@@ -105,7 +105,7 @@ angular.module('portainer.docker').factory('ImageService', [
           }
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to push image tag', err: err });
+          deferred.reject({ msg: '无法推送镜像标记', err: err });
         });
       return deferred.promise;
     }

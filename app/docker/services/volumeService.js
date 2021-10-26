@@ -19,7 +19,7 @@ angular.module('portainer.docker').factory('VolumeService', [
           deferred.resolve(volumes);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve volumes', err: err });
+          deferred.reject({ msg: '无法检索存储卷', err: err });
         });
       return deferred.promise;
     };
@@ -32,7 +32,7 @@ angular.module('portainer.docker').factory('VolumeService', [
           deferred.resolve(volume);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve volume details', err: err });
+          deferred.reject({ msg: '无法检索存储卷详细信息', err: err });
         });
       return deferred.promise;
     };
@@ -53,7 +53,7 @@ angular.module('portainer.docker').factory('VolumeService', [
           }
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to remove volume', err: err });
+          deferred.reject({ msg: '无法删除存储卷', err: err });
         });
 
       return deferred.promise;
@@ -80,7 +80,7 @@ angular.module('portainer.docker').factory('VolumeService', [
           }
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to create volume', err: err });
+          deferred.reject({ msg: '无法创建存储卷', err: err });
         });
       return deferred.promise;
     };

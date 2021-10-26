@@ -16,7 +16,7 @@ angular.module('portainer.docker').factory('ConfigService', [
           deferred.resolve(config);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve config details', err: err });
+          deferred.reject({ msg: '无法检索配置详细信息', err: err });
         });
 
       return deferred.promise;
@@ -33,7 +33,7 @@ angular.module('portainer.docker').factory('ConfigService', [
           deferred.resolve(configs);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve configs', err: err });
+          deferred.reject({ msg: '无法检索配置', err: err });
         });
 
       return deferred.promise;
@@ -51,7 +51,7 @@ angular.module('portainer.docker').factory('ConfigService', [
           }
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to remove config', err: err });
+          deferred.reject({ msg: '无法删除配置文件', err: err });
         });
 
       return deferred.promise;
