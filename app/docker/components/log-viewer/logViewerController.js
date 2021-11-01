@@ -8,10 +8,10 @@ angular.module('portainer.docker').controller('LogViewerController', [
   function (clipboard, Blob, FileSaver) {
     this.state = {
       availableSinceDatetime: [
-        { desc: 'Last day', value: moment().subtract(1, 'days').format() },
-        { desc: 'Last 4 hours', value: moment().subtract(4, 'hours').format() },
-        { desc: 'Last hour', value: moment().subtract(1, 'hours').format() },
-        { desc: 'Last 10 minutes', value: moment().subtract(10, 'minutes').format() },
+        { desc: '最近一天', value: moment().subtract(1, 'days').format() },
+        { desc: '最近4小时', value: moment().subtract(4, 'hours').format() },
+        { desc: '最近1小时', value: moment().subtract(1, 'hours').format() },
+        { desc: '最近10分钟', value: moment().subtract(10, 'minutes').format() },
       ],
       copySupported: clipboard.supported,
       logCollection: true,

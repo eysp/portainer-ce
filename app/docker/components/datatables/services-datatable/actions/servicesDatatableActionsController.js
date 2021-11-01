@@ -14,11 +14,11 @@ angular.module('portainer.docker').controller('ServicesDatatableActionsControlle
       config.Mode.Replicated.Replicas = service.Replicas;
       ServiceService.update(service, config)
         .then(function success() {
-          Notifications.success('Service successfully scaled', 'New replica count: ' + service.Replicas);
+          Notifications.success('服务已成功扩展', '新副本数: ' + service.Replicas);
           $state.reload();
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, 'Unable to scale service');
+          Notifications.error('失败', err, '无法扩展服务');
           service.Scale = false;
           service.Replicas = service.ReplicaCount;
         });
@@ -26,7 +26,7 @@ angular.module('portainer.docker').controller('ServicesDatatableActionsControlle
 
     this.removeAction = function (selectedItems) {
       ModalService.confirmDeletion(
-        'Do you want to remove the selected service(s)? All the containers associated to the selected service(s) will be removed too.',
+        '您要删除选定的服务吗？ 与所选服务关联的所有容器也将被删除。',
         function onConfirm(confirmed) {
           if (!confirmed) {
             return;
@@ -38,7 +38,7 @@ angular.module('portainer.docker').controller('ServicesDatatableActionsControlle
 
     this.updateAction = function (selectedItems) {
       ModalService.confirmServiceForceUpdate(
-        'Do you want to force an update of the selected service(s)? All the tasks associated to the selected service(s) will be recreated.',
+        '是否要强制更新所选服务？ 将重新创建与所选服务关联的所有任务。',
         function (result) {
           if (!result) {
             return;
@@ -65,10 +65,10 @@ angular.module('portainer.docker').controller('ServicesDatatableActionsControlle
         config.TaskTemplate.ForceUpdate++;
         ServiceService.update(service, config)
           .then(function success() {
-            Notifications.success('Service successfully updated', service.Name);
+            Notifications.success('服务更新成功', service.Name);
           })
           .catch(function error(err) {
-            Notifications.error('失败', err, 'Unable to force update service', service.Name);
+            Notifications.error('失败', err, '无法强制更新服务', service.Name);
           })
           .finally(function final() {
             --actionCount;
@@ -90,10 +90,10 @@ angular.module('portainer.docker').controller('ServicesDatatableActionsControlle
             return $q.when(data.length !== 0 && WebhookService.deleteWebhook(data[0].Id));
           })
           .then(function success() {
-            Notifications.success('Service successfully removed', service.Name);
+            Notifications.success('服务已成功删除', service.Name);
           })
           .catch(function error(err) {
-            Notifications.error('失败', err, 'Unable to remove service');
+            Notifications.error('失败', err, '无法删除服务');
           })
           .finally(function final() {
             --actionCount;

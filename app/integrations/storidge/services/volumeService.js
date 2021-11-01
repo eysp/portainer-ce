@@ -16,7 +16,7 @@ angular.module('portainer.integrations.storidge').factory('StoridgeVolumeService
           deferred.resolve(volume);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve Storidge volume', err: err });
+          deferred.reject({ msg: '无法检索 Storridge 存储卷', err: err });
         });
 
       return deferred.promise;
@@ -30,7 +30,7 @@ angular.module('portainer.integrations.storidge').factory('StoridgeVolumeService
           deferred.resolve(data);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to update Storidge volume', err: err });
+          deferred.reject({ msg: '无法更新Storridge存储卷', err: err });
         });
 
       return deferred.promise;

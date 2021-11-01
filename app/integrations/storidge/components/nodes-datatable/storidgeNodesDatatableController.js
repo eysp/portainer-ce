@@ -16,7 +16,7 @@ angular.module('portainer.integrations.storidge').controller('StoridgeNodesDatat
           ctrl.addInfo = data.content;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, 'Unable to retrieve the "add node" command');
+          Notifications.error('失败', err, '无法检索“添加节点”命令');
         });
     };
 

@@ -15,7 +15,7 @@ export class EdgeJobsViewController {
   }
 
   removeAction(selectedItems) {
-    this.ModalService.confirmDeletion('Do you want to remove the selected edge job(s) ?', (confirmed) => {
+    this.ModalService.confirmDeletion('您要删除选定的边缘脚本吗？', (confirmed) => {
       if (!confirmed) {
         return;
       }

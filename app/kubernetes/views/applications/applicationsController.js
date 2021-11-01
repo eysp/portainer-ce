@@ -49,10 +49,10 @@ class KubernetesApplicationsController {
           }
         }
 
-        this.Notifications.success('Stack successfully removed', stack.Name);
+        this.Notifications.success('堆栈成功移除', stack.Name);
         _.remove(this.state.stacks, { Name: stack.Name });
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to remove stack');
+        this.Notifications.error('失败', err, '无法移除堆栈');
       } finally {
         --actionCount;
         if (actionCount === 0) {
@@ -64,7 +64,7 @@ class KubernetesApplicationsController {
 
   removeStacksAction(selectedItems) {
     this.ModalService.confirmDeletion(
-      'Are you sure that you want to remove the selected stack(s) ? This will remove all the applications associated to the stack(s).',
+      '您确定要删除选定的堆栈吗？ 这将删除与堆栈关联的所有应用程序。',
       (confirmed) => {
         if (confirmed) {
           return this.$async(this.removeStacksActionAsync, selectedItems);
@@ -90,11 +90,11 @@ class KubernetesApplicationsController {
             await this.StackService.remove({ Id: application.StackId }, false, this.endpoint.Id);
           }
         }
-        this.Notifications.success('Application successfully removed', application.Name);
+        this.Notifications.success('应用程序已成功删除', application.Name);
         const index = this.state.applications.indexOf(application);
         this.state.applications.splice(index, 1);
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to remove application');
+        this.Notifications.error('失败', err, '无法删除应用程序');
       } finally {
         --actionCount;
         if (actionCount === 0) {
@@ -105,7 +105,7 @@ class KubernetesApplicationsController {
   }
 
   removeAction(selectedItems) {
-    this.ModalService.confirmDeletion('Do you want to remove the selected application(s)?', (confirmed) => {
+    this.ModalService.confirmDeletion('您要删除选定的应用程序吗？', (confirmed) => {
       if (confirmed) {
         return this.$async(this.removeActionAsync, selectedItems);
       }
@@ -134,7 +134,7 @@ class KubernetesApplicationsController {
       this.state.stacks = KubernetesStackHelper.stacksFromApplications(applications);
       this.state.ports = KubernetesApplicationHelper.portMappingsFromApplications(applications);
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to retrieve applications');
+      this.Notifications.error('失败', err, '无法检索应用程序');
     }
   }
 

@@ -93,11 +93,11 @@ angular.module('portainer.docker').controller('VolumeStoridgeInfoController', [
       volume.Name = this.volume.Name;
       StoridgeVolumeService.update(volume)
         .then(function success() {
-          Notifications.success('Volume successfully updated');
+          Notifications.success('存储卷已成功更新');
           $state.reload();
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, 'Unable to update volume');
+          Notifications.error('失败', err, '无法更新存储卷');
           ctrl.state.isUpdating = false;
         });
     };

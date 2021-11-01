@@ -29,7 +29,7 @@ angular.module('portainer.app').factory('StackHelper', [
       try {
         yamlObject = YAML.parse(yaml);
       } catch (err) {
-        return 'There is an error in the yaml syntax: ' + err;
+        return 'yaml 语法有错误: ' + err;
       }
 
       const names = _.uniq(GenericHelper.findDeepAll(yamlObject, 'container_name'));
@@ -38,8 +38,8 @@ angular.module('portainer.app').factory('StackHelper', [
       if (duplicateContainers.length === 0) return;
 
       return (
-        (duplicateContainers.length === 1 ? 'This container name is' : 'These container names are') +
-        ' already used by another container running in this environment: ' +
+        (duplicateContainers.length === 1 ? '这个容器名称是' : '这些容器名称是') +
+        ' 已被在此环境中运行的另一个容器使用: ' +
         _.join(duplicateContainers, ', ') +
         '.'
       );

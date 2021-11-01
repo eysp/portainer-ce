@@ -30,7 +30,7 @@ angular.module('portainer.integrations.storidge').factory('StoridgeProfileServic
           deferred.resolve(profile);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve Storidge profile details', err: err });
+          deferred.reject({ msg: '无法检索 Storridge 个人资料详细信息', err: err });
         });
 
       return deferred.promise;
@@ -47,7 +47,7 @@ angular.module('portainer.integrations.storidge').factory('StoridgeProfileServic
           deferred.resolve(profiles);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve Storidge profiles', err: err });
+          deferred.reject({ msg: '无法检索 Storidge 个人资料', err: err });
         });
 
       return deferred.promise;

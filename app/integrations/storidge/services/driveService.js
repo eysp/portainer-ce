@@ -20,7 +20,7 @@ angular.module('portainer.integrations.storidge').factory('StoridgeDriveService'
           deferred.resolve(drives);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve Storidge drives', err: err });
+          deferred.reject({ msg: '无法检索存储驱动器', err: err });
         });
 
       return deferred.promise;
@@ -38,7 +38,7 @@ angular.module('portainer.integrations.storidge').factory('StoridgeDriveService'
           });
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve Storidge drive', err: err });
+          deferred.reject({ msg: '无法检索存储驱动器', err: err });
         });
 
       return deferred.promise;
@@ -52,7 +52,7 @@ angular.module('portainer.integrations.storidge').factory('StoridgeDriveService'
           deferred.resolve();
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to add Storidge drive', err: err });
+          deferred.reject({ msg: '无法添加存储驱动器', err: err });
         });
 
       return deferred.promise;
@@ -66,7 +66,7 @@ angular.module('portainer.integrations.storidge').factory('StoridgeDriveService'
           deferred.resolve();
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to remove Storidge drive', err: err });
+          deferred.reject({ msg: '无法移除存储驱动器', err: err });
         });
 
       return deferred.promise;

@@ -21,11 +21,11 @@ class KubernetesResourcePoolsController {
     for (const pool of selectedItems) {
       try {
         await this.KubernetesResourcePoolService.delete(pool);
-        this.Notifications.success('Namespace successfully removed', pool.Namespace.Name);
+        this.Notifications.success('Namespace 成功删除', pool.Namespace.Name);
         const index = this.resourcePools.indexOf(pool);
         this.resourcePools.splice(index, 1);
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to remove namespace');
+        this.Notifications.error('失败', err, '无法移除namespace');
       } finally {
         --actionCount;
         if (actionCount === 0) {
@@ -37,7 +37,7 @@ class KubernetesResourcePoolsController {
 
   removeAction(selectedItems) {
     this.ModalService.confirmDeletion(
-      'Do you want to remove the selected namespace(s)? All the resources associated to the selected namespace(s) will be removed too.',
+      '您要删除选定的命名空间吗？ 与所选命名空间关联的所有资源也将被删除。',
       (confirmed) => {
         if (confirmed) {
           return this.$async(this.removeActionAsync, selectedItems);
@@ -50,7 +50,7 @@ class KubernetesResourcePoolsController {
     try {
       this.resourcePools = await this.KubernetesResourcePoolService.get();
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to retreive namespaces');
+      this.Notifications.error('失败', err, '无法检索namespaces');
     }
   }
 

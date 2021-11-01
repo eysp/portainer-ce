@@ -17,7 +17,7 @@
               没有可用的用户
             </span>
             <ui-select ng-if="$ctrl.users.length > 0" ng-model="$ctrl.selectedUser" ng-change="$ctrl.onUserSelect()">
-              <ui-select-match placeholder="Select a user">
+              <ui-select-match placeholder="选择用户">
                 <span>{{ $select.selected.Username }}</span>
               </ui-select-match>
               <ui-select-choices repeat="item in ($ctrl.users | filter: $select.search)">

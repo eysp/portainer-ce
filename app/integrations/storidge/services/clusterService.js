@@ -25,7 +25,7 @@ angular.module('portainer.integrations.storidge').factory('StoridgeClusterServic
           deferred.resolve(info);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve Storidge information', err: err });
+          deferred.reject({ msg: '无法检索 Storridge 信息', err: err });
         });
 
       return deferred.promise;
@@ -40,7 +40,7 @@ angular.module('portainer.integrations.storidge').factory('StoridgeClusterServic
           deferred.resolve(version);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve Storidge version', err: err });
+          deferred.reject({ msg: '无法检索 Storridge 版本', err: err });
         });
 
       return deferred.promise;
@@ -57,7 +57,7 @@ angular.module('portainer.integrations.storidge').factory('StoridgeClusterServic
           deferred.resolve(events);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve Storidge events', err: err });
+          deferred.reject({ msg: '无法检索 Storridge 事件', err: err });
         });
 
       return deferred.promise;

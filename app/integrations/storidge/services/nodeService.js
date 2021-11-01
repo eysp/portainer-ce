@@ -24,7 +24,7 @@ angular.module('portainer.integrations.storidge').factory('StoridgeNodeService',
           deferred.resolve(nodes);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve Storidge nodes', err: err });
+          deferred.reject({ msg: '无法检索 Storridge 节点', err: err });
         });
 
       return deferred.promise;
@@ -39,7 +39,7 @@ angular.module('portainer.integrations.storidge').factory('StoridgeNodeService',
           deferred.resolve(node);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve Storidge node', err: err });
+          deferred.reject({ msg: '无法检索 Storridge 节点', err: err });
         });
 
       return deferred.promise;

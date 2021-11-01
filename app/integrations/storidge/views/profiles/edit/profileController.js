@@ -81,11 +81,11 @@ angular.module('portainer.integrations.storidge').controller('StoridgeProfileCon
       $scope.state.updateInProgress = true;
       StoridgeProfileService.update(profile)
         .then(function success() {
-          Notifications.success('Profile successfully updated');
+          Notifications.success('配置文件已成功更新');
           $state.go('storidge.profiles');
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, 'Unable to update profile');
+          Notifications.error('失败', err, '无法更新个人资料');
         })
         .finally(function final() {
           $scope.state.updateInProgress = false;
@@ -93,7 +93,7 @@ angular.module('portainer.integrations.storidge').controller('StoridgeProfileCon
     };
 
     $scope.delete = function () {
-      ModalService.confirmDeletion('Do you want to remove this profile?', function onConfirm(confirmed) {
+      ModalService.confirmDeletion('您要删除此配置文件吗？', function onConfirm(confirmed) {
         if (!confirmed) {
           return;
         }
@@ -107,11 +107,11 @@ angular.module('portainer.integrations.storidge').controller('StoridgeProfileCon
       $scope.state.deleteInProgress = true;
       StoridgeProfileService.delete(profile.Name)
         .then(function success() {
-          Notifications.success('Profile successfully deleted');
+          Notifications.success('配置文件已成功删除');
           $state.go('storidge.profiles');
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, 'Unable to delete profile');
+          Notifications.error('失败', err, '无法删除配置文件');
         })
         .finally(function final() {
           $scope.state.deleteInProgress = false;
@@ -136,7 +136,7 @@ angular.module('portainer.integrations.storidge').controller('StoridgeProfileCon
           $scope.profile = profile;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, 'Unable to retrieve profile details');
+          Notifications.error('失败', err, '无法检索配置文件详细信息');
         });
     }
 

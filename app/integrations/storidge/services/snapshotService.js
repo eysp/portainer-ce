@@ -30,7 +30,7 @@ angular.module('portainer.integrations.storidge').factory('StoridgeSnapshotServi
           deferred.resolve(snapshots);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve Storidge snapshots', err: err });
+          deferred.reject({ msg: '无法检索存储快照', err: err });
         });
 
       return deferred.promise;
@@ -45,7 +45,7 @@ angular.module('portainer.integrations.storidge').factory('StoridgeSnapshotServi
           deferred.resolve(snapshot);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve Storidge snapshot', err: err });
+          deferred.reject({ msg: '无法检索存储快照', err: err });
         });
 
       return deferred.promise;
@@ -58,7 +58,7 @@ angular.module('portainer.integrations.storidge').factory('StoridgeSnapshotServi
           deferred.resolve(data);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to create Storidge volume snapshot', err: err });
+          deferred.reject({ msg: '无法创建存储卷快照', err: err });
         });
 
       return deferred.promise;
@@ -72,7 +72,7 @@ angular.module('portainer.integrations.storidge').factory('StoridgeSnapshotServi
           deferred.resolve();
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to remove Storidge volume snapshot', err: err });
+          deferred.reject({ msg: '无法删除存储卷快照', err: err });
         });
 
       return deferred.promise;

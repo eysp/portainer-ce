@@ -25,12 +25,12 @@
             </label>
             <div class="col-sm-3 col-md-2">
               <select id="refreshRate" ng-model="state.refreshRate" ng-change="changeUpdateRepeater()" class="form-control">
-                <option value="1">1s</option>
-                <option value="3">3s</option>
-                <option value="5">5s</option>
-                <option value="10">10s</option>
-                <option value="30">30s</option>
-                <option value="60">60s</option>
+                <option value="1">1秒</option>
+                <option value="3">3秒</option>
+                <option value="5">5秒</option>
+                <option value="10">10秒</option>
+                <option value="30">30秒</option>
+                <option value="60">60秒</option>
               </select>
             </div>
             <span>
@@ -102,7 +102,7 @@
 <div class="row">
   <div class="col-sm-12">
     <container-processes-datatable
-      title-text="流程"
+      title-text="容器进程"
       title-icon="fa-tasks"
       dataset="processInfo.Processes"
       headerset="processInfo.Titles"
