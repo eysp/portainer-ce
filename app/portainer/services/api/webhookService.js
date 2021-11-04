@@ -19,7 +19,7 @@ angular.module('portainer.app').factory('WebhookService', [
           deferred.resolve(webhooks);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve webhooks', err: err });
+          deferred.reject({ msg: '无法检索网络钩子', err: err });
         });
 
       return deferred.promise;

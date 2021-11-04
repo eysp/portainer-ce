@@ -103,7 +103,7 @@
               <td>{{ container.State.StartedAt | getisodate }}</td>
             </tr>
             <tr ng-if="!container.State.Running && container.State.Status !== 'created'">
-              <td>Finished</td>
+              <td>完成时间</td>
               <td>{{ container.State.FinishedAt | getisodate }}</td>
             </tr>
             <tr authorization="DockerContainerLogs, DockerContainerInspect, DockerContainerStats, DockerExecStart">

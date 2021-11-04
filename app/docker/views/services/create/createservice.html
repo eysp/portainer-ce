@@ -107,15 +107,15 @@
           <!-- create-webhook -->
           <div ng-if="endpoint.Type !== 4">
             <div class="col-sm-12 form-section-title">
-              Webhooks
+              网络钩子
             </div>
             <div class="form-group">
               <div class="col-sm-12">
                 <label class="control-label text-left">
-                  创建服务 webhook
+                  创建网络钩子(webhook)服务
                   <portainer-tooltip
                     position="top"
-                    message="创建webhook（或回调URI）以自动更新此服务。向此回调URI发送POST请求（无需任何身份验证）将获取关联镜像的最新版本并重新部署此服务。"
+                    message="创建网络钩子（或回调URI）以自动更新此服务。向此回调URI发送POST请求（无需任何身份验证）将获取关联镜像的最新版本并重新部署此服务。"
                   ></portainer-tooltip>
                 </label>
                 <label class="switch" style="margin-left: 20px;"> <input type="checkbox" ng-model="formValues.Webhook" /><i></i> </label>

@@ -10,16 +10,16 @@
   </div>
   <div class="form-group" ng-if="$ctrl.model.RepositoryAutomaticUpdates">
     <label for="repository_mechanism" class="col-sm-1 control-label text-left">
-      Mechanism
+      机制
     </label>
     <div class="col-sm-11">
       <div class="input-group col-sm-10 input-group-sm">
         <div class="btn-group btn-group-sm">
           <label class="btn btn-primary" ng-click="$ctrl.onChangeMechanism($ctrl.model.RepositoryMechanism)" ng-model="$ctrl.model.RepositoryMechanism" uib-btn-radio="'Interval'"
-            >Polling</label
+            >轮询</label
           >
           <label class="btn btn-primary" ng-click="$ctrl.onChangeMechanism($ctrl.model.RepositoryMechanism)" ng-model="$ctrl.model.RepositoryMechanism" uib-btn-radio="'Webhook'"
-            >Webhook</label
+            >网络钩子</label
           >
         </div>
       </div>
@@ -28,7 +28,7 @@
 
   <div class="form-group" ng-if="$ctrl.model.RepositoryAutomaticUpdates && $ctrl.model.RepositoryMechanism === 'Webhook'">
     <label for="repository_mechanism" class="col-sm-1 control-label text-left">
-      Webhook
+      网络钩子
     </label>
     <div class="col-sm-11">
       <span class="text-muted"> {{ $ctrl.model.RepositoryWebhookURL | truncatelr }} </span>

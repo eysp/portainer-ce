@@ -196,8 +196,8 @@
           <div class="form-group" ng-hide="config.Driver === 'macvlan' && formValues.Macvlan.Scope === 'local'">
             <div class="col-sm-12">
               <label for="ownership" class="control-label text-left">
-                Isolated network
-                <portainer-tooltip position="bottom" message="isolated network 没有入站或出站通信。"></portainer-tooltip>
+                独立网络
+                <portainer-tooltip position="bottom" message="独立网络没有入站或出站通信。"></portainer-tooltip>
               </label>
               <label name="ownership" class="switch" style="margin-left: 20px;">
                 <input type="checkbox" ng-model="config.Internal" />

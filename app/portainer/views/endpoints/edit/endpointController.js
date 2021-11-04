@@ -48,22 +48,22 @@ function EndpointController(
     edgeEndpoint: false,
     allowCreate: Authentication.isAdmin(),
     availableEdgeAgentCheckinOptions: [
-      { key: 'Use default interval', value: 0 },
+      { key: '使用默认间隔', value: 0 },
       {
-        key: '5 seconds',
+        key: '5秒',
         value: 5,
       },
       {
-        key: '10 seconds',
+        key: '10秒',
         value: 10,
       },
       {
-        key: '30 seconds',
+        key: '30秒',
         value: 30,
       },
-      { key: '5 minutes', value: 300 },
-      { key: '1 hour', value: 3600 },
-      { key: '1 day', value: 86400 },
+      { key: '5分钟', value: 300 },
+      { key: '1小时', value: 3600 },
+      { key: '1 天', value: 86400 },
     ],
     allowSelfSignedCerts: true,
   };
@@ -136,10 +136,10 @@ function EndpointController(
     try {
       $scope.state.actionInProgress = true;
       await EndpointService.deassociateEndpoint(endpoint.Id);
-      Notifications.success('Environment de-associated', $scope.endpoint.Name);
+      Notifications.success('环境解除关联', $scope.endpoint.Name);
       $state.reload();
     } catch (err) {
-      Notifications.error('失败', err, 'Unable to de-associate environment');
+      Notifications.error('失败', err, '无法解除与环境的关联');
     } finally {
       $scope.state.actionInProgress = false;
     }
@@ -190,12 +190,12 @@ function EndpointController(
     $scope.state.actionInProgress = true;
     EndpointService.updateEndpoint(endpoint.Id, payload).then(
       function success() {
-        Notifications.success('Environment updated', $scope.endpoint.Name);
+        Notifications.success('环境更新', $scope.endpoint.Name);
         EndpointProvider.setEndpointPublicURL(endpoint.PublicURL);
         $state.go('portainer.endpoints', {}, { reload: true });
       },
       function error(err) {
-        Notifications.error('失败', err, 'Unable to update environment');
+        Notifications.error('失败', err, '无法更新环境');
         $scope.state.actionInProgress = false;
       },
       function update(evt) {
@@ -275,7 +275,7 @@ function EndpointController(
 
         configureState();
       } catch (err) {
-        Notifications.error('失败', err, 'Unable to retrieve environment details');
+        Notifications.error('失败', err, '无法检索环境详细信息');
       }
     });
   }

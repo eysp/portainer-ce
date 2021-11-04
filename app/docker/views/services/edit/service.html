@@ -76,10 +76,10 @@
             </tr>
             <tr ng-if="applicationState.endpoint.type !== 4">
               <td colspan="{{ webhookURL ? '1' : '2' }}">
-                Service webhook
+                网络钩子服务
                 <portainer-tooltip
                   position="top"
-                  message="Webhook（或回调URI）用于自动更新此服务。向此回调URI发送POST请求（无需任何身份验证）将获取关联镜像的最新版本并重新部署此服务。"
+                  message="网络钩子（或回调URI）用于自动更新此服务。向此回调URI发送POST请求（无需任何身份验证）将获取关联镜像的最新版本并重新部署此服务。"
                 ></portainer-tooltip>
                 <label class="switch" style="margin-left: 20px;">
                   <input disable-authorization="DockerServiceUpdate" type="checkbox" ng-model="WebhookExists" ng-click="updateWebhook(service)" /><i></i>
