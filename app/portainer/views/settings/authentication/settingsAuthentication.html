@@ -1,21 +1,16 @@
-<rd-header>
-  <rd-header-title title-text="身份验证设置"></rd-header-title>
-  <rd-header-content> <a ui-sref="portainer.settings">设置</a> &gt; 认证 </rd-header-content>
-</rd-header>
+<page-header title="'验证设置'" breadcrumbs="[{label:'Settings', link:'portainer.settings'}, 'Authentication']"> </page-header>
 
 <div class="row">
   <div class="col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="fa-users" title-text="认证"></rd-widget-header>
+      <rd-widget-header icon="users" feather-icon="true" title-text="Authentication"></rd-widget-header>
       <rd-widget-body>
         <form class="form-horizontal" name="authSettingsForm">
-          <div class="col-sm-12 form-section-title">
-            配置
-          </div>
+          <div class="col-sm-12 form-section-title"> 配置 </div>
           <div class="form-group">
             <label for="user_timeout" class="col-sm-2 control-label text-left">
-              Session会话周期
-              <portainer-tooltip message="强制用户重新登录之前的时间。"></portainer-tooltip>
+              Session 会话期限
+              <portainer-tooltip message="'在用户被迫重新登录之前的时间。'"></portainer-tooltip>
             </label>
             <div class="col-sm-10">
               <select
@@ -27,24 +22,23 @@
             </div>
           </div>
           <div class="form-group">
-            <span class="col-sm-12 text-muted small">
-              仅当您在 Portainer 前面有额外的身份验证层时，才建议更改默认设置。
+            <span class="col-sm-12 text-muted small vertical-center">
+              <pr-icon icon="'alert-triangle'" feather="true" class-name="'icon-sm icon-yellow'"></pr-icon>
+              只有当你在Portainer前面有额外的认证层时，才建议改变默认的做法。
             </span>
           </div>
-          <div class="col-sm-12 form-section-title">
-            身份验证方法
-          </div>
 
-          <box-selector radio-name="authOptions" ng-model="authMethod" options="authOptions" on-change="(onChangeAuthMethod)"></box-selector>
+          <div class="col-sm-12 form-section-title"> 认证方法 </div>
 
-          <div ng-if="authenticationMethodSelected(1)">
-            <div class="col-sm-12 form-section-title">
-              信息
-            </div>
-            <div class="form-group col-sm-12 text-muted small">
-              使用内部身份验证时，Portainer 将加密用户密码并在本地存储凭据。
-            </div>
-          </div>
+          <box-selector radio-name="'authOptions'" value="authMethod" options="authOptions" on-change="(onChangeAuthMethod)"></box-selector>
+
+          <internal-auth
+            ng-if="authenticationMethodSelected(1)"
+            on-save-settings="(saveSettings)"
+            is-loading="state.actionInProgress"
+            value="settings.InternalAuthSettings"
+            on-change="(onChangePasswordLength)"
+          ></internal-auth>
 
           <ldap-settings
             ng-if="authenticationMethodSelected(2)"
@@ -52,6 +46,9 @@
             tlsca-cert="formValues.TLSCACert"
             state="state"
             connectivity-check="LDAPConnectivityCheck"
+            on-save-settings="(saveSettings)"
+            save-button-state="state.actionInProgress"
+            is-ldap-form-valid="isLDAPFormValid"
           ></ldap-settings>
 
           <ad-settings
@@ -60,29 +57,18 @@
             tlsca-cert="formValues.TLSCACert"
             state="state"
             connectivity-check="LDAPConnectivityCheck"
+            on-save-settings="(saveSettings)"
+            save-button-state="state.actionInProgress"
+            is-ldap-form-valid="isLDAPFormValid()"
           ></ad-settings>
 
-          <oauth-settings ng-if="authenticationMethodSelected(3)" settings="OAuthSettings" teams="teams"></oauth-settings>
-
-          <!-- actions -->
-          <div class="col-sm-12 form-section-title">
-            操作
-          </div>
-          <div class="form-group">
-            <div class="col-sm-12">
-              <button
-                type="button"
-                class="btn btn-primary btn-sm"
-                ng-click="saveSettings()"
-                ng-disabled="state.actionInProgress || (settings.AuthenticationMethod === 2 && !isLDAPFormValid()) || (settings.AuthenticationMethod === 3 && !isOAuthTeamMembershipFormValid()) || authSettingsForm.$invalid"
-                button-spinner="state.actionInProgress"
-              >
-                <span ng-hide="state.actionInProgress">保存设置</span>
-                <span ng-show="state.actionInProgress">保存中...</span>
-              </button>
-            </div>
-          </div>
-          <!-- !actions -->
+          <oauth-settings
+            ng-if="authenticationMethodSelected(3)"
+            settings="OAuthSettings"
+            teams="teams"
+            on-save-settings="(saveSettings)"
+            save-button-state="state.actionInProgress"
+          ></oauth-settings>
         </form>
       </rd-widget-body>
     </rd-widget>

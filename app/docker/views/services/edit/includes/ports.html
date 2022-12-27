@@ -1,14 +1,14 @@
 <div>
   <rd-widget>
-    <rd-widget-header icon="fa-tasks" title-text="Published ports">
+    <rd-widget-header icon="list" feather-icon="true" title-text="已发布端口">
       <div class="nopadding" authorization="DockerServiceUpdate">
-        <a class="btn btn-default btn-sm pull-right" ng-click="isUpdating ||addPublishedPort(service)" ng-disabled="isUpdating">
-          <i class="fa fa-plus-circle" aria-hidden="true"></i> 端口映射
+        <a class="btn btn-secondary btn-sm pull-right" ng-click="isUpdating ||addPublishedPort(service)" ng-disabled="isUpdating">
+          <pr-icon icon="'plus'" feather="true"></pr-icon> 端口映射
         </a>
       </div>
     </rd-widget-header>
     <rd-widget-body ng-if="!service.Ports || service.Ports.length === 0">
-      <p>此服务未发布任何端口。</p>
+      <p>这项服务没有公布任何端口。</p>
     </rd-widget-body>
     <rd-widget-body ng-if="service.Ports && service.Ports.length > 0" classes="no-padding">
       <table class="table">
@@ -81,8 +81,8 @@
             </td>
             <td authorization="DockerServiceUpdate">
               <span class="input-group-btn">
-                <button class="btn btn-sm btn-danger" type="button" ng-click="removePortPublishedBinding(service, $index)" ng-disabled="isUpdating">
-                  <i class="fa fa-trash" aria-hidden="true"></i>
+                <button class="btn btn-dangerlight" type="button" ng-click="removePortPublishedBinding(service, $index)" ng-disabled="isUpdating">
+                  <pr-icon icon="'trash-2'" feather="true" size="'md'"></pr-icon>
                 </button>
               </span>
             </td>
@@ -98,7 +98,7 @@
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu">
-            <li><a ng-click="cancelChanges(service, ['Ports'])">重置更改</a></li>
+            <li><a ng-click="cancelChanges(service, ['Ports'])">重置变更</a></li>
             <li><a ng-click="cancelChanges(service)">重置所有更改</a></li>
           </ul>
         </div>

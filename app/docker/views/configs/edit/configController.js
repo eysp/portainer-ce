@@ -1,3 +1,5 @@
+import { ResourceControlType } from '@/react/portainer/access-control/types';
+
 angular.module('portainer.docker').controller('ConfigController', [
   '$scope',
   '$transition$',
@@ -5,14 +7,20 @@ angular.module('portainer.docker').controller('ConfigController', [
   'ConfigService',
   'Notifications',
   function ($scope, $transition$, $state, ConfigService, Notifications) {
+    $scope.resourceType = ResourceControlType.Config;
+
+    $scope.onUpdateResourceControlSuccess = function () {
+      $state.reload();
+    };
+
     $scope.removeConfig = function removeConfig(configId) {
       ConfigService.remove(configId)
         .then(function success() {
-          Notifications.success('配置成功删除');
+          Notifications.success('Success', 'Configuration successfully removed');
           $state.go('docker.configs', {});
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法删除配置');
+          Notifications.error('失败', err, 'Unable to remove config');
         });
     };
 
@@ -22,7 +30,7 @@ angular.module('portainer.docker').controller('ConfigController', [
           $scope.config = data;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索配置详细信息');
+          Notifications.error('失败', err, 'Unable to retrieve config details');
         });
     }
 

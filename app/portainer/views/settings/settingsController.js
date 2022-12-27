@@ -1,7 +1,7 @@
 import angular from 'angular';
 
-import { buildOption } from '@/portainer/components/box-selector';
-import { S3_BACKUP_SETTING } from '@/portainer/feature-flags/feature-ids';
+import { FeatureId } from '@/portainer/feature-flags/enums';
+import { options } from './options';
 
 angular.module('portainer.app').controller('SettingsController', [
   '$scope',
@@ -13,28 +13,14 @@ angular.module('portainer.app').controller('SettingsController', [
   'FileSaver',
   'Blob',
   function ($scope, $state, Notifications, SettingsService, StateManager, BackupService, FileSaver) {
-    $scope.s3BackupFeatureId = S3_BACKUP_SETTING;
-    $scope.backupOptions = [
-      buildOption('backup_file', 'fa fa-download', '下载备份文件', '', 'file'),
-      buildOption('backup_s3', 'fa fa-upload', 'Store in S3', '定义cron计划', 's3', S3_BACKUP_SETTING),
-    ];
+    $scope.customBannerFeatureId = FeatureId.CUSTOM_LOGIN_BANNER;
+    $scope.s3BackupFeatureId = FeatureId.S3_BACKUP_SETTING;
+
+    $scope.backupOptions = options;
 
     $scope.state = {
+      isDemo: false,
       actionInProgress: false,
-      availableEdgeAgentCheckinOptions: [
-        {
-          key: '5 秒',
-          value: 5,
-        },
-        {
-          key: '10 秒',
-          value: 10,
-        },
-        {
-          key: '30 秒',
-          value: 30,
-        },
-      ],
       availableKubeconfigExpiryOptions: [
         {
           key: '1 天',
@@ -53,12 +39,13 @@ angular.module('portainer.app').controller('SettingsController', [
           value: `${24 * 30 * 12}h`,
         },
         {
-          key: '不过期',
+          key: '无过期时间',
           value: '0',
         },
       ],
       backupInProgress: false,
       featureLimited: false,
+      showHTTPS: !window.ddExtension,
     };
 
     $scope.BACKUP_FORM_TYPES = { S3: 's3', FILE: 'file' };
@@ -67,11 +54,28 @@ angular.module('portainer.app').controller('SettingsController', [
       customLogo: false,
       labelName: '',
       labelValue: '',
-      enableEdgeComputeFeatures: false,
       enableTelemetry: false,
       passwordProtect: false,
       password: '',
       backupFormType: $scope.BACKUP_FORM_TYPES.FILE,
+    };
+
+    $scope.onToggleEnableTelemetry = function onToggleEnableTelemetry(checked) {
+      $scope.$evalAsync(() => {
+        $scope.formValues.enableTelemetry = checked;
+      });
+    };
+
+    $scope.onToggleCustomLogo = function onToggleCustomLogo(checked) {
+      $scope.$evalAsync(() => {
+        $scope.formValues.customLogo = checked;
+      });
+    };
+
+    $scope.onToggleAutoBackups = function onToggleAutoBackups(checked) {
+      $scope.$evalAsync(() => {
+        $scope.formValues.scheduleAutomaticBackups = checked;
+      });
     };
 
     $scope.onBackupOptionsChange = function (type, limited) {
@@ -109,7 +113,7 @@ angular.module('portainer.app').controller('SettingsController', [
         .then(function success(data) {
           const downloadData = new Blob([data.file], { type: 'application/gzip' });
           FileSaver.saveAs(downloadData, data.name);
-          Notifications.success('备份已成功下载');
+          Notifications.success('Success', '备份成功下载');
         })
         .catch(function error(err) {
           Notifications.error('失败', err, '无法下载备份');
@@ -126,7 +130,6 @@ angular.module('portainer.app').controller('SettingsController', [
         settings.LogoURL = '';
       }
 
-      settings.EnableEdgeComputeFeatures = $scope.formValues.enableEdgeComputeFeatures;
       settings.EnableTelemetry = $scope.formValues.enableTelemetry;
 
       $scope.state.actionInProgress = true;
@@ -136,10 +139,9 @@ angular.module('portainer.app').controller('SettingsController', [
     function updateSettings(settings) {
       SettingsService.update(settings)
         .then(function success() {
-          Notifications.success('Settings updated');
+          Notifications.success('Success', 'Settings updated');
           StateManager.updateLogo(settings.LogoURL);
           StateManager.updateSnapshotInterval(settings.SnapshotInterval);
-          StateManager.updateEnableEdgeComputeFeatures(settings.EnableEdgeComputeFeatures);
           StateManager.updateEnableTelemetry(settings.EnableTelemetry);
           $state.reload();
         })
@@ -152,6 +154,9 @@ angular.module('portainer.app').controller('SettingsController', [
     }
 
     function initView() {
+      const state = StateManager.getState();
+      $scope.state.isDemo = state.application.demoEnvironment.enabled;
+
       SettingsService.settings()
         .then(function success(data) {
           var settings = data;
@@ -160,7 +165,6 @@ angular.module('portainer.app').controller('SettingsController', [
           if (settings.LogoURL !== '') {
             $scope.formValues.customLogo = true;
           }
-          $scope.formValues.enableEdgeComputeFeatures = settings.EnableEdgeComputeFeatures;
           $scope.formValues.enableTelemetry = settings.EnableTelemetry;
         })
         .catch(function error(err) {

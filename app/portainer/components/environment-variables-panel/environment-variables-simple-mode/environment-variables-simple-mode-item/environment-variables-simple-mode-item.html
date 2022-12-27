@@ -1,4 +1,4 @@
-<ng-form class="env-item" name="$ctrl.{{ $ctrl.formName }}">
+<ng-form class="env-item mt-1" name="$ctrl.{{ $ctrl.formName }}">
   <div class="col-sm-5">
     <div class="input-group input-group-sm env-item-key w-full">
       <span class="input-group-addon">名称</span>
@@ -13,19 +13,19 @@
         required
       />
     </div>
-    <div class="form-group" style="margin-top: 5px;" ng-show="$ctrl[$ctrl.formName].name.$invalid">
-      <div class="col-sm-12 small text-warning">
+    <div class="form-group" style="margin-top: 5px" ng-show="$ctrl[$ctrl.formName].name.$invalid">
+      <div class="col-sm-12 small">
         <div ng-messages="$ctrl[$ctrl.formName].name.$error">
-          <p ng-message="required"> <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 名称是必需的。 </p>
+          <p ng-message="required"> <pr-icon icon="'alert-triangle'" mode="'warning'" feather="true"></pr-icon> 名称是必填项。 </p>
           <p ng-message="pattern">
             <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-            此字段必须由字母数字字符'-'或'_'组成，以字母字符开头，以字母数字字符结尾 (例如 'my-var', 或 'MY_VAR123').
+            这个字段必须由字母数字字符'-'或'_'组成，以一个字母字符开始，以一个字母数字字符结束 (例如 'my-var'或 'MY_VAR123').
           </p>
         </div>
       </div>
     </div>
   </div>
-  <div ng-if="$ctrl.hasValue()" class="col-sm-6">
+  <div class="col-sm-6">
     <div class="w-full env-item-value">
       <div class="input-group input-group-sm">
         <span class="input-group-addon">value</span>
@@ -39,23 +39,18 @@
           ng-change="$ctrl.onChangeValue($ctrl.variable.value)"
         />
       </div>
-      <button class="btn btn-sm btn-primary" type="button" ng-click="$ctrl.removeValue()"> <i class="fa fa-minus" aria-hidden="true"></i> 删除value </button>
     </div>
     <div class="form-group" ng-show="$ctrl[$ctrl.formName].value.$invalid">
       <div class="col-sm-12 small text-warning">
         <div ng-messages="$ctrl[$ctrl.formName].value.$error">
-          <p ng-message="required"> <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> value是必需的。 </p>
-          <p ng-message="pattern"> <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> value是必需的。 </p>
+          <p ng-message="pattern"> <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Value 必须填写。 </p>
         </div>
       </div>
     </div>
   </div>
   <div>
-    <button class="btn btn-sm btn-primary" type="button" ng-if="!$ctrl.hasValue()" ng-click="$ctrl.onChangeValue('')">
-      <i class="fa fa-plus" aria-hidden="true"></i> 添加value
-    </button>
-    <button class="btn btn-sm btn-danger" type="button" ng-click="$ctrl.onRemove($ctrl.index)">
-      <i class="fa fa-trash" aria-hidden="true"></i>
+    <button class="btn btn-dangerlight" type="button" ng-click="$ctrl.onRemove($ctrl.index)">
+      <pr-icon icon="'trash-2'" feather="true" size="'md'"></pr-icon>
     </button>
   </div>
 </ng-form>

@@ -117,7 +117,7 @@ angular.module('portainer.app').controller('TemplatesController', [
           return ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl, generatedVolumeIds);
         })
         .then(function success() {
-          Notifications.success('容器创建成功');
+          Notifications.success('Success', '容器成功创建');
           $state.go('docker.containers', {}, { reload: true });
         })
         .catch(function error(err) {
@@ -141,6 +141,7 @@ angular.module('portainer.app').controller('TemplatesController', [
       var repositoryOptions = {
         RepositoryURL: template.Repository.url,
         ComposeFilePathInRepository: template.Repository.stackfile,
+        FromAppTemplate: true,
       };
 
       const endpointId = +$state.params.endpointId;
@@ -150,7 +151,7 @@ angular.module('portainer.app').controller('TemplatesController', [
           return ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl);
         })
         .then(function success() {
-          Notifications.success('堆栈部署成功');
+          Notifications.success('Success', '堆栈成功部署');
           $state.go('docker.stacks');
         })
         .catch(function error(err) {
@@ -178,6 +179,7 @@ angular.module('portainer.app').controller('TemplatesController', [
       var repositoryOptions = {
         RepositoryURL: template.Repository.url,
         ComposeFilePathInRepository: template.Repository.stackfile,
+        FromAppTemplate: true,
       };
 
       const endpointId = +$state.params.endpointId;
@@ -188,7 +190,7 @@ angular.module('portainer.app').controller('TemplatesController', [
           return ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl);
         })
         .then(function success() {
-          Notifications.success('堆栈部署成功');
+          Notifications.success('Success', '堆栈成功部署');
           $state.go('docker.stacks');
         })
         .catch(function error(err) {
@@ -257,7 +259,7 @@ angular.module('portainer.app').controller('TemplatesController', [
           deployable = endpoint.mode.provider === DOCKER_SWARM_MODE;
           break;
         case 3:
-          deployable = endpoint.mode.provider === DOCKER_STANDALONE;
+          deployable = endpoint.mode.provider === DOCKER_SWARM_MODE || endpoint.mode.provider === DOCKER_STANDALONE;
           break;
       }
       return deployable;
@@ -274,9 +276,10 @@ angular.module('portainer.app').controller('TemplatesController', [
 
       var endpointMode = $scope.applicationState.endpoint.mode;
       var apiVersion = $scope.applicationState.endpoint.apiVersion;
+      const endpointId = +$state.params.endpointId;
 
       $q.all({
-        templates: TemplateService.templates(),
+        templates: TemplateService.templates(endpointId),
         volumes: VolumeService.getVolumes(),
         networks: NetworkService.networks(
           endpointMode.provider === 'DOCKER_STANDALONE' || endpointMode.provider === 'DOCKER_SWARM_MODE',
@@ -294,7 +297,7 @@ angular.module('portainer.app').controller('TemplatesController', [
         })
         .catch(function error(err) {
           $scope.templates = [];
-          Notifications.error('失败', err, '应用初始化期间发生错误。');
+          Notifications.error('失败', err, '在应用程序初始化过程中发生了一个错误。');
         });
     }
 

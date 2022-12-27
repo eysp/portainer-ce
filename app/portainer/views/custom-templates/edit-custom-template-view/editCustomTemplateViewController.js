@@ -1,17 +1,22 @@
 import _ from 'lodash';
+import { ResourceControlViewModel } from '@/react/portainer/access-control/models/ResourceControlViewModel';
 
 import { AccessControlFormData } from 'Portainer/components/accessControlForm/porAccessControlFormModel';
-import { ResourceControlViewModel } from 'Portainer/models/resourceControl/resourceControl';
+import { getTemplateVariables, intersectVariables } from '@/react/portainer/custom-templates/components/utils';
+import { isBE } from '@/portainer/feature-flags/feature-flags.service';
 
 class EditCustomTemplateViewController {
   /* @ngInject */
   constructor($async, $state, $window, ModalService, Authentication, CustomTemplateService, FormValidator, Notifications, ResourceControlService) {
     Object.assign(this, { $async, $state, $window, ModalService, Authentication, CustomTemplateService, FormValidator, Notifications, ResourceControlService });
 
+    this.isTemplateVariablesEnabled = isBE;
+
     this.formValues = null;
     this.state = {
       formValidationError: '',
       isEditorDirty: false,
+      isTemplateValid: true,
     };
     this.templates = [];
 
@@ -20,6 +25,8 @@ class EditCustomTemplateViewController {
     this.submitAction = this.submitAction.bind(this);
     this.submitActionAsync = this.submitActionAsync.bind(this);
     this.editorUpdate = this.editorUpdate.bind(this);
+    this.onVariablesChange = this.onVariablesChange.bind(this);
+    this.handleChange = this.handleChange.bind(this);
   }
 
   getTemplate() {
@@ -32,20 +39,38 @@ class EditCustomTemplateViewController {
         this.CustomTemplateService.customTemplateFile(this.$state.params.id),
       ]);
       template.FileContent = file;
+      template.Variables = template.Variables || [];
       this.formValues = template;
+      this.parseTemplate(template.FileContent);
+
       this.oldFileContent = this.formValues.FileContent;
-      this.formValues.ResourceControl = new ResourceControlViewModel(template.ResourceControl);
+      if (template.ResourceControl) {
+        this.formValues.ResourceControl = new ResourceControlViewModel(template.ResourceControl);
+      }
       this.formValues.AccessControlData = new AccessControlFormData();
     } catch (err) {
-      this.Notifications.error('失败', err, '无法检索自定义模板数据');
+      this.Notifications.error('失败', err, 'Unable to retrieve custom template data');
     }
+  }
+
+  onVariablesChange(value) {
+    this.handleChange({ Variables: value });
+  }
+
+  handleChange(values) {
+    return this.$async(async () => {
+      this.formValues = {
+        ...this.formValues,
+        ...values,
+      };
+    });
   }
 
   validateForm() {
     this.state.formValidationError = '';
 
     if (!this.formValues.FileContent) {
-      this.state.formValidationError = '模板文件内容不能为空';
+      this.state.formValidationError = 'Template file content must not be empty';
       return false;
     }
 
@@ -53,7 +78,7 @@ class EditCustomTemplateViewController {
     const id = this.$state.params.id;
     const isNotUnique = _.some(this.templates, (template) => template.Title === title && template.Id != id);
     if (isNotUnique) {
-      this.state.formValidationError = `名称为 ${title} 的模板已存在`;
+      this.state.formValidationError = `A template with the name ${title} already exists`;
       return false;
     }
 
@@ -85,20 +110,37 @@ class EditCustomTemplateViewController {
       const userId = userDetails.ID;
       await this.ResourceControlService.applyResourceControl(userId, this.formValues.AccessControlData, this.formValues.ResourceControl);
 
-      this.Notifications.success('自定义模板已成功更新');
+      this.Notifications.success('Success', 'Custom template successfully updated');
       this.state.isEditorDirty = false;
       this.$state.go('docker.templates.custom');
     } catch (err) {
-      this.Notifications.error('失败', err, '无法更新自定义模板');
+      this.Notifications.error('失败', err, 'Unable to update custom template');
     } finally {
       this.actionInProgress = false;
     }
   }
 
-  editorUpdate(cm) {
-    if (this.formValues.FileContent.replace(/(\r\n|\n|\r)/gm, '') !== cm.getValue().replace(/(\r\n|\n|\r)/gm, '')) {
-      this.formValues.FileContent = cm.getValue();
+  editorUpdate(value) {
+    if (this.formValues.FileContent.replace(/(\r\n|\n|\r)/gm, '') !== value.replace(/(\r\n|\n|\r)/gm, '')) {
+      this.formValues.FileContent = value;
+      this.parseTemplate(value);
       this.state.isEditorDirty = true;
+    }
+  }
+
+  parseTemplate(templateStr) {
+    if (!this.isTemplateVariablesEnabled) {
+      return;
+    }
+
+    const variables = getTemplateVariables(templateStr);
+
+    const isValid = !!variables;
+
+    this.state.isTemplateValid = isValid;
+
+    if (isValid) {
+      this.onVariablesChange(intersectVariables(this.formValues.Variables, variables));
     }
   }
 
@@ -114,7 +156,7 @@ class EditCustomTemplateViewController {
     try {
       this.templates = await this.CustomTemplateService.customTemplates([1, 2]);
     } catch (err) {
-      this.Notifications.error('加载失败', err, '加载自定义模板失败');
+      this.Notifications.error('Failure loading', err, 'Failed loading custom templates');
     }
 
     this.$window.onbeforeunload = () => {

@@ -1,13 +1,15 @@
 <div class="environment-variables-simple-mode">
   <div class="col-sm-12">
-    <a class="small interactive" ng-click="$ctrl.onSwitchModeClick()"> <i class="fa fa-list-ol space-right" aria-hidden="true"></i> 高级模式 </a>
+    <button type="button" class="btn btn-link btn-sm hover:no-underline !ml-0 p-0" ng-click="$ctrl.onSwitchModeClick()">
+      <pr-icon icon="'edit'" feather="true"></pr-icon> 高级模式
+    </button>
   </div>
   <div class="col-sm-12 small text-muted">
-    <i class="fa fa-info-circle blue-icon space-right" aria-hidden="true"></i>
-    切换到高级模式以复制和粘贴多个变量
+    <pr-icon icon="'alert-circle'" mode="'primary'" feather="true"></pr-icon>
+    切换到高级模式来复制和粘贴多个变量
   </div>
   <div class="col-sm-12 environment-variables-simple-mode--actions">
-    <button type="button" class="btn btn-sm btn-default" ng-click="$ctrl.add()"> <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加环境变量 </button>
+    <button type="button" class="btn btn-sm btn-default" ng-click="$ctrl.add()"> <pr-icon icon="'plus'" feather="true"></pr-icon> 添加环境变量 </button>
     <button
       type="button"
       class="btn btn-sm btn-default"
@@ -17,11 +19,11 @@
       ngf-max-size="1MB"
       ngf-model-invalid="errorFile"
     >
-      <i class="fa fa-file-upload" aria-hidden="true"></i> 从.ENV文件加载变量
+      <pr-icon icon="'upload'" feather="true"></pr-icon> 从.env文件加载变量
     </button>
     <span class="space-left" ng-if="errorFile.$error == 'maxSize'">
       <i class="fa fa-times red-icon space-right" aria-hidden="true"></i>
-      文件过大！ 尝试上传小于 1MB 的文件
+      文件太大！尝试上传小于1MB的文件
     </span>
   </div>
   <div class="col-sm-12 form-inline env-items-list">
@@ -32,5 +34,9 @@
       on-change="($ctrl.onChangeVariable)"
       on-remove="($ctrl.remove)"
     ></environment-variables-simple-mode-item>
+  </div>
+  <div class="col-sm-12 small text-muted" ng-if="$ctrl.ngModel.length > 0 && $ctrl.showHelpMessage">
+    <pr-icon icon="'alert-circle'" mode="'primary'" feather="true"></pr-icon>
+    在手动或通过webhook进行重新部署之前，环境变化将不会生效。
   </div>
 </div>

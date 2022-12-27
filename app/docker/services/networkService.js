@@ -15,7 +15,7 @@ angular.module('portainer.docker').factory('NetworkService', [
           deferred.resolve(data);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: '无法创建网络', err: err });
+          deferred.reject({ msg: 'Unable to create network', err: err });
         });
       return deferred.promise;
     };
@@ -29,7 +29,7 @@ angular.module('portainer.docker').factory('NetworkService', [
           deferred.resolve(network);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: '无法检索网络详细信息', err: err });
+          deferred.reject({ msg: 'Unable to retrieve network details', err: err });
         });
 
       return deferred.promise;
@@ -60,7 +60,7 @@ angular.module('portainer.docker').factory('NetworkService', [
           deferred.resolve(filteredNetworks);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: '无法检索网络', err: err });
+          deferred.reject({ msg: 'Unable to retrieve networks', err: err });
         });
 
       return deferred.promise;

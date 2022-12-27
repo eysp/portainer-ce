@@ -1,7 +1,5 @@
-<div class="col-sm-12 form-section-title">
-  Build method
-</div>
-<box-selector radio-name="method" ng-model="$ctrl.state.Method" options="$ctrl.methodOptions" on-change="($ctrl.onChangeMethod)"></box-selector>
+<div class="col-sm-12 form-section-title"> Build method </div>
+<box-selector radio-name="'method'" value="$ctrl.state.Method" options="$ctrl.methodOptions" on-change="($ctrl.onChangeMethod)"></box-selector>
 
 <web-editor-form
   ng-if="$ctrl.state.Method === 'editor'"
@@ -10,31 +8,25 @@
   on-change="($ctrl.onChangeFileContent)"
   ng-required="true"
   yml="true"
-  placeholder="# Define or paste the content of your docker-compose file here"
+  placeholder="# 在这里定义或粘贴你的docker compose文件的内容"
 >
   <editor-description>
-    您可以在
-    <a href="https://docs.docker.com/compose/compose-file/" target="_blank">
-      官方文档
-              </a>
-        中获得有关撰写文件格式的更多信息。
+    你可以在
+                <a href="https://docs.docker.com/compose/compose-file/" target="_blank"> 官方文档</a>
+                中获得更多有关 Compose 文件格式的信息。
   </editor-description>
 </web-editor-form>
 
 <file-upload-form ng-if="$ctrl.state.Method === 'upload'" file="$ctrl.formValues.StackFile" on-change="($ctrl.onChangeFile)" ng-required="true">
-  <file-upload-description>
-    You can upload a Compose file from your computer.
-  </file-upload-description>
+  <file-upload-description> 你可以从你的电脑上传一个 Compose 文件。 </file-upload-description>
 </file-upload-form>
 
-<git-form ng-if="$ctrl.state.Method === 'repository'" model="$ctrl.formValues" on-change="($ctrl.onChangeFormValues)"></git-form>
+<git-form ng-if="$ctrl.state.Method === 'repository'" model="$ctrl.formValues" on-change="($ctrl.onChangeFormValues)" hide-rebuild-info="true"></git-form>
 
 <!-- template -->
 <div ng-if="$ctrl.state.Method === 'template'">
   <div class="form-group">
-    <label for="stack_template" class="col-sm-1 control-label text-left">
-      Template
-    </label>
+    <label for="stack_template" class="col-sm-1 control-label text-left"> Template </label>
     <div class="col-sm-11">
       <select
         class="form-control"
@@ -48,9 +40,7 @@
   </div>
   <!-- description -->
   <div ng-if="$ctrl.selectedTemplate.note">
-    <div class="col-sm-12 form-section-title">
-      Information
-    </div>
+    <div class="col-sm-12 form-section-title"> 信息 </div>
     <div class="form-group">
       <div class="col-sm-12">
         <div class="template-note" ng-bind-html="$ctrl.selectedTemplate.note"></div>
@@ -65,7 +55,7 @@
     value="$ctrl.formValues.StackFileContent"
     on-change="($ctrl.onChangeFileContent)"
     yml="true"
-    placeholder="# Define or paste the content of your docker-compose file here"
+    placeholder="# 在这里定义或粘贴你的docker compose文件的内容"
     ng-required="true"
   >
   </web-editor-form>

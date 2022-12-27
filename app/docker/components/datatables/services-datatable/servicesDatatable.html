@@ -2,15 +2,41 @@
   <rd-widget>
     <rd-widget-body classes="no-padding">
       <div class="toolBar">
-        <div class="toolBarTitle"> <i class="fa" ng-class="$ctrl.titleIcon" aria-hidden="true" style="margin-right: 2px;"></i> {{ $ctrl.titleText }} </div>
+        <div class="toolBarTitle vertical-center">
+          <div class="widget-icon space-right">
+            <pr-icon icon="$ctrl.titleIcon" feather="true"></pr-icon>
+          </div>
+          {{ $ctrl.titleText }}
+        </div>
+        <div class="searchBar vertical-center">
+          <pr-icon icon="'search'" feather="true" class-name="'searchIcon'"></pr-icon>
+          <input
+            type="text"
+            class="searchInput"
+            ng-model="$ctrl.state.textFilter"
+            ng-change="$ctrl.onTextFilterChange()"
+            placeholder="搜索服务..."
+            auto-focus
+            ng-model-options="{ debounce: 300 }"
+            data-cy="service-searchInput"
+          />
+        </div>
+        <services-datatable-actions
+          selected-items="$ctrl.state.selectedItems"
+          selected-item-count="$ctrl.state.selectedItemCount"
+          show-add-action="$ctrl.showAddAction"
+          show-update-action="$ctrl.showUpdateAction"
+          endpoint-id="$ctrl.endpointId"
+        ></services-datatable-actions>
         <div class="settings">
+          <datatable-columns-visibility columns="$ctrl.columnVisibility.columns" on-change="($ctrl.onColumnVisibilityChange)"></datatable-columns-visibility>
           <span class="setting" ng-class="{ 'setting-active': $ctrl.settings.open }" uib-dropdown dropdown-append-to-body auto-close="disabled" is-open="$ctrl.settings.open">
-            <span uib-dropdown-toggle><i class="fa fa-cog" aria-hidden="true"></i> 设置</span>
+            <span uib-dropdown-toggle aria-label="Settings">
+              <pr-icon icon="'more-vertical'" feather="true"></pr-icon>
+            </span>
             <div class="dropdown-menu dropdown-menu-right" uib-dropdown-menu>
               <div class="tableMenu">
-                <div class="menuHeader">
-                  表格设置
-                </div>
+                <div class="menuHeader"> 表格设置 </div>
                 <div class="menuContent">
                   <div>
                     <div class="md-checkbox">
@@ -18,9 +44,7 @@
                       <label for="setting_auto_refresh">自动刷新</label>
                     </div>
                     <div ng-if="$ctrl.settings.repeater.autoRefresh">
-                      <label for="settings_refresh_rate">
-                        刷新频率
-                      </label>
+                      <label for="settings_refresh_rate"> 刷新频率 </label>
                       <select id="settings_refresh_rate" ng-model="$ctrl.settings.repeater.refreshRate" ng-change="$ctrl.onSettingsRepeaterChange()" class="small-select">
                         <option value="10">10s</option>
                         <option value="30">30s</option>
@@ -29,7 +53,7 @@
                         <option value="300">5min</option>
                       </select>
                       <span>
-                        <i id="refreshRateChange" class="fa fa-check green-icon" aria-hidden="true" style="margin-top: 7px; display: none;"></i>
+                        <i id="refreshRateChange" class="fa fa-check green-icon" aria-hidden="true" style="margin-top: 7px; display: none"></i>
                       </span>
                     </div>
                   </div>
@@ -42,29 +66,11 @@
           </span>
         </div>
       </div>
-      <services-datatable-actions
-        selected-items="$ctrl.state.selectedItems"
-        selected-item-count="$ctrl.state.selectedItemCount"
-        show-add-action="$ctrl.showAddAction"
-        show-update-action="$ctrl.showUpdateAction"
-      ></services-datatable-actions>
-      <div class="searchBar">
-        <i class="fa fa-search searchIcon" aria-hidden="true"></i>
-        <input
-          type="text"
-          class="searchInput"
-          ng-model="$ctrl.state.textFilter"
-          ng-change="$ctrl.onTextFilterChange()"
-          placeholder="搜索..."
-          focus-if="!$ctrl.notAutoFocus"
-          ng-model-options="{ debounce: 300 }"
-        />
-      </div>
       <div class="table-responsive">
         <table class="table table-hover nowrap-cells">
           <thead>
             <tr>
-              <th style="width: 55px;">
+              <th style="width: 55px">
                 <span class="md-checkbox" authorization="DockerServiceUpdate, DockerServiceDelete, DockerServiceCreate">
                   <input id="select_all" type="checkbox" ng-model="$ctrl.state.selectAll" ng-change="$ctrl.selectAll()" />
                   <label for="select_all"></label>
@@ -74,53 +80,67 @@
                 </a>
               </th>
               <th>
-                <a ng-click="$ctrl.changeOrderBy('Name')">
-                  名称
-                  <i class="fa fa-sort-alpha-down" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Name' && !$ctrl.state.reverseOrder"></i>
-                  <i class="fa fa-sort-alpha-up" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Name' && $ctrl.state.reverseOrder"></i>
-                </a>
+                <table-column-header
+                  col-title="'名称'"
+                  can-sort="true"
+                  is-sorted="$ctrl.state.orderBy === 'Name'"
+                  is-sorted-desc="$ctrl.state.orderBy === 'Name' && $ctrl.state.reverseOrder"
+                  ng-click="$ctrl.changeOrderBy('Name')"
+                ></table-column-header>
               </th>
               <th ng-if="$ctrl.showStackColumn">
-                <a ng-click="$ctrl.changeOrderBy('StackName')">
-                  堆栈
-                  <i class="fa fa-sort-alpha-down" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'StackName' && !$ctrl.state.reverseOrder"></i>
-                  <i class="fa fa-sort-alpha-up" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'StackName' && $ctrl.state.reverseOrder"></i>
-                </a>
+                <table-column-header
+                  col-title="'堆栈'"
+                  can-sort="true"
+                  is-sorted="$ctrl.state.orderBy === 'StackName'"
+                  is-sorted-desc="$ctrl.state.orderBy === 'StackName' && $ctrl.state.reverseOrder"
+                  ng-click="$ctrl.changeOrderBy('StackName')"
+                ></table-column-header>
+              </th>
+              <th ng-show="$ctrl.columnVisibility.columns.image.display">
+                <table-column-header
+                  col-title="'镜像'"
+                  can-sort="true"
+                  is-sorted="$ctrl.state.orderBy === 'Image'"
+                  is-sorted-desc="$ctrl.state.orderBy === 'Image' && $ctrl.state.reverseOrder"
+                  ng-click="$ctrl.changeOrderBy('Image')"
+                ></table-column-header>
               </th>
               <th>
-                <a ng-click="$ctrl.changeOrderBy('Image')">
-                  镜像
-                  <i class="fa fa-sort-alpha-down" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Image' && !$ctrl.state.reverseOrder"></i>
-                  <i class="fa fa-sort-alpha-up" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Image' && $ctrl.state.reverseOrder"></i>
-                </a>
+                <table-column-header
+                  col-title="'调度模式'"
+                  can-sort="true"
+                  is-sorted="$ctrl.state.orderBy === 'Mode'"
+                  is-sorted-desc="$ctrl.state.orderBy === 'Mode' && $ctrl.state.reverseOrder"
+                  ng-click="$ctrl.changeOrderBy('Mode')"
+                ></table-column-header>
               </th>
-              <th>
-                <a ng-click="$ctrl.changeOrderBy('Mode')">
-                  调度模式
-                  <i class="fa fa-sort-alpha-down" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Mode' && !$ctrl.state.reverseOrder"></i>
-                  <i class="fa fa-sort-alpha-up" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Mode' && $ctrl.state.reverseOrder"></i>
-                </a>
+              <th ng-show="$ctrl.columnVisibility.columns.ports.display">
+                <table-column-header
+                  col-title="'已发布端口'"
+                  can-sort="true"
+                  is-sorted="$ctrl.state.orderBy === 'Ports'"
+                  is-sorted-desc="$ctrl.state.orderBy === 'Ports' && $ctrl.state.reverseOrder"
+                  ng-click="$ctrl.changeOrderBy('Ports')"
+                ></table-column-header>
               </th>
-              <th>
-                <a ng-click="$ctrl.changeOrderBy('Ports')">
-                  已发布端口
-                  <i class="fa fa-sort-alpha-down" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Ports' && !$ctrl.state.reverseOrder"></i>
-                  <i class="fa fa-sort-alpha-up" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Ports' && $ctrl.state.reverseOrder"></i>
-                </a>
+              <th ng-show="$ctrl.columnVisibility.columns.updated.display">
+                <table-column-header
+                  col-title="'最后更新'"
+                  can-sort="true"
+                  is-sorted="$ctrl.state.orderBy === 'UpdatedAt'"
+                  is-sorted-desc="$ctrl.state.orderBy === 'UpdatedAt' && $ctrl.state.reverseOrder"
+                  ng-click="$ctrl.changeOrderBy('UpdatedAt')"
+                ></table-column-header>
               </th>
-              <th>
-                <a ng-click="$ctrl.changeOrderBy('UpdatedAt')">
-                  最后更新
-                  <i class="fa fa-sort-alpha-down" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'UpdatedAt' && !$ctrl.state.reverseOrder"></i>
-                  <i class="fa fa-sort-alpha-up" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'UpdatedAt' && $ctrl.state.reverseOrder"></i>
-                </a>
-              </th>
-              <th>
-                <a ng-click="$ctrl.changeOrderBy('ResourceControl.Ownership')">
-                  所有权
-                  <i class="fa fa-sort-alpha-down" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'ResourceControl.Ownership' && !$ctrl.state.reverseOrder"></i>
-                  <i class="fa fa-sort-alpha-up" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'ResourceControl.Ownership' && $ctrl.state.reverseOrder"></i>
-                </a>
+              <th ng-show="$ctrl.columnVisibility.columns.ownership.display">
+                <table-column-header
+                  col-title="'所有权'"
+                  can-sort="true"
+                  is-sorted="$ctrl.state.orderBy === 'ResourceControl.Ownership'"
+                  is-sorted-desc="$ctrl.state.orderBy === 'ResourceControl.Ownership' && $ctrl.state.reverseOrder"
+                  ng-click="$ctrl.changeOrderBy('ResourceControl.Ownership')"
+                ></table-column-header>
               </th>
             </tr>
           </thead>
@@ -136,19 +156,21 @@
                   <input id="select_{{ $index }}" type="checkbox" ng-model="item.Checked" ng-click="$ctrl.selectItem(item, $event); $event.stopPropagation()" />
                   <label for="select_{{ $index }}"></label>
                 </span>
-                <a><i ng-class="{ 'fas fa-angle-down': item.Expanded, 'fas fa-angle-right': !item.Expanded }" class="space-right" aria-hidden="true"></i></a>
+                <i ng-class="{ 'fas fa-angle-down': item.Expanded, 'fas fa-angle-right': !item.Expanded }" class="space-right" aria-hidden="true"></i>
               </td>
               <td>
-                <a ui-sref="docker.services.service({id: item.Id})" ng-click="$event.stopPropagation()">{{ item.Name }}</a>
+                <button type="button" class="btn btn-link hover:no-underline !ml-0 p-0" ui-sref="docker.services.service({id: item.Id})" ng-click="$event.stopPropagation()">{{
+                  item.Name
+                }}</button>
               </td>
               <td ng-if="$ctrl.showStackColumn">{{ item.StackName ? item.StackName : '-' }}</td>
-              <td>{{ item.Image | hideshasum }}</td>
+              <td ng-show="$ctrl.columnVisibility.columns.image.display">{{ item.Image | hideshasum }}</td>
               <td ng-controller="ServicesDatatableActionsController as actionCtrl">
                 {{ item.Mode }}
                 <code>{{ item.Tasks | runningtaskscount }}</code> / <code>{{ item.Mode === 'replicated' ? item.Replicas : ($ctrl.nodes | availablenodecount: item) }}</code>
                 <span ng-if="item.Mode === 'replicated' && !item.Scale" authorization="DockerServiceUpdate">
                   <a class="interactive" ng-click="item.Scale = true; item.ReplicaCount = item.Replicas; $event.stopPropagation();">
-                    <i class="fa fa-arrows-alt-v" aria-hidden="true"></i> 规模
+                    <i class="fa fa-arrows-alt-v" aria-hidden="true"></i> Scale
                   </a>
                 </span>
                 <span ng-if="item.Mode === 'replicated' && item.Scale">
@@ -166,12 +188,12 @@
                   <a class="interactive" ng-click="actionCtrl.scaleAction(item); $event.stopPropagation();"><i class="fa fa-check-square"></i></a>
                 </span>
               </td>
-              <td>
+              <td ng-show="$ctrl.columnVisibility.columns.ports.display">
                 <a
                   ng-if="item.Ports && item.Ports.length > 0 && p.PublishedPort"
                   ng-repeat="p in item.Ports"
                   class="image-tag"
-                  ng-href="http://{{ $ctrl.state.publicURL }}:{{ p.PublishedPort }}"
+                  ng-href="http://{{ $ctrl.endpointPublicUrl }}:{{ p.PublishedPort }}"
                   target="_blank"
                   ng-click="$event.stopPropagation();"
                 >
@@ -179,8 +201,8 @@
                 </a>
                 <span ng-if="!item.Ports || item.Ports.length === 0">-</span>
               </td>
-              <td>{{ item.UpdatedAt | getisodate }}</td>
-              <td>
+              <td ng-show="$ctrl.columnVisibility.columns.updated.display">{{ item.UpdatedAt | getisodate }}</td>
+              <td ng-show="$ctrl.columnVisibility.columns.ownership.display">
                 <span>
                   <i ng-class="item.ResourceControl.Ownership | ownershipicon" aria-hidden="true"></i>
                   {{ item.ResourceControl.Ownership ? item.ResourceControl.Ownership : item.ResourceControl.Ownership = $ctrl.RCO.ADMINISTRATORS }}
@@ -206,7 +228,7 @@
               <td colspan="8" class="text-center text-muted">加载中...</td>
             </tr>
             <tr ng-if="$ctrl.state.filteredDataSet.length === 0">
-              <td colspan="8" class="text-center text-muted">没有可用的服务。</td>
+              <td colspan="8" class="text-center text-muted">No service available.</td>
             </tr>
           </tbody>
         </table>
@@ -214,13 +236,11 @@
       <div class="footer" ng-if="$ctrl.dataset">
         <div class="infoBar" ng-if="$ctrl.state.selectedItemCount !== 0"> {{ $ctrl.state.selectedItemCount }} 所选项目 </div>
         <div class="paginationControls">
-          <form class="form-inline">
+          <form class="form-inline vertical-center">
             <span class="limitSelector">
-              <span style="margin-right: 5px;">
-                每页项目数
-              </span>
+              <span style="margin-right: 5px"> 每页项目数 </span>
               <select class="form-control" ng-model="$ctrl.state.paginatedItemLimit" ng-change="$ctrl.changePaginationLimit()" data-cy="component-paginationSelect">
-                <option value="0">全部</option>
+                <option value="0">All</option>
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50">50</option>

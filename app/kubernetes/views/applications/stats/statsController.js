@@ -102,7 +102,7 @@ class KubernetesApplicationStatsController {
           };
         }
       } catch (err) {
-        this.Notifications.error('失败', err, '无法检索应用程序统计信息');
+        this.Notifications.error('失败', err, 'Unable to retrieve application stats');
       }
     });
   }
@@ -140,7 +140,7 @@ class KubernetesApplicationStatsController {
         const node = await this.KubernetesNodeService.get(pod.Node);
         this.nodeCPU = node.CPU;
       } else {
-        throw new Error('找不到 pod');
+        throw new Error('Unable to find pod');
       }
       await this.getStats();
       this.state.getMetrics = true;
@@ -149,7 +149,7 @@ class KubernetesApplicationStatsController {
         this.initCharts();
       });
     } catch (err) {
-      this.Notifications.error('失败', err, '无法检索应用程序统计信息');
+      this.Notifications.error('失败', err, 'Unable to retrieve application stats');
     } finally {
       this.state.viewReady = true;
     }

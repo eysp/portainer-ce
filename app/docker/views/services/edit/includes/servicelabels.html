@@ -1,32 +1,28 @@
 <div id="service-labels">
   <rd-widget>
-    <rd-widget-header icon="fa-tasks" title-text="Service labels">
+    <rd-widget-header icon="list" feather-icon="true" title-text="Service labels">
       <div class="nopadding" authorization="DockerServiceUpdate">
-        <a class="btn btn-default btn-sm pull-right" ng-click="isUpdating || addLabel(service)" ng-disabled="isUpdating">
-          <i class="fa fa-plus-circle" aria-hidden="true"></i> 标签
+        <a class="btn btn-secondary btn-sm pull-right" ng-click="isUpdating || addLabel(service)" ng-disabled="isUpdating">
+          <pr-icon icon="'plus'" feather="true"></pr-icon> label
         </a>
       </div>
     </rd-widget-header>
     <rd-widget-body ng-if="service.ServiceLabels.length === 0">
-      <p>此服务没有标签。</p>
+      <p>这项服务没有任何标签。</p>
     </rd-widget-body>
     <rd-widget-body classes="no-padding" ng-if="service.ServiceLabels.length > 0">
       <table class="table">
         <thead>
           <tr>
-            <th>
-              标签
-            </th>
-            <th>
-              Value
-            </th>
+            <th> Label </th>
+            <th> Value </th>
           </tr>
         </thead>
         <tbody>
           <tr ng-repeat="label in service.ServiceLabels">
             <td>
               <div class="input-group input-group-sm">
-                <span class="input-group-addon fit-text-size">name</span>
+                <span class="input-group-addon fit-text-size">名称</span>
                 <input
                   type="text"
                   class="form-control"
@@ -51,8 +47,8 @@
                   disable-authorization="DockerServiceUpdate"
                 />
                 <span class="input-group-btn" authorization="DockerServiceUpdate">
-                  <button class="btn btn-sm btn-danger" type="button" ng-click="removeLabel(service, $index)" ng-disabled="isUpdating">
-                    <i class="fa fa-trash" aria-hidden="true"></i>
+                  <button class="btn btn-dangerlight" type="button" ng-click="removeLabel(service, $index)" ng-disabled="isUpdating">
+                    <pr-icon icon="'trash-2'" feather="true" size="'md'"></pr-icon>
                   </button>
                 </span>
               </div>
@@ -69,7 +65,7 @@
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu">
-            <li><a ng-click="cancelChanges(service, ['ServiceLabels'])">重置更改</a></li>
+            <li><a ng-click="cancelChanges(service, ['ServiceLabels'])">重置变更</a></li>
             <li><a ng-click="cancelChanges(service)">重置所有更改</a></li>
           </ul>
         </div>

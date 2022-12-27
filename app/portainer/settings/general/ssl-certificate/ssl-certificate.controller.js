@@ -1,7 +1,7 @@
 class SslCertificateController {
   /* @ngInject */
-  constructor($async, $state, SSLService, Notifications) {
-    Object.assign(this, { $async, $state, SSLService, Notifications });
+  constructor($async, $scope, $state, SSLService, Notifications) {
+    Object.assign(this, { $async, $scope, $state, SSLService, Notifications });
 
     this.cert = null;
     this.originalValues = {
@@ -26,10 +26,17 @@ class SslCertificateController {
     this.keyFilePattern = `${pemPattern},.key`;
 
     this.save = this.save.bind(this);
+    this.onChangeForceHTTPS = this.onChangeForceHTTPS.bind(this);
   }
 
   isFormChanged() {
     return Object.entries(this.originalValues).some(([key, value]) => value != this.formValues[key]);
+  }
+
+  onChangeForceHTTPS(checked) {
+    return this.$scope.$evalAsync(() => {
+      this.formValues.forceHTTPS = checked;
+    });
   }
 
   async save() {
@@ -45,7 +52,7 @@ class SslCertificateController {
         location.reload();
         this.state.reloadingPage = true;
       } catch (err) {
-        this.Notifications.error('失败', err, '应用更改失败');
+        this.Notifications.error('失败', err, 'Failed applying changes');
       }
       this.state.actionInProgress = false;
     });
@@ -63,7 +70,7 @@ class SslCertificateController {
         this.formValues.forceHTTPS = !certInfo.httpEnabled;
         this.originalValues.forceHTTPS = this.formValues.forceHTTPS;
       } catch (err) {
-        this.Notifications.error('失败', err, '加载证书信息失败');
+        this.Notifications.error('失败', err, 'Failed loading certificate info');
       }
     });
   }

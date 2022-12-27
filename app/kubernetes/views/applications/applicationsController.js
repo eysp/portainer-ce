@@ -4,7 +4,7 @@ import KubernetesStackHelper from 'Kubernetes/helpers/stackHelper';
 import KubernetesApplicationHelper from 'Kubernetes/helpers/application';
 import KubernetesConfigurationHelper from 'Kubernetes/helpers/configurationHelper';
 import { KubernetesApplicationTypes } from 'Kubernetes/models/application/models';
-
+import { KubernetesPortainerApplicationStackNameLabel } from 'Kubernetes/models/application/models';
 class KubernetesApplicationsController {
   /* @ngInject */
   constructor($async, $state, Notifications, KubernetesApplicationService, HelmService, KubernetesConfigurationService, Authentication, ModalService, LocalStorage, StackService) {
@@ -49,10 +49,10 @@ class KubernetesApplicationsController {
           }
         }
 
-        this.Notifications.success('堆栈成功移除', stack.Name);
+        this.Notifications.success('Stack successfully removed', stack.Name);
         _.remove(this.state.stacks, { Name: stack.Name });
       } catch (err) {
-        this.Notifications.error('失败', err, '无法移除堆栈');
+        this.Notifications.error('失败', err, 'Unable to remove stack');
       } finally {
         --actionCount;
         if (actionCount === 0) {
@@ -64,7 +64,7 @@ class KubernetesApplicationsController {
 
   removeStacksAction(selectedItems) {
     this.ModalService.confirmDeletion(
-      '您确定要删除选定的堆栈吗？ 这将删除与堆栈关联的所有应用程序。',
+      'Are you sure that you want to remove the selected stack(s) ? This will remove all the applications associated to the stack(s).',
       (confirmed) => {
         if (confirmed) {
           return this.$async(this.removeStacksActionAsync, selectedItems);
@@ -81,16 +81,20 @@ class KubernetesApplicationsController {
           await this.HelmService.uninstall(this.endpoint.Id, application);
         } else {
           await this.KubernetesApplicationService.delete(application);
-          // Update applications in stack
-          const stack = this.state.stacks.find((x) => x.Name === application.StackName);
-          const index = stack.Applications.indexOf(application);
-          stack.Applications.splice(index, 1);
-          // remove stack if no app left in the stack
-          if (stack.Applications.length === 0 && application.StackId) {
-            await this.StackService.remove({ Id: application.StackId }, false, this.endpoint.Id);
+
+          if (application.Metadata.labels[KubernetesPortainerApplicationStackNameLabel]) {
+            // Update applications in stack
+            const stack = this.state.stacks.find((x) => x.Name === application.StackName);
+            const index = stack.Applications.indexOf(application);
+            stack.Applications.splice(index, 1);
+
+            // remove stack if no app left in the stack
+            if (stack.Applications.length === 0 && application.StackId) {
+              await this.StackService.remove({ Id: application.StackId }, false, this.endpoint.Id);
+            }
           }
         }
-        this.Notifications.success('应用程序已成功删除', application.Name);
+        this.Notifications.success('应用程序成功删除', application.Name);
         const index = this.state.applications.indexOf(application);
         this.state.applications.splice(index, 1);
       } catch (err) {
@@ -105,7 +109,7 @@ class KubernetesApplicationsController {
   }
 
   removeAction(selectedItems) {
-    this.ModalService.confirmDeletion('您要删除选定的应用程序吗？', (confirmed) => {
+    this.ModalService.confirmDeletion('你想删除选定的应用程序吗？', (confirmed) => {
       if (confirmed) {
         return this.$async(this.removeActionAsync, selectedItems);
       }
@@ -134,7 +138,7 @@ class KubernetesApplicationsController {
       this.state.stacks = KubernetesStackHelper.stacksFromApplications(applications);
       this.state.ports = KubernetesApplicationHelper.portMappingsFromApplications(applications);
     } catch (err) {
-      this.Notifications.error('失败', err, '无法检索应用程序');
+      this.Notifications.error('失败', err, '无法检索到应用程序s');
     }
   }
 

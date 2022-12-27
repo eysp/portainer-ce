@@ -1,10 +1,10 @@
 import _ from 'lodash-es';
 
+import * as JsonPatch from 'fast-json-patch';
 import { KubernetesNode, KubernetesNodeDetails, KubernetesNodeTaint, KubernetesNodeAvailabilities, KubernetesPortainerNodeDrainLabel } from 'Kubernetes/node/models';
 import KubernetesResourceReservationHelper from 'Kubernetes/helpers/resourceReservationHelper';
 import { KubernetesNodeFormValues, KubernetesNodeTaintFormValues, KubernetesNodeLabelFormValues } from 'Kubernetes/node/formValues';
 import { KubernetesNodeCreatePayload, KubernetesNodeTaintPayload } from 'Kubernetes/node/payload';
-import * as JsonPatch from 'fast-json-patch';
 
 class KubernetesNodeConverter {
   static apiToNode(data, res) {
@@ -13,7 +13,7 @@ class KubernetesNodeConverter {
     }
     res.Id = data.metadata.uid;
     const hostName = _.find(data.status.addresses, { type: 'Hostname' });
-    res.Name = hostName ? hostName.address : data.metadata.Name;
+    res.Name = data.metadata.name ? data.metadata.name : hostName.address;
     res.Labels = data.metadata.labels;
     res.Role = _.has(data.metadata.labels, 'node-role.kubernetes.io/master') ? 'Master' : 'Worker';
 

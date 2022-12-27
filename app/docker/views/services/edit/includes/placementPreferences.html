@@ -1,20 +1,20 @@
 <div ng-if="service.ServicePreferences" id="service-placement-preferences">
   <rd-widget>
-    <rd-widget-header icon="fa-tasks" title-text="Placement preferences">
+    <rd-widget-header icon="list" feather-icon="true" title-text="Placement preferences">
       <div class="nopadding" authorization="DockerServiceUpdate">
-        <a class="btn btn-default btn-sm pull-right" ng-click="isUpdating || addPlacementPreference(service)" ng-disabled="isUpdating">
-          <i class="fa fa-plus-circle" aria-hidden="true"></i> 放置偏好
+        <a class="btn btn-secondary btn-sm pull-right" ng-click="isUpdating || addPlacementPreference(service)" ng-disabled="isUpdating">
+          <pr-icon icon="'plus'" feather="true"></pr-icon> 安置优先权
         </a>
       </div>
     </rd-widget-header>
     <rd-widget-body ng-if="service.ServicePreferences.length === 0">
-      <p>此服务没有放置偏好。</p>
+      <p>这项服务没有安置的优先权。</p>
     </rd-widget-body>
     <rd-widget-body ng-if="service.ServicePreferences.length > 0" classes="no-padding">
       <table class="table">
         <thead>
           <tr>
-            <th>策略</th>
+            <th>Strategy</th>
             <th>Value</th>
           </tr>
         </thead>
@@ -45,8 +45,8 @@
                   disable-authorization="DockerServiceUpdate"
                 />
                 <span class="input-group-btn" authorization="DockerServiceUpdate">
-                  <button class="btn btn-sm btn-danger" type="button" ng-click="removePlacementPreference(service, $index)" ng-disabled="isUpdating">
-                    <i class="fa fa-trash" aria-hidden="true"></i>
+                  <button class="btn btn-dangerlight" type="button" ng-click="removePlacementPreference(service, $index)" ng-disabled="isUpdating">
+                    <pr-icon icon="'trash-2'" feather="true" size="'md'"></pr-icon>
                   </button>
                 </span>
               </div>
@@ -63,7 +63,7 @@
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu">
-            <li><a ng-click="cancelChanges(service, ['ServicePreferences'])">重置更改</a></li>
+            <li><a ng-click="cancelChanges(service, ['ServicePreferences'])">重置变更</a></li>
             <li><a ng-click="cancelChanges(service)">重置所有更改</a></li>
           </ul>
         </div>

@@ -1,19 +1,10 @@
-<rd-header>
-  <rd-header-title title-text="服务详情">
-    <a data-toggle="tooltip" title="刷新" ui-sref="docker.services.service({id: service.Id})" ui-sref-opts="{reload: true}">
-      <i class="fa fa-sync" aria-hidden="true"></i>
-    </a>
-  </rd-header-title>
-  <rd-header-content>
-    <a ui-sref="docker.services">服务</a> &gt; <a ui-sref="docker.services.service({id: service.Id})">{{ service.Name }}</a>
-  </rd-header-content>
-</rd-header>
+<page-header title="'服务细节'" breadcrumbs="[{label:'Services', link:'docker.services'}, service.Name]" reload="true"> </page-header>
 
 <div class="row">
   <div ng-if="isUpdating" class="col-lg-12 col-md-12 col-xs-12">
     <div class="alert alert-info" role="alert" id="service-update-alert">
-      <p>正在更新此服务。编辑此服务当前已禁用。</p>
-      <a ui-sref="docker.services.service({id: service.Id}, {reload: true})">刷新以查看此服务是否已完成更新。</a>
+      <p>这项服务正在更新中。编辑这项服务目前是禁用的。</p>
+      <a ui-sref="docker.services.service({id: service.Id}, {reload: true})">刷新以查看该服务是否已完成更新。</a>
     </div>
   </div>
 </div>
@@ -21,7 +12,7 @@
 <div class="row">
   <div class="col-lg-9 col-md-9 col-xs-9">
     <rd-widget>
-      <rd-widget-header icon="fa-list-alt" title-text="服务详情"></rd-widget-header>
+      <rd-widget-header icon="shuffle" feather-icon="true" title-text="Service details"></rd-widget-header>
       <rd-widget-body classes="no-padding">
         <table class="table">
           <tbody>
@@ -45,7 +36,7 @@
               <td>{{ service.CreatedAt | getisodate }}</td>
             </tr>
             <tr ng-if="service.UpdatedAt">
-              <td>最后更新</td>
+              <td>最后更新于</td>
               <td>{{ service.UpdatedAt | getisodate }}</td>
             </tr>
             <tr ng-if="service.Version">
@@ -57,7 +48,7 @@
               <td>{{ service.Mode }}</td>
             </tr>
             <tr ng-if="service.Mode === 'replicated'">
-              <td>复制</td>
+              <td>复制副本</td>
               <td>
                 <span ng-if="service.Mode === 'replicated'">
                   <input
@@ -74,16 +65,15 @@
               <td>镜像</td>
               <td>{{ service.Image }}</td>
             </tr>
-            <tr ng-if="applicationState.endpoint.type !== 4">
+            <tr ng-if="isAdmin && applicationState.endpoint.type !== 4">
               <td colspan="{{ webhookURL ? '1' : '2' }}">
-                网络钩子服务
-                <portainer-tooltip
-                  position="top"
-                  message="网络钩子（或回调URI）用于自动更新此服务。向此回调URI发送POST请求（无需任何身份验证）将获取关联镜像的最新版本并重新部署此服务。"
-                ></portainer-tooltip>
-                <label class="switch" style="margin-left: 20px;">
-                  <input disable-authorization="DockerServiceUpdate" type="checkbox" ng-model="WebhookExists" ng-click="updateWebhook(service)" /><i></i>
-                </label>
+                <por-switch-field
+                  tooltip="'用于自动更新此服务的Webhook（或回调URI）。向这个回调URI发送一个POST请求（不需要任何认证）将拉出相关图像的最新版本并重新部署这个服务。'"
+                  checked="WebhookExists"
+                  disabled="!isAdmin"
+                  on-change="(onWebhookChange)"
+                  label="'Service webhook'"
+                ></por-switch-field>
               </td>
               <td ng-if="webhookURL">
                 <span class="text-muted">{{ webhookURL | truncatelr }}</span>
@@ -91,14 +81,14 @@
                   <span><i class="fa fa-copy space-right" aria-hidden="true"></i>复制链接</span>
                 </button>
                 <span>
-                  <i id="copyNotification" class="fa fa-check green-icon" aria-hidden="true" style="margin-left: 7px; display: none;"></i>
+                  <i id="copyNotification" class="fa fa-check green-icon" aria-hidden="true" style="margin-left: 7px; display: none"></i>
                 </span>
               </td>
             </tr>
             <tr authorization="DockerServiceLogs, DockerServiceUpdate, DockerServiceDelete">
               <td colspan="2">
                 <p class="small text-muted" authorization="DockerServiceUpdate">
-                  注意：您只能回滚一个级别的更改。单击“回滚”按钮而不进行新更改将撤消以前的回滚 </p
+                  注意：你只能回滚一级的变化。点击回滚按钮而不做新的修改，将撤消你之前的回滚。 </p
                 ><p>
                   <a
                     authorization="DockerServiceLogs"
@@ -118,7 +108,7 @@
                     ng-if="applicationState.endpoint.apiVersion >= 1.25"
                   >
                     <span ng-hide="state.updateInProgress"><i class="fa fa-sync space-right" aria-hidden="true"></i>更新服务</span>
-                    <span ng-show="state.updateInProgress">正在更新...</span>
+                    <span ng-show="state.updateInProgress">正在更新中...</span>
                   </button>
                   <button
                     authorization="DockerServiceUpdate"
@@ -130,7 +120,7 @@
                     ng-if="applicationState.endpoint.apiVersion >= 1.25"
                   >
                     <span ng-hide="state.rollbackInProgress"><i class="fa fa-undo space-right" aria-hidden="true"></i>回滚服务</span>
-                    <span ng-show="state.rollbackInProgress">正在回滚...</span>
+                    <span ng-show="state.rollbackInProgress">回滚过程中...</span>
                   </button>
                   <button
                     authorization="DockerServiceDelete"
@@ -140,7 +130,7 @@
                     ng-click="removeService()"
                     button-spinner="state.deletionInProgress"
                   >
-                    <span ng-hide="state.deletionInProgress"><i class="fa fa-trash-alt space-right" aria-hidden="true"></i>删除服务</span>
+                    <span ng-hide="state.deletionInProgress"><i class="fa fa-trash-alt space-right" aria-hidden="true"></i>删除该服务</span>
                     <span ng-show="state.deletionInProgress">正在删除...</span>
                   </button>
                 </p></td
@@ -162,7 +152,7 @@
               <span class="caret"></span>
             </button>
             <ul class="dropdown-menu">
-              <li><a ng-click="cancelChanges(service, ['Mode', 'Replicas', 'Name'])">重置更改</a></li>
+              <li><a ng-click="cancelChanges(service, ['Mode', 'Replicas', 'Name'])">重置变更</a></li>
               <li><a ng-click="cancelChanges(service)">重置所有更改</a></li>
             </ul>
           </div>
@@ -182,14 +172,14 @@
           <li><a href ng-click="goToItem('service-mounts')">挂载</a></li>
           <li><a href ng-click="goToItem('service-network-specs')">网络 &amp; 已发布端口</a></li>
           <li><a href ng-click="goToItem('service-resources')">资源限制 &amp; 保留</a></li>
-          <li><a href ng-click="goToItem('service-placement-constraints')">Placement constraints</a></li>
-          <li ng-if="applicationState.endpoint.apiVersion >= 1.3"><a href ng-click="goToItem('service-placement-preferences')">Placement 首选项</a></li>
-          <li><a href ng-click="goToItem('service-restart-policy')">重启策略</a></li>
+          <li><a href ng-click="goToItem('service-placement-constraints')">放置限制</a></li>
+          <li ng-if="applicationState.endpoint.apiVersion >= 1.3"><a href ng-click="goToItem('service-placement-preferences')">放置首选项</a></li>
+          <li><a href ng-click="goToItem('service-restart-policy')">重新启动政策</a></li>
           <li><a href ng-click="goToItem('service-update-config')">更新配置</a></li>
           <li><a href ng-click="goToItem('service-logging')">日志</a></li>
           <li><a href ng-click="goToItem('service-labels')">服务标签</a></li>
           <li><a href ng-click="goToItem('service-configs')">配置</a></li>
-          <li ng-if="applicationState.endpoint.apiVersion >= 1.25"><a href ng-click="goToItem('service-secrets')">秘钥</a></li>
+          <li ng-if="applicationState.endpoint.apiVersion >= 1.25"><a href ng-click="goToItem('service-secrets')">Secrets</a></li>
           <li><a href ng-click="goToItem('service-tasks')">任务</a></li>
         </ul>
       </rd-widget-body>
@@ -198,7 +188,14 @@
 </div>
 
 <!-- access-control-panel -->
-<por-access-control-panel ng-if="service" resource-id="service.Id" resource-control="service.ResourceControl" resource-type="'service'"> </por-access-control-panel>
+<access-control-panel
+  ng-if="service"
+  resource-id="service.Id"
+  resource-control="service.ResourceControl"
+  resource-type="resourceType"
+  on-update-success="(onUpdateResourceControlSuccess)"
+>
+</access-control-panel>
 <!-- !access-control-panel -->
 
 <div class="row">
@@ -226,7 +223,7 @@
 <div class="row">
   <hr />
   <div class="col-lg-12 col-md-12 col-xs-12">
-    <h3 id="service-specs">服务规格</h3>
+    <h3 id="service-specs">服务规范</h3>
     <div id="service-resources" class="padding-top" ng-include="'app/docker/views/services/edit/includes/resources.html'"></div>
     <div id="service-placement-constraints" class="padding-top" ng-include="'app/docker/views/services/edit/includes/constraints.html'"></div>
     <div

@@ -37,17 +37,17 @@ export class VolumeBrowserController {
 
     try {
       await this.VolumeBrowserService.rename(this.volumeId, filePath, newFilePath);
-      this.Notifications.success('File successfully renamed', newFilePath);
+      this.Notifications.success('文件成功重命名', newFilePath);
       this.files = await this.VolumeBrowserService.ls(this.volumeId, this.state.path);
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to rename file');
+      this.Notifications.error('失败', err, '无法重命名文件');
     }
   }
 
   confirmDelete(file) {
     const filePath = this.state.path === '/' ? file : `${this.state.path}/${file}`;
 
-    this.ModalService.confirmDeletion(`Are you sure that you want to delete ${filePath} ?`, (confirmed) => {
+    this.ModalService.confirmDeletion(`你确定你要删除 ${filePath} ?`, (confirmed) => {
       if (!confirmed) {
         return;
       }
@@ -66,7 +66,7 @@ export class VolumeBrowserController {
       const downloadData = new Blob([data.file]);
       this.FileSaver.saveAs(downloadData, file);
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to download file');
+      this.Notifications.error('失败', err, '无法下载文件');
     }
   }
 
@@ -86,10 +86,10 @@ export class VolumeBrowserController {
   async deleteFileAsync(file) {
     try {
       await this.VolumeBrowserService.delete(this.volumeId, file);
-      this.Notifications.success('File successfully deleted', file);
+      this.Notifications.success('文件成功删除', file);
       this.files = await this.VolumeBrowserService.ls(this.volumeId, this.state.path);
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to delete file');
+      this.Notifications.error('失败', err, '无法删除文件');
     }
   }
 
@@ -102,7 +102,7 @@ export class VolumeBrowserController {
       this.state.path = path;
       this.files = files;
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to browse volume');
+      this.Notifications.error('失败', err, '无法浏览卷存储卷');
     }
   }
 
@@ -111,10 +111,10 @@ export class VolumeBrowserController {
   }
   async onFileSelectedForUploadAsync(file) {
     try {
-      await this.VolumeBrowserService.upload(this.state.path, file, this.volumeId);
+      await this.VolumeBrowserService.upload(this.endpointId, this.state.path, file, this.volumeId);
       this.onFileUploaded();
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to upload file');
+      this.Notifications.error('失败', err, '无法上传文件');
     }
   }
 
@@ -147,7 +147,7 @@ export class VolumeBrowserController {
     try {
       this.files = await this.VolumeBrowserService.ls(this.volumeId, this.state.path);
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to browse volume');
+      this.Notifications.error('失败', err, '无法浏览存储卷');
     }
   }
 }

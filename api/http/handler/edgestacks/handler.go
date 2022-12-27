@@ -3,13 +3,14 @@ package edgestacks
 import (
 	"fmt"
 	"net/http"
-	"path"
 	"strconv"
 
 	"github.com/gorilla/mux"
 	httperror "github.com/portainer/libhttp/error"
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/filesystem"
+	"github.com/portainer/portainer/api/http/middlewares"
 	"github.com/portainer/portainer/api/http/security"
 )
 
@@ -17,17 +18,18 @@ import (
 type Handler struct {
 	*mux.Router
 	requestBouncer     *security.RequestBouncer
-	DataStore          portainer.DataStore
+	DataStore          dataservices.DataStore
 	FileService        portainer.FileService
 	GitService         portainer.GitService
 	KubernetesDeployer portainer.KubernetesDeployer
 }
 
 // NewHandler creates a handler to manage environment(endpoint) group operations.
-func NewHandler(bouncer *security.RequestBouncer) *Handler {
+func NewHandler(bouncer *security.RequestBouncer, dataStore dataservices.DataStore) *Handler {
 	h := &Handler{
 		Router:         mux.NewRouter(),
 		requestBouncer: bouncer,
+		DataStore:      dataStore,
 	}
 	h.Handle("/edge_stacks",
 		bouncer.AdminAccess(bouncer.EdgeComputeOperation(httperror.LoggerHandler(h.edgeStackCreate)))).Methods(http.MethodPost)
@@ -43,6 +45,12 @@ func NewHandler(bouncer *security.RequestBouncer) *Handler {
 		bouncer.AdminAccess(bouncer.EdgeComputeOperation(httperror.LoggerHandler(h.edgeStackFile)))).Methods(http.MethodGet)
 	h.Handle("/edge_stacks/{id}/status",
 		bouncer.PublicAccess(httperror.LoggerHandler(h.edgeStackStatusUpdate))).Methods(http.MethodPut)
+
+	edgeStackStatusRouter := h.NewRoute().Subrouter()
+	edgeStackStatusRouter.Use(middlewares.WithEndpoint(h.DataStore.Endpoint(), "endpoint_id"))
+
+	edgeStackStatusRouter.PathPrefix("/edge_stacks/{id}/status/{endpoint_id}").Handler(bouncer.PublicAccess(httperror.LoggerHandler(h.edgeStackStatusDelete))).Methods(http.MethodDelete)
+
 	return h
 }
 
@@ -56,7 +64,7 @@ func (handler *Handler) convertAndStoreKubeManifestIfNeeded(edgeStack *portainer
 		return nil
 	}
 
-	composeConfig, err := handler.FileService.GetFileContent(path.Join(edgeStack.ProjectPath, edgeStack.EntryPoint))
+	composeConfig, err := handler.FileService.GetFileContent(edgeStack.ProjectPath, edgeStack.EntryPoint)
 	if err != nil {
 		return fmt.Errorf("unable to retrieve Compose file from disk: %w", err)
 	}

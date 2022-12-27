@@ -1,0 +1,1 @@
+export { EdgeDevicesView } from './EdgeDevicesView';

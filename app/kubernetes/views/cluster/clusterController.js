@@ -63,6 +63,7 @@ class KubernetesClusterController {
       _.forEach(nodes, (node) => (node.Memory = filesizeParser(node.Memory)));
       this.nodes = nodes;
       this.CPULimit = _.reduce(this.nodes, (acc, node) => node.CPU + acc, 0);
+      this.CPULimit = Math.round(this.CPULimit * 10000) / 10000;
       this.MemoryLimit = _.reduce(this.nodes, (acc, node) => KubernetesResourceReservationHelper.megaBytesValue(node.Memory) + acc, 0);
     } catch (err) {
       this.Notifications.error('失败', err, 'Unable to retrieve nodes');
@@ -95,7 +96,7 @@ class KubernetesClusterController {
         await this.getResourceUsage(this.endpoint.Id);
       }
     } catch (err) {
-      this.Notifications.error('失败', 'Unable to retrieve applications', err);
+      this.Notifications.error('失败', err, 'Unable to retrieve applications');
     } finally {
       this.state.applicationsLoading = false;
     }
@@ -116,7 +117,7 @@ class KubernetesClusterController {
       }, new KubernetesResourceReservation());
       this.resourceUsage = clusterResourceUsage;
     } catch (err) {
-      this.Notifications.error('失败', 'Unable to retrieve cluster resource usage', err);
+      this.Notifications.error('失败', err, 'Unable to retrieve cluster resource usage');
     }
   }
 

@@ -3,11 +3,12 @@ package cli
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
-	"github.com/pkg/errors"
 	portainer "github.com/portainer/portainer/api"
+
+	"github.com/pkg/errors"
+	"github.com/rs/zerolog/log"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -48,7 +49,7 @@ func (kcl *KubeClient) CreateUserShellPod(ctx context.Context, serviceAccountNam
 		},
 	}
 
-	shellPod, err := kcl.cli.CoreV1().Pods(portainerNamespace).Create(podSpec)
+	shellPod, err := kcl.cli.CoreV1().Pods(portainerNamespace).Create(ctx, podSpec, metav1.CreateOptions{})
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating shell pod")
 	}
@@ -58,12 +59,12 @@ func (kcl *KubeClient) CreateUserShellPod(ctx context.Context, serviceAccountNam
 	defer cancelFunc()
 	err = kcl.waitForPodStatus(timeoutCtx, v1.PodRunning, shellPod)
 	if err != nil {
-		kcl.cli.CoreV1().Pods(portainerNamespace).Delete(shellPod.Name, nil)
+		kcl.cli.CoreV1().Pods(portainerNamespace).Delete(context.TODO(), shellPod.Name, metav1.DeleteOptions{})
 		return nil, errors.Wrap(err, "aborting pod creation; error waiting for shell pod ready status")
 	}
 
 	if len(shellPod.Spec.Containers) != 1 {
-		kcl.cli.CoreV1().Pods(portainerNamespace).Delete(shellPod.Name, nil)
+		kcl.cli.CoreV1().Pods(portainerNamespace).Delete(context.TODO(), shellPod.Name, metav1.DeleteOptions{})
 		return nil, fmt.Errorf("incorrect shell pod state, expecting single container to be present")
 	}
 
@@ -78,12 +79,12 @@ func (kcl *KubeClient) CreateUserShellPod(ctx context.Context, serviceAccountNam
 	go func() {
 		select {
 		case <-time.After(portainer.WebSocketKeepAlive):
-			log.Println("[DEBUG] [internal,kubernetes/pod] [message: pod removal schedule duration exceeded]")
-			kcl.cli.CoreV1().Pods(portainerNamespace).Delete(shellPod.Name, nil)
+			log.Debug().Msg("pod removal schedule duration exceeded")
+			kcl.cli.CoreV1().Pods(portainerNamespace).Delete(context.TODO(), shellPod.Name, metav1.DeleteOptions{})
 		case <-ctx.Done():
 			err := ctx.Err()
-			log.Printf("[DEBUG] [internal,kubernetes/pod] [message: context error: err=%s ]\n", err)
-			kcl.cli.CoreV1().Pods(portainerNamespace).Delete(shellPod.Name, nil)
+			log.Debug().Err(err).Msg("context error")
+			kcl.cli.CoreV1().Pods(portainerNamespace).Delete(context.TODO(), shellPod.Name, metav1.DeleteOptions{})
 		}
 	}()
 
@@ -93,7 +94,7 @@ func (kcl *KubeClient) CreateUserShellPod(ctx context.Context, serviceAccountNam
 // waitForPodStatus will wait until duration d (from now) for a pod to reach defined phase/status.
 // The pod status will be polled at specified delay until the pod reaches ready state.
 func (kcl *KubeClient) waitForPodStatus(ctx context.Context, phase v1.PodPhase, pod *v1.Pod) error {
-	log.Printf("[DEBUG] [internal,kubernetes/pod] [message: waiting for pod ready: pod=%s... ]\n", pod.Name)
+	log.Debug().Str("pod", pod.Name).Msg("waiting for pod ready")
 
 	pollDelay := 500 * time.Millisecond
 	for {
@@ -101,7 +102,7 @@ func (kcl *KubeClient) waitForPodStatus(ctx context.Context, phase v1.PodPhase, 
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
-			pod, err := kcl.cli.CoreV1().Pods(pod.Namespace).Get(pod.Name, metav1.GetOptions{})
+			pod, err := kcl.cli.CoreV1().Pods(pod.Namespace).Get(ctx, pod.Name, metav1.GetOptions{})
 			if err != nil {
 				return err
 			}

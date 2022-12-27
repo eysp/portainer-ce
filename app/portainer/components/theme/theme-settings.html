@@ -1,19 +1,14 @@
-<information-panel class="theme-information" title-text="信息">
-  <span class="small text-muted">
-    <p>
-      <i class="fa fa-flask orange-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-      黑暗和高对比度主题是实验性的。 某些 UI 组件可能无法正确显示。
-    </p>
-  </span>
-</information-panel>
-<rd-widget>
-  <rd-widget-header icon="fa-palette" title-text="更改用户主题"></rd-widget-header>
-  <rd-widget-body>
-    <form class="theme-panel">
-      <!-- Theme -->
-      <box-selector radio-name="theme" ng-model="$ctrl.state.userTheme" options="$ctrl.state.availableThemes" on-change="($ctrl.setTheme)"></box-selector>
-      <button ng-click="$ctrl.updateTheme()" class="btn btn-primary btn-sm">更新主题</button>
-      <!-- !Theme -->
-    </form>
-  </rd-widget-body>
-</rd-widget>
+<div class="mt-6">
+  <rd-widget>
+    <rd-widget-header icon="sliders" feather-icon="true" title-text="用户主题"></rd-widget-header>
+    <rd-widget-body>
+      <form class="form-horizontal">
+        <box-selector radio-name="'theme'" value="$ctrl.state.userTheme" options="$ctrl.state.availableThemes" on-change="($ctrl.setTheme)"></box-selector>
+      </form>
+      <p class="mt-2 vertical-center">
+        <pr-icon icon="'alert-circle'" class-name="'icon-primary'" feather="true"></pr-icon>
+        深色和高对比度主题是试验性的。一些用户界面组件可能无法正常显示。
+      </p>
+    </rd-widget-body>
+  </rd-widget>
+</div>

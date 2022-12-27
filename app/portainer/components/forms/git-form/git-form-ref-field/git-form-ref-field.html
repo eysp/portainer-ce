@@ -1,12 +1,15 @@
 <div class="form-group">
-  <span class="col-sm-12 text-muted small">
-    使用以下语法指定仓库的引用：带有 <code>refs/heads/branch_name</code> 的分支或带有 <code>refs/tags/tag_name</code>的标签。 如果不
-     指定，将使用默认的 <code>HEAD</code> 引用通常的 <code>master</code> 分支。
+  <span class="col-sm-12 text-muted small vertical-center">
+    <pr-icon icon="'info'" mode="'primary'" feather="true"></pr-icon>
+    <span>
+      使用以下语法指定版本库的引用：使用 <code>refs/heads/branch_name</code> 的分支或使用 <code>refs/tags/tag_name</code>的标签。 
+      如果不指定，将使用默认的 <code>HEAD</code> 引用，通常是 <code>master</code> 分支。
+    </span>
   </span>
 </div>
 <div class="form-group">
-  <label for="stack_repository_reference_name" class="col-sm-2 control-label text-left">仓库参考</label>
-  <div class="col-sm-10">
+  <label for="stack_repository_reference_name" class="col-lg-2 col-sm-3 control-label text-left">仓库参考</label>
+  <div class="col-sm-8">
     <input
       type="text"
       class="form-control"

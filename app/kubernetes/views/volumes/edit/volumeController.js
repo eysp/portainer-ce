@@ -1,9 +1,9 @@
 import angular from 'angular';
 import _ from 'lodash-es';
+import filesizeParser from 'filesize-parser';
 import KubernetesVolumeHelper from 'Kubernetes/helpers/volumeHelper';
 import KubernetesEventHelper from 'Kubernetes/helpers/eventHelper';
 import { KubernetesStorageClassAccessPolicies } from 'Kubernetes/models/storage-class/models';
-import filesizeParser from 'filesize-parser';
 import KubernetesNamespaceHelper from 'Kubernetes/helpers/namespaceHelper';
 
 class KubernetesVolumeController {
@@ -84,7 +84,7 @@ class KubernetesVolumeController {
     try {
       this.volume.PersistentVolumeClaim.Storage = this.state.volumeSize + this.state.volumeSizeUnit.charAt(0);
       await this.KubernetesPersistentVolumeClaimService.patch(this.oldVolume.PersistentVolumeClaim, this.volume.PersistentVolumeClaim);
-      this.Notifications.success('Volume successfully updated');
+      this.Notifications.success('Success', 'Volume successfully updated');
 
       if (redeploy) {
         const promises = _.flatten(
@@ -93,7 +93,7 @@ class KubernetesVolumeController {
           })
         );
         await Promise.all(promises);
-        this.Notifications.success('Applications successfully redeployed');
+        this.Notifications.success('Success', 'Applications successfully redeployed');
       }
 
       this.$state.reload(this.$state.current);
@@ -116,9 +116,10 @@ class KubernetesVolumeController {
   }
 
   async getVolumeAsync() {
+    const storageClasses = this.endpoint.Kubernetes.Configuration.StorageClasses;
     try {
       const [volume, applications] = await Promise.all([
-        this.KubernetesVolumeService.get(this.state.namespace, this.state.name),
+        this.KubernetesVolumeService.get(this.state.namespace, storageClasses, this.state.name),
         this.KubernetesApplicationService.get(this.state.namespace),
       ]);
       volume.Applications = KubernetesVolumeHelper.getUsingApplications(volume, applications);

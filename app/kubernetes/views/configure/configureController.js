@@ -2,11 +2,12 @@ import _ from 'lodash-es';
 import angular from 'angular';
 import { KubernetesStorageClass, KubernetesStorageClassAccessPolicies } from 'Kubernetes/models/storage-class/models';
 import { KubernetesFormValidationReferences } from 'Kubernetes/models/application/formValues';
-import { KubernetesIngressClass } from 'Kubernetes/ingress/models';
-import KubernetesFormValidationHelper from 'Kubernetes/helpers/formValidationHelper';
 import { KubernetesIngressClassTypes } from 'Kubernetes/ingress/constants';
 import KubernetesNamespaceHelper from 'Kubernetes/helpers/namespaceHelper';
-import { K8S_SETUP_DEFAULT } from '@/portainer/feature-flags/feature-ids';
+import { FeatureId } from '@/portainer/feature-flags/enums';
+
+import { getIngressControllerClassMap, updateIngressControllerClassMap } from '@/react/kubernetes/cluster/ingressClass/utils';
+
 class KubernetesConfigureController {
   /* #region  CONSTRUCTOR */
 
@@ -14,6 +15,7 @@ class KubernetesConfigureController {
   constructor(
     $async,
     $state,
+    $scope,
     Notifications,
     KubernetesStorageService,
     EndpointService,
@@ -25,6 +27,7 @@ class KubernetesConfigureController {
   ) {
     this.$async = $async;
     this.$state = $state;
+    this.$scope = $scope;
     this.Notifications = Notifications;
     this.KubernetesStorageService = KubernetesStorageService;
     this.EndpointService = EndpointService;
@@ -38,7 +41,17 @@ class KubernetesConfigureController {
 
     this.onInit = this.onInit.bind(this);
     this.configureAsync = this.configureAsync.bind(this);
-    this.limitedFeature = K8S_SETUP_DEFAULT;
+    this.areControllersChanged = this.areControllersChanged.bind(this);
+    this.areFormValuesChanged = this.areFormValuesChanged.bind(this);
+    this.onBeforeOnload = this.onBeforeOnload.bind(this);
+    this.limitedFeature = FeatureId.K8S_SETUP_DEFAULT;
+    this.limitedFeatureAutoWindow = FeatureId.HIDE_AUTO_UPDATE_WINDOW;
+    this.onToggleAutoUpdate = this.onToggleAutoUpdate.bind(this);
+    this.onChangeControllers = this.onChangeControllers.bind(this);
+    this.onChangeEnableResourceOverCommit = this.onChangeEnableResourceOverCommit.bind(this);
+    this.onToggleIngressAvailabilityPerNamespace = this.onToggleIngressAvailabilityPerNamespace.bind(this);
+    this.onToggleAllowNoneIngressClass = this.onToggleAllowNoneIngressClass.bind(this);
+    this.onChangeStorageClassAccessMode = this.onChangeStorageClassAccessMode.bind(this);
   }
   /* #endregion */
 
@@ -59,46 +72,44 @@ class KubernetesConfigureController {
   /* #endregion */
 
   /* #region  INGRESS CLASSES UI MANAGEMENT */
-  addIngressClass() {
-    this.formValues.IngressClasses.push(new KubernetesIngressClass());
-    this.onChangeIngressClass();
-  }
-
-  restoreIngressClass(index) {
-    this.formValues.IngressClasses[index].NeedsDeletion = false;
-    this.onChangeIngressClass();
-  }
-
-  removeIngressClass(index) {
-    if (!this.formValues.IngressClasses[index].IsNew) {
-      this.formValues.IngressClasses[index].NeedsDeletion = true;
-    } else {
-      this.formValues.IngressClasses.splice(index, 1);
-    }
-    this.onChangeIngressClass();
-  }
-
-  onChangeIngressClass() {
-    const state = this.state.duplicates.ingressClasses;
-    const source = _.map(this.formValues.IngressClasses, (ic) => (ic.NeedsDeletion ? undefined : ic.Name));
-    const duplicates = KubernetesFormValidationHelper.getDuplicates(source);
-    state.refs = duplicates;
-    state.hasRefs = Object.keys(duplicates).length > 0;
-  }
-
-  onChangeIngressClassName(index) {
-    const fv = this.formValues.IngressClasses[index];
-    if (_.includes(fv.Name, KubernetesIngressClassTypes.NGINX)) {
-      fv.Type = KubernetesIngressClassTypes.NGINX;
-    } else if (_.includes(fv.Name, KubernetesIngressClassTypes.TRAEFIK)) {
-      fv.Type = KubernetesIngressClassTypes.TRAEFIK;
-    }
-    this.onChangeIngressClass();
+  onChangeControllers(controllerClassMap) {
+    this.ingressControllers = controllerClassMap;
   }
 
   hasTraefikIngress() {
     return _.find(this.formValues.IngressClasses, { Type: this.IngressClassTypes.TRAEFIK });
   }
+
+  toggleAdvancedIngSettings() {
+    this.$scope.$evalAsync(() => {
+      this.state.isIngToggleSectionExpanded = !this.state.isIngToggleSectionExpanded;
+    });
+  }
+
+  onToggleAllowNoneIngressClass() {
+    this.$scope.$evalAsync(() => {
+      this.formValues.AllowNoneIngressClass = !this.formValues.AllowNoneIngressClass;
+    });
+  }
+
+  onToggleIngressAvailabilityPerNamespace() {
+    this.$scope.$evalAsync(() => {
+      this.formValues.IngressAvailabilityPerNamespace = !this.formValues.IngressAvailabilityPerNamespace;
+    });
+  }
+  /* #endregion */
+
+  /* #region RESOURCES AND METRICS */
+
+  onChangeEnableResourceOverCommit(enabled) {
+    this.$scope.$evalAsync(() => {
+      this.formValues.EnableResourceOverCommit = enabled;
+      if (enabled) {
+        this.formValues.ResourceOverCommitPercentage = 20;
+      }
+    });
+  }
+
   /* #endregion */
 
   /* #region  CONFIGURE */
@@ -106,8 +117,13 @@ class KubernetesConfigureController {
     endpoint.Kubernetes.Configuration.StorageClasses = storageClasses;
     endpoint.Kubernetes.Configuration.UseLoadBalancer = this.formValues.UseLoadBalancer;
     endpoint.Kubernetes.Configuration.UseServerMetrics = this.formValues.UseServerMetrics;
+    endpoint.Kubernetes.Configuration.EnableResourceOverCommit = this.formValues.EnableResourceOverCommit;
+    endpoint.Kubernetes.Configuration.ResourceOverCommitPercentage = this.formValues.ResourceOverCommitPercentage;
     endpoint.Kubernetes.Configuration.IngressClasses = ingressClasses;
     endpoint.Kubernetes.Configuration.RestrictDefaultNamespace = this.formValues.RestrictDefaultNamespace;
+    endpoint.Kubernetes.Configuration.IngressAvailabilityPerNamespace = this.formValues.IngressAvailabilityPerNamespace;
+    endpoint.Kubernetes.Configuration.AllowNoneIngressClass = this.formValues.AllowNoneIngressClass;
+    endpoint.ChangeWindow = this.state.autoUpdateSettings;
   }
 
   transformFormValues() {
@@ -134,11 +150,9 @@ class KubernetesConfigureController {
 
   async removeIngressesAcrossNamespaces() {
     const ingressesToDel = _.filter(this.formValues.IngressClasses, { NeedsDeletion: true });
-
     if (!ingressesToDel.length) {
       return;
     }
-
     const promises = [];
     const oldEndpointID = this.EndpointProvider.endpointID();
     this.EndpointProvider.setEndpointID(this.endpoint.Id);
@@ -197,7 +211,9 @@ class KubernetesConfigureController {
 
       this.assignFormValuesToEndpoint(this.endpoint, storageClasses, ingressClasses);
       await this.EndpointService.updateEndpoint(this.endpoint.Id, this.endpoint);
-
+      // updateIngressControllerClassMap must be done after updateEndpoint, as a hacky workaround. A better solution: saving ingresscontrollers somewhere else, is being discussed
+      await updateIngressControllerClassMap(this.state.endpointId, this.ingressControllers || []);
+      this.state.isSaving = true;
       const storagePromises = _.map(storageClasses, (storageClass) => {
         const oldStorageClass = _.find(this.oldStorageClasses, { Name: storageClass.Name });
         if (oldStorageClass) {
@@ -212,34 +228,40 @@ class KubernetesConfigureController {
         this.assignFormValuesToEndpoint(modifiedEndpoint, storageClasses, ingressClasses);
         this.EndpointProvider.setEndpoints(endpoints);
       }
-      this.Notifications.success('配置成功应用');
+      this.Notifications.success('Success', 'Configuration successfully applied');
       this.$state.go('portainer.home');
     } catch (err) {
-      this.Notifications.error('失败', err, '无法应用配置');
+      this.Notifications.error('失败', err, 'Unable to apply configuration');
     } finally {
       this.state.actionInProgress = false;
     }
   }
 
   configure() {
-    const toDel = _.filter(this.formValues.IngressClasses, { NeedsDeletion: true });
-    if (toDel.length) {
-      this.ModalService.confirmUpdate(
-        `删除入口控制器可能会导致应用程序无法访问。 来自受影响应用的所有入口配置都将被删除。<br/><br/>是否要继续？`,
-        (confirmed) => {
-          if (confirmed) {
-            return this.$async(this.configureAsync);
-          }
-        }
-      );
-    } else {
-      return this.$async(this.configureAsync);
-    }
+    return this.$async(this.configureAsync);
   }
   /* #endregion */
 
   restrictDefaultToggledOn() {
     return this.formValues.RestrictDefaultNamespace && !this.oldFormValues.RestrictDefaultNamespace;
+  }
+
+  onToggleAutoUpdate(value) {
+    return this.$scope.$evalAsync(() => {
+      this.state.autoUpdateSettings.Enabled = value;
+    });
+  }
+
+  onChangeStorageClassAccessMode(storageClassName, accessModes) {
+    return this.$scope.$evalAsync(() => {
+      const storageClass = this.StorageClasses.find((item) => item.Name === storageClassName);
+
+      if (!storageClass) {
+        throw new Error('Storage class not found');
+      }
+
+      storageClass.AccessModes = accessModes;
+    });
   }
 
   /* #region  ON INIT */
@@ -248,7 +270,8 @@ class KubernetesConfigureController {
       actionInProgress: false,
       displayConfigureClassPanel: {},
       viewReady: false,
-      endpointId: this.$state.params.id,
+      isIngToggleSectionExpanded: false,
+      endpointId: this.$state.params.endpointId,
       duplicates: {
         ingressClasses: new KubernetesFormValidationReferences(),
       },
@@ -257,28 +280,40 @@ class KubernetesConfigureController {
         isServerRunning: false,
         userClick: false,
       },
+      timeZone: '',
+      isSaving: false,
     };
 
     this.formValues = {
       UseLoadBalancer: false,
       UseServerMetrics: false,
+      EnableResourceOverCommit: true,
+      ResourceOverCommitPercentage: 20,
       IngressClasses: [],
       RestrictDefaultNamespace: false,
+      enableAutoUpdateTimeWindow: false,
+      IngressAvailabilityPerNamespace: false,
     };
 
+    this.isIngressControllersLoading = true;
     try {
+      this.availableAccessModes = new KubernetesStorageClassAccessPolicies();
+
       [this.StorageClasses, this.endpoint] = await Promise.all([this.KubernetesStorageService.get(this.state.endpointId), this.EndpointService.endpoint(this.state.endpointId)]);
+
+      this.ingressControllers = await getIngressControllerClassMap({ environmentId: this.state.endpointId });
+      this.originalIngressControllers = structuredClone(this.ingressControllers);
+
+      this.state.autoUpdateSettings = this.endpoint.ChangeWindow;
+
       _.forEach(this.StorageClasses, (item) => {
-        item.availableAccessModes = new KubernetesStorageClassAccessPolicies();
         const storage = _.find(this.endpoint.Kubernetes.Configuration.StorageClasses, (sc) => sc.Name === item.Name);
         if (storage) {
           item.selected = true;
-          _.forEach(storage.AccessModes, (access) => {
-            const mode = _.find(item.availableAccessModes, { Name: access });
-            if (mode) {
-              mode.selected = true;
-            }
-          });
+          item.AccessModes = storage.AccessModes.map((name) => this.availableAccessModes.find((accessMode) => accessMode.Name === name));
+        } else if (this.availableAccessModes.length) {
+          // set a default access mode if the storage class is not enabled and there are available access modes
+          item.AccessModes = [this.availableAccessModes[0]];
         }
       });
 
@@ -286,25 +321,66 @@ class KubernetesConfigureController {
 
       this.formValues.UseLoadBalancer = this.endpoint.Kubernetes.Configuration.UseLoadBalancer;
       this.formValues.UseServerMetrics = this.endpoint.Kubernetes.Configuration.UseServerMetrics;
+      this.formValues.EnableResourceOverCommit = this.endpoint.Kubernetes.Configuration.EnableResourceOverCommit;
+      this.formValues.ResourceOverCommitPercentage = this.endpoint.Kubernetes.Configuration.ResourceOverCommitPercentage;
       this.formValues.RestrictDefaultNamespace = this.endpoint.Kubernetes.Configuration.RestrictDefaultNamespace;
       this.formValues.IngressClasses = _.map(this.endpoint.Kubernetes.Configuration.IngressClasses, (ic) => {
         ic.IsNew = false;
         ic.NeedsDeletion = false;
         return ic;
       });
+      this.formValues.IngressAvailabilityPerNamespace = this.endpoint.Kubernetes.Configuration.IngressAvailabilityPerNamespace;
+      this.formValues.AllowNoneIngressClass = this.endpoint.Kubernetes.Configuration.AllowNoneIngressClass;
 
       this.oldFormValues = Object.assign({}, this.formValues);
     } catch (err) {
-      this.Notifications.error('失败', err, '无法检索环境配置');
+      this.Notifications.error('失败', err, 'Unable to retrieve environment configuration');
     } finally {
       this.state.viewReady = true;
+      this.isIngressControllersLoading = false;
     }
+
+    window.addEventListener('beforeunload', this.onBeforeOnload);
   }
 
   $onInit() {
     return this.$async(this.onInit);
   }
   /* #endregion */
+
+  $onDestroy() {
+    window.removeEventListener('beforeunload', this.onBeforeOnload);
+  }
+
+  areControllersChanged() {
+    return !_.isEqual(this.ingressControllers, this.originalIngressControllers);
+  }
+
+  areFormValuesChanged() {
+    return !_.isEqual(this.formValues, this.oldFormValues);
+  }
+
+  onBeforeOnload(event) {
+    if (!this.state.isSaving && (this.areControllersChanged() || this.areFormValuesChanged())) {
+      event.preventDefault();
+      event.returnValue = '';
+    }
+  }
+
+  uiCanExit() {
+    if (!this.state.isSaving && (this.areControllersChanged() || this.areFormValuesChanged()) && !this.isIngressControllersLoading) {
+      return this.ModalService.confirmAsync({
+        title: '你确定吗？',
+        message: 'You currently have unsaved changes in the cluster setup view. Are you sure you want to leave?',
+        buttons: {
+          confirm: {
+            label: 'Yes',
+            className: 'btn-danger',
+          },
+        },
+      });
+    }
+  }
 }
 
 export default KubernetesConfigureController;

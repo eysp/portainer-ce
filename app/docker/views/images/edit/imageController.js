@@ -17,6 +17,8 @@ angular.module('portainer.docker').controller('ImageController', [
   'FileSaver',
   'Blob',
   'endpoint',
+  'EndpointService',
+  'RegistryModalService',
   function (
     $async,
     $q,
@@ -32,7 +34,9 @@ angular.module('portainer.docker').controller('ImageController', [
     ModalService,
     FileSaver,
     Blob,
-    endpoint
+    endpoint,
+    EndpointService,
+    RegistryModalService
   ) {
     $scope.endpoint = endpoint;
     $scope.isAdmin = Authentication.isAdmin();
@@ -72,7 +76,7 @@ angular.module('portainer.docker').controller('ImageController', [
 
       ImageService.tagImage($transition$.params().id, image.fromImage)
         .then(function success() {
-          Notifications.success('镜像已成功标记');
+          Notifications.success('成功', '已成功标记镜像');
           $state.go('docker.images.image', { id: $transition$.params().id }, { reload: true });
         })
         .catch(function error(err) {
@@ -84,11 +88,13 @@ angular.module('portainer.docker').controller('ImageController', [
 
     async function pushTag(repository) {
       return $async(async () => {
-        $('#uploadResourceHint').show();
         try {
-          const registryModel = await RegistryService.retrievePorRegistryModelFromRepository(repository, endpoint.Id);
-          await ImageService.pushImage(registryModel);
-          Notifications.success('已成功推送镜像', repository);
+          const registryModel = await RegistryModalService.registryModal(repository, $scope.registries);
+          if (registryModel) {
+            $('#uploadResourceHint').show();
+            await ImageService.pushImage(registryModel);
+            Notifications.success('镜像已成功推送', repository);
+          }
         } catch (err) {
           Notifications.error('失败', err, '无法将镜像推送到仓库');
         } finally {
@@ -100,11 +106,13 @@ angular.module('portainer.docker').controller('ImageController', [
     $scope.pullTag = pullTag;
     async function pullTag(repository) {
       return $async(async () => {
-        $('#downloadResourceHint').show();
         try {
-          const registryModel = await RegistryService.retrievePorRegistryModelFromRepository(repository, endpoint.Id);
-          await ImageService.pullImage(registryModel);
-          Notifications.success('镜像成功拉取', repository);
+          const registryModel = await RegistryModalService.registryModal(repository, $scope.registries);
+          if (registryModel) {
+            $('#downloadResourceHint').show();
+            await ImageService.pullImage(registryModel);
+            Notifications.success('已成功拉取镜像', repository);
+          }
         } catch (err) {
           Notifications.error('失败', err, '无法从仓库中拉取镜像');
         } finally {
@@ -117,7 +125,7 @@ angular.module('portainer.docker').controller('ImageController', [
       ImageService.deleteImage(repository, false)
         .then(function success() {
           if ($scope.image.RepoTags.length === 1) {
-            Notifications.success('镜像已成功删除', repository);
+            Notifications.success('已成功删除镜像', repository);
             $state.go('docker.images', {}, { reload: true });
           } else {
             Notifications.success('标记已成功删除', repository);
@@ -132,7 +140,7 @@ angular.module('portainer.docker').controller('ImageController', [
     $scope.removeImage = function (id) {
       ImageService.deleteImage(id, false)
         .then(function success() {
-          Notifications.success('镜像已成功删除', id);
+          Notifications.success('已成功删除镜像', id);
           $state.go('docker.images', {}, { reload: true });
         })
         .catch(function error(err) {
@@ -147,7 +155,7 @@ angular.module('portainer.docker').controller('ImageController', [
         .then(function success(data) {
           var downloadData = new Blob([data.file], { type: 'application/x-tar' });
           FileSaver.saveAs(downloadData, 'images.tar');
-          Notifications.success('镜像已成功下载');
+          Notifications.success('成功', '已成功下载镜像');
         })
         .catch(function error(err) {
           Notifications.error('失败', err, '无法下载镜像');
@@ -171,8 +179,15 @@ angular.module('portainer.docker').controller('ImageController', [
       });
     };
 
-    function initView() {
+    async function initView() {
       HttpRequestHelper.setPortainerAgentTargetHeader($transition$.params().nodeName);
+
+      try {
+        $scope.registries = await RegistryService.loadRegistriesForDropdown(endpoint.Id);
+      } catch (err) {
+        this.Notifications.error('失败', err, '无法加载注册表');
+      }
+
       $q.all({
         image: ImageService.image($transition$.params().id),
         history: ImageService.history($transition$.params().id),

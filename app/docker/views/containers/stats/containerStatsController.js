@@ -115,7 +115,7 @@ angular.module('portainer.docker').controller('ContainerStatsController', [
         })
         .catch(function error(err) {
           stopRepeater();
-          Notifications.error('失败', err, '无法检索容器统计信息');
+          Notifications.error('失败', err, '无法检索容器统计数据');
         });
     }
 
@@ -136,7 +136,7 @@ angular.module('portainer.docker').controller('ContainerStatsController', [
           })
           .catch(function error(err) {
             stopRepeater();
-            Notifications.error('失败', err, '无法检索容器统计信息');
+            Notifications.error('失败', err, '无法检索容器统计数据');
           });
       }, refreshRate * 1000);
     }
@@ -168,7 +168,7 @@ angular.module('portainer.docker').controller('ContainerStatsController', [
           $scope.container = data;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索容器信息');
+          Notifications.error('失败', err, '无法检索到容器信息');
         });
 
       $document.ready(function () {

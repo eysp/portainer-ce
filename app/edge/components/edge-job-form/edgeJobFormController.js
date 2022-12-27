@@ -31,7 +31,8 @@ export class EdgeJobFormController {
     };
 
     // see https://regexr.com/573i2
-    this.cronRegex = /(@(annually|yearly|monthly|weekly|daily|hourly|reboot))|(@every (\d+(ns|us|µs|ms|s|m|h))+)|((((\d+,)+\d+|(\d+(\/|-)\d+)|\d+|\*) ){4,6}((\d+,)+\d+|(\d+(\/|-)\d+)|\d+|\*))/;
+    this.cronRegex =
+      /(@(annually|yearly|monthly|weekly|daily|hourly|reboot))|(@every (\d+(ns|us|µs|ms|s|m|h))+)|((((\d+,)+\d+|(\d+(\/|-)\d+)|\d+|\*) ){4,6}((\d+,)+\d+|(\d+(\/|-)\d+)|\d+|\*))/;
 
     this.action = this.action.bind(this);
     this.editorUpdate = this.editorUpdate.bind(this);
@@ -58,7 +59,10 @@ export class EdgeJobFormController {
     }
 
     if (this.formValues.cronMethod === 'basic') {
-      if (!this.model.Recurring) {
+      if (!this.model.Recurring && (this.formValues.datetime === undefined || !this.formValues.datetime.isValid())) {
+        this.state.formValidationError = 'Schedule date must not be empty';
+        return;
+      } else if (!this.model.Recurring) {
         this.model.CronExpression = datetimeToCron(this.formValues.datetime);
       } else {
         this.model.CronExpression = this.formValues.scheduleValue.cron;

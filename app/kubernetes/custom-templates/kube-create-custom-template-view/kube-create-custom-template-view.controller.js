@@ -1,23 +1,24 @@
-import { buildOption } from '@/portainer/components/box-selector';
 import { AccessControlFormData } from '@/portainer/components/accessControlForm/porAccessControlFormModel';
+import { getTemplateVariables, intersectVariables } from '@/react/portainer/custom-templates/components/utils';
+import { isBE } from '@/portainer/feature-flags/feature-flags.service';
+import { editor, upload } from '@@/BoxSelector/common-options/build-methods';
 
 class KubeCreateCustomTemplateViewController {
   /* @ngInject */
   constructor($async, $state, Authentication, CustomTemplateService, FormValidator, ModalService, Notifications, ResourceControlService) {
     Object.assign(this, { $async, $state, Authentication, CustomTemplateService, FormValidator, ModalService, Notifications, ResourceControlService });
 
-    this.methodOptions = [
-      buildOption('method_editor', 'fa fa-edit', 'Web editor', 'Use our Web editor', 'editor'),
-      buildOption('method_upload', 'fa fa-upload', 'Upload', 'Upload from your computer', 'upload'),
-    ];
+    this.methodOptions = [editor, upload];
 
     this.templates = null;
+    this.isTemplateVariablesEnabled = isBE;
 
     this.state = {
       method: 'editor',
       actionInProgress: false,
       formValidationError: '',
       isEditorDirty: false,
+      isTemplateValid: true,
     };
 
     this.formValues = {
@@ -28,25 +29,59 @@ class KubeCreateCustomTemplateViewController {
       Note: '',
       Logo: '',
       AccessControlData: new AccessControlFormData(),
+      Variables: [],
     };
 
     this.onChangeFile = this.onChangeFile.bind(this);
     this.onChangeFileContent = this.onChangeFileContent.bind(this);
     this.onChangeMethod = this.onChangeMethod.bind(this);
     this.onBeforeOnload = this.onBeforeOnload.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.onVariablesChange = this.onVariablesChange.bind(this);
   }
 
   onChangeMethod(method) {
     this.state.method = method;
+    this.formValues.Variables = [];
   }
 
   onChangeFileContent(content) {
-    this.formValues.FileContent = content;
+    this.handleChange({ FileContent: content });
+    this.parseTemplate(content);
     this.state.isEditorDirty = true;
   }
 
+  parseTemplate(templateStr) {
+    if (!this.isTemplateVariablesEnabled) {
+      return;
+    }
+
+    const variables = getTemplateVariables(templateStr);
+
+    const isValid = !!variables;
+
+    this.state.isTemplateValid = isValid;
+
+    if (isValid) {
+      this.onVariablesChange(intersectVariables(this.formValues.Variables, variables));
+    }
+  }
+
+  onVariablesChange(value) {
+    this.handleChange({ Variables: value });
+  }
+
   onChangeFile(file) {
-    this.formValues.File = file;
+    this.handleChange({ File: file });
+  }
+
+  handleChange(values) {
+    return this.$async(async () => {
+      this.formValues = {
+        ...this.formValues,
+        ...values,
+      };
+    });
   }
 
   async createCustomTemplate() {
@@ -66,7 +101,7 @@ class KubeCreateCustomTemplateViewController {
         const userId = userDetails.ID;
         await this.ResourceControlService.applyResourceControl(userId, accessControlData, customTemplate.ResourceControl);
 
-        this.Notifications.success('Custom template successfully created');
+        this.Notifications.success('Success', 'Custom template successfully created');
         this.state.isEditorDirty = false;
         this.$state.go('kubernetes.templates.custom');
       } catch (err) {
@@ -111,6 +146,11 @@ class KubeCreateCustomTemplateViewController {
       return false;
     }
 
+    if (!this.state.isTemplateValid) {
+      this.state.formValidationError = 'Template is not valid';
+      return false;
+    }
+
     const isAdmin = this.Authentication.isAdmin();
     const accessControlData = this.formValues.AccessControlData;
     const error = this.FormValidator.validateAccessControl(accessControlData, isAdmin);
@@ -128,6 +168,7 @@ class KubeCreateCustomTemplateViewController {
       const { fileContent, type } = this.$state.params;
 
       this.formValues.FileContent = fileContent;
+      this.parseTemplate(fileContent);
       if (type) {
         this.formValues.Type = +type;
       }

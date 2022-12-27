@@ -1,55 +1,68 @@
 import _ from 'lodash-es';
+import { isLimitedToBE } from '@/portainer/feature-flags/feature-flags.service';
 
+import { getEnvironments } from '@/portainer/environments/environment.service';
 import AccessViewerPolicyModel from '../../models/access';
 
 export default class AccessViewerController {
   /* @ngInject */
-  constructor(featureService, Notifications, RoleService, UserService, EndpointService, GroupService, TeamService, TeamMembershipService) {
-    this.featureService = featureService;
+  constructor($scope, Notifications, RoleService, UserService, GroupService, TeamService, TeamMembershipService, Authentication) {
+    this.$scope = $scope;
     this.Notifications = Notifications;
     this.RoleService = RoleService;
     this.UserService = UserService;
-    this.EndpointService = EndpointService;
     this.GroupService = GroupService;
     this.TeamService = TeamService;
     this.TeamMembershipService = TeamMembershipService;
+    this.Authentication = Authentication;
 
     this.limitedFeature = 'rbac-roles';
     this.users = [];
+    this.selectedUserId = null;
+
+    this.onUserSelect = this.onUserSelect.bind(this);
   }
 
-  onUserSelect() {
-    this.userRoles = [];
-    const userRoles = {};
-    const user = this.selectedUser;
-    const userMemberships = _.filter(this.teamMemberships, { UserId: user.Id });
+  onUserSelect(selectedUserId) {
+    this.$scope.$evalAsync(() => {
+      this.userRoles = [];
+      this.selectedUserId = selectedUserId;
 
-    for (const [, endpoint] of _.entries(this.endpoints)) {
-      let role = this.getRoleFromUserEndpointPolicy(user, endpoint);
-      if (role) {
-        userRoles[endpoint.Id] = role;
-        continue;
+      const userRoles = {};
+      const user = this.allUsers.find((user) => user.Id === selectedUserId);
+      if (!user) {
+        throw new Error('User not found');
       }
 
-      role = this.getRoleFromUserEndpointGroupPolicy(user, endpoint);
-      if (role) {
-        userRoles[endpoint.Id] = role;
-        continue;
+      const userMemberships = _.filter(this.teamMemberships, { UserId: user.Id });
+
+      for (const [, endpoint] of _.entries(this.endpoints)) {
+        let role = this.getRoleFromUserEndpointPolicy(user, endpoint);
+        if (role) {
+          userRoles[endpoint.Id] = role;
+          continue;
+        }
+
+        role = this.getRoleFromUserEndpointGroupPolicy(user, endpoint);
+        if (role) {
+          userRoles[endpoint.Id] = role;
+          continue;
+        }
+
+        role = this.getRoleFromTeamEndpointPolicies(userMemberships, endpoint);
+        if (role) {
+          userRoles[endpoint.Id] = role;
+          continue;
+        }
+
+        role = this.getRoleFromTeamEndpointGroupPolicies(userMemberships, endpoint);
+        if (role) {
+          userRoles[endpoint.Id] = role;
+        }
       }
 
-      role = this.getRoleFromTeamEndpointPolicies(userMemberships, endpoint);
-      if (role) {
-        userRoles[endpoint.Id] = role;
-        continue;
-      }
-
-      role = this.getRoleFromTeamEndpointGroupPolicies(userMemberships, endpoint);
-      if (role) {
-        userRoles[endpoint.Id] = role;
-      }
-    }
-
-    this.userRoles = _.values(userRoles);
+      this.userRoles = _.values(userRoles);
+    });
   }
 
   findLowestRole(policies) {
@@ -100,16 +113,44 @@ export default class AccessViewerController {
     return this.findLowestRole(policyRoles);
   }
 
+  // for admin, returns all users
+  // for team leader, only return all his/her team member users
+  async teamMemberUsers(users, teamMemberships) {
+    if (this.isAdmin) {
+      return users;
+    }
+
+    const filteredUsers = [];
+    const userId = this.Authentication.getUserDetails().ID;
+    const leadingTeams = await this.UserService.userLeadingTeams(userId);
+
+    const isMember = (userId, teamId) => {
+      return !!_.find(teamMemberships, { UserId: userId, TeamId: teamId });
+    };
+
+    for (const user of users) {
+      for (const leadingTeam of leadingTeams) {
+        if (isMember(user.Id, leadingTeam.Id)) {
+          filteredUsers.push(user);
+          break;
+        }
+      }
+    }
+
+    return filteredUsers;
+  }
+
   async $onInit() {
     try {
-      const limitedToBE = this.featureService.isLimitedToBE(this.limitedFeature);
+      const limitedToBE = isLimitedToBE(this.limitedFeature);
 
       if (limitedToBE) {
         return;
       }
 
-      this.users = await this.UserService.users();
-      this.endpoints = _.keyBy((await this.EndpointService.endpoints()).value, 'Id');
+      this.isAdmin = this.Authentication.isAdmin();
+      this.allUsers = await this.UserService.users();
+      this.endpoints = _.keyBy((await getEnvironments()).value, 'Id');
       const groups = await this.GroupService.groups();
       this.groupUserAccessPolicies = {};
       this.groupTeamAccessPolicies = {};
@@ -121,8 +162,10 @@ export default class AccessViewerController {
       this.roles = _.keyBy(await this.RoleService.roles(), 'Id');
       this.teams = _.keyBy(await this.TeamService.teams(), 'Id');
       this.teamMemberships = await this.TeamMembershipService.memberships();
+      const teamUsers = await this.teamMemberUsers(this.allUsers, this.teamMemberships);
+      this.users = teamUsers.map((user) => ({ label: user.Username, value: user.Id }));
     } catch (err) {
-      this.Notifications.error('失败', err, '无法检索访问');
+      this.Notifications.error('失败', err, 'Unable to retrieve accesses');
     }
   }
 }

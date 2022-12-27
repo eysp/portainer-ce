@@ -12,6 +12,7 @@ import (
 // @description List all roles available for use
 // @description **Access policy**: administrator
 // @tags roles
+// @security ApiKeyAuth
 // @security jwt
 // @produce json
 // @success 200 {array} portainer.Role "Success"
@@ -20,7 +21,7 @@ import (
 func (handler *Handler) roleList(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	roles, err := handler.DataStore.Role().Roles()
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve authorization sets from the database", err}
+		return httperror.InternalServerError("Unable to retrieve authorization sets from the database", err)
 	}
 
 	return response.JSON(w, roles)

@@ -1,13 +1,52 @@
 <ng-form name="$ctrl.webEditorForm">
-  <div class="col-sm-12 form-section-title">
-    Web editor
-  </div>
-  <div class="form-group">
-    <span class="col-sm-12 text-muted small" ng-transclude="description"> </span>
-  </div>
-  <div class="form-group">
-    <div class="col-sm-12">
-      <code-editor identifier="{{ $ctrl.identifier }}" placeholder="{{ $ctrl.placeholder }}" yml="$ctrl.yml" value="$ctrl.value" on-change="($ctrl.editorUpdate)"></code-editor>
+  <div class="web-editor overflow-auto">
+    <div ng-if="!$ctrl.hideTitle" class="col-sm-12 form-section-title pr-0"
+      >网络编辑
+      <div class="text-muted small vertical-center float-right mt-0">
+        <span ng-if="$ctrl.BROWSER_OS_PLATFORM !== 'mac'" class="vertical-center">Ctrl+F搜索</span>
+        <span ng-if="$ctrl.BROWSER_OS_PLATFORM === 'mac'" class="vertical-center">Cmd+F进行搜索</span>
+        <portainer-tooltip
+          ng-if="$ctrl.BROWSER_OS_PLATFORM !== 'mac'"
+          message="'Ctrl+F - 开始搜索 <br />
+              Ctrl+G - 查找下一个 <br />
+              Ctrl+Shift+G - 查找上一个 <br />
+              Ctrl+Shift+F - 替换 <br />
+              Ctrl+Shift+R - 全部替换 <br />
+              Alt+G - 跳转到行 <br />
+              Alt+F - 持续搜索： <br />
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enter - 查找下一个 <br />
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Shift+Enter - 查找上一个 <br />'"
+          class-name="'[&>span]:!text-left'"
+        >
+        </portainer-tooltip>
+        <portainer-tooltip
+          ng-if="$ctrl.BROWSER_OS_PLATFORM === 'mac'"
+          message="'Cmd+F - 开始搜索 <br />
+              Cmd+G - 查找下一个 <br />
+              Cmd+Shift+G - 查找上一个 <br />
+              Cmd+Option+F - 替换 <br />
+              Cmd+Option+R - 全部替换 <br />
+              Option+G - 跳转到行 <br />
+              Option+F - 持续搜索： <br />
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enter - 查找下一个 <br />
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Shift+Enter - 查找上一个 <br />'"
+          class-name="'[&>span]:!text-left'"
+        >
+        </portainer-tooltip>
+      </div>
+    </div>
+    <div class="trancluded-item form-group col-sm-9 col-lg-10 text-muted small" ng-transclude="description"></div>
+    <div class="form-group">
+      <div class="col-sm-12 col-lg-12">
+        <code-editor
+          identifier="{{ $ctrl.identifier }}"
+          placeholder="{{ $ctrl.placeholder }}"
+          read-only="$ctrl.readOnly"
+          yml="$ctrl.yml"
+          value="$ctrl.value"
+          on-change="($ctrl.editorUpdate)"
+        ></code-editor>
+      </div>
     </div>
   </div>
 </ng-form>

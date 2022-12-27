@@ -1,11 +1,15 @@
 import moment from 'moment';
-import { ACTIVITY_AUDIT } from '@/portainer/feature-flags/feature-ids';
+
+import { FeatureId } from '@/portainer/feature-flags/enums';
 export default class ActivityLogsViewController {
   /* @ngInject */
-  constructor($async, Notifications) {
+  constructor($async, $scope, Notifications) {
     this.$async = $async;
+    this.$scope = $scope;
     this.Notifications = Notifications;
-    this.limitedFeature = ACTIVITY_AUDIT;
+
+    this.limitedFeature = FeatureId.ACTIVITY_AUDIT;
+
     this.state = {
       keyword: '',
       date: {
@@ -51,25 +55,17 @@ export default class ActivityLogsViewController {
   }
 
   onChangeKeyword(keyword) {
-    this.state.page = 1;
-    this.state.keyword = keyword;
-    this.loadLogs();
+    return this.$scope.$evalAsync(() => {
+      this.state.page = 1;
+      this.state.keyword = keyword;
+      this.loadLogs();
+    });
   }
 
   onChangeDate({ startDate, endDate }) {
     this.state.page = 1;
     this.state.date = { to: endDate, from: startDate };
     this.loadLogs();
-  }
-
-  async export() {
-    return this.$async(async () => {
-      try {
-        await this.UserActivityService.saveLogsAsCSV(this.state.sort, this.state.keyword, this.state.date, this.state.contextFilter);
-      } catch (err) {
-        this.Notifications.error('失败', err, '加载用户活动日志 csv 失败');
-      }
-    });
   }
 
   async loadLogs() {
@@ -80,7 +76,7 @@ export default class ActivityLogsViewController {
         this.state.logs = logs;
         this.state.totalItems = totalCount;
       } catch (err) {
-        this.Notifications.error('失败', err, '加载用户活动日志失败');
+        this.Notifications.error('失败', err, 'Failed loading user activity logs');
       }
     });
   }

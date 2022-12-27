@@ -11,14 +11,14 @@ import (
 	httperror "github.com/portainer/libhttp/error"
 	"github.com/portainer/libhttp/request"
 	portainer "github.com/portainer/portainer/api"
-	"github.com/portainer/portainer/api/bolt/errors"
 )
 
 // @summary Attach a websocket
 // @description If the nodeName query parameter is present, the request will be proxied to the underlying agent environment(endpoint).
 // @description If the nodeName query parameter is not specified, the request will be upgraded to the websocket protocol and
 // @description an AttachStart operation HTTP request will be created and hijacked.
-// @description Authentication and access is controlled via the mandatory token query parameter.
+// @description **Access policy**: authenticated
+// @security ApiKeyAuth
 // @security jwt
 // @tags websocket
 // @accept json
@@ -35,27 +35,27 @@ import (
 func (handler *Handler) websocketAttach(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	attachID, err := request.RetrieveQueryParameter(r, "id", false)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid query parameter: id", err}
+		return httperror.BadRequest("Invalid query parameter: id", err)
 	}
 	if !govalidator.IsHexadecimal(attachID) {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid query parameter: id (must be hexadecimal identifier)", err}
+		return httperror.BadRequest("Invalid query parameter: id (must be hexadecimal identifier)", err)
 	}
 
 	endpointID, err := request.RetrieveNumericQueryParameter(r, "endpointId", false)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid query parameter: endpointId", err}
+		return httperror.BadRequest("Invalid query parameter: endpointId", err)
 	}
 
 	endpoint, err := handler.DataStore.Endpoint().Endpoint(portainer.EndpointID(endpointID))
-	if err == errors.ErrObjectNotFound {
-		return &httperror.HandlerError{http.StatusNotFound, "Unable to find the environment associated to the stack inside the database", err}
+	if handler.DataStore.IsErrObjectNotFound(err) {
+		return httperror.NotFound("Unable to find the environment associated to the stack inside the database", err)
 	} else if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to find the environment associated to the stack inside the database", err}
+		return httperror.InternalServerError("Unable to find the environment associated to the stack inside the database", err)
 	}
 
 	err = handler.requestBouncer.AuthorizedEndpointOperation(r, endpoint)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusForbidden, "Permission denied to access environment", err}
+		return httperror.Forbidden("Permission denied to access environment", err)
 	}
 
 	params := &webSocketRequestParams{
@@ -66,7 +66,7 @@ func (handler *Handler) websocketAttach(w http.ResponseWriter, r *http.Request) 
 
 	err = handler.handleAttachRequest(w, r, params)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "An error occured during websocket attach operation", err}
+		return httperror.InternalServerError("An error occured during websocket attach operation", err)
 	}
 
 	return nil

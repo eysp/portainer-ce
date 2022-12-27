@@ -15,6 +15,7 @@ import (
 // @description only return authorized environment(endpoint) groups.
 // @description **Access policy**: restricted
 // @tags endpoint_groups
+// @security ApiKeyAuth
 // @security jwt
 // @produce json
 // @success 200 {array} portainer.EndpointGroup "Environment(Endpoint) group"
@@ -23,12 +24,12 @@ import (
 func (handler *Handler) endpointGroupList(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	endpointGroups, err := handler.DataStore.EndpointGroup().EndpointGroups()
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve environment groups from the database", err}
+		return httperror.InternalServerError("Unable to retrieve environment groups from the database", err)
 	}
 
 	securityContext, err := security.RetrieveRestrictedRequestContext(r)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve info from request context", err}
+		return httperror.InternalServerError("Unable to retrieve info from request context", err)
 	}
 
 	endpointGroups = security.FilterEndpointGroups(endpointGroups, securityContext)

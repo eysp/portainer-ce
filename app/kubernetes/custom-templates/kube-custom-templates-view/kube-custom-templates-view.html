@@ -1,13 +1,11 @@
-<kubernetes-view-header title="自定义模板" state="kubernetes.templates.custom" view-ready="true">
-  自定义模板
-</kubernetes-view-header>
+<page-header title="'Custom Templates'" breadcrumbs="['Custom Templates']" reload="true"></page-header>
 
 <div class="row">
   <div class="col-sm-12">
     <custom-templates-list
       ng-if="$ctrl.templates"
-      title-text="模板"
-      title-icon="fa-rocket"
+      title-text="Templates"
+      title-icon="edit"
       templates="$ctrl.templates"
       table-key="customTemplates"
       is-edit-allowed="$ctrl.isEditAllowed"

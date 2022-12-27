@@ -1,7 +1,18 @@
-<kubernetes-view-header title="Namespace access management" state="kubernetes.resourcePools.resourcePool.access" view-ready="ctrl.state.viewReady">
-  <a ui-sref="kubernetes.resourcePools">Namespaces</a> &gt;
-  <a ui-sref="kubernetes.resourcePools.resourcePool({id: ctrl.pool.Namespace.Name})">{{ ctrl.pool.Namespace.Name }}</a> &gt; 访问管理
-</kubernetes-view-header>
+<page-header
+  ng-if="ctrl.state.viewReady"
+  title="'Namespace access management'"
+  breadcrumbs="[
+    { label:'Namespaces', link:'kubernetes.resourcePools' },
+    {
+      label:ctrl.pool.Namespace.Name,
+      link: 'kubernetes.resourcePools.resourcePool',
+      linkParams:{id: ctrl.pool.Namespace.Name}
+    },
+     'Access management'
+     ]"
+  reload="true"
+>
+</page-header>
 
 <kubernetes-view-loading view-ready="ctrl.state.viewReady"></kubernetes-view-loading>
 
@@ -9,12 +20,12 @@
   <div class="row" ng-if="ctrl.pool">
     <div class="col-sm-12">
       <rd-widget>
-        <rd-widget-header icon="fa-plug" title-text="Namespace"></rd-widget-header>
-        <rd-widget-body classes="no-padding">
+        <rd-widget-header icon="layers" feather-icon="true" title-text="Namespace"></rd-widget-header>
+        <rd-widget-body>
           <table class="table">
             <tbody>
               <tr>
-                <td>名称</td>
+                <td class="!pl-0">名称</td>
                 <td>
                   {{ ctrl.pool.Namespace.Name }}
                 </td>
@@ -29,31 +40,31 @@
   <div class="row">
     <div class="col-sm-12">
       <rd-widget ng-if="ctrl.availableUsersAndTeams">
-        <rd-widget-header icon="fa-user-lock" title-text="Create access"></rd-widget-header>
+        <rd-widget-header icon="svg-userlock" title-text="创建访问权限"></rd-widget-header>
         <rd-widget-body>
           <form class="form-horizontal">
             <div class="form-group">
-              <label class="col-sm-3 col-lg-2 control-label text-left">
-                选择用户和/或团队
-              </label>
+              <span class="col-sm-12 small text-warning">
+                <p class="vertical-center">
+                  <pr-icon icon="'alert-triangle'" feather="true" mode="'warning'"></pr-icon>
+                  增加用户访问权限将要求受影响的用户退出并登录，以便考虑到这些变化。
+                </p>
+              </span>
+            </div>
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-2 control-label text-left" for="users-selector"> 选择用户和/或团队 </label>
               <div class="col-sm-9 col-lg-4">
                 <span class="small text-muted" ng-if="ctrl.availableUsersAndTeams.length === 0">
-                  未在环境中设置用户或团队访问权限。 前往
-                  <a ui-sref="portainer.endpoints.endpoint.access({id: ctrl.endpointId})">环境访问视图</a> 来管理它们。
+                  环境上没有设置用户或团队的访问权限。请到
+                  <a ui-sref="portainer.endpoints">环境视图</a> 中去管理它们。
                 </span>
-                <span
-                  isteven-multi-select
+                <namespace-access-users-selector
                   ng-if="ctrl.availableUsersAndTeams.length > 0"
-                  input-model="ctrl.availableUsersAndTeams"
-                  output-model="ctrl.formValues.multiselectOutput"
-                  button-label="icon '-' Name"
-                  item-label="icon '-' Name"
-                  tick-property="ticked"
-                  helper-elements="filter"
-                  search-property="Name"
-                  translation="{nothingSelected: '选择一个或多个用户和/或团队', search: '搜索...'}"
-                >
-                </span>
+                  input-id="users-selector"
+                  value="ctrl.formValues.multiselectOutput"
+                  options="ctrl.availableUsersAndTeams"
+                  on-change="(ctrl.onUsersAndTeamsChange)"
+                ></namespace-access-users-selector>
               </div>
             </div>
 
@@ -62,12 +73,12 @@
               <div class="col-sm-12">
                 <button
                   type="submit"
-                  class="btn btn-primary btn-sm"
-                  ng-disabled="(ctrl.availableUsersAndTeams | filter:{ticked:true}).length === 0 || ctrl.actionInProgress"
+                  class="btn btn-primary btn-sm !ml-0 vertical-center"
+                  ng-disabled="ctrl.formValues.multiselectOutput.length === 0 || ctrl.actionInProgress"
                   ng-click="ctrl.authorizeAccess()"
                   button-spinner="ctrl.actionInProgress"
                 >
-                  <span ng-hide="ctrl.state.actionInProgress"><i class="fa fa-plus" aria-hidden="true"></i> 创建访问权限</span>
+                  <span class="vertical-center" ng-hide="ctrl.state.actionInProgress"><pr-icon icon="'plus'" feather="true" class="vertical-center"></pr-icon> 创建访问</span>
                   <span ng-show="ctrl.state.actionInProgress">创建访问权限...</span>
                 </button>
               </div>
@@ -83,8 +94,8 @@
     <div class="col-sm-12">
       <access-datatable
         ng-if="ctrl.authorizedUsersAndTeams"
-        title-text="Access"
-        title-icon="fa-user-lock"
+        title-text="Namespace access"
+        title-icon="svg-userlock"
         table-key="kubernetes_resourcepool_access"
         order-by="Name"
         dataset="ctrl.authorizedUsersAndTeams"

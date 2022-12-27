@@ -2,18 +2,19 @@ package scheduler
 
 import (
 	"context"
-	"log"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/pkg/errors"
 	"github.com/robfig/cron/v3"
-	"github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 )
 
 type Scheduler struct {
 	crontab    *cron.Cron
 	activeJobs map[cron.EntryID]context.CancelFunc
+	mu         sync.Mutex
 }
 
 func NewScheduler(ctx context.Context) *Scheduler {
@@ -41,15 +42,17 @@ func (s *Scheduler) Shutdown() error {
 		return nil
 	}
 
-	log.Println("[DEBUG] Stopping scheduler")
+	log.Debug().Msg("stopping scheduler")
 	ctx := s.crontab.Stop()
 	<-ctx.Done()
 
+	s.mu.Lock()
 	for _, job := range s.crontab.Entries() {
 		if cancel, ok := s.activeJobs[job.ID]; ok {
 			cancel()
 		}
 	}
+	s.mu.Unlock()
 
 	err := ctx.Err()
 	if err == context.Canceled {
@@ -65,9 +68,12 @@ func (s *Scheduler) StopJob(jobID string) error {
 		return errors.Wrapf(err, "failed convert jobID %q to int", jobID)
 	}
 	entryID := cron.EntryID(id)
+
+	s.mu.Lock()
 	if cancel, ok := s.activeJobs[entryID]; ok {
 		cancel()
 	}
+	s.mu.Unlock()
 
 	return nil
 }
@@ -80,18 +86,20 @@ func (s *Scheduler) StartJobEvery(duration time.Duration, job func() error) stri
 
 	j := cron.FuncJob(func() {
 		if err := job(); err != nil {
-			logrus.Debug("job returned an error")
+			log.Debug().Msg("job returned an error")
 			cancel()
 		}
 	})
 
 	entryID := s.crontab.Schedule(cron.Every(duration), j)
 
+	s.mu.Lock()
 	s.activeJobs[entryID] = cancel
+	s.mu.Unlock()
 
 	go func(entryID cron.EntryID) {
 		<-ctx.Done()
-		logrus.Debug("job cancelled, stopping")
+		log.Debug().Msg("job cancelled, stopping")
 		s.crontab.Remove(entryID)
 	}(entryID)
 

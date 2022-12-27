@@ -1,9 +1,14 @@
-<rd-header>
-  <rd-header-title title-text="容器日志"></rd-header-title>
-  <rd-header-content>
-    <a ui-sref="docker.containers">容器</a> &gt; <a ui-sref="docker.containers.container({id: container.Id})">{{ container.Name | trimcontainername }}</a> &gt; 日志
-  </rd-header-content>
-</rd-header>
+<page-header
+  title="'容器日志'"
+  breadcrumbs="[
+    { label:'容器', link:'docker.containers' },
+    { 
+      label:(container.Name | trimcontainername),
+      link: 'docker.containers.container', 
+      linkParams:container.Id
+    }, 'Logs']"
+>
+</page-header>
 
 <log-viewer
   data="logs"

@@ -1,39 +1,32 @@
-<rd-header>
-  <rd-header-title title-text="集群概述">
-    <a data-toggle="tooltip" title="刷新" ui-sref="docker.swarm" ui-sref-opts="{reload: true}">
-      <i class="fa fa-sync" aria-hidden="true"></i>
-    </a>
-  </rd-header-title>
-  <rd-header-content>集群</rd-header-content>
-</rd-header>
+<page-header title="'Cluster overview'" breadcrumbs="['Swarm']" reload="true"> </page-header>
 
 <div class="row">
   <div class="col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="fa-object-group" title-text="集群状态"></rd-widget-header>
+      <rd-widget-header icon="trello" feather-icon="true" title-text="Cluster status"></rd-widget-header>
       <rd-widget-body classes="no-padding">
         <table class="table">
           <tbody>
             <tr>
-              <td>节点</td>
+              <td>Nodes</td>
               <td>{{ info.Swarm.Nodes }}</td>
             </tr>
             <tr>
-              <td>Docker API 版本</td>
+              <td>Docker API version</td>
               <td>{{ docker.ApiVersion }}</td>
             </tr>
             <tr>
-              <td>总 CPU</td>
+              <td>Total CPU</td>
               <td>{{ totalCPU }}</td>
             </tr>
             <tr>
-              <td>总内存</td>
+              <td>Total memory</td>
               <td>{{ totalMemory | humansize: 2 }}</td>
             </tr>
             <tr>
               <td colspan="2">
                 <div class="btn-group" role="group" aria-label="...">
-                  <a ui-sref="docker.swarm.visualizer"><i class="fa fa-object-group space-right" aria-hidden="true"></i>转到群集可视化工具</a>
+                  <a ui-sref="docker.swarm.visualizer" class="vertical-center"><pr-icon icon="'trello'" feather="true" class-name="'icon'"></pr-icon>Go to cluster visualizer</a>
                 </div>
               </td>
             </tr>
@@ -48,7 +41,7 @@
   <div class="col-sm-12">
     <nodes-datatable
       title-text="Nodes"
-      title-icon="fa-hdd"
+      title-icon="trello"
       dataset="nodes"
       table-key="nodes"
       order-by="Hostname"

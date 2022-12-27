@@ -7,20 +7,21 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/portainer/portainer/api/internal/endpointutils"
+
 	"github.com/docker/docker/api/types"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	httperror "github.com/portainer/libhttp/error"
 	portainer "github.com/portainer/portainer/api"
-	bolterrors "github.com/portainer/portainer/api/bolt/errors"
+	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/docker"
 	"github.com/portainer/portainer/api/http/security"
 	"github.com/portainer/portainer/api/internal/authorization"
+	"github.com/portainer/portainer/api/kubernetes/cli"
 	"github.com/portainer/portainer/api/scheduler"
 	"github.com/portainer/portainer/api/stacks"
 )
-
-const defaultGitReferenceName = "refs/heads/master"
 
 var (
 	errStackAlreadyExists     = errors.New("A stack already exists with this name")
@@ -34,18 +35,19 @@ type Handler struct {
 	stackDeletionMutex *sync.Mutex
 	requestBouncer     *security.RequestBouncer
 	*mux.Router
-	DataStore           portainer.DataStore
-	DockerClientFactory *docker.ClientFactory
-	FileService         portainer.FileService
-	GitService          portainer.GitService
-	SwarmStackManager   portainer.SwarmStackManager
-	ComposeStackManager portainer.ComposeStackManager
-	KubernetesDeployer  portainer.KubernetesDeployer
-	Scheduler           *scheduler.Scheduler
-	StackDeployer       stacks.StackDeployer
+	DataStore               dataservices.DataStore
+	DockerClientFactory     *docker.ClientFactory
+	FileService             portainer.FileService
+	GitService              portainer.GitService
+	SwarmStackManager       portainer.SwarmStackManager
+	ComposeStackManager     portainer.ComposeStackManager
+	KubernetesDeployer      portainer.KubernetesDeployer
+	KubernetesClientFactory *cli.ClientFactory
+	Scheduler               *scheduler.Scheduler
+	StackDeployer           stacks.StackDeployer
 }
 
-func stackExistsError(name string) (*httperror.HandlerError){
+func stackExistsError(name string) *httperror.HandlerError {
 	msg := fmt.Sprintf("A stack with the normalized name '%s' already exists", name)
 	err := errors.New(msg)
 	return &httperror.HandlerError{StatusCode: http.StatusConflict, Message: msg, Err: err}
@@ -133,6 +135,20 @@ func (handler *Handler) userCanCreateStack(securityContext *security.RestrictedR
 	return handler.userIsAdminOrEndpointAdmin(user, endpointID)
 }
 
+// if stack management is disabled for non admins and the user isn't an admin, then return false. Otherwise return true
+func (handler *Handler) userCanManageStacks(securityContext *security.RestrictedRequestContext, endpoint *portainer.Endpoint) (bool, error) {
+	if endpointutils.IsDockerEndpoint(endpoint) && !endpoint.SecuritySettings.AllowStackManagementForRegularUsers {
+		canCreate, err := handler.userCanCreateStack(securityContext, portainer.EndpointID(endpoint.ID))
+
+		if err != nil {
+			return false, fmt.Errorf("Failed to get user from the database: %w", err)
+		}
+
+		return canCreate, nil
+	}
+	return true, nil
+}
+
 func (handler *Handler) checkUniqueStackName(endpoint *portainer.Endpoint, name string, stackID portainer.StackID) (bool, error) {
 	stacks, err := handler.DataStore.Stack().Stacks()
 	if err != nil {
@@ -148,13 +164,38 @@ func (handler *Handler) checkUniqueStackName(endpoint *portainer.Endpoint, name 
 	return true, nil
 }
 
+func (handler *Handler) checkUniqueStackNameInKubernetes(endpoint *portainer.Endpoint, name string, stackID portainer.StackID, namespace string) (bool, error) {
+	isUniqueStackName, err := handler.checkUniqueStackName(endpoint, name, stackID)
+	if err != nil {
+		return false, err
+	}
+
+	if !isUniqueStackName {
+		// Check if this stack name is really used in the kubernetes.
+		// Because the stack with this name could be removed via kubectl cli outside and the datastore does not be informed of this action.
+		if namespace == "" {
+			namespace = "default"
+		}
+
+		kubeCli, err := handler.KubernetesClientFactory.GetKubeClient(endpoint)
+		if err != nil {
+			return false, err
+		}
+		isUniqueStackName, err = kubeCli.HasStackName(namespace, name)
+		if err != nil {
+			return false, err
+		}
+	}
+	return isUniqueStackName, nil
+}
+
 func (handler *Handler) checkUniqueStackNameInDocker(endpoint *portainer.Endpoint, name string, stackID portainer.StackID, swarmMode bool) (bool, error) {
 	isUniqueStackName, err := handler.checkUniqueStackName(endpoint, name, stackID)
 	if err != nil {
 		return false, err
 	}
 
-	dockerClient, err := handler.DockerClientFactory.CreateClient(endpoint, "")
+	dockerClient, err := handler.DockerClientFactory.CreateClient(endpoint, "", nil)
 	if err != nil {
 		return false, err
 	}
@@ -191,7 +232,7 @@ func (handler *Handler) checkUniqueStackNameInDocker(endpoint *portainer.Endpoin
 
 func (handler *Handler) checkUniqueWebhookID(webhookID string) (bool, error) {
 	_, err := handler.DataStore.Stack().StackByWebhookID(webhookID)
-	if err == bolterrors.ErrObjectNotFound {
+	if handler.DataStore.IsErrObjectNotFound(err) {
 		return true, nil
 	}
 	return false, err

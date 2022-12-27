@@ -1,15 +1,18 @@
 <form name="$ctrl.redeployGitForm" class="form-horizontal my-8">
-  <div class="col-sm-12 form-section-title">
-    从git仓库重新部署
-  </div>
+  <div class="col-sm-12 form-section-title"> Redeploy from git repository </div>
   <git-form-info-panel
     class-name="text-muted small"
     url="$ctrl.model.URL"
+    type="stack"
     config-file-path="$ctrl.model.ConfigFilePath"
     additional-files="$ctrl.stack.AdditionalFiles"
   ></git-form-info-panel>
 
-  <git-form-auto-update-fieldset model="$ctrl.formValues.AutoUpdate" on-change="($ctrl.onChangeAutoUpdate)"></git-form-auto-update-fieldset>
+  <git-form-auto-update-fieldset
+    model="$ctrl.formValues.AutoUpdate"
+    on-change="($ctrl.onChangeAutoUpdate)"
+    show-force-pull-image="$ctrl.stack.Type !== 3"
+  ></git-form-auto-update-fieldset>
   <div class="form-group">
     <div class="col-sm-12">
       <p>
@@ -30,30 +33,30 @@
   ></git-form-auth-fieldset>
   <environment-variables-panel
     ng-model="$ctrl.formValues.Env"
-    explanation="These values will be used as substitutions in the stack file"
+    explanation="这些值将被用作堆栈文件中的替代值"
     on-change="($ctrl.onChangeEnvVar)"
+    show-help-message="true"
   ></environment-variables-panel>
-
+  <option-panel ng-if="$ctrl.stack.Type === 1 && $ctrl.endpoint.apiVersion >= 1.27" ng-model="$ctrl.formValues.Option" on-change="($ctrl.onChangeOption)"></option-panel>
   <button
     class="btn btn-sm btn-primary"
     ng-click="$ctrl.submit()"
-    ng-if="!$ctrl.formValues.AutoUpdate.RepositoryAutomaticUpdates"
     ng-disabled="$ctrl.isSubmitButtonDisabled() || $ctrl.state.hasUnsavedChanges || !$ctrl.redeployGitForm.$valid"
-    style="margin-top: 7px; margin-left: 0;"
+    style="margin-top: 7px; margin-left: 0"
     button-spinner="$ctrl.state.redeployInProgress"
     analytics-on
     analytics-event="docker-stack-pull-redeploy"
     analytics-category="docker"
   >
-    <span ng-hide="$ctrl.state.redeployInProgress"> <i class="fa fa-sync space-right" aria-hidden="true"></i> Pull and redeploy </span>
-    <span ng-show="$ctrl.state.redeployInProgress">进行中...</span>
+    <span ng-hide="$ctrl.state.redeployInProgress"> <i class="fa fa-sync space-right" aria-hidden="true"></i> 拉取并重新部署 </span>
+    <span ng-show="$ctrl.state.redeployInProgress">正在进行中...</span>
   </button>
 
   <button
     class="btn btn-sm btn-primary"
     ng-click="$ctrl.saveGitSettings()"
     ng-disabled="$ctrl.isSubmitButtonDisabled() || !$ctrl.state.hasUnsavedChanges || !$ctrl.redeployGitForm.$valid"
-    style="margin-top: 7px; margin-left: 0;"
+    style="margin-top: 7px; margin-left: 0"
     button-spinner="$ctrl.state.inProgress"
     analytics-on
     analytics-event="docker-stack-update-git-settings"
@@ -61,6 +64,6 @@
     analytics-properties="$ctrl.buildAnalyticsProperties()"
   >
     <span ng-hide="$ctrl.state.inProgress"> 保存设置 </span>
-    <span ng-show="$ctrl.state.inProgress">进行中...</span>
+    <span ng-show="$ctrl.state.inProgress">正在进行中...</span>
   </button>
 </form>

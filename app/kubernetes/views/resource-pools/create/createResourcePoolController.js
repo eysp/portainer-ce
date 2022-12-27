@@ -2,25 +2,21 @@ import _ from 'lodash-es';
 import filesizeParser from 'filesize-parser';
 import { KubernetesResourceQuotaDefaults } from 'Kubernetes/models/resource-quota/models';
 import KubernetesResourceReservationHelper from 'Kubernetes/helpers/resourceReservationHelper';
-import {
-  KubernetesResourcePoolFormValues,
-  KubernetesResourcePoolIngressClassAnnotationFormValue,
-  KubernetesResourcePoolIngressClassHostFormValue,
-} from 'Kubernetes/models/resource-pool/formValues';
+import { KubernetesResourcePoolFormValues, KubernetesResourcePoolIngressClassHostFormValue } from 'Kubernetes/models/resource-pool/formValues';
 import { KubernetesIngressConverter } from 'Kubernetes/ingress/converter';
-import KubernetesFormValidationHelper from 'Kubernetes/helpers/formValidationHelper';
 import { KubernetesFormValidationReferences } from 'Kubernetes/models/application/formValues';
 import { KubernetesIngressClassTypes } from 'Kubernetes/ingress/constants';
-
-import { K8S_RESOURCE_POOL_LB_QUOTA, K8S_RESOURCE_POOL_STORAGE_QUOTA } from '@/portainer/feature-flags/feature-ids';
+import { FeatureId } from '@/portainer/feature-flags/enums';
+import { getIngressControllerClassMap, updateIngressControllerClassMap } from '@/react/kubernetes/cluster/ingressClass/utils';
 
 class KubernetesCreateResourcePoolController {
   /* #region  CONSTRUCTOR */
   /* @ngInject */
-  constructor($async, $state, Notifications, KubernetesNodeService, KubernetesResourcePoolService, KubernetesIngressService, Authentication, EndpointService) {
+  constructor($async, $state, $scope, Notifications, KubernetesNodeService, KubernetesResourcePoolService, KubernetesIngressService, Authentication, EndpointService) {
     Object.assign(this, {
       $async,
       $state,
+      $scope,
       Notifications,
       KubernetesNodeService,
       KubernetesResourcePoolService,
@@ -30,68 +26,61 @@ class KubernetesCreateResourcePoolController {
     });
 
     this.IngressClassTypes = KubernetesIngressClassTypes;
-    this.LBQuotaFeatureId = K8S_RESOURCE_POOL_LB_QUOTA;
-    this.StorageQuotaFeatureId = K8S_RESOURCE_POOL_STORAGE_QUOTA;
+    this.LBQuotaFeatureId = FeatureId.K8S_RESOURCE_POOL_LB_QUOTA;
+
+    this.onToggleStorageQuota = this.onToggleStorageQuota.bind(this);
+    this.onToggleLoadBalancerQuota = this.onToggleLoadBalancerQuota.bind(this);
+    this.onToggleResourceQuota = this.onToggleResourceQuota.bind(this);
+    this.onChangeIngressControllerAvailability = this.onChangeIngressControllerAvailability.bind(this);
+    this.onRegistriesChange = this.onRegistriesChange.bind(this);
+    this.handleMemoryLimitChange = this.handleMemoryLimitChange.bind(this);
+    this.handleCpuLimitChange = this.handleCpuLimitChange.bind(this);
   }
   /* #endregion */
 
-  onChangeIngressHostname() {
-    const state = this.state.duplicates.ingressHosts;
-    const hosts = _.flatMap(this.formValues.IngressClasses, 'Hosts');
-    const hostnames = _.compact(hosts.map((h) => h.Host));
-    const hostnamesWithoutRemoved = _.filter(hostnames, (h) => !h.NeedsDeletion);
-    const allHosts = _.flatMap(this.allIngresses, 'Hosts');
-    const formDuplicates = KubernetesFormValidationHelper.getDuplicates(hostnamesWithoutRemoved);
-    _.forEach(hostnames, (host, idx) => {
-      if (host !== undefined && _.includes(allHosts, host)) {
-        formDuplicates[idx] = host;
-      }
-    });
-    const duplicates = {};
-    let count = 0;
-    _.forEach(this.formValues.IngressClasses, (ic) => {
-      duplicates[ic.IngressClass.Name] = {};
-      _.forEach(ic.Hosts, (hostFV, hostIdx) => {
-        if (hostFV.Host === formDuplicates[count]) {
-          duplicates[ic.IngressClass.Name][hostIdx] = hostFV.Host;
-        }
-        count++;
-      });
-    });
-    state.refs = duplicates;
-    state.hasRefs = false;
-    _.forIn(duplicates, (value) => {
-      if (Object.keys(value).length > 0) {
-        state.hasRefs = true;
-      }
+  onRegistriesChange(registries) {
+    return this.$scope.$evalAsync(() => {
+      this.formValues.Registries = registries;
     });
   }
 
-  addHostname(ingressClass) {
-    ingressClass.Hosts.push(new KubernetesResourcePoolIngressClassHostFormValue());
+  onToggleStorageQuota(storageClassName, enabled) {
+    this.$scope.$evalAsync(() => {
+      this.formValues.StorageClasses = this.formValues.StorageClasses.map((sClass) => (sClass.Name !== storageClassName ? sClass : { ...sClass, Selected: enabled }));
+    });
   }
 
-  removeHostname(ingressClass, index) {
-    ingressClass.Hosts.splice(index, 1);
-    this.onChangeIngressHostname();
+  onToggleLoadBalancerQuota(enabled) {
+    this.$scope.$evalAsync(() => {
+      this.formValues.UseLoadBalancersQuota = enabled;
+    });
   }
 
-  /* #region  ANNOTATIONS MANAGEMENT */
-  addAnnotation(ingressClass) {
-    ingressClass.Annotations.push(new KubernetesResourcePoolIngressClassAnnotationFormValue());
+  onToggleResourceQuota(enabled) {
+    this.$scope.$evalAsync(() => {
+      this.formValues.HasQuota = enabled;
+    });
   }
 
-  removeAnnotation(ingressClass, index) {
-    ingressClass.Annotations.splice(index, 1);
+  /* #region  INGRESS MANAGEMENT */
+  onChangeIngressControllerAvailability(controllerClassMap) {
+    this.ingressControllers = controllerClassMap;
   }
   /* #endregion */
 
   isCreateButtonDisabled() {
-    return this.state.actionInProgress || (this.formValues.HasQuota && !this.isQuotaValid()) || this.state.isAlreadyExist || this.state.duplicates.ingressHosts.hasRefs;
+    return (
+      this.state.actionInProgress ||
+      (this.formValues.HasQuota && !this.isQuotaValid()) ||
+      this.state.isAlreadyExist ||
+      this.state.hasPrefixKube ||
+      this.state.duplicates.ingressHosts.hasRefs
+    );
   }
 
   onChangeName() {
     this.state.isAlreadyExist = _.find(this.resourcePools, (resourcePool) => resourcePool.Namespace.Name === this.formValues.Name) !== undefined;
+    this.state.hasPrefixKube = /^kube-/.test(this.formValues.Name);
   }
 
   isQuotaValid() {
@@ -114,6 +103,18 @@ class KubernetesCreateResourcePoolController {
     }
   }
 
+  handleMemoryLimitChange(memoryLimit) {
+    return this.$async(async () => {
+      this.formValues.MemoryLimit = memoryLimit;
+    });
+  }
+
+  handleCpuLimitChange(cpuLimit) {
+    return this.$async(async () => {
+      this.formValues.CpuLimit = cpuLimit;
+    });
+  }
+
   /* #region  CREATE NAMESPACE */
   createResourcePool() {
     return this.$async(async () => {
@@ -122,10 +123,11 @@ class KubernetesCreateResourcePoolController {
         this.checkDefaults();
         this.formValues.Owner = this.Authentication.getUserDetails().username;
         await this.KubernetesResourcePoolService.create(this.formValues);
-        this.Notifications.success('Namespace 已成功创建', this.formValues.Name);
+        await updateIngressControllerClassMap(this.endpoint.Id, this.ingressControllers || [], this.formValues.Name);
+        this.Notifications.success('Namespace successfully created', this.formValues.Name);
         this.$state.go('kubernetes.resourcePools');
       } catch (err) {
-        this.Notifications.error('失败', err, '无法创建 namespace');
+        this.Notifications.error('失败', err, 'Unable to create namespace');
       } finally {
         this.state.actionInProgress = false;
       }
@@ -139,7 +141,7 @@ class KubernetesCreateResourcePoolController {
       try {
         this.allIngresses = await this.KubernetesIngressService.get();
       } catch (err) {
-        this.Notifications.error('失败', err, '无法检索入口。');
+        this.Notifications.error('失败', err, 'Unable to retrieve ingresses.');
       }
     });
   }
@@ -151,7 +153,7 @@ class KubernetesCreateResourcePoolController {
       try {
         this.resourcePools = await this.KubernetesResourcePoolService.get();
       } catch (err) {
-        this.Notifications.error('失败', err, '无法检索 namespaces');
+        this.Notifications.error('失败', err, 'Unable to retrieve namespaces');
       }
     });
   }
@@ -163,7 +165,7 @@ class KubernetesCreateResourcePoolController {
       try {
         this.registries = await this.EndpointService.registries(this.endpoint.Id);
       } catch (err) {
-        this.Notifications.error('失败', err, '无法检索注册表');
+        this.Notifications.error('失败', err, 'Unable to retrieve registries');
       }
     });
   }
@@ -185,14 +187,21 @@ class KubernetesCreateResourcePoolController {
           sliderMaxCpu: 0,
           viewReady: false,
           isAlreadyExist: false,
-          canUseIngress: endpoint.Kubernetes.Configuration.IngressClasses.length,
+          hasPrefixKube: false,
+          canUseIngress: false,
           duplicates: {
             ingressHosts: new KubernetesFormValidationReferences(),
           },
           isAdmin: this.Authentication.isAdmin(),
+          ingressAvailabilityPerNamespace: endpoint.Kubernetes.Configuration.IngressAvailabilityPerNamespace,
         };
 
         const nodes = await this.KubernetesNodeService.get();
+
+        this.ingressControllers = [];
+        if (this.state.ingressAvailabilityPerNamespace) {
+          this.ingressControllers = await getIngressControllerClassMap({ environmentId: this.endpoint.Id, allowedOnly: true });
+        }
 
         _.forEach(nodes, (item) => {
           this.state.sliderMaxMemory += filesizeParser(item.Memory);
@@ -213,7 +222,7 @@ class KubernetesCreateResourcePoolController {
 
         await this.getRegistries();
       } catch (err) {
-        this.Notifications.error('失败', err, '无法加载视图数据');
+        this.Notifications.error('失败', err, 'Unable to load view data');
       } finally {
         this.state.viewReady = true;
       }

@@ -1,6 +1,6 @@
 import _ from 'lodash-es';
 import './datatable.css';
-import { ResourceControlOwnership as RCO } from 'Portainer/models/resourceControl/resourceControlOwnership';
+import { ResourceControlOwnership as RCO } from '@/react/portainer/access-control/types';
 
 function isBetween(value, a, b) {
   return (value >= a && value <= b) || (value >= b && value <= a);
@@ -40,9 +40,15 @@ angular.module('portainer.app').controller('GenericDatatableController', [
       _.map(this.state.filteredDataSet, (item) => (item.Checked = false));
     };
 
-    this.onTextFilterChange = function () {
-      DatatableService.setDataTableTextFilters(this.tableKey, this.state.textFilter);
+    this.onTextFilterChangeGeneric = onTextFilterChangeGeneric;
+
+    this.onTextFilterChange = function onTextFilterChange() {
+      return this.onTextFilterChangeGeneric();
     };
+
+    function onTextFilterChangeGeneric() {
+      DatatableService.setDataTableTextFilters(this.tableKey, this.state.textFilter);
+    }
 
     this.changeOrderBy = function changeOrderBy(orderField) {
       this.state.reverseOrder = this.state.orderBy === orderField ? !this.state.reverseOrder : false;
@@ -71,7 +77,7 @@ angular.module('portainer.app').controller('GenericDatatableController', [
         item.Checked = !item.Checked;
         this.state.firstClickedItem = item;
       }
-      this.state.selectedItems = _.uniq(_.concat(this.state.selectedItems, this.state.filteredDataSet)).filter((i) => i.Checked);
+      this.state.selectedItems = this.uniq().filter((i) => i.Checked);
       if (event && this.state.selectAll && this.state.selectedItems.length !== this.state.filteredDataSet.length) {
         this.state.selectAll = false;
       }
@@ -88,6 +94,13 @@ angular.module('portainer.app').controller('GenericDatatableController', [
         }
       }
       this.onSelectionChanged();
+    };
+
+    /**
+     * Override this method to change the uniqness filter when selecting items
+     */
+    this.uniq = function () {
+      return _.uniq(_.concat(this.state.filteredDataSet, this.state.selectedItems));
     };
 
     /**

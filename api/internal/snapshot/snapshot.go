@@ -2,19 +2,24 @@ package snapshot
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
-	"log"
 	"time"
 
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/agent"
+	"github.com/portainer/portainer/api/crypto"
+	"github.com/portainer/portainer/api/dataservices"
+
+	"github.com/rs/zerolog/log"
 )
 
 // Service repesents a service to manage environment(endpoint) snapshots.
 // It provides an interface to start background snapshots as well as
 // specific Docker/Kubernetes environment(endpoint) snapshot methods.
 type Service struct {
-	dataStore                 portainer.DataStore
-	refreshSignal             chan struct{}
+	dataStore                 dataservices.DataStore
+	snapshotIntervalCh        chan time.Duration
 	snapshotIntervalInSeconds float64
 	dockerSnapshotter         portainer.DockerSnapshotter
 	kubernetesSnapshotter     portainer.KubernetesSnapshotter
@@ -22,52 +27,53 @@ type Service struct {
 }
 
 // NewService creates a new instance of a service
-func NewService(snapshotInterval string, dataStore portainer.DataStore, dockerSnapshotter portainer.DockerSnapshotter, kubernetesSnapshotter portainer.KubernetesSnapshotter, shutdownCtx context.Context) (*Service, error) {
-	snapshotFrequency, err := time.ParseDuration(snapshotInterval)
+func NewService(snapshotIntervalFromFlag string, dataStore dataservices.DataStore, dockerSnapshotter portainer.DockerSnapshotter, kubernetesSnapshotter portainer.KubernetesSnapshotter, shutdownCtx context.Context) (*Service, error) {
+	interval, err := parseSnapshotFrequency(snapshotIntervalFromFlag, dataStore)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Service{
 		dataStore:                 dataStore,
-		snapshotIntervalInSeconds: snapshotFrequency.Seconds(),
+		snapshotIntervalCh:        make(chan time.Duration),
+		snapshotIntervalInSeconds: interval,
 		dockerSnapshotter:         dockerSnapshotter,
 		kubernetesSnapshotter:     kubernetesSnapshotter,
 		shutdownCtx:               shutdownCtx,
 	}, nil
 }
 
-// Start will start a background routine to execute periodic snapshots of environments(endpoints)
-func (service *Service) Start() {
-	if service.refreshSignal != nil {
-		return
+func parseSnapshotFrequency(snapshotInterval string, dataStore dataservices.DataStore) (float64, error) {
+	if snapshotInterval == "" {
+		settings, err := dataStore.Settings().Settings()
+		if err != nil {
+			return 0, err
+		}
+		snapshotInterval = settings.SnapshotInterval
+		if snapshotInterval == "" {
+			snapshotInterval = portainer.DefaultSnapshotInterval
+		}
 	}
-
-	service.refreshSignal = make(chan struct{})
-	service.startSnapshotLoop()
+	snapshotFrequency, err := time.ParseDuration(snapshotInterval)
+	if err != nil {
+		return 0, err
+	}
+	return snapshotFrequency.Seconds(), nil
 }
 
-func (service *Service) Stop() {
-	if service.refreshSignal == nil {
-		return
-	}
-
-	// clear refreshSignal to mark the service as disabled
-	close(service.refreshSignal)
-	service.refreshSignal = nil
+// Start will start a background routine to execute periodic snapshots of environments(endpoints)
+func (service *Service) Start() {
+	go service.startSnapshotLoop()
 }
 
 // SetSnapshotInterval sets the snapshot interval and resets the service
 func (service *Service) SetSnapshotInterval(snapshotInterval string) error {
-	service.Stop()
-
-	snapshotFrequency, err := time.ParseDuration(snapshotInterval)
+	interval, err := time.ParseDuration(snapshotInterval)
 	if err != nil {
 		return err
 	}
-	service.snapshotIntervalInSeconds = snapshotFrequency.Seconds()
 
-	service.Start()
+	service.snapshotIntervalCh <- interval
 
 	return nil
 }
@@ -85,6 +91,24 @@ func SupportDirectSnapshot(endpoint *portainer.Endpoint) bool {
 // SnapshotEndpoint will create a snapshot of the environment(endpoint) based on the environment(endpoint) type.
 // If the snapshot is a success, it will be associated to the environment(endpoint).
 func (service *Service) SnapshotEndpoint(endpoint *portainer.Endpoint) error {
+	if endpoint.Type == portainer.AgentOnDockerEnvironment || endpoint.Type == portainer.AgentOnKubernetesEnvironment {
+		var err error
+		var tlsConfig *tls.Config
+		if endpoint.TLSConfig.TLS {
+			tlsConfig, err = crypto.CreateTLSConfigurationFromDisk(endpoint.TLSConfig.TLSCACertPath, endpoint.TLSConfig.TLSCertPath, endpoint.TLSConfig.TLSKeyPath, endpoint.TLSConfig.TLSSkipVerify)
+			if err != nil {
+				return err
+			}
+		}
+
+		_, version, err := agent.GetAgentVersionAndPlatform(endpoint.URL, tlsConfig)
+		if err != nil {
+			return err
+		}
+
+		endpoint.Agent.Version = version
+	}
+
 	switch endpoint.Type {
 	case portainer.AzureEnvironment:
 		return nil
@@ -95,60 +119,87 @@ func (service *Service) SnapshotEndpoint(endpoint *portainer.Endpoint) error {
 	return service.snapshotDockerEndpoint(endpoint)
 }
 
-func (service *Service) snapshotKubernetesEndpoint(endpoint *portainer.Endpoint) error {
-	snapshot, err := service.kubernetesSnapshotter.CreateSnapshot(endpoint)
+func (service *Service) Create(snapshot portainer.Snapshot) error {
+	return service.dataStore.Snapshot().Create(&snapshot)
+}
+
+func (service *Service) FillSnapshotData(endpoint *portainer.Endpoint) error {
+	snapshot, err := service.dataStore.Snapshot().Snapshot(endpoint.ID)
+	if service.dataStore.IsErrObjectNotFound(err) {
+		endpoint.Snapshots = []portainer.DockerSnapshot{}
+		endpoint.Kubernetes.Snapshots = []portainer.KubernetesSnapshot{}
+
+		return nil
+	}
+
 	if err != nil {
 		return err
 	}
 
-	if snapshot != nil {
-		endpoint.Kubernetes.Snapshots = []portainer.KubernetesSnapshot{*snapshot}
+	if snapshot.Docker != nil {
+		endpoint.Snapshots = []portainer.DockerSnapshot{*snapshot.Docker}
+	}
+
+	if snapshot.Kubernetes != nil {
+		endpoint.Kubernetes.Snapshots = []portainer.KubernetesSnapshot{*snapshot.Kubernetes}
+	}
+
+	return nil
+}
+
+func (service *Service) snapshotKubernetesEndpoint(endpoint *portainer.Endpoint) error {
+	kubernetesSnapshot, err := service.kubernetesSnapshotter.CreateSnapshot(endpoint)
+	if err != nil {
+		return err
+	}
+
+	if kubernetesSnapshot != nil {
+		snapshot := &portainer.Snapshot{EndpointID: endpoint.ID, Kubernetes: kubernetesSnapshot}
+
+		return service.dataStore.Snapshot().Create(snapshot)
 	}
 
 	return nil
 }
 
 func (service *Service) snapshotDockerEndpoint(endpoint *portainer.Endpoint) error {
-	snapshot, err := service.dockerSnapshotter.CreateSnapshot(endpoint)
+	dockerSnapshot, err := service.dockerSnapshotter.CreateSnapshot(endpoint)
 	if err != nil {
 		return err
 	}
 
-	if snapshot != nil {
-		endpoint.Snapshots = []portainer.DockerSnapshot{*snapshot}
+	if dockerSnapshot != nil {
+		snapshot := &portainer.Snapshot{EndpointID: endpoint.ID, Docker: dockerSnapshot}
+
+		return service.dataStore.Snapshot().Create(snapshot)
 	}
 
 	return nil
 }
 
-func (service *Service) startSnapshotLoop() error {
+func (service *Service) startSnapshotLoop() {
 	ticker := time.NewTicker(time.Duration(service.snapshotIntervalInSeconds) * time.Second)
-	go func() {
-		err := service.snapshotEndpoints()
-		if err != nil {
-			log.Printf("[ERROR] [internal,snapshot] [message: background schedule error (environment snapshot).] [error: %s]", err)
-		}
 
-		for {
-			select {
-			case <-ticker.C:
-				err := service.snapshotEndpoints()
-				if err != nil {
-					log.Printf("[ERROR] [internal,snapshot] [message: background schedule error (environment snapshot).] [error: %s]", err)
-				}
-			case <-service.shutdownCtx.Done():
-				log.Println("[DEBUG] [internal,snapshot] [message: shutting down snapshotting]")
-				ticker.Stop()
-				return
-			case <-service.refreshSignal:
-				log.Println("[DEBUG] [internal,snapshot] [message: shutting down snapshotting]")
-				ticker.Stop()
-				return
+	err := service.snapshotEndpoints()
+	if err != nil {
+		log.Error().Err(err).Msg("background schedule error (environment snapshot)")
+	}
+
+	for {
+		select {
+		case <-ticker.C:
+			err := service.snapshotEndpoints()
+			if err != nil {
+				log.Error().Err(err).Msg("background schedule error (environment snapshot)")
 			}
+		case <-service.shutdownCtx.Done():
+			log.Debug().Msg("shutting down snapshotting")
+			ticker.Stop()
+			return
+		case interval := <-service.snapshotIntervalCh:
+			ticker.Reset(interval)
 		}
-	}()
-
-	return nil
+	}
 }
 
 func (service *Service) snapshotEndpoints() error {
@@ -166,22 +217,33 @@ func (service *Service) snapshotEndpoints() error {
 
 		latestEndpointReference, err := service.dataStore.Endpoint().Endpoint(endpoint.ID)
 		if latestEndpointReference == nil {
-			log.Printf("background schedule error (environment snapshot). Environment not found inside the database anymore (endpoint=%s, URL=%s) (err=%s)\n", endpoint.Name, endpoint.URL, err)
+			log.Debug().
+				Str("endpoint", endpoint.Name).
+				Str("URL", endpoint.URL).Err(err).
+				Msg("background schedule error (environment snapshot), environment not found inside the database anymore")
+
 			continue
 		}
 
 		latestEndpointReference.Status = portainer.EndpointStatusUp
 		if snapshotError != nil {
-			log.Printf("background schedule error (environment snapshot). Unable to create snapshot (endpoint=%s, URL=%s) (err=%s)\n", endpoint.Name, endpoint.URL, snapshotError)
+			log.Debug().
+				Str("endpoint", endpoint.Name).
+				Str("URL", endpoint.URL).Err(err).
+				Msg("background schedule error (environment snapshot), unable to create snapshot")
+
 			latestEndpointReference.Status = portainer.EndpointStatusDown
 		}
 
-		latestEndpointReference.Snapshots = endpoint.Snapshots
-		latestEndpointReference.Kubernetes.Snapshots = endpoint.Kubernetes.Snapshots
+		latestEndpointReference.Agent.Version = endpoint.Agent.Version
 
 		err = service.dataStore.Endpoint().UpdateEndpoint(latestEndpointReference.ID, latestEndpointReference)
 		if err != nil {
-			log.Printf("background schedule error (environment snapshot). Unable to update environment (endpoint=%s, URL=%s) (err=%s)\n", endpoint.Name, endpoint.URL, err)
+			log.Debug().
+				Str("endpoint", endpoint.Name).
+				Str("URL", endpoint.URL).Err(err).
+				Msg("background schedule error (environment snapshot), unable to update environment")
+
 			continue
 		}
 	}
@@ -191,24 +253,17 @@ func (service *Service) snapshotEndpoints() error {
 
 // FetchDockerID fetches info.Swarm.Cluster.ID if environment(endpoint) is swarm and info.ID otherwise
 func FetchDockerID(snapshot portainer.DockerSnapshot) (string, error) {
-	info, done := snapshot.SnapshotRaw.Info.(map[string]interface{})
-	if !done {
-		return "", errors.New("failed getting snapshot info")
-	}
+	info := snapshot.SnapshotRaw.Info
 
 	if !snapshot.Swarm {
-		return info["ID"].(string), nil
+		return info.ID, nil
 	}
 
-	if info["Swarm"] == nil {
-		return "", errors.New("swarm environment is missing swarm info snapshot")
-	}
-
-	swarmInfo := info["Swarm"].(map[string]interface{})
-	if swarmInfo["Cluster"] == nil {
+	swarmInfo := info.Swarm
+	if swarmInfo.Cluster == nil {
 		return "", errors.New("swarm environment is missing cluster info snapshot")
 	}
 
-	clusterInfo := swarmInfo["Cluster"].(map[string]interface{})
-	return clusterInfo["ID"].(string), nil
+	clusterInfo := swarmInfo.Cluster
+	return clusterInfo.ID, nil
 }

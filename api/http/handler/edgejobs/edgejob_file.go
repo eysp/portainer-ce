@@ -7,7 +7,6 @@ import (
 	"github.com/portainer/libhttp/request"
 	"github.com/portainer/libhttp/response"
 	portainer "github.com/portainer/portainer/api"
-	bolterrors "github.com/portainer/portainer/api/bolt/errors"
 )
 
 type edgeJobFileResponse struct {
@@ -16,10 +15,10 @@ type edgeJobFileResponse struct {
 
 // @id EdgeJobFile
 // @summary Fetch a file of an EdgeJob
-// @description
+// @description **Access policy**: administrator
 // @tags edge_jobs
+// @security ApiKeyAuth
 // @security jwt
-// @accept json
 // @produce json
 // @param id path string true "EdgeJob Id"
 // @success 200 {object} edgeJobFileResponse
@@ -30,19 +29,19 @@ type edgeJobFileResponse struct {
 func (handler *Handler) edgeJobFile(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	edgeJobID, err := request.RetrieveNumericRouteVariableValue(r, "id")
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid Edge job identifier route variable", err}
+		return httperror.BadRequest("Invalid Edge job identifier route variable", err)
 	}
 
 	edgeJob, err := handler.DataStore.EdgeJob().EdgeJob(portainer.EdgeJobID(edgeJobID))
-	if err == bolterrors.ErrObjectNotFound {
-		return &httperror.HandlerError{http.StatusNotFound, "Unable to find an Edge job with the specified identifier inside the database", err}
+	if handler.DataStore.IsErrObjectNotFound(err) {
+		return httperror.NotFound("Unable to find an Edge job with the specified identifier inside the database", err)
 	} else if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to find an Edge job with the specified identifier inside the database", err}
+		return httperror.InternalServerError("Unable to find an Edge job with the specified identifier inside the database", err)
 	}
 
-	edgeJobFileContent, err := handler.FileService.GetFileContent(edgeJob.ScriptPath)
+	edgeJobFileContent, err := handler.FileService.GetFileContent(edgeJob.ScriptPath, "")
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve Edge job script file from disk", err}
+		return httperror.InternalServerError("Unable to retrieve Edge job script file from disk", err)
 	}
 
 	return response.JSON(w, &edgeJobFileResponse{FileContent: string(edgeJobFileContent)})

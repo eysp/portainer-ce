@@ -21,25 +21,13 @@ function computeSize(volumes) {
 
 class KubernetesVolumesController {
   /* @ngInject */
-  constructor(
-    $async,
-    $state,
-    Notifications,
-    Authentication,
-    ModalService,
-    LocalStorage,
-    EndpointProvider,
-    KubernetesStorageService,
-    KubernetesVolumeService,
-    KubernetesApplicationService
-  ) {
+  constructor($async, $state, Notifications, Authentication, ModalService, LocalStorage, KubernetesStorageService, KubernetesVolumeService, KubernetesApplicationService) {
     this.$async = $async;
     this.$state = $state;
     this.Notifications = Notifications;
     this.Authentication = Authentication;
     this.ModalService = ModalService;
     this.LocalStorage = LocalStorage;
-    this.EndpointProvider = EndpointProvider;
     this.KubernetesStorageService = KubernetesStorageService;
     this.KubernetesVolumeService = KubernetesVolumeService;
     this.KubernetesApplicationService = KubernetesApplicationService;
@@ -75,7 +63,7 @@ class KubernetesVolumesController {
   }
 
   removeAction(selectedItems) {
-    this.ModalService.confirmDeletion('是否要删除所选存储卷？', (confirmed) => {
+    this.ModalService.confirmDeletion('您想删除所选的存储卷吗？', (confirmed) => {
       if (confirmed) {
         return this.$async(this.removeActionAsync, selectedItems);
       }
@@ -83,11 +71,12 @@ class KubernetesVolumesController {
   }
 
   async getVolumesAsync() {
+    const storageClasses = this.endpoint.Kubernetes.Configuration.StorageClasses;
     try {
       const [volumes, applications, storages] = await Promise.all([
-        this.KubernetesVolumeService.get(),
+        this.KubernetesVolumeService.get(undefined, storageClasses),
         this.KubernetesApplicationService.get(),
-        this.KubernetesStorageService.get(this.state.endpointId),
+        this.KubernetesStorageService.get(this.endpoint.Id),
       ]);
 
       this.volumes = _.map(volumes, (volume) => {
@@ -96,7 +85,7 @@ class KubernetesVolumesController {
       });
       this.storages = buildStorages(storages, volumes);
     } catch (err) {
-      this.Notifications.error('失败', err, '无法检索 namespaces');
+      this.Notifications.error('失败', err, '无法检索命名空间');
     }
   }
 
@@ -107,9 +96,7 @@ class KubernetesVolumesController {
   async onInit() {
     this.state = {
       viewReady: false,
-      // endpointId: this.$transition$.params().endpointId, // TODO: use this when moving to endpointID in URL
       currentName: this.$state.$current.name,
-      endpointId: this.EndpointProvider.endpointID(),
       activeTab: this.LocalStorage.getActiveTab('volumes'),
       isAdmin: this.Authentication.isAdmin(),
     };

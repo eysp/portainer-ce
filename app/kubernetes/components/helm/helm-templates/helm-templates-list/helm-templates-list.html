@@ -1,42 +1,42 @@
 <div class="datatable">
   <rd-widget>
     <rd-widget-body classes="no-padding">
-      <div class="toolBar">
-        <div class="toolBarTitle"> <i class="fa" ng-class="$ctrl.titleIcon" aria-hidden="true" style="margin-right: 2px;"></i> {{ $ctrl.titleText }} </div>
-      </div>
+      <div class="toolBar vertical-center !gap-x-5 !gap-y-1 flex-wrap w-full relative">
+        <div class="toolBarTitle vertical-center">
+          <div class="widget-icon space-right">
+            <pr-icon icon="$ctrl.titleIcon" feather="true"></pr-icon>
+          </div>
 
-      <div class="actionBar">
-        <div>
-          <span style="width: 25%;">
-            <ui-select ng-model="$ctrl.state.selectedCategory" theme="bootstrap">
-              <ui-select-match placeholder="选择一个类别">
-                <a class="btn btn-xs btn-link pull-right" ng-click="$ctrl.clearCategory()"><i class="glyphicon glyphicon-remove"></i></a>
-                <span>{{ $select.selected }}</span>
-              </ui-select-match>
-              <ui-select-choices repeat="category in ($ctrl.state.categories | filter: $select.search)">
-                <span>{{ category }}</span>
-              </ui-select-choices>
-            </ui-select>
-          </span>
+          {{ $ctrl.titleText }}
         </div>
-      </div>
 
-      <div class="searchBar" style="border-top: 2px solid #f6f6f6;">
-        <i class="fa fa-search searchIcon" aria-hidden="true"></i>
-        <input
-          type="text"
-          class="searchInput"
-          ng-model="$ctrl.state.textFilter"
-          ng-change="$ctrl.onTextFilterChange()"
-          placeholder="搜索..."
-          auto-focus
-          ng-model-options="{ debounce: 300 }"
-        />
+        <div class="searchBar vertical-center !mr-0">
+          <pr-icon icon="'search'" feather="true" class="searchIcon"></pr-icon>
+          <input
+            type="text"
+            class="searchInput"
+            ng-model="$ctrl.state.textFilter"
+            ng-change="$ctrl.onTextFilterChange()"
+            placeholder="Search for a chart..."
+            auto-focus
+            ng-model-options="{ debounce: 300 }"
+          />
+        </div>
+        <div class="w-1/5">
+          <por-select
+            placeholder="'Select a category'"
+            value="$ctrl.state.selectedCategory"
+            options="$ctrl.state.categories"
+            on-change="($ctrl.onCategoryChange)"
+            is-clearable="true"
+            bind-to-body="true"
+          ></por-select>
+        </div>
       </div>
 
       <div class="blocklist">
         <helm-templates-list-item
-          ng-repeat="chart in $ctrl.charts | filter:$ctrl.state.textFilter | filter: $ctrl.state.selectedCategory "
+          ng-repeat="chart in $ctrl.charts | filter:$ctrl.state.textFilter | filter: $ctrl.state.selectedCategory"
           model="chart"
           type-label="helm"
           on-select="($ctrl.selectAction)"
@@ -44,13 +44,9 @@
         </helm-templates-list-item>
         <div ng-if="$ctrl.loading" class="text-center text-muted">
           加载中...
-          <div class="text-center text-muted">
-            Helm Charts 的初始下载可能需要几分钟时间
-          </div>
+          <div class="text-center text-muted"> Initial download of Helm Charts can take a few minutes </div>
         </div>
-        <div ng-if="!$ctrl.loading && $ctrl.charts.length === 0" class="text-center text-muted">
-          没有 helm charts 可用.
-        </div>
+        <div ng-if="!$ctrl.loading && $ctrl.charts.length === 0" class="text-center text-muted"> No helm charts available. </div>
       </div>
     </rd-widget-body>
   </rd-widget>

@@ -1,35 +1,33 @@
 <div>
-  <div class="col-sm-12 form-section-title">
-    Macvlan 配置
-  </div>
+  <div class="col-sm-12 form-section-title"> Macvlan configuration </div>
   <!-- selector -->
   <div class="form-group">
-    <span class="col-sm-12 text-muted small">
-      <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-      要创建 MACVLAN 网络，您需要创建一个配置，然后从该配置创建网络。
+    <span class="col-sm-12 text-muted small vertical-center">
+      <pr-icon icon="'alert-circle'" mode="'primary'" feather="true"></pr-icon>
+      To create a MACVLAN network you need to create a configuration, then create the network from this configuration.
     </span>
   </div>
   <div class="col-sm-12">
-    <div class="form-group" style="margin-bottom: 0;">
+    <div class="form-group">
       <div class="boxselector_wrapper">
         <div>
           <input type="radio" id="network_config" ng-model="$ctrl.data.Scope" value="local" />
           <label for="network_config">
             <div class="boxselector_header">
-              <i class="fa fa-cog" aria-hidden="true" style="margin-right: 2px;"></i>
-              配置
+              <pr-icon icon="'sliders'" feather="true"></pr-icon>
+              Configuration
             </div>
-            <p>我想在部署之前配置网络</p>
+            <p>I want to configure a network before deploying it</p>
           </label>
         </div>
         <div>
           <input type="radio" id="network_deploy" ng-model="$ctrl.data.Scope" value="swarm" ng-disabled="$ctrl.availableNetworks.length === 0" />
           <label for="network_deploy" ng-class="$ctrl.availableNetworks.length === 0 ? 'boxselector_disabled' : ''">
             <div class="boxselector_header">
-              <i class="fa fa-sitemap" aria-hidden="true" style="margin-right: 2px;"></i>
-              创建
+              <pr-icon icon="'share-2'" feather="true"></pr-icon>
+              Creation
             </div>
-            <p>我想从配置创建网络</p>
+            <p>I want to create a network from a configuration</p>
           </label>
         </div>
       </div>
@@ -42,7 +40,7 @@
     <div ng-show="$ctrl.data.Scope === 'local'">
       <!-- network-card-input -->
       <div class="form-group">
-        <label for="network_card" class="col-sm-3 col-lg-2 control-label text-left">父网卡</label>
+        <label for="network_card" class="col-sm-3 col-lg-2 control-label text-left">Parent network card</label>
         <div class="col-sm-9 col-lg-10">
           <input
             type="text"
@@ -57,7 +55,7 @@
       <div class="form-group" ng-show="macvlanConfigurationForm.network_card.$invalid">
         <div class="col-sm-12 small text-warning">
           <div ng-messages="macvlanConfigurationForm.network_card.$error">
-            <p ng-message="required"> <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 必须指定父网卡。</p>
+            <p ng-message="required" class="vertical-center"> <pr-icon icon="'alert-triangle'" mode="'warning'" feather="true"></pr-icon> Parent network card must be specified.</p>
           </div>
         </div>
       </div>
@@ -67,7 +65,7 @@
         <div class="form-group">
           <div class="col-sm-12">
             <macvlan-nodes-datatable
-              title-text="选择要部署本地配置的节点"
+              title-text="Select the nodes where you want to deploy the local configuration"
               title-icon="fa-hdd"
               dataset="$ctrl.nodes"
               table-key="nodes"
@@ -84,7 +82,7 @@
         <div class="form-group" ng-show="macvlanConfigurationForm.node_selector.$invalid">
           <div class="col-sm-12 small text-warning">
             <div ng-messages="macvlanConfigurationForm.node_selector.$error">
-              <p ng-message="required"> <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 必须至少选择一个节点。</p>
+              <p ng-message="required" class="vertical-center"> <pr-icon icon="'alert-triangle'" mode="'warning'" feather="true"></pr-icon> At least one node must be selected.</p>
             </div>
           </div>
         </div>
@@ -97,8 +95,8 @@
       <!-- configuration-selector -->
       <!-- network-input -->
       <div class="form-group">
-        <label for="config_network" class="col-sm-2 col-lg-1 control-label text-left">配置</label>
-        <div class="col-sm-9">
+        <label for="config_network" class="col-sm-3 col-lg-2 control-label text-left">Configuration</label>
+        <div class="col-sm-9 col-lg-10">
           <select
             class="form-control"
             ng-options="net.Name for net in $ctrl.availableNetworks"
@@ -106,7 +104,7 @@
             name="config_network"
             ng-required="$ctrl.requiredConfigSelection()"
           >
-            <option selected disabled hidden value="">选择网络</option>
+            <option selected disabled hidden value="">选择一个网络</option>
           </select>
         </div>
       </div>
@@ -114,7 +112,7 @@
       <div class="form-group" ng-show="macvlanConfigurationForm.config_network.$invalid">
         <div class="col-sm-12 small text-warning">
           <div ng-messages="macvlanConfigurationForm.config_network.$error">
-            <p ng-message="required"> <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 选择配置网络。</p>
+            <p ng-message="required" class="vertical-center"> <pr-icon icon="'alert-triangle'" mode="'warning'" feather="true"></pr-icon> Select a configuration network.</p>
           </div>
         </div>
       </div>

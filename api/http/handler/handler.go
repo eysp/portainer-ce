@@ -7,16 +7,20 @@ import (
 	"github.com/portainer/portainer/api/http/handler/auth"
 	"github.com/portainer/portainer/api/http/handler/backup"
 	"github.com/portainer/portainer/api/http/handler/customtemplates"
+	"github.com/portainer/portainer/api/http/handler/docker"
 	"github.com/portainer/portainer/api/http/handler/edgegroups"
 	"github.com/portainer/portainer/api/http/handler/edgejobs"
 	"github.com/portainer/portainer/api/http/handler/edgestacks"
 	"github.com/portainer/portainer/api/http/handler/edgetemplates"
+	"github.com/portainer/portainer/api/http/handler/edgeupdateschedules"
 	"github.com/portainer/portainer/api/http/handler/endpointedge"
 	"github.com/portainer/portainer/api/http/handler/endpointgroups"
 	"github.com/portainer/portainer/api/http/handler/endpointproxy"
 	"github.com/portainer/portainer/api/http/handler/endpoints"
 	"github.com/portainer/portainer/api/http/handler/file"
 	"github.com/portainer/portainer/api/http/handler/helm"
+	"github.com/portainer/portainer/api/http/handler/hostmanagement/fdo"
+	"github.com/portainer/portainer/api/http/handler/hostmanagement/openamt"
 	"github.com/portainer/portainer/api/http/handler/kubernetes"
 	"github.com/portainer/portainer/api/http/handler/ldap"
 	"github.com/portainer/portainer/api/http/handler/motd"
@@ -27,6 +31,7 @@ import (
 	"github.com/portainer/portainer/api/http/handler/ssl"
 	"github.com/portainer/portainer/api/http/handler/stacks"
 	"github.com/portainer/portainer/api/http/handler/status"
+	"github.com/portainer/portainer/api/http/handler/storybook"
 	"github.com/portainer/portainer/api/http/handler/tags"
 	"github.com/portainer/portainer/api/http/handler/teammemberships"
 	"github.com/portainer/portainer/api/http/handler/teams"
@@ -39,42 +44,47 @@ import (
 
 // Handler is a collection of all the service handlers.
 type Handler struct {
-	AuthHandler            *auth.Handler
-	BackupHandler          *backup.Handler
-	CustomTemplatesHandler *customtemplates.Handler
-	EdgeGroupsHandler      *edgegroups.Handler
-	EdgeJobsHandler        *edgejobs.Handler
-	EdgeStacksHandler      *edgestacks.Handler
-	EdgeTemplatesHandler   *edgetemplates.Handler
-	EndpointEdgeHandler    *endpointedge.Handler
-	EndpointGroupHandler   *endpointgroups.Handler
-	EndpointHandler        *endpoints.Handler
-	EndpointHelmHandler    *helm.Handler
-	EndpointProxyHandler   *endpointproxy.Handler
-	HelmTemplatesHandler   *helm.Handler
-	KubernetesHandler      *kubernetes.Handler
-	FileHandler            *file.Handler
-	LDAPHandler            *ldap.Handler
-	MOTDHandler            *motd.Handler
-	RegistryHandler        *registries.Handler
-	ResourceControlHandler *resourcecontrols.Handler
-	RoleHandler            *roles.Handler
-	SettingsHandler        *settings.Handler
-	SSLHandler             *ssl.Handler
-	StackHandler           *stacks.Handler
-	StatusHandler          *status.Handler
-	TagHandler             *tags.Handler
-	TeamMembershipHandler  *teammemberships.Handler
-	TeamHandler            *teams.Handler
-	TemplatesHandler       *templates.Handler
-	UploadHandler          *upload.Handler
-	UserHandler            *users.Handler
-	WebSocketHandler       *websocket.Handler
-	WebhookHandler         *webhooks.Handler
+	AuthHandler               *auth.Handler
+	BackupHandler             *backup.Handler
+	CustomTemplatesHandler    *customtemplates.Handler
+	DockerHandler             *docker.Handler
+	EdgeGroupsHandler         *edgegroups.Handler
+	EdgeJobsHandler           *edgejobs.Handler
+	EdgeUpdateScheduleHandler *edgeupdateschedules.Handler
+	EdgeStacksHandler         *edgestacks.Handler
+	EdgeTemplatesHandler      *edgetemplates.Handler
+	EndpointEdgeHandler       *endpointedge.Handler
+	EndpointGroupHandler      *endpointgroups.Handler
+	EndpointHandler           *endpoints.Handler
+	EndpointHelmHandler       *helm.Handler
+	EndpointProxyHandler      *endpointproxy.Handler
+	HelmTemplatesHandler      *helm.Handler
+	KubernetesHandler         *kubernetes.Handler
+	FileHandler               *file.Handler
+	LDAPHandler               *ldap.Handler
+	MOTDHandler               *motd.Handler
+	RegistryHandler           *registries.Handler
+	ResourceControlHandler    *resourcecontrols.Handler
+	RoleHandler               *roles.Handler
+	SettingsHandler           *settings.Handler
+	SSLHandler                *ssl.Handler
+	OpenAMTHandler            *openamt.Handler
+	FDOHandler                *fdo.Handler
+	StackHandler              *stacks.Handler
+	StatusHandler             *status.Handler
+	StorybookHandler          *storybook.Handler
+	TagHandler                *tags.Handler
+	TeamMembershipHandler     *teammemberships.Handler
+	TeamHandler               *teams.Handler
+	TemplatesHandler          *templates.Handler
+	UploadHandler             *upload.Handler
+	UserHandler               *users.Handler
+	WebSocketHandler          *websocket.Handler
+	WebhookHandler            *webhooks.Handler
 }
 
 // @title PortainerCE API
-// @version 2.9.1
+// @version 2.16.2
 // @description.markdown api-description.md
 // @termsOfService
 
@@ -86,6 +96,10 @@ type Handler struct {
 // @host
 // @BasePath /api
 // @schemes http https
+
+// @securitydefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 
 // @securitydefinitions.apikey jwt
 // @in header
@@ -155,6 +169,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.StripPrefix("/api", h.BackupHandler).ServeHTTP(w, r)
 	case strings.HasPrefix(r.URL.Path, "/api/custom_templates"):
 		http.StripPrefix("/api", h.CustomTemplatesHandler).ServeHTTP(w, r)
+	case strings.HasPrefix(r.URL.Path, "/api/edge_update_schedules"):
+		http.StripPrefix("/api", h.EdgeUpdateScheduleHandler).ServeHTTP(w, r)
 	case strings.HasPrefix(r.URL.Path, "/api/edge_stacks"):
 		http.StripPrefix("/api", h.EdgeStacksHandler).ServeHTTP(w, r)
 	case strings.HasPrefix(r.URL.Path, "/api/edge_groups"):
@@ -169,6 +185,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.StripPrefix("/api", h.EndpointGroupHandler).ServeHTTP(w, r)
 	case strings.HasPrefix(r.URL.Path, "/api/kubernetes"):
 		http.StripPrefix("/api", h.KubernetesHandler).ServeHTTP(w, r)
+	case strings.HasPrefix(r.URL.Path, "/api/docker"):
+		http.StripPrefix("/api/docker", h.DockerHandler).ServeHTTP(w, r)
 
 	// Helm subpath under kubernetes -> /api/endpoints/{id}/kubernetes/helm
 	case strings.HasPrefix(r.URL.Path, "/api/endpoints/") && strings.Contains(r.URL.Path, "/kubernetes/helm"):
@@ -179,8 +197,6 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		case strings.Contains(r.URL.Path, "/docker/"):
 			http.StripPrefix("/api/endpoints", h.EndpointProxyHandler).ServeHTTP(w, r)
 		case strings.Contains(r.URL.Path, "/kubernetes/"):
-			http.StripPrefix("/api/endpoints", h.EndpointProxyHandler).ServeHTTP(w, r)
-		case strings.Contains(r.URL.Path, "/storidge/"):
 			http.StripPrefix("/api/endpoints", h.EndpointProxyHandler).ServeHTTP(w, r)
 		case strings.Contains(r.URL.Path, "/azure/"):
 			http.StripPrefix("/api/endpoints", h.EndpointProxyHandler).ServeHTTP(w, r)
@@ -219,6 +235,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.StripPrefix("/api", h.UserHandler).ServeHTTP(w, r)
 	case strings.HasPrefix(r.URL.Path, "/api/ssl"):
 		http.StripPrefix("/api", h.SSLHandler).ServeHTTP(w, r)
+	case strings.HasPrefix(r.URL.Path, "/api/open_amt"):
+		http.StripPrefix("/api", h.OpenAMTHandler).ServeHTTP(w, r)
+	case strings.HasPrefix(r.URL.Path, "/api/fdo"):
+		http.StripPrefix("/api", h.FDOHandler).ServeHTTP(w, r)
 	case strings.HasPrefix(r.URL.Path, "/api/teams"):
 		http.StripPrefix("/api", h.TeamHandler).ServeHTTP(w, r)
 	case strings.HasPrefix(r.URL.Path, "/api/team_memberships"):
@@ -227,6 +247,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.StripPrefix("/api", h.WebSocketHandler).ServeHTTP(w, r)
 	case strings.HasPrefix(r.URL.Path, "/api/webhooks"):
 		http.StripPrefix("/api", h.WebhookHandler).ServeHTTP(w, r)
+	case strings.HasPrefix(r.URL.Path, "/storybook"):
+		http.StripPrefix("/storybook", h.StorybookHandler).ServeHTTP(w, r)
 	case strings.HasPrefix(r.URL.Path, "/"):
 		h.FileHandler.ServeHTTP(w, r)
 	}

@@ -4,14 +4,13 @@ import { TeamMembershipModel } from '../../models/teamMembership';
 angular.module('portainer.app').factory('TeamService', [
   '$q',
   'Teams',
-  'TeamMembershipService',
-  function TeamServiceFactory($q, Teams, TeamMembershipService) {
+  function TeamServiceFactory($q, Teams) {
     'use strict';
     var service = {};
 
-    service.teams = function () {
+    service.teams = function (environmentId) {
       var deferred = $q.defer();
-      Teams.query()
+      Teams.query({ environmentId: environmentId })
         .$promise.then(function success(data) {
           var teams = data.map(function (item) {
             return new TeamViewModel(item);
@@ -19,7 +18,7 @@ angular.module('portainer.app').factory('TeamService', [
           deferred.resolve(teams);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve teams', err: err });
+          deferred.reject({ msg: '无法检索到团队', err: err });
         });
       return deferred.promise;
     };
@@ -32,7 +31,7 @@ angular.module('portainer.app').factory('TeamService', [
           deferred.resolve(team);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve team details', err: err });
+          deferred.reject({ msg: '无法检索到团队的详细信息', err: err });
         });
       return deferred.promise;
     };
@@ -41,20 +40,14 @@ angular.module('portainer.app').factory('TeamService', [
       var deferred = $q.defer();
       var payload = {
         Name: name,
+        TeamLeaders: leaderIds,
       };
       Teams.create({}, payload)
-        .$promise.then(function success(data) {
-          var teamId = data.Id;
-          var teamMembershipQueries = [];
-          angular.forEach(leaderIds, function (userId) {
-            teamMembershipQueries.push(TeamMembershipService.createMembership(userId, teamId, 1));
-          });
-          $q.all(teamMembershipQueries).then(function success() {
-            deferred.resolve();
-          });
+        .$promise.then(function success() {
+          deferred.resolve();
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to create team', err: err });
+          deferred.reject({ msg: '无法创建团队', err: err });
         });
       return deferred.promise;
     };
@@ -73,7 +66,7 @@ angular.module('portainer.app').factory('TeamService', [
           deferred.resolve(memberships);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve user memberships for the team', err: err });
+          deferred.reject({ msg: '无法检索团队的用户会员资格', err: err });
         });
       return deferred.promise;
     };

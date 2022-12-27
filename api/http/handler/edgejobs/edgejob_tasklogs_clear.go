@@ -8,15 +8,14 @@ import (
 	"github.com/portainer/libhttp/request"
 	"github.com/portainer/libhttp/response"
 	portainer "github.com/portainer/portainer/api"
-	bolterrors "github.com/portainer/portainer/api/bolt/errors"
 )
 
 // @id EdgeJobTasksClear
 // @summary Clear the log for a specifc task on an EdgeJob
-// @description
+// @description **Access policy**: administrator
 // @tags edge_jobs
+// @security ApiKeyAuth
 // @security jwt
-// @accept json
 // @produce json
 // @param id path string true "EdgeJob Id"
 // @param taskID path string true "Task Id"
@@ -28,19 +27,19 @@ import (
 func (handler *Handler) edgeJobTasksClear(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	edgeJobID, err := request.RetrieveNumericRouteVariableValue(r, "id")
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid Edge job identifier route variable", err}
+		return httperror.BadRequest("Invalid Edge job identifier route variable", err)
 	}
 
 	taskID, err := request.RetrieveNumericRouteVariableValue(r, "taskID")
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid Task identifier route variable", err}
+		return httperror.BadRequest("Invalid Task identifier route variable", err)
 	}
 
 	edgeJob, err := handler.DataStore.EdgeJob().EdgeJob(portainer.EdgeJobID(edgeJobID))
-	if err == bolterrors.ErrObjectNotFound {
-		return &httperror.HandlerError{http.StatusNotFound, "Unable to find an Edge job with the specified identifier inside the database", err}
+	if handler.DataStore.IsErrObjectNotFound(err) {
+		return httperror.NotFound("Unable to find an Edge job with the specified identifier inside the database", err)
 	} else if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to find an Edge job with the specified identifier inside the database", err}
+		return httperror.InternalServerError("Unable to find an Edge job with the specified identifier inside the database", err)
 	}
 
 	endpointID := portainer.EndpointID(taskID)
@@ -52,14 +51,14 @@ func (handler *Handler) edgeJobTasksClear(w http.ResponseWriter, r *http.Request
 
 	err = handler.FileService.ClearEdgeJobTaskLogs(strconv.Itoa(edgeJobID), strconv.Itoa(taskID))
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to clear log file from disk", err}
+		return httperror.InternalServerError("Unable to clear log file from disk", err)
 	}
 
 	handler.ReverseTunnelService.AddEdgeJob(endpointID, edgeJob)
 
 	err = handler.DataStore.EdgeJob().UpdateEdgeJob(edgeJob.ID, edgeJob)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to persist Edge job changes in the database", err}
+		return httperror.InternalServerError("Unable to persist Edge job changes in the database", err)
 	}
 
 	return response.Empty(w)

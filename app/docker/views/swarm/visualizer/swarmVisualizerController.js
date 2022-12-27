@@ -16,6 +16,20 @@ angular.module('portainer.docker').controller('SwarmVisualizerController', [
       refreshRate: '5',
     };
 
+    $scope.handleChangeDisplayOnlyRunningTasks = function handleChangeDisplayOnlyRunningTasks(enabled) {
+      $scope.$evalAsync(() => {
+        $scope.state.DisplayOnlyRunningTasks = enabled;
+        $scope.changeDisplayOnlyRunningTasks();
+      });
+    };
+
+    $scope.handleChangeDisplayNodeLabels = function handleChangeDisplayNodeLabels(enabled) {
+      $scope.$evalAsync(() => {
+        $scope.state.DisplayNodeLabels = enabled;
+        $scope.changeDisplayNodeLabels();
+      });
+    };
+
     $scope.$on('$destroy', function () {
       stopRepeater();
     });
@@ -70,7 +84,7 @@ angular.module('portainer.docker').controller('SwarmVisualizerController', [
           })
           .catch(function error(err) {
             stopRepeater();
-            Notifications.error('失败', err, '无法检索群集信息');
+            Notifications.error('失败', err, 'Unable to retrieve cluster information');
           });
       }, refreshRate * 1000);
     }
@@ -145,7 +159,7 @@ angular.module('portainer.docker').controller('SwarmVisualizerController', [
           setUpdateRepeater();
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法初始化群集可视化工具');
+          Notifications.error('失败', err, 'Unable to initialize cluster visualizer');
         });
 
       loadState();

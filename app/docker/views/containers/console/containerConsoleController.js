@@ -1,29 +1,32 @@
 import { Terminal } from 'xterm';
+import { baseHref } from '@/portainer/helpers/pathHelper';
 
 angular.module('portainer.docker').controller('ContainerConsoleController', [
   '$scope',
+  '$state',
   '$transition$',
   'ContainerService',
   'ImageService',
-  'EndpointProvider',
   'Notifications',
   'ContainerHelper',
   'ExecService',
   'HttpRequestHelper',
   'LocalStorage',
   'CONSOLE_COMMANDS_LABEL_PREFIX',
+  'SidebarService',
   function (
     $scope,
+    $state,
     $transition$,
     ContainerService,
     ImageService,
-    EndpointProvider,
     Notifications,
     ContainerHelper,
     ExecService,
     HttpRequestHelper,
     LocalStorage,
-    CONSOLE_COMMANDS_LABEL_PREFIX
+    CONSOLE_COMMANDS_LABEL_PREFIX,
+    SidebarService
   ) {
     var socket, term;
 
@@ -57,19 +60,20 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
       ContainerService.container(attachId)
         .then((details) => {
           if (!details.State.Running) {
-            Notifications.error('失败', details, '容器 ' + attachId + ' 没有运行！');
+            Notifications.error('失败', details, '容器 ' + attachId + ' 没有运行!');
             $scope.disconnect();
             return;
           }
 
           const params = {
             token: LocalStorage.getJWT(),
-            endpointId: EndpointProvider.endpointID(),
+            endpointId: $state.params.endpointId,
             id: attachId,
           };
 
+          const base = window.location.origin.startsWith('http') ? `${window.location.origin}${baseHref()}` : baseHref();
           var url =
-            window.location.href.split('#')[0] +
+            base +
             'api/websocket/attach?' +
             Object.keys(params)
               .map((k) => k + '=' + params[k])
@@ -78,7 +82,7 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
           initTerm(url, ContainerService.resizeTTY.bind(this, attachId));
         })
         .catch(function error(err) {
-          Notifications.error('错误', err, '无法检索容器详细信息');
+          Notifications.error('Error', err, '无法检索到容器的详细信息');
           $scope.disconnect();
         });
     };
@@ -104,12 +108,13 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
         .then(function success(data) {
           const params = {
             token: LocalStorage.getJWT(),
-            endpointId: EndpointProvider.endpointID(),
+            endpointId: $state.params.endpointId,
             id: data.Id,
           };
 
+          const base = window.location.origin.startsWith('http') ? `${window.location.origin}${baseHref()}` : baseHref();
           var url =
-            window.location.href.split('#')[0] +
+            base +
             'api/websocket/exec?' +
             Object.keys(params)
               .map((k) => k + '=' + params[k])
@@ -118,7 +123,7 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
           initTerm(url, ExecService.resizeTTY.bind(this, params.id));
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法执行到容器');
+          Notifications.error('失败', err, '无法执行到容器中');
           $scope.disconnect();
         });
     };
@@ -130,7 +135,7 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
       if ($scope.state > states.disconnected) {
         $scope.state = states.disconnected;
         if (term) {
-          term.write('\n\r(连接关闭)');
+          term.write('\n\r(connection closed)');
           term.dispose();
         }
       }
@@ -186,7 +191,7 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
           $scope.$apply();
         };
 
-        $scope.$watch('toggle', function () {
+        $scope.$watch(SidebarService.isSidebarOpen, function () {
           setTimeout(resizefun, 400);
         });
 
@@ -234,8 +239,14 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
           $scope.loaded = true;
         })
         .catch(function error(err) {
-          Notifications.error('错误', err, '无法检索容器详细信息');
+          Notifications.error('Error', err, '无法检索到容器的详细信息');
         });
+    };
+
+    $scope.handleIsCustomCommandChange = function (enabled) {
+      $scope.$evalAsync(() => {
+        $scope.formValues.isCustomCommand = enabled;
+      });
     };
   },
 ]);

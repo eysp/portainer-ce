@@ -1,12 +1,14 @@
 import angular from 'angular';
 import _ from 'lodash-es';
 
-import { HIDE_INTERNAL_AUTH } from '@/portainer/feature-flags/feature-ids';
 import { buildLdapSettingsModel, buildAdSettingsModel } from '@/portainer/settings/authentication/ldap/ldap-settings.model';
+import { options } from './options';
 
 angular.module('portainer.app').controller('SettingsAuthenticationController', SettingsAuthenticationController);
 
 function SettingsAuthenticationController($q, $scope, $state, Notifications, SettingsService, FileUploadService, TeamService, LDAPService) {
+  $scope.authMethod = 1;
+
   $scope.state = {
     uploadInProgress: false,
     actionInProgress: false,
@@ -44,14 +46,11 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
     },
   };
 
-  $scope.authOptions = [
-    { id: 'auth_internal', icon: 'fa fa-users', label: 'Internal', description: '内部认证机制', value: 1 },
-    { id: 'auth_ldap', icon: 'fa fa-users', label: 'LDAP', description: 'LDAP 认证', value: 2 },
-    { id: 'auth_ad', icon: 'fab fa-microsoft', label: 'Microsoft Active Directory', description: 'AD 认证', value: 4, feature: HIDE_INTERNAL_AUTH },
-    { id: 'auth_oauth', icon: 'fa fa-users', label: 'OAuth', description: 'OAuth 认证', value: 3 },
-  ];
+  $scope.authOptions = options;
 
   $scope.onChangeAuthMethod = function onChangeAuthMethod(value) {
+    $scope.authMethod = value;
+
     if (value === 4) {
       $scope.settings.AuthenticationMethod = 2;
       $scope.formValues.ldap.serverType = 2;
@@ -65,6 +64,12 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
     }
 
     $scope.settings.AuthenticationMethod = value;
+  };
+
+  $scope.onChangePasswordLength = function onChangePasswordLength(value) {
+    $scope.$evalAsync(() => {
+      $scope.settings.InternalAuthSettings = { RequiredPasswordLength: value };
+    });
   };
 
   $scope.authenticationMethodSelected = function authenticationMethodSelected(value) {
@@ -104,12 +109,12 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
       .then(function success() {
         $scope.state.failedConnectivityCheck = false;
         $scope.state.successfulConnectivityCheck = true;
-        Notifications.success('连接到 LDAP 成功');
+        Notifications.success('Success', 'Connection to LDAP successful');
       })
       .catch(function error(err) {
         $scope.state.failedConnectivityCheck = true;
         $scope.state.successfulConnectivityCheck = false;
-        Notifications.error('失败', err, '连接到 LDAP 失败');
+        Notifications.error('失败', err, 'Connection to LDAP failed');
       })
       .finally(function final() {
         $scope.state.uploadInProgress = false;
@@ -131,10 +136,10 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
         return SettingsService.update(settings);
       })
       .then(function success() {
-        Notifications.success('身份验证设置已更新');
+        Notifications.success('Success', 'Authentication settings updated');
       })
       .catch(function error(err) {
-        Notifications.error('失败', err, '无法更新身份验证设置');
+        Notifications.error('失败', err, 'Unable to update authentication settings');
       })
       .finally(function final() {
         $scope.state.uploadInProgress = false;
@@ -182,7 +187,8 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
     return (
       _.compact(ldapSettings.URLs).length &&
       (ldapSettings.AnonymousMode || (ldapSettings.ReaderDN && ldapSettings.Password)) &&
-      (!isTLSMode || $scope.formValues.TLSCACert || ldapSettings.TLSConfig.TLSSkipVerify)
+      (!isTLSMode || (isTLSMode && $scope.formValues.TLSCACert) || ldapSettings.TLSConfig.TLSSkipVerify) &&
+      (!$scope.settings.LDAPSettings.AdminAutoPopulate || ($scope.settings.LDAPSettings.AdminAutoPopulate && $scope.formValues.selectedAdminGroups.length > 0))
     );
   }
 
@@ -217,13 +223,6 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
           $scope.authMethod = 4;
         }
 
-        $scope.formValues.ldap.serverType = settings.LDAPSettings.ServerType;
-        if (settings.LDAPSettings.ServerType === 2) {
-          $scope.formValues.ldap.adSettings = settings.LDAPSettings;
-        } else {
-          $scope.formValues.ldap.ldapSettings = settings.LDAPSettings;
-        }
-
         if (settings.LDAPSettings.URL) {
           settings.LDAPSettings.URLs = [settings.LDAPSettings.URL];
         }
@@ -236,9 +235,16 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
         if (!settings.LDAPSettings.ServerType) {
           settings.LDAPSettings.ServerType = 0;
         }
+
+        $scope.formValues.ldap.serverType = settings.LDAPSettings.ServerType;
+        if (settings.LDAPSettings.ServerType === 2) {
+          $scope.formValues.ldap.adSettings = settings.LDAPSettings;
+        } else {
+          $scope.formValues.ldap.ldapSettings = Object.assign($scope.formValues.ldap.ldapSettings, settings.LDAPSettings);
+        }
       })
       .catch(function error(err) {
-        Notifications.error('失败', err, '无法检索应用程序设置');
+        Notifications.error('失败', err, 'Unable to retrieve application settings');
       });
   }
 

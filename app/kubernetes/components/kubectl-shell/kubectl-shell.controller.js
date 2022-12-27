@@ -1,5 +1,6 @@
 import { Terminal } from 'xterm';
 import * as fit from 'xterm/lib/addons/fit/fit';
+import { baseHref } from '@/portainer/helpers/pathHelper';
 
 export default class KubectlShellController {
   /* @ngInject */
@@ -91,12 +92,14 @@ export default class KubectlShellController {
     };
 
     const wsProtocol = this.$window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-    const path = '/api/websocket/kubernetes-shell';
+    const path = baseHref() + 'api/websocket/kubernetes-shell';
+    const base = path.startsWith('http') ? path.replace(/^https?:\/\//i, '') : window.location.host + path;
+
     const queryParams = Object.entries(params)
       .map(([k, v]) => `${k}=${v}`)
       .join('&');
-    const url = `${wsProtocol}${window.location.host}${path}?${queryParams}`;
 
+    const url = `${wsProtocol}${base}?${queryParams}`;
     Terminal.applyAddon(fit);
     this.state.shell.socket = new WebSocket(url);
     this.state.shell.term = new Terminal();

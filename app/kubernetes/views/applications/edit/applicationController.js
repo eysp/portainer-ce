@@ -1,6 +1,7 @@
 import angular from 'angular';
 import _ from 'lodash-es';
 import * as JsonPatch from 'fast-json-patch';
+
 import {
   KubernetesApplicationDataAccessPolicies,
   KubernetesApplicationDeploymentTypes,
@@ -107,12 +108,12 @@ class KubernetesApplicationController {
     Notifications,
     LocalStorage,
     ModalService,
+    KubernetesResourcePoolService,
     KubernetesApplicationService,
     KubernetesEventService,
     KubernetesStackService,
     KubernetesPodService,
     KubernetesNodeService,
-    EndpointProvider,
     StackService
   ) {
     this.$async = $async;
@@ -121,6 +122,7 @@ class KubernetesApplicationController {
     this.Notifications = Notifications;
     this.LocalStorage = LocalStorage;
     this.ModalService = ModalService;
+    this.KubernetesResourcePoolService = KubernetesResourcePoolService;
     this.StackService = StackService;
 
     this.KubernetesApplicationService = KubernetesApplicationService;
@@ -131,7 +133,6 @@ class KubernetesApplicationController {
 
     this.KubernetesApplicationDeploymentTypes = KubernetesApplicationDeploymentTypes;
     this.KubernetesApplicationTypes = KubernetesApplicationTypes;
-    this.EndpointProvider = EndpointProvider;
     this.KubernetesDeploymentTypes = KubernetesDeploymentTypes;
 
     this.ApplicationDataAccessPolicies = KubernetesApplicationDataAccessPolicies;
@@ -214,15 +215,15 @@ class KubernetesApplicationController {
       // await this.KubernetesApplicationService.rollback(this.application, this.formValues.SelectedRevision);
       const revision = _.nth(this.application.Revisions, -2);
       await this.KubernetesApplicationService.rollback(this.application, revision);
-      this.Notifications.success('应用程序已成功回滚');
+      this.Notifications.success('Success', 'Application successfully rolled back');
       this.$state.reload(this.$state.current);
     } catch (err) {
-      this.Notifications.error('失败', err, '无法回滚应用程序');
+      this.Notifications.error('失败', err, 'Unable to rollback the application');
     }
   }
 
   rollbackApplication() {
-    this.ModalService.confirmUpdate('将应用程序回滚到以前的配置可能会导致服务中断。你想继续吗？', (confirmed) => {
+    this.ModalService.confirmUpdate('Rolling back the application to a previous configuration may cause a service interruption. Do you wish to continue?', (confirmed) => {
       if (confirmed) {
         return this.$async(this.rollbackApplicationAsync);
       }
@@ -235,15 +236,15 @@ class KubernetesApplicationController {
     try {
       const promises = _.map(this.application.Pods, (item) => this.KubernetesPodService.delete(item));
       await Promise.all(promises);
-      this.Notifications.success('已成功重新部署应用程序');
+      this.Notifications.success('Success', 'Application successfully redeployed');
       this.$state.reload(this.$state.current);
     } catch (err) {
-      this.Notifications.error('失败', err, '无法重新部署应用程序');
+      this.Notifications.error('失败', err, 'Unable to redeploy the application');
     }
   }
 
   redeployApplication() {
-    this.ModalService.confirmUpdate('重新部署应用程序可能会导致服务中断。你想继续吗？', (confirmed) => {
+    this.ModalService.confirmUpdate('Redeploying the application may cause a service interruption. Do you wish to continue?', (confirmed) => {
       if (confirmed) {
         return this.$async(this.redeployApplicationAsync);
       }
@@ -258,10 +259,10 @@ class KubernetesApplicationController {
       const application = angular.copy(this.application);
       application.Note = this.formValues.Note;
       await this.KubernetesApplicationService.patch(this.application, application, true);
-      this.Notifications.success('应用程序已成功更新');
+      this.Notifications.success('Success', 'Application successfully updated');
       this.$state.reload(this.$state.current);
     } catch (err) {
-      this.Notifications.error('失败', err, '无法更新应用程序');
+      this.Notifications.error('失败', err, 'Unable to update application');
     }
   }
 
@@ -295,7 +296,7 @@ class KubernetesApplicationController {
       );
       this.state.eventWarningCount = KubernetesEventHelper.warningCount(this.events);
     } catch (err) {
-      this.Notifications.error('失败', err, '无法检索与应用程序相关的事件');
+      this.Notifications.error('失败', err, 'Unable to retrieve application related events');
     } finally {
       this.state.eventsLoading = false;
     }
@@ -318,6 +319,7 @@ class KubernetesApplicationController {
       this.application = application;
       this.allContainers = KubernetesApplicationHelper.associateAllContainersAndApplication(application);
       this.formValues.Note = this.application.Note;
+      this.formValues.Services = this.application.Services;
       if (this.application.Note) {
         this.state.expandedNote = true;
       }
@@ -337,7 +339,7 @@ class KubernetesApplicationController {
         this.stackFileContent = file;
       }
     } catch (err) {
-      this.Notifications.error('失败', err, '无法检索应用程序详细信息');
+      this.Notifications.error('失败', err, 'Unable to retrieve application details');
     } finally {
       this.state.dataLoading = false;
     }
@@ -365,7 +367,8 @@ class KubernetesApplicationController {
       placementWarning: false,
       expandedNote: false,
       useIngress: false,
-      useServerMetrics: this.EndpointProvider.currentEndpoint().Kubernetes.Configuration.UseServerMetrics,
+      useServerMetrics: this.endpoint.Kubernetes.Configuration.UseServerMetrics,
+      publicUrl: this.endpoint.PublicURL,
     };
 
     this.state.activeTab = this.LocalStorage.getActiveTab('application');
@@ -374,6 +377,9 @@ class KubernetesApplicationController {
       Note: '',
       SelectedRevision: undefined,
     };
+
+    const resourcePools = await this.KubernetesResourcePoolService.get();
+    this.allNamespaces = resourcePools.map(({ Namespace }) => Namespace.Name);
 
     await this.getApplication();
     await this.getEvents();

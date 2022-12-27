@@ -2,27 +2,32 @@
   <rd-widget>
     <rd-widget-custom-header icon="$ctrl.template.Logo" title-text="$ctrl.template.Title"></rd-widget-custom-header>
     <rd-widget-body classes="padding">
-      <form class="form-horizontal">
+      <form class="form-horizontal" name="stackTemplateForm">
         <!-- description -->
         <div ng-if="$ctrl.template.Note">
-          <div class="col-sm-12 form-section-title">
-            信息
-          </div>
-          <div class="form-group">
-            <div class="col-sm-12">
-              <div class="template-note" ng-bind-html="$ctrl.template.Note"></div>
-            </div>
+          <div class="form-section-title"> 信息 </div>
+          <div class="col-sm-12 form-group">
+            <div class="template-note" ng-bind-html="$ctrl.template.Note"></div>
           </div>
         </div>
         <!-- !description -->
-        <div class="col-sm-12 form-section-title">
-          配置
-        </div>
+        <div class="form-section-title"> 配置 </div>
         <!-- name-input -->
         <div class="form-group">
-          <label for="container_name" class="col-sm-2 control-label text-left">名称</label>
-          <div class="col-sm-10">
-            <input type="text" name="container_name" class="form-control" ng-model="$ctrl.formValues.name" placeholder="例如 myStack" required />
+          <label for="template_name" class="col-sm-2 control-label text-left">名称</label>
+          <div class="col-sm-6">
+            <input type="text" name="template_name" class="form-control" ng-model="$ctrl.formValues.name" ng-pattern="$ctrl.nameRegex" placeholder="例如 myStack" required />
+          </div>
+        </div>
+        <div class="form-group" ng-if="stackTemplateForm.template_name.$invalid">
+          <div class="col-sm-12 small text-warning">
+            <div ng-messages="stackTemplateForm.template_name.$error">
+              <p ng-message="pattern">
+                <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                <span>该字段必须由小写字母数字字符组成， '_' or '-' (例如 'my-name', 或 'abc-123').</span>
+              </p>
+              <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 本栏为必填项。</p>
+            </div>
           </div>
         </div>
         <!-- !name-input -->
@@ -30,12 +35,12 @@
         <div ng-repeat="var in $ctrl.template.Env" ng-if="!var.preset || var.select" class="form-group">
           <label for="field_{{ $index }}" class="col-sm-2 control-label text-left">
             {{ var.label }}
-            <portainer-tooltip ng-if="var.description" position="bottom" message="{{ var.description }}"></portainer-tooltip>
+            <portainer-tooltip ng-if="var.description" message="var.description"></portainer-tooltip>
           </label>
-          <div class="col-sm-10">
+          <div class="col-sm-6">
             <input type="text" class="form-control" ng-if="!var.select" ng-model="var.value" id="field_{{ $index }}" />
             <select class="form-control" ng-if="var.select" ng-model="var.value" id="field_{{ $index }}">
-              <option selected disabled hidden value="">选择value</option>
+              <option selected disabled hidden value="">选择数值</option>
               <option ng-repeat="choice in var.select" value="{{ choice.value }}">{{ choice.text }}</option>
             </select>
           </div>
@@ -47,26 +52,22 @@
         <por-access-control-form form-data="$ctrl.formValues.AccessControlData"></por-access-control-form>
         <!-- !access-control -->
         <!-- actions -->
-        <div class="col-sm-12 form-section-title">
-          Actions
-        </div>
+        <div class="form-section-title"> 操作 </div>
         <div class="form-group">
           <div class="col-sm-12">
             <button
               type="button"
-              class="btn btn-primary btn-sm"
-              ng-disabled="$ctrl.state.actionInProgress || !$ctrl.formValues.name || !$ctrl.state.deployable"
+              class="btn btn-primary"
+              ng-disabled="$ctrl.state.actionInProgress || !$ctrl.formValues.name || !$ctrl.state.deployable || stackTemplateForm.$invalid"
               ng-click="$ctrl.createTemplate()"
               button-spinner="$ctrl.state.actionInProgress"
             >
               <span ng-hide="$ctrl.state.actionInProgress">部署堆栈</span>
-              <span ng-show="$ctrl.state.actionInProgress">正在部署...</span>
+              <span ng-show="$ctrl.state.actionInProgress">部署进行中...</span>
             </button>
-            <button type="button" class="btn btn-sm btn-default" ng-click="$ctrl.unselectTemplate($ctrl.template)">隐藏</button>
-            <div class="cols-sm-12 small text-danger" ng-if="$ctrl.state.formValidationError" style="margin-left: 5px; margin-top: 5px;">{{ $ctrl.state.formValidationError }}</div>
-            <div class="cols-sm-12 small text-danger" ng-if="!$ctrl.state.deployable" style="margin-left: 5px; margin-top: 5px;"
-              >无法在此环境上部署此模板类型。</div
-            >
+            <button type="button" class="btn btn-default" ng-click="$ctrl.unselectTemplate($ctrl.template)">隐藏</button>
+            <div class="cols-sm-12 small text-danger space-left mt-1" ng-if="$ctrl.state.formValidationError">{{ $ctrl.state.formValidationError }}</div>
+            <div class="cols-sm-12 small text-danger space-left mt-1" ng-if="!$ctrl.state.deployable">无法在此环境上部署此模板类型。</div>
           </div>
         </div>
         <!-- !actions -->

@@ -8,16 +8,14 @@ import (
 	"github.com/portainer/libhttp/request"
 	"github.com/portainer/libhttp/response"
 	portainer "github.com/portainer/portainer/api"
-	bolterrors "github.com/portainer/portainer/api/bolt/errors"
 )
 
 // @id EdgeJobDelete
 // @summary Delete an EdgeJob
-// @description
+// @description **Access policy**: administrator
 // @tags edge_jobs
+// @security ApiKeyAuth
 // @security jwt
-// @accept json
-// @produce json
 // @param id path string true "EdgeJob Id"
 // @success 204
 // @failure 500
@@ -27,27 +25,27 @@ import (
 func (handler *Handler) edgeJobDelete(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	edgeJobID, err := request.RetrieveNumericRouteVariableValue(r, "id")
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid Edge job identifier route variable", err}
+		return httperror.BadRequest("Invalid Edge job identifier route variable", err)
 	}
 
 	edgeJob, err := handler.DataStore.EdgeJob().EdgeJob(portainer.EdgeJobID(edgeJobID))
-	if err == bolterrors.ErrObjectNotFound {
-		return &httperror.HandlerError{http.StatusNotFound, "Unable to find an Edge job with the specified identifier inside the database", err}
+	if handler.DataStore.IsErrObjectNotFound(err) {
+		return httperror.NotFound("Unable to find an Edge job with the specified identifier inside the database", err)
 	} else if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to find an Edge job with the specified identifier inside the database", err}
+		return httperror.InternalServerError("Unable to find an Edge job with the specified identifier inside the database", err)
 	}
 
 	edgeJobFolder := handler.FileService.GetEdgeJobFolder(strconv.Itoa(edgeJobID))
 	err = handler.FileService.RemoveDirectory(edgeJobFolder)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to remove the files associated to the Edge job on the filesystem", err}
+		return httperror.InternalServerError("Unable to remove the files associated to the Edge job on the filesystem", err)
 	}
 
 	handler.ReverseTunnelService.RemoveEdgeJob(edgeJob.ID)
 
 	err = handler.DataStore.EdgeJob().DeleteEdgeJob(edgeJob.ID)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to remove the Edge job from the database", err}
+		return httperror.InternalServerError("Unable to remove the Edge job from the database", err)
 	}
 
 	return response.Empty(w)

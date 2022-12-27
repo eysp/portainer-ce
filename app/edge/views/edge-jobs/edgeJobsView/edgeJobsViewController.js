@@ -15,7 +15,7 @@ export class EdgeJobsViewController {
   }
 
   removeAction(selectedItems) {
-    this.ModalService.confirmDeletion('您要删除选定的边缘脚本吗？', (confirmed) => {
+    this.ModalService.confirmDeletion('你想删除选定的边缘作业吗？', (confirmed) => {
       if (!confirmed) {
         return;
       }
@@ -31,10 +31,10 @@ export class EdgeJobsViewController {
     for (let edgeJob of edgeJobs) {
       try {
         await this.EdgeJobService.remove(edgeJob.Id);
-        this.Notifications.success('Stack successfully removed', edgeJob.Name);
+        this.Notifications.success('边缘作业成功删除', edgeJob.Name);
         _.remove(this.edgeJobs, edgeJob);
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to remove Edge job ' + edgeJob.Name);
+        this.Notifications.error('失败', err, '无法删除边缘作业 ' + edgeJob.Name);
       }
     }
 
@@ -46,7 +46,7 @@ export class EdgeJobsViewController {
       const edgeJobs = await this.EdgeJobService.edgeJobs();
       this.edgeJobs = edgeJobs;
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to retrieve Edge jobs');
+      this.Notifications.error('失败', err, '无法检索到边缘作业');
       this.edgeJobs = [];
     }
   }

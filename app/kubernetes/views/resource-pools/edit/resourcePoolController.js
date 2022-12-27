@@ -5,18 +5,15 @@ import { KubernetesResourceQuotaDefaults } from 'Kubernetes/models/resource-quot
 import KubernetesResourceReservationHelper from 'Kubernetes/helpers/resourceReservationHelper';
 import { KubernetesResourceReservation } from 'Kubernetes/models/resource-reservation/models';
 import KubernetesEventHelper from 'Kubernetes/helpers/eventHelper';
-import {
-  KubernetesResourcePoolFormValues,
-  KubernetesResourcePoolIngressClassAnnotationFormValue,
-  KubernetesResourcePoolIngressClassHostFormValue,
-} from 'Kubernetes/models/resource-pool/formValues';
+
+import { KubernetesResourcePoolFormValues, KubernetesResourcePoolIngressClassHostFormValue } from 'Kubernetes/models/resource-pool/formValues';
 import { KubernetesIngressConverter } from 'Kubernetes/ingress/converter';
 import { KubernetesFormValidationReferences } from 'Kubernetes/models/application/formValues';
-import KubernetesFormValidationHelper from 'Kubernetes/helpers/formValidationHelper';
 import { KubernetesIngressClassTypes } from 'Kubernetes/ingress/constants';
 import KubernetesResourceQuotaConverter from 'Kubernetes/converters/resourceQuota';
 import KubernetesNamespaceHelper from 'Kubernetes/helpers/namespaceHelper';
-import { K8S_RESOURCE_POOL_LB_QUOTA, K8S_RESOURCE_POOL_STORAGE_QUOTA } from '@/portainer/feature-flags/feature-ids';
+import { FeatureId } from '@/portainer/feature-flags/enums';
+import { updateIngressControllerClassMap, getIngressControllerClassMap } from '@/react/kubernetes/cluster/ingressClass/utils';
 
 class KubernetesResourcePoolController {
   /* #region  CONSTRUCTOR */
@@ -24,6 +21,7 @@ class KubernetesResourcePoolController {
   constructor(
     $async,
     $state,
+    $scope,
     Authentication,
     Notifications,
     LocalStorage,
@@ -42,6 +40,7 @@ class KubernetesResourcePoolController {
     Object.assign(this, {
       $async,
       $state,
+      $scope,
       Authentication,
       Notifications,
       LocalStorage,
@@ -61,73 +60,41 @@ class KubernetesResourcePoolController {
     this.IngressClassTypes = KubernetesIngressClassTypes;
     this.ResourceQuotaDefaults = KubernetesResourceQuotaDefaults;
 
-    this.LBQuotaFeatureId = K8S_RESOURCE_POOL_LB_QUOTA;
-    this.StorageQuotaFeatureId = K8S_RESOURCE_POOL_STORAGE_QUOTA;
+    this.LBQuotaFeatureId = FeatureId.K8S_RESOURCE_POOL_LB_QUOTA;
+    this.StorageQuotaFeatureId = FeatureId.K8S_RESOURCE_POOL_STORAGE_QUOTA;
 
     this.updateResourcePoolAsync = this.updateResourcePoolAsync.bind(this);
     this.getEvents = this.getEvents.bind(this);
+    this.onToggleLoadBalancersQuota = this.onToggleLoadBalancersQuota.bind(this);
+    this.onToggleStorageQuota = this.onToggleStorageQuota.bind(this);
+    this.onChangeIngressControllerAvailability = this.onChangeIngressControllerAvailability.bind(this);
+    this.onRegistriesChange = this.onRegistriesChange.bind(this);
+    this.handleMemoryLimitChange = this.handleMemoryLimitChange.bind(this);
+    this.handleCpuLimitChange = this.handleCpuLimitChange.bind(this);
   }
   /* #endregion */
 
-  /* #region  ANNOTATIONS MANAGEMENT */
-  addAnnotation(ingressClass) {
-    ingressClass.Annotations.push(new KubernetesResourcePoolIngressClassAnnotationFormValue());
-  }
-
-  removeAnnotation(ingressClass, index) {
-    ingressClass.Annotations.splice(index, 1);
-    this.onChangeIngressHostname();
-  }
-  /* #endregion */
-
-  /* #region  INGRESS MANAGEMENT */
-  onChangeIngressHostname() {
-    const state = this.state.duplicates.ingressHosts;
-    const otherIngresses = _.without(this.allIngresses, ...this.ingresses);
-    const allHosts = _.flatMap(otherIngresses, 'Hosts');
-
-    const hosts = _.flatMap(this.formValues.IngressClasses, 'Hosts');
-    const hostsWithoutRemoved = _.filter(hosts, { NeedsDeletion: false });
-    const hostnames = _.map(hostsWithoutRemoved, 'Host');
-    const formDuplicates = KubernetesFormValidationHelper.getDuplicates(hostnames);
-    _.forEach(hostnames, (host, idx) => {
-      if (host !== undefined && _.includes(allHosts, host)) {
-        formDuplicates[idx] = host;
-      }
-    });
-    const duplicatedHostnames = Object.values(formDuplicates);
-    state.hasRefs = false;
-    _.forEach(this.formValues.IngressClasses, (ic) => {
-      _.forEach(ic.Hosts, (hostFV) => {
-        if (_.includes(duplicatedHostnames, hostFV.Host) && hostFV.NeedsDeletion === false) {
-          hostFV.Duplicate = true;
-          state.hasRefs = true;
-        } else {
-          hostFV.Duplicate = false;
-        }
-      });
+  onRegistriesChange(registries) {
+    return this.$scope.$evalAsync(() => {
+      this.formValues.Registries = registries;
     });
   }
 
-  addHostname(ingressClass) {
-    ingressClass.Hosts.push(new KubernetesResourcePoolIngressClassHostFormValue());
+  onToggleLoadBalancersQuota(checked) {
+    return this.$scope.$evalAsync(() => {
+      this.formValues.UseLoadBalancersQuota = checked;
+    });
   }
 
-  removeHostname(ingressClass, index) {
-    if (!ingressClass.Hosts[index].IsNew) {
-      ingressClass.Hosts[index].NeedsDeletion = true;
-    } else {
-      ingressClass.Hosts.splice(index, 1);
-    }
-    this.onChangeIngressHostname();
+  onToggleStorageQuota(storageClassName, enabled) {
+    this.$scope.$evalAsync(() => {
+      this.formValues.StorageClasses = this.formValues.StorageClasses.map((sClass) => (sClass.Name !== storageClassName ? sClass : { ...sClass, Selected: enabled }));
+    });
   }
 
-  restoreHostname(host) {
-    if (!host.IsNew) {
-      host.NeedsDeletion = false;
-    }
+  onChangeIngressControllerAvailability(controllerClassMap) {
+    this.ingressControllers = controllerClassMap;
   }
-  /* #endregion*/
 
   selectTab(index) {
     this.LocalStorage.storeActiveTab('resourcePool', index);
@@ -157,6 +124,18 @@ class KubernetesResourcePoolController {
     }
   }
 
+  handleMemoryLimitChange(memoryLimit) {
+    return this.$async(async () => {
+      this.formValues.MemoryLimit = memoryLimit;
+    });
+  }
+
+  handleCpuLimitChange(cpuLimit) {
+    return this.$async(async () => {
+      this.formValues.CpuLimit = cpuLimit;
+    });
+  }
+
   showEditor() {
     this.state.showEditorTab = true;
     this.selectTab(2);
@@ -179,10 +158,11 @@ class KubernetesResourcePoolController {
     try {
       this.checkDefaults();
       await this.KubernetesResourcePoolService.patch(oldFormValues, newFormValues);
-      this.Notifications.success('Namespace 成功更新', this.pool.Namespace.Name);
+      await updateIngressControllerClassMap(this.endpoint.Id, this.ingressControllers || [], this.formValues.Name);
+      this.Notifications.success('Namespace successfully updated', this.pool.Namespace.Name);
       this.$state.reload(this.$state.current);
     } catch (err) {
-      this.Notifications.error('失败', err, '无法创建 namespace');
+      this.Notifications.error('失败', err, 'Unable to create namespace');
     } finally {
       this.state.actionInProgress = false;
     }
@@ -200,10 +180,10 @@ class KubernetesResourcePoolController {
     if (warnings.quota || warnings.ingress || warnings.registries) {
       const messages = {
         quota:
-          '减少分配给“使用中”namespace的配额可能会产生意想不到的后果，包括阻止正在运行的应用程序正常运行，甚至可能完全阻止它们运行。',
-        ingress: '停用入口可能会导致应用程序无法访问。 来自受影响应用程序的所有入口配置都将被删除。',
+          '减少分配给 "使用中 "命名空间的配额可能会产生意想不到的后果，包括阻止正在运行的应用程序正常运行，甚至有可能完全阻止它们运行。',
+        ingress: '停用接入点可能导致应用程序无法访问。受影响的应用程序的所有入口配置将被删除。',
         registries:
-          '您删除的某些注册表可能会被此环境中的一个或多个应用程序使用。 删除注册表访问可能会导致这些应用程序的服务中断。',
+          '你删除的一些注册表可能被这个环境中的一个或多个应用程序使用。移除注册表的访问可能导致这些应用程序的服务中断。',
       };
       const displayedMessage = `${warnings.quota ? messages.quota + '<br/><br/>' : ''}
       ${warnings.ingress ? messages.ingress + '<br/><br/>' : ''}
@@ -221,8 +201,8 @@ class KubernetesResourcePoolController {
 
   async confirmMarkUnmarkAsSystem() {
     const message = this.isSystem
-      ? '取消将此命名空间标记为系统将允许非管理员用户根据访问控制设置管理它和包含的资源。 你确定吗？'
-      : '将此命名空间标记为系统命名空间将阻止非管理员用户管理它及其包含的资源。 你确定吗？';
+      ? '如果不把这个命名空间标记为系统，将允许非管理员用户根据访问控制设置来管理它和其中的资源。 你确定吗？'
+      : '将此命名空间标记为系统命名空间将防止非管理员用户管理它和它包含的资源。 你确定吗？';
 
     return new Promise((resolve) => {
       this.ModalService.confirmUpdate(message, resolve);
@@ -241,10 +221,10 @@ class KubernetesResourcePoolController {
         }
         await this.KubernetesResourcePoolService.toggleSystem(this.endpoint.Id, namespaceName, !this.isSystem);
 
-        this.Notifications.success('Namespace 成功更新', namespaceName);
+        this.Notifications.success('Namespace successfully updated', namespaceName);
         this.$state.reload(this.$state.current);
       } catch (err) {
-        this.Notifications.error('失败', err, '无法创建 namespace');
+        this.Notifications.error('失败', err, 'Unable to create namespace');
       } finally {
         this.state.actionInProgress = false;
       }
@@ -264,7 +244,7 @@ class KubernetesResourcePoolController {
         this.events = await this.KubernetesEventService.get(this.pool.Namespace.Name);
         this.state.eventWarningCount = KubernetesEventHelper.warningCount(this.events);
       } catch (err) {
-        this.Notifications.error('失败', err, '无法检索namespace相关事件');
+        this.Notifications.error('失败', err, 'Unable to retrieve namespace related events');
       } finally {
         this.state.eventsLoading = false;
       }
@@ -289,7 +269,7 @@ class KubernetesResourcePoolController {
           await this.getResourceUsage(this.pool.Namespace.Name);
         }
       } catch (err) {
-        this.Notifications.error('失败', err, '无法检索应用程序。');
+        this.Notifications.error('失败', err, 'Unable to retrieve applications.');
       } finally {
         this.state.applicationsLoading = false;
       }
@@ -313,7 +293,7 @@ class KubernetesResourcePoolController {
           });
         });
       } catch (err) {
-        this.Notifications.error('失败', err, '无法检索入口。');
+        this.Notifications.error('失败', err, 'Unable to retrieve ingresses.');
       } finally {
         this.state.ingressesLoading = false;
       }
@@ -343,7 +323,7 @@ class KubernetesResourcePoolController {
         const registries = await this.EndpointService.registries(this.endpoint.Id, namespace);
         this.selectedRegistries = registries.map((r) => r.Name).join(', ');
       } catch (err) {
-        this.Notifications.error('失败', err, '无法检索注册表');
+        this.Notifications.error('失败', err, 'Unable to retrieve registries');
       }
     });
   }
@@ -361,7 +341,7 @@ class KubernetesResourcePoolController {
       }, new KubernetesResourceReservation());
       this.state.resourceUsage = namespaceResourceUsage;
     } catch (err) {
-      this.Notifications.error('失败', '无法检索 amespace 资源使用情况', err);
+      this.Notifications.error('失败', err, 'Unable to retrieve namespace resource usage');
     }
   }
 
@@ -386,11 +366,12 @@ class KubernetesResourcePoolController {
           ingressesLoading: true,
           viewReady: false,
           eventWarningCount: 0,
-          canUseIngress: this.endpoint.Kubernetes.Configuration.IngressClasses.length,
+          canUseIngress: false,
           useServerMetrics: this.endpoint.Kubernetes.Configuration.UseServerMetrics,
           duplicates: {
             ingressHosts: new KubernetesFormValidationReferences(),
           },
+          ingressAvailabilityPerNamespace: this.endpoint.Kubernetes.Configuration.IngressAvailabilityPerNamespace,
         };
 
         this.state.activeTab = this.LocalStorage.getActiveTab('resourcePool');
@@ -398,6 +379,11 @@ class KubernetesResourcePoolController {
         const name = this.$state.params.id;
 
         const [nodes, pools] = await Promise.all([this.KubernetesNodeService.get(), this.KubernetesResourcePoolService.get()]);
+
+        this.ingressControllers = [];
+        if (this.state.ingressAvailabilityPerNamespace) {
+          this.ingressControllers = await getIngressControllerClassMap({ environmentId: this.endpoint.Id, namespace: name });
+        }
 
         this.pool = _.find(pools, { Namespace: { Name: name } });
         this.formValues = new KubernetesResourcePoolFormValues(KubernetesResourceQuotaDefaults);
@@ -442,7 +428,7 @@ class KubernetesResourcePoolController {
 
         this.savedFormValues = angular.copy(this.formValues);
       } catch (err) {
-        this.Notifications.error('失败', err, '无法加载视图数据');
+        this.Notifications.error('失败', err, 'Unable to load view data');
       } finally {
         this.state.viewReady = true;
       }

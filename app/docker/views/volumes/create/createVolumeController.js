@@ -38,6 +38,24 @@ angular.module('portainer.docker').controller('CreateVolumeController', [
       $scope.formValues.DriverOptions.splice(index, 1);
     };
 
+    $scope.onUseNFSChange = onUseNFSChange;
+
+    function onUseNFSChange(checked) {
+      return $scope.$evalAsync(() => {
+        $scope.formValues.NFSData.useNFS = checked;
+        $scope.formValues.CIFSData.useCIFS = false;
+      });
+    }
+
+    $scope.onUseCIFSChange = onUseCIFSChange;
+
+    function onUseCIFSChange(checked) {
+      return $scope.$evalAsync(() => {
+        $scope.formValues.CIFSData.useCIFS = checked;
+        $scope.formValues.NFSData.useNFS = false;
+      });
+    }
+
     function validateForm(accessControlData, isAdmin) {
       $scope.state.formValidationError = '';
       var error = '';
@@ -63,7 +81,7 @@ angular.module('portainer.docker').controller('CreateVolumeController', [
       driverOptions.push({ name: 'device', value: device });
 
       const versionNumber = data.versionsNumber[data.versions.indexOf(data.version)];
-      const options = 'username=' + data.username + ',password=' + data.password + ',vers=' + versionNumber;
+      const options = 'addr=' + data.serverAddress + ',username=' + data.username + ',password=' + data.password + ',vers=' + versionNumber;
       driverOptions.push({ name: 'o', value: options });
     }
 
@@ -86,11 +104,6 @@ angular.module('portainer.docker').controller('CreateVolumeController', [
       var name = $scope.formValues.Name;
       var driver = $scope.formValues.Driver;
       var driverOptions = $scope.formValues.DriverOptions;
-      var storidgeProfile = $scope.formValues.StoridgeProfile;
-
-      if (driver === 'cio:latest' && storidgeProfile) {
-        driverOptions.push({ name: 'profile', value: storidgeProfile.Name });
-      }
 
       if ($scope.formValues.NFSData.useNFS) {
         prepareNFSConfiguration(driverOptions);
@@ -120,11 +133,11 @@ angular.module('portainer.docker').controller('CreateVolumeController', [
           return ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl);
         })
         .then(function success() {
-          Notifications.success('存储卷成功创建');
+          Notifications.success('成功', '已成功创建存储卷');
           $state.go('docker.volumes', {}, { reload: true });
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '创建存储卷时出错');
+          Notifications.error('失败', err, '在创建存储卷的过程中发生了一个错误');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -139,7 +152,7 @@ angular.module('portainer.docker').controller('CreateVolumeController', [
           $scope.availableVolumeDrivers = data;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索存储卷驱动程序');
+          Notifications.error('失败', err, '无法检索到存储卷驱动');
         });
     }
 

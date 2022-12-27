@@ -1,23 +1,14 @@
-<rd-header>
-  <rd-header-title title-text="标签">
-    <a data-toggle="tooltip" title="刷新" ui-sref="portainer.tags" ui-sref-opts="{reload: true}">
-      <i class="fa fa-sync" aria-hidden="true"></i>
-    </a>
-  </rd-header-title>
-  <rd-header-content>标签管理</rd-header-content>
-</rd-header>
+<page-header title="'标记'" breadcrumbs="['Tag management']" reload="true"> </page-header>
 
 <div class="row">
   <div class="col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="fa-plus" title-text="添加新标签"> </rd-widget-header>
+      <rd-widget-header icon="plus" feather-icon="true" title-text="添加新标记"> </rd-widget-header>
       <rd-widget-body>
         <form class="form-horizontal" name="tagCreationForm" ng-submit="createTag()">
           <!-- name-input -->
           <div class="form-group">
-            <label for="name" class="col-sm-2 control-label text-left">
-              名称
-            </label>
+            <label for="name" class="col-sm-2 control-label text-left required"> 名称 </label>
             <div class="col-sm-10">
               <input
                 type="text"
@@ -29,13 +20,19 @@
                 required
                 auto-focus
               />
-            </div>
-          </div>
-          <div class="form-group" ng-show="tagCreationForm.name.$invalid">
-            <div class="col-sm-12 small text-warning">
-              <div ng-messages="tagCreationForm.name.$error">
-                <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此字段是必需的。</p>
-                <p ng-message="validName"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此标签已存在。</p>
+              <div class="help-block" ng-show="tagCreationForm.name.$invalid">
+                <div class="small text-warning">
+                  <div ng-messages="tagCreationForm.name.$error">
+                    <p ng-message="required" class="vertical-center">
+                      <pr-icon icon="'alert-triangle'" mode="'warning'" feather="true"></pr-icon>
+                      本栏为必填项。
+                    </p>
+                    <p ng-message="validName" class="vertical-center">
+                      <pr-icon icon="'alert-triangle'" mode="'warning'" feather="true"></pr-icon>
+                      这个标签已经存在。
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -49,8 +46,11 @@
                 ng-click="createTag()"
                 button-spinner="state.actionInProgress"
               >
-                <span ng-hide="state.actionInProgress"><i class="fa fa-plus" aria-hidden="true"></i> 创建标签</span>
-                <span ng-show="state.actionInProgress">正在创建标签...</span>
+                <span ng-hide="state.actionInProgress" class="vertical-center">
+                  <pr-icon icon="'plus'" feather="true"></pr-icon>
+                  创建标记
+                </span>
+                <span ng-show="state.actionInProgress">创建标记中...</span>
               </button>
             </div>
           </div>
@@ -62,6 +62,6 @@
 
 <div class="row">
   <div class="col-sm-12">
-    <tags-datatable title-text="标签" title-icon="fa-tags" dataset="tags" table-key="tags" order-by="Name" remove-action="removeAction"></tags-datatable>
+    <tags-datatable title-text="标记" title-icon="svg-tag2" dataset="tags" table-key="tags" order-by="Name" remove-action="removeAction"></tags-datatable>
   </div>
 </div>

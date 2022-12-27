@@ -179,9 +179,9 @@ class KubernetesNodeController {
     for (const pod of pods) {
       try {
         await this.KubernetesPodService.eviction(pod);
-        this.Notifications.success('Pod 成功驱逐', pod.Name);
+        this.Notifications.success('Pod successfully evicted', pod.Name);
       } catch (err) {
-        this.Notifications.error('失败', err, '无法驱逐 pod');
+        this.Notifications.error('失败', err, 'Unable to evict pod');
         this.formValues.Availability = this.availabilities.PAUSE;
         await this.KubernetesNodeService.patch(this.node, this.formValues);
       } finally {
@@ -252,7 +252,7 @@ class KubernetesNodeController {
       if (this.formValues.Availability === 'Drain') {
         await this.drainNode();
       }
-      this.Notifications.success('节点更新成功');
+      this.Notifications.success('Success', '节点更新成功');
       this.$state.reload(this.$state.current);
     } catch (err) {
       this.Notifications.error('失败', err, '无法更新节点');
@@ -267,7 +267,7 @@ class KubernetesNodeController {
 
     if (taintsWarning && !labelsWarning) {
       this.ModalService.confirmUpdate(
-        '对污点的更改将立即取消调度在此节点上运行的应用程序，而没有相应的容忍度。 你想继续吗？',
+        '对污点的更改将立即取消在该节点上运行的应用程序的计划，而没有相应的容差。是否要继续？',
         (confirmed) => {
           if (confirmed) {
             return this.$async(this.updateNodeAsync);
@@ -276,7 +276,7 @@ class KubernetesNodeController {
       );
     } else if (!taintsWarning && labelsWarning) {
       this.ModalService.confirmUpdate(
-        '删除或更改使用的标签可能会阻止应用程序将来在此节点上调度。 你想继续吗？',
+        '删除或更改使用的标签可能会阻止将来在此节点上安排应用程序。是否要继续？',
         (confirmed) => {
           if (confirmed) {
             return this.$async(this.updateNodeAsync);
@@ -285,7 +285,7 @@ class KubernetesNodeController {
       );
     } else if (taintsWarning && labelsWarning) {
       this.ModalService.confirmUpdate(
-        '对污点的更改将立即取消在此节点上运行的应用程序的调度，而没有相应的容忍度。<br/></br/>删除或更改所使用的标签可能会阻止应用程序将来在此节点上调度。\n\n您是吗？ 想继续吗？',
+        '对污点的更改将立即取消在该节点上运行的应用程序的计划，而没有相应的容差<br/></br/>删除或更改使用的标签可能会阻止应用程序将来在此节点上进行调度。\\n\n是否继续？',
         (confirmed) => {
           if (confirmed) {
             return this.$async(this.updateNodeAsync);
@@ -294,7 +294,7 @@ class KubernetesNodeController {
       );
     } else if (cordonWarning) {
       this.ModalService.confirmUpdate(
-        '将此节点标记为不可调度将有效地封锁该节点并防止在该节点上调度任何新的工作负载。 你确定吗？',
+        '将此节点标记为不可调度将有效地阻止该节点，并防止在该节点上调度任何新的工作负载。 你确定吗？',
         (confirmed) => {
           if (confirmed) {
             return this.$async(this.updateNodeAsync);
@@ -303,7 +303,7 @@ class KubernetesNodeController {
       );
     } else if (drainWarning) {
       this.ModalService.confirmUpdate(
-        '耗尽此节点将导致所有工作负载从该节点驱逐。 这可能会导致某些服务中断。 你确定吗？',
+        '排空此节点将导致所有工作负载从该节点中逐出。这可能会导致某些服务中断。 你确定吗？',
         (confirmed) => {
           if (confirmed) {
             return this.$async(this.updateNodeAsync);
@@ -323,7 +323,7 @@ class KubernetesNodeController {
       this.node = _.find(this.nodes, { Name: nodeName });
       this.state.isDrainOperation = _.find(this.nodes, { Availability: this.availabilities.DRAIN });
     } catch (err) {
-      this.Notifications.error('失败', err, '无法检索节点');
+      this.Notifications.error('失败', err, '无法检索到节点');
     } finally {
       this.state.dataLoading = false;
     }
@@ -345,7 +345,7 @@ class KubernetesNodeController {
       this.resourceUsage.CPU = KubernetesResourceReservationHelper.parseCPU(node.usage.cpu);
       this.resourceUsage.Memory = KubernetesResourceReservationHelper.megaBytesValue(node.usage.memory);
     } catch (err) {
-      this.Notifications.error('失败', '无法检索节点资源使用情况', err);
+      this.Notifications.error('失败', err, '无法检索节点资源使用情况');
     }
   }
 

@@ -7,7 +7,6 @@ import (
 	"github.com/portainer/libhttp/request"
 	"github.com/portainer/libhttp/response"
 	portainer "github.com/portainer/portainer/api"
-	"github.com/portainer/portainer/api/bolt/errors"
 )
 
 type teamUpdatePayload struct {
@@ -23,7 +22,8 @@ func (payload *teamUpdatePayload) Validate(r *http.Request) error {
 // @summary Update a team
 // @description Update a team.
 // @description **Access policy**: administrator
-// @tags
+// @tags teams
+// @security ApiKeyAuth
 // @security jwt
 // @accept json
 // @produce json
@@ -39,20 +39,20 @@ func (payload *teamUpdatePayload) Validate(r *http.Request) error {
 func (handler *Handler) teamUpdate(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	teamID, err := request.RetrieveNumericRouteVariableValue(r, "id")
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid team identifier route variable", err}
+		return httperror.BadRequest("Invalid team identifier route variable", err)
 	}
 
 	var payload teamUpdatePayload
 	err = request.DecodeAndValidateJSONPayload(r, &payload)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid request payload", err}
+		return httperror.BadRequest("Invalid request payload", err)
 	}
 
 	team, err := handler.DataStore.Team().Team(portainer.TeamID(teamID))
-	if err == errors.ErrObjectNotFound {
-		return &httperror.HandlerError{http.StatusNotFound, "Unable to find a team with the specified identifier inside the database", err}
+	if handler.DataStore.IsErrObjectNotFound(err) {
+		return httperror.NotFound("Unable to find a team with the specified identifier inside the database", err)
 	} else if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to find a team with the specified identifier inside the database", err}
+		return httperror.InternalServerError("Unable to find a team with the specified identifier inside the database", err)
 	}
 
 	if payload.Name != "" {
@@ -61,7 +61,7 @@ func (handler *Handler) teamUpdate(w http.ResponseWriter, r *http.Request) *http
 
 	err = handler.DataStore.Team().UpdateTeam(team.ID, team)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusNotFound, "Unable to persist team changes inside the database", err}
+		return httperror.NotFound("Unable to persist team changes inside the database", err)
 	}
 
 	return response.JSON(w, team)

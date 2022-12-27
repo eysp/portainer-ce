@@ -1,122 +1,101 @@
-<rd-header>
-  <rd-header-title title-text="环境详情">
-    <a data-toggle="tooltip" title="刷新" ui-sref="portainer.endpoints.endpoint({id: endpoint.Id})" ui-sref-opts="{reload: true}">
-      <i class="fa fa-sync" aria-hidden="true"></i>
-    </a>
-  </rd-header-title>
-  <rd-header-content>
-    <a ui-sref="portainer.endpoints">环境</a> &gt; <a ui-sref="portainer.endpoints.endpoint({id: endpoint.Id})">{{ endpoint.Name }}</a>
-  </rd-header-content>
-</rd-header>
+<page-header ng-if="endpoint" title="'环境细节'" breadcrumbs="[{label:'Environments', link:'portainer.endpoints'}, endpoint.Name]" reload="true"> </page-header>
 
 <div class="row">
-  <information-panel ng-if="state.edgeEndpoint && endpoint.EdgeID" title-text="Edge information">
-    <span class="small text-muted">
-      <p>
-        <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-        此Edge环境与Edge环境相关联 {{ state.kubernetesEndpoint ? '(Kubernetes)' : '(Docker)' }}.
-      </p>
-      <p>
-        Edge key: <code>{{ endpoint.EdgeKey }}</code>
-      </p>
-      <p>
-        Edge identifier: <code>{{ endpoint.EdgeID }}</code>
-      </p>
-      <p>
-        <button
-          type="button"
-          class="btn btn-primary btn-sm"
-          ng-disabled="state.actionInProgress"
-          ng-click="onDeassociateEndpoint()"
-          button-spinner="state.actionInProgress"
-          analytics-on
-          analytics-event="edge-endpoint-deassociate"
-          analytics-category="edge"
-        >
-          <span ng-hide="state.actionInProgress">解除关联</span>
-        </button>
-      </p>
-    </span>
-  </information-panel>
-  <information-panel ng-if="state.edgeEndpoint && !endpoint.EdgeID" title-text="Deploy an agent">
-    <span class="small text-muted">
-      <p>
-        <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-        请参阅下面与平台相关的命令，以在远程群集中部署Edge代理。
-      </p>
-      <p>
-        代理将通过 <u>{{ edgeKeyDetails.instanceURL }}</u> and <u>tcp://{{ edgeKeyDetails.tunnelServerAddr }}</u>与Portainer通信
-      </p>
-      <div class="input-group input-group-sm" style="margin-top: 10px; margin-bottom: 10px;">
-        <div class="btn-group btn-group-sm">
-          <label class="btn btn-primary" ng-model="state.platformType" uib-btn-radio="'linux'"><i class="fab fa-linux" style="margin-right: 2px;"></i> Linux</label>
-          <label class="btn btn-primary" ng-model="state.platformType" uib-btn-radio="'windows'"><i class="fab fa-windows" style="margin-right: 2px;"></i> Windows</label>
-        </div>
-      </div>
-      <por-switch-field
-        label="Allow self-signed certs"
-        ng-model="state.allowSelfSignedCerts"
-        tooltip="当允许自签名证书时，边缘代理在通过HTTPS连接到Portainer时将忽略域验证"
-      ></por-switch-field>
-      <div style="margin-top: 10px;">
-        <uib-tabset active="state.deploymentTab">
-          <uib-tab index="'kubernetes'" heading="Kubernetes" ng-if="state.platformType === 'linux'">
-            <code style="display: block; white-space: pre-wrap; padding: 16px 45px;">
-              {{ dockerCommands[state.deploymentTab][state.platformType](agentVersion, agentShortVersion, randomEdgeID, endpoint.EdgeKey, state.allowSelfSignedCerts) }}
-            </code>
-          </uib-tab>
-          <uib-tab index="'swarm'" heading="Docker Swarm">
-            <code style="display: block; white-space: pre-wrap; padding: 16px 45px;">
-              {{ dockerCommands[state.deploymentTab][state.platformType](agentVersion, agentShortVersion, randomEdgeID, endpoint.EdgeKey, state.allowSelfSignedCerts) }}
-            </code>
-          </uib-tab>
-          <uib-tab index="'standalone'" heading="Docker Standalone">
-            <code style="display: block; white-space: pre-wrap; padding: 16px 45px;">
-              {{ dockerCommands[state.deploymentTab][state.platformType](agentVersion, agentShortVersion, randomEdgeID, endpoint.EdgeKey, state.allowSelfSignedCerts) }}
-            </code>
-          </uib-tab>
-        </uib-tabset>
-        <div style="margin-top: 10px;">
-          <span class="btn btn-primary btn-sm" ng-click="copyEdgeAgentDeploymentCommand()"><i class="fa fa-copy space-right" aria-hidden="true"></i>Copy command</span>
-          <span id="copyNotificationDeploymentCommand" style="margin-left: 7px; display: none; color: #23ae89;"> <i class="fa fa-check" aria-hidden="true"></i> copied </span>
-        </div>
-      </div>
-      <div class="col-sm-12 form-section-title" style="margin-top: 25px;">
-        Join token
-      </div>
-      <p>
-        <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-        对于预加载Edge代理的用户，请使用以下连接token将Edge代理与此环境关联。
-      </p>
-      <p> 您可以在 <a href="https://downloads.portainer.io/edge_agent_guide.pdf">此处</a>提供的用户指南中阅读有关预暂存的更多信息。 </p>
-      <div style="margin-top: 10px; overflow-wrap: break-word;">
-        <code>
-          {{ endpoint.EdgeKey }}
-        </code>
-        <div style="margin-top: 10px;">
-          <span class="btn btn-primary btn-sm" ng-click="copyEdgeAgentKey()"><i class="fa fa-copy space-right" aria-hidden="true"></i>复制 token</span>
-          <span id="copyNotificationEdgeKey" style="margin-left: 7px; display: none; color: #23ae89;"> <i class="fa fa-check" aria-hidden="true"></i> copied </span>
-        </div>
-      </div>
-    </span>
-  </information-panel>
-  <information-panel ng-if="state.kubernetesEndpoint && (!state.edgeEndpoint || (state.edgeEndpoint && endpoint.EdgeID))" title-text="Kubernetes 功能配置">
-    <span class="small text-muted">
-      <i class="fa fa-tools blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-      您应该在
-      <a ui-sref="portainer.endpoints.endpoint.kubernetesConfig({id: endpoint.Id})">Kubernetes 配置视图</a> 中配置此Kubernetes环境中可用的功能。
+  <div ng-if="state.edgeEndpoint">
+    <information-panel ng-if="state.edgeAssociated" title-text="Edge information">
+      <span class="small text-muted">
+        <p class="vertical-center">
+          <pr-icon icon="'alert-circle'" mode="'primary'" feather="true"></pr-icon>
+          这个边缘环境与一个边缘环境相关联 {{ state.kubernetesEndpoint ? '(Kubernetes)' : '(Docker)' }}.
+        </p>
+        <p>
+          Edge key: <code>{{ endpoint.EdgeKey }}</code>
+        </p>
+        <p>
+          Edge identifier: <code>{{ endpoint.EdgeID }}</code>
+        </p>
+        <p>
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            ng-disabled="state.actionInProgress"
+            ng-click="onDisassociateEndpoint()"
+            button-spinner="state.actionInProgress"
+            analytics-on
+            analytics-event="edge-endpoint-disassociate"
+            analytics-category="edge"
+          >
+            <span ng-hide="state.actionInProgress">解除关联</span>
+          </button>
+        </p>
+      </span>
+    </information-panel>
+
+    <div class="col-sm-12" ng-if="!state.edgeAssociated">
+      <rd-widget>
+        <rd-widget-body>
+          <div class="col-sm-12 form-section-title">部署代理</div>
+          <span class="small text-muted">
+            <p class="vertical-center">
+              <pr-icon icon="'alert-circle'" mode="'primary'" feather="true"></pr-icon>
+              参考下面的平台相关命令，在你的远程集群中部署Edge代理。
+            </p>
+            <p>
+              The agent will communicate with Portainer via <u>{{ edgeKeyDetails.instanceURL }}</u> and <u>tcp://{{ edgeKeyDetails.tunnelServerAddr }}</u>
+            </p>
+          </span>
+
+          <div class="col-sm-12 form-section-title"> Edge 代理部署脚本 </div>
+          <edge-script-form
+            edge-info="{ key: endpoint.EdgeKey, id: endpoint.EdgeID }"
+            commands="state.edgeScriptCommands"
+            is-nomad-token-visible="state.showNomad"
+            hide-async-mode="!endpoint.IsEdgeDevice"
+          ></edge-script-form>
+
+          <span class="small text-muted">
+            <div class="col-sm-12 form-section-title" style="margin-top: 25px"> 加入 token </div>
+            <p class="vertical-center">
+              <pr-icon icon="'alert-circle'" mode="'primary'" feather="true"></pr-icon>
+              对于那些预存边缘代理，使用下面的连接标记将边缘代理与这个环境联系起来。
+            </p>
+            <p> 你可以点击 <a href="https://downloads.portainer.io/edge_agent_guide.pdf">这里</a> 的用户指南中阅读更多关于预分期的信息。</p>
+            <div style="margin-top: 10px; overflow-wrap: break-word">
+              <code>
+                {{ endpoint.EdgeKey }}
+              </code>
+              <div class="mt-2">
+                <span class="btn btn-primary btn-sm" ng-click="copyEdgeAgentKey()">
+                  <pr-icon icon="'copy'" feather="true"></pr-icon>
+                  复制 token
+                </span>
+                <span id="copyNotificationEdgeKey" class="vertical-center" style="margin-left: 7px; display: none; color: #23ae89">
+                  <pr-icon icon="'check'" feather="true"></pr-icon>
+                  复制的
+                </span>
+              </div>
+            </div>
+          </span>
+        </rd-widget-body>
+      </rd-widget>
+    </div>
+  </div>
+
+  <information-panel ng-if="state.kubernetesEndpoint && (!state.edgeEndpoint || state.edgeAssociated)" title-text="Kubernetes features configuration">
+    <span class="small text-muted vertical-center">
+      <pr-icon icon="'tool'" mode="'primary'" feather="true"></pr-icon>
+      你应该在
+      <a ui-sref="kubernetes.cluster.setup({endpointId: endpoint.Id})">Kubernetes 配置</a> 中配置这个Kubernetes环境中的可用功能。
     </span>
   </information-panel>
 </div>
 
-<div class="row">
+<div class="row mt-4">
   <div class="col-lg-12 col-md-12 col-xs-12">
     <rd-widget>
       <rd-widget-body>
         <form class="form-horizontal">
-          <div class="col-sm-12 form-section-title">
-            配置
-          </div>
+          <div class="col-sm-12 form-section-title"> Configuration </div>
           <!-- name-input -->
           <div class="form-group">
             <label for="container_name" class="col-sm-3 col-lg-2 control-label text-left">名称</label>
@@ -128,12 +107,14 @@
           <!-- endpoint-url-input -->
           <div class="form-group" ng-if="!state.edgeEndpoint">
             <label for="endpoint_url" class="col-sm-3 col-lg-2 control-label text-left">
-              环境 URL
+              <span ng-if="!state.agentEndpoint">环境URL</span>
+              <span ng-if="state.agentEndpoint">环境地址</span>
               <portainer-tooltip
-                position="bottom"
-                message="Docker主机的URL或IP地址。Docker API必须通过TCP端口公开。请参考Docker文档进行配置。"
+                ng-if="!state.agentEndpoint"
+                message="'Docker主机的URL或IP地址。Docker API必须通过一个TCP端口暴露。请参考Docker文档来配置它。'"
               >
               </portainer-tooltip>
+              <portainer-tooltip ng-if="state.agentEndpoint" message="'Portainer代理的地址，格式为 <HOST>:<PORT> 或 <IP>:<PORT>'"> </portainer-tooltip>
             </label>
             <div class="col-sm-9 col-lg-10">
               <input
@@ -151,33 +132,19 @@
           <div class="form-group" ng-if="!state.azureEndpoint">
             <label for="endpoint_public_url" class="col-sm-3 col-lg-2 control-label text-left">
               Public IP
-              <portainer-tooltip
-                position="bottom"
-                message="可访问暴露容器的URL或IP地址。此字段是可选的，默认为环境URL。"
-              >
+              <portainer-tooltip message="'暴露的容器可以到达的URL或IP地址。这个字段是可选的，将默认为环境URL。'">
               </portainer-tooltip>
             </label>
             <div class="col-sm-9 col-lg-10">
               <input type="text" class="form-control" id="endpoint_public_url" ng-model="endpoint.PublicURL" placeholder="例如 10.0.0.10 or mydocker.mydomain.com" />
             </div>
           </div>
-          <div class="form-group" ng-if="state.edgeEndpoint">
-            <label for="edge_checkin" class="col-sm-2 control-label text-left">
-              Poll frequency
-              <portainer-tooltip
-                position="bottom"
-                message="此Edge代理用于签入Portainer实例的时间间隔。影响Edge环境管理和Edge计算功能。"
-              ></portainer-tooltip>
-            </label>
-            <div class="col-sm-10">
-              <select
-                id="edge_checkin"
-                class="form-control"
-                ng-model="endpoint.EdgeCheckinInterval"
-                ng-options="+(opt.value) as opt.key for opt in state.availableEdgeAgentCheckinOptions"
-              ></select>
-            </div>
+
+          <div ng-if="endpoint && state.edgeEndpoint">
+            <div class="col-sm-12 form-section-title"> 签到时间间隔 </div>
+            <edge-checkin-interval-field value="endpoint.EdgeCheckinInterval" on-change="(onChangeCheckInInterval)"></edge-checkin-interval-field>
           </div>
+
           <!-- !endpoint-public-url-input -->
           <azure-endpoint-config
             ng-if="state.azureEndpoint"
@@ -185,32 +152,89 @@
             tenant-id="endpoint.AzureCredentials.TenantID"
             authentication-key="endpoint.AzureCredentials.AuthenticationKey"
           ></azure-endpoint-config>
-          <div class="col-sm-12 form-section-title">
-            元数据
-          </div>
+          <div class="col-sm-12 form-section-title"> 元数据 </div>
           <!-- group -->
           <div class="form-group">
-            <label for="endpoint_group" class="col-sm-3 col-lg-2 control-label text-left">
-              群组
-            </label>
+            <label for="endpoint_group" class="col-sm-3 col-lg-2 control-label text-left"> 群组 </label>
             <div class="col-sm-9 col-lg-10">
               <select ng-options="group.Id as group.Name for group in groups" ng-model="endpoint.GroupId" id="endpoint_group" class="form-control"></select>
             </div>
           </div>
           <!-- !group -->
-          <!-- tags -->
-          <div class="form-group">
-            <tag-selector ng-if="endpoint && availableTags" tags="availableTags" model="endpoint.TagIds" on-create="(onCreateTag)" allow-create="state.allowCreate"></tag-selector>
-          </div>
-          <!-- !tags -->
+
+          <tag-selector ng-if="endpoint" value="endpoint.TagIds" allow-create="state.allowCreate" on-change="(onChangeTags)"></tag-selector>
+
           <!-- endpoint-security -->
           <div ng-if="endpointType === 'remote' && !state.azureEndpoint && !state.kubernetesEndpoint && !state.edgeEndpoint && endpoint.Type !== 6">
-            <div class="col-sm-12 form-section-title">
-              安全
-            </div>
+            <div class="col-sm-12 form-section-title"> 安全 </div>
             <por-endpoint-security form-data="formValues.SecurityFormData" endpoint="endpoint"></por-endpoint-security>
           </div>
           <!-- !endpoint-security -->
+          <!-- open-amt info -->
+          <div ng-if="state.showAMTInfo">
+            <div class="col-sm-12 form-section-title"> 开放式主动管理技术 </div>
+
+            <div class="form-group">
+              <label for="endpoint_managementinfoVersion" class="col-sm-3 col-lg-2 control-label text-left"> AMT版本 </label>
+              <div class="col-sm-9 col-lg-10">
+                <input type="text" ng-disabled="true" class="form-control" id="endpoint_managementinfoVersion" ng-model="endpoint.ManagementInfo['AMT']" placeholder="加载中..." />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="endpoint_managementinfoUUID" class="col-sm-3 col-lg-2 control-label text-left"> UUID </label>
+              <div class="col-sm-9 col-lg-10">
+                <input type="text" ng-disabled="true" class="form-control" id="endpoint_managementinfoUUID" ng-model="endpoint.ManagementInfo['UUID']" placeholder="加载中..." />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="endpoint_managementinfoBuildNumber" class="col-sm-3 col-lg-2 control-label text-left"> Build Number </label>
+              <div class="col-sm-9 col-lg-10">
+                <input
+                  type="text"
+                  ng-disabled="true"
+                  class="form-control"
+                  id="endpoint_managementinfoBuildNumber"
+                  ng-model="endpoint.ManagementInfo['Build Number']"
+                  placeholder="加载中..."
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="endpoint_managementinfoControlMode" class="col-sm-3 col-lg-2 control-label text-left"> 控制模式 </label>
+              <div class="col-sm-9 col-lg-10">
+                <input
+                  type="text"
+                  ng-disabled="true"
+                  class="form-control"
+                  id="endpoint_managementinfoControlMode"
+                  ng-model="endpoint.ManagementInfo['Control Mode']"
+                  placeholder="加载中..."
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="endpoint_managementinfoDNSSuffix" class="col-sm-3 col-lg-2 control-label text-left"> DNS后缀 </label>
+              <div class="col-sm-9 col-lg-10">
+                <input
+                  type="text"
+                  ng-disabled="true"
+                  class="form-control"
+                  id="endpoint_managementinfoDNSSuffix"
+                  ng-model="endpoint.ManagementInfo['DNS Suffix']"
+                  placeholder="加载中..."
+                />
+              </div>
+            </div>
+          </div>
+          <!-- !open-amt info -->
+          <!-- gpus info -->
+          <div class="col-sm-12 form-section-title">硬件加速</div>
+          <gpus-list ng-if="endpoint && endpoint.Gpus" value="endpoint.Gpus" on-change="(onGpusChange)"></gpus-list>
+          <!-- gpus info -->
           <div class="form-group">
             <div class="col-sm-12">
               <button
@@ -221,9 +245,9 @@
                 button-spinner="state.actionInProgress"
               >
                 <span ng-hide="state.actionInProgress">更新环境</span>
-                <span ng-show="state.actionInProgress">更新环境中...</span>
+                <span ng-show="state.actionInProgress">正在更新环境...</span>
               </button>
-              <a type="button" class="btn btn-default btn-sm" ui-sref="portainer.endpoints">Cancel</a>
+              <a type="button" class="btn btn-default btn-sm" ui-sref="portainer.endpoints">取消</a>
             </div>
           </div>
         </form>

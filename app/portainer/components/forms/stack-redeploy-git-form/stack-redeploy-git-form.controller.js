@@ -1,16 +1,19 @@
 import uuidv4 from 'uuid/v4';
 import { RepositoryMechanismTypes } from 'Kubernetes/models/deploy';
+import { FeatureId } from 'Portainer/feature-flags/enums';
 class StackRedeployGitFormController {
   /* @ngInject */
-  constructor($async, $state, StackService, ModalService, Notifications, WebhookHelper, FormHelper) {
+  constructor($async, $state, $compile, $scope, StackService, ModalService, Notifications, WebhookHelper, FormHelper) {
     this.$async = $async;
     this.$state = $state;
+    this.$compile = $compile;
+    this.$scope = $scope;
     this.StackService = StackService;
     this.ModalService = ModalService;
     this.Notifications = Notifications;
     this.WebhookHelper = WebhookHelper;
     this.FormHelper = FormHelper;
-
+    $scope.stackPullImageFeature = FeatureId.STACK_PULL_IMAGE;
     this.state = {
       inProgress: false,
       redeployInProgress: false,
@@ -25,6 +28,10 @@ class StackRedeployGitFormController {
       RepositoryUsername: '',
       RepositoryPassword: '',
       Env: [],
+      PullImage: false,
+      Option: {
+        Prune: false,
+      },
       // auto update
       AutoUpdate: {
         RepositoryAutomaticUpdates: false,
@@ -38,6 +45,7 @@ class StackRedeployGitFormController {
     this.onChangeRef = this.onChangeRef.bind(this);
     this.onChangeAutoUpdate = this.onChangeAutoUpdate.bind(this);
     this.onChangeEnvVar = this.onChangeEnvVar.bind(this);
+    this.onChangeOption = this.onChangeOption.bind(this);
   }
 
   buildAnalyticsProperties() {
@@ -85,34 +93,45 @@ class StackRedeployGitFormController {
     this.onChange({ Env: value });
   }
 
+  onChangeOption(values) {
+    this.onChange({
+      Option: {
+        ...this.formValues.Option,
+        ...values,
+      },
+    });
+  }
+
   async submit() {
-    return this.$async(async () => {
-      try {
-        const confirmed = await this.ModalService.confirmAsync({
-          title: '你确定吗？',
-          message: '在Portainer中本地对此堆栈所做的任何更改都将被git中的定义覆盖，并可能导致服务中断。你想继续吗',
-          buttons: {
-            confirm: {
-              label: '更新',
-              className: 'btn-warning',
-            },
-          },
-        });
-        if (!confirmed) {
+    const isSwarmStack = this.stack.Type === 1;
+    const that = this;
+    this.ModalService.confirmStackUpdate(
+      'Any changes to this stack or application made locally in Portainer will be overridden, which may cause service interruption. Do you wish to continue?',
+      isSwarmStack,
+      'btn-warning',
+      async function (result) {
+        if (!result) {
           return;
         }
-
-        this.state.redeployInProgress = true;
-
-        await this.StackService.updateGit(this.stack.Id, this.stack.EndpointId, this.FormHelper.removeInvalidEnvVars(this.formValues.Env), false, this.formValues);
-        this.Notifications.success('已成功拉取并重新部署堆栈');
-        await this.$state.reload();
-      } catch (err) {
-        this.Notifications.error('失败', err, '重新部署堆栈失败');
-      } finally {
-        this.state.redeployInProgress = false;
+        try {
+          that.state.redeployInProgress = true;
+          await that.StackService.updateGit(
+            that.stack.Id,
+            that.stack.EndpointId,
+            that.FormHelper.removeInvalidEnvVars(that.formValues.Env),
+            that.formValues.Option.Prune,
+            that.formValues,
+            !!result[0]
+          );
+          that.Notifications.success('Success', 'Pulled and redeployed stack successfully');
+          that.$state.reload();
+        } catch (err) {
+          that.Notifications.error('失败', err, 'Failed redeploying stack');
+        } finally {
+          that.state.redeployInProgress = false;
+        }
       }
-    });
+    );
   }
 
   async saveGitSettings() {
@@ -127,11 +146,11 @@ class StackRedeployGitFormController {
         );
         this.savedFormValues = angular.copy(this.formValues);
         this.state.hasUnsavedChanges = false;
-        this.Notifications.success('成功保存堆栈设置');
+        this.Notifications.success('Success', 'Save stack settings successfully');
 
         this.stack = stack;
       } catch (err) {
-        this.Notifications.error('失败', err, '无法保存堆栈设置');
+        this.Notifications.error('失败', err, 'Unable to save stack settings');
       } finally {
         this.state.inProgress = false;
       }
@@ -151,6 +170,10 @@ class StackRedeployGitFormController {
   $onInit() {
     this.formValues.RefName = this.model.ReferenceName;
     this.formValues.Env = this.stack.Env;
+    if (this.stack.Option) {
+      this.formValues.Option = this.stack.Option;
+    }
+
     // Init auto update
     if (this.stack.AutoUpdate && (this.stack.AutoUpdate.Interval || this.stack.AutoUpdate.Webhook)) {
       this.formValues.AutoUpdate.RepositoryAutomaticUpdates = true;

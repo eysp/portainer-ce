@@ -10,8 +10,9 @@ import (
 // @id TagList
 // @summary List tags
 // @description List tags.
-// @description **Access policy**: administrator
+// @description **Access policy**: authenticated
 // @tags tags
+// @security ApiKeyAuth
 // @security jwt
 // @produce json
 // @success 200 {array} portainer.Tag "Success"
@@ -20,7 +21,7 @@ import (
 func (handler *Handler) tagList(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	tags, err := handler.DataStore.Tag().Tags()
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve tags from the database", err}
+		return httperror.InternalServerError("Unable to retrieve tags from the database", err)
 	}
 
 	return response.JSON(w, tags)

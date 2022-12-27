@@ -1,3 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Inter';
+  src: url('../fonts/Inter-VariableFont.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  select {
+    font-family: Inter, Arial, Helvetica, sans-serif;
+  }
+}
+
+html {
+  font-size: 16px;
+  overflow-y: scroll;
+}
+
+body {
+  background: var(--bg-body-color);
+  font-family: 'Inter';
+  color: var(--text-body-color) !important;
+}
+
 html,
 body,
 #page-wrapper,
@@ -13,15 +40,16 @@ body,
   position: relative;
 }
 
-.white-space-normal {
-  white-space: normal !important;
-}
-
 .logo {
   display: inline;
   max-width: 155px;
   max-height: 55px;
 }
+
+.white-space-normal {
+  white-space: normal !important;
+}
+
 .legend .title {
   padding: 0 0.3em;
   margin: 0.5em;
@@ -54,16 +82,16 @@ body,
   font-size: 18px;
 }
 
-.header_title_content {
-  margin-left: 5px;
-}
-
 .form-section-title {
-  border-bottom: 1px solid var(--border-form-section-title-color);
+  @apply text-gray-9;
+  @apply th-dark:text-gray-5;
+  @apply th-highcontrast:text-white;
+
   margin-top: 5px;
-  margin-bottom: 15px;
-  color: var(--text-form-section-title-color);
+  margin-bottom: 10px;
   padding-left: 0;
+  font-weight: 500;
+  font-size: 16px;
 }
 
 .form-horizontal .control-label.text-left {
@@ -82,8 +110,11 @@ input[type='checkbox'] {
   margin-top: -1px;
 }
 
-a[ng-click] {
-  cursor: pointer;
+.md-checkbox input[type='checkbox']:indeterminate + label:before {
+  content: '-';
+  align-content: center;
+  line-height: 16px;
+  text-align: center;
 }
 
 .space-right {
@@ -116,44 +147,12 @@ a[ng-click] {
   background-color: var(--bg-item-highlighted-null-color);
 }
 
-.service-datatable {
-  background-color: var(--bg-item-highlighted-color);
-  padding: 2px;
-}
-
-.service-datatable thead {
-  background-color: var(--bg-service-datatable-thead) !important;
-}
-
-.service-datatable tbody {
-  background-color: var(--bg-service-datatable-tbody);
-}
-
-.tooltip.portainer-tooltip .tooltip-inner {
-  font-family: Montserrat;
-  background-color: var(--bg-tooltip-color);
-  padding: 0.833em 1em;
-  color: var(--text-tooltip-color);
-  border: 1px solid var(--border-tooltip-color);
-  border-radius: 0.14285714rem;
-  box-shadow: 0 2px 4px 0 rgba(34, 36, 38, 0.12), 0 2px 10px 0 rgba(34, 36, 38, 0.15);
-}
-
-.tooltip.portainer-tooltip .tooltip-arrow {
-  display: none;
-}
-
-.fa.tooltip-icon {
-  margin-left: 5px;
-  font-size: 1.3em;
-}
-
 .fa.green-icon {
   color: #23ae89;
 }
 
 .fa.red-icon {
-  color: #ae2323;
+  color: #f04438;
 }
 
 .fa.orange-icon {
@@ -170,7 +169,7 @@ a[ng-click] {
 }
 
 .text-warning {
-  color: #f0ad4e;
+  @apply text-warning-9 th-dark:text-warning-7 th-highcontrast:text-warning-1;
 }
 
 .widget .widget-body table tbody .image-tag {
@@ -225,12 +224,12 @@ a[ng-click] {
 }
 
 .blocklist-item {
-  padding: 0.7rem;
-  margin-bottom: 0.7rem;
+  padding: 10px;
+  margin-bottom: 10px;
   cursor: pointer;
-  border: 1px solid var(--border-blocklist-color);
-  border-radius: 2px;
-  box-shadow: var(--shadow-box-color);
+  border: 1px solid var(--border-blocklist);
+  border-radius: 8px;
+  margin-right: 10px;
 }
 
 .blocklist-item--disabled {
@@ -245,6 +244,8 @@ a[ng-click] {
 }
 
 .blocklist-item:hover {
+  @apply border border-blue-7;
+
   background-color: var(--bg-blocklist-hover-color);
   color: var(--text-blocklist-hover-color);
 }
@@ -265,7 +266,6 @@ a[ng-click] {
 .blocklist-item-logo {
   width: 100%;
   max-width: 60px;
-  height: 100%;
   max-height: 60px;
 }
 
@@ -326,7 +326,6 @@ a[ng-click] {
 .custom-header-ico {
   max-width: 32px;
   max-height: 32px;
-  margin-right: 2px;
 }
 
 .btn-responsive {
@@ -384,16 +383,13 @@ a[ng-click] {
 }
 
 .panel-body {
-  padding-top: 30px;
-  background-color: var(--white-color) fff;
-}
-
-.pagination-controls {
-  margin-left: 10px;
+  padding: 20px 25px;
+  background-color: var(--white-color);
+  border-radius: 8px;
 }
 
 .user-box {
-  margin-right: 25px;
+  margin-right: 15px;
 }
 
 .select-endpoint {
@@ -460,8 +456,28 @@ a[ng-click] {
   display: none;
 }
 
+.bootbox-form .visible {
+  position: initial !important;
+  display: initial !important;
+  margin-left: 10px !important;
+  margin-top: -2px !important;
+}
+
 .bootbox-form label {
   padding-left: 0;
+}
+
+.bootbox-checkbox-list {
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: var(--white-color);
+  border: 1px solid var(--grey-48);
+  border-radius: 4px;
+}
+
+:root[theme='dark'] .bootbox-checkbox-list,
+:root[theme='highcontrast'] .bootbox-checkbox-list {
+  background-color: var(--bg-modal-content-color);
 }
 
 .small-select {
@@ -596,11 +612,7 @@ a[ng-click] {
   background-color: var(--bg-log-line-selected-color);
 }
 
-.row.header .meta .page {
-  padding-top: 7px;
-}
-
-.tag {
+.tag:not(.token) {
   padding: 2px 6px;
   color: white;
   background-color: var(--blue-2);
@@ -677,80 +689,14 @@ a[ng-click] {
 .image-zoom-modal .modal-dialog {
   width: 80%;
 }
+
 /*!bootbox override*/
-
-/*angular-multi-select override*/
-.multiSelect > button {
-  min-height: 30px !important;
-  background-image: var(--bg-image-multiselect-button);
-  border-color: var(--border-multiselect);
-  color: var(--text-multiselect);
-  background-color: var(--bg-multiselect-color);
-}
-
-.multiSelect > button:hover {
-  background-image: var(--bg-image-multiselect-hover);
-}
-
-.multiSelect .checkboxLayer {
-  border-color: var(--border-multiselect-checkboxlayer);
-}
-
-.multiSelect .checkBoxContainer {
-  background-color: var(--bg-multiselect-checkboxcontainer);
-}
-
-.multiSelect .multiSelectItem {
-  color: var(--text-multiselect-item);
-}
-
-.multiSelect .helperContainer {
-  background-color: var(--bg-multiselect-helpercontainer);
-}
-
-.multiSelect .multiSelectFocus {
-  background-image: var(--bg-image-multiselect);
-}
-
-.multiSelect .multiSelectItem:not(.multiSelectGroup).selected {
-  background-image: var(--bg-image-multiselect);
-  color: var(--white-color);
-  border: none;
-}
-
-.multiSelect .multiSelectItem:hover,
-.multiSelect .multiSelectGroup:hover {
-  border-color: var(--grey-3);
-  background-image: var(--bg-image-multiselect) !important;
-  color: var(--white-color) !important;
-}
-
-.multiSelect .tickMark,
-.widget .widget-body table tbody .multiSelect .tickMark {
-  top: 2px;
-  right: 12px;
-  font-size: 20px !important;
-}
-/*!angular-multi-select override*/
 
 /*toaster override*/
 #toast-container > div {
   opacity: 0.9;
 }
 /*!toaster override*/
-
-/*angular-loading-bar override*/
-#loadingbar-placeholder {
-  margin-bottom: 0;
-  height: 3px;
-}
-
-#loading-bar .bar {
-  position: relative;
-  height: 3px;
-  background: var(--blue-3);
-}
-/*!angular-loading-bar override*/
 
 .monospaced {
   font-family: monospace;
@@ -819,34 +765,65 @@ json-tree .branch-preview {
 }
 /* !uib-typeahead override */
 
-.kubectl-shell {
-  display: block;
-  text-align: center;
-  padding-bottom: 5px;
+.no-margin {
+  margin: 0 !important;
 }
 
-.w-full {
-  width: 100%;
-}
-
-.flex {
-  display: flex;
-}
-
-.block {
-  display: block;
-}
-
-.items-center {
-  align-items: center;
-}
-
-.my-8 {
-  margin-top: 2rem;
-  margin-bottom: 2rem;
+.no-border {
+  border: none;
 }
 
 .text-wrap {
   word-break: break-all;
   white-space: normal;
+}
+
+.icon-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* used for bootbox prompt with inputType radio */
+.form-check.radio {
+  margin-left: 15px;
+}
+
+.inline-text {
+  display: inline;
+  position: absolute;
+  font-family: 'Montserrat';
+  font-size: smaller;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.web-editor {
+  background-color: var(--bg-webeditor-color);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.web-editor a {
+  color: var(--text-link-color);
+}
+
+.web-editor a:hover {
+  color: var(--text-link-hover-color);
+  text-decoration-line: underline;
+}
+
+reach-portal > div {
+  z-index: 10;
+}
+
+input[style*='background-image: url("data:image/png'] + [data-cy='auth-passwordInputToggle'] {
+  right: 20px;
+}
+
+input[style*='background-image: url("data:image/png'] {
+  padding-right: 60px;
+}
+
+.web-editor .trancluded-item:empty {
+  display: none;
 }

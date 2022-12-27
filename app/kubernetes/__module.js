@@ -1,7 +1,9 @@
 import registriesModule from './registries';
 import customTemplateModule from './custom-templates';
+import { reactModule } from './react';
+import './views/kubernetes.css';
 
-angular.module('portainer.kubernetes', ['portainer.app', registriesModule, customTemplateModule]).config([
+angular.module('portainer.kubernetes', ['portainer.app', registriesModule, customTemplateModule, reactModule]).config([
   '$stateRegistryProvider',
   function ($stateRegistryProvider) {
     'use strict';
@@ -30,7 +32,7 @@ angular.module('portainer.kubernetes', ['portainer.app', registriesModule, custo
             }
 
             EndpointProvider.setEndpointID(endpoint.Id);
-            await StateManager.updateEndpointState(endpoint, []);
+            await StateManager.updateEndpointState(endpoint);
 
             if (endpoint.Type === 7 && endpoint.Status === 2) {
               throw new Error('Unable to contact Edge agent, please ensure that the agent is properly running on the remote environment.');
@@ -61,6 +63,36 @@ angular.module('portainer.kubernetes', ['portainer.app', registriesModule, custo
       views: {
         'content@': {
           component: 'helmTemplatesView',
+        },
+      },
+    };
+
+    const ingresses = {
+      name: 'kubernetes.ingresses',
+      url: '/ingresses',
+      views: {
+        'content@': {
+          component: 'kubernetesIngressesView',
+        },
+      },
+    };
+
+    const ingressesCreate = {
+      name: 'kubernetes.ingresses.create',
+      url: '/add',
+      views: {
+        'content@': {
+          component: 'kubernetesIngressesCreateView',
+        },
+      },
+    };
+
+    const ingressesEdit = {
+      name: 'kubernetes.ingresses.edit',
+      url: '/:namespace/:name/edit',
+      views: {
+        'content@': {
+          component: 'kubernetesIngressesCreateView',
         },
       },
     };
@@ -320,6 +352,29 @@ angular.module('portainer.kubernetes', ['portainer.app', registriesModule, custo
       },
     };
 
+    const endpointKubernetesConfiguration = {
+      name: 'kubernetes.cluster.setup',
+      url: '/configure',
+      views: {
+        'content@': {
+          templateUrl: './views/configure/configure.html',
+          controller: 'KubernetesConfigureController',
+          controllerAs: 'ctrl',
+        },
+      },
+    };
+
+    const endpointKubernetesSecurityConstraint = {
+      name: 'kubernetes.cluster.securityConstraint',
+      url: '/securityConstraint',
+      views: {
+        'content@': {
+          templateUrl: '../kubernetes/views/security-constraint/constraint.html',
+          controller: 'KubernetesSecurityConstraintController',
+        },
+      },
+    };
+
     $stateRegistryProvider.register(kubernetes);
     $stateRegistryProvider.register(helmApplication);
     $stateRegistryProvider.register(helmTemplates);
@@ -349,5 +404,11 @@ angular.module('portainer.kubernetes', ['portainer.app', registriesModule, custo
     $stateRegistryProvider.register(volume);
     $stateRegistryProvider.register(registries);
     $stateRegistryProvider.register(registriesAccess);
+    $stateRegistryProvider.register(endpointKubernetesConfiguration);
+    $stateRegistryProvider.register(endpointKubernetesSecurityConstraint);
+
+    $stateRegistryProvider.register(ingresses);
+    $stateRegistryProvider.register(ingressesCreate);
+    $stateRegistryProvider.register(ingressesEdit);
   },
 ]);

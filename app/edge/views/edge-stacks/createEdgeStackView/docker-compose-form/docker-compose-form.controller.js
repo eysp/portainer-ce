@@ -1,14 +1,11 @@
+import { editor, git, template, upload } from '@@/BoxSelector/common-options/build-methods';
+
 class DockerComposeFormController {
   /* @ngInject */
   constructor($async, EdgeTemplateService, Notifications) {
     Object.assign(this, { $async, EdgeTemplateService, Notifications });
 
-    this.methodOptions = [
-      { id: 'method_editor', icon: 'fa fa-edit', label: 'Web editor', description: 'Use our Web editor', value: 'editor' },
-      { id: 'method_upload', icon: 'fa fa-upload', label: 'Upload', description: 'Upload from your computer', value: 'upload' },
-      { id: 'method_repository', icon: 'fab fa-github', label: 'Repository', description: 'Use a git repository', value: 'repository' },
-      { id: 'method_template', icon: 'fa fa-rocket', label: 'Template', description: 'Use an Edge stack template', value: 'template' },
-    ];
+    this.methodOptions = [editor, upload, git, template];
 
     this.selectedTemplate = null;
 
@@ -23,7 +20,8 @@ class DockerComposeFormController {
     this.formValues = values;
   }
 
-  onChangeMethod() {
+  onChangeMethod(method) {
+    this.state.Method = method;
     this.formValues.StackFileContent = '';
     this.selectedTemplate = null;
   }
@@ -35,7 +33,7 @@ class DockerComposeFormController {
         const fileContent = await this.EdgeTemplateService.edgeTemplate(template);
         this.formValues.StackFileContent = fileContent;
       } catch (err) {
-        this.Notifications.error('失败', err, '无法检索模板');
+        this.Notifications.error('失败', err, 'Unable to retrieve Template');
       }
     });
   }
@@ -46,7 +44,9 @@ class DockerComposeFormController {
   }
 
   onChangeFile(value) {
-    this.formValues.StackFile = value;
+    return this.$async(async () => {
+      this.formValues.StackFile = value;
+    });
   }
 
   async $onInit() {
@@ -55,7 +55,7 @@ class DockerComposeFormController {
         const templates = await this.EdgeTemplateService.edgeTemplates();
         this.templates = templates.map((template) => ({ ...template, label: `${template.title} - ${template.description}` }));
       } catch (err) {
-        this.Notifications.error('失败', err, '无法检索模板');
+        this.Notifications.error('失败', err, 'Unable to retrieve Templates');
       }
     });
   }

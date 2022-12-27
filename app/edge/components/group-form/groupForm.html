@@ -1,47 +1,54 @@
 <form class="form-horizontal" name="EdgeGroupForm" ng-submit="$ctrl.formAction()">
   <div class="form-group">
-    <label for="group_name" class="col-sm-3 col-lg-2 control-label text-left">
-      Name
-    </label>
+    <label for="group_name" class="col-sm-3 col-lg-2 control-label text-left required"> 名称 </label>
     <div class="col-sm-9 col-lg-10">
-      <input type="text" class="form-control" id="group_name" name="group_name" ng-model="$ctrl.model.Name" required auto-focus data-cy="edgeGroupCreate-groupNameInput" />
-    </div>
-  </div>
-  <div class="form-group" ng-show="EdgeGroupForm.group_name.$invalid">
-    <div class="col-sm-12 small text-warning">
-      <div ng-messages="EdgeGroupForm.group_name.$error">
-        <p ng-message="required">
-          <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-          此字段是必需的。
-        </p>
+      <input
+        type="text"
+        class="form-control"
+        id="group_name"
+        name="group_name"
+        ng-model="$ctrl.model.Name"
+        required
+        auto-focus
+        data-cy="edgeGroupCreate-groupNameInput"
+        placeholder="例如 mygroup"
+      />
+      <div class="help-block" ng-show="EdgeGroupForm.group_name.$invalid">
+        <div class="small text-warning">
+          <div ng-messages="EdgeGroupForm.group_name.$error">
+            <p ng-message="required" class="vertical-center">
+              <pr-icon icon="'alert-triangle'" class-name="'icon-sm icon-warning'" feather="true"></pr-icon> 本栏为必填项。
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="col-sm-12 form-section-title">
-    群组类型
-  </div>
-  <div class="form-group col-sm-12">
-    <div class="boxselector_wrapper">
-      <div class="boxselector">
-        <input type="radio" id="static-group" ng-model="$ctrl.model.Dynamic" ng-value="false" ng-checked="!$ctrl.model.Dynamic" />
-        <label for="static-group">
-          <div class="boxselector_header">
-            <i class="fa fa-list-ol" aria-hidden="true" style="margin-right: 2px;"></i>
-            Static
-          </div>
-          <p>手动选择Edge环境</p>
-        </label>
-      </div>
-      <div class="boxselector">
-        <input type="radio" id="dynamic-group" ng-model="$ctrl.model.Dynamic" ng-value="true" ng-checked="$ctrl.model.Dynamic" />
-        <label for="dynamic-group">
-          <div class="boxselector_header">
-            <i class="fa fa-tags" aria-hidden="true" style="margin-right: 2px;"></i>
-            Dynamic
-          </div>
-          <p>通过标签自动关联环境</p>
-        </label>
+  <div class="col-sm-12 form-section-title"> 组类型 </div>
+  <div class="form-group">
+    <div class="col-sm-12">
+      <div class="boxselector_wrapper">
+        <div class="boxselector">
+          <input type="radio" id="static-group" ng-model="$ctrl.model.Dynamic" ng-value="false" ng-checked="!$ctrl.model.Dynamic" />
+          <label for="static-group">
+            <div class="boxselector_header vertical-center">
+              <pr-icon icon="'list'" feather="true"></pr-icon>
+              静态
+            </div>
+            <p>手动选择边缘环境</p>
+          </label>
+        </div>
+        <div class="boxselector">
+          <input type="radio" id="dynamic-group" ng-model="$ctrl.model.Dynamic" ng-value="true" ng-checked="$ctrl.model.Dynamic" />
+          <label for="dynamic-group">
+            <div class="boxselector_header vertical-center">
+              <pr-icon icon="'tag'" feather="true"></pr-icon>
+              动态
+            </div>
+            <p>通过标记自动关联环境</p>
+          </label>
+        </div>
       </div>
     </div>
   </div>
@@ -50,9 +57,7 @@
   <div ng-if="!$ctrl.model.Dynamic">
     <div ng-if="!$ctrl.noEndpoints">
       <!-- environments -->
-      <div class="col-sm-12 form-section-title">
-        相关环境
-      </div>
+      <div class="col-sm-12 form-section-title"> 相关环境 </div>
       <div class="form-group">
         <associated-endpoints-selector
           endpoint-ids="$ctrl.model.Endpoints"
@@ -66,7 +71,7 @@
     </div>
     <div class="form-group" ng-if="$ctrl.noEndpoints">
       <div class="col-sm-12 small text-muted">
-        没有可用的 Edge 环境。 前往 <a ui-sref="portainer.endpoints">环境视图</a>添加环境。
+        没有可用的边缘环境。请到 <a ui-sref="portainer.endpoints">环境视图</a> 中添加环境。
       </div>
     </div>
   </div>
@@ -74,43 +79,37 @@
 
   <!-- DynamicGroup -->
   <div ng-if="$ctrl.model.Dynamic">
-    <div class="col-sm-12 form-section-title">
-      标签
-    </div>
-    <div ng-if="$ctrl.tags.length" class="form-group col-sm-12">
-      <div class="boxselector_wrapper">
-        <div class="boxselector">
-          <input type="radio" id="or-selector" ng-model="$ctrl.model.PartialMatch" ng-value="true" ng-checked="$ctrl.model.PartialMatch" />
-          <label for="or-selector">
-            <div class="boxselector_header">
-              <i class="fa fa-tag" aria-hidden="true" style="margin-right: 2px;"></i>
-              Partial match
-            </div>
-            <p>关联与至少一个选定标记匹配的任何环境</p>
-          </label>
-        </div>
-        <div class="boxselector">
-          <input type="radio" id="and-selector" ng-model="$ctrl.model.PartialMatch" ng-value="false" ng-checked="!$ctrl.model.PartialMatch" />
-          <label for="and-selector">
-            <div class="boxselector_header">
-              <i class="fa fa-tag" aria-hidden="true" style="margin-right: 2px;"></i>
-              Full match
-            </div>
-            <p>关联与所有选定标记匹配的任何环境</p>
-          </label>
-        </div>
-      </div>
-    </div>
+    <div class="col-sm-12 form-section-title"> 标记 </div>
     <div class="form-group">
-      <tag-selector ng-if="$ctrl.tags.length" tags="$ctrl.tags" model="$ctrl.model.TagIds"></tag-selector>
-      <div ng-if="$ctrl.tags && !$ctrl.tags.length" class="col-sm-12 small text-muted">
-        No tags available. Head over to the <a ui-sref="portainer.tags">Tags view</a> to add tags
+      <div class="col-sm-12">
+        <div class="boxselector_wrapper">
+          <div class="boxselector">
+            <input type="radio" id="or-selector" ng-model="$ctrl.model.PartialMatch" ng-value="true" ng-checked="$ctrl.model.PartialMatch" />
+            <label for="or-selector">
+              <div class="boxselector_header vertical-center">
+                <pr-icon icon="'tag'" feather="true"></pr-icon>
+                部分匹配
+              </div>
+              <p>关联任何与所选标签中的至少一个相匹配的环境</p>
+            </label>
+          </div>
+          <div class="boxselector">
+            <input type="radio" id="and-selector" ng-model="$ctrl.model.PartialMatch" ng-value="false" ng-checked="!$ctrl.model.PartialMatch" />
+            <label for="and-selector">
+              <div class="boxselector_header vertical-center">
+                <pr-icon icon="'tag'" feather="true"></pr-icon>
+                完全匹配
+              </div>
+              <p>关联任何符合所有选定标签的环境</p>
+            </label>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="col-sm-12 form-section-title">
-      Associated environments by tags
-    </div>
-    <div class="col-sm-12 form-group">
+
+    <tag-selector ng-if="$ctrl.model.TagIds" value="$ctrl.model.TagIds" on-change="($ctrl.onChangeTags)"> </tag-selector>
+
+    <div class="table-in-row">
       <group-association-table
         loaded="$ctrl.loaded"
         page-type="$ctrl.pageType"
@@ -118,21 +117,20 @@
         retrieve-page="$ctrl.getDynamicEndpoints"
         dataset="$ctrl.endpoints.value"
         pagination-state="$ctrl.endpoints.state"
-        empty-dataset-message="没有关联的端点"
+        empty-dataset-message="No associated endpoint"
         tags="$ctrl.tags"
         show-tags="true"
         groups="$ctrl.groups"
         show-groups="true"
         has-backend-pagination="true"
+        title="按标签划分的相关环境"
       ></group-association-table>
     </div>
   </div>
   <!-- !DynamicGroup -->
 
   <!-- actions -->
-  <div class="col-sm-12 form-section-title">
-    操作
-  </div>
+  <div class="col-sm-12 form-section-title"> 操作 </div>
   <div class="form-group">
     <div class="col-sm-12">
       <button
@@ -143,7 +141,7 @@
         data-cy="edgeGroupCreate-addGroupButton"
       >
         <span ng-hide="$ctrl.actionInProgress">{{ $ctrl.formActionLabel }}</span>
-        <span ng-show="$ctrl.actionInProgress">进行中...</span>
+        <span ng-show="$ctrl.actionInProgress">正在进行中...</span>
       </button>
     </div>
   </div>

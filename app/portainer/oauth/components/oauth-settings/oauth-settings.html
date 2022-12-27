@@ -1,17 +1,15 @@
-<ng-form name="$ctrl.oauthSettingsForm">
-  <div class="col-sm-12 form-section-title">
-    单点登录
-  </div>
+<ng-form name="oauthSettingsForm">
+  <div class="col-sm-12 form-section-title"> Single Sign-On </div>
 
   <!-- SSO -->
   <div class="form-group">
     <div class="col-sm-12">
       <por-switch-field
-        label="使用SSO"
-        tooltip="使用 SSO 时，不会强制 OAuth 提供程序提示输入凭据。"
-        name="use-sso"
-        ng-model="$ctrl.settings.SSO"
-        on-change="$ctrl.updateSSO()"
+        label="'使用 SSO'"
+        tooltip="'当使用SSO时，OAuth提供者不会被强制提示凭证。'"
+        name="'use-sso'"
+        checked="$ctrl.settings.SSO"
+        on-change="($ctrl.updateSSO)"
       ></por-switch-field>
     </div>
   </div>
@@ -21,10 +19,11 @@
   <div class="form-group" ng-if="$ctrl.settings.SSO">
     <div class="col-sm-12">
       <por-switch-field
-        label="Hide internal authentication prompt"
-        name="hide-internal-auth"
-        feature="$ctrl.limitedFeature"
-        ng-model="$ctrl.settings.HideInternalAuth"
+        label="'隐藏内部认证提示'"
+        name="'hide-internal-auth'"
+        feature-id="$ctrl.limitedFeature"
+        checked="$ctrl.settings.HideInternalAuth"
+        on-change="($ctrl.onChangeHideInternalAuth)"
       ></por-switch-field>
     </div>
   </div>
@@ -32,66 +31,70 @@
 
   <auto-user-provision-toggle ng-model="$ctrl.settings.OAuthAutoCreateUsers">
     <field-description>
-      启用自动用户配置后，Portainer 将自动创建具有标准用户角色的用户。 如果禁用，则必须事先在 Portainer 中创建用户才能登录。
+      启用自动用户配置后，Portainer将自动创建具有标准用户角色的用户。如果禁用，用户必须事先在Portainer中创建
+      中创建用户，以便登录。
     </field-description>
   </auto-user-provision-toggle>
 
   <div ng-if="$ctrl.settings.OAuthAutoCreateUsers">
     <div class="form-group">
       <span class="col-sm-12 text-muted small">
-        <p>通过自动配置功能创建的用户可以在创建时添加到默认团队。</p>
+        <p>由自动供应功能创建的用户可以在创建时被添加到一个默认的团队。</p>
         <p>
-          通过将新创建的用户分配给团队，他们将能够访问与该团队关联的环境。 此设置是可选的，如果未设置，新创建的用户将无法访问任何环境。
+          通过将新创建的用户分配到一个团队，他们将能够访问与该团队相关的环境。这个设置是可选的，如果不设置，新创建的
+          用户将不能访问任何环境。
         </p>
       </span>
     </div>
     <div class="form-group">
       <label class="col-sm-3 col-lg-2 control-label text-left">默认团队</label>
-      <span class="small text-muted" style="margin-left: 20px;" ng-if="$ctrl.teams.length === 0">
-        您尚未创建任何团队。 前往<a ui-sref="portainer.teams">团队视图</a>来管理团队。
+      <span class="small text-muted" style="margin-left: 20px" ng-if="$ctrl.teams.length === 0">
+        你还没有创建任何团队，请到 <a ui-sref="portainer.teams">团队视图</a> 中管理团队。
       </span>
 
       <div class="col-sm-9" ng-if="$ctrl.teams.length > 0">
         <div class="col-sm-12 small text-muted">
-          <p>
-            <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-            启用自动团队成员资格后，默认团队选项将被禁用
+          <p class="vertical-center">
+            <pr-icon icon="'info'" feather="true" mode="'primary'"></pr-icon>
+            启用自动团队成员资格后，默认团队选项将被禁用。
           </p>
         </div>
-        <div class="col-xs-11">
+        <div class="col-xs-12 vertical-center">
           <select
             class="form-control"
             ng-disabled="$ctrl.settings.OAuthAutoMapTeamMemberships"
             ng-model="$ctrl.settings.DefaultTeamID"
             ng-options="team.Id as team.Name for team in $ctrl.teams"
           >
-            <option value="">没有团队</option>
+            <option value="">No team</option>
           </select>
+          <button
+            type="button"
+            class="btn btn-md btn-danger"
+            ng-click="$ctrl.settings.DefaultTeamID = null"
+            ng-disabled="!$ctrl.settings.DefaultTeamID || $ctrl.settings.OAuthAutoMapTeamMemberships"
+            ng-if="$ctrl.teams.length > 0"
+          >
+            <pr-icon icon="'x'" feather="true" size="'md'"></pr-icon>
+          </button>
         </div>
-        <button
-          type="button"
-          class="btn btn-sm btn-danger"
-          ng-click="$ctrl.settings.DefaultTeamID = null"
-          ng-disabled="!$ctrl.settings.DefaultTeamID || $ctrl.settings.OAuthAutoMapTeamMemberships"
-          ng-if="$ctrl.teams.length > 0"
-        >
-          <i class="fa fa-times" aria-hidden="true"> </i
-        ></button>
       </div>
     </div>
   </div>
 
-  <div class="col-sm-12 form-section-title">
-    团队成员
-  </div>
+  <div class="col-sm-12 form-section-title"> 团队成员 </div>
   <div class="form-group">
-    <div class="col-sm-12 text-muted small">
-      自动团队成员资格根据来自 OAuth 提供程序的token中的自定义声明同步团队成员资格.
-    </div>
+    <div class="col-sm-12 text-muted small"> 自动团队成员资格根据来自OAuth提供者的令牌中的自定义要求，同步团队成员资格。 </div>
   </div>
   <div class="form-group">
     <div class="col-sm-12">
-      <por-switch-field label="Automatic team membership" name="tls" feature="$ctrl.limitedFeature" ng-model="$ctrl.settings.OAuthAutoMapTeamMemberships"></por-switch-field>
+      <por-switch-field
+        label="'自动团队成员'"
+        name="'tls'"
+        feature-id="$ctrl.limitedFeature"
+        checked="$ctrl.settings.OAuthAutoMapTeamMemberships"
+        on-change="($ctrl.onToggleAutoTeamMembership)"
+      ></por-switch-field>
     </div>
   </div>
 
@@ -99,7 +102,7 @@
     <div class="form-group">
       <label class="col-sm-3 col-lg-2 control-label text-left">
         Claim name
-        <portainer-tooltip position="bottom" message="包含用户所属团队标识符的OpenID Connect UserInfo声明名称。"></portainer-tooltip>
+        <portainer-tooltip message="'包含用户所属团队标识的OpenID Connect UserInfo Claim名称。'"></portainer-tooltip>
       </label>
       <div class="col-sm-9 col-lg-10">
         <div class="col-xs-11 col-lg-10">
@@ -109,20 +112,19 @@
     </div>
 
     <div class="form-group">
-      <label class="col-sm-3 col-lg-2 control-label text-left">
-        静态分配的团队
-      </label>
+      <label class="col-sm-3 col-lg-2 control-label text-left"> Statically assigned teams </label>
       <div class="col-sm-9 col-lg-10">
-        <span class="label label-default interactive" style="margin-left: 1.4em;" ng-click="$ctrl.addTeamMembershipMapping()">
-          <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加团队映射
+        <span class="label label-default interactive vertical-center ml-4" ng-click="$ctrl.addTeamMembershipMapping()">
+          <pr-icon icon="'plus-circle'" feather="true"></pr-icon>
+          添加团队映射
         </span>
 
-        <div class="col-sm-12 form-inline" ng-repeat="mapping in $ctrl.settings.TeamMemberships.OAuthClaimMappings" style="margin-top: 0.75em;">
+        <div class="col-sm-12 form-inline" ng-repeat="mapping in $ctrl.settings.TeamMemberships.OAuthClaimMappings" style="margin-top: 0.75em">
           <div class="input-group input-group-sm col-sm-5">
-            <span class="input-group-addon">值正则表达式</span>
+            <span class="input-group-addon">claim value regex</span>
             <input type="text" class="form-control" ng-model="mapping.ClaimValRegex" />
           </div>
-          <span style="margin: 0px 0.5em;">映射</span>
+          <span style="margin: 0px 0.5em">映射到</span>
           <div class="input-group input-group-sm col-sm-3 col-lg-4">
             <span class="input-group-addon">团队</span>
             <select
@@ -131,31 +133,34 @@
               ng-model="mapping.Team"
               ng-options="team.Id as team.Name for team in $ctrl.teams"
             >
-              <option selected value="">选择一个团队</option>
+              <option selected value="">选择团队</option>
             </select>
           </div>
-          <button type="button" class="btn btn-sm btn-danger" ng-click="$ctrl.removeTeamMembership($index)"> <i class="fa fa-trash" aria-hidden="true"> </i></button>
+          <button type="button" class="btn btn-md btn-danger" ng-click="$ctrl.removeTeamMembership($index)">
+            <pr-icon icon="'trash-2'" feather="true" size="'md'"></pr-icon>
+          </button>
 
-          <div class="small text-warning" ng-show="!mapping.ClaimValRegex" style="margin-top: 0.4em;">
-            <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 值正则表达式是必需的。
+          <div>
+            <div class="small text-warning vertical-center mt-1" ng-show="!mapping.ClaimValRegex">
+              <pr-icon icon="'alert-triangle'" feather="true" mode="'warning'"></pr-icon>
+              Claim value regex is required.
+            </div>
           </div>
         </div>
       </div>
     </div>
 
     <div class="form-group">
-      <div class="col-sm-12 text-muted small" style="margin-bottom: 0.5em;">
-        当用户不属于任何其他团队时，将分配
-      </div>
+      <div class="col-sm-12 text-muted small" style="margin-bottom: 0.5em"> 当用户不属于任何其他团队时，将分配默认团队 </div>
       <label class="col-sm-3 col-lg-2 control-label text-left">默认团队</label>
-      <span class="small text-muted" style="margin-left: 20px;" ng-if="$ctrl.teams.length === 0">
-        您尚未创建任何团队。 前往<a ui-sref="portainer.teams">团队视图</a>来管理团队。
+      <span class="small text-muted" style="margin-left: 20px" ng-if="$ctrl.teams.length === 0">
+        您尚未创建任何团队。转到 <a ui-sref="portainer.teams">团队视图</a> 中管理团队。
       </span>
 
       <div class="col-sm-9" ng-if="$ctrl.teams.length > 0">
         <div class="col-xs-11">
           <select class="form-control" ng-model="$ctrl.settings.DefaultTeamID" ng-options="team.Id as team.Name for team in $ctrl.teams">
-            <option value="">没有团队</option>
+            <option value="">No team</option>
           </select>
         </div>
       </div>
@@ -164,12 +169,12 @@
 
   <oauth-providers-selector on-change="($ctrl.onSelectProvider)" value="$ctrl.state.provider"></oauth-providers-selector>
 
-  <div class="col-sm-12 form-section-title">OAuth 配置</div>
+  <div class="col-sm-12 form-section-title">OAuth Configuration</div>
 
   <div class="form-group" ng-if="$ctrl.state.provider == 'microsoft'">
     <label for="oauth_microsoft_tenant_id" class="col-sm-3 col-lg-2 control-label text-left">
       Tenant ID
-      <portainer-tooltip position="bottom" message="您希望对其进行身份验证的 Azure 目录的 ID。 也称为目录 ID"></portainer-tooltip>
+      <portainer-tooltip message="'要针对其进行身份验证的Azure目录的ID。也称为目录ID'"></portainer-tooltip>
     </label>
     <div class="col-sm-9 col-lg-10">
       <input
@@ -190,8 +195,8 @@
 
   <div class="form-group">
     <label for="oauth_client_id" class="col-sm-3 col-lg-2 control-label text-left">
-      {{ $ctrl.state.provider == 'microsoft' ? '应用ID' : '客户端ID' }}
-      <portainer-tooltip position="bottom" message="OAuth 应用程序的公共标识符"></portainer-tooltip>
+      {{ $ctrl.state.provider == 'microsoft' ? 'Application ID' : 'Client ID' }}
+      <portainer-tooltip message="'Public identifier of the OAuth application'"></portainer-tooltip>
     </label>
     <div class="col-sm-9 col-lg-10">
       <input
@@ -208,7 +213,7 @@
 
   <div class="form-group">
     <label for="oauth_client_secret" class="col-sm-3 col-lg-2 control-label text-left">
-      {{ $ctrl.state.provider == 'microsoft' ? '应用key' : '客户端secret' }}
+      {{ $ctrl.state.provider == 'microsoft' ? 'Application key' : 'Client secret' }}
     </label>
     <div class="col-sm-9 col-lg-10">
       <input
@@ -228,11 +233,8 @@
   <div ng-if="$ctrl.state.provider == 'custom' || $ctrl.state.overrideConfiguration">
     <div class="form-group">
       <label for="oauth_authorization_uri" class="col-sm-3 col-lg-2 control-label text-left">
-        授权 URL
-        <portainer-tooltip
-          position="bottom"
-          message="用于针对 OAuth 提供程序进行身份验证的 URL。 将用户重定向到 OAuth 提供者登录视图"
-        ></portainer-tooltip>
+        Authorization URL
+        <portainer-tooltip message="'URL used to authenticate against the OAuth provider. Will redirect the user to the OAuth provider login view'"></portainer-tooltip>
       </label>
       <div class="col-sm-9 col-lg-10">
         <input
@@ -249,8 +251,8 @@
 
     <div class="form-group">
       <label for="oauth_access_token_uri" class="col-sm-3 col-lg-2 control-label text-left">
-        访问token URL
-        <portainer-tooltip position="bottom" message="Portainer 用于为访问token交换有效 OAuth 身份验证代码的 URL"></portainer-tooltip>
+        Access token URL
+        <portainer-tooltip message="'URL used by Portainer to exchange a valid OAuth authentication code for an access token'"></portainer-tooltip>
       </label>
       <div class="col-sm-9 col-lg-10">
         <input
@@ -267,8 +269,8 @@
 
     <div class="form-group">
       <label for="oauth_resource_uri" class="col-sm-3 col-lg-2 control-label text-left">
-        资源URL
-        <portainer-tooltip position="bottom" message="Portainer 用于检索有关已验证用户的信息的 URL"></portainer-tooltip>
+        Resource URL
+        <portainer-tooltip message="'URL used by Portainer to retrieve information about the authenticated user'"></portainer-tooltip>
       </label>
       <div class="col-sm-9 col-lg-10">
         <input
@@ -285,10 +287,9 @@
 
     <div class="form-group">
       <label for="oauth_redirect_uri" class="col-sm-3 col-lg-2 control-label text-left">
-        重定向URL
+        Redirect URL
         <portainer-tooltip
-          position="bottom"
-          message="OAuth 提供程序用于在成功验证后重定向用户的 URL。 应设置为您的 Portainer 实例 URL"
+          message="'URL used by the OAuth provider to redirect the user after successful authentication. Should be set to your Portainer instance URL'"
         ></portainer-tooltip>
       </label>
       <div class="col-sm-9 col-lg-10">
@@ -306,10 +307,9 @@
 
     <div class="form-group">
       <label for="oauth_logout_url" class="col-sm-3 col-lg-2 control-label text-left">
-        登出URL
+        Logout URL
         <portainer-tooltip
-          position="bottom"
-          message="Portainer 使用的 URL 将用户重定向到 OAuth 提供程序，以便将用户从身份提供程序会话中注销。"
+          message="'URL used by Portainer to redirect the user to the OAuth provider in order to log the user out of the identity provider session.'"
         ></portainer-tooltip>
       </label>
       <div class="col-sm-9 col-lg-10">
@@ -326,10 +326,9 @@
 
     <div class="form-group">
       <label for="oauth_user_identifier" class="col-sm-3 col-lg-2 control-label text-left">
-        用户标识符
+        User identifier
         <portainer-tooltip
-          position="bottom"
-          message="Portainer 将使用的标识符为经过身份验证的用户创建帐户。 从通过资源 URL 字段指定的资源服务器检索"
+          message="'Identifier that will be used by Portainer to create an account for the authenticated user. Retrieved from the resource server specified via the Resource URL field'"
         ></portainer-tooltip>
       </label>
       <div class="col-sm-9 col-lg-10">
@@ -347,10 +346,9 @@
 
     <div class="form-group">
       <label for="oauth_scopes" class="col-sm-3 col-lg-2 control-label text-left">
-        范围
+        Scopes
         <portainer-tooltip
-          position="bottom"
-          message="OAuth 提供者检索有关经过身份验证的用户的信息所需的范围。 有关这方面的更多信息，请参阅您的 OAuth 提供程序文档"
+          message="'Scopes required by the OAuth provider to retrieve information about the authenticated user. Refer to your OAuth provider documentation for more information about this'"
         ></portainer-tooltip>
       </label>
       <div class="col-sm-9 col-lg-10">
@@ -369,12 +367,22 @@
 
   <div class="form-group" ng-if="$ctrl.state.provider != 'custom'">
     <div class="col-sm-12">
-      <a class="small interactive" ng-if="!$ctrl.state.overrideConfiguration" ng-click="$ctrl.state.overrideConfiguration = true;">
-        <i class="fa fa-wrench space-right" aria-hidden="true"></i> 覆盖默认配置
+      <a class="small interactive vertical-center" ng-if="!$ctrl.state.overrideConfiguration" ng-click="$ctrl.state.overrideConfiguration = true;">
+        <pr-icon icon="'tool'" feather="true"></pr-icon>
+        Override default configuration
       </a>
-      <a class="small interactive" ng-if="$ctrl.state.overrideConfiguration" ng-click="$ctrl.useDefaultProviderConfiguration($ctrl.state.provider)">
-        <i class="fa fa-cogs space-right" aria-hidden="true"></i> 使用默认配置
+      <a class="small interactive vertical-center" ng-if="$ctrl.state.overrideConfiguration" ng-click="$ctrl.useDefaultProviderConfiguration($ctrl.state.provider)">
+        <pr-icon icon="'settings'" feather="true"></pr-icon>
+        Use default configuration
       </a>
     </div>
   </div>
+  <save-auth-settings-button
+    on-save-settings="($ctrl.onSaveSettings)"
+    save-button-state="($ctrl.saveButtonState)"
+    save-button-disabled="!$ctrl.isOAuthTeamMembershipFormValid() || oauthSettingsForm.$invalid"
+    limited-feature-id="$ctrl.limitedFeature"
+    limited-feature-class="$ctrl.limitedFeatureClass"
+    class-name="'oauth-save-settings-button'"
+  ></save-auth-settings-button>
 </ng-form>

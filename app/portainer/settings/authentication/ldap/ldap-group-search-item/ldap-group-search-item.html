@@ -1,9 +1,7 @@
 <rd-widget>
   <rd-widget-body>
-    <div ng-if="$ctrl.index > 0" style="margin-bottom: 10px;">
-      <span class="text-muted small">
-        额外的搜索配置
-      </span>
+    <div ng-if="$ctrl.index > 0" style="margin-bottom: 10px">
+      <span class="text-muted small"> Extra search configuration </span>
       <button
         class="btn btn-sm btn-danger"
         type="button"
@@ -11,7 +9,7 @@
         limited-feature-dir="{{::$ctrl.limitedFeatureId}}"
         limited-feature-tabindex="-1"
       >
-        <i class="fa fa-trash" aria-hidden="true"></i>
+        <pr-icon icon="'trash-2'" feather="true"></pr-icon>
       </button>
     </div>
 
@@ -24,19 +22,18 @@
     ></ldap-settings-dn-builder>
 
     <div class="form-group">
-      <label class="col-sm-4 col-md-2 control-label text-left">
-        Group Base DN
-      </label>
+      <label class="col-sm-4 col-md-2 control-label text-left"> Group Base DN </label>
       <div class="col-sm-8 col-md-10">
         {{ $ctrl.config.GroupBaseDN }}
       </div>
     </div>
 
     <div class="form-group">
-      <div class="col-sm-12" style="margin-bottom: 5px;">
-        <label class="control-label text-left">群组</label>
-        <span class="label label-default interactive" style="margin-left: 10px;" ng-click="$ctrl.addGroup()">
-          <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加另一个组
+      <div class="col-sm-12 vertical-center" style="margin-bottom: 5px">
+        <label class="control-label text-left !pt-0">Groups</label>
+        <span class="label label-default interactive vertical-center" style="margin-left: 10px" ng-click="$ctrl.addGroup()">
+          <pr-icon icon="'plus-circle'" feather="true"></pr-icon>
+          add another group
         </span>
       </div>
       <div class="col-sm-12" ng-if="$ctrl.groups.length">
@@ -52,7 +49,7 @@
                   limited-feature-tabindex="-1"
                 >
                   <option value="ou">OU Name</option>
-                  <option value="cn">文件夹名</option>
+                  <option value="cn">Folder Name</option>
                 </select>
               </div>
               <div class="col-sm-5">
@@ -66,13 +63,13 @@
               </div>
               <div class="col-sm-3 text-right">
                 <button
-                  class="btn btn-sm btn-danger"
+                  class="btn btn-md btn-danger"
                   type="button"
                   ng-click="$ctrl.removeGroup($index)"
                   limited-feature-dir="{{::$ctrl.limitedFeatureId}}"
                   limited-feature-tabindex="-1"
                 >
-                  <i class="fa fa-trash-alt" aria-hidden="true"></i>
+                  <pr-icon icon="'trash-2'" feather="true" size="'md'"></pr-icon>
                 </button>
               </div>
             </div>
@@ -82,9 +79,7 @@
     </div>
 
     <div class="form-group no-margin-last-child">
-      <label class="col-sm-4 col-md-2 control-label text-left">
-        群组筛选
-      </label>
+      <label class="col-sm-4 col-md-2 control-label text-left"> Group Filter </label>
       <div class="col-sm-8 col-md-10">
         {{ $ctrl.config.GroupFilter }}
       </div>

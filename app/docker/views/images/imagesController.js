@@ -1,5 +1,6 @@
 import _ from 'lodash-es';
 import { PorImageRegistryModel } from 'Docker/models/porImageRegistry';
+import { isOfflineEndpoint } from '@/portainer/helpers/endpointHelper';
 
 angular.module('portainer.docker').controller('ImagesController', [
   '$scope',
@@ -11,9 +12,8 @@ angular.module('portainer.docker').controller('ImagesController', [
   'HttpRequestHelper',
   'FileSaver',
   'Blob',
-  'EndpointProvider',
   'endpoint',
-  function ($scope, $state, Authentication, ImageService, Notifications, ModalService, HttpRequestHelper, FileSaver, Blob, EndpointProvider, endpoint) {
+  function ($scope, $state, Authentication, ImageService, Notifications, ModalService, HttpRequestHelper, FileSaver, Blob, endpoint) {
     $scope.endpoint = endpoint;
     $scope.isAdmin = Authentication.isAdmin();
 
@@ -41,7 +41,7 @@ angular.module('portainer.docker').controller('ImagesController', [
           if (err) {
             return Notifications.error('失败', err, '无法拉取镜像');
           }
-          Notifications.success('镜像成功拉取', registryModel.Image);
+          Notifications.success('已成功提取镜像', registryModel.Image);
           $state.reload();
         })
         .catch(function error(err) {
@@ -76,7 +76,7 @@ angular.module('portainer.docker').controller('ImagesController', [
       }
 
       if (_.uniqBy(selectedItems, 'NodeName').length > 1) {
-        Notifications.warning('', '不能同时下载不同节点的镜像');
+        Notifications.warning('', '不能同时从不同的节点下载镜像');
         return false;
       }
 
@@ -90,7 +90,7 @@ angular.module('portainer.docker').controller('ImagesController', [
         .then(function success(data) {
           var downloadData = new Blob([data.file], { type: 'application/x-tar' });
           FileSaver.saveAs(downloadData, 'images.tar');
-          Notifications.success('镜像已成功下载');
+          Notifications.success('成功', '已成功下载镜像');
         })
         .catch(function error(err) {
           Notifications.error('失败', err, '无法下载镜像');
@@ -119,7 +119,7 @@ angular.module('portainer.docker').controller('ImagesController', [
         HttpRequestHelper.setPortainerAgentTargetHeader(image.NodeName);
         ImageService.deleteImage(image.Id, force)
           .then(function success() {
-            Notifications.success('镜像已成功删除', image.Id);
+            Notifications.success('已成功删除镜像', image.Id);
             var index = $scope.images.indexOf(image);
             $scope.images.splice(index, 1);
           })
@@ -142,7 +142,7 @@ angular.module('portainer.docker').controller('ImagesController', [
       ImageService.images(true)
         .then(function success(data) {
           $scope.images = data;
-          $scope.offlineMode = EndpointProvider.offlineMode();
+          $scope.offlineMode = isOfflineEndpoint(endpoint);
         })
         .catch(function error(err) {
           Notifications.error('失败', err, '无法检索镜像');

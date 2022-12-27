@@ -78,7 +78,7 @@ angular.module('portainer.docker').controller('ContainerLogsController', [
           startLogPolling(!container.Config.Tty);
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索容器信息rmation');
+          Notifications.error('失败', err, '无法检索容器信息');
         });
     }
 

@@ -22,7 +22,7 @@ class ConfigsController {
     try {
       this.configs = await this.ConfigService.configs();
     } catch (err) {
-      this.Notifications.error('失败', err, '无法检索配置');
+      this.Notifications.error('失败', err, 'Unable to retrieve configs');
     }
   }
 
@@ -40,11 +40,11 @@ class ConfigsController {
     for (const config of selectedItems) {
       try {
         await this.ConfigService.remove(config.Id);
-        this.Notifications.success('配置成功删除', config.Name);
+        this.Notifications.success('Config successfully removed', config.Name);
         const index = this.configs.indexOf(config);
         this.configs.splice(index, 1);
       } catch (err) {
-        this.Notifications.error('失败', err, '无法删除配置');
+        this.Notifications.error('失败', err, 'Unable to remove config');
       } finally {
         --actionCount;
         if (actionCount === 0) {

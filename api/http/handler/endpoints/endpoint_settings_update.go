@@ -7,7 +7,6 @@ import (
 	"github.com/portainer/libhttp/request"
 	"github.com/portainer/libhttp/response"
 	portainer "github.com/portainer/portainer/api"
-	"github.com/portainer/portainer/api/bolt/errors"
 )
 
 type endpointSettingsUpdatePayload struct {
@@ -36,9 +35,10 @@ func (payload *endpointSettingsUpdatePayload) Validate(r *http.Request) error {
 }
 
 // @id EndpointSettingsUpdate
-// @summary Update settings for an environments(endpoints)
-// @description Update settings for an environments(endpoints).
-// @description **Access policy**: administrator
+// @summary Update settings for an environment(endpoint)
+// @description Update settings for an environment(endpoint).
+// @description **Access policy**: authenticated
+// @security ApiKeyAuth
 // @security jwt
 // @tags endpoints
 // @accept json
@@ -49,24 +49,24 @@ func (payload *endpointSettingsUpdatePayload) Validate(r *http.Request) error {
 // @failure 400 "Invalid request"
 // @failure 404 "Environment(Endpoint) not found"
 // @failure 500 "Server error"
-// @router /api/endpoints/{id}/settings [put]
+// @router /endpoints/{id}/settings [put]
 func (handler *Handler) endpointSettingsUpdate(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	endpointID, err := request.RetrieveNumericRouteVariableValue(r, "id")
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid environment identifier route variable", err}
+		return httperror.BadRequest("Invalid environment identifier route variable", err)
 	}
 
 	var payload endpointSettingsUpdatePayload
 	err = request.DecodeAndValidateJSONPayload(r, &payload)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid request payload", err}
+		return httperror.BadRequest("Invalid request payload", err)
 	}
 
 	endpoint, err := handler.DataStore.Endpoint().Endpoint(portainer.EndpointID(endpointID))
-	if err == errors.ErrObjectNotFound {
-		return &httperror.HandlerError{http.StatusNotFound, "Unable to find an environment with the specified identifier inside the database", err}
+	if handler.DataStore.IsErrObjectNotFound(err) {
+		return httperror.NotFound("Unable to find an environment with the specified identifier inside the database", err)
 	} else if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to find an environment with the specified identifier inside the database", err}
+		return httperror.InternalServerError("Unable to find an environment with the specified identifier inside the database", err)
 	}
 
 	securitySettings := endpoint.SecuritySettings
@@ -111,7 +111,7 @@ func (handler *Handler) endpointSettingsUpdate(w http.ResponseWriter, r *http.Re
 
 	err = handler.DataStore.Endpoint().UpdateEndpoint(portainer.EndpointID(endpointID), endpoint)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Failed persisting environment in database", err}
+		return httperror.InternalServerError("Failed persisting environment in database", err)
 	}
 
 	return response.JSON(w, endpoint)

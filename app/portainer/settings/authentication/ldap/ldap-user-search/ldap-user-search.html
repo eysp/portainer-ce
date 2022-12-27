@@ -1,8 +1,6 @@
-<div class="col-sm-12 form-section-title" style="float: initial;">
-  用户搜索配置
-</div>
+<div class="col-sm-12 form-section-title" style="float: initial"> User search configurations </div>
 
-<div style="margin-top: 10px;" ng-repeat="config in $ctrl.settings | limitTo: (1 - $ctrl.settings)">
+<div style="margin-top: 10px" ng-repeat="config in $ctrl.settings | limitTo: (1 - $ctrl.settings)">
   <ldap-user-search-item
     index="$index"
     config="config"
@@ -14,27 +12,28 @@
   ></ldap-user-search-item>
 </div>
 
-<div class="form-group" style="margin-top: 10px;">
+<div class="form-group" style="margin-top: 10px">
   <div class="col-sm-12">
     <button
-      class="label label-default interactive"
-      style="border: 0;"
+      class="label label-default interactive vertical-center"
+      style="border: 0"
       ng-click="$ctrl.onAddClick()"
       limited-feature-dir="{{::$ctrl.limitedFeatureId}}"
       limited-feature-tabindex="-1"
     >
-      <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加用户搜索配置
+      <pr-icon icon="'plus-circle'" feather="true"></pr-icon>
+      add user search configuration
     </button>
   </div>
-  <div class="col-sm-12" style="margin-top: 10px;">
+  <div class="col-sm-12" style="margin-top: 10px">
     <button class="btn btm-sm btn-primary" type="button" ng-click="$ctrl.search()" limited-feature-dir="{{::$ctrl.limitedFeatureId}}" limited-feature-tabindex="-1">
-      显示用户
+      Display Users
     </button>
   </div>
 </div>
 
 <div ng-if="$ctrl.showTable">
-  <div class="form-group">
-    <ldap-users-datatable dataset="$ctrl.users" title-text="用户" title-icon="fa-users" table-key="ldapUsers" order-by="" reverse-order=""></ldap-users-datatable>
+  <div class="form-group col-sm-12">
+    <ldap-users-datatable dataset="$ctrl.users" title-text="Users" title-icon="users" table-key="ldapUsers" order-by="" reverse-order=""></ldap-users-datatable>
   </div>
 </div>

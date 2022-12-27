@@ -1,22 +1,18 @@
 <div authorization="PortainerStackMigrate">
-  <div class="col-sm-12 form-section-title">
-    堆栈复制/迁移
-  </div>
+  <div class="col-sm-12 form-section-title"> 堆栈复制/迁移 </div>
   <rd-widget>
     <rd-widget-body>
       <form class="form-horizontal" name="dupStackForm">
         <div class="form-group">
-          <span class="small" style="margin-top: 10px;">
-            <p class="text-muted">
-              此功能允许您复制或迁移此堆栈。
-            </p>
+          <span class="small" style="margin-top: 10px">
+            <p class="text-muted"> 此功能允许您复制或迁移此堆栈。 </p>
           </span>
         </div>
 
         <div class="form-group">
           <input
             class="form-control"
-            placeholder="堆栈名称（迁移可选）"
+            placeholder="堆栈名称（迁移时可选）"
             aria-placeholder="Stack name"
             name="new_stack_name"
             ng-pattern="$ctrl.STACK_NAME_VALIDATION_REGEX"
@@ -28,14 +24,14 @@
             <div ng-messages="dupStackForm.new_stack_name.$error">
               <p ng-message="pattern">
                 <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-                <span>此字段必须由小写字母数字字符组成， '_' or '-' (例如 'my-name', 或 'abc-123').</span>
+                <span>该字段必须由小写字母数字字符组成， '_' 或 '-' (例如 'my-name', or 'abc-123').</span>
               </p>
             </div>
           </div>
         </div>
 
-        <div class="form-group">
-          <endpoint-selector ng-if="$ctrl.endpoints && $ctrl.groups" model="$ctrl.formValues.endpoint" endpoints="$ctrl.endpoints" groups="$ctrl.groups"></endpoint-selector>
+        <div class="form-group" ng-if="$ctrl.endpoints && $ctrl.groups">
+          <por-select value="$ctrl.formValues.endpointId" on-change="($ctrl.onChangeEnvironment)" options="$ctrl.environmentSelectorOptions"></por-select>
         </div>
 
         <div class="form-group">
@@ -43,17 +39,17 @@
             class="btn btn-sm btn-primary"
             ng-click="$ctrl.migrateStack()"
             ng-disabled="$ctrl.isMigrationButtonDisabled()"
-            style="margin-top: 7px; margin-left: 0;"
+            style="margin-top: 7px; margin-left: 0"
             button-spinner="$ctrl.state.migrationInProgress"
           >
             <span ng-hide="$ctrl.state.migrationInProgress"> <i class="fa fa-long-arrow-alt-right space-right" aria-hidden="true"></i> 迁移 </span>
-            <span ng-show="$ctrl.state.migrationInProgress">正在迁移...</span>
+            <span ng-show="$ctrl.state.migrationInProgress">正在进行迁移...</span>
           </button>
           <button
             class="btn btn-sm btn-primary"
             ng-click="$ctrl.duplicateStack()"
             ng-disabled="!$ctrl.isFormValidForDuplication() || $ctrl.state.duplicationInProgress || $ctrl.state.migrationInProgress"
-            style="margin-top: 7px; margin-left: 0;"
+            style="margin-top: 7px; margin-left: 0"
             button-spinner="$ctrl.state.duplicationInProgress"
           >
             <span ng-hide="$ctrl.state.duplicationInProgress"> <i class="fa fa-clone space-right" aria-hidden="true"></i> 复制 </span>

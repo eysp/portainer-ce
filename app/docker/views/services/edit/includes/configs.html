@@ -1,15 +1,15 @@
 <form ng-if="applicationState.endpoint.apiVersion >= 1.3" id="service-configs" ng-submit="updateService(service)">
   <rd-widget>
-    <rd-widget-header icon="fa-tasks" title-text="配置"> </rd-widget-header>
+    <rd-widget-header icon="list" feather-icon="true" title-text="配置"> </rd-widget-header>
     <rd-widget-body classes="no-padding">
-      <div class="form-inline" style="padding: 10px;" authorization="DockerServiceUpdate">
-        添加一个配置：
+      <div class="form-inline" style="padding: 10px" authorization="DockerServiceUpdate">
+        添加配置:
         <select class="form-control" ng-options="config.Name for config in configs | orderBy: 'Name'" ng-model="newConfig">
-          <option selected disabled hidden value="">选择一个配置</option>
+          <option selected disabled hidden value="">选择配置</option>
         </select>
-        <a class="btn btn-default btn-sm" ng-click="addConfig(service, newConfig)"> <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加配置 </a>
+        <a class="btn btn-default btn-sm" ng-click="addConfig(service, newConfig)"> <pr-icon icon="'plus'" feather="true"></pr-icon> 添加配置 </a>
       </div>
-      <table class="table" style="margin-top: 5px;">
+      <table class="table" style="margin-top: 5px">
         <thead>
           <tr>
             <th>名称</th>
@@ -39,8 +39,8 @@
             <td>{{ config.Gid }}</td>
             <td>{{ config.Mode }}</td>
             <td authorization="DockerServiceUpdate">
-              <button class="btn btn-xs btn-danger pull-right" type="button" ng-click="removeConfig(service, $index)" ng-disabled="isUpdating">
-                <i class="fa fa-trash" aria-hidden="true"></i> 删除配置
+              <button class="btn btn-dangerlight pull-right" type="button" ng-click="removeConfig(service, $index)" ng-disabled="isUpdating">
+                <pr-icon icon="'trash-2'" feather="true" size="'md'"></pr-icon>
               </button>
             </td>
           </tr>
@@ -58,7 +58,7 @@
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu">
-            <li><a ng-click="cancelChanges(service, ['ServiceConfigs'])">重置更改</a></li>
+            <li><a ng-click="cancelChanges(service, ['ServiceConfigs'])">重置变更</a></li>
             <li><a ng-click="cancelChanges(service)">重置所有更改</a></li>
           </ul>
         </div>

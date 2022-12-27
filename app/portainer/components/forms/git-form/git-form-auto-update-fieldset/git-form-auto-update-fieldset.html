@@ -1,25 +1,32 @@
 <ng-form name="autoUpdateForm">
   <div class="form-group">
     <div class="col-sm-12">
-      <por-switch-field name="autoUpdate" ng-model="$ctrl.model.RepositoryAutomaticUpdates" label="自动更新" on-change="($ctrl.onChangeAutoUpdate)"></por-switch-field>
+      <por-switch-field
+        name="'autoUpdate'"
+        checked="$ctrl.model.RepositoryAutomaticUpdates"
+        label="'自动更新'"
+        label-class="'col-sm-3 col-lg-2'"
+        on-change="($ctrl.onChangeAutoUpdate)"
+        switch-values="{on:'Yes',off:'No'}"
+      ></por-switch-field>
     </div>
   </div>
-  <div class="small text-warning" style="margin: 5px 0 10px 0;" ng-if="$ctrl.model.RepositoryAutomaticUpdates">
-    <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
-    <span class="text-muted">在 Portainer 本地对此堆栈进行的任何更改都将被 git 中的定义覆盖，并可能导致服务中断。</span>
+  <div class="small vertical-center" ng-if="$ctrl.model.RepositoryAutomaticUpdates">
+    <pr-icon icon="'alert-triangle'" mode="'warning'" feather="true"></pr-icon>
+    <span class="text-warning"
+      >Any changes to this stack or application made locally in Portainer will be overridden, which may cause service interruption. Do you wish to continue?</span
+    >
   </div>
-  <div class="form-group" ng-if="$ctrl.model.RepositoryAutomaticUpdates">
-    <label for="repository_mechanism" class="col-sm-1 control-label text-left">
-      机制
-    </label>
-    <div class="col-sm-11">
+  <div class="form-group mt-2" ng-if="$ctrl.model.RepositoryAutomaticUpdates">
+    <label for="repository_mechanism" class="col-lg-2 col-sm-3 control-label text-left"> Mechanism </label>
+    <div class="col-sm-8">
       <div class="input-group col-sm-10 input-group-sm">
         <div class="btn-group btn-group-sm">
-          <label class="btn btn-primary" ng-click="$ctrl.onChangeMechanism($ctrl.model.RepositoryMechanism)" ng-model="$ctrl.model.RepositoryMechanism" uib-btn-radio="'Interval'"
-            >轮询</label
+          <label class="btn btn-light" ng-click="$ctrl.onChangeMechanism($ctrl.model.RepositoryMechanism)" ng-model="$ctrl.model.RepositoryMechanism" uib-btn-radio="'Interval'"
+            >Polling</label
           >
-          <label class="btn btn-primary" ng-click="$ctrl.onChangeMechanism($ctrl.model.RepositoryMechanism)" ng-model="$ctrl.model.RepositoryMechanism" uib-btn-radio="'Webhook'"
-            >网络钩子</label
+          <label class="btn btn-light" ng-click="$ctrl.onChangeMechanism($ctrl.model.RepositoryMechanism)" ng-model="$ctrl.model.RepositoryMechanism" uib-btn-radio="'Webhook'"
+            >Webhook</label
           >
         </div>
       </div>
@@ -27,24 +34,20 @@
   </div>
 
   <div class="form-group" ng-if="$ctrl.model.RepositoryAutomaticUpdates && $ctrl.model.RepositoryMechanism === 'Webhook'">
-    <label for="repository_mechanism" class="col-sm-1 control-label text-left">
-      网络钩子
-    </label>
-    <div class="col-sm-11">
+    <label for="repository_mechanism" class="col-sm-3 col-lg-2 control-label text-left"> Webhook </label>
+    <div class="col-sm-8">
       <span class="text-muted"> {{ $ctrl.model.RepositoryWebhookURL | truncatelr }} </span>
-      <button type="button" class="btn btn-sm btn-primary btn-sm space-left" ng-if="$ctrl.model.RepositoryWebhookURL" ng-click="$ctrl.copyWebhook()">
-        <span><i class="fa fa-copy space-right" aria-hidden="true"></i>复制链接</span>
+      <button type="button" class="btn btn-sm btn-light btn-sm space-left vertical-center" ng-if="$ctrl.model.RepositoryWebhookURL" ng-click="$ctrl.copyWebhook()">
+        <pr-icon icon="'copy'" size="'sm'" feather="true"></pr-icon> Copy link
       </button>
       <span>
-        <i id="copyNotification" class="fa fa-check green-icon" aria-hidden="true" style="margin-left: 7px; display: none;"></i>
+        <pr-icon icon="'check'" mode="'success'" feather="true" style="display: none"></pr-icon>
       </span>
     </div>
   </div>
   <div class="form-group" ng-if="$ctrl.model.RepositoryAutomaticUpdates && $ctrl.model.RepositoryMechanism === 'Interval'">
-    <label for="repository_fetch_interval" class="col-sm-1 control-label text-left">
-      获取间隔
-    </label>
-    <div class="col-sm-11">
+    <label for="repository_fetch_interval" class="col-sm-3 col-lg-2 control-label text-left required"> Fetch interval </label>
+    <div class="col-sm-8">
       <input
         type="text"
         class="form-control"
@@ -55,15 +58,50 @@
         required
         interval-format
       />
-    </div>
-  </div>
-  <div class="form-group col-md-12" ng-show="autoUpdateForm.repository_fetch_interval.$touched && autoUpdateForm.repository_fetch_interval.$invalid">
-    <div class="small text-warning">
-      <div ng-messages="autoUpdateForm.repository_fetch_interval.$error">
-        <p ng-message="required"> <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此字段是必需的。</p>
-        <p ng-message="invalidIntervalFormat"> <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 请输入有效的时间间隔。</p>
-        <p ng-message="minimumInterval"> <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 最小间隔为 1m</p>
+      <div class="help-group">
+        <div class="form-group col-md-12 pt-1" ng-show="autoUpdateForm.repository_fetch_interval.$touched && autoUpdateForm.repository_fetch_interval.$invalid">
+          <div class="small text-warning">
+            <div ng-messages="autoUpdateForm.repository_fetch_interval.$error">
+              <p ng-message="required"> <pr-icon icon="'alert-triangle'" mode="'warning'" feather="true"></pr-icon> 本栏为必填项。</p>
+              <p ng-message="invalidIntervalFormat"> <pr-icon icon="'alert-triangle'" mode="'warning'" feather="true"></pr-icon> Please enter a valid time interval.</p>
+              <p ng-message="minimumInterval"> <pr-icon icon="'alert-triangle'" mode="'warning'" feather="true"></pr-icon> Minimum interval is 1m</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+  </div>
+
+  <div class="form-group" ng-if="$ctrl.showForcePullImage && $ctrl.model.RepositoryAutomaticUpdates">
+    <div class="col-sm-12">
+      <por-switch-field
+        name="'forcePullImage'"
+        feature-id="$ctrl.stackPullImageFeature"
+        checked="$ctrl.model.ForcePullImage"
+        label="'Pull latest image'"
+        label-class="'col-sm-3 col-lg-2'"
+      ></por-switch-field>
+    </div>
+  </div>
+
+  <div class="form-group" ng-if="$ctrl.model.RepositoryAutomaticUpdates">
+    <div class="col-sm-12">
+      <por-switch-field
+        name="'forceUpdate'"
+        feature-id="$ctrl.limitedFeature"
+        checked="$ctrl.model.RepositoryAutomaticUpdatesForce"
+        label="'Force Redeployment'"
+        label-class="'col-sm-3 col-lg-2'"
+        on-change="($ctrl.onChangeAutoUpdateForce)"
+      ></por-switch-field>
+    </div>
+  </div>
+  <div class="small vertical-center" ng-if="$ctrl.model.RepositoryAutomaticUpdates">
+    <pr-icon icon="'info'" mode="'primary'" feather="true"></pr-icon>
+    <span class="text-muted">启用后，在每个间隔期或webhook调用时强制执行自动部署。</span>
+  </div>
+  <div class="small vertical-center" ng-if="!$ctrl.model.RepositoryAutomaticUpdates">
+    <pr-icon icon="'info'" mode="'primary'" feather="true"></pr-icon>
+    <span class="text-muted">启用后，来自git仓库的更新将在某个时间间隔或webhook自动发生。</span>
   </div>
 </ng-form>

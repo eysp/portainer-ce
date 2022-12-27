@@ -1,11 +1,13 @@
 import _ from 'lodash-es';
 import angular from 'angular';
+import { endpointsByGroup } from '@/portainer/environments/environment.service';
+import { notifyError } from '@/portainer/services/notifications';
 
 class GroupFormController {
   /* @ngInject */
-  constructor($q, EndpointService, GroupService, Notifications, Authentication) {
-    this.$q = $q;
-    this.EndpointService = EndpointService;
+  constructor($async, $scope, GroupService, Notifications, Authentication) {
+    this.$async = $async;
+    this.$scope = $scope;
     this.GroupService = GroupService;
     this.Notifications = Notifications;
     this.Authentication = Authentication;
@@ -13,6 +15,13 @@ class GroupFormController {
     this.associateEndpoint = this.associateEndpoint.bind(this);
     this.dissociateEndpoint = this.dissociateEndpoint.bind(this);
     this.getPaginatedEndpointsByGroup = this.getPaginatedEndpointsByGroup.bind(this);
+    this.onChangeTags = this.onChangeTags.bind(this);
+  }
+
+  onChangeTags(value) {
+    return this.$scope.$evalAsync(() => {
+      this.model.TagIds = value;
+    });
   }
 
   $onInit() {
@@ -38,10 +47,10 @@ class GroupFormController {
     } else if (this.pageType === 'edit') {
       this.GroupService.addEndpoint(this.model.Id, endpoint)
         .then(() => {
-          this.Notifications.success('成功', '环境已成功添加到组');
+          this.Notifications.success('Success', 'Environment successfully added to group');
           this.reloadTablesContent();
         })
-        .catch((err) => this.Notifications.error('Error', err, '无法将环境添加到组'));
+        .catch((err) => this.Notifications.error('Error', err, 'Unable to add environment to group'));
     }
   }
 
@@ -51,10 +60,10 @@ class GroupFormController {
     } else if (this.pageType === 'edit') {
       this.GroupService.removeEndpoint(this.model.Id, endpoint.Id)
         .then(() => {
-          this.Notifications.success('成功', '环境已成功从组中删除');
+          this.Notifications.success('Success', 'Environment successfully removed from group');
           this.reloadTablesContent();
         })
-        .catch((err) => this.Notifications.error('Error', err, '无法从组中删除环境'));
+        .catch((err) => this.Notifications.error('Error', err, 'Unable to remove environment from group'));
     }
   }
 
@@ -67,23 +76,27 @@ class GroupFormController {
   }
 
   getPaginatedEndpointsByGroup(pageType, tableType) {
-    if (tableType === 'available') {
-      const context = this.state.available;
-      const start = (context.pageNumber - 1) * context.limit + 1;
-      this.EndpointService.endpointsByGroup(start, context.limit, context.filter, 1).then((data) => {
-        this.availableEndpoints = data.value;
-        this.state.available.totalCount = data.totalCount;
-      });
-    } else if (tableType === 'associated' && pageType === 'edit') {
-      const groupId = this.model.Id ? this.model.Id : 1;
-      const context = this.state.associated;
-      const start = (context.pageNumber - 1) * context.limit + 1;
-      this.EndpointService.endpointsByGroup(start, context.limit, context.filter, groupId).then((data) => {
-        this.associatedEndpoints = data.value;
-        this.state.associated.totalCount = data.totalCount;
-      });
-    }
-    // ignore (associated + create) group as there is no backend pagination for this table
+    this.$async(async () => {
+      try {
+        if (tableType === 'available') {
+          const context = this.state.available;
+          const start = (context.pageNumber - 1) * context.limit + 1;
+          const data = await endpointsByGroup(1, start, context.limit, { search: context.filter });
+          this.availableEndpoints = data.value;
+          this.state.available.totalCount = data.totalCount;
+        } else if (tableType === 'associated' && pageType === 'edit') {
+          const groupId = this.model.Id ? this.model.Id : 1;
+          const context = this.state.associated;
+          const start = (context.pageNumber - 1) * context.limit + 1;
+          const data = await endpointsByGroup(groupId, start, context.limit, { search: context.filter });
+          this.associatedEndpoints = data.value;
+          this.state.associated.totalCount = data.totalCount;
+        }
+        // ignore (associated + create) group as there is no backend pagination for this table
+      } catch (err) {
+        notifyError('失败', err, 'Failed getting endpoints for group');
+      }
+    });
   }
 }
 

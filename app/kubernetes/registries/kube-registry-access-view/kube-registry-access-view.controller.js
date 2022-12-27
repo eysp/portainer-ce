@@ -2,12 +2,14 @@ import KubernetesNamespaceHelper from 'Kubernetes/helpers/namespaceHelper';
 
 export default class KubernetesRegistryAccessController {
   /* @ngInject */
-  constructor($async, $state, ModalService, EndpointService, Notifications, KubernetesResourcePoolService) {
+  constructor($async, $scope, $state, ModalService, EndpointService, Notifications, RegistryService, KubernetesResourcePoolService) {
     this.$async = $async;
+    this.$scope = $scope;
     this.$state = $state;
     this.ModalService = ModalService;
     this.Notifications = Notifications;
     this.KubernetesResourcePoolService = KubernetesResourcePoolService;
+    this.RegistryService = RegistryService;
     this.EndpointService = EndpointService;
 
     this.state = {
@@ -19,10 +21,11 @@ export default class KubernetesRegistryAccessController {
     this.savedResourcePools = [];
 
     this.handleRemove = this.handleRemove.bind(this);
+    this.onChangeResourcePools = this.onChangeResourcePools.bind(this);
   }
 
   async submit() {
-    return this.updateNamespaces([...this.savedResourcePools.map(({ value }) => value), ...this.selectedResourcePools.map((pool) => pool.name)]);
+    return this.updateNamespaces([...this.savedResourcePools.map(({ value }) => value), ...this.selectedResourcePools]);
   }
 
   handleRemove(namespaces) {
@@ -51,13 +54,19 @@ export default class KubernetesRegistryAccessController {
     });
   }
 
+  onChangeResourcePools(resourcePools) {
+    return this.$scope.$evalAsync(() => {
+      this.selectedResourcePools = resourcePools;
+    });
+  }
+
   $onInit() {
     return this.$async(async () => {
       try {
         this.state = {
           registryId: this.$state.params.id,
         };
-        this.registry = await this.EndpointService.registry(this.endpoint.Id, this.state.registryId);
+        this.registry = await this.RegistryService.registry(this.state.registryId, this.endpoint.Id);
         if (this.registry.RegistryAccesses && this.registry.RegistryAccesses[this.endpoint.Id]) {
           this.savedResourcePools = this.registry.RegistryAccesses[this.endpoint.Id].Namespaces.map((value) => ({ value }));
         }

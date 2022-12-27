@@ -28,7 +28,9 @@ func (payload *tagCreatePayload) Validate(r *http.Request) error {
 // @description Create a new tag.
 // @description **Access policy**: administrator
 // @tags tags
+// @security ApiKeyAuth
 // @security jwt
+// @accept json
 // @produce json
 // @param body body tagCreatePayload true "Tag details"
 // @success 200 {object} portainer.Tag "Success"
@@ -39,17 +41,17 @@ func (handler *Handler) tagCreate(w http.ResponseWriter, r *http.Request) *httpe
 	var payload tagCreatePayload
 	err := request.DecodeAndValidateJSONPayload(r, &payload)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid request payload", err}
+		return httperror.BadRequest("Invalid request payload", err)
 	}
 
 	tags, err := handler.DataStore.Tag().Tags()
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve tags from the database", err}
+		return httperror.InternalServerError("Unable to retrieve tags from the database", err)
 	}
 
 	for _, tag := range tags {
 		if tag.Name == payload.Name {
-			return &httperror.HandlerError{http.StatusConflict, "This name is already associated to a tag", errors.New("A tag already exists with this name")}
+			return &httperror.HandlerError{StatusCode: http.StatusConflict, Message: "This name is already associated to a tag", Err: errors.New("A tag already exists with this name")}
 		}
 	}
 
@@ -59,9 +61,9 @@ func (handler *Handler) tagCreate(w http.ResponseWriter, r *http.Request) *httpe
 		Endpoints:      map[portainer.EndpointID]bool{},
 	}
 
-	err = handler.DataStore.Tag().CreateTag(tag)
+	err = handler.DataStore.Tag().Create(tag)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to persist the tag inside the database", err}
+		return httperror.InternalServerError("Unable to persist the tag inside the database", err)
 	}
 
 	return response.JSON(w, tag)

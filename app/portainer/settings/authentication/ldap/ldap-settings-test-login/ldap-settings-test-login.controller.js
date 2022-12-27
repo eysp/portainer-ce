@@ -1,7 +1,7 @@
 const TEST_STATUS = {
   LOADING: 'LOADING',
   SUCCESS: 'SUCCESS',
-  FAILURE: 'FAILURE',
+  FAILURE: '失败',
 };
 
 export default class LdapSettingsTestLogin {

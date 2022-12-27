@@ -1,40 +1,39 @@
 <div class="row">
   <div class="col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="fa-key" title-text="SSL 证书"></rd-widget-header>
+      <rd-widget-header icon="key" feather-icon="true" title-text="SSL certificate"></rd-widget-header>
       <rd-widget-body>
         <form class="form-horizontal" name="$ctrl.sslForm">
           <span class="small">
-            <p class="text-muted">
-              <i class="fa fa-exclamation-circle orange-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-              仅强制使用HTTPs将导致Portainer停止在HTTP端口上侦听。使用HTTP的任何edge代理环境将不再可用。
+            <p class="text-muted vertical-center">
+              <pr-icon icon="'alert-circle'" feather="true" class-name="'icon-warning =vertical-center'"></pr-icon>
+              只强制执行HTTP将导致Portainer停止监听HTTP端口。任何正在使用HTTP的边缘代理环境将不再可用。
             </p>
           </span>
-
-          <por-switch-field ng-model="$ctrl.formValues.forceHTTPS" label="仅强制使用 HTTPS" on-change="($ctrl.onChangeForceHTTPS)"></por-switch-field>
-
-          <hr />
-
           <div class="form-group">
-            <span class="col-sm-12">
-              提供新的 SSL 证书以替换用于 HTTPS 连接的现有证书。
-            </span>
+            <por-switch-field
+              checked="$ctrl.formValues.forceHTTPS"
+              label="'Force HTTPS only'"
+              on-change="($ctrl.onChangeForceHTTPS)"
+              field-class="'col-sm-12'"
+              label-class="'col-sm-2'"
+            ></por-switch-field>
           </div>
 
           <div class="form-group">
-            <span class="col-sm-12">
-              上传 X.509 证书，通常是 crt、cer 或 pem 文件。
-            </span>
+            <span class="col-sm-12 control-label"> 提供一个新的SSL证书，以取代用于HTTPS连接的现有证书。 </span>
+          </div>
+
+          <div class="form-group">
+            <span class="col-sm-12"> 上传一个X.509证书，通常是一个crt、cer或pem文件。 </span>
           </div>
 
           <div class="form-group">
             <div class="col-sm-12">
-              <button class="btn btn-sm btn-primary" ngf-select ng-model="$ctrl.formValues.certFile" ngf-pattern="$ctrl.certFilePattern" name="certFile">
-                选择文件
-              </button>
-              <span style="margin-left: 5px;">
+              <button class="btn btn-sm btn-primary" ngf-select ng-model="$ctrl.formValues.certFile" ngf-pattern="$ctrl.certFilePattern" name="certFile"> 选择文件 </button>
+              <span style="margin-left: 5px">
                 {{ $ctrl.formValues.certFile.name }}
-                <i class="fa fa-times red-icon" ng-if="!$ctrl.formValues.certFile" aria-hidden="true"></i>
+                <pr-icon icon="'x-circle'" feather="true" class-name="'icon-danger'" ng-if="!$ctrl.formValues.certFile"></pr-icon>
               </span>
             </div>
           </div>
@@ -47,19 +46,15 @@
           </div>
 
           <div class="form-group">
-            <span class="col-sm-12">
-              上传私钥，通常是 key 或 pem 文件。
-            </span>
+            <span class="col-sm-12"> 上传一个私钥，通常是一个.key，或者一个.pem文件。 </span>
           </div>
 
           <div class="form-group">
             <div class="col-sm-12">
-              <button class="btn btn-sm btn-primary" ngf-select ng-model="$ctrl.formValues.keyFile" ngf-pattern="$ctrl.keyFilePattern" name="keyFile">
-                选择文件
-              </button>
-              <span style="margin-left: 5px;">
+              <button class="btn btn-sm btn-primary" ngf-select ng-model="$ctrl.formValues.keyFile" ngf-pattern="$ctrl.keyFilePattern" name="keyFile"> 选择文件 </button>
+              <span style="margin-left: 5px">
                 {{ $ctrl.formValues.keyFile.name }}
-                <i class="fa fa-times red-icon" ng-if="!$ctrl.formValues.keyFile" aria-hidden="true"></i>
+                <pr-icon icon="'x-circle'" feather="true" class-name="'icon-danger'" ng-if="!$ctrl.formValues.keyFile"></pr-icon>
               </span>
             </div>
           </div>
@@ -71,7 +66,6 @@
             </div>
           </div>
 
-          <hr />
           <div class="form-group">
             <div class="col-sm-12">
               <button
@@ -86,11 +80,11 @@
                 analytics-event="portainer-settings-edit"
                 analytics-properties="{ metadata: { forceHTTPS: $ctrl.formValues.forceHTTPS } }"
               >
-                <span ng-hide="$ctrl.state.actionInProgress || $ctrl.state.reloadingPage">应用更改</span>
-                <span ng-show="$ctrl.state.actionInProgress">正在保存...</span>
-                <span ng-show="$ctrl.state.reloadingPage">重新加载页面...</span>
+                <span ng-hide="$ctrl.state.actionInProgress || $ctrl.state.reloadingPage">应该更改</span>
+                <span ng-show="$ctrl.state.actionInProgress">保存中...</span>
+                <span ng-show="$ctrl.state.reloadingPage">重载页面中...</span>
               </button>
-              <span class="text-danger" ng-if="state.formValidationError" style="margin-left: 5px;">{{ state.formValidationError }}</span>
+              <span class="text-danger" ng-if="state.formValidationError" style="margin-left: 5px">{{ state.formValidationError }}</span>
             </div>
           </div>
         </form>

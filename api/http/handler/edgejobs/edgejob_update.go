@@ -10,7 +10,6 @@ import (
 	"github.com/portainer/libhttp/request"
 	"github.com/portainer/libhttp/response"
 	portainer "github.com/portainer/portainer/api"
-	bolterrors "github.com/portainer/portainer/api/bolt/errors"
 )
 
 type edgeJobUpdatePayload struct {
@@ -30,8 +29,9 @@ func (payload *edgeJobUpdatePayload) Validate(r *http.Request) error {
 
 // @id EdgeJobUpdate
 // @summary Update an EdgeJob
-// @description
+// @description **Access policy**: administrator
 // @tags edge_jobs
+// @security ApiKeyAuth
 // @security jwt
 // @accept json
 // @produce json
@@ -45,30 +45,30 @@ func (payload *edgeJobUpdatePayload) Validate(r *http.Request) error {
 func (handler *Handler) edgeJobUpdate(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	edgeJobID, err := request.RetrieveNumericRouteVariableValue(r, "id")
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid Edge job identifier route variable", err}
+		return httperror.BadRequest("Invalid Edge job identifier route variable", err)
 	}
 
 	var payload edgeJobUpdatePayload
 	err = request.DecodeAndValidateJSONPayload(r, &payload)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid request payload", err}
+		return httperror.BadRequest("Invalid request payload", err)
 	}
 
 	edgeJob, err := handler.DataStore.EdgeJob().EdgeJob(portainer.EdgeJobID(edgeJobID))
-	if err == bolterrors.ErrObjectNotFound {
-		return &httperror.HandlerError{http.StatusNotFound, "Unable to find an Edge job with the specified identifier inside the database", err}
+	if handler.DataStore.IsErrObjectNotFound(err) {
+		return httperror.NotFound("Unable to find an Edge job with the specified identifier inside the database", err)
 	} else if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to find an Edge job with the specified identifier inside the database", err}
+		return httperror.InternalServerError("Unable to find an Edge job with the specified identifier inside the database", err)
 	}
 
 	err = handler.updateEdgeSchedule(edgeJob, &payload)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to update Edge job", err}
+		return httperror.InternalServerError("Unable to update Edge job", err)
 	}
 
 	err = handler.DataStore.EdgeJob().UpdateEdgeJob(edgeJob.ID, edgeJob)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to persist Edge job changes inside the database", err}
+		return httperror.InternalServerError("Unable to persist Edge job changes inside the database", err)
 	}
 
 	return response.JSON(w, edgeJob)
@@ -92,7 +92,7 @@ func (handler *Handler) updateEdgeSchedule(edgeJob *portainer.EdgeJob, payload *
 				continue
 			}
 
-			if meta, ok := edgeJob.Endpoints[endpointID]; ok {
+			if meta, exists := edgeJob.Endpoints[endpointID]; exists {
 				endpointsMap[endpointID] = meta
 			} else {
 				endpointsMap[endpointID] = portainer.EdgeJobEndpointMeta{}
@@ -103,13 +103,19 @@ func (handler *Handler) updateEdgeSchedule(edgeJob *portainer.EdgeJob, payload *
 	}
 
 	updateVersion := false
-	if payload.CronExpression != nil {
+	if payload.CronExpression != nil && *payload.CronExpression != edgeJob.CronExpression {
 		edgeJob.CronExpression = *payload.CronExpression
 		updateVersion = true
 	}
 
-	if payload.FileContent != nil {
-		_, err := handler.FileService.StoreEdgeJobFileFromBytes(strconv.Itoa(int(edgeJob.ID)), []byte(*payload.FileContent))
+	fileContent, err := handler.FileService.GetFileContent(edgeJob.ScriptPath, "")
+	if err != nil {
+		return err
+	}
+
+	if payload.FileContent != nil && *payload.FileContent != string(fileContent) {
+		fileContent = []byte(*payload.FileContent)
+		_, err := handler.FileService.StoreEdgeJobFileFromBytes(strconv.Itoa(int(edgeJob.ID)), fileContent)
 		if err != nil {
 			return err
 		}
@@ -117,7 +123,7 @@ func (handler *Handler) updateEdgeSchedule(edgeJob *portainer.EdgeJob, payload *
 		updateVersion = true
 	}
 
-	if payload.Recurring != nil {
+	if payload.Recurring != nil && *payload.Recurring != edgeJob.Recurring {
 		edgeJob.Recurring = *payload.Recurring
 		updateVersion = true
 	}

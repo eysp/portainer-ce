@@ -35,7 +35,7 @@ export default class porImageRegistryContainerController {
       this.setValidity(!this.pullRateLimits.limit || (this.pullRateLimits.limit && this.pullRateLimits.remaining >= 0));
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.error('加载DockerHub拉取频率限制失败', e);
+      console.error('Failed loading DockerHub pull rate limits', e);
       this.setValidity(true);
     }
   }

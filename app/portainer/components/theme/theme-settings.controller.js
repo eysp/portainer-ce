@@ -1,4 +1,4 @@
-import { buildOption } from '@/portainer/components/box-selector';
+import { options } from './options';
 
 export default class ThemeSettingsController {
   /* @ngInject */
@@ -13,58 +13,45 @@ export default class ThemeSettingsController {
     this.setTheme = this.setTheme.bind(this);
   }
 
-  /** Theme Settings Panel */
-  async updateTheme() {
+  async setTheme(theme) {
     try {
-      await this.UserService.updateUserTheme(this.state.userId, this.state.userTheme);
-      this.state.themeInProgress = false;
-      this.Notifications.success('成功', '用户主题更新成功');
+      if (theme === 'auto' || !theme) {
+        this.ThemeManager.autoTheme();
+      } else {
+        this.ThemeManager.setTheme(theme);
+      }
+
+      this.state.userTheme = theme;
+      if (!this.state.isDemo) {
+        await this.UserService.updateUserTheme(this.state.userId, this.state.userTheme);
+      }
+
+      this.Notifications.success('Success', '用户主题已成功更新');
     } catch (err) {
       this.Notifications.error('失败', err, '无法更新用户主题');
     }
   }
 
-  setTheme(theme) {
-    this.ThemeManager.setTheme(theme);
-    this.state.themeInProgress = true;
-  }
-
   $onInit() {
     return this.$async(async () => {
+      const state = this.StateManager.getState();
+
       this.state = {
         userId: null,
         userTheme: '',
-        initTheme: '',
-        defaultTheme: 'light',
-        themeInProgress: false,
+        defaultTheme: 'auto',
+        isDemo: state.application.demoEnvironment.enabled,
       };
 
-      this.state.availableThemes = [
-        buildOption('light', 'fas fa-sun', 'Light Theme', 'Default color mode', 'light'),
-        buildOption('dark', 'fas fa-moon', 'Dark Theme', 'Dark color mode', 'dark'),
-        buildOption('highcontrast', 'fas fa-adjust', 'High Contrast', 'High contrast color mode', 'highcontrast'),
-      ];
-
-      this.state.availableTheme = {
-        light: 'light',
-        dark: 'dark',
-        highContrast: 'highcontrast',
-      };
+      this.state.availableThemes = options;
 
       try {
         this.state.userId = await this.Authentication.getUserDetails().ID;
         const data = await this.UserService.user(this.state.userId);
         this.state.userTheme = data.UserTheme || this.state.defaultTheme;
-        this.state.initTheme = this.state.userTheme;
       } catch (err) {
         this.Notifications.error('失败', err, '无法获取用户详细信息');
       }
     });
-  }
-
-  $onDestroy() {
-    if (this.state.themeInProgress) {
-      this.ThemeManager.setTheme(this.state.initTheme);
-    }
   }
 }

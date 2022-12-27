@@ -1,36 +1,44 @@
-<kubernetes-view-header title="Stacks logs" state="kubernetes.stacks.stack.logs" view-ready="ctrl.state.viewReady">
-  <a ui-sref="kubernetes.resourcePools">Namespaces</a>
-  &gt; <a ui-sref="kubernetes.resourcePools.resourcePool({ id: ctrl.state.transition.namespace })">{{ ctrl.state.transition.namespace }}</a> &gt;
-  <a ui-sref="kubernetes.applications">应用</a> &gt; 堆栈 &gt; {{ ctrl.state.transition.name }} &gt; 日志
-</kubernetes-view-header>
+<page-header
+  ng-if="ctrl.state.viewReady"
+  title="'堆栈日志'"
+  breadcrumbs="[
+{ label:'Namespaces', link:'kubernetes.resourcePools' },
+{ label:ctrl.state.transition.namespace, link:'kubernetes.resourcePools.resourcePool', linkParams:{ id: ctrl.state.transition.namespace } },
+{ label:'Applications', link:'kubernetes.applications' },
+'堆栈',
+ctrl.state.transition.name,
+'Logs'
+]"
+  reload="true"
+></page-header>
 
 <kubernetes-view-loading view-ready="ctrl.state.viewReady"></kubernetes-view-loading>
 
-<div ng-if="ctrl.state.viewReady" style="height: 100%;">
+<div ng-if="ctrl.state.viewReady">
   <div class="row">
     <div class="col-sm-12">
       <rd-widget>
         <rd-widget-body>
           <form class="form-horizontal" autocomplete="off">
-            <div class="col-sm-12 form-section-title">
-              操作
-            </div>
+            <div class="col-sm-12 form-section-title"> 操作 </div>
             <!-- auto-refresh -->
             <div class="form-group">
-              <div class="col-sm-12">
-                <label class="control-label text-left">
-                  自动刷新<portainer-tooltip position="bottom" message="每 30 秒自动刷新日志"></portainer-tooltip>
+              <label class="control-label text-left col-sm-3 col-lg-2 vertical-center !py-2">
+                自动刷新
+                <portainer-tooltip message="'每30秒自动刷新一次日志'"></portainer-tooltip>
+              </label>
+              <div class="col-sm-8 col-sm-9 vertical-center">
+                <label class="switch col-sm-8 col-sm-9 vertical-center !mb-0">
+                  <input type="checkbox" ng-model="ctrl.state.autoRefresh" ng-change="ctrl.updateAutoRefresh()" />
+                  <span class="slider round"></span>
                 </label>
-                <label class="switch" style="margin-left: 20px;"> <input type="checkbox" ng-model="ctrl.state.autoRefresh" ng-change="ctrl.updateAutoRefresh()" /><i></i> </label>
               </div>
             </div>
             <!-- !auto-refresh -->
             <!-- search -->
             <div class="form-group">
-              <label for="logs_search" class="col-sm-1 control-label text-left">
-                搜索
-              </label>
-              <div class="col-sm-11">
+              <label for="logs_search" class="col-sm-3 col-lg-2 control-label text-left"> 搜索 </label>
+              <div class="col-sm-8 col-lg-9">
                 <input
                   class="form-control"
                   type="text"
@@ -46,7 +54,10 @@
             <!-- actions -->
             <div class="form-group">
               <div class="col-sm-12">
-                <button class="btn btn-primary btn-sm" type="button" ng-click="ctrl.downloadLogs()" style="margin-left: 0;"><i class="fa fa-download"></i> 下载日志</button>
+                <button class="btn btn-primary btn-sm !ml-0 vertical-center" type="button" ng-click="ctrl.downloadLogs()">
+                  <pr-icon icon="'download'" feather="true"></pr-icon>
+                  下载日志
+                </button>
               </div>
             </div>
             <!-- !actions -->
@@ -56,11 +67,13 @@
     </div>
   </div>
 
-  <div class="row" style="height: 54%;">
-    <div class="col-sm-12" style="height: 100%;">
-      <pre
-        class="log_viewer"
-      ><div ng-repeat="line in ctrl.state.filteredLogs = (ctrl.stackLogs | filter:ctrl.state.search) track by $index" class="line" ng-if="line"><p class="inner_line"><span ng-style="{'color': line.Color, 'font-weight': 'bold'};">{{ line.AppName }}</span> {{ line.Line }}</p></div><div ng-if="ctrl.stackLogs.length && !ctrl.state.filteredLogs.length" class="line"><p class="inner_line">没有匹配的日志行 '{{ ctrl.state.search }}' 筛选</p></div><div ng-if="ctrl.stackLogs.length === 0" class="line"><p class="inner_line">没有可用的日志</p></div></pre>
+  <div class="row">
+    <div class="col-sm-12 h-[max(400px,calc(100vh-380px))]">
+      <pre class="log_viewer">
+        <div ng-repeat="log in ctrl.state.filteredLogs = (ctrl.stackLogs | filter:{ 'line': ctrl.state.search }) track by $index" class="line" ng-if="log.line"><p class="inner_line"><span ng-style="{'color': log.appColor, 'font-weight': 'bold'};">{{ log.appName }}</span> <span ng-repeat="span in log.spans track by $index" ng-style="{ 'color': span.fgColor, 'background-color': span.bgColor, 'font-weight': span.fontWeight }">{{ span.text }}</span></p></div>
+        <div ng-if="ctrl.stackLogs.length && !ctrl.state.filteredLogs.length" class="line"><p class="inner_line">没有符合 '{{ ctrl.state.search }}' 筛选的日志行。</p></div>
+        <div ng-if="ctrl.stackLogs.length === 0" class="line"><p class="inner_line">没有可用的日志</p></div>
+    </pre>
     </div>
   </div>
 </div>

@@ -1,6 +1,6 @@
 import angular from 'angular';
 
-import { RBAC_ROLES } from '@/portainer/feature-flags/feature-ids';
+import { FeatureId } from '@/portainer/feature-flags/enums';
 
 class EndpointAccessController {
   /* @ngInject */
@@ -12,7 +12,7 @@ class EndpointAccessController {
     this.GroupService = GroupService;
     this.$async = $async;
 
-    this.limitedFeature = RBAC_ROLES;
+    this.limitedFeature = FeatureId.RBAC_ROLES;
 
     this.updateAccess = this.updateAccess.bind(this);
     this.updateAccessAsync = this.updateAccessAsync.bind(this);
@@ -36,11 +36,11 @@ class EndpointAccessController {
     try {
       this.state.actionInProgress = true;
       await this.EndpointService.updateEndpoint(this.$transition$.params().id, this.endpoint);
-      this.Notifications.success('访问权限已成功更新');
+      this.Notifications.success('Success', 'Access successfully updated');
       this.$state.reload(this.$state.current);
     } catch (err) {
       this.state.actionInProgress = false;
-      this.Notifications.error('失败', err, '无法更新访问权限');
+      this.Notifications.error('失败', err, 'Unable to update accesses');
     }
   }
 }

@@ -120,6 +120,8 @@ class KubernetesApplicationConverter {
       res.ServiceType = serviceType;
       res.ServiceId = service.metadata.uid;
       res.ServiceName = service.metadata.name;
+      res.ClusterIp = service.spec.clusterIP;
+      res.ExternalIp = service.spec.externalIP;
 
       if (serviceType === KubernetesServiceTypes.LOAD_BALANCER) {
         if (service.status.loadBalancer.ingress && service.status.loadBalancer.ingress.length > 0) {
@@ -149,7 +151,7 @@ class KubernetesApplicationConverter {
     // FIX FOR SFS ONLY ; as far as we know it's not possible to do this with DEPLOYMENTS/DAEMONSETS
     //
     // This may lead to destructing behaviours when we will allow external apps to be edited.
-    // E.G. if we try to generate the formValues and patch the app, SFS reference will be created under
+    // 例如 if we try to generate the formValues and patch the app, SFS reference will be created under
     // spec.template.spec.volumes and not be referenced directly inside spec.template.spec.containers[0].volumeMounts
     // As we preserve original SFS name and try to build around it, it SHOULD be fine, but we definitely need to test this
     // before allowing external apps modification
@@ -279,6 +281,8 @@ class KubernetesApplicationConverter {
     res.ApplicationType = app.ApplicationType;
     res.ResourcePool = _.find(resourcePools, ['Namespace.Name', app.ResourcePool]);
     res.Name = app.Name;
+    res.Services = KubernetesApplicationHelper.generateServicesFormValuesFromServices(app);
+    res.Selector = KubernetesApplicationHelper.generateSelectorFromService(app);
     res.StackName = app.StackName;
     res.ApplicationOwner = app.ApplicationOwner;
     res.ImageModel.Image = app.Image;
@@ -356,7 +360,9 @@ class KubernetesApplicationConverter {
       service = undefined;
     }
 
-    return [app, headlessService, service, claims];
+    let services = KubernetesServiceConverter.applicationFormValuesToServices(formValues);
+
+    return [app, headlessService, services, service, claims];
   }
 }
 

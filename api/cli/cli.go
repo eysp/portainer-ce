@@ -2,15 +2,14 @@ package cli
 
 import (
 	"errors"
-	"log"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	portainer "github.com/portainer/portainer/api"
 
-	"os"
-	"path/filepath"
-	"strings"
-
+	"github.com/rs/zerolog/log"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -35,7 +34,9 @@ func (*Service) ParseFlags(version string) (*portainer.CLIFlags, error) {
 		TunnelPort:                kingpin.Flag("tunnel-port", "Port to serve the tunnel server").Default(defaultTunnelServerPort).String(),
 		Assets:                    kingpin.Flag("assets", "Path to the assets").Default(defaultAssetsDirectory).Short('a').String(),
 		Data:                      kingpin.Flag("data", "Path to the folder where the data is stored").Default(defaultDataDirectory).Short('d').String(),
+		DemoEnvironment:           kingpin.Flag("demo", "Demo environment").Bool(),
 		EndpointURL:               kingpin.Flag("host", "Environment URL").Short('H').String(),
+		FeatureFlags:              BoolPairs(kingpin.Flag("feat", "List of feature flags").Hidden()),
 		EnableEdgeComputeFeatures: kingpin.Flag("edge-compute", "Enable Edge Compute features").Bool(),
 		NoAnalytics:               kingpin.Flag("no-analytics", "Disable Analytics in app (deprecated)").Bool(),
 		TLS:                       kingpin.Flag("tlsverify", "TLS support").Default(defaultTLS).Bool(),
@@ -44,16 +45,24 @@ func (*Service) ParseFlags(version string) (*portainer.CLIFlags, error) {
 		TLSCert:                   kingpin.Flag("tlscert", "Path to the TLS certificate file").Default(defaultTLSCertPath).String(),
 		TLSKey:                    kingpin.Flag("tlskey", "Path to the TLS key").Default(defaultTLSKeyPath).String(),
 		HTTPDisabled:              kingpin.Flag("http-disabled", "Serve portainer only on https").Default(defaultHTTPDisabled).Bool(),
+		HTTPEnabled:               kingpin.Flag("http-enabled", "Serve portainer on http").Default(defaultHTTPEnabled).Bool(),
 		SSL:                       kingpin.Flag("ssl", "Secure Portainer instance using SSL (deprecated)").Default(defaultSSL).Bool(),
 		SSLCert:                   kingpin.Flag("sslcert", "Path to the SSL certificate used to secure the Portainer instance").String(),
 		SSLKey:                    kingpin.Flag("sslkey", "Path to the SSL key used to secure the Portainer instance").String(),
 		Rollback:                  kingpin.Flag("rollback", "Rollback the database store to the previous version").Bool(),
-		SnapshotInterval:          kingpin.Flag("snapshot-interval", "Duration between each environment snapshot job").Default(defaultSnapshotInterval).String(),
-		AdminPassword:             kingpin.Flag("admin-password", "Hashed admin password").String(),
+		SnapshotInterval:          kingpin.Flag("snapshot-interval", "Duration between each environment snapshot job").String(),
+		AdminPassword:             kingpin.Flag("admin-password", "Set admin password with provided hash").String(),
 		AdminPasswordFile:         kingpin.Flag("admin-password-file", "Path to the file containing the password for the admin user").String(),
 		Labels:                    pairs(kingpin.Flag("hide-label", "Hide containers with a specific label in the UI").Short('l')),
 		Logo:                      kingpin.Flag("logo", "URL for the logo displayed in the UI").String(),
 		Templates:                 kingpin.Flag("templates", "URL to the templates definitions.").Short('t').String(),
+		BaseURL:                   kingpin.Flag("base-url", "Base URL parameter such as portainer if running portainer as http://yourdomain.com/portainer/.").Short('b').Default(defaultBaseURL).String(),
+		InitialMmapSize:           kingpin.Flag("initial-mmap-size", "Initial mmap size of the database in bytes").Int(),
+		MaxBatchSize:              kingpin.Flag("max-batch-size", "Maximum size of a batch").Int(),
+		MaxBatchDelay:             kingpin.Flag("max-batch-delay", "Maximum delay before a batch starts").Duration(),
+		SecretKeyName:             kingpin.Flag("secret-key-name", "Secret key name for encryption and will be used as /run/secrets/<secret-key-name>.").Default(defaultSecretKeyName).String(),
+		LogLevel:                  kingpin.Flag("log-level", "Set the minimum logging level to show").Default("INFO").Enum("DEBUG", "INFO", "WARN", "ERROR"),
+		LogMode:                   kingpin.Flag("log-mode", "Set the logging output mode").Default("PRETTY").Enum("PRETTY", "JSON"),
 	}
 
 	kingpin.Parse()
@@ -93,11 +102,11 @@ func (*Service) ValidateFlags(flags *portainer.CLIFlags) error {
 
 func displayDeprecationWarnings(flags *portainer.CLIFlags) {
 	if *flags.NoAnalytics {
-		log.Println("Warning: The --no-analytics flag has been kept to allow migration of instances running a previous version of Portainer with this flag enabled, to version 2.0 where enabling this flag will have no effect.")
+		log.Warn().Msg("the --no-analytics flag has been kept to allow migration of instances running a previous version of Portainer with this flag enabled, to version 2.0 where enabling this flag will have no effect")
 	}
 
 	if *flags.SSL {
-		log.Println("Warning: SSL is enabled by default and there is no need for the --ssl flag. It has been kept to allow migration of instances running a previous version of Portainer with this flag enabled")
+		log.Warn().Msg("SSL is enabled by default and there is no need for the --ssl flag, it has been kept to allow migration of instances running a previous version of Portainer with this flag enabled")
 	}
 }
 
@@ -122,7 +131,7 @@ func validateEndpointURL(endpointURL string) error {
 }
 
 func validateSnapshotInterval(snapshotInterval string) error {
-	if snapshotInterval != defaultSnapshotInterval {
+	if snapshotInterval != "" {
 		_, err := time.ParseDuration(snapshotInterval)
 		if err != nil {
 			return errInvalidSnapshotInterval

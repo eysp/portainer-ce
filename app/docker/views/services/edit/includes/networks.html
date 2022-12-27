@@ -1,14 +1,14 @@
 <div id="service-network-specs">
   <rd-widget>
-    <rd-widget-header icon="fa-tasks" title-text="Networks">
+    <rd-widget-header icon="list" feather-icon="true" title-text="网络">
       <div class="nopadding" authorization="DockerServiceUpdate">
-        <a class="btn btn-default btn-sm pull-right" ng-click="isUpdating || addNetwork(service)" ng-disabled="isUpdating">
-          <i class="fa fa-plus-circle" aria-hidden="true"></i> 网络
+        <a class="btn btn-secondary btn-sm pull-right" ng-click="isUpdating || addNetwork(service)" ng-disabled="isUpdating">
+          <pr-icon icon="'plus'" feather="true"></pr-icon> 网络
         </a>
       </div>
     </rd-widget-header>
     <rd-widget-body ng-if="!service.Networks || service.Networks.length === 0">
-      <p>此服务未连接到任何网络。</p>
+      <p>这项服务没有连接到任何网络。</p>
     </rd-widget-body>
     <rd-widget-body ng-if="service.Networks && service.Networks.length > 0" classes="no-padding">
       <table class="table">
@@ -30,9 +30,9 @@
                 ng-change="updateNetwork(service)"
                 ng-options="net.Id as net.Name for net in filterNetworks(swarmNetworks, network)"
                 disable-authorization="DockerServiceUpdate"
-                style="width: initial; min-width: 50%;"
+                style="width: initial; min-width: 50%"
               >
-                <option disabled value="" selected>选择网络</option>
+                <option disabled value="" selected>选择一个网络</option>
               </select>
               <span ng-if="!network.Editable">{{ network.Name }}</span>
             </td>
@@ -44,8 +44,8 @@
             </td>
             <td ng-if="network.Editable" authorization="DockerServiceUpdate">
               <span class="input-group-btn">
-                <button class="btn btn-sm btn-danger" type="button" ng-click="removeNetwork(service, $index)" ng-disabled="isUpdating">
-                  <i class="fa fa-trash" aria-hidden="true"></i>
+                <button class="btn btn-dangerlight" type="button" ng-click="removeNetwork(service, $index)" ng-disabled="isUpdating">
+                  <pr-icon icon="'trash-2'" feather="true" size="'md'"></pr-icon>
                 </button>
               </span>
             </td>
@@ -58,13 +58,13 @@
       <div class="btn-toolbar" role="toolbar">
         <div class="btn-group" role="group">
           <button type="button" class="btn btn-primary btn-sm" ng-disabled="isUpdating || !hasChanges(service, ['Networks'])" ng-click="updateService(service)">
-            Apply changes
+            应用变更
           </button>
           <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu">
-            <li><a ng-click="cancelChanges(service, ['Networks'])">重置更改</a></li>
+            <li><a ng-click="cancelChanges(service, ['Networks'])">重置变更</a></li>
             <li><a ng-click="cancelChanges(service)">重置所有更改</a></li>
           </ul>
         </div>

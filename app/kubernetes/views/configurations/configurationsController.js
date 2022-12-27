@@ -43,11 +43,11 @@ class KubernetesConfigurationsController {
     for (const configuration of selectedItems) {
       try {
         await this.KubernetesConfigurationService.delete(configuration);
-        this.Notifications.success('Configurations successfully removed', configuration.Name);
+        this.Notifications.success('配置成功删除', configuration.Name);
         const index = this.configurations.indexOf(configuration);
         this.configurations.splice(index, 1);
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to remove configuration');
+        this.Notifications.error('失败', err, '无法删除配置');
       } finally {
         --actionCount;
         if (actionCount === 0) {
@@ -58,7 +58,7 @@ class KubernetesConfigurationsController {
   }
 
   removeAction(selectedItems) {
-    this.ModalService.confirmDeletion('Do you want to remove the selected configuration(s)?', (confirmed) => {
+    this.ModalService.confirmDeletion('你想删除所选的配置吗？?', (confirmed) => {
       if (confirmed) {
         return this.$async(this.removeActionAsync, selectedItems);
       }
@@ -70,7 +70,7 @@ class KubernetesConfigurationsController {
       this.state.applicationsLoading = true;
       this.applications = await this.KubernetesApplicationService.get();
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to retrieve applications');
+      this.Notifications.error('失败', err, '无法检索应用程序');
     } finally {
       this.state.applicationsLoading = false;
     }

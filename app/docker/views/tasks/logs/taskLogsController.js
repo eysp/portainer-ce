@@ -44,7 +44,7 @@ angular.module('portainer.docker').controller('TaskLogsController', [
           })
           .catch(function error(err) {
             stopRepeater();
-            Notifications.error('失败', err, '无法检索任务日志');
+            Notifications.error('失败', err, 'Unable to retrieve task logs');
           });
       }, refreshRate * 1000);
     }
@@ -57,7 +57,7 @@ angular.module('portainer.docker').controller('TaskLogsController', [
         })
         .catch(function error(err) {
           stopRepeater();
-          Notifications.error('失败', err, '无法检索任务日志');
+          Notifications.error('失败', err, 'Unable to retrieve task logs');
         });
     }
 
@@ -74,7 +74,7 @@ angular.module('portainer.docker').controller('TaskLogsController', [
           startLogPolling();
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索任务详细信息');
+          Notifications.error('失败', err, 'Unable to retrieve task details');
         });
     }
 

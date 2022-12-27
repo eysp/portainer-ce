@@ -2,6 +2,7 @@ import angular from 'angular';
 import _ from 'lodash-es';
 import filesizeParser from 'filesize-parser';
 import * as JsonPatch from 'fast-json-patch';
+import { RegistryTypes } from '@/portainer/models/registryTypes';
 
 import {
   KubernetesApplicationDataAccessPolicies,
@@ -31,6 +32,8 @@ import KubernetesApplicationHelper from 'Kubernetes/helpers/application/index';
 import KubernetesVolumeHelper from 'Kubernetes/helpers/volumeHelper';
 import KubernetesNamespaceHelper from 'Kubernetes/helpers/namespaceHelper';
 import { KubernetesNodeHelper } from 'Kubernetes/node/helper';
+import { updateIngress, getIngresses } from '@/kubernetes/react/views/networks/ingresses/service';
+import { confirmUpdateAppIngress } from '@/portainer/services/modal.service/prompt';
 
 class KubernetesCreateApplicationController {
   /* #region  CONSTRUCTOR */
@@ -143,8 +146,8 @@ class KubernetesCreateApplicationController {
     this.setPullImageValidity = this.setPullImageValidity.bind(this);
     this.onChangeFileContent = this.onChangeFileContent.bind(this);
     this.onServicePublishChange = this.onServicePublishChange.bind(this);
-
-    this.$scope.$watch(() => this.formValues.IsPublishingService, this.onServicePublishChange);
+    this.checkIngressesToUpdate = this.checkIngressesToUpdate.bind(this);
+    this.confirmUpdateApplicationAsync = this.confirmUpdateApplicationAsync.bind(this);
   }
   /* #endregion */
 
@@ -160,10 +163,10 @@ class KubernetesCreateApplicationController {
       try {
         const confirmed = await this.ModalService.confirmAsync({
           title: '你确定吗？',
-          message: '对此应用程序的任何更改都将被覆盖，并可能导致服务中断。你想继续吗？',
+          message: 'Any changes to this application will be overriden and may cause a service interruption. Do you wish to continue?',
           buttons: {
             confirm: {
-              label: '更新',
+              label: 'Update',
               className: 'btn-warning',
             },
           },
@@ -176,7 +179,7 @@ class KubernetesCreateApplicationController {
         this.state.isEditorDirty = false;
         await this.$state.reload(this.$state.current);
       } catch (err) {
-        this.Notifications.error('失败', err, '重新部署应用程序失败');
+        this.Notifications.error('失败', err, 'Failed redeploying application');
       } finally {
         this.state.updateWebEditorInProgress = false;
       }
@@ -191,6 +194,10 @@ class KubernetesCreateApplicationController {
 
   setPullImageValidity(validity) {
     this.state.pullImageValidity = validity;
+  }
+
+  imageValidityIsValid() {
+    return this.state.pullImageValidity || this.formValues.ImageModel.Registry.Type !== RegistryTypes.DOCKERHUB;
   }
 
   onChangeName() {
@@ -421,34 +428,31 @@ class KubernetesCreateApplicationController {
 
   /* #endregion */
 
+  /* #region  PUBLISHED PORTS UI MANAGEMENT */
   onServicePublishChange() {
-    // service creation
-    if (this.formValues.PublishedPorts.length === 0) {
-      if (this.formValues.IsPublishingService) {
-        // toggle enabled
-        this.addPublishedPort();
-      }
+    // enable publishing with no previous ports exposed
+    if (this.formValues.IsPublishingService && !this.formValues.PublishedPorts.length) {
+      this.addPublishedPort();
       return;
     }
 
     // service update
     if (this.formValues.IsPublishingService) {
-      // toggle enabled
       this.formValues.PublishedPorts.forEach((port) => (port.NeedsDeletion = false));
     } else {
-      // toggle disabled
-      // all new ports need to be deleted, existing ports need to be marked as needing deletion
+      // delete new ports, mark old ports to be deleted
       this.formValues.PublishedPorts = this.formValues.PublishedPorts.filter((port) => !port.IsNew).map((port) => ({ ...port, NeedsDeletion: true }));
     }
   }
 
-  /* #region  PUBLISHED PORTS UI MANAGEMENT */
   addPublishedPort() {
     const p = new KubernetesApplicationPublishedPortFormValue();
     const ingresses = this.ingresses;
-    p.IngressName = ingresses && ingresses.length ? ingresses[0].Name : undefined;
-    p.IngressHost = ingresses && ingresses.length ? ingresses[0].Hosts[0] : undefined;
-    p.IngressHosts = ingresses && ingresses.length ? ingresses[0].Hosts : undefined;
+    if (this.formValues.PublishingType === KubernetesApplicationPublishingTypes.INGRESS) {
+      p.IngressName = ingresses && ingresses.length ? ingresses[0].Name : undefined;
+      p.IngressHost = ingresses && ingresses.length ? ingresses[0].Hosts[0] : undefined;
+      p.IngressHosts = ingresses && ingresses.length ? ingresses[0].Hosts : undefined;
+    }
     if (this.formValues.PublishedPorts.length) {
       p.Protocol = this.formValues.PublishedPorts[0].Protocol;
     }
@@ -676,6 +680,11 @@ class KubernetesCreateApplicationController {
     return this.formValues.DeploymentType === this.ApplicationDeploymentTypes.GLOBAL ? this.nodeNumber : this.formValues.ReplicaCount;
   }
 
+  hasPortErrors() {
+    const portError = this.formValues.Services.some((service) => service.nodePortError || service.servicePortError);
+    return portError;
+  }
+
   resourceReservationsOverflow() {
     const instances = this.effectiveInstances();
     const cpu = this.formValues.CpuLimit;
@@ -720,7 +729,7 @@ class KubernetesCreateApplicationController {
   }
 
   publishViaLoadBalancerEnabled() {
-    return this.state.useLoadBalancer;
+    return this.state.useLoadBalancer && this.state.maxLoadBalancersQuota !== 0;
   }
 
   publishViaIngressEnabled() {
@@ -797,6 +806,14 @@ class KubernetesCreateApplicationController {
     const nonScalable = this.isNonScalable();
     const isPublishingWithoutPorts = this.formValues.IsPublishingService && this.hasNoPublishedPorts();
     return overflow || autoScalerOverflow || inProgress || invalid || hasNoChanges || nonScalable || isPublishingWithoutPorts;
+  }
+
+  isExternalApplication() {
+    if (this.application) {
+      return KubernetesApplicationHelper.isExternalApplication(this.application);
+    } else {
+      return false;
+    }
   }
 
   disableLoadBalancerEdit() {
@@ -896,7 +913,7 @@ class KubernetesCreateApplicationController {
       try {
         this.stacks = await this.KubernetesStackService.get(namespace);
       } catch (err) {
-        this.Notifications.error('失败', err, '无法检索堆栈');
+        this.Notifications.error('失败', err, 'Unable to retrieve stacks');
       }
     });
   }
@@ -906,7 +923,7 @@ class KubernetesCreateApplicationController {
       try {
         this.configurations = await this.KubernetesConfigurationService.get(namespace);
       } catch (err) {
-        this.Notifications.error('失败', err, '无法检索配置');
+        this.Notifications.error('失败', err, 'Unable to retrieve configurations');
       }
     });
   }
@@ -916,7 +933,7 @@ class KubernetesCreateApplicationController {
       try {
         this.applications = await this.KubernetesApplicationService.get(namespace);
       } catch (err) {
-        this.Notifications.error('失败', err, '无法检索应用程序');
+        this.Notifications.error('失败', err, 'Unable to retrieve applications');
       }
     });
   }
@@ -924,7 +941,8 @@ class KubernetesCreateApplicationController {
   refreshVolumes(namespace) {
     return this.$async(async () => {
       try {
-        const volumes = await this.KubernetesVolumeService.get(namespace);
+        const storageClasses = this.endpoint.Kubernetes.Configuration.StorageClasses;
+        const volumes = await this.KubernetesVolumeService.get(namespace, storageClasses);
         _.forEach(volumes, (volume) => {
           volume.Applications = KubernetesVolumeHelper.getUsingApplications(volume, this.applications);
         });
@@ -936,7 +954,7 @@ class KubernetesCreateApplicationController {
         });
         this.availableVolumes = filteredVolumes;
       } catch (err) {
-        this.Notifications.error('失败', err, '无法检索存储卷');
+        this.Notifications.error('失败', err, 'Unable to retrieve volumes');
       }
     });
   }
@@ -955,7 +973,7 @@ class KubernetesCreateApplicationController {
         }
         this.formValues.OriginalIngresses = this.ingresses;
       } catch (err) {
-        this.Notifications.error('失败', err, '无法检索入口');
+        this.Notifications.error('失败', err, 'Unable to retrieve ingresses');
       }
     });
   }
@@ -997,7 +1015,7 @@ class KubernetesCreateApplicationController {
       this.formValues.ApplicationOwner = this.Authentication.getUserDetails().username;
       _.remove(this.formValues.Configurations, (item) => item.SelectedConfiguration === undefined);
       await this.KubernetesApplicationService.create(this.formValues);
-      this.Notifications.success('应用程序已成功部署', this.formValues.Name);
+      this.Notifications.success('应用程序成功部署', this.formValues.Name);
       this.$state.go('kubernetes.applications');
     } catch (err) {
       this.Notifications.error('失败', err, '无法创建应用程序');
@@ -1006,11 +1024,20 @@ class KubernetesCreateApplicationController {
     }
   }
 
-  async updateApplicationAsync() {
+  async updateApplicationAsync(ingressesToUpdate, rulePlural) {
+    if (ingressesToUpdate.length) {
+      try {
+        await Promise.all(ingressesToUpdate.map((ing) => updateIngress(this.endpoint.Id, ing)));
+        this.Notifications.success('Success', `入口$ ${rulePlural} 成功更新了`);
+      } catch (error) {
+        this.Notifications.error('失败', error, '无法更新接入点');
+      }
+    }
+
     try {
       this.state.actionInProgress = true;
       await this.KubernetesApplicationService.patch(this.savedFormValues, this.formValues);
-      this.Notifications.success('应用程序已成功更新');
+      this.Notifications.success('Success', '应用程序成功更新');
       this.$state.go('kubernetes.applications.application', { name: this.application.Name, namespace: this.application.ResourcePool });
     } catch (err) {
       this.Notifications.error('失败', err, '无法更新应用程序');
@@ -1019,13 +1046,100 @@ class KubernetesCreateApplicationController {
     }
   }
 
-  deployApplication() {
-    if (this.state.isEdit) {
-      this.ModalService.confirmUpdate('更新应用程序可能会导致服务中断。你想继续吗？', (confirmed) => {
-        if (confirmed) {
-          return this.$async(this.updateApplicationAsync);
+  async confirmUpdateApplicationAsync() {
+    const [ingressesToUpdate, servicePortsToUpdate] = await this.checkIngressesToUpdate();
+    // if there is an ingressesToUpdate, then show a warning modal with asking if they want to update the ingresses
+    if (ingressesToUpdate.length) {
+      const rulePlural = ingressesToUpdate.length > 1 ? 'rules' : 'rule';
+      const noMatchSentence =
+        servicePortsToUpdate.length > 1
+          ? `此应用程序中的服务端口不再匹配入口 ${rulePlural}.`
+          : `该应用中的一个服务端口不再匹配入口 ${rulePlural} ，这可能会破坏入口规则路径。`;
+      const message = `
+        <ul class="ml-3">
+          <li>更新应用程序可能会导致服务中断。</li>
+          <li>${noMatchSentence}</li>
+        </ul>
+      `;
+      const inputLabel = `更新入口 ${rulePlural} 以匹配服务端口的变化`;
+      confirmUpdateAppIngress(`你确定吗？`, message, inputLabel, (value) => {
+        if (value === null) {
+          return;
+        }
+        if (value.length === 0) {
+          return this.$async(this.updateApplicationAsync, [], '');
+        }
+        if (value[0] === '1') {
+          return this.$async(this.updateApplicationAsync, ingressesToUpdate, rulePlural);
         }
       });
+    } else {
+      this.ModalService.confirmUpdate('更新应用程序可能会导致服务中断。您希望继续吗？', (confirmed) => {
+        if (confirmed) {
+          return this.$async(this.updateApplicationAsync, [], '');
+        }
+      });
+    }
+  }
+
+  // check if service ports with ingresses have changed and allow the user to update the ingress to the new port values with a modal
+  async checkIngressesToUpdate() {
+    let ingressesToUpdate = [];
+    let servicePortsToUpdate = [];
+    const fullIngresses = await getIngresses(this.endpoint.Id, this.formValues.ResourcePool.Namespace.Name);
+    this.formValues.Services.forEach((updatedService) => {
+      const oldServiceIndex = this.oldFormValues.Services.findIndex((oldService) => oldService.Name === updatedService.Name);
+      const numberOfPortsInOldService = this.oldFormValues.Services[oldServiceIndex] && this.oldFormValues.Services[oldServiceIndex].Ports.length;
+      // if the service has an ingress and there is the same number of ports or more in the updated service
+      if (updatedService.Ingress && numberOfPortsInOldService && numberOfPortsInOldService <= updatedService.Ports.length) {
+        const updatedOldPorts = updatedService.Ports.slice(0, numberOfPortsInOldService);
+        const ingressesForService = fullIngresses.filter((ing) => {
+          const ingServiceNames = ing.Paths.map((path) => path.ServiceName);
+          if (ingServiceNames.includes(updatedService.Name)) {
+            return true;
+          }
+        });
+        ingressesForService.forEach((ingressForService) => {
+          updatedOldPorts.forEach((servicePort, pIndex) => {
+            if (servicePort.ingress) {
+              // if there isn't a ingress path that has a matching service name and port
+              const doesIngressPathMatchServicePort = ingressForService.Paths.find((ingPath) => ingPath.ServiceName === updatedService.Name && ingPath.Port === servicePort.port);
+              if (!doesIngressPathMatchServicePort) {
+                // then find the ingress path index to update by looking for the matching port in the old form values
+                const oldServicePort = this.oldFormValues.Services[oldServiceIndex].Ports[pIndex].port;
+                const newServicePort = servicePort.port;
+
+                const ingressPathIndex = ingressForService.Paths.findIndex((ingPath) => {
+                  return ingPath.ServiceName === updatedService.Name && ingPath.Port === oldServicePort;
+                });
+                if (ingressPathIndex !== -1) {
+                  // if the ingress to update isn't in the ingressesToUpdate list
+                  const ingressUpdateIndex = ingressesToUpdate.findIndex((ing) => ing.Name === ingressForService.Name);
+                  if (ingressUpdateIndex === -1) {
+                    // then add it to the list with the new port
+                    const ingressToUpdate = angular.copy(ingressForService);
+                    ingressToUpdate.Paths[ingressPathIndex].Port = newServicePort;
+                    ingressesToUpdate.push(ingressToUpdate);
+                  } else {
+                    // if the ingress is already in the list, then update the path with the new port
+                    ingressesToUpdate[ingressUpdateIndex].Paths[ingressPathIndex].Port = newServicePort;
+                  }
+                  if (!servicePortsToUpdate.includes(newServicePort)) {
+                    servicePortsToUpdate.push(newServicePort);
+                  }
+                }
+              }
+            }
+          });
+        });
+      }
+    });
+    return [ingressesToUpdate, servicePortsToUpdate];
+  }
+
+  deployApplication() {
+    if (this.state.isEdit) {
+      return this.$async(this.confirmUpdateApplicationAsync);
     } else {
       return this.$async(this.deployApplicationAsync);
     }
@@ -1037,12 +1151,14 @@ class KubernetesCreateApplicationController {
     return this.$async(async () => {
       try {
         const namespace = this.$state.params.namespace;
+        const storageClasses = this.endpoint.Kubernetes.Configuration.StorageClasses;
+
         [this.application, this.persistentVolumeClaims] = await Promise.all([
           this.KubernetesApplicationService.get(namespace, this.$state.params.name),
-          this.KubernetesPersistentVolumeClaimService.get(namespace),
+          this.KubernetesPersistentVolumeClaimService.get(namespace, storageClasses),
         ]);
       } catch (err) {
-        this.Notifications.error('失败', err, '无法检索应用程序详细信息');
+        this.Notifications.error('失败', err, '无法检索到应用程序的详细信息');
       }
     });
   }
@@ -1052,7 +1168,7 @@ class KubernetesCreateApplicationController {
       try {
         return await this.RegistryService.retrievePorRegistryModelFromRepository(imageModel.Image, this.endpoint.Id, imageModel.Registry.Id, this.$state.params.namespace);
       } catch (err) {
-        this.Notifications.error('失败', err, '无法检索注册表');
+        this.Notifications.error('失败', err, 'Unable to retrieve registry');
         return imageModel;
       }
     });
@@ -1074,7 +1190,11 @@ class KubernetesCreateApplicationController {
         ]);
         this.nodesLimits = nodesLimits;
 
-        this.resourcePools = _.filter(resourcePools, (resourcePool) => !KubernetesNamespaceHelper.isSystemNamespace(resourcePool.Namespace.Name));
+        const nonSystemNamespaces = _.filter(resourcePools, (resourcePool) => !KubernetesNamespaceHelper.isSystemNamespace(resourcePool.Namespace.Name));
+
+        this.allNamespaces = resourcePools.map(({ Namespace }) => Namespace.Name);
+        this.resourcePools = _.sortBy(nonSystemNamespaces, ({ Namespace }) => (Namespace.Name === 'default' ? 0 : 1));
+
         this.formValues.ResourcePool = this.resourcePools[0];
         if (!this.formValues.ResourcePool) {
           return;
@@ -1140,10 +1260,12 @@ class KubernetesCreateApplicationController {
 
         this.formValues.IsPublishingService = this.formValues.PublishedPorts.length > 0;
 
+        this.oldFormValues = angular.copy(this.formValues);
+
         this.updateNamespaceLimits();
         this.updateSliders();
       } catch (err) {
-        this.Notifications.error('失败', err, '无法加载视图数据');
+        this.Notifications.error('失败', err, 'Unable to load view data');
       } finally {
         this.state.viewReady = true;
       }

@@ -202,6 +202,18 @@ angular.module('portainer.docker').controller('CreateNetworkController', [
       }
     }
 
+    $scope.onChangeInternal = function (enable) {
+      $scope.$evalAsync(() => {
+        $scope.config.Internal = enable;
+      });
+    };
+
+    $scope.onChangeAttachable = function (enable) {
+      $scope.$evalAsync(() => {
+        $scope.config.Attachable = enable;
+      });
+    };
+
     function validateForm(accessControlData, isAdmin) {
       $scope.state.formValidationError = '';
       var error = '';
@@ -227,7 +239,7 @@ angular.module('portainer.docker').controller('CreateNetworkController', [
           return ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl);
         })
         .then(function success() {
-          Notifications.success('网络已成功创建');
+          Notifications.success('成功', '已成功创建网络');
           if (context.reload) {
             $state.go(
               'docker.networks',
@@ -239,7 +251,7 @@ angular.module('portainer.docker').controller('CreateNetworkController', [
           }
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '网络创建过程中发生错误');
+          Notifications.error('失败', err, '创建网络时出错');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;

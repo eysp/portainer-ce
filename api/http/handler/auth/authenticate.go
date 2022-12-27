@@ -2,17 +2,18 @@ package auth
 
 import (
 	"errors"
-	"log"
 	"net/http"
 	"strings"
 
-	"github.com/asaskevich/govalidator"
 	httperror "github.com/portainer/libhttp/error"
 	"github.com/portainer/libhttp/request"
 	"github.com/portainer/libhttp/response"
 	portainer "github.com/portainer/portainer/api"
-	bolterrors "github.com/portainer/portainer/api/bolt/errors"
 	httperrors "github.com/portainer/portainer/api/http/errors"
+	"github.com/portainer/portainer/api/internal/authorization"
+
+	"github.com/asaskevich/govalidator"
+	"github.com/rs/zerolog/log"
 )
 
 type authenticatePayload struct {
@@ -31,14 +32,17 @@ func (payload *authenticatePayload) Validate(r *http.Request) error {
 	if govalidator.IsNull(payload.Username) {
 		return errors.New("Invalid username")
 	}
+
 	if govalidator.IsNull(payload.Password) {
 		return errors.New("Invalid password")
 	}
+
 	return nil
 }
 
 // @id AuthenticateUser
 // @summary Authenticate
+// @description **Access policy**: public
 // @description Use this environment(endpoint) to authenticate against Portainer using a username and password.
 // @tags auth
 // @accept json
@@ -49,94 +53,98 @@ func (payload *authenticatePayload) Validate(r *http.Request) error {
 // @failure 422 "Invalid Credentials"
 // @failure 500 "Server error"
 // @router /auth [post]
-func (handler *Handler) authenticate(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
+func (handler *Handler) authenticate(rw http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	var payload authenticatePayload
 	err := request.DecodeAndValidateJSONPayload(r, &payload)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid request payload", err}
+		return httperror.BadRequest("Invalid request payload", err)
 	}
 
 	settings, err := handler.DataStore.Settings().Settings()
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve settings from the database", err}
+		return httperror.InternalServerError("Unable to retrieve settings from the database", err)
 	}
 
-	u, err := handler.DataStore.User().UserByUsername(payload.Username)
-	if err != nil && err != bolterrors.ErrObjectNotFound {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve a user with the specified username from the database", err}
+	user, err := handler.DataStore.User().UserByUsername(payload.Username)
+	if err != nil {
+		if !handler.DataStore.IsErrObjectNotFound(err) {
+			return httperror.InternalServerError("Unable to retrieve a user with the specified username from the database", err)
+		}
+
+		if settings.AuthenticationMethod == portainer.AuthenticationInternal ||
+			settings.AuthenticationMethod == portainer.AuthenticationOAuth ||
+			(settings.AuthenticationMethod == portainer.AuthenticationLDAP && !settings.LDAPSettings.AutoCreateUsers) {
+			return &httperror.HandlerError{StatusCode: http.StatusUnprocessableEntity, Message: "Invalid credentials", Err: httperrors.ErrUnauthorized}
+		}
 	}
 
-	if err == bolterrors.ErrObjectNotFound && (settings.AuthenticationMethod == portainer.AuthenticationInternal || settings.AuthenticationMethod == portainer.AuthenticationOAuth) {
-		return &httperror.HandlerError{http.StatusUnprocessableEntity, "Invalid credentials", httperrors.ErrUnauthorized}
+	if user != nil && isUserInitialAdmin(user) || settings.AuthenticationMethod == portainer.AuthenticationInternal {
+		return handler.authenticateInternal(rw, user, payload.Password)
+	}
+
+	if settings.AuthenticationMethod == portainer.AuthenticationOAuth {
+		return &httperror.HandlerError{StatusCode: http.StatusUnprocessableEntity, Message: "Only initial admin is allowed to login without oauth", Err: httperrors.ErrUnauthorized}
 	}
 
 	if settings.AuthenticationMethod == portainer.AuthenticationLDAP {
-		if u == nil && settings.LDAPSettings.AutoCreateUsers {
-			return handler.authenticateLDAPAndCreateUser(w, payload.Username, payload.Password, &settings.LDAPSettings)
-		} else if u == nil && !settings.LDAPSettings.AutoCreateUsers {
-			return &httperror.HandlerError{http.StatusUnprocessableEntity, "Invalid credentials", httperrors.ErrUnauthorized}
-		}
-		return handler.authenticateLDAP(w, u, payload.Password, &settings.LDAPSettings)
+		return handler.authenticateLDAP(rw, user, payload.Username, payload.Password, &settings.LDAPSettings)
 	}
 
-	return handler.authenticateInternal(w, u, payload.Password)
+	return &httperror.HandlerError{StatusCode: http.StatusUnprocessableEntity, Message: "Login method is not supported", Err: httperrors.ErrUnauthorized}
 }
 
-func (handler *Handler) authenticateLDAP(w http.ResponseWriter, user *portainer.User, password string, ldapSettings *portainer.LDAPSettings) *httperror.HandlerError {
-	err := handler.LDAPService.AuthenticateUser(user.Username, password, ldapSettings)
-	if err != nil {
-		return handler.authenticateInternal(w, user, password)
-	}
-
-	err = handler.addUserIntoTeams(user, ldapSettings)
-	if err != nil {
-		log.Printf("Warning: unable to automatically add user into teams: %s\n", err.Error())
-	}
-
-	return handler.writeToken(w, user)
+func isUserInitialAdmin(user *portainer.User) bool {
+	return int(user.ID) == 1
 }
 
 func (handler *Handler) authenticateInternal(w http.ResponseWriter, user *portainer.User, password string) *httperror.HandlerError {
 	err := handler.CryptoService.CompareHashAndData(user.Password, password)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusUnprocessableEntity, "Invalid credentials", httperrors.ErrUnauthorized}
+		return &httperror.HandlerError{StatusCode: http.StatusUnprocessableEntity, Message: "Invalid credentials", Err: httperrors.ErrUnauthorized}
 	}
 
-	return handler.writeToken(w, user)
+	forceChangePassword := !handler.passwordStrengthChecker.Check(password)
+
+	return handler.writeToken(w, user, forceChangePassword)
 }
 
-func (handler *Handler) authenticateLDAPAndCreateUser(w http.ResponseWriter, username, password string, ldapSettings *portainer.LDAPSettings) *httperror.HandlerError {
+func (handler *Handler) authenticateLDAP(w http.ResponseWriter, user *portainer.User, username, password string, ldapSettings *portainer.LDAPSettings) *httperror.HandlerError {
 	err := handler.LDAPService.AuthenticateUser(username, password, ldapSettings)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusUnprocessableEntity, "Invalid credentials", err}
+		return httperror.Forbidden("Only initial admin is allowed to login without oauth", err)
 	}
 
-	user := &portainer.User{
-		Username: username,
-		Role:     portainer.StandardUserRole,
-	}
+	if user == nil {
+		user = &portainer.User{
+			Username:                username,
+			Role:                    portainer.StandardUserRole,
+			PortainerAuthorizations: authorization.DefaultPortainerAuthorizations(),
+		}
 
-	err = handler.DataStore.User().CreateUser(user)
-	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to persist user inside the database", err}
+		err = handler.DataStore.User().Create(user)
+		if err != nil {
+			return httperror.InternalServerError("Unable to persist user inside the database", err)
+		}
 	}
 
 	err = handler.addUserIntoTeams(user, ldapSettings)
 	if err != nil {
-		log.Printf("Warning: unable to automatically add user into teams: %s\n", err.Error())
+		log.Warn().Err(err).Msg("unable to automatically add user into teams")
 	}
 
-	return handler.writeToken(w, user)
+	return handler.writeToken(w, user, false)
 }
 
-func (handler *Handler) writeToken(w http.ResponseWriter, user *portainer.User) *httperror.HandlerError {
-	return handler.persistAndWriteToken(w, composeTokenData(user))
+func (handler *Handler) writeToken(w http.ResponseWriter, user *portainer.User, forceChangePassword bool) *httperror.HandlerError {
+	tokenData := composeTokenData(user, forceChangePassword)
+
+	return handler.persistAndWriteToken(w, tokenData)
 }
 
 func (handler *Handler) persistAndWriteToken(w http.ResponseWriter, tokenData *portainer.TokenData) *httperror.HandlerError {
 	token, err := handler.JWTService.GenerateToken(tokenData)
 	if err != nil {
-		return &httperror.HandlerError{StatusCode: http.StatusInternalServerError, Message: "Unable to generate JWT token", Err: err}
+		return httperror.InternalServerError("Unable to generate JWT token", err)
 	}
 
 	return response.JSON(w, &authenticateResponse{JWT: token})
@@ -171,7 +179,7 @@ func (handler *Handler) addUserIntoTeams(user *portainer.User, settings *portain
 				Role:   portainer.TeamMember,
 			}
 
-			err := handler.DataStore.TeamMembership().CreateTeamMembership(membership)
+			err := handler.DataStore.TeamMembership().Create(membership)
 			if err != nil {
 				return err
 			}
@@ -187,6 +195,7 @@ func teamExists(teamName string, ldapGroups []string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -196,13 +205,15 @@ func teamMembershipExists(teamID portainer.TeamID, memberships []portainer.TeamM
 			return true
 		}
 	}
+
 	return false
 }
 
-func composeTokenData(user *portainer.User) *portainer.TokenData {
+func composeTokenData(user *portainer.User, forceChangePassword bool) *portainer.TokenData {
 	return &portainer.TokenData{
-		ID:       user.ID,
-		Username: user.Username,
-		Role:     user.Role,
+		ID:                  user.ID,
+		Username:            user.Username,
+		Role:                user.Role,
+		ForceChangePassword: forceChangePassword,
 	}
 }

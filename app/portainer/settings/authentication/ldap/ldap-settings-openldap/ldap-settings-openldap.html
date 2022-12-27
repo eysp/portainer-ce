@@ -1,186 +1,192 @@
 <ng-form limited-feature-dir="{{::$ctrl.limitedFeatureId}}" limited-feature-class="limited-be" class="ldap-settings-openldap">
-  <be-feature-indicator feature="$ctrl.limitedFeatureId" class="my-8 block"></be-feature-indicator>
-
-  <div>
-    <div class="col-sm-12 form-section-title">
-      信息
-    </div>
-    <div class="form-group col-sm-12 text-muted small">
-      使用 LDAP 身份验证时，Portainer 会将用户身份验证委托给 LDAP 服务器，如果 LDAP 身份验证失败，则回退到内部身份验证。
-    </div>
-  </div>
-
-  <div class="col-sm-12 form-section-title">
-    LDAP 配置
-  </div>
-
-  <div class="form-group">
-    <div class="col-sm-12 small text-muted">
-      <p>
-        <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-        您可以配置多个 LDAP 服务器以进行身份验证回退。 确保所有服务器都使用相同的配置（即如果启用了 TLS，它们应该都使用相同的证书）。
-      </p>
-    </div>
-  </div>
-
-  <div class="form-group">
-    <label for="ldap_url" class="col-sm-3 col-lg-2 control-label text-left" style="display: flex; flex-wrap: wrap;">
-      LDAP 服务器
-      <button
-        type="button"
-        class="label label-default interactive"
-        style="border: 0;"
-        ng-click="$ctrl.addLDAPUrl()"
-        limited-feature-dir="{{::$ctrl.limitedFeatureId}}"
-        limited-feature-tabindex="-1"
-      >
-        <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加额外的服务器
-      </button>
-    </label>
-    <div class="col-sm-9 col-lg-10">
-      <div ng-repeat="url in $ctrl.settings.URLs track by $index" style="display: flex; margin-bottom: 10px;">
-        <input
-          type="text"
-          class="form-control"
-          id="ldap_url"
-          ng-model="$ctrl.settings.URLs[$index]"
-          placeholder="例如 10.0.0.10:389 or myldap.domain.tld:389"
-          limited-feature-dir="{{::$ctrl.limitedFeatureId}}"
-          limited-feature-tabindex="-1"
-        />
-        <button
-          ng-if="$index > 0"
-          class="btn btn-sm btn-danger"
-          type="button"
-          ng-click="$ctrl.removeLDAPUrl($index)"
-          limited-feature-dir="{{::$ctrl.limitedFeatureId}}"
-          limited-feature-tabindex="-1"
-        >
-          <i class="fa fa-trash" aria-hidden="true"></i>
-        </button>
+  <div class="overlay">
+    <div class="limited-be-link vertical-center"
+      ><be-feature-indicator feature="$ctrl.limitedFeatureId"></be-feature-indicator
+      ><portainer-tooltip message="'这个功能目前只限于商业版用户。 '"></portainer-tooltip
+    ></div>
+    <div class="limited-be-content">
+      <div>
+        <div class="col-sm-12 form-section-title"> 信息 </div>
+        <div class="form-group col-sm-12 text-muted small">
+          当使用LDAP认证时，Portainer会将用户认证委托给LDAP服务器，并在LDAP认证失败时回退到内部认证。
+        </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Anonymous mode-->
-  <div class="form-group">
-    <label for="anonymous_mode" class="control-label text-left col-sm-3" style="padding-top: 0;">
-      匿名模式
-      <portainer-tooltip position="bottom" message="如果服务器配置为匿名访问，则启用此选项。"></portainer-tooltip>
-    </label>
-    <div class="col-sm-9">
-      <label class="switch">
-        <input
-          type="checkbox"
-          id="anonymous_mode"
-          ng-model="$ctrl.settings.AnonymousMode"
-          limited-feature-dir="{{::$ctrl.limitedFeatureId}}"
-          limited-feature-tabindex="-1"
-        /><i></i>
-      </label>
-    </div>
-  </div>
-  <!-- !Anonymous mode-->
+      <div class="col-sm-12 form-section-title"> LDAP configuration </div>
 
-  <div ng-if="!$ctrl.settings.AnonymousMode">
-    <div class="form-group">
-      <label for="ldap_username" class="col-sm-3 control-label text-left">
-        Reader DN
-        <portainer-tooltip position="bottom" message="将用于搜索用户的帐户。"></portainer-tooltip>
-      </label>
-      <div class="col-sm-9">
-        <input
-          type="text"
-          class="form-control"
-          id="ldap_username"
-          ng-model="$ctrl.settings.ReaderDN"
-          placeholder="cn=user,dc=domain,dc=tld"
-          ng-change="$ctrl.onAccountChange($ctrl.settings.ReaderDN)"
-          limited-feature-dir="{{::$ctrl.limitedFeatureId}}"
-          limited-feature-tabindex="-1"
-        />
+      <div class="form-group">
+        <div class="col-sm-12 small text-muted">
+          <p class="vertical-center">
+            <pr-icon icon="'info'" feather="true" mode="'primary'"></pr-icon>
+            你可以配置多个LDAP服务器进行认证回退。确保所有的服务器都使用相同的配置（例如，如果启用了TLS，它们都应该使用
+            相同的证书）。
+          </p>
+        </div>
       </div>
-    </div>
 
-    <div class="form-group">
-      <label for="ldap_password" class="col-sm-3 control-label text-left">
-        密码
-        <portainer-tooltip position="bottom" message="如果您不输入密码，Portainer 将保持当前密码不变。"></portainer-tooltip>
-      </label>
-      <div class="col-sm-9">
-        <input
-          type="password"
-          class="form-control"
-          id="ldap_password"
-          ng-model="$ctrl.settings.Password"
-          placeholder="password"
-          autocomplete="new-password"
-          limited-feature-dir="{{::$ctrl.limitedFeatureId}}"
-          limited-feature-tabindex="-1"
-        />
+      <div class="form-group">
+        <label for="ldap_url" class="col-sm-3 col-lg-2 control-label text-left" style="display: flex; flex-wrap: wrap">
+          LDAP Server
+          <button
+            type="button"
+            class="label label-default interactive vertical-center"
+            style="border: 0"
+            ng-click="$ctrl.addLDAPUrl()"
+            limited-feature-dir="{{::$ctrl.limitedFeatureId}}"
+            limited-feature-tabindex="-1"
+          >
+            <pr-icon icon="'plus-circle'" feather="true"></pr-icon>
+            Add additional server
+          </button>
+        </label>
+        <div class="col-sm-9 col-lg-10">
+          <div ng-repeat="url in $ctrl.settings.URLs track by $index" style="display: flex; margin-bottom: 10px">
+            <input
+              type="text"
+              class="form-control"
+              id="ldap_url"
+              ng-model="$ctrl.settings.URLs[$index]"
+              placeholder="例如 10.0.0.10:389 or myldap.domain.tld:389"
+              limited-feature-dir="{{::$ctrl.limitedFeatureId}}"
+              limited-feature-tabindex="-1"
+            />
+            <button
+              ng-if="$index > 0"
+              class="btn btn-sm btn-danger"
+              type="button"
+              ng-click="$ctrl.removeLDAPUrl($index)"
+              limited-feature-dir="{{::$ctrl.limitedFeatureId}}"
+              limited-feature-tabindex="-1"
+            >
+              <pr-icon icon="'trash-2'" feather="true" size="'md'"></pr-icon>
+            </button>
+          </div>
+        </div>
       </div>
+
+      <!-- Anonymous mode-->
+      <div class="form-group">
+        <div class="col-sm-12">
+          <label for="anonymous_mode" class="control-label text-left col-sm-3 col-lg-2">
+            Anonymous mode
+            <portainer-tooltip message="'Enable this option if the server is configured for Anonymous access.'"></portainer-tooltip>
+          </label>
+
+          <div class="col-sm-9 col-lg-10">
+            <label class="switch">
+              <input type="checkbox" id="anonymous_mode" ng-model="$ctrl.settings.AnonymousMode" limited-feature-dir="{{::$ctrl.limitedFeatureId}}" limited-feature-tabindex="-1" />
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <!-- !Anonymous mode-->
+
+      <div ng-if="!$ctrl.settings.AnonymousMode">
+        <div class="form-group">
+          <label for="ldap_username" class="col-sm-3 col-lg-2 control-label text-left">
+            Reader DN
+            <portainer-tooltip message="'Account that will be used to search for users.'"></portainer-tooltip>
+          </label>
+          <div class="col-sm-9 col-lg-10">
+            <input
+              type="text"
+              class="form-control"
+              id="ldap_username"
+              ng-model="$ctrl.settings.ReaderDN"
+              placeholder="cn=user,dc=domain,dc=tld"
+              ng-change="$ctrl.onAccountChange($ctrl.settings.ReaderDN)"
+              limited-feature-dir="{{::$ctrl.limitedFeatureId}}"
+              limited-feature-tabindex="-1"
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="ldap_password" class="col-sm-3 col-lg-2 control-label text-left">
+            Password
+            <portainer-tooltip message="'If you do not enter a password, Portainer will leave the current password unchanged.'"></portainer-tooltip>
+          </label>
+          <div class="col-sm-9">
+            <input
+              type="password"
+              class="form-control"
+              id="ldap_password"
+              ng-model="$ctrl.settings.Password"
+              placeholder="password"
+              autocomplete="new-password"
+              limited-feature-dir="{{::$ctrl.limitedFeatureId}}"
+              limited-feature-tabindex="-1"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" ng-if="$ctrl.settings.AnonymousMode">
+        <label for="ldap_domain_root" class="col-sm-3 col-lg-2 control-label text-left"> Domain root </label>
+        <div class="col-sm-9">
+          <input
+            type="text"
+            class="form-control"
+            id="ldap_domain_root"
+            ng-model="$ctrl.domainSuffix"
+            placeholder="dc=domain,dc=tld"
+            limited-feature-dir="{{::$ctrl.limitedFeatureId}}"
+            limited-feature-tabindex="-1"
+          />
+        </div>
+      </div>
+
+      <ldap-connectivity-check
+        ng-if="!$ctrl.settings.TLSConfig.TLS && !$ctrl.settings.StartTLS"
+        settings="$ctrl.settings"
+        state="$ctrl.state"
+        connectivity-check="$ctrl.connectivityCheck"
+        limited-feature-id="$ctrl.limitedFeatureId"
+      ></ldap-connectivity-check>
+
+      <ldap-settings-security
+        title="Connectivity Security"
+        settings="$ctrl.settings"
+        tlsca-cert="$ctrl.tlscaCert"
+        upload-in-progress="$ctrl.state.uploadInProgress"
+        on-tlsca-cert-change="($ctrl.onTlscaCertChange)"
+        limited-feature-id="$ctrl.limitedFeatureId"
+      ></ldap-settings-security>
+
+      <ldap-connectivity-check
+        ng-if="$ctrl.settings.TLSConfig.TLS || $ctrl.settings.StartTLS"
+        settings="$ctrl.settings"
+        state="$ctrl.state"
+        connectivity-check="$ctrl.connectivityCheck"
+        limited-feature-id="$ctrl.limitedFeatureId"
+      ></ldap-connectivity-check>
+
+      <ldap-user-search
+        style="margin-top: 5px"
+        settings="$ctrl.settings.SearchSettings"
+        domain-suffix="{{ $ctrl.domainSuffix }}"
+        base-filter="(objectClass=inetOrgPerson)"
+        on-search-click="($ctrl.onSearchUsersClick)"
+        limited-feature-id="$ctrl.limitedFeatureId"
+      ></ldap-user-search>
+
+      <ldap-group-search
+        style="margin-top: 5px"
+        settings="$ctrl.settings.GroupSearchSettings"
+        domain-suffix="{{ $ctrl.domainSuffix }}"
+        base-filter="(objectClass=groupOfNames)"
+        on-search-click="($ctrl.onSearchGroupsClick)"
+        limited-feature-id="$ctrl.limitedFeatureId"
+      ></ldap-group-search>
+
+      <ldap-settings-test-login settings="$ctrl.settings" limited-feature-id="$ctrl.limitedFeatureId"></ldap-settings-test-login>
+      <save-auth-settings-button
+        on-save-settings="($ctrl.onSaveSettings)"
+        save-button-state="($ctrl.saveButtonState)"
+        save-button-disabled="!$ctrl.saveButtonDisabled()"
+        limited-feature-id="$ctrl.limitedFeatureId"
+      ></save-auth-settings-button>
     </div>
   </div>
-
-  <div class="form-group" ng-if="$ctrl.settings.AnonymousMode">
-    <label for="ldap_domain_root" class="col-sm-3 control-label text-left">
-      域名根
-    </label>
-    <div class="col-sm-9">
-      <input
-        type="text"
-        class="form-control"
-        id="ldap_domain_root"
-        ng-model="$ctrl.domainSuffix"
-        placeholder="dc=domain,dc=tld"
-        limited-feature-dir="{{::$ctrl.limitedFeatureId}}"
-        limited-feature-tabindex="-1"
-      />
-    </div>
-  </div>
-
-  <ldap-connectivity-check
-    ng-if="!$ctrl.settings.TLSConfig.TLS && !$ctrl.settings.StartTLS"
-    settings="$ctrl.settings"
-    state="$ctrl.state"
-    connectivity-check="$ctrl.connectivityCheck"
-    limited-feature-id="$ctrl.limitedFeatureId"
-  ></ldap-connectivity-check>
-
-  <ldap-settings-security
-    title="Connectivity Security"
-    settings="$ctrl.settings"
-    tlsca-cert="$ctrl.tlscaCert"
-    upload-in-progress="$ctrl.state.uploadInProgress"
-    on-tlsca-cert-change="($ctrl.onTlscaCertChange)"
-    limited-feature-id="$ctrl.limitedFeatureId"
-  ></ldap-settings-security>
-
-  <ldap-connectivity-check
-    ng-if="$ctrl.settings.TLSConfig.TLS || $ctrl.settings.StartTLS"
-    settings="$ctrl.settings"
-    state="$ctrl.state"
-    connectivity-check="$ctrl.connectivityCheck"
-    limited-feature-id="$ctrl.limitedFeatureId"
-  ></ldap-connectivity-check>
-
-  <ldap-user-search
-    style="margin-top: 5px;"
-    settings="$ctrl.settings.SearchSettings"
-    domain-suffix="{{ $ctrl.domainSuffix }}"
-    base-filter="(objectClass=inetOrgPerson)"
-    on-search-click="($ctrl.onSearchUsersClick)"
-    limited-feature-id="$ctrl.limitedFeatureId"
-  ></ldap-user-search>
-
-  <ldap-group-search
-    style="margin-top: 5px;"
-    settings="$ctrl.settings.GroupSearchSettings"
-    domain-suffix="{{ $ctrl.domainSuffix }}"
-    base-filter="(objectClass=groupOfNames)"
-    on-search-click="($ctrl.onSearchGroupsClick)"
-    limited-feature-id="$ctrl.limitedFeatureId"
-  ></ldap-group-search>
-
-  <ldap-settings-test-login settings="$ctrl.settings" limited-feature-id="$ctrl.limitedFeatureId"></ldap-settings-test-login>
 </ng-form>

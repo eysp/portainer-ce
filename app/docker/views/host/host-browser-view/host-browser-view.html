@@ -1,12 +1,7 @@
-<rd-header>
-  <rd-header-title title-text="主机浏览"></rd-header-title>
-  <rd-header-content>
-    主机 &gt; <a ui-sref="docker.host">{{ $ctrl.host.Name }}</a> &gt; 浏览
-  </rd-header-content>
-</rd-header>
+<page-header title="'主机浏览'" breadcrumbs="['Host', {label:$ctrl.host.Name, link:'docker.host'},  'browse']"> </page-header>
 
 <div class="row">
   <div class="col-sm-12">
-    <host-browser ng-if="$ctrl.host"></host-browser>
+    <host-browser ng-if="$ctrl.host" endpoint-id="$ctrl.endpoint.Id"></host-browser>
   </div>
 </div>

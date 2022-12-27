@@ -1,5 +1,8 @@
 import _ from 'lodash-es';
 import { AccessControlFormData } from 'Portainer/components/accessControlForm/porAccessControlFormModel';
+import { TEMPLATE_NAME_VALIDATION_REGEX } from '@/constants';
+import { renderTemplate } from '@/react/portainer/custom-templates/components/utils';
+import { isBE } from '@/portainer/feature-flags/feature-flags.service';
 
 class CustomTemplatesViewController {
   /* @ngInject */
@@ -10,7 +13,6 @@ class CustomTemplatesViewController {
     $state,
     Authentication,
     CustomTemplateService,
-    EndpointProvider,
     FormValidator,
     ModalService,
     NetworkService,
@@ -25,7 +27,6 @@ class CustomTemplatesViewController {
     this.$state = $state;
     this.Authentication = Authentication;
     this.CustomTemplateService = CustomTemplateService;
-    this.EndpointProvider = EndpointProvider;
     this.FormValidator = FormValidator;
     this.ModalService = ModalService;
     this.NetworkService = NetworkService;
@@ -33,6 +34,8 @@ class CustomTemplatesViewController {
     this.ResourceControlService = ResourceControlService;
     this.StateManager = StateManager;
     this.StackService = StackService;
+
+    this.isTemplateVariablesEnabled = isBE;
 
     this.DOCKER_STANDALONE = 'DOCKER_STANDALONE';
     this.DOCKER_SWARM_MODE = 'DOCKER_SWARM_MODE';
@@ -44,6 +47,8 @@ class CustomTemplatesViewController {
       actionInProgress: false,
       isEditorVisible: false,
       deployable: false,
+      templateNameRegex: TEMPLATE_NAME_VALIDATION_REGEX,
+      templateContent: '',
     };
 
     this.currentUser = {
@@ -56,6 +61,7 @@ class CustomTemplatesViewController {
       name: '',
       fileContent: '',
       AccessControlData: new AccessControlFormData(),
+      variables: [],
     };
 
     this.getTemplates = this.getTemplates.bind(this);
@@ -75,6 +81,8 @@ class CustomTemplatesViewController {
     this.confirmDeleteAsync = this.confirmDeleteAsync.bind(this);
     this.editorUpdate = this.editorUpdate.bind(this);
     this.isEditAllowed = this.isEditAllowed.bind(this);
+    this.onChangeFormValues = this.onChangeFormValues.bind(this);
+    this.onChangeTemplateVariables = this.onChangeTemplateVariables.bind(this);
   }
 
   isEditAllowed(template) {
@@ -88,7 +96,7 @@ class CustomTemplatesViewController {
     try {
       this.templates = await this.CustomTemplateService.customTemplates([1, 2]);
     } catch (err) {
-      this.Notifications.error('加载模板失败', err, '无法加载自定义模板');
+      this.Notifications.error('Failed loading templates', err, 'Unable to load custom templates');
     }
   }
 
@@ -99,12 +107,34 @@ class CustomTemplatesViewController {
     for (let template of templates) {
       try {
         await this.CustomTemplateService.remove(template.id);
-        this.Notifications.success('已成功删除模板');
+        this.Notifications.success('Success', 'Removed template successfully');
         _.remove(this.templates, template);
       } catch (err) {
-        this.Notifications.error('删除模板失败', err, '无法删除自定义模板');
+        this.Notifications.error('Failed removing template', err, 'Unable to remove custom template');
       }
     }
+  }
+
+  onChangeTemplateVariables(variables) {
+    this.onChangeFormValues({ variables });
+
+    this.renderTemplate();
+  }
+
+  renderTemplate() {
+    if (!this.isTemplateVariablesEnabled) {
+      return;
+    }
+
+    const fileContent = renderTemplate(this.state.templateContent, this.formValues.variables, this.state.selectedTemplate.Variables);
+    this.onChangeFormValues({ fileContent });
+  }
+
+  onChangeFormValues(values) {
+    this.formValues = {
+      ...this.formValues,
+      ...values,
+    };
   }
 
   validateForm(accessControlData, isAdmin) {
@@ -130,7 +160,7 @@ class CustomTemplatesViewController {
     }
     const stackName = this.formValues.name;
 
-    const endpointId = this.EndpointProvider.endpointID();
+    const endpointId = this.endpoint.Id;
 
     this.state.actionInProgress = true;
 
@@ -139,10 +169,10 @@ class CustomTemplatesViewController {
       const createAction = this.state.selectedTemplate.Type === 1 ? this.StackService.createSwarmStackFromFileContent : this.StackService.createComposeStackFromFileContent;
       const { ResourceControl: resourceControl } = await createAction(stackName, file, [], endpointId);
       await this.ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl);
-      this.Notifications.success('堆栈已成功部署');
+      this.Notifications.success('Success', 'Stack successfully deployed');
       this.$state.go('docker.stacks');
     } catch (err) {
-      this.Notifications.error('部署错误', err, '未能部署堆栈');
+      this.Notifications.error('Deployment error', err, 'Failed to deploy stack');
     } finally {
       this.state.actionInProgress = false;
     }
@@ -161,6 +191,7 @@ class CustomTemplatesViewController {
       name: '',
       fileContent: '',
       AccessControlData: new AccessControlFormData(),
+      variables: [],
     };
   }
 
@@ -184,7 +215,13 @@ class CustomTemplatesViewController {
     const applicationState = this.StateManager.getState();
     this.state.deployable = this.isDeployable(applicationState.endpoint, template.Type);
     const file = await this.CustomTemplateService.customTemplateFile(template.Id);
+    this.state.templateContent = file;
     this.formValues.fileContent = file;
+
+    if (template.Variables && template.Variables.length > 0) {
+      const variables = Object.fromEntries(template.Variables.map((variable) => [variable.name, '']));
+      this.onChangeTemplateVariables(variables);
+    }
   }
 
   getNetworks(provider, apiVersion) {
@@ -199,7 +236,7 @@ class CustomTemplatesViewController {
       );
       this.availableNetworks = networks;
     } catch (err) {
-      this.Notifications.error('失败', err, '无法加载网络。');
+      this.Notifications.error('失败', err, 'Failed to load networks.');
     }
   }
 
@@ -207,21 +244,23 @@ class CustomTemplatesViewController {
     return this.$async(this.confirmDeleteAsync, templateId);
   }
   async confirmDeleteAsync(templateId) {
-    const confirmed = await this.ModalService.confirmDeletionAsync('是否确实要删除此模板？');
+    const confirmed = await this.ModalService.confirmDeletionAsync('Are you sure that you want to delete this template?');
     if (!confirmed) {
       return;
     }
 
     try {
+      var template = _.find(this.templates, { Id: templateId });
       await this.CustomTemplateService.remove(templateId);
+      this.Notifications.success('Template successfully deleted', template && template.Title);
       _.remove(this.templates, { Id: templateId });
     } catch (err) {
-      this.Notifications.error('失败', err, '无法删除模板');
+      this.Notifications.error('失败', err, 'Failed to delete template');
     }
   }
 
-  editorUpdate(cm) {
-    this.formValues.fileContent = cm.getValue();
+  editorUpdate(value) {
+    this.formValues.fileContent = value;
   }
 
   isDeployable(endpoint, templateType) {

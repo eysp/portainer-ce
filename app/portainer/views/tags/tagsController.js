@@ -34,10 +34,10 @@ function TagsController($scope, $state, $async, TagService, Notifications) {
       try {
         await TagService.deleteTag(tag.Id);
 
-        Notifications.success('标签已成功删除', tag.Name);
+        Notifications.success('Tag successfully removed', tag.Name);
         _.remove($scope.tags, tag);
       } catch (err) {
-        Notifications.error('失败', err, '无法删除标签');
+        Notifications.error('失败', err, 'Unable to remove tag');
       }
     }
 
@@ -48,11 +48,11 @@ function TagsController($scope, $state, $async, TagService, Notifications) {
     var tagName = $scope.formValues.Name;
     TagService.createTag(tagName)
       .then(function success() {
-        Notifications.success('已成功创建标签', tagName);
+        Notifications.success('Tag successfully created', tagName);
         $state.reload();
       })
       .catch(function error(err) {
-        Notifications.error('失败', err, '无法创建标签');
+        Notifications.error('失败', err, 'Unable to create tag');
       });
   };
 
@@ -62,7 +62,7 @@ function TagsController($scope, $state, $async, TagService, Notifications) {
         $scope.tags = data;
       })
       .catch(function error(err) {
-        Notifications.error('失败', err, '无法检索标签');
+        Notifications.error('失败', err, 'Unable to retrieve tags');
         $scope.tags = [];
       });
   }

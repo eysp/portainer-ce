@@ -2,6 +2,7 @@ import angular from 'angular';
 import _ from 'lodash-es';
 import KubernetesConfigurationHelper from 'Kubernetes/helpers/configurationHelper';
 import KubernetesNamespaceHelper from 'Kubernetes/helpers/namespaceHelper';
+import { PortainerEndpointTypes } from 'Portainer/models/endpoint/models';
 
 class KubernetesDashboardController {
   /* @ngInject */
@@ -9,7 +10,6 @@ class KubernetesDashboardController {
     $async,
     Notifications,
     EndpointService,
-    EndpointProvider,
     KubernetesResourcePoolService,
     KubernetesApplicationService,
     KubernetesConfigurationService,
@@ -20,7 +20,6 @@ class KubernetesDashboardController {
     this.$async = $async;
     this.Notifications = Notifications;
     this.EndpointService = EndpointService;
-    this.EndpointProvider = EndpointProvider;
     this.KubernetesResourcePoolService = KubernetesResourcePoolService;
     this.KubernetesApplicationService = KubernetesApplicationService;
     this.KubernetesConfigurationService = KubernetesConfigurationService;
@@ -35,18 +34,17 @@ class KubernetesDashboardController {
 
   async getAllAsync() {
     const isAdmin = this.Authentication.isAdmin();
+    const storageClasses = this.endpoint.Kubernetes.Configuration.StorageClasses;
+    this.showEnvUrl = this.endpoint.Type !== PortainerEndpointTypes.EdgeAgentOnDockerEnvironment && this.endpoint.Type !== PortainerEndpointTypes.EdgeAgentOnKubernetesEnvironment;
 
     try {
-      const endpointId = this.EndpointProvider.endpointID();
-      const [endpoint, pools, applications, configurations, volumes, tags] = await Promise.all([
-        this.EndpointService.endpoint(endpointId),
+      const [pools, applications, configurations, volumes, tags] = await Promise.all([
         this.KubernetesResourcePoolService.get(),
         this.KubernetesApplicationService.get(),
         this.KubernetesConfigurationService.get(),
-        this.KubernetesVolumeService.get(),
+        this.KubernetesVolumeService.get(undefined, storageClasses),
         this.TagService.tags(),
       ]);
-      this.endpoint = endpoint;
       this.applications = applications;
       this.volumes = volumes;
 
@@ -71,7 +69,7 @@ class KubernetesDashboardController {
         this.configurations = configurations;
       }
     } catch (err) {
-      this.Notifications.error('失败', err, '无法加载仪表盘数据');
+      this.Notifications.error('失败', err, 'Unable to load dashboard data');
     }
   }
 

@@ -2,16 +2,24 @@ import _ from 'lodash-es';
 import angular from 'angular';
 
 import { RoleTypes } from '@/portainer/rbac/models/role';
+import { isLimitedToBE } from '@/portainer/feature-flags/feature-flags.service';
 
 class PorAccessManagementController {
   /* @ngInject */
-  constructor(Notifications, AccessService, RoleService, featureService) {
-    Object.assign(this, { Notifications, AccessService, RoleService, featureService });
+  constructor($scope, Notifications, AccessService, RoleService) {
+    Object.assign(this, { $scope, Notifications, AccessService, RoleService });
 
     this.limitedToBE = false;
 
     this.unauthorizeAccess = this.unauthorizeAccess.bind(this);
     this.updateAction = this.updateAction.bind(this);
+    this.onChangeUsersAndTeams = this.onChangeUsersAndTeams.bind(this);
+  }
+
+  onChangeUsersAndTeams(value) {
+    this.$scope.$evalAsync(() => {
+      this.formValues.multiselectOutput = value;
+    });
   }
 
   updateAction() {
@@ -67,7 +75,7 @@ class PorAccessManagementController {
     }
 
     if (this.isRoleLimitedToBE(role)) {
-      return `${role.Name} (Business Edition Feature)`;
+      return `${role.Name} (商业版功能)`;
     }
 
     return `${role.Name} (Default)`;
@@ -76,7 +84,7 @@ class PorAccessManagementController {
   async $onInit() {
     try {
       if (this.limitedFeature) {
-        this.limitedToBE = this.featureService.isLimitedToBE(this.limitedFeature);
+        this.limitedToBE = isLimitedToBE(this.limitedFeature);
       }
 
       const entity = this.accessControlledEntity;
@@ -99,7 +107,7 @@ class PorAccessManagementController {
     } catch (err) {
       this.availableUsersAndTeams = [];
       this.authorizedUsersAndTeams = [];
-      this.Notifications.error('失败', err, '无法检索访问');
+      this.Notifications.error('失败', err, 'Unable to retrieve accesses');
     }
   }
 }

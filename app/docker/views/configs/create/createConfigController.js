@@ -1,7 +1,6 @@
 import _ from 'lodash-es';
-import { AccessControlFormData } from 'Portainer/components/accessControlForm/porAccessControlFormModel';
-
 import angular from 'angular';
+import { AccessControlFormData } from 'Portainer/components/accessControlForm/porAccessControlFormModel';
 
 class CreateConfigController {
   /* @ngInject */
@@ -58,7 +57,7 @@ class CreateConfigController {
       this.formValues.displayCodeEditor = true;
     } catch (err) {
       this.formValues.displayCodeEditor = true;
-      this.Notifications.error('失败', err, '无法克隆配置');
+      this.Notifications.error('失败', err, 'Unable to clone config');
     }
   }
 
@@ -125,7 +124,7 @@ class CreateConfigController {
     const isAdmin = this.Authentication.isAdmin();
 
     if (this.formValues.ConfigContent === '') {
-      this.state.formValidationError = '配置内容不能为空';
+      this.state.formValidationError = 'Config content must not be empty';
       return;
     }
 
@@ -140,16 +139,16 @@ class CreateConfigController {
       const resourceControl = data.Portainer.ResourceControl;
       const userId = userDetails.ID;
       await this.ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl);
-      this.Notifications.success('配置成功创建');
+      this.Notifications.success('Success', 'Configuration successfully created');
       this.state.isEditorDirty = false;
       this.$state.go('docker.configs', {}, { reload: true });
     } catch (err) {
-      this.Notifications.error('失败', err, '无法创建配置');
+      this.Notifications.error('失败', err, 'Unable to create config');
     }
   }
 
-  editorUpdate(cm) {
-    this.formValues.ConfigContent = cm.getValue();
+  editorUpdate(value) {
+    this.formValues.ConfigContent = value;
     this.state.isEditorDirty = true;
   }
 }
