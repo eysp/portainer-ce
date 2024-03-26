@@ -8,7 +8,7 @@ export async function configureFDO(formValues: FDOConfiguration) {
   try {
     await axios.post(`${BASE_URL}/configure`, formValues);
   } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to configure FDO');
+    throw parseAxiosError(e as Error, '无法配置FDO');
   }
 }
 
@@ -19,7 +19,7 @@ export async function configureDevice(
   try {
     await axios.post(`${BASE_URL}/configure/${deviceId}`, deviceConfig);
   } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to configure device');
+    throw parseAxiosError(e as Error, '无法配置设备');
   }
 }
 
@@ -37,7 +37,7 @@ export async function createProfile(
       params: { method },
     });
   } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to create profile');
+    throw parseAxiosError(e as Error, '无法创建配置文件');
   }
 }
 
@@ -48,7 +48,7 @@ export async function getProfiles() {
     );
     return profiles;
   } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to retrieve the profiles');
+    throw parseAxiosError(e as Error, '无法获取配置文件');
   }
 }
 
@@ -59,7 +59,7 @@ export async function getProfile(profileId: number) {
     );
     return profile;
   } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to retrieve profile');
+    throw parseAxiosError(e as Error, '无法获取配置文件');
   }
 }
 
@@ -67,7 +67,7 @@ export async function deleteProfile(profileId: number) {
   try {
     await axios.delete(`${BASE_URL}/profiles/${profileId}`);
   } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to delete profile');
+    throw parseAxiosError(e as Error, '无法删除配置文件');
   }
 }
 
@@ -83,7 +83,7 @@ export async function updateProfile(
   try {
     await axios.put(`${BASE_URL}/profiles/${id}`, payload);
   } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to update profile');
+    throw parseAxiosError(e as Error, '无法更新配置文件');
   }
 }
 
@@ -94,6 +94,6 @@ export async function duplicateProfile(id: number) {
     );
     return profile;
   } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to duplicate profile');
+    throw parseAxiosError(e as Error, '无法复制配置文件');
   }
 }

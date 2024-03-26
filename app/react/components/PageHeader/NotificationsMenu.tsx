@@ -7,11 +7,11 @@ import {
 } from '@reach/menu-button';
 import { UISrefProps, useSref } from '@uirouter/react';
 import Moment from 'moment';
-import { useEffect, useState } from 'react';
 import { useStore } from 'zustand';
+import { AlertCircle, Bell, CheckCircle, Trash2 } from 'lucide-react';
 
 import { AutomationTestingProps } from '@/types';
-import { useUser } from '@/portainer/hooks/useUser';
+import { useUser } from '@/react/hooks/useUser';
 import { ToastNotification } from '@/react/portainer/notifications/types';
 
 import { Icon } from '@@/Icon';
@@ -33,23 +33,7 @@ export function NotificationsMenu() {
     notificationsStore,
     (state) => state.userNotifications[user.Id]
   );
-
-  if (userNotifications && userNotifications.length > 1) {
-    userNotifications.sort(
-      (a, b) =>
-        new Date(b.timeStamp).getTime() - new Date(a.timeStamp).getTime()
-    );
-  }
-
-  const [badge, setBadge] = useState(false);
-
-  useEffect(() => {
-    if (userNotifications?.length > 0) {
-      setBadge(true);
-    } else {
-      setBadge(false);
-    }
-  }, [userNotifications]);
+  const reducedNotifications = userNotifications?.slice(0, 50);
 
   return (
     <Menu>
@@ -59,18 +43,22 @@ export function NotificationsMenu() {
           headerStyles.menuButton
         )}
         data-cy="notificationsMenu-button"
-        aria-label="通知菜单切换"
+        aria-label="Notifications menu toggle"
       >
         <div
           className={clsx(
             headerStyles.menuIcon,
-            'icon-badge text-lg !p-2 mr-1',
+            'icon-badge mr-1 !p-2 text-lg',
             'text-gray-8',
             'th-dark:text-gray-warm-7'
           )}
         >
-          <Icon icon="bell" feather />
-          <span className={badge ? notificationStyles.badge : ''} />
+          <Icon icon={Bell} />
+          <span
+            className={
+              reducedNotifications?.length > 0 ? notificationStyles.badge : ''
+            }
+          />
         </div>
       </MenuButton>
 
@@ -90,7 +78,7 @@ export function NotificationsMenu() {
               <h4>通知</h4>
             </div>
             <div className={notificationStyles.itemLast}>
-              {userNotifications?.length > 0 && (
+              {reducedNotifications?.length > 0 && (
                 <Button
                   color="none"
                   onClick={(e) => {
@@ -106,10 +94,10 @@ export function NotificationsMenu() {
             </div>
           </div>
         </div>
-        {userNotifications?.length > 0 ? (
+        {reducedNotifications?.length > 0 ? (
           <>
             <div className={notificationStyles.notifications}>
-              {userNotifications.map((notification) => (
+              {reducedNotifications.map((notification) => (
                 <MenuLink
                   to="portainer.notifications"
                   params={{ id: notification.id }}
@@ -126,8 +114,8 @@ export function NotificationsMenu() {
           </>
         ) : (
           <div className="flex flex-col items-center">
-            <Icon icon="bell" feather size="xl" />
-            <p className="my-5">你还没有任何通知。</p>
+            <Icon icon={Bell} size="xl" />
+            <p className="my-5">您暂时没有通知。</p>
           </div>
         )}
       </MenuList>
@@ -160,9 +148,9 @@ function MenuLink({ to, params, notification, onDelete }: MenuLinkProps) {
       <div className={notificationStyles.container}>
         <div className={notificationStyles.notificationIcon}>
           {notification.type === 'success' ? (
-            <Icon icon="check-circle" feather size="lg" mode="success" />
+            <Icon icon={CheckCircle} size="lg" mode="success" />
           ) : (
-            <Icon icon="alert-circle" feather size="lg" mode="danger" />
+            <Icon icon={AlertCircle} size="lg" mode="danger" />
           )}
         </div>
         <div className={notificationStyles.notificationBody}>
@@ -186,9 +174,8 @@ function MenuLink({ to, params, notification, onDelete }: MenuLinkProps) {
             }}
             data-cy="notification-deleteButton"
             size="large"
-          >
-            <Icon icon="trash-2" feather />
-          </Button>
+            icon={Trash2}
+          />
         </div>
       </div>
     </ReachMenuLink>
@@ -203,16 +190,16 @@ function formatTime(timeCreated: Date) {
   if (diff <= 86400) {
     let interval = Math.floor(diff / 3600);
     if (interval >= 1) {
-      return `${interval} hours ago`;
+      return `${interval} 小时前`;
     }
     interval = Math.floor(diff / 60);
     if (interval >= 1) {
-      return `${interval} min ago`;
+      return `${interval} 分钟前`;
     }
   }
   if (diff > 86400) {
     const formatDate = Moment(timeCreated).format('YYYY-MM-DD h:mm:ss');
     return formatDate;
   }
-  return 'Just now';
+  return '刚刚';
 }

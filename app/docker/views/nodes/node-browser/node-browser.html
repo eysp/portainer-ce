@@ -1,5 +1,5 @@
 <page-header
-  title="'Node Browser'"
+  title="'节点浏览'"
   breadcrumbs="[
     {
       label:'swarm',
@@ -15,8 +15,4 @@
 >
 </page-header>
 
-<div class="row">
-  <div class="col-sm-12">
-    <host-browser ng-if="$ctrl.node" endpoint-id="$ctrl.endpoint.Id"></host-browser>
-  </div>
-</div>
+<host-browser ng-if="$ctrl.node" endpoint-id="$ctrl.endpoint.Id"></host-browser>

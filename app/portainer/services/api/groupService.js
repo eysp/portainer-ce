@@ -16,7 +16,7 @@ angular.module('portainer.app').factory('GroupService', [
           deferred.resolve(group);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve group', err: err });
+          deferred.reject({ msg: '无法检索组', err: err });
         });
 
       return deferred.promise;
@@ -40,8 +40,8 @@ angular.module('portainer.app').factory('GroupService', [
       return EndpointGroups.updateAccess({ id: groupId }, { UserAccessPolicies: userAccessPolicies, TeamAccessPolicies: teamAccessPolicies }).$promise;
     };
 
-    service.addEndpoint = function (groupId, endpoint) {
-      return EndpointGroups.addEndpoint({ id: groupId, action: 'endpoints/' + endpoint.Id }, endpoint).$promise;
+    service.addEndpoint = function (groupId, endpointId) {
+      return EndpointGroups.addEndpoint({ id: groupId, action: 'endpoints/' + endpointId }).$promise;
     };
 
     service.removeEndpoint = function (groupId, endpointId) {

@@ -1,10 +1,10 @@
 import { EventViewModel } from '../models/event';
+import { ping } from './ping';
 
 angular.module('portainer.docker').factory('SystemService', [
   '$q',
   'System',
-  'SystemEndpoint',
-  function SystemServiceFactory($q, System, SystemEndpoint) {
+  function SystemServiceFactory($q, System) {
     'use strict';
     var service = {};
 
@@ -16,7 +16,7 @@ angular.module('portainer.docker').factory('SystemService', [
           deferred.resolve(plugins);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve plugins information from system', err: err });
+          deferred.reject({ msg: '无法从系统检索插件信息', err: err });
         });
       return deferred.promise;
     };
@@ -26,7 +26,7 @@ angular.module('portainer.docker').factory('SystemService', [
     };
 
     service.ping = function (endpointId) {
-      return SystemEndpoint.ping({ endpointId: endpointId }).$promise;
+      return ping(endpointId);
     };
 
     service.version = function () {
@@ -44,7 +44,7 @@ angular.module('portainer.docker').factory('SystemService', [
           deferred.resolve(events);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve engine events', err: err });
+          deferred.reject({ msg: '无法检索引擎事件', err: err });
         });
 
       return deferred.promise;

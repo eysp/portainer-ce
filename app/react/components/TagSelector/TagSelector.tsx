@@ -1,15 +1,13 @@
-import clsx from 'clsx';
 import _ from 'lodash';
 
 import { TagId } from '@/portainer/tags/types';
-import { Icon } from '@/react/components/Icon';
 import { useCreateTagMutation, useTags } from '@/portainer/tags/queries';
 
 import { Creatable, Select } from '@@/form-components/ReactSelect';
 import { FormControl } from '@@/form-components/FormControl';
 import { Link } from '@@/Link';
 
-import styles from './TagSelector.module.css';
+import { TagButton } from '../TagButton';
 
 interface Props {
   value: TagId[];
@@ -24,17 +22,17 @@ interface Option {
 
 export function TagSelector({ value, allowCreate = false, onChange }: Props) {
   // change the struct because react-select has a bug with Creatable (https://github.com/JedWatson/react-select/issues/3417#issuecomment-461868989)
-  const tagsQuery = useTags((tags) =>
-    tags.map((opt) => ({ label: opt.Name, value: opt.ID }))
-  );
+  const tagsQuery = useTags({
+    select: (tags) => tags?.map((opt) => ({ label: opt.Name, value: opt.ID })),
+  });
 
   const createTagMutation = useCreateTagMutation();
 
-  if (!tagsQuery.tags) {
+  if (!tagsQuery.data) {
     return null;
   }
 
-  const { tags } = tagsQuery;
+  const { data: tags } = tagsQuery;
 
   const selectedTags = _.compact(
     value.map((id) => tags.find((tag) => tag.value === id))
@@ -46,11 +44,11 @@ export function TagSelector({ value, allowCreate = false, onChange }: Props) {
     return (
       <div className="form-group">
         <div className="col-sm-12 small text-muted">
-          No tags available. Head over to the
+          没有可用的标签。请前往
           <Link to="portainer.tags" className="space-right space-left">
-            Tags view
+            标签视图
           </Link>
-          to add tags
+          添加标签
         </div>
       </div>
     );
@@ -59,23 +57,15 @@ export function TagSelector({ value, allowCreate = false, onChange }: Props) {
   return (
     <>
       {value.length > 0 && (
-        <FormControl label="Selected tags">
+        <FormControl label="已选标签">
           {selectedTags.map((tag) => (
-            <button
-              type="button"
-              title="Remove tag"
-              className={clsx(
-                styles.removeTagBtn,
-                'space-left',
-                'tag',
-                'vertical-center'
-              )}
-              onClick={() => handleRemove(tag.value)}
+            <TagButton
               key={tag.value}
-            >
-              {tag.label}
-              <Icon icon="trash-2" feather />
-            </button>
+              title="删除标签"
+              value={tag.value}
+              label={tag.label}
+              onRemove={() => handleRemove(tag.value)}
+            />
           ))}
         </FormControl>
       )}
@@ -88,9 +78,10 @@ export function TagSelector({ value, allowCreate = false, onChange }: Props) {
           options={tags.filter((tag) => !value.includes(tag.value))}
           closeMenuOnSelect={false}
           onChange={handleAdd}
-          noOptionsMessage={() => 'No tags available'}
+          noOptionsMessage={() => '没有可用的标签'}
           formatCreateLabel={(inputValue) => `Create "${inputValue}"`}
           onCreateOption={handleCreateOption}
+          aria-label="Tags"
         />
       </FormControl>
     </>
@@ -111,6 +102,12 @@ export function TagSelector({ value, allowCreate = false, onChange }: Props) {
     if (!allowCreate) {
       return;
     }
+
+    // Prevent the new tag composed of space from being added
+    if (!inputValue.replace(/\s/g, '').length) {
+      return;
+    }
+
     createTagMutation.mutate(inputValue, {
       onSuccess(tag) {
         handleAdd({ label: tag.Name, value: tag.ID });

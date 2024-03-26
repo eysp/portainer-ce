@@ -10,7 +10,7 @@ export default {
 function Template({ message, position }: JSX.IntrinsicAttributes & Props) {
   return (
     <div className="col-sm-3 col-lg-2">
-      Example tooltip
+      示例提示框
       <Tooltip message={message} position={position} />
     </div>
   );
@@ -18,6 +18,6 @@ function Template({ message, position }: JSX.IntrinsicAttributes & Props) {
 
 export const Primary: Story<Props> = Template.bind({});
 Primary.args = {
-  message: 'Tooltip example',
+  message: '提示框示例',
   position: 'bottom',
 };

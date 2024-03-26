@@ -11,7 +11,8 @@ import (
 	portainer "github.com/portainer/portainer/api"
 	httperrors "github.com/portainer/portainer/api/http/errors"
 	"github.com/portainer/portainer/api/http/security"
-	"github.com/portainer/portainer/api/internal/stackutils"
+	"github.com/portainer/portainer/api/stacks/deployments"
+	"github.com/portainer/portainer/api/stacks/stackutils"
 )
 
 type stackMigratePayload struct {
@@ -59,7 +60,7 @@ func (handler *Handler) stackMigrate(w http.ResponseWriter, r *http.Request) *ht
 		return httperror.BadRequest("Invalid request payload", err)
 	}
 
-	stack, err := handler.DataStore.Stack().Stack(portainer.StackID(stackID))
+	stack, err := handler.DataStore.Stack().Read(portainer.StackID(stackID))
 	if handler.DataStore.IsErrObjectNotFound(err) {
 		return httperror.NotFound("Unable to find a stack with the specified identifier inside the database", err)
 	} else if err != nil {
@@ -160,14 +161,14 @@ func (handler *Handler) stackMigrate(w http.ResponseWriter, r *http.Request) *ht
 	}
 
 	stack.Name = newName
-	err = handler.DataStore.Stack().UpdateStack(stack.ID, stack)
+	err = handler.DataStore.Stack().Update(stack.ID, stack)
 	if err != nil {
 		return httperror.InternalServerError("Unable to persist the stack changes inside the database", err)
 	}
 
 	if resourceControl != nil {
 		resourceControl.ResourceID = stackutils.ResourceControlID(stack.EndpointID, stack.Name)
-		err := handler.DataStore.ResourceControl().UpdateResourceControl(resourceControl.ID, resourceControl)
+		err := handler.DataStore.ResourceControl().Update(resourceControl.ID, resourceControl)
 		if err != nil {
 			return httperror.InternalServerError("Unable to persist the resource control changes", err)
 		}
@@ -189,26 +190,53 @@ func (handler *Handler) migrateStack(r *http.Request, stack *portainer.Stack, ne
 }
 
 func (handler *Handler) migrateComposeStack(r *http.Request, stack *portainer.Stack, next *portainer.Endpoint) *httperror.HandlerError {
-	config, configErr := handler.createComposeDeployConfig(r, stack, next, false)
-	if configErr != nil {
-		return configErr
+	// Create compose deployment config
+	securityContext, err := security.RetrieveRestrictedRequestContext(r)
+	if err != nil {
+		return httperror.InternalServerError("Unable to retrieve info from request context", err)
 	}
 
-	err := handler.deployComposeStack(config, false)
+	composeDeploymentConfig, err := deployments.CreateComposeStackDeploymentConfig(securityContext,
+		stack,
+		next,
+		handler.DataStore,
+		handler.FileService,
+		handler.StackDeployer,
+		false,
+		false)
 	if err != nil {
 		return httperror.InternalServerError(err.Error(), err)
 	}
 
+	// Deploy the stack
+	err = composeDeploymentConfig.Deploy()
+	if err != nil {
+		return httperror.InternalServerError(err.Error(), err)
+	}
 	return nil
 }
 
 func (handler *Handler) migrateSwarmStack(r *http.Request, stack *portainer.Stack, next *portainer.Endpoint) *httperror.HandlerError {
-	config, configErr := handler.createSwarmDeployConfig(r, stack, next, true, true)
-	if configErr != nil {
-		return configErr
+	// Create swarm deployment config
+	securityContext, err := security.RetrieveRestrictedRequestContext(r)
+	if err != nil {
+		return httperror.InternalServerError("Unable to retrieve info from request context", err)
 	}
 
-	err := handler.deploySwarmStack(config)
+	swarmDeploymentConfig, err := deployments.CreateSwarmStackDeploymentConfig(securityContext,
+		stack,
+		next,
+		handler.DataStore,
+		handler.FileService,
+		handler.StackDeployer,
+		true,
+		true)
+	if err != nil {
+		return httperror.InternalServerError(err.Error(), err)
+	}
+
+	// Deploy the stack
+	err = swarmDeploymentConfig.Deploy()
 	if err != nil {
 		return httperror.InternalServerError(err.Error(), err)
 	}

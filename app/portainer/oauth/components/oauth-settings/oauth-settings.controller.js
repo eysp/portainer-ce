@@ -1,14 +1,18 @@
 import { baseHref } from '@/portainer/helpers/pathHelper';
-import { isLimitedToBE } from '@/portainer/feature-flags/feature-flags.service';
-import { FeatureId } from '@/portainer/feature-flags/enums';
+import { FeatureId } from '@/react/portainer/feature-flags/enums';
+import { isLimitedToBE } from '@/react/portainer/feature-flags/feature-flags.service';
+import { ModalType } from '@@/modals';
+import { confirm } from '@@/modals/confirm';
+import { buildConfirmButton } from '@@/modals/utils';
+
 import providers, { getProviderByUrl } from './providers';
 
 const MS_TENANT_ID_PLACEHOLDER = 'TENANT_ID';
 
 export default class OAuthSettingsController {
   /* @ngInject */
-  constructor($scope) {
-    Object.assign(this, { $scope });
+  constructor($scope, $async) {
+    Object.assign(this, { $scope, $async });
 
     this.limitedFeature = FeatureId.HIDE_INTERNAL_AUTH;
     this.limitedFeatureClass = 'limited-be';
@@ -69,15 +73,30 @@ export default class OAuthSettingsController {
   updateSSO(checked) {
     this.$scope.$evalAsync(() => {
       this.settings.SSO = checked;
-      this.onChangeHideInternalAuth(checked);
+      this.settings.HideInternalAuth = false;
     });
   }
 
-  onChangeHideInternalAuth(checked) {
-    this.$scope.$evalAsync(() => {
-      if (!this.isLimitedToBE) {
-        this.settings.HideInternalAuth = checked;
+  async onChangeHideInternalAuth(checked) {
+    this.$async(async () => {
+      if (this.isLimitedToBE) {
+        return;
       }
+
+      if (checked) {
+        const confirmed = await confirm({
+          title: '隐藏内部身份验证提示',
+          message: '隐藏内部身份验证提示后，您只能通过SSO登录。您确定吗？',
+          confirmButton: buildConfirmButton('确认', 'danger'),
+          modalType: ModalType.Warn,
+        });
+
+        if (!confirmed) {
+          return;
+        }
+      }
+
+      this.settings.HideInternalAuth = checked;
     });
   }
 

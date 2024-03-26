@@ -27,14 +27,15 @@ export function CustomTemplatesVariablesDefinitionField({
 }: Props) {
   return (
     <InputList
-      label="Variables definition"
+      label="变量定义"
       onChange={onChange}
       value={value}
-      renderItem={(item, onChange, error) => (
+      renderItem={(item, onChange, index, error) => (
         <Item
           item={item}
           onChange={onChange}
           error={error}
+          index={index}
           isNameReadonly={isVariablesNamesFromParent}
         />
       )}
@@ -45,7 +46,7 @@ export function CustomTemplatesVariablesDefinitionField({
         description: '',
       })}
       errors={errors}
-      textTip="List should map the mustache variables in the template file, if default value is empty, the variable will be required."
+      textTip="列表应映射模板文件中的mustache变量，如果默认值为空，则变量将为必填项。"
       isAddButtonHidden={isVariablesNamesFromParent}
     />
   );
@@ -65,7 +66,7 @@ function Item({ item, onChange, error, isNameReadonly }: DefinitionItemProps) {
           value={item.name}
           name="name"
           onChange={handleChange}
-          placeholder="Name (e.g var_name)"
+          placeholder="名称（例如 var_name）"
           readOnly={isNameReadonly}
         />
         {errorObj?.name && <FormError>{errorObj.name}</FormError>}
@@ -74,7 +75,7 @@ function Item({ item, onChange, error, isNameReadonly }: DefinitionItemProps) {
         <Input
           value={item.label}
           onChange={handleChange}
-          placeholder="Label"
+          placeholder="标签"
           name="label"
         />
         {errorObj?.label && <FormError>{errorObj.label}</FormError>}
@@ -84,7 +85,7 @@ function Item({ item, onChange, error, isNameReadonly }: DefinitionItemProps) {
           name="description"
           value={item.description}
           onChange={handleChange}
-          placeholder="Description"
+          placeholder="描述"
         />
         {errorObj?.description && <FormError>{errorObj.description}</FormError>}
       </div>
@@ -92,7 +93,7 @@ function Item({ item, onChange, error, isNameReadonly }: DefinitionItemProps) {
         <Input
           value={item.defaultValue}
           onChange={handleChange}
-          placeholder="Default Value"
+          placeholder="默认值"
           name="defaultValue"
         />
         {errorObj?.defaultValue && (

@@ -10,7 +10,7 @@ export async function getBackupStatus() {
     const { data } = await axios.get<StatusResponse>(buildUrl('s3', 'status'));
     return data;
   } catch (error) {
-    throw parseAxiosError(error as Error, 'Unable to retrieve backup status');
+    throw parseAxiosError(error as Error, '无法检索备份状态');
   }
 }
 

@@ -10,7 +10,7 @@ import (
 	"github.com/portainer/libhttp/response"
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/http/security"
-	"github.com/portainer/portainer/api/internal/stackutils"
+	"github.com/portainer/portainer/api/stacks/stackutils"
 )
 
 // @id StackAssociate
@@ -21,7 +21,7 @@ import (
 // @security jwt
 // @produce json
 // @param id path int true "Stack identifier"
-// @param endpointId query int true "Stacks created before version 1.18.0 might not have an associated environment(endpoint) identifier. Use this optional parameter to set the environment(endpoint) identifier used by the stack."
+// @param endpointId query int true "Environment identifier"
 // @param swarmId query int true "Swarm identifier"
 // @param orphanedRunning query boolean true "Indicates whether the stack is orphaned"
 // @success 200 {object} portainer.Stack "Success"
@@ -56,12 +56,12 @@ func (handler *Handler) stackAssociate(w http.ResponseWriter, r *http.Request) *
 		return httperror.InternalServerError("Unable to retrieve info from request context", err)
 	}
 
-	user, err := handler.DataStore.User().User(securityContext.UserID)
+	user, err := handler.DataStore.User().Read(securityContext.UserID)
 	if err != nil {
 		return httperror.InternalServerError("Unable to load user information from the database", err)
 	}
 
-	stack, err := handler.DataStore.Stack().Stack(portainer.StackID(stackID))
+	stack, err := handler.DataStore.Stack().Read(portainer.StackID(stackID))
 	if handler.DataStore.IsErrObjectNotFound(err) {
 		return httperror.NotFound("Unable to find a stack with the specified identifier inside the database", err)
 	} else if err != nil {
@@ -76,7 +76,7 @@ func (handler *Handler) stackAssociate(w http.ResponseWriter, r *http.Request) *
 	if resourceControl != nil {
 		resourceControl.ResourceID = fmt.Sprintf("%d_%s", endpointID, stack.Name)
 
-		err = handler.DataStore.ResourceControl().UpdateResourceControl(resourceControl.ID, resourceControl)
+		err = handler.DataStore.ResourceControl().Update(resourceControl.ID, resourceControl)
 		if err != nil {
 			return httperror.InternalServerError("Unable to persist resource control changes inside the database", err)
 		}
@@ -112,7 +112,7 @@ func (handler *Handler) stackAssociate(w http.ResponseWriter, r *http.Request) *
 	stack.UpdateDate = 0
 	stack.UpdatedBy = ""
 
-	err = handler.DataStore.Stack().UpdateStack(stack.ID, stack)
+	err = handler.DataStore.Stack().Update(stack.ID, stack)
 	if err != nil {
 		return httperror.InternalServerError("Unable to persist the stack changes inside the database", err)
 	}

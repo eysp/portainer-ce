@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/portainer/portainer/api/archive"
+	gittypes "github.com/portainer/portainer/api/git/types"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
@@ -38,7 +39,7 @@ func Test_ClonePublicRepository_Shallow(t *testing.T) {
 
 	dir := t.TempDir()
 	t.Logf("Cloning into %s", dir)
-	err := service.CloneRepository(dir, repositoryURL, referenceName, "", "")
+	err := service.CloneRepository(dir, repositoryURL, referenceName, "", "", false)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, getCommitHistoryLength(t, err, dir), "cloned repo has incorrect depth")
 }
@@ -50,7 +51,7 @@ func Test_ClonePublicRepository_NoGitDirectory(t *testing.T) {
 
 	dir := t.TempDir()
 	t.Logf("Cloning into %s", dir)
-	err := service.CloneRepository(dir, repositoryURL, referenceName, "", "")
+	err := service.CloneRepository(dir, repositoryURL, referenceName, "", "", false)
 	assert.NoError(t, err)
 	assert.NoDirExists(t, filepath.Join(dir, ".git"))
 }
@@ -84,7 +85,7 @@ func Test_latestCommitID(t *testing.T) {
 	repositoryURL := setup(t)
 	referenceName := "refs/heads/main"
 
-	id, err := service.LatestCommitID(repositoryURL, referenceName, "", "")
+	id, err := service.LatestCommitID(repositoryURL, referenceName, "", "", false)
 
 	assert.NoError(t, err)
 	assert.Equal(t, "68dcaa7bd452494043c64252ab90db0f98ecf8d2", id)
@@ -95,10 +96,12 @@ func getCommitHistoryLength(t *testing.T, err error, dir string) int {
 	if err != nil {
 		t.Fatalf("can't open a git repo at %s with error %v", dir, err)
 	}
+
 	iter, err := repo.Log(&git.LogOptions{All: true})
 	if err != nil {
 		t.Fatalf("can't get a commit history iterator with error %v", err)
 	}
+
 	count := 0
 	err = iter.ForEach(func(_ *object.Commit) error {
 		count++
@@ -107,6 +110,7 @@ func getCommitHistoryLength(t *testing.T, err error, dir string) int {
 	if err != nil {
 		t.Fatalf("can't iterate over the commit history with error %v", err)
 	}
+
 	return count
 }
 
@@ -148,7 +152,7 @@ func Test_listRefsPrivateRepository(t *testing.T) {
 				password:      "test-token",
 			},
 			expect: expectResult{
-				err: ErrAuthenticationFailure,
+				err: gittypes.ErrAuthenticationFailure,
 			},
 		},
 		{
@@ -159,7 +163,7 @@ func Test_listRefsPrivateRepository(t *testing.T) {
 				password:      "",
 			},
 			expect: expectResult{
-				err: ErrAuthenticationFailure,
+				err: gittypes.ErrAuthenticationFailure,
 			},
 		},
 		{
@@ -170,7 +174,7 @@ func Test_listRefsPrivateRepository(t *testing.T) {
 				password:      accessToken,
 			},
 			expect: expectResult{
-				err: ErrIncorrectRepositoryURL,
+				err: gittypes.ErrIncorrectRepositoryURL,
 			},
 		},
 	}
@@ -222,7 +226,7 @@ func Test_listFilesPrivateRepository(t *testing.T) {
 			},
 			expect: expectResult{
 				shouldFail: true,
-				err:        ErrAuthenticationFailure,
+				err:        gittypes.ErrAuthenticationFailure,
 			},
 		},
 		{
@@ -237,7 +241,7 @@ func Test_listFilesPrivateRepository(t *testing.T) {
 			},
 			expect: expectResult{
 				shouldFail: true,
-				err:        ErrAuthenticationFailure,
+				err:        gittypes.ErrAuthenticationFailure,
 			},
 		},
 		{
@@ -281,7 +285,7 @@ func Test_listFilesPrivateRepository(t *testing.T) {
 			},
 			expect: expectResult{
 				shouldFail: true,
-				err:        ErrIncorrectRepositoryURL,
+				err:        gittypes.ErrIncorrectRepositoryURL,
 			},
 		},
 	}

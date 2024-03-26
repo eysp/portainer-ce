@@ -1,13 +1,11 @@
 import axios, { parseAxiosError } from '@/portainer/services/axios';
-import { EnvironmentId } from '@/portainer/environments/types';
-
+import { EnvironmentId } from '@/react/portainer/environments/types';
 import {
   OpenAMTConfiguration,
   AMTInformation,
   AuthorizationResponse,
-  Device,
   DeviceFeatures,
-} from './model';
+} from '@/react/edge/edge-devices/open-amt/types';
 
 const BASE_URL = '/open_amt';
 
@@ -15,7 +13,7 @@ export async function configureAMT(formValues: OpenAMTConfiguration) {
   try {
     await axios.post(`${BASE_URL}/configure`, formValues);
   } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to configure AMT');
+    throw parseAxiosError(e as Error, '无法配置AMT');
   }
 }
 
@@ -29,44 +27,8 @@ export async function getAMTInfo(environmentId: EnvironmentId) {
   } catch (e) {
     throw parseAxiosError(
       e as Error,
-      'Unable to retrieve environment information'
+      '无法检索环境信息'
     );
-  }
-}
-
-export async function activateDevice(environmentId: EnvironmentId) {
-  try {
-    await axios.post(`${BASE_URL}/${environmentId}/activate`);
-  } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to activate device');
-  }
-}
-
-export async function getDevices(environmentId: EnvironmentId) {
-  try {
-    const { data: devices } = await axios.get<Device[]>(
-      `${BASE_URL}/${environmentId}/devices`
-    );
-
-    return devices;
-  } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to retrieve device information');
-  }
-}
-
-export async function executeDeviceAction(
-  environmentId: EnvironmentId,
-  deviceGUID: string,
-  action: string
-) {
-  try {
-    const actionPayload = { action };
-    await axios.post(
-      `${BASE_URL}/${environmentId}/devices/${deviceGUID}/action`,
-      actionPayload
-    );
-  } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to execute device action');
   }
 }
 
@@ -84,6 +46,6 @@ export async function enableDeviceFeatures(
       );
     return authorizationResponse;
   } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to enable device features');
+    throw parseAxiosError(e as Error, '无法启用设备功能');
   }
 }

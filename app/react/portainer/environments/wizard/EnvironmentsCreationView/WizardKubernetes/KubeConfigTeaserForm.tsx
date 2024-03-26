@@ -1,4 +1,5 @@
 import { Field, Form, Formik } from 'formik';
+import { Plug2 } from 'lucide-react';
 
 import { LoadingButton } from '@@/buttons/LoadingButton';
 import { FormControl } from '@@/form-components/FormControl';
@@ -20,72 +21,66 @@ export function KubeConfigTeaserForm() {
   return (
     <Formik initialValues={initialValues} onSubmit={() => {}} validateOnMount>
       {() => (
-        <Form className="mt-5">
-          <FormSectionTitle>Environment details</FormSectionTitle>
-
+        <Form>
+          <FormSectionTitle>环境详情</FormSectionTitle>
           <div className="form-group">
             <div className="col-sm-12">
               <TextTip color="blue">
                 <span className="text-muted">
                   <a
-                    href="https://docs.portainer.io/start/install/agent/kubernetes/import"
+                    href="https://docs.portainer.io/admin/environments/add/kubernetes/import"
                     target="_blank"
                     rel="noreferrer"
-                    className="mx-1"
                   >
-                    Import the kubeconfig file
-                  </a>
-                  of an existing Kubernetes cluster located on-premise or on a
-                  cloud platform. This will create a corresponding environment
-                  in Portainer and install the agent on the cluster. Please
-                  ensure:
+                    导入现有的位于本地或云平台上的Kubernetes集群的kubeconfig文件
+                  </a>{' '}
+                  将在Portainer中创建相应的环境，并在集群上安装代理。请确保：
                 </span>
               </TextTip>
             </div>
-            <div className="col-sm-12 text-muted small">
+            <div className="col-sm-12 text-muted text-xs">
               <ul className="p-2 pl-4">
-                <li>You have a load balancer enabled in your cluster</li>
-                <li>You specify current-context in your kubeconfig</li>
+                <li>您的集群中启用了负载均衡器</li>
+                <li>您的kubeconfig中指定了current-context</li>
                 <li>
-                  The kubeconfig is self-contained - including any required
-                  credentials.
+                  kubeconfig是自包含的-包括任何所需的凭据。
                 </li>
               </ul>
               <p>
-                Note: Officially supported cloud providers are Civo, Linode,
-                DigitalOcean and Microsoft Azure (others are not guaranteed to
-                work at present)
+                注：官方支持的云服务提供商包括Civo、Linode、DigitalOcean
+                和Microsoft Azure（其他目前不能保证工作）
               </p>
             </div>
           </div>
 
-          <FormControl label="Name" required>
+          <FormControl label="名称e" required>
             <Field
               name="name"
               as={Input}
               data-cy="endpointCreate-nameInput"
-              placeholder="e.g. docker-prod01 / kubernetes-cluster01"
+              placeholder="例如： docker-prod01 / kubernetes-cluster01"
               readOnly
             />
           </FormControl>
 
           <FormControl
-            label="Kubeconfig file"
+            label="Kubeconfig 文件"
             required
             inputId="kubeconfig_file"
           >
-            <Button disabled>Select a file</Button>
+            <Button disabled>选择一个文件</Button>
           </FormControl>
 
           <div className="form-group">
             <div className="col-sm-12">
               <LoadingButton
-                className="wizard-connect-button"
-                loadingText="Connecting environment..."
+                className="wizard-connect-button !ml-0"
+                loadingText="连接环境中..."
                 isLoading={false}
                 disabled
+                icon={Plug2}
               >
-                <i className="fa fa-plug" aria-hidden="true" /> Connect
+                连接
               </LoadingButton>
             </div>
           </div>

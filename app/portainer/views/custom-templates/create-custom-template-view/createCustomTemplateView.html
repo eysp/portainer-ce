@@ -1,4 +1,4 @@
-<page-header title="'创建自定义模板'" breadcrumbs="[{label:'Custom Templates', link:'docker.templates.custom'}, '创建自定义模板']"> </page-header>
+<page-header title="'创建自定义模板'" breadcrumbs="[{label:'自定义模板', link:'docker.templates.custom'}, '创建自定义模板']"> </page-header>
 
 <div class="row" ng-if="!$ctrl.state.loading">
   <div class="col-sm-12">
@@ -10,45 +10,21 @@
             show-platform-field="true"
             show-type-field="true"
             name-regex="$ctrl.state.templateNameRegex"
+            name-regex-error="'此字段必须由小写字母数字字符、'_' 或 '-' 组成（例如 'my-name' 或 'abc-123'）。'"
           ></custom-template-common-fields>
 
           <!-- build-method -->
           <div ng-if="!$ctrl.state.fromStack">
             <div class="col-sm-12 form-section-title"> 构建方法 </div>
-            <div class="form-group">
-              <div class="col-sm-12">
-                <div class="boxselector_wrapper">
-                  <div>
-                    <input type="radio" id="method_editor" ng-model="$ctrl.state.Method" value="editor" ng-change="$ctrl.onChangeMethod()" />
-                    <label for="method_editor">
-                      <div class="boxselector_header">
-                        <pr-icon icon="'edit'" feather="true"></pr-icon>
-                        Web editor
-                      </div>
-                      <p>使用我们的网页编辑器</p>
-                    </label>
-                  </div>
-                  <div>
-                    <input type="radio" id="method_upload" ng-model="$ctrl.state.Method" value="upload" ng-change="$ctrl.onChangeMethod()" />
-                    <label for="method_upload">
-                      <div class="boxselector_header">
-                        <pr-icon icon="'upload'" feather="true"></pr-icon> 上传 </div>
-                      <p>从你的电脑上传</p>
-                    </label>
-                  </div>
-                  <div>
-                    <input type="radio" id="method_repository" ng-model="$ctrl.state.Method" value="repository" ng-change="$ctrl.onChangeMethod()" />
-                    <label for="method_repository">
-                      <div class="boxselector_header">
-                        <pr-icon icon="'git-pull-request'" feather="true"></pr-icon>
-                        Repository
-                      </div>
-                      <p>使用git仓库</p>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
+
+            <box-selector
+              slim="true"
+              options="$ctrl.buildMethods"
+              value="$ctrl.state.Method"
+              on-change="($ctrl.onChangeMethod)"
+              radio-name="'buildMethod'"
+              slim="true"
+            ></box-selector>
           </div>
           <!-- !build-method -->
           <!-- web-editor -->
@@ -59,14 +35,14 @@
             on-change="($ctrl.editorUpdate)"
             ng-required="true"
             yml="true"
-            placeholder="# 在这里定义或粘贴你的docker compose文件的内容"
+            placeholder="在这里定义或粘贴您的docker-compose文件的内容"
           >
             <editor-description>
-              <span class="col-sm-12 text-muted">
-                你可以在
-                <a href="https://docs.docker.com/compose/compose-file/" target="_blank"> 官方文档</a>
-                中获得更多有关 Compose 文件格式的信息。
-              </span>
+              <p>
+                您可以在
+                <a href="https://docs.docker.com/compose/compose-file/" target="_blank"> 官方文档 </a>
+                查看有关Compose文件格式的更多信息。
+              </p>
             </editor-description>
           </web-editor-form>
           <!-- !web-editor -->
@@ -74,29 +50,31 @@
           <div ng-show="$ctrl.state.Method === 'upload'">
             <div class="col-sm-12 form-section-title"> 上传 </div>
             <div class="form-group">
-              <span class="col-sm-12 text-muted small"> 你可以从你的电脑上传一个 Compose 文件。 </span>
+              <span class="col-sm-12 text-muted small"> 您可以从计算机上上传Compose文件。 </span>
             </div>
             <div class="form-group">
               <div class="col-sm-12">
                 <button type="button" class="btn btn-sm btn-primary" ngf-select ng-model="$ctrl.formValues.File"> 选择文件 </button>
                 <span class="space-left">
                   {{ $ctrl.formValues.File.name }}
-                  <span ng-if="$ctrl.formValues.File">
-                    <pr-icon icon="'x'" feather="true" mode="'danger'"></pr-icon>
-                  </span>
                 </span>
               </div>
             </div>
           </div>
           <!-- !upload -->
           <!-- repository -->
-          <git-form ng-if="$ctrl.state.Method === 'repository'" model="$ctrl.formValues" on-change="($ctrl.handleChange)"></git-form>
+          <git-form
+            ng-if="$ctrl.state.Method === 'repository'"
+            value="$ctrl.formValues"
+            on-change="($ctrl.handleChange)"
+            is-docker-standalone="$ctrl.isDockerStandalone"
+          ></git-form>
 
           <div class="form-group" ng-if="!$ctrl.state.isTemplateValid">
             <div class="col-sm-12">
               <div class="small text-warning">
-                <pr-icon icon="'alert-triangle'" feather="true" class-name="space-right"></pr-icon>
-                模板是无效的。
+                <pr-icon icon="'alert-triangle'" class-name="'space-right'"></pr-icon>
+                模板无效。
               </div>
             </div>
           </div>
@@ -128,7 +106,7 @@
                 button-spinner="$ctrl.state.actionInProgress"
               >
                 <span ng-hide="$ctrl.state.actionInProgress">创建自定义模板</span>
-                <span ng-show="$ctrl.state.actionInProgress">正在创建中...</span>
+                <span ng-show="$ctrl.state.actionInProgress">创建中...</span>
               </button>
               <span class="text-danger space-left" ng-if="$ctrl.state.formValidationError">
                 {{ $ctrl.state.formValidationError }}

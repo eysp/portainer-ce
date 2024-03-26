@@ -1,7 +1,8 @@
-import _ from 'lodash-es';
-import { confirmDestructiveAsync } from '@/portainer/services/modal.service/confirm';
-import { EdgeTypes } from '@/portainer/environments/types';
-import { getEnvironments } from '@/portainer/environments/environment.service';
+import { confirmDestructive } from '@@/modals/confirm';
+import { EdgeTypes } from '@/react/portainer/environments/types';
+import { buildConfirmButton } from '@@/modals/utils';
+import { tagOptions } from '@/react/edge/edge-groups/CreateView/tag-options';
+import { groupTypeOptions } from '@/react/edge/edge-groups/CreateView/group-type-options';
 
 export class EdgeGroupFormController {
   /* @ngInject */
@@ -9,83 +10,77 @@ export class EdgeGroupFormController {
     this.$async = $async;
     this.$scope = $scope;
 
-    this.endpoints = {
-      state: {
-        limit: '10',
-        filter: '',
-        pageNumber: 1,
-        totalCount: 0,
-      },
-      value: null,
+    this.groupTypeOptions = groupTypeOptions;
+    this.tagOptions = tagOptions;
+
+    this.dynamicQuery = {
+      types: EdgeTypes,
+      tagIds: [],
+      tagsPartialMatch: false,
     };
 
-    this.associateEndpoint = this.associateEndpoint.bind(this);
-    this.dissociateEndpoint = this.dissociateEndpoint.bind(this);
-    this.getDynamicEndpointsAsync = this.getDynamicEndpointsAsync.bind(this);
-    this.getDynamicEndpoints = this.getDynamicEndpoints.bind(this);
+    this.onChangeEnvironments = this.onChangeEnvironments.bind(this);
     this.onChangeTags = this.onChangeTags.bind(this);
+    this.onChangeDynamic = this.onChangeDynamic.bind(this);
+    this.onChangeModel = this.onChangeModel.bind(this);
+    this.onChangePartialMatch = this.onChangePartialMatch.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
 
     $scope.$watch(
       () => this.model,
       () => {
         if (this.model.Dynamic) {
-          this.getDynamicEndpoints();
+          this.dynamicQuery = {
+            types: EdgeTypes,
+            tagIds: this.model.TagIds,
+            tagsPartialMatch: this.model.PartialMatch,
+          };
         }
       },
       true
     );
   }
 
-  onChangeTags(value) {
+  onChangeModel(model) {
     return this.$scope.$evalAsync(() => {
-      this.model.TagIds = value;
+      this.model = {
+        ...this.model,
+        ...model,
+      };
     });
   }
 
-  associateEndpoint(endpoint) {
-    if (!_.includes(this.model.Endpoints, endpoint.Id)) {
-      this.model.Endpoints = [...this.model.Endpoints, endpoint.Id];
-    }
+  onChangePartialMatch(value) {
+    return this.onChangeModel({ PartialMatch: value });
   }
 
-  dissociateEndpoint(endpoint) {
-    return this.$async(async () => {
-      const confirmed = await confirmDestructiveAsync({
-        title: '确认操作',
-        message: '从这个组中删除环境将删除其相应的边缘堆栈',
-        buttons: {
-          cancel: {
-            label: '取消',
-            className: 'btn-default',
-          },
-          confirm: {
-            label: '确认',
-            className: 'btn-primary',
-          },
-        },
-      });
+  onChangeDynamic(value) {
+    this.onChangeModel({ Dynamic: value });
+  }
 
-      if (!confirmed) {
-        return;
+  onChangeTags(value) {
+    this.onChangeModel({ TagIds: value });
+  }
+
+  onChangeEnvironments(value, meta) {
+    return this.$async(async () => {
+      if (meta.type === 'remove' && this.pageType === 'edit') {
+        const confirmed = await confirmDestructive({
+          title: 'Confirm action',
+          message: 'Removing the environment from this group will remove its corresponding edge stacks',
+          confirmButton: buildConfirmButton('Confirm'),
+        });
+
+        if (!confirmed) {
+          return;
+        }
       }
 
-      this.model.Endpoints = _.filter(this.model.Endpoints, (id) => id !== endpoint.Id);
+      this.onChangeModel({ Endpoints: value });
     });
   }
 
-  getDynamicEndpoints() {
-    return this.$async(this.getDynamicEndpointsAsync);
-  }
-
-  async getDynamicEndpointsAsync() {
-    const { pageNumber, limit, search } = this.endpoints.state;
-    const start = (pageNumber - 1) * limit + 1;
-    const query = { search, types: EdgeTypes, tagIds: this.model.TagIds, tagsPartialMatch: this.model.PartialMatch };
-
-    const response = await getEnvironments({ start, limit, query });
-
-    const totalCount = parseInt(response.totalCount, 10);
-    this.endpoints.value = response.value;
-    this.endpoints.state.totalCount = totalCount;
+  handleSubmit() {
+    this.formAction(this.model);
   }
 }

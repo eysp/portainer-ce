@@ -1,4 +1,4 @@
-import { FeatureId } from '@/portainer/feature-flags/enums';
+import { FeatureId } from '@/react/portainer/feature-flags/enums';
 
 angular.module('portainer.app').controller('GroupAccessController', [
   '$scope',
@@ -18,7 +18,7 @@ angular.module('portainer.app').controller('GroupAccessController', [
         })
         .catch((err) => {
           $scope.state.actionInProgress = false;
-          Notifications.error('失败', err, 'Unable to update accesses');
+          Notifications.error('Failure', err, 'Unable to update accesses');
         });
     };
 
@@ -31,7 +31,7 @@ angular.module('portainer.app').controller('GroupAccessController', [
           $scope.group = data;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, 'Unable to load view');
+          Notifications.error('Failure', err, 'Unable to load view');
         });
     }
 

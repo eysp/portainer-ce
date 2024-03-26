@@ -1,22 +1,23 @@
-import clsx from 'clsx';
+import { Plug2 } from 'lucide-react';
 
 import {
   environmentTypeIcon,
   endpointTypeName,
   stripProtocol,
 } from '@/portainer/filters/filters';
-import { EnvironmentId } from '@/portainer/environments/types';
-import { EdgeIndicator } from '@/portainer/home/EnvironmentList/EnvironmentItem';
+import { EnvironmentId } from '@/react/portainer/environments/types';
 import {
   isEdgeEnvironment,
   isUnassociatedEdgeEnvironment,
-} from '@/portainer/environments/utils';
+} from '@/react/portainer/environments/utils';
 import {
   ENVIRONMENTS_POLLING_INTERVAL,
   useEnvironmentList,
-} from '@/portainer/environments/queries/useEnvironmentList';
+} from '@/react/portainer/environments/queries/useEnvironmentList';
 
+import { EdgeIndicator } from '@@/EdgeIndicator';
 import { Widget, WidgetBody, WidgetTitle } from '@@/Widget';
+import { Icon } from '@@/Icon';
 
 import styles from './WizardEndpointsList.module.css';
 
@@ -27,34 +28,33 @@ interface Props {
 export function WizardEndpointsList({ environmentIds }: Props) {
   const { environments } = useEnvironmentList(
     { endpointIds: environmentIds },
-    (environments) => {
-      if (!environments) {
-        return false;
-      }
+    {
+      refetchInterval: (environments) => {
+        if (!environments) {
+          return false;
+        }
 
-      if (!environments.value.some(isUnassociatedEdgeEnvironment)) {
-        return false;
-      }
+        if (!environments.value.some(isUnassociatedEdgeEnvironment)) {
+          return false;
+        }
 
-      return ENVIRONMENTS_POLLING_INTERVAL;
-    },
-    0,
-    environmentIds.length > 0
+        return ENVIRONMENTS_POLLING_INTERVAL;
+      },
+
+      enabled: environmentIds.length > 0,
+    }
   );
 
   return (
     <Widget>
-      <WidgetTitle icon="svg-plug" title="新环境" />
+      <WidgetTitle icon={Plug2} title="新环境" />
       <WidgetBody>
         {environments.map((environment) => (
           <div className={styles.wizardListWrapper} key={environment.Id}>
             <div className={styles.wizardListImage}>
-              <i
-                aria-hidden="true"
-                className={clsx(
-                  'space-right',
-                  environmentTypeIcon(environment.Type)
-                )}
+              <Icon
+                icon={environmentTypeIcon(environment.Type)}
+                className="mr-1"
               />
             </div>
             <div className={styles.wizardListTitle}>{environment.Name}</div>

@@ -1,7 +1,9 @@
 import clsx from 'clsx';
 import { useState } from 'react';
+import { Check } from 'lucide-react';
 
 import { Checkbox } from '@@/form-components/Checkbox';
+import { Icon } from '@@/Icon';
 
 import styles from './TableSettingsMenuAutoRefresh.module.css';
 
@@ -26,18 +28,18 @@ export function TableSettingsMenuAutoRefresh({ onChange, value }: Props) {
 
       {isEnabled && (
         <div>
-          <label htmlFor="settings_refresh_rate">Refresh rate</label>
+          <label htmlFor="settings_refresh_rate">刷新速率</label>
           <select
             id="settings_refresh_rate"
             className="small-select"
             value={value}
             onChange={(e) => handleChange(e.target.value)}
           >
-            <option value={10}>10s</option>
-            <option value={30}>30s</option>
-            <option value={60}>1min</option>
-            <option value={120}>2min</option>
-            <option value={300}>5min</option>
+            <option value={10}>10秒</option>
+            <option value={30}>30秒</option>
+            <option value={60}>1分钟</option>
+            <option value={120}>2分钟</option>
+            <option value={300}>5分钟</option>
           </select>
           <span
             className={clsx(
@@ -46,12 +48,7 @@ export function TableSettingsMenuAutoRefresh({ onChange, value }: Props) {
             )}
             onTransitionEnd={() => setIsCheckVisible(false)}
           >
-            <i
-              id="refreshRateChange"
-              className="fa fa-check green-icon"
-              aria-hidden="true"
-              style={{ marginTop: '7px' }}
-            />
+            <Icon icon={Check} className="!ml-1" mode="success" />
           </span>
         </div>
       )}

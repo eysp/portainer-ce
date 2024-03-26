@@ -33,14 +33,18 @@ func (handler *Handler) customTemplateFile(w http.ResponseWriter, r *http.Reques
 		return httperror.BadRequest("Invalid custom template identifier route variable", err)
 	}
 
-	customTemplate, err := handler.DataStore.CustomTemplate().CustomTemplate(portainer.CustomTemplateID(customTemplateID))
+	customTemplate, err := handler.DataStore.CustomTemplate().Read(portainer.CustomTemplateID(customTemplateID))
 	if handler.DataStore.IsErrObjectNotFound(err) {
 		return httperror.NotFound("Unable to find a custom template with the specified identifier inside the database", err)
 	} else if err != nil {
 		return httperror.InternalServerError("Unable to find a custom template with the specified identifier inside the database", err)
 	}
 
-	fileContent, err := handler.FileService.GetFileContent(customTemplate.ProjectPath, customTemplate.EntryPoint)
+	entryPath := customTemplate.EntryPoint
+	if customTemplate.GitConfig != nil {
+		entryPath = customTemplate.GitConfig.ConfigFilePath
+	}
+	fileContent, err := handler.FileService.GetFileContent(customTemplate.ProjectPath, entryPath)
 	if err != nil {
 		return httperror.InternalServerError("Unable to retrieve custom template file from disk", err)
 	}

@@ -1,16 +1,16 @@
 <rd-widget>
-  <rd-widget-header icon="svg-tachometer" title-text="群集信息"></rd-widget-header>
+  <rd-widget-header icon="gauge" title-text="集群信息"></rd-widget-header>
   <rd-widget-body classes="!px-5 !py-0">
     <table class="table">
       <tbody>
         <tr>
-          <td>Nodes in the cluster</td>
+          <td>集群中的节点数</td>
           <td>{{ $ctrl.agentCount }}</td>
         </tr>
         <tr>
           <td colspan="2">
             <div class="btn-group" role="group" aria-label="...">
-              <a ui-sref="docker.swarm.visualizer" class="vertical-center"><pr-icon icon="'trello'" feather="true" class-name="'icon'"></pr-icon>Go to cluster visualizer</a>
+              <a ui-sref="docker.swarm.visualizer" class="vertical-center"><pr-icon icon="'trello'" class-name="'icon'"></pr-icon>前往集群可视化器</a>
             </div>
           </td>
         </tr>

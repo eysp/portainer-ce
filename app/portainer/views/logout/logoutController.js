@@ -25,11 +25,10 @@ class LogoutController {
    */
   async logoutAsync() {
     const error = this.$transition$.params().error;
-    const performApiLogout = this.$transition$.params().performApiLogout;
     const settings = await this.SettingsService.publicSettings();
 
     try {
-      await this.Authentication.logout(performApiLogout);
+      await this.Authentication.logout();
     } finally {
       this.LocalStorage.storeLogoutReason(error);
       if (settings.OAuthLogoutURI && this.Authentication.getUserDetails().ID !== 1) {
@@ -52,7 +51,7 @@ class LogoutController {
     try {
       await this.logout();
     } catch (err) {
-      this.Notifications.error('失败', err, 'An error occured during logout');
+      this.Notifications.error('Failure', err, '注销时发生错误');
     }
   }
 

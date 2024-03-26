@@ -1,6 +1,7 @@
 package users
 
 import (
+	"errors"
 	"net/http"
 
 	httperror "github.com/portainer/libhttp/error"
@@ -47,7 +48,7 @@ func (handler *Handler) userRemoveAccessToken(w http.ResponseWriter, r *http.Req
 		return httperror.Forbidden("Permission denied to get user access tokens", httperrors.ErrUnauthorized)
 	}
 
-	_, err = handler.DataStore.User().User(portainer.UserID(userID))
+	_, err = handler.DataStore.User().Read(portainer.UserID(userID))
 	if err != nil {
 		if handler.DataStore.IsErrObjectNotFound(err) {
 			return httperror.NotFound("Unable to find a user with the specified identifier inside the database", err)
@@ -66,7 +67,7 @@ func (handler *Handler) userRemoveAccessToken(w http.ResponseWriter, r *http.Req
 
 	err = handler.apiKeyService.DeleteAPIKey(portainer.APIKeyID(apiKeyID))
 	if err != nil {
-		if err == apikey.ErrInvalidAPIKey {
+		if errors.Is(err, apikey.ErrInvalidAPIKey) {
 			return httperror.NotFound("Unable to find an api-key with the specified identifier inside the database", err)
 		}
 		return httperror.InternalServerError("Unable to remove the api-key from the user", err)

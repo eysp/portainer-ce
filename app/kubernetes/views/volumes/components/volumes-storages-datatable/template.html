@@ -1,21 +1,21 @@
 <div class="datatable">
   <!-- toolbar header actions and settings -->
   <div class="toolBar !flex-col gap-1">
-    <div class="toolBar vertical-center !gap-x-5 !gap-y-1 flex-wrap !p-0 w-full">
+    <div class="toolBar vertical-center w-full flex-wrap !gap-x-5 !gap-y-1 !p-0">
       <div class="toolBarTitle vertical-center">
         <div class="widget-icon space-right">
-          <pr-icon icon="'hard-drive'" feather="true"></pr-icon>
+          <pr-icon icon="'hard-drive'"></pr-icon>
         </div>
-        Storage
+        存储
       </div>
       <div class="searchBar vertical-center !mr-0">
-        <pr-icon icon="'search'" feather="true"></pr-icon>
+        <pr-icon icon="'search'"></pr-icon>
         <input
           type="text"
           class="searchInput"
           ng-model="$ctrl.state.textFilter"
           ng-change="$ctrl.onTextFilterChange()"
-          placeholder="Search for storage..."
+          placeholder="搜索存储..."
           auto-focus
           ng-model-options="{ debounce: 300 }"
         />
@@ -23,7 +23,7 @@
       <div class="settings">
         <div class="setting" ng-class="{ 'setting-active': $ctrl.settings.open }" uib-dropdown dropdown-append-to-body auto-close="disabled" is-open="$ctrl.settings.open">
           <span uib-dropdown-toggle aria-label="Settings">
-            <pr-icon icon="'more-vertical'" feather="true" class-name="'!mr-0 !h-4'"></pr-icon>
+            <pr-icon icon="'more-vertical'" class-name="'!mr-0 !h-4'"></pr-icon>
           </span>
           <div class="dropdown-menu dropdown-menu-right" uib-dropdown-menu>
             <div class="tableMenu">
@@ -37,14 +37,14 @@
                   <div ng-if="$ctrl.settings.repeater.autoRefresh">
                     <label for="settings_refresh_rate"> 刷新频率 </label>
                     <select id="settings_refresh_rate" ng-model="$ctrl.settings.repeater.refreshRate" ng-change="$ctrl.onSettingsRepeaterChange()" class="small-select">
-                      <option value="10">10s</option>
-                      <option value="30">30s</option>
-                      <option value="60">1min</option>
-                      <option value="120">2min</option>
-                      <option value="300">5min</option>
+                      <option value="10">10秒</option>
+                      <option value="30">30秒</option>
+                      <option value="60">1分钟</option>
+                      <option value="120">2分钟</option>
+                      <option value="300">5分钟</option>
                     </select>
                     <span>
-                      <pr-icon id="refreshRateChange" icon="'check'" feather="true" mode="'success'" size="'sm'"></pr-icon>
+                      <pr-icon id="refreshRateChange" icon="'check'" mode="'success'" style="display: none"></pr-icon>
                     </span>
                   </div>
                 </div>
@@ -59,18 +59,18 @@
     </div>
   </div>
   <div class="table-responsive">
-    <table class="table table-hover nowrap-cells">
+    <table class="table-hover nowrap-cells table">
       <thead>
         <tr>
           <th class="datatable-wide dropdown" ng-if="$ctrl.hasExpandableItems()">
-            <div class="cursor-pointer vertical-center" ng-click="$ctrl.expandAll()">
-              <pr-icon ng-if="$ctrl.state.expandAll" icon="'chevron-down'" feather="true"></pr-icon>
-              <pr-icon ng-if="!$ctrl.state.expandAll" icon="'chevron-right'" feather="true"></pr-icon>
+            <div class="vertical-center cursor-pointer" ng-click="$ctrl.expandAll()">
+              <pr-icon ng-if="$ctrl.state.expandAll" icon="'chevron-down'"></pr-icon>
+              <pr-icon ng-if="!$ctrl.state.expandAll" icon="'chevron-right'"></pr-icon>
             </div>
           </th>
           <th style="width: 60%">
             <table-column-header
-              col-title="'Storage'"
+              col-title="'存储'"
               can-sort="true"
               is-sorted="$ctrl.state.orderBy === 'Name'"
               is-sorted-desc="$ctrl.state.orderBy === 'Name' && $ctrl.state.reverseOrder"
@@ -79,7 +79,7 @@
           </th>
           <th style="width: 38%">
             <table-column-header
-              col-title="'Usage'"
+              col-title="'使用情况'"
               can-sort="true"
               is-sorted="$ctrl.state.orderBy === 'Size'"
               is-sorted-desc="$ctrl.state.orderBy === 'Size' && $ctrl.state.reverseOrder"
@@ -97,8 +97,8 @@
         >
           <td ng-if="$ctrl.hasExpandableItems()">
             <div ng-if="$ctrl.itemCanExpand(item)" class="vertical-center">
-              <pr-icon ng-if="item.Expanded" icon="'chevron-down'" feather="true"></pr-icon>
-              <pr-icon ng-if="!item.Expanded" icon="'chevron-right'" feather="true"></pr-icon>
+              <pr-icon ng-if="item.Expanded" icon="'chevron-down'"></pr-icon>
+              <pr-icon ng-if="!item.Expanded" icon="'chevron-right'"></pr-icon>
             </div>
           </td>
           <td>{{ item.Name }}</td>
@@ -121,22 +121,22 @@
           </td>
         </tr>
         <tr ng-if="!$ctrl.dataset">
-          <td colspan="5" class="text-center text-muted">加载中...</td>
+          <td colspan="5" class="text-muted text-center">加载中...</td>
         </tr>
         <tr ng-if="$ctrl.state.filteredDataSet.length === 0">
-          <td colspan="5" class="text-center text-muted">No storage available.</td>
+          <td colspan="5" class="text-muted text-center">暂无可用存储。</td>
         </tr>
       </tbody>
     </table>
   </div>
   <div class="footer pl-5" ng-if="$ctrl.dataset">
-    <div class="infoBar !ml-0" ng-if="$ctrl.state.selectedItemCount !== 0"> {{ $ctrl.state.selectedItemCount }} 所选项目 </div>
+    <div class="infoBar !ml-0" ng-if="$ctrl.state.selectedItemCount !== 0"> {{ $ctrl.state.selectedItemCount }} 项已选择 </div>
     <div class="paginationControls">
       <form class="form-inline">
         <span class="limitSelector">
-          <span style="margin-right: 5px"> 每页项目数 </span>
+          <span style="margin-right: 5px"> 每页项目 </span>
           <select class="form-control" ng-model="$ctrl.state.paginatedItemLimit" ng-change="$ctrl.changePaginationLimit()" data-cy="component-paginationSelect">
-            <option value="0">All</option>
+            <option value="0">全部</option>
             <option value="10">10</option>
             <option value="25">25</option>
             <option value="50">50</option>

@@ -1,4 +1,6 @@
+import { ReactNode } from 'react';
 import type { Meta } from '@storybook/react';
+import { User } from 'lucide-react';
 
 import { Widget } from './Widget';
 import { WidgetBody } from './WidgetBody';
@@ -9,18 +11,18 @@ import { WidgetTaskbar } from './WidgetTaskbar';
 interface WidgetProps {
   loading: boolean;
   title: string;
-  icon: string;
+  icon: ReactNode;
   bodyText: string;
   footerText: string;
 }
 
 const meta: Meta<WidgetProps> = {
-  title: 'Widget',
+  title: 'Components/Widget',
   component: Widget,
   args: {
     loading: false,
     title: 'Title',
-    icon: 'fa-rocket',
+    icon: User,
     bodyText: 'Body',
     footerText: 'Footer',
   },
@@ -52,11 +54,15 @@ function WidgetWithCustomImage({
       <WidgetTitle
         title={title}
         icon={
-          <img
-            className="custom-header-ico space-right"
-            src={icon}
-            alt="header-icon"
-          />
+          typeof icon === 'string' ? (
+            <img
+              className="custom-header-ico space-right"
+              src={icon}
+              alt="header-icon"
+            />
+          ) : (
+            icon
+          )
         }
       />
       <WidgetBody loading={loading}>{bodyText}</WidgetBody>
@@ -81,7 +87,7 @@ function WidgetWithTaskBar({
       <WidgetTitle title={title} icon={icon} />
       <WidgetTaskbar>
         <button type="button" className="btn btn-primary">
-          Button
+          按钮
         </button>
       </WidgetTaskbar>
       <WidgetBody loading={loading}>{bodyText}</WidgetBody>

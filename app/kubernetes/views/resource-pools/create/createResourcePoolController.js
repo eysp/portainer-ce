@@ -6,7 +6,7 @@ import { KubernetesResourcePoolFormValues, KubernetesResourcePoolIngressClassHos
 import { KubernetesIngressConverter } from 'Kubernetes/ingress/converter';
 import { KubernetesFormValidationReferences } from 'Kubernetes/models/application/formValues';
 import { KubernetesIngressClassTypes } from 'Kubernetes/ingress/constants';
-import { FeatureId } from '@/portainer/feature-flags/enums';
+import { FeatureId } from '@/react/portainer/feature-flags/enums';
 import { getIngressControllerClassMap, updateIngressControllerClassMap } from '@/react/kubernetes/cluster/ingressClass/utils';
 
 class KubernetesCreateResourcePoolController {
@@ -127,7 +127,7 @@ class KubernetesCreateResourcePoolController {
         this.Notifications.success('Namespace successfully created', this.formValues.Name);
         this.$state.go('kubernetes.resourcePools');
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to create namespace');
+        this.Notifications.error('Failure', err, 'Unable to create namespace');
       } finally {
         this.state.actionInProgress = false;
       }
@@ -141,7 +141,7 @@ class KubernetesCreateResourcePoolController {
       try {
         this.allIngresses = await this.KubernetesIngressService.get();
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to retrieve ingresses.');
+        this.Notifications.error('Failure', err, 'Unable to retrieve ingresses.');
       }
     });
   }
@@ -151,9 +151,9 @@ class KubernetesCreateResourcePoolController {
   getResourcePools() {
     return this.$async(async () => {
       try {
-        this.resourcePools = await this.KubernetesResourcePoolService.get();
+        this.resourcePools = await this.KubernetesResourcePoolService.get('', { getQuota: true });
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to retrieve namespaces');
+        this.Notifications.error('Failure', err, 'Unable to retrieve namespaces');
       }
     });
   }
@@ -165,7 +165,7 @@ class KubernetesCreateResourcePoolController {
       try {
         this.registries = await this.EndpointService.registries(this.endpoint.Id);
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to retrieve registries');
+        this.Notifications.error('Failure', err, 'Unable to retrieve registries');
       }
     });
   }
@@ -179,7 +179,7 @@ class KubernetesCreateResourcePoolController {
         this.defaults = KubernetesResourceQuotaDefaults;
         this.formValues = new KubernetesResourcePoolFormValues(this.defaults);
         this.formValues.EndpointId = this.endpoint.Id;
-        this.formValues.HasQuota = true;
+        this.formValues.HasQuota = false;
 
         this.state = {
           actionInProgress: false,
@@ -222,7 +222,7 @@ class KubernetesCreateResourcePoolController {
 
         await this.getRegistries();
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to load view data');
+        this.Notifications.error('Failure', err, 'Unable to load view data');
       } finally {
         this.state.viewReady = true;
       }

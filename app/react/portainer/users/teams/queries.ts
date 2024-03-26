@@ -91,14 +91,14 @@ export function useRemoveMemberMutation(
             (membership) => membership.UserID === userId
           );
           if (!membership) {
-            throw new Error('Membership not found');
+            throw new Error('找不到成员');
           }
           return deleteTeamMembership(membership.Id);
         })
       ),
     {
       onError(error) {
-        notifyError('Failure', error as Error, 'Failure to add membership');
+        notifyError('错误', error as Error, '添加成员失败');
       },
       onSuccess() {
         queryClient.invalidateQueries(['teams', teamId, 'memberships']);
@@ -119,13 +119,13 @@ export function useUpdateRoleMutation(
         (membership) => membership.UserID === userId
       );
       if (!membership) {
-        throw new Error('Membership not found');
+        throw new Error('找不到成员');
       }
       return updateTeamMembership(membership.Id, userId, teamId, role);
     },
     {
       onError(error) {
-        notifyError('Failure', error as Error, 'Failure to update membership');
+        notifyError('失败', error as Error, '更新成员失败');
       },
       onSuccess() {
         queryClient.invalidateQueries(['teams', teamId, 'memberships']);

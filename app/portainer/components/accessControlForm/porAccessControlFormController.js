@@ -21,6 +21,13 @@ angular.module('portainer.app').controller('porAccessControlFormController', [
     ctrl.availableTeams = [];
     ctrl.availableUsers = [];
 
+    ctrl.onChangeEnablement = onChangeEnablement;
+    ctrl.onChangeOwnership = onChangeOwnership;
+
+    function onChangeOwnership(ownership) {
+      onChange({ Ownership: ownership });
+    }
+
     function setOwnership(resourceControl, isAdmin) {
       if (isAdmin && resourceControl.Ownership === RCO.PRIVATE) {
         ctrl.formData.Ownership = RCO.RESTRICTED;
@@ -88,12 +95,11 @@ angular.module('portainer.app').controller('porAccessControlFormController', [
         .catch(function error(err) {
           Notifications.error('失败', err, '无法检索访问控制信息');
         });
+    }
 
-      this.onChangeEnablement = function (enable) {
-        $scope.$evalAsync(() => {
-          ctrl.formData.AccessControlEnabled = enable;
-        });
-      };
+    function onChangeEnablement(enable) {
+      const isAdmin = Authentication.isAdmin();
+      onChange({ AccessControlEnabled: enable, Ownership: isAdmin ? RCO.ADMINISTRATORS : RCO.PRIVATE });
     }
   },
 ]);

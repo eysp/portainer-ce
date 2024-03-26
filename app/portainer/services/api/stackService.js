@@ -1,5 +1,5 @@
 import _ from 'lodash-es';
-import { RepositoryMechanismTypes } from 'Kubernetes/models/deploy';
+import { transformAutoUpdateViewModel } from '@/react/portainer/gitops/AutoUpdateFieldset/utils';
 import { StackViewModel, OrphanedStackViewModel } from '../../models/stack';
 
 angular.module('portainer.app').factory('StackService', [
@@ -11,8 +11,7 @@ angular.module('portainer.app').factory('StackService', [
   'ServiceService',
   'ContainerService',
   'SwarmService',
-  'EndpointProvider',
-  function StackServiceFactory($q, $async, Stack, FileUploadService, StackHelper, ServiceService, ContainerService, SwarmService, EndpointProvider) {
+  function StackServiceFactory($q, $async, Stack, FileUploadService, StackHelper, ServiceService, ContainerService, SwarmService) {
     'use strict';
     var service = {
       updateGit,
@@ -28,7 +27,7 @@ angular.module('portainer.app').factory('StackService', [
           deferred.resolve(stack);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve stack details', err: err });
+          deferred.reject({ msg: '无法获取堆栈详细信息', err: err });
         });
 
       return deferred.promise;
@@ -42,7 +41,7 @@ angular.module('portainer.app').factory('StackService', [
           deferred.resolve(data.StackFileContent);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve stack content', err: err });
+          deferred.reject({ msg: '无法获取堆栈内容', err: err });
         });
 
       return deferred.promise;
@@ -51,13 +50,11 @@ angular.module('portainer.app').factory('StackService', [
     service.migrateSwarmStack = function (stack, targetEndpointId, newName) {
       var deferred = $q.defer();
 
-      EndpointProvider.setEndpointID(targetEndpointId);
-
-      SwarmService.swarm()
+      SwarmService.swarm(targetEndpointId)
         .then(function success(data) {
           var swarm = data;
           if (swarm.Id === stack.SwarmId) {
-            deferred.reject({ msg: 'Target environment is located in the same Swarm cluster as the current environment', err: null });
+            deferred.reject({ msg: '目标环境位于与当前环境相同的Swarm集群中', err: null });
             return;
           }
           return Stack.migrate({ id: stack.Id, endpointId: stack.EndpointId }, { EndpointID: targetEndpointId, SwarmID: swarm.Id, Name: newName }).$promise;
@@ -66,10 +63,7 @@ angular.module('portainer.app').factory('StackService', [
           deferred.resolve();
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to migrate stack', err: err });
-        })
-        .finally(function final() {
-          EndpointProvider.setEndpointID(stack.EndpointId);
+          deferred.reject({ msg: '无法迁移堆栈', err: err });
         });
 
       return deferred.promise;
@@ -78,15 +72,12 @@ angular.module('portainer.app').factory('StackService', [
     service.migrateComposeStack = function (stack, targetEndpointId, newName) {
       var deferred = $q.defer();
 
-      EndpointProvider.setEndpointID(targetEndpointId);
-
       Stack.migrate({ id: stack.Id, endpointId: stack.EndpointId }, { EndpointID: targetEndpointId, Name: newName })
         .$promise.then(function success() {
           deferred.resolve();
         })
         .catch(function error(err) {
-          EndpointProvider.setEndpointID(stack.EndpointId);
-          deferred.reject({ msg: 'Unable to migrate stack', err: err });
+          deferred.reject({ msg: '无法迁移堆栈', err: err });
         });
 
       return deferred.promise;
@@ -115,7 +106,7 @@ angular.module('portainer.app').factory('StackService', [
           deferred.resolve(stacks);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve stacks', err: err });
+          deferred.reject({ msg: '无法获取堆栈', err: err });
         });
 
       return deferred.promise;
@@ -129,7 +120,7 @@ angular.module('portainer.app').factory('StackService', [
           deferred.resolve(StackHelper.getExternalStacksFromServices(services));
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve external stacks', err: err });
+          deferred.reject({ msg: '无法获取外部堆栈', err: err });
         });
 
       return deferred.promise;
@@ -143,7 +134,7 @@ angular.module('portainer.app').factory('StackService', [
           deferred.resolve(StackHelper.getExternalStacksFromContainers(containers));
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve external stacks', err: err });
+          deferred.reject({ msg: '无法获取外部堆栈', err: err });
         });
 
       return deferred.promise;
@@ -185,7 +176,7 @@ angular.module('portainer.app').factory('StackService', [
           deferred.resolve(result);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve stacks', err: err });
+          deferred.reject({ msg: '无法获取堆栈', err: err });
         });
 
       return deferred.promise;
@@ -218,7 +209,7 @@ angular.module('portainer.app').factory('StackService', [
           deferred.resolve(result);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve stacks', err: err });
+          deferred.reject({ msg: '无法获取堆栈', err: err });
         });
 
       return deferred.promise;
@@ -232,7 +223,7 @@ angular.module('portainer.app').factory('StackService', [
           deferred.resolve();
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to remove the stack', err: err });
+          deferred.reject({ msg: '无法删除堆栈', err: err });
         });
 
       return deferred.promise;
@@ -251,7 +242,7 @@ angular.module('portainer.app').factory('StackService', [
             deferred.resolve(data);
           })
           .catch(function error(err) {
-            deferred.reject({ msg: 'Unable to associate the stack', err: err });
+            deferred.reject({ msg: '无法关联堆栈', err: err });
           });
       } else {
         Stack.associate({ id: stack.Id, endpointId: endpointId, orphanedRunning })
@@ -259,7 +250,7 @@ angular.module('portainer.app').factory('StackService', [
             deferred.resolve(data);
           })
           .catch(function error(err) {
-            deferred.reject({ msg: 'Unable to associate the stack', err: err });
+            deferred.reject({ msg: '无法关联堆栈', err: err });
           });
       }
 
@@ -279,7 +270,7 @@ angular.module('portainer.app').factory('StackService', [
       ).$promise;
     };
 
-    service.updateKubeStack = function (stack, stackFile, gitConfig) {
+    service.updateKubeStack = function (stack, { stackFile, gitConfig, webhookId }) {
       let payload = {};
 
       if (stackFile) {
@@ -287,21 +278,13 @@ angular.module('portainer.app').factory('StackService', [
           StackFileContent: stackFile,
         };
       } else {
-        const autoUpdate = {};
-        if (gitConfig.AutoUpdate && gitConfig.AutoUpdate.RepositoryAutomaticUpdates) {
-          if (gitConfig.AutoUpdate.RepositoryMechanism === RepositoryMechanismTypes.INTERVAL) {
-            autoUpdate.Interval = gitConfig.AutoUpdate.RepositoryFetchInterval;
-          } else if (gitConfig.AutoUpdate.RepositoryMechanism === RepositoryMechanismTypes.WEBHOOK) {
-            autoUpdate.Webhook = gitConfig.AutoUpdate.RepositoryWebhookURL.split('/').reverse()[0];
-          }
-        }
-
         payload = {
-          AutoUpdate: autoUpdate,
+          AutoUpdate: transformAutoUpdateViewModel(gitConfig.AutoUpdate, webhookId),
           RepositoryReferenceName: gitConfig.RefName,
           RepositoryAuthentication: gitConfig.RepositoryAuthentication,
           RepositoryUsername: gitConfig.RepositoryUsername,
           RepositoryPassword: gitConfig.RepositoryPassword,
+          TLSSkipVerify: gitConfig.TLSSkipVerify,
         };
       }
 
@@ -324,7 +307,7 @@ angular.module('portainer.app').factory('StackService', [
           deferred.resolve(data.data);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to create the stack', err: err });
+          deferred.reject({ msg: '无法创建堆栈', err: err });
         });
 
       return deferred.promise;
@@ -335,13 +318,13 @@ angular.module('portainer.app').factory('StackService', [
         StackFileContent: stackFileContent,
         Env: env,
       };
-      return Stack.create({ method: 'string', type: 2, endpointId: endpointId }, payload).$promise;
+      return Stack.create({ endpointId: endpointId }, { method: 'string', type: 'standalone', ...payload }).$promise;
     };
 
     service.createSwarmStackFromFileContent = function (name, stackFileContent, env, endpointId) {
       var deferred = $q.defer();
 
-      SwarmService.swarm()
+      SwarmService.swarm(endpointId)
         .then(function success(swarm) {
           var payload = {
             Name: name,
@@ -349,13 +332,13 @@ angular.module('portainer.app').factory('StackService', [
             StackFileContent: stackFileContent,
             Env: env,
           };
-          return Stack.create({ method: 'string', type: 1, endpointId: endpointId }, payload).$promise;
+          return Stack.create({ endpointId: endpointId }, { method: 'string', type: 'swarm', ...payload }).$promise;
         })
         .then(function success(data) {
           deferred.resolve(data);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to create the stack', err: err });
+          deferred.reject({ msg: '无法创建堆栈', err: err });
         });
 
       return deferred.promise;
@@ -373,13 +356,14 @@ angular.module('portainer.app').factory('StackService', [
         RepositoryPassword: repositoryOptions.RepositoryPassword,
         Env: env,
         FromAppTemplate: repositoryOptions.FromAppTemplate,
+        TLSSkipVerify: repositoryOptions.TLSSkipVerify,
       };
 
       if (repositoryOptions.AutoUpdate) {
         payload.AutoUpdate = repositoryOptions.AutoUpdate;
       }
 
-      return Stack.create({ method: 'repository', type: 2, endpointId: endpointId }, payload).$promise;
+      return Stack.create({ endpointId: endpointId }, { method: 'repository', type: 'standalone', ...payload }).$promise;
     };
 
     service.createSwarmStackFromGitRepository = function (name, repositoryOptions, env, endpointId) {
@@ -400,19 +384,20 @@ angular.module('portainer.app').factory('StackService', [
             RepositoryPassword: repositoryOptions.RepositoryPassword,
             Env: env,
             FromAppTemplate: repositoryOptions.FromAppTemplate,
+            TLSSkipVerify: repositoryOptions.TLSSkipVerify,
           };
 
           if (repositoryOptions.AutoUpdate) {
             payload.AutoUpdate = repositoryOptions.AutoUpdate;
           }
 
-          return Stack.create({ method: 'repository', type: 1, endpointId: endpointId }, payload).$promise;
+          return Stack.create({ endpointId: endpointId }, { method: 'repository', type: 'swarm', ...payload }).$promise;
         })
         .then(function success(data) {
           deferred.resolve(data);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to create the stack', err: err });
+          deferred.reject({ msg: '无法创建堆栈', err: err });
         });
 
       return deferred.promise;
@@ -425,7 +410,7 @@ angular.module('portainer.app').factory('StackService', [
 
     async function kubernetesDeployAsync(endpointId, method, payload) {
       try {
-        await Stack.create({ endpointId: endpointId, method: method, type: 3 }, payload).$promise;
+        await Stack.create({ endpointId: endpointId }, { method, type: 'kubernetes', ...payload }).$promise;
       } catch (err) {
         throw { err: err };
       }
@@ -436,13 +421,13 @@ angular.module('portainer.app').factory('StackService', [
     };
 
     service.start = start;
-    function start(id) {
-      return Stack.start({ id }).$promise;
+    function start(endpointId, id) {
+      return Stack.start({ id, endpointId }).$promise;
     }
 
     service.stop = stop;
-    function stop(id) {
-      return Stack.stop({ id }).$promise;
+    function stop(endpointId, id) {
+      return Stack.stop({ endpointId, id }).$promise;
     }
 
     function updateGit(id, endpointId, env, prune, gitConfig, pullImage) {
@@ -473,28 +458,18 @@ angular.module('portainer.app').factory('StackService', [
       ).$promise;
     }
 
-    service.updateGitStackSettings = function (id, endpointId, env, gitConfig) {
-      // prepare auto update
-      const autoUpdate = {};
-
-      if (gitConfig.AutoUpdate.RepositoryAutomaticUpdates) {
-        if (gitConfig.AutoUpdate.RepositoryMechanism === RepositoryMechanismTypes.INTERVAL) {
-          autoUpdate.Interval = gitConfig.AutoUpdate.RepositoryFetchInterval;
-        } else if (gitConfig.AutoUpdate.RepositoryMechanism === RepositoryMechanismTypes.WEBHOOK) {
-          autoUpdate.Webhook = gitConfig.AutoUpdate.RepositoryWebhookURL.split('/').reverse()[0];
-        }
-      }
-
+    service.updateGitStackSettings = function (id, endpointId, env, gitConfig, webhookId) {
       return Stack.updateGitStackSettings(
         { endpointId, id },
         {
-          AutoUpdate: autoUpdate,
+          AutoUpdate: transformAutoUpdateViewModel(gitConfig.AutoUpdate, webhookId),
           Env: env,
           RepositoryReferenceName: gitConfig.RefName,
           RepositoryAuthentication: gitConfig.RepositoryAuthentication,
           RepositoryUsername: gitConfig.RepositoryUsername,
           RepositoryPassword: gitConfig.RepositoryPassword,
           Prune: gitConfig.Option.Prune,
+          TLSSkipVerify: gitConfig.TLSSkipVerify,
         }
       ).$promise;
     };

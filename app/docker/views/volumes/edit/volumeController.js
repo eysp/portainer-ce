@@ -1,16 +1,15 @@
 import { ResourceControlType } from '@/react/portainer/access-control/types';
+import { confirmDelete } from '@@/modals/confirm';
 
 angular.module('portainer.docker').controller('VolumeController', [
   '$scope',
   '$state',
   '$transition$',
-  '$q',
-  'ModalService',
   'VolumeService',
   'ContainerService',
   'Notifications',
   'HttpRequestHelper',
-  function ($scope, $state, $transition$, $q, ModalService, VolumeService, ContainerService, Notifications, HttpRequestHelper) {
+  function ($scope, $state, $transition$, VolumeService, ContainerService, Notifications, HttpRequestHelper) {
     $scope.resourceType = ResourceControlType.Volume;
 
     $scope.onUpdateResourceControlSuccess = function () {
@@ -18,11 +17,11 @@ angular.module('portainer.docker').controller('VolumeController', [
     };
 
     $scope.removeVolume = function removeVolume() {
-      ModalService.confirmDeletion('你想删除此存储卷吗？', (confirmed) => {
+      confirmDelete('您是否要删除此存储卷？').then((confirmed) => {
         if (confirmed) {
           VolumeService.remove($scope.volume)
             .then(function success() {
-              Notifications.success('存储卷成功删除', $transition$.params().id);
+              Notifications.success('存储卷删除成功', $transition$.params().id);
               $state.go('docker.volumes', {});
             })
             .catch(function error(err) {
@@ -59,7 +58,7 @@ angular.module('portainer.docker').controller('VolumeController', [
           $scope.containersUsingVolume = containers;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索到存储卷的详细信息');
+          Notifications.error('失败', err, '无法检索存储卷详情');
         });
     }
 

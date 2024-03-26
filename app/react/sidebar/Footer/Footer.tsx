@@ -1,7 +1,7 @@
 import { PropsWithChildren } from 'react';
 import clsx from 'clsx';
 
-import { isBE } from '@/portainer/feature-flags/feature-flags.service';
+import { isBE } from '@/react/portainer/feature-flags/feature-flags.service';
 
 import { UpdateNotification } from './UpdateNotifications';
 import { BuildInfoModalButton } from './BuildInfoModal';
@@ -19,27 +19,10 @@ function CEFooter() {
       <UpdateNotification />
 
       <FooterContent>
-        <Logo width="90px" height="" />
+        <Logo width="90px" height="100%" />
         <span>社区版</span>
 
         <BuildInfoModalButton />
-
-        <a
-          href="https://www.portainer.io/install-BE-now"
-          className="text-blue-6 font-medium"
-          target="_blank"
-          rel="noreferrer"
-        >
-          升级
-        </a>
-        <a
-          href="https://hub.docker.com/r/6053537/portainer-ce"
-          className="text-blue-6 font-medium"
-          target="_blank"
-          rel="noreferrer"
-        >
-          汉化
-        </a>
       </FooterContent>
     </div>
   );
@@ -50,7 +33,7 @@ function BEFooter() {
     <div className={clsx(styles.root, 'text-center')}>
       <FooterContent>
         <span>&copy;</span>
-        <span>Portainer商业版</span>
+        <span>Portainer 商业版</span>
 
         <BuildInfoModalButton />
       </FooterContent>
@@ -60,7 +43,7 @@ function BEFooter() {
 
 function FooterContent({ children }: PropsWithChildren<unknown>) {
   return (
-    <div className="text-[10px] space-x-1 text-gray-5 be:text-gray-6 flex items-center mx-auto justify-center">
+    <div className="mx-auto flex items-center justify-center space-x-1 text-[10px] text-gray-5 be:text-gray-6">
       {children}
     </div>
   );

@@ -1,6 +1,6 @@
 import { FormikErrors } from 'formik';
 
-import { useUser } from '@/portainer/hooks/useUser';
+import { useUser } from '@/react/hooks/useUser';
 
 import { FormSectionTitle } from '@@/form-components/FormSectionTitle';
 import { SwitchField } from '@@/form-components/SwitchField';
@@ -37,7 +37,7 @@ export function AccessControlForm({
             checked={accessControlEnabled}
             name={withNamespace('accessControlEnabled')}
             label="启用访问控制"
-            tooltip="启用后，你可以限制对该资源的访问和管理。"
+            tooltip="启用后，您可以限制对此资源的访问和管理权限。"
             onChange={handleToggleEnable}
             dataCy="portainer-accessMgmtToggle"
           />

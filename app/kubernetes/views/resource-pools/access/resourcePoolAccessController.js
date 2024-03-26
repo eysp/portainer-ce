@@ -3,13 +3,15 @@ import _ from 'lodash-es';
 import { KubernetesPortainerConfigMapConfigName, KubernetesPortainerConfigMapNamespace, KubernetesPortainerConfigMapAccessKey } from 'Kubernetes/models/config-map/models';
 import { UserAccessViewModel, TeamAccessViewModel } from 'Portainer/models/access';
 import KubernetesConfigMapHelper from 'Kubernetes/helpers/configMapHelper';
+import { getIsRBACEnabled } from '@/react/kubernetes/cluster/getIsRBACEnabled';
 
 class KubernetesResourcePoolAccessController {
   /* @ngInject */
-  constructor($async, $state, $scope, Notifications, KubernetesResourcePoolService, KubernetesConfigMapService, GroupService, AccessService) {
+  constructor($async, $state, $scope, Notifications, KubernetesResourcePoolService, KubernetesConfigMapService, GroupService, AccessService, EndpointProvider) {
     this.$async = $async;
     this.$state = $state;
     this.$scope = $scope;
+    this.EndpointProvider = EndpointProvider;
     this.Notifications = Notifications;
     this.KubernetesResourcePoolService = KubernetesResourcePoolService;
     this.KubernetesConfigMapService = KubernetesConfigMapService;
@@ -45,12 +47,16 @@ class KubernetesResourcePoolAccessController {
       multiselectOutput: [],
     };
 
+    // default to true if error is thrown
+    this.isRBACEnabled = true;
+
     try {
       const name = this.$transition$.params().id;
       let [pool, configMap] = await Promise.all([
         this.KubernetesResourcePoolService.get(name),
         this.KubernetesConfigMapService.getAccess(KubernetesPortainerConfigMapNamespace, KubernetesPortainerConfigMapConfigName),
       ]);
+      this.isRBACEnabled = await getIsRBACEnabled(this.EndpointProvider.endpointID());
       const group = await this.GroupService.group(endpoint.GroupId);
       const roles = [];
       const endpointAccesses = await this.AccessService.accesses(endpoint, group, roles);
@@ -76,7 +82,7 @@ class KubernetesResourcePoolAccessController {
 
       this.availableUsersAndTeams = _.without(endpointAccesses.authorizedUsersAndTeams, ...this.authorizedUsersAndTeams);
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to retrieve namespace information');
+      this.Notifications.error('Failure', err, 'Unable to retrieve namespace information');
     } finally {
       this.state.viewReady = true;
     }
@@ -98,7 +104,7 @@ class KubernetesResourcePoolAccessController {
       this.Notifications.success('Success', 'Access successfully created');
       this.$state.reload(this.$state.current);
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to create accesses');
+      this.Notifications.error('Failure', err, 'Unable to create accesses');
     }
   }
 
@@ -124,7 +130,7 @@ class KubernetesResourcePoolAccessController {
       this.Notifications.success('Success', 'Access successfully removed');
       this.$state.reload(this.$state.current);
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to remove accesses');
+      this.Notifications.error('Failure', err, 'Unable to remove accesses');
     } finally {
       this.state.actionInProgress = false;
     }

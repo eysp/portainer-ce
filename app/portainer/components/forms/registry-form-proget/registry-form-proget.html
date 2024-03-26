@@ -1,27 +1,26 @@
 <form class="form-horizontal" name="$ctrl.registryFormProGet" ng-submit="$ctrl.formAction()">
-  <div class="col-sm-12 form-section-title"> Important notice </div>
+  <div class="col-sm-12 form-section-title"> 重要通知 </div>
   <div class="form-group">
     <div class="col-sm-12 text-muted small">
-      Any Portainer user that has access to this registry will be able to use the Registry Manager features against the content of any Feed in the ProGet registry that the ProGet
-      user has access to.
+      任何具有对此注册表访问权限的 Portainer 用户都将能够使用注册表管理器功能来管理 ProGet 注册表中所有 Feed 的内容，只要 ProGet 用户具有对这些 Feed 的访问权限。
     </div>
   </div>
-  <div class="col-sm-12 form-section-title"> ProGet registry details </div>
+  <div class="col-sm-12 form-section-title"> ProGet 注册表详情 </div>
   <!-- name-input -->
   <div class="form-group">
-    <label for="registry_name" class="col-sm-3 col-lg-2 control-label text-left required">名称</label>
+    <label for="registry_name" class="col-sm-3 col-lg-2 control-label required text-left">名称</label>
     <div class="col-sm-9 col-lg-10">
       <input type="text" class="form-control" id="registry_name" name="registry_name" ng-model="$ctrl.model.Name" placeholder="proget-registry" required auto-focus />
       <div class="help-block" ng-show="$ctrl.registryFormProGet.registry_name.$invalid">
         <div class="small text-warning">
           <div ng-messages="$ctrl.registryFormProGet.registry_name.$error">
             <p ng-message="required" class="vertical-center">
-              <pr-icon icon="'alert-triangle'" feather="true"></pr-icon>
-              本栏为必填项。
+              <pr-icon icon="'alert-triangle'"></pr-icon>
+              此字段为必填项。
             </p>
             <p ng-message="used" class="vertical-center">
-              <pr-icon icon="'alert-triangle'" feather="true"></pr-icon>
-              A registry with the same name already exists.
+              <pr-icon icon="'alert-triangle'"></pr-icon>
+              已存在同名的注册表。
             </p>
           </div>
         </div>
@@ -32,8 +31,8 @@
   <!-- url-input -->
   <div class="form-group">
     <label for="registry_url" class="col-sm-3 col-lg-2 control-label text-left">
-      <span class="required">Registry URL</span>
-      <portainer-tooltip message="'The URL of the ProGet registry including the Feed name'"></portainer-tooltip>
+      <span class="required">注册表 URL</span>
+      <portainer-tooltip message="'ProGet 注册表的 URL，包括 Feed 名称'"></portainer-tooltip>
     </label>
     <div class="col-sm-9 col-lg-10">
       <input type="text" class="form-control" id="registry_url" name="registry_url" ng-model="$ctrl.model.URL" placeholder="proget.example.com/example-registry" required />
@@ -41,8 +40,8 @@
         <div class="small text-warning">
           <div ng-messages="$ctrl.registryFormProGet.registry_url.$error">
             <p ng-message="required" class="vertical-center">
-              <pr-icon icon="'alert-triangle'" feather="true"></pr-icon>
-              本栏为必填项。
+              <pr-icon icon="'alert-triangle'"></pr-icon>
+              此字段为必填项。
             </p>
           </div>
         </div>
@@ -53,7 +52,7 @@
   <!-- base-url-input -->
   <div class="form-group">
     <label for="registry_base_url" class="col-sm-3 col-lg-2 control-label text-left">
-      <span class="required">Base URL</span>
+      <span class="required">基本 URL</span>
       <portainer-tooltip message="'The base URL of the ProGet registry'"></portainer-tooltip>
     </label>
     <div class="col-sm-9 col-lg-10">
@@ -62,8 +61,8 @@
         <div class="small text-warning">
           <div ng-messages="$ctrl.registryFormProGet.registry_base_url.$error">
             <p ng-message="required" class="vertical-center">
-              <pr-icon icon="'alert-triangle'" feather="true"></pr-icon>
-              本栏为必填项。
+              <pr-icon icon="'alert-triangle'"></pr-icon>
+              此字段为必填项。
             </p>
           </div>
         </div>
@@ -74,15 +73,15 @@
   <div>
     <!-- credentials-user -->
     <div class="form-group">
-      <label for="registry_username" class="col-sm-3 col-lg-2 control-label text-left required">用户名</label>
+      <label for="registry_username" class="col-sm-3 col-lg-2 control-label required text-left">用户名</label>
       <div class="col-sm-9 col-lg-10">
         <input type="text" class="form-control" id="registry_username" name="registry_username" ng-model="$ctrl.model.Username" required />
         <div class="help-block" ng-show="$ctrl.registryFormProGet.registry_username.$invalid">
           <div class="small text-warning">
             <div ng-messages="$ctrl.registryFormProGet.registry_username.$error">
               <p ng-message="required" class="vertical-center">
-                <pr-icon icon="'alert-triangle'" feather="true"></pr-icon>
-                本栏为必填项。
+                <pr-icon icon="'alert-triangle'"></pr-icon>
+                此字段为必填项。
               </p>
             </div>
           </div>
@@ -92,15 +91,15 @@
     <!-- !credentials-user -->
     <!-- credentials-password -->
     <div class="form-group">
-      <label for="registry_password" class="col-sm-3 col-lg-2 control-label text-left required">密码</label>
+      <label for="registry_password" class="col-sm-3 col-lg-2 control-label required text-left">密码</label>
       <div class="col-sm-9 col-lg-10">
         <input type="password" class="form-control" id="registry_password" name="registry_password" ng-model="$ctrl.model.Password" required />
         <div class="help-block" ng-show="$ctrl.registryFormProGet.registry_password.$invalid">
           <div class="small text-warning">
             <div ng-messages="$ctrl.registryFormProGet.registry_password.$error">
               <p ng-message="required" class="vertical-center">
-                <pr-icon icon="'alert-triangle'" feather="true"></pr-icon>
-                本栏为必填项。
+                <pr-icon icon="'alert-triangle'"></pr-icon>
+                此字段为必填项。
               </p>
             </div>
           </div>
@@ -124,7 +123,7 @@
         analytics-properties="{ metadata: { type: 'proget' } }"
       >
         <span ng-hide="$ctrl.actionInProgress">{{ $ctrl.formActionLabel }}</span>
-        <span ng-show="$ctrl.actionInProgress">正在进行中...</span>
+        <span ng-show="$ctrl.actionInProgress">进行中...</span>
       </button>
     </div>
   </div>

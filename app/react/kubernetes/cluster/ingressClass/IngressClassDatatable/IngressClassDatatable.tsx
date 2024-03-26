@@ -1,17 +1,21 @@
 import { useEffect, useState } from 'react';
+import { Database, AlertTriangle } from 'lucide-react';
 
-import { confirmWarn } from '@/portainer/services/modal.service/confirm';
-
+import { confirm } from '@@/modals/confirm';
+import { ModalType } from '@@/modals';
 import { Datatable } from '@@/datatables';
 import { Button, ButtonGroup } from '@@/buttons';
 import { Icon } from '@@/Icon';
+import { createPersistedStore } from '@@/datatables/types';
+import { buildConfirmButton } from '@@/modals/utils';
+import { useTableState } from '@@/datatables/useTableState';
 
 import { IngressControllerClassMap } from '../types';
 
-import { useColumns } from './columns';
-import { createStore } from './datatable-store';
+import { columns } from './columns';
 
-const useStore = createStore('ingressClasses');
+const storageKey = 'ingressClasses';
+const settingsStore = createPersistedStore(storageKey);
 
 interface Props {
   onChangeControllers: (
@@ -34,11 +38,11 @@ export function IngressClassDatatable({
   noIngressControllerLabel,
   view,
 }: Props) {
+  const tableState = useTableState(settingsStore, storageKey);
+
   const [ingControllerFormValues, setIngControllerFormValues] = useState(
     ingressControllers || []
   );
-  const settings = useStore();
-  const columns = useColumns();
 
   useEffect(() => {
     if (allowNoneIngressClass === undefined) {
@@ -75,17 +79,13 @@ export function IngressClassDatatable({
   return (
     <div className="-mx-[15px]">
       <Datatable
+        settingsManager={tableState}
         dataset={ingControllerFormValues || []}
-        storageKey="ingressClasses"
         columns={columns}
-        settingsStore={settings}
         isLoading={isLoading}
         emptyContentLabel={noIngressControllerLabel}
-        titleOptions={{
-          icon: 'database',
-          title: 'Ingress controllers',
-          featherIcon: true,
-        }}
+        title="Ingress Controllers"
+        titleIcon={Database}
         getRowId={(row) => `${row.Name}-${row.ClassName}-${row.Type}`}
         renderTableActions={(selectedRows) => renderTableActions(selectedRows)}
         description={renderIngressClassDescription()}
@@ -138,13 +138,13 @@ export function IngressClassDatatable({
 
   function renderIngressClassDescription() {
     return (
-      <div className="flex flex-col !text-xs text-muted w-full">
+      <div className="text-muted flex w-full flex-col !text-xs">
         <div className="mt-1">{description}</div>
         {ingressControllers &&
           ingControllerFormValues &&
           isUnsavedChanges(ingressControllers, ingControllerFormValues) && (
-            <span className="flex items-center text-warning mt-1">
-              <Icon icon="alert-triangle" feather className="!mr-1" />
+            <span className="text-warning mt-1 flex items-center">
+              <Icon icon={AlertTriangle} className="!mr-1" />
               <span className="text-warning">Unsaved changes.</span>
             </span>
           )}
@@ -152,7 +152,7 @@ export function IngressClassDatatable({
     );
   }
 
-  function updateIngressControllers(
+  async function updateIngressControllers(
     selectedRows: IngressControllerClassMap[],
     ingControllerFormValues: IngressControllerClassMap[],
     availability: boolean
@@ -188,38 +188,32 @@ export function IngressClassDatatable({
       );
 
       if (usedControllersToDisallow.length > 0) {
-        const usedControllerHtmlListItems = usedControllersToDisallow.map(
-          (controller) => `<li>${controller.ClassName}</li>`
-        );
-        const usedControllerHtmlList = `<ul class="ml-6">${usedControllerHtmlListItems.join(
-          ''
-        )}</ul>`;
-        confirmWarn({
-          title: '不允许使用中的入站控制器？',
-          message: `
+        const confirmed = await confirm({
+          title: 'Disallow in-use ingress controllers?',
+          modalType: ModalType.Warn,
+          message: (
             <div>
-              <p>有一些你想禁止的入口控制器正在使用中：</p>
-              ${usedControllerHtmlList}
-              <p>不能为不允许的控制器创建新的入口规则。</p>
-            </div>`,
-          buttons: {
-            cancel: {
-              label: '取消',
-              className: 'btn-default',
-            },
-            confirm: {
-              label: '禁止',
-              className: 'btn-warning',
-            },
-          },
-          callback: (confirmed) => {
-            if (confirmed) {
-              setIngControllerFormValues(updatedIngressControllers);
-              onChangeControllers(updatedIngressControllers);
-            }
-          },
+              <p>
+                There are ingress controllers you want to disallow that are in
+                use:
+              </p>
+              <ul className="ml-6">
+                {usedControllersToDisallow.map((controller) => (
+                  <li key={controller.ClassName}>{controller.ClassName}</li>
+                ))}
+              </ul>
+              <p>
+                No new ingress rules can be created for the disallowed
+                controllers.
+              </p>
+            </div>
+          ),
+          confirmButton: buildConfirmButton('Disallow', 'warning'),
         });
-        return;
+
+        if (!confirmed) {
+          return;
+        }
       }
       setIngControllerFormValues(updatedIngressControllers);
       onChangeControllers(updatedIngressControllers);

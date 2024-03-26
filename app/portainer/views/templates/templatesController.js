@@ -117,11 +117,11 @@ angular.module('portainer.app').controller('TemplatesController', [
           return ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl, generatedVolumeIds);
         })
         .then(function success() {
-          Notifications.success('Success', '容器成功创建');
+          Notifications.success('Success', '容器创建成功');
           $state.go('docker.containers', {}, { reload: true });
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, err.msg);
+          Notifications.error('Failure', err, err.msg);
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -151,7 +151,7 @@ angular.module('portainer.app').controller('TemplatesController', [
           return ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl);
         })
         .then(function success() {
-          Notifications.success('Success', '堆栈成功部署');
+          Notifications.success('Success', '堆栈部署成功');
           $state.go('docker.stacks');
         })
         .catch(function error(err) {
@@ -190,11 +190,11 @@ angular.module('portainer.app').controller('TemplatesController', [
           return ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl);
         })
         .then(function success() {
-          Notifications.success('Success', '堆栈成功部署');
+          Notifications.success('Success', '堆栈部署成功');
           $state.go('docker.stacks');
         })
         .catch(function error(err) {
-          Notifications.error('Deployment error', err);
+          Notifications.error('部署错误', err);
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -297,7 +297,7 @@ angular.module('portainer.app').controller('TemplatesController', [
         })
         .catch(function error(err) {
           $scope.templates = [];
-          Notifications.error('失败', err, '在应用程序初始化过程中发生了一个错误。');
+          Notifications.error('Failure', err, '应用程序初始化期间发生错误。');
         });
     }
 

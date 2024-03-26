@@ -1,21 +1,21 @@
 <div id="service-container-labels">
   <rd-widget>
-    <rd-widget-header icon="list" feather-icon="true" title-text="容器标签">
+    <rd-widget-header icon="list" title-text="容器标签">
       <div class="nopadding" authorization="DockerServiceUpdate">
         <a class="btn btn-secondary btn-sm pull-right" ng-click="isUpdating ||addContainerLabel(service)" ng-disabled="isUpdating">
-          <pr-icon icon="'plus'" feather="true"></pr-icon> 容器标签
+          <pr-icon icon="'plus'"></pr-icon> 添加容器标签
         </a>
       </div>
     </rd-widget-header>
     <rd-widget-body ng-if="service.ServiceContainerLabels.length === 0">
-      <p>这项服务没有容器标签。</p>
+      <p>此服务没有容器标签。</p>
     </rd-widget-body>
     <rd-widget-body ng-if="service.ServiceContainerLabels.length > 0" classes="no-padding">
       <table class="table">
         <thead>
           <tr>
-            <th>Label</th>
-            <th>Value</th>
+            <th>标签</th>
+            <th>值</th>
           </tr>
         </thead>
         <tbody>
@@ -27,7 +27,7 @@
                   type="text"
                   class="form-control"
                   ng-model="label.key"
-                  placeholder="例如 com.example.foo"
+                  placeholder="例如：com.example.foo"
                   ng-change="updateContainerLabel(service, label)"
                   ng-disabled="isUpdating"
                   disable-authorization="DockerServiceUpdate"
@@ -36,19 +36,19 @@
             </td>
             <td>
               <div class="input-group input-group-sm">
-                <span class="input-group-addon fit-text-size">value</span>
+                <span class="input-group-addon fit-text-size">值</span>
                 <input
                   type="text"
                   class="form-control"
                   ng-model="label.value"
-                  placeholder="例如 bar"
+                  placeholder="例如：bar"
                   ng-change="updateContainerLabel(service, label)"
                   ng-disabled="isUpdating"
                   disable-authorization="DockerServiceUpdate"
                 />
                 <span class="input-group-btn" authorization="DockerServiceUpdate">
                   <button class="btn btn-dangerlight" type="button" ng-click="removeContainerLabel(service, $index)" ng-disabled="isUpdating">
-                    <pr-icon icon="'trash-2'" feather="true" size="'md'"></pr-icon>
+                    <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
                   </button>
                 </span>
               </div>
@@ -67,7 +67,7 @@
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu">
-            <li><a ng-click="cancelChanges(service, ['ServiceContainerLabels'])">重置变更</a></li>
+            <li><a ng-click="cancelChanges(service, ['ServiceContainerLabels'])">重置更改</a></li>
             <li><a ng-click="cancelChanges(service)">重置所有更改</a></li>
           </ul>
         </div>

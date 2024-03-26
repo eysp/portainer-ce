@@ -18,7 +18,7 @@ angular.module('portainer.app').factory('TeamService', [
           deferred.resolve(teams);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: '无法检索到团队', err: err });
+          deferred.reject({ msg: '无法检索团队', err: err });
         });
       return deferred.promise;
     };
@@ -31,7 +31,7 @@ angular.module('portainer.app').factory('TeamService', [
           deferred.resolve(team);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: '无法检索到团队的详细信息', err: err });
+          deferred.reject({ msg: '无法检索团队详情', err: err });
         });
       return deferred.promise;
     };
@@ -66,7 +66,7 @@ angular.module('portainer.app').factory('TeamService', [
           deferred.resolve(memberships);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: '无法检索团队的用户会员资格', err: err });
+          deferred.reject({ msg: '无法获取团队的用户成员身份', err: err });
         });
       return deferred.promise;
     };

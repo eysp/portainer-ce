@@ -1,7 +1,7 @@
 import _ from 'lodash-es';
 
+import * as envVarsUtils from '@/react/components/form-components/EnvironmentVariablesFieldset/utils';
 import { PorImageRegistryModel } from 'Docker/models/porImageRegistry';
-import * as envVarsUtils from '@/portainer/helpers/env-vars';
 import { AccessControlFormData } from '../../../../portainer/components/accessControlForm/porAccessControlFormModel';
 
 require('./includes/update-restart.html');
@@ -232,7 +232,7 @@ angular.module('portainer.docker').controller('CreateServiceController', [
         .sort((a, b) => {
           if (a.model.Id === b.model.Id) {
             $scope.formValues.Secrets.$invalid = true;
-            $scope.formValues.Secrets.$error = 'Secret ' + a.model.Name + ' cannot be assigned multiple times.';
+            $scope.formValues.Secrets.$error = 'Secret ' + a.model.Name + ' 不能多次分配。';
           }
         });
       if (!$scope.formValues.Secrets.$invalid) {
@@ -247,7 +247,7 @@ angular.module('portainer.docker').controller('CreateServiceController', [
         .sort((a, b) => {
           if (a.model.Id === b.model.Id) {
             $scope.formValues.Configs.$invalid = true;
-            $scope.formValues.Configs.$error = 'Config ' + a.model.Name + ' cannot be assigned multiple times.';
+            $scope.formValues.Configs.$error = '配置 ' + a.model.Name + ' 不能多次分配。';
           }
         });
       if (!$scope.formValues.Configs.$invalid) {
@@ -537,11 +537,11 @@ angular.module('portainer.docker').controller('CreateServiceController', [
           return $q.all([rcPromise, webhookPromise]);
         })
         .then(function success() {
-          Notifications.success('Success', 'Service successfully created');
+          Notifications.success('Success', '服务创建成功');
           $state.go('docker.services', {}, { reload: true });
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, 'Unable to create service');
+          Notifications.error('Failure', err, '无法创建服务');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -624,7 +624,7 @@ angular.module('portainer.docker').controller('CreateServiceController', [
           $scope.allowBindMounts = data.allowBindMounts;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, 'Unable to initialize view');
+          Notifications.error('Failure', err, '无法初始化视图');
         });
     }
 

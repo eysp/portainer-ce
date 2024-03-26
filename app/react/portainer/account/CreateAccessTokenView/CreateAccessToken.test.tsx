@@ -4,10 +4,10 @@ import { render } from '@/react-tools/test-utils';
 
 import { CreateAccessToken } from './CreateAccessToken';
 
-test('the button is disabled when description is missing and enabled when description is filled', async () => {
+test('当描述为空时，按钮禁用；当描述填写时，按钮启用', async () => {
   const queries = renderComponent();
 
-  const button = queries.getByRole('button', { name: 'Add access token' });
+  const button = queries.getByRole('button', { name: '添加访问令牌' });
 
   expect(button).toBeDisabled();
 
@@ -22,8 +22,8 @@ test('the button is disabled when description is missing and enabled when descri
   expect(button).toBeDisabled();
 });
 
-test('once the button is clicked, the access token is generated and displayed', async () => {
-  const token = 'a very long access token that should be displayed';
+test('点击按钮后，生成并显示访问令牌', async () => {
+  const token = '一个非常长的访问令牌应该显示出来';
   const onSubmit = jest.fn(() => Promise.resolve({ rawAPIKey: token }));
 
   const queries = renderComponent(onSubmit);
@@ -32,14 +32,14 @@ test('once the button is clicked, the access token is generated and displayed', 
 
   userEvent.type(descriptionField, 'description');
 
-  const button = queries.getByRole('button', { name: 'Add access token' });
+  const button = queries.getByRole('button', { name: '添加访问令牌' });
 
   userEvent.click(button);
 
   expect(onSubmit).toHaveBeenCalledWith('description');
   expect(onSubmit).toHaveBeenCalledTimes(1);
 
-  await expect(queries.findByText('New access token')).resolves.toBeVisible();
+  await expect(queries.findByText('新的访问令牌')).resolves.toBeVisible();
   expect(queries.getByText(token)).toHaveTextContent(token);
 });
 

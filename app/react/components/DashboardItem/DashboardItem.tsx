@@ -1,54 +1,87 @@
 import { ReactNode } from 'react';
 import clsx from 'clsx';
+import { Loader2 } from 'lucide-react';
 
 import { Icon, IconProps } from '@/react/components/Icon';
 import { pluralize } from '@/portainer/helpers/strings';
 
+import { Link } from '@@/Link';
+
 interface Props extends IconProps {
-  value?: number;
   type: string;
+  pluralType?: string; // in case the pluralise function isn't suitable
+  isLoading?: boolean;
+  isRefetching?: boolean;
+  value?: number;
+  to?: string;
+  params?: object;
   children?: ReactNode;
+  dataCy?: string;
 }
 
 export function DashboardItem({
-  value,
   icon,
   type,
+  pluralType,
+  isLoading,
+  isRefetching,
+  value,
+  to,
+  params,
   children,
-  featherIcon,
+  dataCy,
 }: Props) {
-  return (
+  const Item = (
     <div
       className={clsx(
-        'border-solid rounded-lg border p-3',
-        'bg-gray-2 hover:bg-blue-2 border-gray-5 hover:border-blue-7',
-        'th-dark:bg-gray-iron-10 th-dark:hover:bg-gray-10 th-dark:border-gray-neutral-8 th-dark:hover:border-blue-8',
-        'th-highcontrast:bg-black th-highcontrast:hover:bg-gray-11 th-highcontrast:border-white th-highcontrast:hover:border-blue-8'
+        'relative rounded-lg border border-solid p-3',
+        'border-gray-5 bg-gray-2 hover:border-blue-7 hover:bg-blue-2',
+        'th-dark:border-gray-neutral-8 th-dark:bg-gray-iron-10 th-dark:hover:border-blue-8 th-dark:hover:bg-gray-10',
+        'th-highcontrast:border-white th-highcontrast:bg-black th-highcontrast:hover:border-blue-8 th-highcontrast:hover:bg-gray-11'
       )}
+      data-cy={dataCy}
     >
+      <div
+        className={clsx(
+          'text-muted absolute top-2 right-2 flex items-center text-xs transition-opacity',
+          isRefetching ? 'opacity-100' : 'opacity-0'
+        )}
+      >
+        正在刷新总数
+        <Loader2 className="h-4 animate-spin-slow" />
+      </div>
+      <div
+        className={clsx(
+          'text-muted absolute top-2 right-2 flex items-center text-xs transition-opacity',
+          isLoading ? 'opacity-100' : 'opacity-0'
+        )}
+      >
+        正在加载总数
+        <Loader2 className="h-4 animate-spin-slow" />
+      </div>
       <div className="flex items-center" aria-label={type}>
         <div
           className={clsx(
-            'icon-badge text-2xl mr-4 !p-2',
+            'icon-badge mr-4 !p-2 text-2xl',
             'bg-blue-3 text-blue-8',
             'th-dark:bg-blue-3 th-dark:text-blue-8',
             'th-highcontrast:bg-blue-3 th-highcontrast:text-blue-8'
           )}
         >
-          <Icon icon={icon} feather={featherIcon} className="feather" />
+          <Icon icon={icon} />
         </div>
 
         <div className="flex flex-col justify-around">
           <div
             className={clsx(
-              'font-medium text-2xl',
+              'text-2xl font-medium',
               'text-gray-9',
               'th-dark:text-white',
               'th-highcontrast:text-white'
             )}
             aria-label="value"
           >
-            {typeof value !== 'undefined' ? value : '-'}
+            {typeof value === 'undefined' ? '-' : value}
           </div>
           <div
             className={clsx(
@@ -59,7 +92,7 @@ export function DashboardItem({
             )}
             aria-label="resourceType"
           >
-            {pluralize(value || 0, type)}
+            {pluralize(value || 0, type, pluralType)}
           </div>
         </div>
 
@@ -67,4 +100,13 @@ export function DashboardItem({
       </div>
     </div>
   );
+
+  if (to) {
+    return (
+      <Link to={to} className="!no-underline" params={params}>
+        {Item}
+      </Link>
+    );
+  }
+  return Item;
 }

@@ -6,14 +6,15 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"io"
+	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/gofrs/uuid"
 	portainer "github.com/portainer/portainer/api"
 
-	"io"
-	"os"
+	"github.com/gofrs/uuid"
+	"github.com/rs/zerolog/log"
 )
 
 const (
@@ -62,6 +63,15 @@ const (
 	SSLKeyFilename = "key.pem"
 	// SSLCACertFilename represents the CA ssl certificate file name for mTLS
 	SSLCACertFilename = "ca-cert.pem"
+
+	MTLSCertFilename   = "mtls-cert.pem"
+	MTLSCACertFilename = "mtls-ca-cert.pem"
+	MTLSKeyFilename    = "mtls-key.pem"
+
+	// ChiselPath represents the default chisel path
+	ChiselPath = "chisel"
+	// ChiselPrivateKeyFilename represents the chisel private key file name
+	ChiselPrivateKeyFilename = "private-key.pem"
 )
 
 // ErrUndefinedTLSFileType represents an error returned on undefined TLS file type
@@ -154,6 +164,20 @@ func (service *Service) GetStackProjectPath(stackIdentifier string) string {
 	return JoinPaths(service.wrapFileStore(ComposeStorePath), stackIdentifier)
 }
 
+// GetStackProjectPathByVersion returns the absolute path on the FS for a stack based
+// on its identifier and version.
+func (service *Service) GetStackProjectPathByVersion(stackIdentifier string, version int, commitHash string) string {
+	versionStr := ""
+	if version != 0 {
+		versionStr = fmt.Sprintf("v%d", version)
+	}
+
+	if commitHash != "" {
+		versionStr = fmt.Sprintf("%s", commitHash)
+	}
+	return JoinPaths(service.wrapFileStore(ComposeStorePath), stackIdentifier, versionStr)
+}
+
 // Copy copies the file on fromFilePath to toFilePath
 // if toFilePath exists func will fail unless deleteIfExists is true
 func (service *Service) Copy(fromFilePath string, toFilePath string, deleteIfExists bool) error {
@@ -163,7 +187,7 @@ func (service *Service) Copy(fromFilePath string, toFilePath string, deleteIfExi
 	}
 
 	if !exists {
-		return errors.New(fmt.Sprintf("File (%s) doesn't exist", fromFilePath))
+		return fmt.Errorf("File (%s) doesn't exist", fromFilePath)
 	}
 
 	finput, err := os.Open(fromFilePath)
@@ -234,10 +258,67 @@ func (service *Service) StoreStackFileFromBytes(stackIdentifier, fileName string
 	return service.wrapFileStore(stackStorePath), nil
 }
 
+// StoreStackFileFromBytesByVersion creates a version subfolder in the ComposeStorePath and stores a new file from bytes.
+// It returns the path to the folder where version folders are stored.
+func (service *Service) StoreStackFileFromBytesByVersion(stackIdentifier, fileName string, version int, data []byte) (string, error) {
+	versionStr := ""
+	if version != 0 {
+		versionStr = fmt.Sprintf("v%d", version)
+	}
+	stackStorePath := JoinPaths(ComposeStorePath, stackIdentifier)
+	stackVersionPath := JoinPaths(stackStorePath, versionStr)
+	err := service.createDirectoryInStore(stackVersionPath)
+	if err != nil {
+		return "", err
+	}
+
+	composeFilePath := JoinPaths(stackVersionPath, fileName)
+	r := bytes.NewReader(data)
+
+	err = service.createFileInStore(composeFilePath, r)
+	if err != nil {
+		return "", err
+	}
+
+	return service.wrapFileStore(stackStorePath), nil
+}
+
 // UpdateStoreStackFileFromBytes makes stack file backup and updates a new file from bytes.
 // It returns the path to the folder where the file is stored.
 func (service *Service) UpdateStoreStackFileFromBytes(stackIdentifier, fileName string, data []byte) (string, error) {
 	stackStorePath := JoinPaths(ComposeStorePath, stackIdentifier)
+	composeFilePath := JoinPaths(stackStorePath, fileName)
+	err := service.createBackupFileInStore(composeFilePath)
+	if err != nil {
+		return "", err
+	}
+
+	r := bytes.NewReader(data)
+	err = service.createFileInStore(composeFilePath, r)
+	if err != nil {
+		return "", err
+	}
+
+	return service.wrapFileStore(stackStorePath), nil
+}
+
+// UpdateStoreStackFileFromBytesByVersion makes stack file backup and updates a new file from bytes.
+// It returns the path to the folder where the file is stored.
+func (service *Service) UpdateStoreStackFileFromBytesByVersion(stackIdentifier, fileName string, version int, commitHash string, data []byte) (string, error) {
+	stackStorePath := JoinPaths(ComposeStorePath, stackIdentifier)
+
+	versionStr := ""
+	if version != 0 {
+		versionStr = fmt.Sprintf("v%d", version)
+	}
+	if commitHash != "" {
+		versionStr = commitHash
+	}
+
+	if versionStr != "" {
+		stackStorePath = JoinPaths(stackStorePath, versionStr)
+	}
+
 	composeFilePath := JoinPaths(stackStorePath, fileName)
 	err := service.createBackupFileInStore(composeFilePath)
 	if err != nil {
@@ -261,9 +342,50 @@ func (service *Service) RemoveStackFileBackup(stackIdentifier, fileName string) 
 	return service.removeBackupFileInStore(composeFilePath)
 }
 
+// RemoveStackFileBackupByVersion removes the stack file backup by version in the ComposeStorePath.
+func (service *Service) RemoveStackFileBackupByVersion(stackIdentifier string, version int, fileName string) error {
+	versionStr := ""
+	if version != 0 {
+		versionStr = fmt.Sprintf("v%d", version)
+	}
+	stackStorePath := JoinPaths(ComposeStorePath, stackIdentifier, versionStr)
+	composeFilePath := JoinPaths(stackStorePath, fileName)
+
+	return service.removeBackupFileInStore(composeFilePath)
+}
+
 // RollbackStackFile rollbacks the stack file backup in the ComposeStorePath.
 func (service *Service) RollbackStackFile(stackIdentifier, fileName string) error {
 	stackStorePath := JoinPaths(ComposeStorePath, stackIdentifier)
+	composeFilePath := JoinPaths(stackStorePath, fileName)
+	path := service.wrapFileStore(composeFilePath)
+	backupPath := fmt.Sprintf("%s.bak", path)
+
+	exists, err := service.FileExists(backupPath)
+	if err != nil {
+		return err
+	}
+
+	if !exists {
+		// keep the updated/failed stack file
+		return nil
+	}
+
+	err = service.Copy(backupPath, path, true)
+	if err != nil {
+		return err
+	}
+
+	return os.Remove(backupPath)
+}
+
+// RollbackStackFileByVersion rollbacks the stack file backup by version in the ComposeStorePath.
+func (service *Service) RollbackStackFileByVersion(stackIdentifier string, version int, fileName string) error {
+	versionStr := ""
+	if version != 0 {
+		versionStr = fmt.Sprintf("v%d", version)
+	}
+	stackStorePath := JoinPaths(ComposeStorePath, stackIdentifier, versionStr)
 	composeFilePath := JoinPaths(stackStorePath, fileName)
 	path := service.wrapFileStore(composeFilePath)
 	backupPath := fmt.Sprintf("%s.bak", path)
@@ -310,6 +432,62 @@ func (service *Service) StoreEdgeStackFileFromBytes(edgeStackIdentifier, fileNam
 	}
 
 	return service.wrapFileStore(stackStorePath), nil
+}
+
+// GetEdgeStackProjectPathByVersion returns the absolute path on the FS for a edge stack based
+// on its identifier and version.
+// EE only feature
+func (service *Service) GetEdgeStackProjectPathByVersion(edgeStackIdentifier string, version int, commitHash string) string {
+	versionStr := ""
+	if version != 0 {
+		versionStr = fmt.Sprintf("v%d", version)
+	}
+
+	if commitHash != "" {
+		versionStr = commitHash
+	}
+
+	return JoinPaths(service.wrapFileStore(EdgeStackStorePath), edgeStackIdentifier, versionStr)
+}
+
+// StoreEdgeStackFileFromBytesByVersion creates a subfolder in the EdgeStackStorePath with version and stores a new file from bytes.
+// It returns the path to the folder where the file is stored.
+// EE only feature
+func (service *Service) StoreEdgeStackFileFromBytesByVersion(edgeStackIdentifier, fileName string, version int, data []byte) (string, error) {
+	versionStr := ""
+	if version != 0 {
+		versionStr = fmt.Sprintf("v%d", version)
+	}
+	stackStorePath := JoinPaths(EdgeStackStorePath, edgeStackIdentifier, versionStr)
+
+	err := service.createDirectoryInStore(stackStorePath)
+	if err != nil {
+		return "", err
+	}
+
+	composeFilePath := JoinPaths(stackStorePath, fileName)
+	r := bytes.NewReader(data)
+
+	err = service.createFileInStore(composeFilePath, r)
+	if err != nil {
+		return "", err
+	}
+
+	return service.wrapFileStore(stackStorePath), nil
+}
+
+// FormProjectPathByVersion returns the absolute path on the FS for a project based with version
+func (service *Service) FormProjectPathByVersion(path string, version int, commitHash string) string {
+	versionStr := ""
+	if version != 0 {
+		versionStr = fmt.Sprintf("v%d", version)
+	}
+
+	if commitHash != "" {
+		versionStr = commitHash
+	}
+
+	return JoinPaths(path, versionStr)
 }
 
 // StoreRegistryManagementFileFromBytes creates a subfolder in the
@@ -489,14 +667,7 @@ func (service *Service) createDirectoryInStore(name string) error {
 func (service *Service) createFileInStore(filePath string, r io.Reader) error {
 	path := service.wrapFileStore(filePath)
 
-	out, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-
-	_, err = io.Copy(out, r)
-	return err
+	return CreateFile(path, r)
 }
 
 // createBackupFileInStore makes a copy in the file store.
@@ -670,6 +841,36 @@ func (service *Service) GetDefaultSSLCertsPath() (string, string) {
 	return service.wrapFileStore(certPath), service.wrapFileStore(keyPath)
 }
 
+func defaultMTLSCertPathUnderFileStore() (string, string, string) {
+	certPath := JoinPaths(SSLCertPath, MTLSCertFilename)
+	caCertPath := JoinPaths(SSLCertPath, MTLSCACertFilename)
+	keyPath := JoinPaths(SSLCertPath, MTLSKeyFilename)
+
+	return certPath, caCertPath, keyPath
+}
+
+// GetDefaultChiselPrivateKeyPath returns the chisle private key path
+func (service *Service) GetDefaultChiselPrivateKeyPath() string {
+	privateKeyPath := defaultChiselPrivateKeyPathUnderFileStore()
+	return service.wrapFileStore(privateKeyPath)
+}
+
+func defaultChiselPrivateKeyPathUnderFileStore() string {
+	return JoinPaths(ChiselPath, ChiselPrivateKeyFilename)
+}
+
+// StoreChiselPrivateKey store the specified chisel private key content on disk.
+func (service *Service) StoreChiselPrivateKey(privateKey []byte) error {
+	err := service.createDirectoryInStore(ChiselPath)
+	if err != nil && !os.IsExist(err) {
+		return err
+	}
+
+	r := bytes.NewReader(privateKey)
+	privateKeyPath := defaultChiselPrivateKeyPathUnderFileStore()
+	return service.createFileInStore(privateKeyPath, r)
+}
+
 // StoreSSLCertPair stores a ssl certificate pair
 func (service *Service) StoreSSLCertPair(cert, key []byte) (string, string, error) {
 	certPath, keyPath := defaultCertPathUnderFileStore()
@@ -729,6 +930,56 @@ func FileExists(filePath string) (bool, error) {
 	return true, nil
 }
 
+// SafeCopyDirectory copies a directory from src to dst in a safe way.
+func (service *Service) SafeMoveDirectory(originalPath, newPath string) error {
+	// 1. Backup the source directory to a different folder
+	backupDir := fmt.Sprintf("%s-%s", filepath.Dir(originalPath), "backup")
+	err := MoveDirectory(originalPath, backupDir)
+	if err != nil {
+		return fmt.Errorf("failed to backup source directory: %w", err)
+	}
+
+	defer func() {
+		if err != nil {
+			// If an error occurred, rollback the backup directory
+			restoreErr := restoreBackup(originalPath, backupDir)
+			if restoreErr != nil {
+				log.Warn().Err(restoreErr).Msg("failed to restore backup during creating versioning folder")
+			}
+		}
+	}()
+
+	// 2. Copy the backup directory to the destination directory
+	err = CopyDir(backupDir, newPath, false)
+	if err != nil {
+		return fmt.Errorf("failed to copy backup directory to destination directory: %w", err)
+	}
+
+	// 3. Delete the backup directory
+	err = os.RemoveAll(backupDir)
+	if err != nil {
+		return fmt.Errorf("failed to delete backup directory: %w", err)
+	}
+
+	return nil
+}
+
+func restoreBackup(src, backupDir string) error {
+	// Rollback by deleting the original directory and copying the
+	// backup direcotry back to the source directory, and then deleting
+	// the backup directory
+	err := os.RemoveAll(src)
+	if err != nil {
+		return fmt.Errorf("failed to delete destination directory: %w", err)
+	}
+
+	err = MoveDirectory(backupDir, src)
+	if err != nil {
+		return fmt.Errorf("failed to restore backup directory: %w", err)
+	}
+	return nil
+}
+
 func MoveDirectory(originalPath, newPath string) error {
 	if _, err := os.Stat(originalPath); err != nil {
 		return err
@@ -761,4 +1012,40 @@ func (service *Service) StoreFDOProfileFileFromBytes(fdoProfileIdentifier string
 	}
 
 	return service.wrapFileStore(filePath), nil
+}
+
+func CreateFile(path string, r io.Reader) error {
+	out, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	if err != nil {
+		return err
+	}
+
+	defer out.Close()
+
+	_, err = io.Copy(out, r)
+	return err
+}
+
+func (service *Service) StoreMTLSCertificates(cert, caCert, key []byte) (string, string, string, error) {
+	certPath, caCertPath, keyPath := defaultMTLSCertPathUnderFileStore()
+
+	r := bytes.NewReader(cert)
+	err := service.createFileInStore(certPath, r)
+	if err != nil {
+		return "", "", "", err
+	}
+
+	r = bytes.NewReader(caCert)
+	err = service.createFileInStore(caCertPath, r)
+	if err != nil {
+		return "", "", "", err
+	}
+
+	r = bytes.NewReader(key)
+	err = service.createFileInStore(keyPath, r)
+	if err != nil {
+		return "", "", "", err
+	}
+
+	return service.wrapFileStore(certPath), service.wrapFileStore(caCertPath), service.wrapFileStore(keyPath), nil
 }

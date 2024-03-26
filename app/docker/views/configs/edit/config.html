@@ -1,9 +1,9 @@
-<page-header title="'Config details'" breadcrumbs="[{label:'Configs', link:'docker.configs'}, config.Name]" reload="true"> </page-header>
+<page-header title="'配置详情'" breadcrumbs="[{label:'配置', link:'docker.configs'}, config.Name]" reload="true"> </page-header>
 
 <div class="row">
   <div class="col-lg-12 col-md-12 col-xs-12">
     <rd-widget>
-      <rd-widget-header icon="clipboard" feather-icon="true" title-text="Config details"></rd-widget-header>
+      <rd-widget-header icon="clipboard" title-text="配置详情"></rd-widget-header>
       <rd-widget-body classes="no-padding">
         <table class="table">
           <tbody>
@@ -16,25 +16,25 @@
               <td>
                 {{ config.Id }}
                 <button authorization="DockerConfigDelete" class="btn btn-xs btn-dangerlight" ng-click="removeConfig(config.Id)"
-                  ><pr-icon icon="'trash-2'" feather="true"></pr-icon>Delete this config</button
+                  ><pr-icon icon="'trash-2'"></pr-icon>删除此配置</button
                 >
                 <button authorization="DockerConfigCreate" class="btn btn-xs btn-secondary" ui-sref="docker.configs.new({id: config.Id})"
-                  ><pr-icon icon="'copy'" feather="true"></pr-icon>Clone config</button
+                  ><pr-icon icon="'copy'"></pr-icon>克隆配置</button
                 >
               </td>
             </tr>
             <tr>
-              <td>Created</td>
+              <td>创建时间</td>
               <td>{{ config.CreatedAt | getisodate }}</td>
             </tr>
             <tr>
-              <td>Last updated</td>
+              <td>最后更新时间</td>
               <td>{{ config.UpdatedAt | getisodate }}</td>
             </tr>
             <tr ng-if="!(config.Labels | emptyobject)">
               <td>标签</td>
               <td>
-                <table class="table table-bordered table-condensed">
+                <table class="table-bordered table-condensed table">
                   <tr ng-repeat="(k, v) in config.Labels">
                     <td>{{ k }}</td>
                     <td>{{ v }}</td>
@@ -63,7 +63,7 @@
 <div class="row" ng-if="config">
   <div class="col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="code" feather-icon="true" title-text="Config content"></rd-widget-header>
+      <rd-widget-header icon="code" title-text="配置内容"></rd-widget-header>
       <rd-widget-body>
         <form class="form-horizontal">
           <div class="form-group">

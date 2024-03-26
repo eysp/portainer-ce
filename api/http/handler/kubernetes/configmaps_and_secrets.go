@@ -9,7 +9,7 @@ import (
 	"github.com/portainer/libhttp/response"
 )
 
-func (handler *Handler) getKubernetesConfigMaps(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
+func (handler *Handler) getKubernetesConfigMapsAndSecrets(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	endpointID, err := request.RetrieveNumericRouteVariableValue(r, "id")
 	if err != nil {
 		return httperror.BadRequest(
@@ -18,7 +18,7 @@ func (handler *Handler) getKubernetesConfigMaps(w http.ResponseWriter, r *http.R
 		)
 	}
 
-	cli, ok := handler.kubernetesClientFactory.GetProxyKubeClient(
+	cli, ok := handler.KubernetesClientFactory.GetProxyKubeClient(
 		strconv.Itoa(endpointID), r.Header.Get("Authorization"),
 	)
 	if !ok {

@@ -22,6 +22,7 @@ var (
 	errAdminCannotRemoveSelf      = errors.New("Cannot remove your own user account. Contact another administrator")
 	errCannotRemoveLastLocalAdmin = errors.New("Cannot remove the last local administrator account")
 	errCryptoHashFailure          = errors.New("Unable to hash data")
+	errWrongPassword              = errors.New("Wrong password")
 )
 
 func hideFields(user *portainer.User) {
@@ -31,16 +32,17 @@ func hideFields(user *portainer.User) {
 // Handler is the HTTP handler used to handle user operations.
 type Handler struct {
 	*mux.Router
-	bouncer                 *security.RequestBouncer
+	bouncer                 security.BouncerService
 	apiKeyService           apikey.APIKeyService
 	demoService             *demo.Service
 	DataStore               dataservices.DataStore
 	CryptoService           portainer.CryptoService
 	passwordStrengthChecker security.PasswordStrengthChecker
+	AdminCreationDone       chan<- struct{}
 }
 
 // NewHandler creates a handler to manage user operations.
-func NewHandler(bouncer *security.RequestBouncer, rateLimiter *security.RateLimiter, apiKeyService apikey.APIKeyService, demoService *demo.Service, passwordStrengthChecker security.PasswordStrengthChecker) *Handler {
+func NewHandler(bouncer security.BouncerService, rateLimiter *security.RateLimiter, apiKeyService apikey.APIKeyService, demoService *demo.Service, passwordStrengthChecker security.PasswordStrengthChecker) *Handler {
 	h := &Handler{
 		Router:                  mux.NewRouter(),
 		bouncer:                 bouncer,

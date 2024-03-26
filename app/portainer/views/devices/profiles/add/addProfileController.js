@@ -1,10 +1,14 @@
 import angular from 'angular';
+import { editor } from '@@/BoxSelector/common-options/build-methods';
 
 import { createProfile } from 'Portainer/hostmanagement/fdo/fdo.service';
 
 angular.module('portainer.app').controller('AddProfileController', AddProfileController);
 
-export default function AddProfileController($scope, $async, $state, $window, ModalService, Authentication, Notifications) {
+/* @ngInject */
+export default function AddProfileController($scope, $async, $state, $window, Notifications) {
+  $scope.buildMethods = [editor];
+
   $scope.formValues = {
     name: '',
     profileFileContent: '',
@@ -36,7 +40,7 @@ export default function AddProfileController($scope, $async, $state, $window, Mo
       const fileContent = $scope.formValues.profileFileContent;
 
       if (method !== 'editor' && fileContent === '') {
-        $scope.state.formValidationError = 'Profile file content must not be empty';
+        $scope.state.formValidationError = '配置文件内容不能为空';
         return;
       }
 
@@ -44,11 +48,11 @@ export default function AddProfileController($scope, $async, $state, $window, Mo
 
       try {
         await createProfile(name, method, fileContent);
-        Notifications.success('Success', 'Profile successfully created');
+        Notifications.success('成功', '配置文件创建成功');
         $scope.state.isEditorDirty = false;
         $state.go('portainer.settings.edgeCompute');
       } catch (err) {
-        Notifications.error('失败', err, 'Unable to create Profile');
+        Notifications.error('失败', err, '无法创建配置文件');
       } finally {
         $scope.state.actionInProgress = false;
       }

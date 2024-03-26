@@ -1,9 +1,10 @@
 import _ from 'lodash-es';
+import { confirmDelete } from '@@/modals/confirm';
 
 export class VolumeBrowserController {
   /* @ngInject */
-  constructor($async, HttpRequestHelper, VolumeBrowserService, FileSaver, Blob, ModalService, Notifications) {
-    Object.assign(this, { $async, HttpRequestHelper, VolumeBrowserService, FileSaver, Blob, ModalService, Notifications });
+  constructor($async, HttpRequestHelper, VolumeBrowserService, FileSaver, Blob, Notifications) {
+    Object.assign(this, { $async, HttpRequestHelper, VolumeBrowserService, FileSaver, Blob, Notifications });
     this.state = {
       path: '/',
     };
@@ -36,18 +37,18 @@ export class VolumeBrowserController {
     const newFilePath = this.state.path === '/' ? newName : `${this.state.path}/${newName}`;
 
     try {
-      await this.VolumeBrowserService.rename(this.volumeId, filePath, newFilePath);
-      this.Notifications.success('文件成功重命名', newFilePath);
-      this.files = await this.VolumeBrowserService.ls(this.volumeId, this.state.path);
+      await this.VolumeBrowserService.rename(this.endpointId, this.volumeId, filePath, newFilePath);
+      this.Notifications.success('File successfully renamed', newFilePath);
+      this.files = await this.VolumeBrowserService.ls(this.endpointId, this.volumeId, this.state.path);
     } catch (err) {
-      this.Notifications.error('失败', err, '无法重命名文件');
+      this.Notifications.error('Failure', err, 'Unable to rename file');
     }
   }
 
   confirmDelete(file) {
     const filePath = this.state.path === '/' ? file : `${this.state.path}/${file}`;
 
-    this.ModalService.confirmDeletion(`你确定你要删除 ${filePath} ?`, (confirmed) => {
+    confirmDelete(`Are you sure that you want to delete ${filePath} ?`).then((confirmed) => {
       if (!confirmed) {
         return;
       }
@@ -62,11 +63,11 @@ export class VolumeBrowserController {
     const filePath = this.state.path === '/' ? file : `${this.state.path}/${file}`;
 
     try {
-      const data = await this.VolumeBrowserService.get(this.volumeId, filePath);
+      const data = await this.VolumeBrowserService.get(this.endpointId, this.volumeId, filePath);
       const downloadData = new Blob([data.file]);
       this.FileSaver.saveAs(downloadData, file);
     } catch (err) {
-      this.Notifications.error('失败', err, '无法下载文件');
+      this.Notifications.error('Failure', err, 'Unable to download file');
     }
   }
 
@@ -85,11 +86,11 @@ export class VolumeBrowserController {
   }
   async deleteFileAsync(file) {
     try {
-      await this.VolumeBrowserService.delete(this.volumeId, file);
-      this.Notifications.success('文件成功删除', file);
-      this.files = await this.VolumeBrowserService.ls(this.volumeId, this.state.path);
+      await this.VolumeBrowserService.delete(this.endpointId, this.volumeId, file);
+      this.Notifications.success('File successfully deleted', file);
+      this.files = await this.VolumeBrowserService.ls(this.endpointId, this.volumeId, this.state.path);
     } catch (err) {
-      this.Notifications.error('失败', err, '无法删除文件');
+      this.Notifications.error('Failure', err, 'Unable to delete file');
     }
   }
 
@@ -98,11 +99,11 @@ export class VolumeBrowserController {
   }
   async getFilesForPathAsync(path) {
     try {
-      const files = await this.VolumeBrowserService.ls(this.volumeId, path);
+      const files = await this.VolumeBrowserService.ls(this.endpointId, this.volumeId, path);
       this.state.path = path;
       this.files = files;
     } catch (err) {
-      this.Notifications.error('失败', err, '无法浏览卷存储卷');
+      this.Notifications.error('Failure', err, 'Unable to browse volume');
     }
   }
 
@@ -114,7 +115,7 @@ export class VolumeBrowserController {
       await this.VolumeBrowserService.upload(this.endpointId, this.state.path, file, this.volumeId);
       this.onFileUploaded();
     } catch (err) {
-      this.Notifications.error('失败', err, '无法上传文件');
+      this.Notifications.error('Failure', err, 'Unable to upload file');
     }
   }
 
@@ -145,9 +146,9 @@ export class VolumeBrowserController {
   async $onInit() {
     this.HttpRequestHelper.setPortainerAgentTargetHeader(this.nodeName);
     try {
-      this.files = await this.VolumeBrowserService.ls(this.volumeId, this.state.path);
+      this.files = await this.VolumeBrowserService.ls(this.endpointId, this.volumeId, this.state.path);
     } catch (err) {
-      this.Notifications.error('失败', err, '无法浏览存储卷');
+      this.Notifications.error('Failure', err, 'Unable to browse volume');
     }
   }
 }

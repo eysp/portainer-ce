@@ -26,7 +26,7 @@ function Template() {
           name: 'required',
           defaultValue: 'non empty',
           description: '',
-          label: 'invalid',
+          label: '无效',
         },
       ]}
     />

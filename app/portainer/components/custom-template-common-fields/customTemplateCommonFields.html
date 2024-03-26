@@ -1,7 +1,7 @@
 <ng-form name="commonCustomTemplateForm">
   <!-- title-input -->
   <div class="form-group mb-0">
-    <label for="template_title" class="col-sm-3 col-lg-2 control-label text-left required"> 标题 </label>
+    <label for="template_title" class="col-sm-3 col-lg-2 control-label required text-left"> 标题 </label>
     <div class="col-sm-8">
       <input
         type="text"
@@ -16,12 +16,12 @@
       />
       <span class="help-block">
         <div ng-show="commonCustomTemplateForm.template_title.$invalid">
-          <div class="mt-2 small text-warning">
+          <div class="small text-warning mt-2">
             <div ng-messages="commonCustomTemplateForm.template_title.$error">
-              <p class="vertical-center" ng-message="required"> <pr-icon icon="'alert-triangle'" feather="true" mode="'warning'"></pr-icon> 标题是必填项。 </p>
+              <p class="vertical-center" ng-message="required"> <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 标题是必填项。 </p>
               <p class="vertical-center" ng-message="pattern">
-                <pr-icon icon="'alert-triangle'" feather="true" mode="'warning'"></pr-icon>
-                该字段必须由小写字母数字字符组成， '_' 或 '-' (例如 'my-name', or 'abc-123').
+                <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
+                {{ $ctrl.nameRegexError }}
               </p>
             </div>
           </div>
@@ -33,14 +33,14 @@
 
   <!-- description-input -->
   <div class="form-group mb-0">
-    <label for="description" class="col-sm-3 col-lg-2 control-label text-left required">描述</label>
+    <label for="description" class="col-sm-3 col-lg-2 control-label required text-left">描述</label>
     <div class="col-sm-8">
       <input type="text" class="form-control" id="description" ng-model="$ctrl.formValues.Description" name="description" required />
       <span class="help-block">
-        <div class="mt-2 small text-warning">
+        <div class="small text-warning mt-2">
           <div ng-show="commonCustomTemplateForm.description.$invalid">
             <div ng-messages="commonCustomTemplateForm.description.$error">
-              <p class="vertical-center" ng-message="required"> <pr-icon icon="'alert-triangle'" feather="true" mode="'warning'"></pr-icon> 描述必须填写。</p>
+              <p class="vertical-center" ng-message="required"> <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 描述是必填项。</p>
             </div>
           </div>
         </div>
@@ -60,7 +60,7 @@
 
   <!-- icon-url-input -->
   <div class="form-group">
-    <label for="icon-url" class="col-sm-3 col-lg-2 control-label text-left">Icon URL</label>
+    <label for="icon-url" class="col-sm-3 col-lg-2 control-label text-left">图标 URL</label>
     <div class="col-sm-8">
       <input type="text" class="form-control" id="icon-url" ng-model="$ctrl.formValues.Logo" />
     </div>
@@ -78,7 +78,7 @@
 
   <!-- platform-input -->
   <div ng-if="$ctrl.showTypeField" class="form-group">
-    <label for="platform" class="col-sm-3 col-lg-2 control-label text-left">类别</label>
+    <label for="platform" class="col-sm-3 col-lg-2 control-label text-left">类型</label>
     <div class="col-sm-8">
       <select class="form-control" ng-model="$ctrl.formValues.Type" ng-options="+(opt.value) as opt.label for opt in $ctrl.templateTypes"> </select>
     </div>

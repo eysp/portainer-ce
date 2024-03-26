@@ -17,7 +17,7 @@ angular.module('portainer.app').factory('TeamMembershipService', [
           deferred.resolve(memberships);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve team memberships', err: err });
+          deferred.reject({ msg: '无法获取团队成员身份', err: err });
         });
       return deferred.promise;
     };

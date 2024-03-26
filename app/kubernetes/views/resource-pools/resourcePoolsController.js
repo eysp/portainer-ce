@@ -1,12 +1,14 @@
 import angular from 'angular';
+import { confirm } from '@@/modals/confirm';
+import { ModalType } from '@@/modals';
+import { buildConfirmButton } from '@@/modals/utils';
 
 class KubernetesResourcePoolsController {
   /* @ngInject */
-  constructor($async, $state, Notifications, ModalService, KubernetesResourcePoolService, KubernetesNamespaceService) {
+  constructor($async, $state, Notifications, KubernetesResourcePoolService, KubernetesNamespaceService) {
     this.$async = $async;
     this.$state = $state;
     this.Notifications = Notifications;
-    this.ModalService = ModalService;
     this.KubernetesResourcePoolService = KubernetesResourcePoolService;
     this.KubernetesNamespaceService = KubernetesNamespaceService;
 
@@ -15,6 +17,11 @@ class KubernetesResourcePoolsController {
     this.getResourcePoolsAsync = this.getResourcePoolsAsync.bind(this);
     this.removeAction = this.removeAction.bind(this);
     this.removeActionAsync = this.removeActionAsync.bind(this);
+    this.onReload = this.onReload.bind(this);
+  }
+
+  async onReload() {
+    this.$state.reload(this.$state.current);
   }
 
   async removeActionAsync(selectedItems) {
@@ -34,11 +41,11 @@ class KubernetesResourcePoolsController {
         } else {
           await this.KubernetesResourcePoolService.delete(pool);
         }
-        this.Notifications.success('成功删除命名空间', pool.Namespace.Name);
+        this.Notifications.success('Namespace successfully removed', pool.Namespace.Name);
         const index = this.resourcePools.indexOf(pool);
         this.resourcePools.splice(index, 1);
       } catch (err) {
-        this.Notifications.error('失败', err, '无法删除命名空间');
+        this.Notifications.error('Failure', err, 'Unable to remove namespace');
       } finally {
         --actionCount;
         if (actionCount === 0) {
@@ -51,9 +58,15 @@ class KubernetesResourcePoolsController {
   removeAction(selectedItems) {
     const isTerminatingNS = selectedItems.some((pool) => pool.Namespace.Status === 'Terminating');
     const message = isTerminatingNS
-      ? '至少有一个命名空间处于终结状态。对于终止状态的命名空间，你可以继续并强制删除，但在没有适当清理的情况下这样做可能会导致不稳定和不可预测的行为。你确定你要继续吗？'
-      : '您想删除所选命名空间吗？与所选命名空间相关的所有资源也将被删除。您确定要继续吗？';
-    this.ModalService.confirmWithTitle(isTerminatingNS ? '强制删除命名空间' : '你确定吗？', message, (confirmed) => {
+      ? 'At least one namespace is in a terminating state. For terminating state namespaces, you may continue and force removal, but doing so without having properly cleaned up may lead to unstable and unpredictable behavior. Are you sure you wish to proceed?'
+      : 'Do you want to remove the selected namespace(s)? All the resources associated to the selected namespace(s) will be removed too. Are you sure you wish to proceed?';
+    confirm({
+      title: isTerminatingNS ? 'Force namespace removal' : 'Are you sure?',
+      message,
+      confirmButton: buildConfirmButton('Remove', 'danger'),
+
+      modalType: ModalType.Destructive,
+    }).then((confirmed) => {
       if (confirmed) {
         return this.$async(this.removeActionAsync, selectedItems);
       }
@@ -62,9 +75,9 @@ class KubernetesResourcePoolsController {
 
   async getResourcePoolsAsync() {
     try {
-      this.resourcePools = await this.KubernetesResourcePoolService.get();
+      this.resourcePools = await this.KubernetesResourcePoolService.get('', { getQuota: true });
     } catch (err) {
-      this.Notifications.error('失败', err, '无法检索到命名空间');
+      this.Notifications.error('Failure', err, 'Unable to retreive namespaces');
     }
   }
 

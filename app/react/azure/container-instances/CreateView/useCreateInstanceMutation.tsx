@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from 'react-query';
 
 import { createContainerGroup } from '@/react/azure/services/container-groups.service';
 import { queryKeys } from '@/react/azure/queries/query-keys';
-import { EnvironmentId } from '@/portainer/environments/types';
+import { EnvironmentId } from '@/react/portainer/environments/types';
 import PortainerError from '@/portainer/error';
 import {
   ContainerGroup,
@@ -23,7 +23,7 @@ export function useCreateInstanceMutation(
   return useMutation<ContainerGroup, unknown, ContainerInstanceFormValues>(
     (values) => {
       if (!values.subscription) {
-        throw new PortainerError('subscription is required');
+        throw new PortainerError('需要订阅');
       }
 
       const subscriptionResourceGroup = getSubscriptionResourceGroups(
@@ -34,7 +34,7 @@ export function useCreateInstanceMutation(
         (r) => r.value === values.resourceGroup
       );
       if (!resourceGroup) {
-        throw new PortainerError('resource group not found');
+        throw new PortainerError('找不到资源组');
       }
 
       return createContainerGroup(
@@ -48,7 +48,7 @@ export function useCreateInstanceMutation(
       async onSuccess(containerGroup, values) {
         const resourceControl = containerGroup.Portainer?.ResourceControl;
         if (!resourceControl) {
-          throw new PortainerError('resource control expected after creation');
+          throw new PortainerError('创建后预期的资源控制');
         }
 
         const accessControlData = values.accessControl;

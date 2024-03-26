@@ -1,4 +1,4 @@
-import { UserContext } from '@/portainer/hooks/useUser';
+import { UserContext } from '@/react/hooks/useUser';
 import { UserViewModel } from '@/portainer/models/user';
 import { renderWithQueryClient } from '@/react-tools/test-utils';
 
@@ -20,5 +20,5 @@ function renderComponent() {
   );
 }
 
-test.todo('当用户列表为空时，“添加所有用户”按钮被禁用');
-test.todo('筛选器显示预期用户');
+test.todo('当用户列表为空时，添加所有用户按钮被禁用');
+test.todo('过滤器显示预期用户');

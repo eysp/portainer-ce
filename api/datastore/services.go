@@ -3,10 +3,10 @@ package datastore
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"strconv"
+	"os"
 
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/database/models"
 	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/dataservices/apikeyrepository"
 	"github.com/portainer/portainer/api/dataservices/customtemplate"
@@ -14,7 +14,6 @@ import (
 	"github.com/portainer/portainer/api/dataservices/edgegroup"
 	"github.com/portainer/portainer/api/dataservices/edgejob"
 	"github.com/portainer/portainer/api/dataservices/edgestack"
-	"github.com/portainer/portainer/api/dataservices/edgeupdateschedule"
 	"github.com/portainer/portainer/api/dataservices/endpoint"
 	"github.com/portainer/portainer/api/dataservices/endpointgroup"
 	"github.com/portainer/portainer/api/dataservices/endpointrelation"
@@ -50,7 +49,6 @@ type Store struct {
 	DockerHubService          *dockerhub.Service
 	EdgeGroupService          *edgegroup.Service
 	EdgeJobService            *edgejob.Service
-	EdgeUpdateScheduleService *edgeupdateschedule.Service
 	EdgeStackService          *edgestack.Service
 	EndpointGroupService      *endpointgroup.Service
 	EndpointService           *endpoint.Service
@@ -95,17 +93,18 @@ func (store *Store) initServices() error {
 	}
 	store.DockerHubService = dockerhubService
 
-	edgeUpdateScheduleService, err := edgeupdateschedule.NewService(store.connection)
+	endpointRelationService, err := endpointrelation.NewService(store.connection)
 	if err != nil {
 		return err
 	}
-	store.EdgeUpdateScheduleService = edgeUpdateScheduleService
+	store.EndpointRelationService = endpointRelationService
 
-	edgeStackService, err := edgestack.NewService(store.connection)
+	edgeStackService, err := edgestack.NewService(store.connection, endpointRelationService.InvalidateEdgeCacheForEdgeStack)
 	if err != nil {
 		return err
 	}
 	store.EdgeStackService = edgeStackService
+	endpointRelationService.RegisterUpdateStackFunction(edgeStackService.UpdateEdgeStackFunc, edgeStackService.UpdateEdgeStackFuncTx)
 
 	edgeGroupService, err := edgegroup.NewService(store.connection)
 	if err != nil {
@@ -130,12 +129,6 @@ func (store *Store) initServices() error {
 		return err
 	}
 	store.EndpointService = endpointService
-
-	endpointRelationService, err := endpointrelation.NewService(store.connection)
-	if err != nil {
-		return err
-	}
-	store.EndpointRelationService = endpointRelationService
 
 	extensionService, err := extension.NewService(store.connection)
 	if err != nil {
@@ -261,11 +254,6 @@ func (store *Store) EdgeGroup() dataservices.EdgeGroupService {
 // EdgeJob gives access to the EdgeJob data management layer
 func (store *Store) EdgeJob() dataservices.EdgeJobService {
 	return store.EdgeJobService
-}
-
-// EdgeUpdateSchedule gives access to the EdgeUpdateSchedule data management layer
-func (store *Store) EdgeUpdateSchedule() dataservices.EdgeUpdateScheduleService {
-	return store.EdgeUpdateScheduleService
 }
 
 // EdgeStack gives access to the EdgeStack data management layer
@@ -395,7 +383,7 @@ type storeExport struct {
 	Team               []portainer.Team               `json:"teams,omitempty"`
 	TunnelServer       portainer.TunnelServerInfo     `json:"tunnel_server,omitempty"`
 	User               []portainer.User               `json:"users,omitempty"`
-	Version            map[string]string              `json:"version,omitempty"`
+	Version            models.Version                 `json:"version,omitempty"`
 	Webhook            []portainer.Webhook            `json:"webhooks,omitempty"`
 	Metadata           map[string]interface{}         `json:"metadata,omitempty"`
 }
@@ -404,7 +392,7 @@ func (store *Store) Export(filename string) (err error) {
 
 	backup := storeExport{}
 
-	if c, err := store.CustomTemplate().CustomTemplates(); err != nil {
+	if c, err := store.CustomTemplate().ReadAll(); err != nil {
 		if !store.IsErrObjectNotFound(err) {
 			log.Error().Err(err).Msg("exporting Custom Templates")
 		}
@@ -412,7 +400,7 @@ func (store *Store) Export(filename string) (err error) {
 		backup.CustomTemplate = c
 	}
 
-	if e, err := store.EdgeGroup().EdgeGroups(); err != nil {
+	if e, err := store.EdgeGroup().ReadAll(); err != nil {
 		if !store.IsErrObjectNotFound(err) {
 			log.Error().Err(err).Msg("exporting Edge Groups")
 		}
@@ -420,7 +408,7 @@ func (store *Store) Export(filename string) (err error) {
 		backup.EdgeGroup = e
 	}
 
-	if e, err := store.EdgeJob().EdgeJobs(); err != nil {
+	if e, err := store.EdgeJob().ReadAll(); err != nil {
 		if !store.IsErrObjectNotFound(err) {
 			log.Error().Err(err).Msg("exporting Edge Jobs")
 		}
@@ -444,7 +432,7 @@ func (store *Store) Export(filename string) (err error) {
 		backup.Endpoint = e
 	}
 
-	if e, err := store.EndpointGroup().EndpointGroups(); err != nil {
+	if e, err := store.EndpointGroup().ReadAll(); err != nil {
 		if !store.IsErrObjectNotFound(err) {
 			log.Error().Err(err).Msg("exporting Endpoint Groups")
 		}
@@ -468,7 +456,7 @@ func (store *Store) Export(filename string) (err error) {
 		backup.Extensions = r
 	}
 
-	if r, err := store.HelmUserRepository().HelmUserRepositories(); err != nil {
+	if r, err := store.HelmUserRepository().ReadAll(); err != nil {
 		if !store.IsErrObjectNotFound(err) {
 			log.Error().Err(err).Msg("exporting Helm User Repositories")
 		}
@@ -476,7 +464,7 @@ func (store *Store) Export(filename string) (err error) {
 		backup.HelmUserRepository = r
 	}
 
-	if r, err := store.Registry().Registries(); err != nil {
+	if r, err := store.Registry().ReadAll(); err != nil {
 		if !store.IsErrObjectNotFound(err) {
 			log.Error().Err(err).Msg("exporting Registries")
 		}
@@ -484,7 +472,7 @@ func (store *Store) Export(filename string) (err error) {
 		backup.Registry = r
 	}
 
-	if c, err := store.ResourceControl().ResourceControls(); err != nil {
+	if c, err := store.ResourceControl().ReadAll(); err != nil {
 		if !store.IsErrObjectNotFound(err) {
 			log.Error().Err(err).Msg("exporting Resource Controls")
 		}
@@ -492,7 +480,7 @@ func (store *Store) Export(filename string) (err error) {
 		backup.ResourceControl = c
 	}
 
-	if role, err := store.Role().Roles(); err != nil {
+	if role, err := store.Role().ReadAll(); err != nil {
 		if !store.IsErrObjectNotFound(err) {
 			log.Error().Err(err).Msg("exporting Roles")
 		}
@@ -516,9 +504,9 @@ func (store *Store) Export(filename string) (err error) {
 		backup.Settings = *settings
 	}
 
-	if snapshot, err := store.Snapshot().Snapshots(); err != nil {
+	if snapshot, err := store.Snapshot().ReadAll(); err != nil {
 		if !store.IsErrObjectNotFound(err) {
-			log.Err(err).Msg("Exporting Snapshots")
+			log.Error().Err(err).Msg("exporting Snapshots")
 		}
 	} else {
 		backup.Snapshot = snapshot
@@ -532,7 +520,7 @@ func (store *Store) Export(filename string) (err error) {
 		backup.SSLSettings = *settings
 	}
 
-	if t, err := store.Stack().Stacks(); err != nil {
+	if t, err := store.Stack().ReadAll(); err != nil {
 		if !store.IsErrObjectNotFound(err) {
 			log.Error().Err(err).Msg("exporting Stacks")
 		}
@@ -540,7 +528,7 @@ func (store *Store) Export(filename string) (err error) {
 		backup.Stack = t
 	}
 
-	if t, err := store.Tag().Tags(); err != nil {
+	if t, err := store.Tag().ReadAll(); err != nil {
 		if !store.IsErrObjectNotFound(err) {
 			log.Error().Err(err).Msg("exporting Tags")
 		}
@@ -548,7 +536,7 @@ func (store *Store) Export(filename string) (err error) {
 		backup.Tag = t
 	}
 
-	if t, err := store.TeamMembership().TeamMemberships(); err != nil {
+	if t, err := store.TeamMembership().ReadAll(); err != nil {
 		if !store.IsErrObjectNotFound(err) {
 			log.Error().Err(err).Msg("exporting Team Memberships")
 		}
@@ -556,7 +544,7 @@ func (store *Store) Export(filename string) (err error) {
 		backup.TeamMembership = t
 	}
 
-	if t, err := store.Team().Teams(); err != nil {
+	if t, err := store.Team().ReadAll(); err != nil {
 		if !store.IsErrObjectNotFound(err) {
 			log.Error().Err(err).Msg("exporting Teams")
 		}
@@ -572,7 +560,7 @@ func (store *Store) Export(filename string) (err error) {
 		backup.TunnelServer = *info
 	}
 
-	if users, err := store.User().Users(); err != nil {
+	if users, err := store.User().ReadAll(); err != nil {
 		if !store.IsErrObjectNotFound(err) {
 			log.Error().Err(err).Msg("exporting Users")
 		}
@@ -580,7 +568,7 @@ func (store *Store) Export(filename string) (err error) {
 		backup.User = users
 	}
 
-	if webhooks, err := store.Webhook().Webhooks(); err != nil {
+	if webhooks, err := store.Webhook().ReadAll(); err != nil {
 		if !store.IsErrObjectNotFound(err) {
 			log.Error().Err(err).Msg("exporting Webhooks")
 		}
@@ -588,14 +576,12 @@ func (store *Store) Export(filename string) (err error) {
 		backup.Webhook = webhooks
 	}
 
-	v, err := store.Version().DBVersion()
-	if err != nil && !store.IsErrObjectNotFound(err) {
-		log.Error().Err(err).Msg("exporting DB version")
-	}
-	instance, _ := store.Version().InstanceID()
-	backup.Version = map[string]string{
-		"DB_VERSION":  strconv.Itoa(v),
-		"INSTANCE_ID": instance,
+	if version, err := store.Version().Version(); err != nil {
+		if !store.IsErrObjectNotFound(err) {
+			log.Error().Err(err).Msg("exporting Version")
+		}
+	} else {
+		backup.Version = *version
 	}
 
 	backup.Metadata, err = store.connection.BackupMetadata()
@@ -607,13 +593,13 @@ func (store *Store) Export(filename string) (err error) {
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(filename, b, 0600)
+	return os.WriteFile(filename, b, 0600)
 }
 
 func (store *Store) Import(filename string) (err error) {
 	backup := storeExport{}
 
-	s, err := ioutil.ReadFile(filename)
+	s, err := os.ReadFile(filename)
 	if err != nil {
 		return err
 	}
@@ -622,30 +608,18 @@ func (store *Store) Import(filename string) (err error) {
 		return err
 	}
 
-	// TODO: yup, this is bad, and should be in a version struct...
-	if dbversion, ok := backup.Version["DB_VERSION"]; ok {
-		if v, err := strconv.Atoi(dbversion); err == nil {
-			if err := store.Version().StoreDBVersion(v); err != nil {
-				log.Error().Err(err).Msg("DB_VERSION import issue")
-			}
-		}
-	}
-	if instanceID, ok := backup.Version["INSTANCE_ID"]; ok {
-		if err := store.Version().StoreInstanceID(instanceID); err != nil {
-			log.Error().Err(err).Msg("INSTANCE_ID import issue")
-		}
-	}
+	store.Version().UpdateVersion(&backup.Version)
 
 	for _, v := range backup.CustomTemplate {
-		store.CustomTemplate().UpdateCustomTemplate(v.ID, &v)
+		store.CustomTemplate().Update(v.ID, &v)
 	}
 
 	for _, v := range backup.EdgeGroup {
-		store.EdgeGroup().UpdateEdgeGroup(v.ID, &v)
+		store.EdgeGroup().Update(v.ID, &v)
 	}
 
 	for _, v := range backup.EdgeJob {
-		store.EdgeJob().UpdateEdgeJob(v.ID, &v)
+		store.EdgeJob().Update(v.ID, &v)
 	}
 
 	for _, v := range backup.EdgeStack {
@@ -657,7 +631,7 @@ func (store *Store) Import(filename string) (err error) {
 	}
 
 	for _, v := range backup.EndpointGroup {
-		store.EndpointGroup().UpdateEndpointGroup(v.ID, &v)
+		store.EndpointGroup().Update(v.ID, &v)
 	}
 
 	for _, v := range backup.EndpointRelation {
@@ -665,54 +639,54 @@ func (store *Store) Import(filename string) (err error) {
 	}
 
 	for _, v := range backup.HelmUserRepository {
-		store.HelmUserRepository().UpdateHelmUserRepository(v.ID, &v)
+		store.HelmUserRepository().Update(v.ID, &v)
 	}
 
 	for _, v := range backup.Registry {
-		store.Registry().UpdateRegistry(v.ID, &v)
+		store.Registry().Update(v.ID, &v)
 	}
 
 	for _, v := range backup.ResourceControl {
-		store.ResourceControl().UpdateResourceControl(v.ID, &v)
+		store.ResourceControl().Update(v.ID, &v)
 	}
 
 	for _, v := range backup.Role {
-		store.Role().UpdateRole(v.ID, &v)
+		store.Role().Update(v.ID, &v)
 	}
 
 	store.Settings().UpdateSettings(&backup.Settings)
 	store.SSLSettings().UpdateSettings(&backup.SSLSettings)
 
 	for _, v := range backup.Snapshot {
-		store.Snapshot().UpdateSnapshot(&v)
+		store.Snapshot().Update(v.EndpointID, &v)
 	}
 
 	for _, v := range backup.Stack {
-		store.Stack().UpdateStack(v.ID, &v)
+		store.Stack().Update(v.ID, &v)
 	}
 
 	for _, v := range backup.Tag {
-		store.Tag().UpdateTag(v.ID, &v)
+		store.Tag().Update(v.ID, &v)
 	}
 
 	for _, v := range backup.TeamMembership {
-		store.TeamMembership().UpdateTeamMembership(v.ID, &v)
+		store.TeamMembership().Update(v.ID, &v)
 	}
 
 	for _, v := range backup.Team {
-		store.Team().UpdateTeam(v.ID, &v)
+		store.Team().Update(v.ID, &v)
 	}
 
 	store.TunnelServer().UpdateInfo(&backup.TunnelServer)
 
 	for _, user := range backup.User {
-		if err := store.User().UpdateUser(user.ID, &user); err != nil {
-			log.Debug().Str("user", fmt.Sprintf("%+v", user)).Err(err).Msg("user: failed to Update Database")
+		if err := store.User().Update(user.ID, &user); err != nil {
+			log.Debug().Str("user", fmt.Sprintf("%+v", user)).Err(err).Msg("failed to update the user in the database")
 		}
 	}
 
 	for _, v := range backup.Webhook {
-		store.Webhook().UpdateWebhook(v.ID, &v)
+		store.Webhook().Update(v.ID, &v)
 	}
 
 	return store.connection.RestoreMetadata(backup.Metadata)

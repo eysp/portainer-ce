@@ -2,6 +2,7 @@ package testhelpers
 
 import (
 	"io"
+	"time"
 
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/dataservices"
@@ -12,7 +13,6 @@ type testDatastore struct {
 	customTemplate          dataservices.CustomTemplateService
 	edgeGroup               dataservices.EdgeGroupService
 	edgeJob                 dataservices.EdgeJobService
-	edgeUpdateSchedule      dataservices.EdgeUpdateScheduleService
 	edgeStack               dataservices.EdgeStackService
 	endpoint                dataservices.EndpointService
 	endpointGroup           dataservices.EndpointGroupService
@@ -36,10 +36,13 @@ type testDatastore struct {
 	webhook                 dataservices.WebhookService
 }
 
-func (d *testDatastore) BackupTo(io.Writer) error                           { return nil }
-func (d *testDatastore) Open() (bool, error)                                { return false, nil }
-func (d *testDatastore) Init() error                                        { return nil }
-func (d *testDatastore) Close() error                                       { return nil }
+func (d *testDatastore) BackupTo(io.Writer) error                            { return nil }
+func (d *testDatastore) Open() (bool, error)                                 { return false, nil }
+func (d *testDatastore) Init() error                                         { return nil }
+func (d *testDatastore) Close() error                                        { return nil }
+func (d *testDatastore) UpdateTx(func(dataservices.DataStoreTx) error) error { return nil }
+func (d *testDatastore) ViewTx(func(dataservices.DataStoreTx) error) error   { return nil }
+
 func (d *testDatastore) CheckCurrentEdition() error                         { return nil }
 func (d *testDatastore) MigrateData() error                                 { return nil }
 func (d *testDatastore) Rollback(force bool) error                          { return nil }
@@ -49,9 +52,7 @@ func (d *testDatastore) EdgeJob() dataservices.EdgeJobService               { re
 func (d *testDatastore) EdgeStack() dataservices.EdgeStackService           { return d.edgeStack }
 func (d *testDatastore) Endpoint() dataservices.EndpointService             { return d.endpoint }
 func (d *testDatastore) EndpointGroup() dataservices.EndpointGroupService   { return d.endpointGroup }
-func (d *testDatastore) EdgeUpdateSchedule() dataservices.EdgeUpdateScheduleService {
-	return d.edgeUpdateSchedule
-}
+
 func (d *testDatastore) FDOProfile() dataservices.FDOProfileService {
 	return d.fdoProfile
 }
@@ -117,9 +118,6 @@ func (s *stubSettingsService) UpdateSettings(settings *portainer.Settings) error
 	s.settings = settings
 	return nil
 }
-func (s *stubSettingsService) IsFeatureFlagEnabled(feature portainer.Feature) bool {
-	return false
-}
 func WithSettingsService(settings *portainer.Settings) datastoreOption {
 	return func(d *testDatastore) {
 		d.settings = &stubSettingsService{
@@ -133,15 +131,15 @@ type stubUserService struct {
 }
 
 func (s *stubUserService) BucketName() string                                      { return "users" }
-func (s *stubUserService) User(ID portainer.UserID) (*portainer.User, error)       { return nil, nil }
+func (s *stubUserService) Read(ID portainer.UserID) (*portainer.User, error)       { return nil, nil }
 func (s *stubUserService) UserByUsername(username string) (*portainer.User, error) { return nil, nil }
-func (s *stubUserService) Users() ([]portainer.User, error)                        { return s.users, nil }
+func (s *stubUserService) ReadAll() ([]portainer.User, error)                      { return s.users, nil }
 func (s *stubUserService) UsersByRole(role portainer.UserRole) ([]portainer.User, error) {
 	return s.users, nil
 }
-func (s *stubUserService) Create(user *portainer.User) error                          { return nil }
-func (s *stubUserService) UpdateUser(ID portainer.UserID, user *portainer.User) error { return nil }
-func (s *stubUserService) DeleteUser(ID portainer.UserID) error                       { return nil }
+func (s *stubUserService) Create(user *portainer.User) error                      { return nil }
+func (s *stubUserService) Update(ID portainer.UserID, user *portainer.User) error { return nil }
+func (s *stubUserService) Delete(ID portainer.UserID) error                       { return nil }
 
 // WithUsers testDatastore option that will instruct testDatastore to return provided users
 func WithUsers(us []portainer.User) datastoreOption {
@@ -154,19 +152,25 @@ type stubEdgeJobService struct {
 	jobs []portainer.EdgeJob
 }
 
-func (s *stubEdgeJobService) BucketName() string                     { return "edgejob" }
-func (s *stubEdgeJobService) EdgeJobs() ([]portainer.EdgeJob, error) { return s.jobs, nil }
-func (s *stubEdgeJobService) EdgeJob(ID portainer.EdgeJobID) (*portainer.EdgeJob, error) {
+func (s *stubEdgeJobService) BucketName() string                    { return "edgejobs" }
+func (s *stubEdgeJobService) ReadAll() ([]portainer.EdgeJob, error) { return s.jobs, nil }
+func (s *stubEdgeJobService) Read(ID portainer.EdgeJobID) (*portainer.EdgeJob, error) {
 	return nil, nil
 }
-func (s *stubEdgeJobService) Create(ID portainer.EdgeJobID, edgeJob *portainer.EdgeJob) error {
+func (s *stubEdgeJobService) Create(edgeJob *portainer.EdgeJob) error {
 	return nil
 }
-func (s *stubEdgeJobService) UpdateEdgeJob(ID portainer.EdgeJobID, edgeJob *portainer.EdgeJob) error {
+func (s *stubEdgeJobService) CreateWithID(ID portainer.EdgeJobID, edgeJob *portainer.EdgeJob) error {
 	return nil
 }
-func (s *stubEdgeJobService) DeleteEdgeJob(ID portainer.EdgeJobID) error { return nil }
-func (s *stubEdgeJobService) GetNextIdentifier() int                     { return 0 }
+func (s *stubEdgeJobService) Update(ID portainer.EdgeJobID, edgeJob *portainer.EdgeJob) error {
+	return nil
+}
+func (s *stubEdgeJobService) UpdateEdgeJobFunc(ID portainer.EdgeJobID, updateFunc func(edgeJob *portainer.EdgeJob)) error {
+	return nil
+}
+func (s *stubEdgeJobService) Delete(ID portainer.EdgeJobID) error { return nil }
+func (s *stubEdgeJobService) GetNextIdentifier() int              { return 0 }
 
 // WithEdgeJobs option will instruct testDatastore to return provided jobs
 func WithEdgeJobs(js []portainer.EdgeJob) datastoreOption {
@@ -231,6 +235,34 @@ func (s *stubEndpointService) Endpoint(ID portainer.EndpointID) (*portainer.Endp
 	return nil, errors.ErrObjectNotFound
 }
 
+func (s *stubEndpointService) EndpointIDByEdgeID(edgeID string) (portainer.EndpointID, bool) {
+	for _, endpoint := range s.endpoints {
+		if endpoint.EdgeID == edgeID {
+			return endpoint.ID, true
+		}
+	}
+
+	return 0, false
+}
+
+func (s *stubEndpointService) Heartbeat(endpointID portainer.EndpointID) (int64, bool) {
+	for i, endpoint := range s.endpoints {
+		if endpoint.ID == endpointID {
+			return s.endpoints[i].LastCheckInDate, true
+		}
+	}
+
+	return 0, false
+}
+
+func (s *stubEndpointService) UpdateHeartbeat(endpointID portainer.EndpointID) {
+	for i, endpoint := range s.endpoints {
+		if endpoint.ID == endpointID {
+			s.endpoints[i].LastCheckInDate = time.Now().Unix()
+		}
+	}
+}
+
 func (s *stubEndpointService) Endpoints() ([]portainer.Endpoint, error) {
 	return s.endpoints, nil
 }
@@ -267,6 +299,19 @@ func (s *stubEndpointService) DeleteEndpoint(ID portainer.EndpointID) error {
 
 func (s *stubEndpointService) GetNextIdentifier() int {
 	return len(s.endpoints)
+}
+
+func (s *stubEndpointService) EndpointsByTeamID(teamID portainer.TeamID) ([]portainer.Endpoint, error) {
+	var endpoints = make([]portainer.Endpoint, 0)
+
+	for _, e := range s.endpoints {
+		for t := range e.TeamAccessPolicies {
+			if t == teamID {
+				endpoints = append(endpoints, e)
+			}
+		}
+	}
+	return endpoints, nil
 }
 
 // WithEndpoints option will instruct testDatastore to return provided environments(endpoints)

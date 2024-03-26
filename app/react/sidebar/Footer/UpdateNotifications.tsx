@@ -1,8 +1,8 @@
-import { useQuery } from 'react-query';
 import clsx from 'clsx';
+import { DownloadCloud } from 'lucide-react';
 
-import { getVersionStatus } from '@/portainer/services/api/status.service';
-import { useUIState } from '@/portainer/hooks/useUIState';
+import { useUIState } from '@/react/hooks/useUIState';
+import { useSystemVersion } from '@/react/portainer/system/useSystemVersion';
 
 import { Icon } from '@@/Icon';
 
@@ -10,7 +10,7 @@ import styles from './UpdateNotifications.module.css';
 
 export function UpdateNotification() {
   const uiStateStore = useUIState();
-  const query = useUpdateNotification();
+  const query = useSystemVersion();
 
   if (!query.data || !query.data.UpdateAvailable) {
     return null;
@@ -18,11 +18,7 @@ export function UpdateNotification() {
 
   const { LatestVersion } = query.data;
 
-  if (
-    !!uiStateStore.dismissedUpdateVersion &&
-    LatestVersion?.length > 0 &&
-    uiStateStore.dismissedUpdateVersion === LatestVersion
-  ) {
+   {
     return null;
   }
 
@@ -36,9 +32,9 @@ export function UpdateNotification() {
       )}
     >
       <div className={clsx(styles.dismissTitle, 'vertical-center')}>
-        <Icon icon="download-cloud" mode="primary" feather size="md" />
+        <Icon icon={DownloadCloud} mode="primary" size="md" />
         <span className="space-left">
-          New version available {LatestVersion}
+        新版本可用 {LatestVersion}
         </span>
       </div>
 
@@ -48,7 +44,7 @@ export function UpdateNotification() {
           className={clsx(styles.dismissBtn, 'space-right')}
           onClick={() => onDismiss(LatestVersion)}
         >
-          Dismiss
+          忽略
         </button>
         <a
           className="hyperlink space-left"
@@ -56,7 +52,7 @@ export function UpdateNotification() {
           href={`https://github.com/portainer/portainer/releases/tag/${LatestVersion}`}
           rel="noreferrer"
         >
-          See what&apos;s new
+          查看新特性
         </a>
       </div>
     </div>
@@ -65,8 +61,4 @@ export function UpdateNotification() {
   function onDismiss(version: string) {
     uiStateStore.dismissUpdateVersion(version);
   }
-}
-
-function useUpdateNotification() {
-  return useQuery(['status', 'version'], () => getVersionStatus());
 }

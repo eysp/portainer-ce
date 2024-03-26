@@ -7,11 +7,11 @@ import (
 	"testing"
 
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/database/models"
 )
 
 func TestCreateBackupFolders(t *testing.T) {
-	_, store, teardown := MustNewTestStore(t, false, true)
-	defer teardown()
+	_, store := MustNewTestStore(t, true, true)
 
 	connection := store.GetConnection()
 	backupPath := path.Join(connection.GetStorePath(), backupDefaults.backupDir)
@@ -27,9 +27,7 @@ func TestCreateBackupFolders(t *testing.T) {
 }
 
 func TestStoreCreation(t *testing.T) {
-	_, store, teardown := MustNewTestStore(t, true, true)
-	defer teardown()
-
+	_, store := MustNewTestStore(t, true, true)
 	if store == nil {
 		t.Error("Expect to create a store")
 	}
@@ -40,15 +38,17 @@ func TestStoreCreation(t *testing.T) {
 }
 
 func TestBackup(t *testing.T) {
-	_, store, teardown := MustNewTestStore(t, true, true)
+	_, store := MustNewTestStore(t, true, true)
 	connection := store.GetConnection()
-	defer teardown()
 
 	t.Run("Backup should create default db backup", func(t *testing.T) {
-		store.VersionService.StoreDBVersion(portainer.DBVersion)
+		v := models.Version{
+			SchemaVersion: portainer.APIVersion,
+		}
+		store.VersionService.UpdateVersion(&v)
 		store.backupWithOptions(nil)
 
-		backupFileName := path.Join(connection.GetStorePath(), "backups", "common", fmt.Sprintf("portainer.edb.%03d.*", portainer.DBVersion))
+		backupFileName := path.Join(connection.GetStorePath(), "backups", "common", fmt.Sprintf("portainer.edb.%s.*", portainer.APIVersion))
 		if !isFileExist(backupFileName) {
 			t.Errorf("Expect backup file to be created %s", backupFileName)
 		}
@@ -67,8 +67,7 @@ func TestBackup(t *testing.T) {
 }
 
 func TestRemoveWithOptions(t *testing.T) {
-	_, store, teardown := MustNewTestStore(t, true, true)
-	defer teardown()
+	_, store := MustNewTestStore(t, true, true)
 
 	t.Run("successfully removes file if existent", func(t *testing.T) {
 		store.createBackupFolders()

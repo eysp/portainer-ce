@@ -1,16 +1,16 @@
-<page-header title="'用户'" breadcrumbs="['User management']" reload="true"> </page-header>
+<page-header title="'用户'" breadcrumbs="['用户管理']" reload="true"> </page-header>
 
 <div class="row" ng-if="isAdmin">
   <div class="col-lg-12 col-md-12 col-xs-12">
     <rd-widget>
-      <rd-widget-header icon="plus" feather-icon="true" title-text="Add a new user"> </rd-widget-header>
+      <rd-widget-header icon="plus" title-text="添加新用户"> </rd-widget-header>
       <rd-widget-body>
         <form name="form" class="form-horizontal">
           <!-- name-input -->
           <div class="form-group">
-            <label for="username" class="col-sm-3 col-lg-2 control-label text-left required">
+            <label for="username" class="col-sm-3 col-lg-2 control-label required text-left">
               用户名
-              <portainer-tooltip ng-if="AuthenticationMethod === 2" message="'用户名必须与外部LDAP源中定义的用户名完全一致。'"></portainer-tooltip>
+              <portainer-tooltip ng-if="AuthenticationMethod === 2" message="'用户名必须与外部LDAP源中定义的用户名完全匹配。'"></portainer-tooltip>
             </label>
             <div class="col-sm-8">
               <div class="input-group">
@@ -25,8 +25,8 @@
                   data-cy="user-usernameInput"
                 />
                 <span class="input-group-addon">
-                  <pr-icon class="fa green-icon" icon="'check'" feather="true" aria-hidden="true" ng-if="state.validUsername"></pr-icon>
-                  <pr-icon class="fa red-icon" icon="'x'" feather="true" aria-hidden="true" ng-if="!state.validUsername"></pr-icon>
+                  <pr-icon mode="'success'" icon="'check'" ng-if="state.validUsername"></pr-icon>
+                  <pr-icon mode="'danger'" icon="'x'" ng-if="!state.validUsername"></pr-icon>
                 </span>
               </div>
             </div>
@@ -34,7 +34,7 @@
           <!-- !name-input -->
           <!-- new-password-input -->
           <div class="form-group" ng-if="AuthenticationMethod === 1">
-            <label for="password" class="col-sm-3 col-lg-2 control-label text-left required">密码</label>
+            <label for="password" class="col-sm-3 col-lg-2 control-label required text-left">密码</label>
             <div class="col-sm-8">
               <input
                 type="password"
@@ -50,7 +50,7 @@
           <!-- !new-password-input -->
           <!-- confirm-password-input -->
           <div class="form-group" ng-if="AuthenticationMethod === 1">
-            <label for="confirm_password" class="col-sm-3 col-lg-2 control-label text-left required">确认密码</label>
+            <label for="confirm_password" class="col-sm-3 col-lg-2 control-label required text-left">确认密码</label>
             <div class="col-sm-8">
               <div class="input-group">
                 <input
@@ -62,16 +62,14 @@
                 />
                 <span class="input-group-addon">
                   <pr-icon
-                    class="fa green-icon"
+                    mode="'success'"
                     icon="'check'"
-                    feather="true"
                     aria-hidden="true"
                     ng-if="form.password.$viewValue !== '' && form.password.$viewValue === formValues.ConfirmPassword"
                   ></pr-icon>
                   <pr-icon
-                    class="fa red-icon"
+                    mode="'danger'"
                     icon="'x'"
-                    feather="true"
                     aria-hidden="true"
                     ng-if="!(form.password.$viewValue !== '' && form.password.$viewValue === formValues.ConfirmPassword)"
                   ></pr-icon>
@@ -96,8 +94,8 @@
               <por-switch-field
                 label-class="'col-sm-3 col-lg-2 control-label text-left'"
                 checked="formValues.Administrator"
-                label="'Administrator'"
-                tooltip="'管理员可以访问Portainer设置管理，以及对所有定义的环境及其资源的完全控制。'"
+                label="'管理员'"
+                tooltip="'管理员可以访问Portainer设置管理，以及对所有定义的环境及其资源拥有完全控制权。'"
                 on-change="(handleAdministratorChange)"
               ></por-switch-field>
             </div>
@@ -108,7 +106,7 @@
             <label class="col-sm-3 col-lg-2 control-label text-left" for="teams-selector">添加到团队</label>
             <div class="col-sm-8">
               <span class="small text-muted" ng-if="teams.length === 0">
-                你似乎没有任何团队可以添加用户。请到 <a ui-sref="portainer.teams">团队视图</a> 中去创建一些。
+                似乎没有任何团队可添加用户。请前往<a ui-sref="portainer.teams">团队视图</a>创建一些。
               </span>
               <teams-selector
                 ng-if="teams.length > 0"
@@ -118,17 +116,27 @@
                 data-cy="'user-teamSelect'"
                 on-change="(onChangeTeamIds)"
                 input-id="'teams-selector'"
+                disabled="teamSync"
               ></teams-selector>
+            </div>
+          </div>
+          <div class="form-group" ng-if="teamSync">
+            <div class="col-sm-12">
+              <span class="small">
+                <p class="small text-muted vertical-center">
+                  <pr-icon icon="'alert-circle'" class-name="'icon-warning =vertical-center'"></pr-icon>
+                  当前启用了团队同步的外部认证，因此团队领导功能被禁用。
+                </p>
+              </span>
             </div>
           </div>
           <!-- !teams -->
           <div class="form-group" ng-if="isAdmin && !formValues.Administrator && formValues.Teams.length === 0">
             <div class="col-sm-12">
               <span class="small text-muted vertical-center">
-                <pr-icon class="vertical-center" icon="'alert-circle'" feather="true" aria-hidden="true" mode="'primary'" size="'md'"></pr-icon>
+                <pr-icon class="vertical-center" icon="'alert-circle'" aria-hidden="true" mode="'primary'" size="'md'"></pr-icon>
                 <span
-                  >注意：不在团队中的非管理员用户默认情况下无法访问任何环境。请前往
-                  <a ui-sref="portainer.endpoints">环境视图</a> 管理其访问权限。</span
+                  >注意：非管理员用户如果不属于任何团队，默认情况下无法访问任何环境。请前往<a ui-sref="portainer.endpoints">环境视图</a>管理他们的访问。</span
                 >
               </span>
             </div>
@@ -137,19 +145,17 @@
             <div class="col-sm-12">
               <button
                 type="button"
-                class="btn btn-primary btn-sm"
+                class="btn btn-primary btn-sm !ml-0"
                 ng-disabled="state.actionInProgress || !state.validUsername || formValues.Username === '' || (AuthenticationMethod === 1 && (!formValues.Password || form.$invalid || formValues.Password !== formValues.ConfirmPassword))"
                 ng-click="addUser()"
                 button-spinner="state.actionInProgress"
                 data-cy="user-createUserButton"
               >
-                <span ng-hide="state.actionInProgress" class="vertical-center icon-white">
-                  <pr-icon icon="'plus'" feather="true" aria-hidden="true" size="'md'"></pr-icon> 创建用户</span
-                >
-                <span ng-show="state.actionInProgress">创建用户中...</span>
+                <span ng-hide="state.actionInProgress" class="vertical-center icon-white"> <pr-icon icon="'plus'" aria-hidden="true" size="'md'"></pr-icon> 创建用户</span>
+                <span ng-show="state.actionInProgress">正在创建用户...</span>
               </button>
               <span class="text-danger" ng-if="state.userCreationError">
-                <pr-icon icon="'alert-circle'" feather="true" aria-hidden="true" mode="'primary'" size="'md'"></pr-icon> {{ state.userCreationError }}
+                <pr-icon icon="'alert-circle'" aria-hidden="true" mode="'primary'" size="'md'"></pr-icon> {{ state.userCreationError }}
               </span>
             </div>
           </div>
@@ -162,7 +168,7 @@
 <div class="row">
   <div class="col-sm-12">
     <users-datatable
-      title-text="Users"
+      title-text="用户"
       title-icon="user"
       dataset="users"
       table-key="users"

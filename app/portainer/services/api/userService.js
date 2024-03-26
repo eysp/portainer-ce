@@ -1,6 +1,8 @@
 import _ from 'lodash-es';
+
 import { UserTokenModel, UserViewModel } from '@/portainer/models/user';
-import { getUser, getUsers } from '@/portainer/users/user.service';
+import { getUsers } from '@/portainer/users/user.service';
+import { getUser } from '@/portainer/users/queries/useUser';
 
 import { TeamMembershipModel } from '../../models/teamMembership';
 
@@ -15,8 +17,8 @@ export function UserService($q, Users, TeamService, TeamMembershipService) {
     return users.map((u) => new UserViewModel(u));
   };
 
-  service.user = async function (includeAdministrators) {
-    const user = await getUser(includeAdministrators);
+  service.user = async function (userId) {
+    const user = await getUser(userId);
 
     return new UserViewModel(user);
   };
@@ -52,8 +54,8 @@ export function UserService($q, Users, TeamService, TeamMembershipService) {
     return Users.remove({ id: id }).$promise;
   };
 
-  service.updateUser = function (id, { password, role, username }) {
-    return Users.update({ id }, { password, role, username }).$promise;
+  service.updateUser = function (id, { newPassword, role, username }) {
+    return Users.update({ id }, { newPassword, role, username }).$promise;
   };
 
   service.updateUserPassword = function (id, currentPassword, newPassword) {
@@ -65,8 +67,8 @@ export function UserService($q, Users, TeamService, TeamMembershipService) {
     return Users.updatePassword({ id: id }, payload).$promise;
   };
 
-  service.updateUserTheme = function (id, userTheme) {
-    return Users.updateTheme({ id }, { userTheme }).$promise;
+  service.updateUserTheme = function (id, theme) {
+    return Users.updateTheme({ id }, { theme }).$promise;
   };
 
   service.userMemberships = function (id) {
@@ -80,7 +82,7 @@ export function UserService($q, Users, TeamService, TeamMembershipService) {
         deferred.resolve(memberships);
       })
       .catch(function error(err) {
-        deferred.reject({ msg: 'Unable to retrieve user memberships', err: err });
+        deferred.reject({ msg: '无法检索用户成员身份', err: err });
       });
 
     return deferred.promise;
@@ -104,7 +106,7 @@ export function UserService($q, Users, TeamService, TeamMembershipService) {
         deferred.resolve(teams);
       })
       .catch(function error(err) {
-        deferred.reject({ msg: 'Unable to retrieve user teams', err: err });
+        deferred.reject({ msg: '无法检索用户团队', err: err });
       });
 
     return deferred.promise;
@@ -118,7 +120,7 @@ export function UserService($q, Users, TeamService, TeamMembershipService) {
         deferred.resolve(data);
       })
       .catch(function error(err) {
-        deferred.reject({ msg: 'Unable to create user', err: err });
+        deferred.reject({ msg: '无法创建用户', err: err });
       });
     return deferred.promise;
   };
@@ -134,7 +136,7 @@ export function UserService($q, Users, TeamService, TeamMembershipService) {
         deferred.resolve(userTokens);
       })
       .catch(function error(err) {
-        deferred.reject({ msg: 'Unable to retrieve user tokens', err: err });
+        deferred.reject({ msg: '无法检索用户令牌', err: err });
       });
 
     return deferred.promise;
@@ -159,7 +161,7 @@ export function UserService($q, Users, TeamService, TeamMembershipService) {
         if (err.status === 404) {
           deferred.resolve(false);
         }
-        deferred.reject({ msg: 'Unable to verify administrator account existence', err: err });
+        deferred.reject({ msg: '无法验证管理员账户是否存在', err: err });
       });
 
     return deferred.promise;

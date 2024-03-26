@@ -17,7 +17,7 @@ angular.module('portainer.docker').factory('TaskService', [
           deferred.resolve(task);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve task details', err: err });
+          deferred.reject({ msg: '无法检索任务详情', err: err });
         });
 
       return deferred.promise;
@@ -34,7 +34,7 @@ angular.module('portainer.docker').factory('TaskService', [
           deferred.resolve(tasks);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve tasks', err: err });
+          deferred.reject({ msg: '无法检索任务', err: err });
         });
 
       return deferred.promise;

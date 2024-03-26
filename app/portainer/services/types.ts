@@ -1,12 +1,14 @@
-import { Environment } from '../environments/types';
-
-export interface EndpointProvider {
-  setEndpointID(id: Environment['Id']): void;
-  setEndpointPublicURL(url?: string): void;
-  setOfflineModeFromStatus(status: Environment['Status']): void;
-  setCurrentEndpoint(endpoint: Environment | undefined): void;
-}
+import { Environment } from '@/react/portainer/environments/types';
 
 export interface StateManager {
   updateEndpointState(endpoint: Environment): Promise<void>;
+  updateLogo(logo: string): void;
+  updateSnapshotInterval(interval: string): void;
+  updateEnableTelemetry(enable: boolean): void;
 }
+
+export interface IAuthenticationService {
+  getUserDetails(): { ID: number };
+}
+
+export type AsyncService = <T>(fn: () => Promise<T>) => Promise<T>;

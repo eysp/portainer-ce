@@ -1,15 +1,15 @@
 import { TeamId } from '@/react/portainer/users/teams/types';
-import { UserId } from '@/portainer/users/types';
+import { UserId } from '@/portainer/users/types/user-id';
 
 export type ResourceControlId = number;
 
 export type ResourceId = number | string;
 
 export enum ResourceControlOwnership {
-  PUBLIC = 'public',
-  PRIVATE = 'private',
-  RESTRICTED = 'restricted',
-  ADMINISTRATORS = 'administrators',
+  PUBLIC = '公共',
+  PRIVATE = '私有',
+  RESTRICTED = '受限',
+  ADMINISTRATORS = '管理员',
 }
 
 /**

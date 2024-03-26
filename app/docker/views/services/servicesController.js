@@ -46,7 +46,7 @@ angular.module('portainer.docker').controller('ServicesController', [
         })
         .catch(function error(err) {
           $scope.services = [];
-          Notifications.error('失败', err, 'Unable to retrieve services');
+          Notifications.error('Failure', err, 'Unable to retrieve services');
         });
     }
 

@@ -1,4 +1,4 @@
-import clsx from 'clsx';
+import { Heart, Power } from 'lucide-react';
 
 import { Icon } from '@/react/components/Icon';
 
@@ -17,38 +17,22 @@ export function ContainerStatus({ containers }: Props) {
     <div className="pull-right">
       <div>
         <div className="vertical-center space-right pr-5">
-          <Icon
-            icon="power"
-            className={clsx('icon icon-sm icon-success')}
-            feather
-          />
-          {runningContainersFilter(containers)} running
+          <Icon icon={Power} mode="success" size="sm" />
+          {runningContainersFilter(containers)} 运行中
         </div>
         <div className="vertical-center space-right">
-          <Icon
-            icon="power"
-            className={clsx('icon icon-sm icon-danger')}
-            feather
-          />
-          {stoppedContainersFilter(containers)} stopped
+          <Icon icon={Power} mode="danger" size="sm" />
+          {stoppedContainersFilter(containers)} 已停止
         </div>
       </div>
       <div>
         <div className="vertical-center space-right pr-5">
-          <Icon
-            icon="heart"
-            className={clsx('icon icon-sm icon-success')}
-            feather
-          />
-          {healthyContainersFilter(containers)} healthy
+          <Icon icon={Heart} mode="success" size="sm" />
+          {healthyContainersFilter(containers)} 健康
         </div>
         <div className="vertical-center space-right">
-          <Icon
-            icon="heart"
-            className={clsx('icon icon-sm icon-danger')}
-            feather
-          />
-          {unhealthyContainersFilter(containers)} unhealthy
+          <Icon icon={Heart} mode="danger" size="sm" />
+          {unhealthyContainersFilter(containers)} 不健康
         </div>
       </div>
     </div>
@@ -60,7 +44,10 @@ function runningContainersFilter(containers: DockerContainer[]) {
     .length;
 }
 function stoppedContainersFilter(containers: DockerContainer[]) {
-  return containers.filter((container) => container.Status === 'exited').length;
+  return containers.filter(
+    (container) =>
+      container.Status === 'exited' || container.Status === 'stopped'
+  ).length;
 }
 function healthyContainersFilter(containers: DockerContainer[]) {
   return containers.filter((container) => container.Status === 'healthy')

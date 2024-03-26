@@ -5,13 +5,14 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/asaskevich/govalidator"
 	httperror "github.com/portainer/libhttp/error"
 	"github.com/portainer/libhttp/request"
 	"github.com/portainer/libhttp/response"
 	portainer "github.com/portainer/portainer/api"
 	httperrors "github.com/portainer/portainer/api/http/errors"
 	"github.com/portainer/portainer/api/http/security"
+
+	"github.com/asaskevich/govalidator"
 )
 
 type userUpdatePasswordPayload struct {
@@ -73,7 +74,7 @@ func (handler *Handler) userUpdatePassword(w http.ResponseWriter, r *http.Reques
 		return httperror.BadRequest("Invalid request payload", err)
 	}
 
-	user, err := handler.DataStore.User().User(portainer.UserID(userID))
+	user, err := handler.DataStore.User().Read(portainer.UserID(userID))
 	if handler.DataStore.IsErrObjectNotFound(err) {
 		return httperror.NotFound("Unable to find a user with the specified identifier inside the database", err)
 	} else if err != nil {
@@ -86,7 +87,7 @@ func (handler *Handler) userUpdatePassword(w http.ResponseWriter, r *http.Reques
 	}
 
 	if !handler.passwordStrengthChecker.Check(payload.NewPassword) {
-		return httperror.BadRequest("Password does not meet the requirements", nil)
+		return httperror.BadRequest("Password does not meet the minimum strength requirements", nil)
 	}
 
 	user.Password, err = handler.CryptoService.Hash(payload.NewPassword)
@@ -96,7 +97,7 @@ func (handler *Handler) userUpdatePassword(w http.ResponseWriter, r *http.Reques
 
 	user.TokenIssueAt = time.Now().Unix()
 
-	err = handler.DataStore.User().UpdateUser(user.ID, user)
+	err = handler.DataStore.User().Update(user.ID, user)
 	if err != nil {
 		return httperror.InternalServerError("Unable to persist user changes inside the database", err)
 	}

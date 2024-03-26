@@ -5,22 +5,23 @@ import (
 	"strings"
 	"time"
 
-	portainer "github.com/portainer/portainer/api"
-
 	"github.com/docker/docker/api/types"
 	_container "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
+	portainer "github.com/portainer/portainer/api"
+	dockerclient "github.com/portainer/portainer/api/docker/client"
+	"github.com/portainer/portainer/api/docker/consts"
 	"github.com/rs/zerolog/log"
 )
 
 // Snapshotter represents a service used to create environment(endpoint) snapshots
 type Snapshotter struct {
-	clientFactory *ClientFactory
+	clientFactory *dockerclient.ClientFactory
 }
 
 // NewSnapshotter returns a new Snapshotter instance
-func NewSnapshotter(clientFactory *ClientFactory) *Snapshotter {
+func NewSnapshotter(clientFactory *dockerclient.ClientFactory) *Snapshotter {
 	return &Snapshotter{
 		clientFactory: clientFactory,
 	}
@@ -159,7 +160,7 @@ func snapshotContainers(snapshot *portainer.DockerSnapshot, cli *client.Client) 
 	gpuUseSet := make(map[string]struct{})
 	gpuUseAll := false
 	for _, container := range containers {
-		if container.State == "exited" {
+		if container.State == "exited" || container.State == "stopped" {
 			stoppedContainers++
 		} else if container.State == "running" {
 			runningContainers++
@@ -167,22 +168,30 @@ func snapshotContainers(snapshot *portainer.DockerSnapshot, cli *client.Client) 
 			// snapshot GPUs
 			response, err := cli.ContainerInspect(context.Background(), container.ID)
 			if err != nil {
-				return err
-			}
-
-			var gpuOptions *_container.DeviceRequest = nil
-			for _, deviceRequest := range response.HostConfig.Resources.DeviceRequests {
-				if deviceRequest.Driver == "nvidia" || deviceRequest.Capabilities[0][0] == "gpu" {
-					gpuOptions = &deviceRequest
+				// Inspect a container will fail when the container runs on a different
+				// Swarm node, so it is better to log the error instead of return error
+				// when the Swarm mode is enabled
+				if !snapshot.Swarm {
+					return err
+				} else {
+					log.Info().Str("container", container.ID).Err(err).Msg("unable to inspect container in other Swarm nodes")
 				}
-			}
-
-			if gpuOptions != nil {
-				if gpuOptions.Count == -1 {
-					gpuUseAll = true
+			} else {
+				var gpuOptions *_container.DeviceRequest = nil
+				for _, deviceRequest := range response.HostConfig.Resources.DeviceRequests {
+					deviceRequest := deviceRequest
+					if deviceRequest.Driver == "nvidia" || deviceRequest.Capabilities[0][0] == "gpu" {
+						gpuOptions = &deviceRequest
+					}
 				}
-				for _, id := range gpuOptions.DeviceIDs {
-					gpuUseSet[id] = struct{}{}
+
+				if gpuOptions != nil {
+					if gpuOptions.Count == -1 {
+						gpuUseAll = true
+					}
+					for _, id := range gpuOptions.DeviceIDs {
+						gpuUseSet[id] = struct{}{}
+					}
 				}
 			}
 		}
@@ -194,7 +203,7 @@ func snapshotContainers(snapshot *portainer.DockerSnapshot, cli *client.Client) 
 		}
 
 		for k, v := range container.Labels {
-			if k == "com.docker.compose.project" {
+			if k == consts.ComposeStackNameLabel {
 				stacks[v] = struct{}{}
 			}
 		}
@@ -213,7 +222,9 @@ func snapshotContainers(snapshot *portainer.DockerSnapshot, cli *client.Client) 
 	snapshot.HealthyContainerCount = healthyContainers
 	snapshot.UnhealthyContainerCount = unhealthyContainers
 	snapshot.StackCount += len(stacks)
-	snapshot.SnapshotRaw.Containers = containers
+	for _, container := range containers {
+		snapshot.SnapshotRaw.Containers = append(snapshot.SnapshotRaw.Containers, portainer.DockerContainerSnapshot{Container: container})
+	}
 	return nil
 }
 

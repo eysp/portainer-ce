@@ -1,4 +1,4 @@
-<page-header ng-if="ctrl.state.viewReady" title="'存储卷'" breadcrumbs="['存储卷']" reload="true"></page-header>
+<page-header ng-if="ctrl.state.viewReady" title="'Volume list'" breadcrumbs="['Volumes']" reload="true"></page-header>
 
 <kubernetes-view-loading view-ready="ctrl.state.viewReady"></kubernetes-view-loading>
 
@@ -10,8 +10,8 @@
           <uib-tabset active="ctrl.state.activeTab" justified="true" type="pills">
             <uib-tab index="0" classes="btn-sm" select="ctrl.selectTab(0)">
               <uib-tab-heading class="vertical-center">
-                <pr-icon icon="'database'" feather="true"></pr-icon>
-                存储卷
+                <pr-icon icon="'database'"></pr-icon>
+                Volumes
               </uib-tab-heading>
               <kubernetes-volumes-datatable
                 dataset="ctrl.volumes"
@@ -25,8 +25,8 @@
             </uib-tab>
             <uib-tab index="1" classes="btn-sm" select="ctrl.selectTab(1)">
               <uib-tab-heading class="vertical-center">
-                <pr-icon icon="'hard-drive'" feather="true"></pr-icon>
-                存储
+                <pr-icon icon="'hard-drive'"></pr-icon>
+                Storage
               </uib-tab-heading>
               <kubernetes-volumes-storages-datatable dataset="ctrl.storages" table-key="kubernetes.volumes.storages" order-by="Name" refresh-callback="ctrl.getVolumes">
               </kubernetes-volumes-storages-datatable>

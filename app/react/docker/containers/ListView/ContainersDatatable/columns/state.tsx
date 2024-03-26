@@ -1,27 +1,32 @@
-import { CellProps, Column } from 'react-table';
 import clsx from 'clsx';
+import { CellContext } from '@tanstack/react-table';
 
 import {
   type DockerContainer,
   ContainerStatus,
 } from '@/react/docker/containers/types';
 
-import { DefaultFilter } from '@@/datatables/Filter';
+import { filterHOC } from '@@/datatables/Filter';
+import { multiple } from '@@/datatables/filter-types';
 
-export const state: Column<DockerContainer> = {
-  Header: '状态',
-  accessor: 'Status',
+import { columnHelper } from './helper';
+
+export const state = columnHelper.accessor('Status', {
+  header: '状态',
   id: 'state',
-  Cell: StatusCell,
-  sortType: 'string',
-  filter: 'multiple',
-  Filter: DefaultFilter,
-  canHide: true,
-};
+  cell: StatusCell,
+  enableColumnFilter: true,
+  filterFn: multiple,
+  meta: {
+    filter: filterHOC('按状态筛选'),
+  },
+});
 
 function StatusCell({
-  value: status,
-}: CellProps<DockerContainer, ContainerStatus>) {
+  getValue,
+}: CellContext<DockerContainer, ContainerStatus>) {
+  const status = getValue();
+
   const hasHealthCheck = [
     ContainerStatus.Starting,
     ContainerStatus.Healthy,
@@ -35,7 +40,7 @@ function StatusCell({
       className={clsx('label', `label-${statusClassName}`, {
         interactive: hasHealthCheck,
       })}
-      title={hasHealthCheck ? '该容器有一个健康检查' : ''}
+      title={hasHealthCheck ? '此容器已设置健康检查' : ''}
     >
       {status}
     </span>

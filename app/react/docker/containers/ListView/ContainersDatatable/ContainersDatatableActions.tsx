@@ -7,11 +7,11 @@ import {
   Slash,
   Square,
   Trash2,
-} from 'react-feather';
+} from 'lucide-react';
 
 import * as notifications from '@/portainer/services/notifications';
-import { useAuthorizations, Authorized } from '@/portainer/hooks/useUser';
-import { confirmContainerDeletion } from '@/portainer/services/modal.service/prompt';
+import { useAuthorizations, Authorized } from '@/react/hooks/useUser';
+import { confirmContainerDeletion } from '@/react/docker/containers/common/confirm-container-delete-modal';
 import { setPortainerAgentTargetHeader } from '@/portainer/services/http-request.helper';
 import {
   ContainerId,
@@ -27,7 +27,7 @@ import {
   startContainer,
   stopContainer,
 } from '@/react/docker/containers/containers.service';
-import type { EnvironmentId } from '@/portainer/environments/types';
+import type { EnvironmentId } from '@/react/portainer/environments/types';
 
 import { Link } from '@@/Link';
 import { ButtonGroup, Button } from '@@/buttons';
@@ -98,7 +98,7 @@ export function ContainersDatatableActions({
             启动
           </Button>
         </Authorized>
-
+  
         <Authorized authorizations="DockerContainerStop">
           <Button
             color="light"
@@ -109,7 +109,7 @@ export function ContainersDatatableActions({
             停止
           </Button>
         </Authorized>
-
+  
         <Authorized authorizations="DockerContainerKill">
           <Button
             color="light"
@@ -117,10 +117,10 @@ export function ContainersDatatableActions({
             disabled={selectedItemCount === 0 || hasStoppedItemsSelected}
             icon={Slash}
           >
-            终止
+            强制停止
           </Button>
         </Authorized>
-
+  
         <Authorized authorizations="DockerContainerRestart">
           <Button
             color="light"
@@ -131,7 +131,7 @@ export function ContainersDatatableActions({
             重启
           </Button>
         </Authorized>
-
+  
         <Authorized authorizations="DockerContainerPause">
           <Button
             color="light"
@@ -142,7 +142,7 @@ export function ContainersDatatableActions({
             暂停
           </Button>
         </Authorized>
-
+  
         <Authorized authorizations="DockerContainerUnpause">
           <Button
             color="light"
@@ -153,7 +153,7 @@ export function ContainersDatatableActions({
             恢复
           </Button>
         </Authorized>
-
+  
         <Authorized authorizations="DockerContainerDelete">
           <Button
             color="dangerlight"
@@ -165,7 +165,7 @@ export function ContainersDatatableActions({
           </Button>
         </Authorized>
       </ButtonGroup>
-
+  
       {isAddActionVisible && (
         <Authorized authorizations="DockerContainerCreate">
           <Link to="docker.containers.new" className="space-left">
@@ -177,7 +177,7 @@ export function ContainersDatatableActions({
   );
 
   function onStartClick(selectedItems: DockerContainer[]) {
-    const successMessage = '容器已成功启动';
+    const successMessage = '容器成功启动';
     const errorMessage = '无法启动容器';
     executeActionOnContainerList(
       selectedItems,
@@ -185,22 +185,22 @@ export function ContainersDatatableActions({
       successMessage,
       errorMessage
     );
-  }
+}
 
-  function onStopClick(selectedItems: DockerContainer[]) {
-    const successMessage = '容器已成功停止';
-    const errorMessage = '无法停止容器';
-    executeActionOnContainerList(
-      selectedItems,
-      stopContainer,
-      successMessage,
-      errorMessage
-    );
-  }
+function onStopClick(selectedItems: DockerContainer[]) {
+  const successMessage = '容器成功停止';
+  const errorMessage = '无法停止容器';
+  executeActionOnContainerList(
+    selectedItems,
+    stopContainer,
+    successMessage,
+    errorMessage
+  );
+}
 
   function onRestartClick(selectedItems: DockerContainer[]) {
-    const successMessage = '容器已成功重新启动';
-    const errorMessage = '无法重新启动容器';
+    const successMessage = '容器成功重启';
+    const errorMessage = '无法重启容器';
     executeActionOnContainerList(
       selectedItems,
       restartContainer,
@@ -210,8 +210,8 @@ export function ContainersDatatableActions({
   }
 
   function onKillClick(selectedItems: DockerContainer[]) {
-    const successMessage = '容器已成功终止';
-    const errorMessage = '无法终止容器';
+    const successMessage = '容器成功强制停止';
+    const errorMessage = '无法强制停止容器';
     executeActionOnContainerList(
       selectedItems,
       killContainer,
@@ -221,7 +221,7 @@ export function ContainersDatatableActions({
   }
 
   function onPauseClick(selectedItems: DockerContainer[]) {
-    const successMessage = '容器已成功暂停';
+    const successMessage = '容器成功暂停';
     const errorMessage = '无法暂停容器';
     executeActionOnContainerList(
       selectedItems,
@@ -232,7 +232,7 @@ export function ContainersDatatableActions({
   }
 
   function onResumeClick(selectedItems: DockerContainer[]) {
-    const successMessage = '容器已成功恢复';
+    const successMessage = '容器成功恢复';
     const errorMessage = '无法恢复容器';
     executeActionOnContainerList(
       selectedItems,
@@ -242,22 +242,21 @@ export function ContainersDatatableActions({
     );
   }
 
-  function onRemoveClick(selectedItems: DockerContainer[]) {
+  async function onRemoveClick(selectedItems: DockerContainer[]) {
     const isOneContainerRunning = selectedItems.some(
       (container) => container.State === 'running'
     );
 
     const runningTitle = isOneContainerRunning ? 'running' : '';
-    const title = `您将要删除一个或多个 ${runningTitle} 容器。`;
+    const title = `您将要删除一个或多个${runningTitle}容器。`;
 
-    confirmContainerDeletion(title, (result: string[]) => {
-      if (!result) {
-        return;
-      }
-      const cleanVolumes = !!result[0];
+    const result = await confirmContainerDeletion(title);
+    if (!result) {
+      return;
+    }
+    const { removeVolumes } = result;
 
-      removeSelectedContainers(selectedItems, cleanVolumes);
-    });
+    removeSelectedContainers(selectedItems, removeVolumes);
   }
 
   async function executeActionOnContainerList(
@@ -294,12 +293,12 @@ export function ContainersDatatableActions({
         setPortainerAgentTargetHeader(container.NodeName);
         await removeContainer(endpointId, container, cleanVolumes);
         notifications.success(
-          '容器已成功删除',
+          '容器成功删除',
           container.Names[0]
         );
       } catch (err) {
         notifications.error(
-          'Failure',
+          '失败',
           err as Error,
           '无法删除容器'
         );

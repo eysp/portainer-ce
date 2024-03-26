@@ -1,13 +1,12 @@
-import { Column } from 'react-table';
-
 import { isoDateFromTimestamp } from '@/portainer/filters/filters';
 
-import { EdgeUpdateSchedule } from '../../types';
+import { columnHelper } from './helper';
 
-export const created: Column<EdgeUpdateSchedule> = {
-  Header: '创建于',
-  accessor: (row) => isoDateFromTimestamp(row.created),
-  disableFilters: true,
-  Filter: () => null,
-  canHide: false,
-};
+export const created = columnHelper.accessor('created', {
+  id: 'created',
+  header: '创建时间',
+  cell: ({ getValue }) => {
+    const value = getValue();
+    return isoDateFromTimestamp(value);
+  },
+});

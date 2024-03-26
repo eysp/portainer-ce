@@ -2,14 +2,12 @@
   <div class="form-group">
     <div class="col-sm-12" style="margin-top: 5px">
       <label class="control-label text-left">配置</label>
-      <span class="label label-default interactive" style="margin-left: 10px" ng-click="addConfig()">
-        <pr-icon icon="'plus'" mode="'alt'" feather="true"></pr-icon> 添加配置
-      </span>
+      <span class="label label-default interactive" style="margin-left: 10px" ng-click="addConfig()"> <pr-icon icon="'plus'" mode="'alt'"></pr-icon> 添加配置 </span>
     </div>
     <!-- info message -->
     <div class="form-group" ng-show="formValues.Configs.$invalid" style="margin-bottom: 0px">
       <div class="col-sm-12 small text-warning" style="padding-left: 35px; padding-top: 20px">
-        <pr-icon icon="'alert-triangle'" mode="'warning'" feather="true"></pr-icon> {{ formValues.Configs.$error }}
+        <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> {{ formValues.Configs.$error }}
       </div>
     </div>
     <div class="col-sm-12 form-inline" style="margin-top: 10px">
@@ -22,10 +20,10 @@
         </div>
         <div class="input-group col-sm-4 input-group-sm">
           <span class="input-group-addon">容器中的路径</span>
-          <input class="form-control" ng-model="config.FileName" placeholder="例如 /path/in/container" />
+          <input class="form-control" ng-model="config.FileName" placeholder="例如：/path/in/container" />
         </div>
         <button class="btn btn-dangerlight" type="button" ng-click="removeConfig($index)">
-          <pr-icon icon="'trash-2'" feather="true" size="'md'"></pr-icon>
+          <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
         </button>
       </div>
     </div>

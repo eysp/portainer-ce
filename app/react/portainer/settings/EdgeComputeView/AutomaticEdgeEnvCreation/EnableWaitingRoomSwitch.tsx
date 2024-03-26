@@ -1,22 +1,24 @@
 import { useField } from 'formik';
 
-import { confirmAsync } from '@/portainer/services/modal.service/confirm';
-
+import { confirm } from '@@/modals/confirm';
 import { FormControl } from '@@/form-components/FormControl';
 import { Switch } from '@@/form-components/SwitchField/Switch';
+import { buildConfirmButton } from '@@/modals/utils';
+import { ModalType } from '@@/modals';
 
 export function EnabledWaitingRoomSwitch() {
-  const [inputProps, meta, helpers] = useField<boolean>('TrustOnFirstConnect');
+  const [inputProps, meta, helpers] = useField<boolean>('EnableWaitingRoom');
 
   return (
     <FormControl
       inputId="edge_waiting_room"
-      label="Disable Edge Environment Waiting Room"
+      label="Enable Edge Environment Waiting Room"
+      size="medium"
       errors={meta.error}
     >
       <Switch
         id="edge_waiting_room"
-        name="TrustOnFirstConnect"
+        name="EnableWaitingRoom"
         className="space-right"
         checked={inputProps.value}
         onChange={handleChange}
@@ -24,28 +26,24 @@ export function EnabledWaitingRoomSwitch() {
     </FormControl>
   );
 
-  async function handleChange(trust: boolean) {
-    if (!trust) {
-      helpers.setValue(false);
+  async function handleChange(enable: boolean) {
+    if (enable) {
+      helpers.setValue(true);
       return;
     }
 
-    const confirmed = await confirmAsync({
-      title: '禁用边缘环境等候室',
+    const confirmed = await confirm({
+      modalType: ModalType.Warn,
+      title: 'Disable Edge Environment Waiting Room',
       message:
-        '通过禁用等待室功能，所有请求关联的设备都会自动关联，可能会造成安全风险。你确定吗？',
-      buttons: {
-        cancel: {
-          label: '取消',
-          className: 'btn-default',
-        },
-        confirm: {
-          label: '确认',
-          className: 'btn-danger',
-        },
-      },
+        'By disabling the waiting room feature, all devices requesting association will be automatically associated and could pose a security risk. Are you sure?',
+      confirmButton: buildConfirmButton('Confirm', 'danger'),
     });
 
-    helpers.setValue(!!confirmed);
+    if (!confirmed) {
+      return;
+    }
+
+    helpers.setValue(false);
   }
 }

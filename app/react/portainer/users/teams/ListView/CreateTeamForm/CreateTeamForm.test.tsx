@@ -4,12 +4,12 @@ import { renderWithQueryClient, waitFor } from '@/react-tools/test-utils';
 
 import { CreateTeamForm } from './CreateTeamForm';
 
-test('filling the name should make the submit button clickable and emptying it should make it disabled', async () => {
+test('填写名称应该使提交按钮可点击，清空名称应该使其禁用', async () => {
   const { findByLabelText, findByText } = renderWithQueryClient(
     <CreateTeamForm users={[]} teams={[]} />
   );
 
-  const button = await findByText('Create team');
+  const button = await findByText('创建团队');
   expect(button).toBeVisible();
 
   const nameField = await findByLabelText('Name*');

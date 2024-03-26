@@ -27,13 +27,13 @@ function TemplateServiceFactory($q, Templates, TemplateHelper, ImageHelper, Cont
               template.RegistryModel.Registry = registry;
               return template;
             } catch (err) {
-              deferred.reject({ msg: 'Unable to retrieve templates', err: err });
+              deferred.reject({ msg: '无法检索模板', err: err });
             }
           })
         );
       })
       .catch(function error(err) {
-        deferred.reject({ msg: 'Unable to retrieve templates', err: err });
+        deferred.reject({ msg: '无法检索模板', err: err });
       });
 
     return deferred.promise;

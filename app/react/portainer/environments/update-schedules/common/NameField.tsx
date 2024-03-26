@@ -12,7 +12,13 @@ export function NameField() {
   const [{ name }, { error }] = useField<FormValues['name']>('name');
 
   return (
-    <FormControl label="Name" required inputId="name-input" errors={error}>
+    <FormControl
+      label="Name"
+      required
+      inputId="name-input"
+      errors={error}
+      tooltip="A descriptive name helps identify the update or roll back schedule when you have more than one"
+    >
       <Field as={Input} name={name} id="name-input" />
     </FormControl>
   );
@@ -23,7 +29,7 @@ export function nameValidation(
   currentId?: EdgeUpdateSchedule['id']
 ) {
   return string()
-    .required('This field is required')
+    .required('此字段为必填项')
     .test('unique', 'Name must be unique', (value) =>
       schedules.every((s) => s.id === currentId || s.name !== value)
     );

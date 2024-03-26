@@ -26,7 +26,7 @@ class EndpointRegistriesController {
       try {
         this.registries = await this.EndpointService.registries(this.endpointId);
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to retrieve registries');
+        this.Notifications.error('Failure', err, '无法检索注册表');
       }
     });
   }
@@ -42,7 +42,7 @@ class EndpointRegistriesController {
         this.endpointId = this.endpoint.Id;
         await this.getRegistries();
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to retrieve registries');
+        this.Notifications.error('Failure', err, '无法检索注册表');
       } finally {
         this.state.viewReady = true;
       }

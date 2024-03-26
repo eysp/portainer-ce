@@ -1,27 +1,25 @@
 <div class="datatable datatable-empty">
   <rd-widget>
     <rd-widget-body classes="no-padding">
-      <div class="toolBar vertical-center !gap-x-5 !gap-y-1 flex-wrap">
+      <div class="toolBar vertical-center flex-wrap !gap-x-5 !gap-y-1">
         <div class="toolBarTitle vertical-center">
           <div class="widget-icon space-right">
-            <pr-icon icon="'svg-clockrewind'"></pr-icon>
+            <pr-icon icon="'history'"></pr-icon>
           </div>
-
-          Authentication Events
-          <be-feature-indicator feature="$ctrl.feature"></be-feature-indicator>
+          认证事件
         </div>
         <div class="vertical-center">
           <datatable-searchbar on-change="($ctrl.onChangeKeyword)"></datatable-searchbar>
         </div>
       </div>
       <div class="table-responsive">
-        <table class="table table-hover nowrap-cells">
+        <table class="table-hover nowrap-cells table">
           <thead>
             <tr>
               <th>
                 <div class="vertical-center">
                   <table-column-header
-                    col-title="'Time'"
+                    col-title="'时间'"
                     can-sort="true"
                     is-sorted="$ctrl.sort.key === 'Timestamp'"
                     is-sorted-desc="$ctrl.sort.key === 'Timestamp' && $ctrl.sort.desc"
@@ -33,7 +31,7 @@
               <th>
                 <div class="vertical-center">
                   <table-column-header
-                    col-title="'Origin'"
+                    col-title="'来源'"
                     can-sort="true"
                     is-sorted="$ctrl.sort.key === 'Origin'"
                     is-sorted-desc="$ctrl.sort.key === 'Origin' && $ctrl.sort.desc"
@@ -45,7 +43,7 @@
               <th>
                 <div class="vertical-center">
                   <table-column-header
-                    col-title="'Context'"
+                    col-title="'上下文'"
                     can-sort="true"
                     is-sorted="$ctrl.sort.key === 'Context'"
                     is-sorted-desc="$ctrl.sort.key === 'Context' && $ctrl.sort.desc"
@@ -59,7 +57,7 @@
               <th>
                 <div class="vertical-center">
                   <table-column-header
-                    col-title="'User'"
+                    col-title="'用户'"
                     can-sort="true"
                     is-sorted="$ctrl.sort.key === 'Username'"
                     is-sorted-desc="$ctrl.sort.key === 'Username' && $ctrl.sort.desc"
@@ -70,7 +68,7 @@
               </th>
               <th>
                 <div class="vertical-center">
-                  <table-column-header col-title="'Result'" can-sort="false"> </table-column-header>
+                  <table-column-header col-title="'结果'" can-sort="false"> </table-column-header>
                   <datatable-filter labels="$ctrl.typeFilterLabels" filter-key="type" state="$ctrl.typeFilter" on-change="($ctrl.onChangeTypeFilter)"> </datatable-filter>
                 </div>
               </th>
@@ -85,10 +83,10 @@
               <td></td>
             </tr>
             <tr ng-if="!$ctrl.logs">
-              <td class="text-center text-muted" colspan="5">加载中...</td>
+              <td class="text-muted text-center" colspan="5">加载中...</td>
             </tr>
             <tr ng-if="$ctrl.state.logs.length === 0">
-              <td class="text-center text-muted" colspan="8"> No logs available. </td>
+              <td class="text-muted text-center" colspan="8">暂无日志可用。</td>
             </tr>
           </tbody>
         </table>

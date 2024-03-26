@@ -1,6 +1,6 @@
 import { useQuery } from 'react-query';
 
-import { EnvironmentId } from '@/portainer/environments/types';
+import { EnvironmentId } from '@/react/portainer/environments/types';
 import axios, { parseAxiosError } from '@/portainer/services/axios';
 
 export interface VersionResponse {
@@ -14,7 +14,7 @@ export async function getVersion(environmentId: EnvironmentId) {
     );
     return data;
   } catch (err) {
-    throw parseAxiosError(err as Error, 'Unable to retrieve version');
+    throw parseAxiosError(err as Error, '无法检索版本');
   }
 }
 
@@ -32,7 +32,7 @@ export async function getInfo(environmentId: EnvironmentId) {
     );
     return data;
   } catch (err) {
-    throw parseAxiosError(err as Error, 'Unable to retrieve version');
+    throw parseAxiosError(err as Error, '无法检索版本');
   }
 }
 

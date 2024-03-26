@@ -1,10 +1,11 @@
 import { useReducer } from 'react';
+import { Edit, Eye } from 'lucide-react';
 
-import { useUser } from '@/portainer/hooks/useUser';
+import { useUser } from '@/react/hooks/useUser';
 import { Icon } from '@/react/components/Icon';
 import { TeamMembership, TeamRole } from '@/react/portainer/users/teams/types';
-import { useUserMembership } from '@/portainer/users/queries';
-import { EnvironmentId } from '@/portainer/environments/types';
+import { useIsTeamLeader, useUserMembership } from '@/portainer/users/queries';
+import { EnvironmentId } from '@/react/portainer/environments/types';
 
 import { TableContainer, TableTitle } from '@@/datatables';
 import { Button } from '@@/buttons';
@@ -33,7 +34,7 @@ export function AccessControlPanel({
   onUpdateSuccess,
 }: Props) {
   const [isEditMode, toggleEditMode] = useReducer((state) => !state, false);
-  const { isAdmin } = useUser();
+  const { user, isAdmin } = useUser();
 
   const isInherited = checkIfInherited();
 
@@ -45,40 +46,39 @@ export function AccessControlPanel({
     isInherited ||
     (!isAdmin && !isPartOfRestrictedUsers && !isLeaderOfAnyRestrictedTeams);
 
+  const isTeamLeader = useIsTeamLeader(user) as boolean;
+
   return (
-    <div className="row">
-      <div className="col-sm-12">
-        <TableContainer>
-          <TableTitle label="访问控制" icon="eye" featherIcon />
-          <AccessControlPanelDetails
-            resourceType={resourceType}
-            resourceControl={resourceControl}
-          />
-
-          {!isEditDisabled && !isEditMode && (
-            <div className="row">
-              <div>
-                <Button color="link" onClick={toggleEditMode}>
-                  <Icon icon="edit" className="space-right" feather />
-                  更改所有权
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {isEditMode && (
-            <AccessControlPanelForm
-              resourceControl={resourceControl}
-              onCancelClick={() => toggleEditMode()}
-              resourceId={resourceId}
-              resourceType={resourceType}
-              environmentId={environmentId}
-              onUpdateSuccess={handleUpdateSuccess}
-            />
-          )}
-        </TableContainer>
-      </div>
-    </div>
+    <TableContainer>
+      <TableTitle label="访问控制" icon={Eye} />
+      <AccessControlPanelDetails
+        resourceType={resourceType}
+        resourceControl={resourceControl}
+        isAuthorisedToFetchUsers={isAdmin || isTeamLeader}
+      />
+  
+      {!isEditDisabled && !isEditMode && (
+        <div className="row">
+          <div>
+            <Button color="link" onClick={toggleEditMode}>
+              <Icon icon={Edit} className="space-right" />
+              更改所有权
+            </Button>
+          </div>
+        </div>
+      )}
+  
+      {isEditMode && (
+        <AccessControlPanelForm
+          resourceControl={resourceControl}
+          onCancelClick={() => toggleEditMode()}
+          resourceId={resourceId}
+          resourceType={resourceType}
+          environmentId={environmentId}
+          onUpdateSuccess={handleUpdateSuccess}
+        />
+      )}
+    </TableContainer>
   );
 
   async function handleUpdateSuccess() {

@@ -1,13 +1,15 @@
+import { confirmDelete } from '@@/modals/confirm';
+import { confirmServiceForceUpdate } from '@/react/docker/services/common/update-service-modal';
+
 angular.module('portainer.docker').controller('ServicesDatatableActionsController', [
   '$q',
   '$state',
   'ServiceService',
   'ServiceHelper',
   'Notifications',
-  'ModalService',
   'ImageHelper',
   'WebhookService',
-  function ($q, $state, ServiceService, ServiceHelper, Notifications, ModalService, ImageHelper, WebhookService) {
+  function ($q, $state, ServiceService, ServiceHelper, Notifications, ImageHelper, WebhookService) {
     const ctrl = this;
 
     this.scaleAction = function scaleService(service) {
@@ -19,36 +21,29 @@ angular.module('portainer.docker').controller('ServicesDatatableActionsControlle
           $state.reload();
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, 'Unable to scale service');
+          Notifications.error('Failure', err, 'Unable to scale service');
           service.Scale = false;
           service.Replicas = service.ReplicaCount;
         });
     };
 
     this.removeAction = function (selectedItems) {
-      ModalService.confirmDeletion(
-        '你想删除选中的服务吗？所有与所选服务相关的容器也将被删除。',
-        function onConfirm(confirmed) {
-          if (!confirmed) {
-            return;
-          }
-          removeServices(selectedItems);
+      confirmDelete('Do you want to remove the selected service(s)? All the containers associated to the selected service(s) will be removed too.').then((confirmed) => {
+        if (!confirmed) {
+          return;
         }
-      );
+        removeServices(selectedItems);
+      });
     };
 
     this.updateAction = function (selectedItems) {
-      ModalService.confirmServiceForceUpdate(
-        '你想强制更新所选服务吗？所有与所选服务相关的任务将被重新创建。',
-        function (result) {
+      confirmServiceForceUpdate('Do you want to force an update of the selected service(s)? All the tasks associated to the selected service(s) will be recreated.').then(
+        (result) => {
           if (!result) {
             return;
           }
-          var pullImage = false;
-          if (result[0]) {
-            pullImage = true;
-          }
-          forceUpdateServices(selectedItems, pullImage);
+
+          forceUpdateServices(selectedItems, result.pullLatest);
         }
       );
     };
@@ -69,7 +64,7 @@ angular.module('portainer.docker').controller('ServicesDatatableActionsControlle
             Notifications.success('Service successfully updated', service.Name);
           })
           .catch(function error(err) {
-            Notifications.error('失败', err, 'Unable to force update service' + service.Name);
+            Notifications.error('Failure', err, 'Unable to force update service' + service.Name);
           })
           .finally(function final() {
             --actionCount;
@@ -94,7 +89,7 @@ angular.module('portainer.docker').controller('ServicesDatatableActionsControlle
             Notifications.success('Service successfully removed', service.Name);
           })
           .catch(function error(err) {
-            Notifications.error('失败', err, 'Unable to remove service');
+            Notifications.error('Failure', err, 'Unable to remove service');
           })
           .finally(function final() {
             --actionCount;

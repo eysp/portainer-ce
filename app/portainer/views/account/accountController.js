@@ -1,3 +1,7 @@
+import { confirmChangePassword, confirmDelete } from '@@/modals/confirm';
+import { openDialog } from '@@/modals/Dialog';
+import { buildConfirmButton } from '@@/modals/utils';
+
 angular.module('portainer.app').controller('AccountController', [
   '$scope',
   '$state',
@@ -6,27 +10,24 @@ angular.module('portainer.app').controller('AccountController', [
   'Notifications',
   'SettingsService',
   'StateManager',
-  'ThemeManager',
-  'ModalService',
-  function ($scope, $state, Authentication, UserService, Notifications, SettingsService, StateManager, ThemeManager, ModalService) {
+  function ($scope, $state, Authentication, UserService, Notifications, SettingsService, StateManager) {
     $scope.formValues = {
       currentPassword: '',
       newPassword: '',
       confirmPassword: '',
-      userTheme: '',
     };
 
     $scope.updatePassword = async function () {
-      const confirmed = await ModalService.confirmChangePassword();
+      const confirmed = await confirmChangePassword();
       if (confirmed) {
         try {
           await UserService.updateUserPassword($scope.userID, $scope.formValues.currentPassword, $scope.formValues.newPassword);
-          Notifications.success('Success', 'Password successfully updated');
+          Notifications.success('成功', '密码成功更新');
           StateManager.resetPasswordChangeSkips($scope.userID.toString());
           $scope.forceChangePassword = false;
           $state.go('portainer.logout');
         } catch (err) {
-          Notifications.error('失败', err, err.msg);
+          Notifications.error('Failure', err, err.msg);
         }
       }
     };
@@ -39,7 +40,7 @@ angular.module('portainer.app').controller('AccountController', [
           $state.go('portainer.home');
         }
       } catch (err) {
-        Notifications.error('失败', err, err.msg);
+        Notifications.error('Failure', err, err.msg);
       }
     };
 
@@ -56,8 +57,9 @@ angular.module('portainer.app').controller('AccountController', [
           return true;
         }
       }
+
       if ($scope.forceChangePassword) {
-        ModalService.confirmForceChangePassword();
+        confirmForceChangePassword();
       }
       return !$scope.forceChangePassword;
     };
@@ -67,9 +69,9 @@ angular.module('portainer.app').controller('AccountController', [
     };
 
     $scope.removeAction = (selectedTokens) => {
-      const msg = '您是否想删除所选的访问令牌？任何使用这些令牌的脚本或应用程序将不再能够调用Portainer API。';
+      const msg = '您是否要删除所选的访问令牌？使用这些令牌的任何脚本或应用程序将无法调用Portainer API。';
 
-      ModalService.confirmDeletion(msg, function (confirmed) {
+      confirmDelete(msg).then((confirmed) => {
         if (!confirmed) {
           return;
         }
@@ -77,7 +79,7 @@ angular.module('portainer.app').controller('AccountController', [
         selectedTokens.forEach((token) => {
           UserService.deleteAccessToken($scope.userID, token.id)
             .then(() => {
-              Notifications.success('Success', '令牌成功移除');
+              Notifications.success('成功', '令牌成功删除');
               var index = $scope.tokens.indexOf(token);
               $scope.tokens.splice(index, 1);
             })
@@ -94,24 +96,6 @@ angular.module('portainer.app').controller('AccountController', [
       });
     };
 
-    // Update DOM for theme attribute & LocalStorage
-    $scope.setTheme = function (theme) {
-      ThemeManager.setTheme(theme);
-      StateManager.updateTheme(theme);
-    };
-
-    // Rest API Call to update theme with userID in DB
-    $scope.updateTheme = function () {
-      UserService.updateUserTheme($scope.userID, $scope.formValues.userTheme)
-        .then(function success() {
-          Notifications.success('Success', '用户主题成功更新');
-          $state.reload();
-        })
-        .catch(function error(err) {
-          Notifications.error('失败', err, err.msg);
-        });
-    };
-
     async function initView() {
       const state = StateManager.getState();
       const userDetails = Authentication.getUserDetails();
@@ -123,10 +107,6 @@ angular.module('portainer.app').controller('AccountController', [
       if (state.application.demoEnvironment.enabled) {
         $scope.isDemoUser = state.application.demoEnvironment.users.includes($scope.userID);
       }
-
-      const data = await UserService.user($scope.userID);
-
-      $scope.formValues.userTheme = data.UserTheme;
 
       SettingsService.publicSettings()
         .then(function success(data) {
@@ -153,10 +133,17 @@ angular.module('portainer.app').controller('AccountController', [
           $scope.tokens = data;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索到用户令牌');
+          Notifications.error('失败', err, '无法检索用户令牌');
         });
     }
 
     initView();
   },
 ]);
+
+function confirmForceChangePassword() {
+  return openDialog({
+    message: '请更新您的密码为更强的密码，以继续使用Portainer',
+    buttons: [buildConfirmButton('确定')],
+  });
+}

@@ -77,7 +77,7 @@ class KubernetesStackLogsController {
       this.stackLogs = logs;
     } catch (err) {
       this.stopRepeater();
-      this.Notifications.error('失败', err, 'Unable to retrieve application logs');
+      this.Notifications.error('Failure', err, 'Unable to retrieve application logs');
     }
   }
 
@@ -103,7 +103,7 @@ class KubernetesStackLogsController {
     try {
       await this.getStackLogsAsync();
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to retrieve stack logs');
+      this.Notifications.error('Failure', err, 'Unable to retrieve stack logs');
     } finally {
       this.state.viewReady = true;
     }

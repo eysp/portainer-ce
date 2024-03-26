@@ -52,6 +52,9 @@ function StateManagerFactory(
   };
 
   manager.resetPasswordChangeSkips = function (userID) {
+    if (!state.UI.timesPasswordChangeSkipped) {
+      return;
+    }
     if (state.UI.timesPasswordChangeSkipped[userID]) state.UI.timesPasswordChangeSkipped[userID] = 0;
     LocalStorage.storeUIState(state.UI);
   };
@@ -66,13 +69,14 @@ function StateManagerFactory(
   };
 
   manager.clean = function () {
-    state.endpoint = {};
+    manager.cleanEndpoint();
     state.application = {};
   };
 
   manager.cleanEndpoint = function () {
     state.endpoint = {};
     EndpointProvider.clean();
+    LocalStorage.cleanEndpointState();
   };
 
   manager.updateLogo = function (logoURL) {
@@ -129,7 +133,7 @@ function StateManagerFactory(
         deferred.resolve(state);
       })
       .catch(function error(err) {
-        deferred.reject({ msg: 'Unable to retrieve server settings and status', err: err });
+        deferred.reject({ msg: '无法检索服务器设置和状态', err: err });
       });
 
     return deferred.promise;
@@ -193,11 +197,9 @@ function StateManagerFactory(
       return deferred.promise;
     }
 
-    const reload = endpoint.Status === 1 || !endpoint.Snaphosts || !endpoint.Snaphosts.length || !endpoint.Snapshots[0].SnapshotRaw;
-
     $q.all({
-      version: reload ? SystemService.version() : $q.when(endpoint.Snapshots[0].SnapshotRaw.Version),
-      info: reload ? SystemService.info() : $q.when(endpoint.Snapshots[0].SnapshotRaw.Info),
+      version: SystemService.version(),
+      info: SystemService.info(),
     })
       .then(function success(data) {
         var endpointMode = InfoHelper.determineEndpointMode(data.info, endpoint.Type);
@@ -208,7 +210,7 @@ function StateManagerFactory(
         state.endpoint.apiVersion = endpointAPIVersion;
 
         if (endpointMode.agentProxy && endpoint.Status === 1) {
-          return AgentPingService.ping().then(function onPingSuccess(data) {
+          return AgentPingService.ping(endpoint.Id).then(function onPingSuccess(data) {
             state.endpoint.agentApiVersion = data.version;
           });
         }
@@ -218,7 +220,7 @@ function StateManagerFactory(
         deferred.resolve();
       })
       .catch(function error(err) {
-        deferred.reject({ msg: 'Unable to connect to the Docker environment', err: err });
+        deferred.reject({ msg: '无法连接Docker环境', err: err });
       })
       .finally(function final() {
         state.loading = false;

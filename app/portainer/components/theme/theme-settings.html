@@ -1,14 +1,10 @@
 <div class="mt-6">
   <rd-widget>
-    <rd-widget-header icon="sliders" feather-icon="true" title-text="用户主题"></rd-widget-header>
+    <rd-widget-header icon="sliders" title-text="用户主题"></rd-widget-header>
     <rd-widget-body>
       <form class="form-horizontal">
-        <box-selector radio-name="'theme'" value="$ctrl.state.userTheme" options="$ctrl.state.availableThemes" on-change="($ctrl.setTheme)"></box-selector>
+        <box-selector radio-name="'theme'" value="$ctrl.state.themeColor" options="$ctrl.state.availableThemes" on-change="($ctrl.setThemeColor)"></box-selector>
       </form>
-      <p class="mt-2 vertical-center">
-        <pr-icon icon="'alert-circle'" class-name="'icon-primary'" feather="true"></pr-icon>
-        深色和高对比度主题是试验性的。一些用户界面组件可能无法正常显示。
-      </p>
     </rd-widget-body>
   </rd-widget>
 </div>

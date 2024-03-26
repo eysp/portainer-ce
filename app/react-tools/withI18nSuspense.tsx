@@ -7,16 +7,15 @@ export function withI18nSuspense<T>(
   const displayName =
     WrappedComponent.displayName || WrappedComponent.name || 'Component';
 
-  function WrapperComponent(props: T) {
+  function WrapperComponent(props: T & JSX.IntrinsicAttributes) {
     return (
       <Suspense fallback="Loading translations...">
-        {/* eslint-disable-next-line react/jsx-props-no-spreading */}
         <WrappedComponent {...props} />
       </Suspense>
     );
   }
 
-  WrapperComponent.displayName = displayName;
+  WrapperComponent.displayName = `withI18nSuspense(${displayName})`;
 
   return WrapperComponent;
 }

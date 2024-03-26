@@ -1,4 +1,4 @@
-import semverCompare from 'semver-compare';
+import { semverCompare } from '@/react/common/semver-utils';
 
 export function compareVersion(
   currentVersion: string,

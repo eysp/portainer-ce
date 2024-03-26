@@ -13,7 +13,10 @@ angular.module('portainer.docker').controller('CreateVolumeController', [
   'Notifications',
   'FormValidator',
   'HttpRequestHelper',
-  function ($q, $scope, $state, VolumeService, PluginService, ResourceControlService, Authentication, Notifications, FormValidator, HttpRequestHelper) {
+  'endpoint',
+  function ($q, $scope, $state, VolumeService, PluginService, ResourceControlService, Authentication, Notifications, FormValidator, HttpRequestHelper, endpoint) {
+    $scope.endpoint = endpoint;
+
     $scope.formValues = {
       Driver: 'local',
       DriverOptions: [],
@@ -133,11 +136,11 @@ angular.module('portainer.docker').controller('CreateVolumeController', [
           return ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl);
         })
         .then(function success() {
-          Notifications.success('成功', '已成功创建存储卷');
+          Notifications.success('Success', 'Volume successfully created');
           $state.go('docker.volumes', {}, { reload: true });
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '在创建存储卷的过程中发生了一个错误');
+          Notifications.error('Failure', err, 'An error occurred during volume creation');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -152,7 +155,7 @@ angular.module('portainer.docker').controller('CreateVolumeController', [
           $scope.availableVolumeDrivers = data;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索到存储卷驱动');
+          Notifications.error('Failure', err, '无法检索存储卷驱动程序');
         });
     }
 

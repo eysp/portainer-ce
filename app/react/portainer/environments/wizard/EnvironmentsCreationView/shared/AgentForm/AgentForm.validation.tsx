@@ -1,26 +1,24 @@
 import { object, SchemaOf, string } from 'yup';
 
-import { gpusListValidation } from '@/react/portainer/environments/wizard/EnvironmentsCreationView/shared/Hardware/GpusList';
-import { CreateAgentEnvironmentValues } from '@/portainer/environments/environment.service/create';
+import { CreateAgentEnvironmentValues } from '@/react/portainer/environments/environment.service/create';
 
 import { metadataValidation } from '../MetadataFieldset/validation';
-import { nameValidation } from '../NameField';
+import { useNameValidation } from '../NameField';
 
-export function validation(): SchemaOf<CreateAgentEnvironmentValues> {
+export function useValidation(): SchemaOf<CreateAgentEnvironmentValues> {
   return object({
-    name: nameValidation(),
+    name: useNameValidation(),
     environmentUrl: environmentValidation(),
     meta: metadataValidation(),
-    gpus: gpusListValidation(),
   });
 }
 
 function environmentValidation() {
   return string()
-    .required('此字段必填')
+    .required('此字段为必填项')
     .test(
       'address',
-      '环境地址的格式必须为 <IP>:<PORT> 或 <HOST>:<PORT>.',
+      '环境地址必须符合 <IP>:<PORT> 或 <HOST>:<PORT> 的格式。',
       (environmentUrl) => validateAddress(environmentUrl)
     );
 }

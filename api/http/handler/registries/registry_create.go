@@ -119,9 +119,9 @@ func (handler *Handler) registryCreate(w http.ResponseWriter, r *http.Request) *
 		Ecr:              payload.Ecr,
 	}
 
-	rs := handler.DataStore.Registry()
+	registry.ManagementConfiguration = syncConfig(registry)
 
-	registries, err := rs.Registries()
+	registries, err := handler.DataStore.Registry().ReadAll()
 	if err != nil {
 		return httperror.InternalServerError("Unable to retrieve registries from the database", err)
 	}
@@ -134,7 +134,7 @@ func (handler *Handler) registryCreate(w http.ResponseWriter, r *http.Request) *
 		}
 	}
 
-	err = rs.Create(registry)
+	err = handler.DataStore.Registry().Create(registry)
 	if err != nil {
 		return httperror.InternalServerError("Unable to persist the registry inside the database", err)
 	}

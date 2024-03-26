@@ -1,14 +1,13 @@
 import { useField } from 'formik';
 
-import { useGroups } from '@/portainer/environment-groups/queries';
-import { EnvironmentGroupId } from '@/portainer/environment-groups/types';
+import { useGroups } from '@/react/portainer/environments/environment-groups/queries';
+import { EnvironmentGroupId } from '@/react/portainer/environments/environment-groups/types';
 
 import { FormControl } from '@@/form-components/FormControl';
 import { Select } from '@@/form-components/Input';
 
-export function GroupField() {
-  const [fieldProps, metaProps, helpers] =
-    useField<EnvironmentGroupId>('meta.groupId');
+export function GroupField({ name = 'meta.groupId' }: { name?: string }) {
+  const [fieldProps, metaProps, helpers] = useField<EnvironmentGroupId>(name);
 
   const groupsQuery = useGroups();
   if (!groupsQuery.data) {
@@ -21,9 +20,9 @@ export function GroupField() {
   }));
 
   return (
-    <FormControl label="群组" errors={metaProps.error}>
+    <FormControl label="Group" errors={metaProps.error}>
       <Select
-        name="meta.groupId"
+        name={name}
         options={options}
         value={fieldProps.value}
         onChange={(e) => handleChange(e.target.value)}

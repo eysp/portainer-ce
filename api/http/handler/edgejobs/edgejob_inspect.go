@@ -21,7 +21,7 @@ type edgeJobInspectResponse struct {
 // @security ApiKeyAuth
 // @security jwt
 // @produce json
-// @param id path string true "EdgeJob Id"
+// @param id path int true "EdgeJob Id"
 // @success 200 {object} portainer.EdgeJob
 // @failure 500
 // @failure 400
@@ -33,22 +33,19 @@ func (handler *Handler) edgeJobInspect(w http.ResponseWriter, r *http.Request) *
 		return httperror.BadRequest("Invalid Edge job identifier route variable", err)
 	}
 
-	edgeJob, err := handler.DataStore.EdgeJob().EdgeJob(portainer.EdgeJobID(edgeJobID))
+	edgeJob, err := handler.DataStore.EdgeJob().Read(portainer.EdgeJobID(edgeJobID))
 	if handler.DataStore.IsErrObjectNotFound(err) {
 		return httperror.NotFound("Unable to find an Edge job with the specified identifier inside the database", err)
 	} else if err != nil {
 		return httperror.InternalServerError("Unable to find an Edge job with the specified identifier inside the database", err)
 	}
 
-	endpointIDs := []portainer.EndpointID{}
-
-	for endpointID := range edgeJob.Endpoints {
-		endpointIDs = append(endpointIDs, endpointID)
+	responseObj := edgeJobInspectResponse{
+		EdgeJob: edgeJob,
 	}
 
-	responseObj := edgeJobInspectResponse{
-		EdgeJob:   edgeJob,
-		Endpoints: endpointIDs,
+	for endpointID := range edgeJob.Endpoints {
+		responseObj.Endpoints = append(responseObj.Endpoints, endpointID)
 	}
 
 	return response.JSON(w, responseObj)

@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { RegistryTypes } from 'Portainer/models/registryTypes';
 import { RegistryCreateFormValues } from 'Portainer/models/registry';
-import { options } from './options';
+import { options } from '@/react/portainer/registries/CreateView/options';
 
 class CreateRegistryController {
   /* @ngInject */
@@ -114,7 +114,7 @@ class CreateRegistryController {
       try {
         this.gitlabProjects = await this.RegistryGitlabService.projects(this.model.Gitlab.InstanceURL, this.model.Token);
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to retrieve projects');
+        this.Notifications.error('Failure', err, '无法检索项目');
       } finally {
         this.state.actionInProgress = false;
       }
@@ -126,10 +126,10 @@ class CreateRegistryController {
       try {
         this.state.actionInProgress = true;
         await this.RegistryService.createGitlabRegistries(this.model, this.state.gitlab.selectedItems);
-        this.Notifications.success('Success', 'Registries successfully created');
+        this.Notifications.success('Success', '注册表创建成功');
         this.$state.go(this.state.originViewReference, { endpointId: this.state.originalEndpointId });
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to create registries');
+        this.Notifications.error('Failure', err, '无法创建注册表');
         this.state.actionInProgress = false;
       }
     });
@@ -140,10 +140,10 @@ class CreateRegistryController {
       try {
         this.state.actionInProgress = true;
         await this.RegistryService.createRegistry(this.model);
-        this.Notifications.success('Success', 'Registry successfully created');
+        this.Notifications.success('Success', '注册表创建成功');
         this.$state.go(this.state.originViewReference, { endpointId: this.state.originalEndpointId });
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to create registry');
+        this.Notifications.error('Failure', err, '无法创建注册表');
         this.state.actionInProgress = false;
       }
     });
@@ -159,7 +159,7 @@ class CreateRegistryController {
         const registries = await this.RegistryService.registries();
         this.registriesNames = _.map(registries, 'Name');
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to fetch existing registries');
+        this.Notifications.error('Failure', err, 'Unable to fetch existing registries');
       }
     });
   }

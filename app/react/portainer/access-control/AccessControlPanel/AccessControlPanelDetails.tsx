@@ -1,15 +1,18 @@
 import clsx from 'clsx';
 import { PropsWithChildren } from 'react';
 import _ from 'lodash';
+import { Info } from 'lucide-react';
 
 import { ownershipIcon, truncate } from '@/portainer/filters/filters';
 import { UserId } from '@/portainer/users/types';
 import { TeamId } from '@/react/portainer/users/teams/types';
 import { useTeams } from '@/react/portainer/users/teams/queries';
 import { useUsers } from '@/portainer/users/queries';
+import { pluralize } from '@/portainer/helpers/strings';
 
 import { Link } from '@@/Link';
 import { Tooltip } from '@@/Tip/Tooltip';
+import { Icon } from '@@/Icon';
 
 import {
   ResourceControlOwnership,
@@ -21,11 +24,13 @@ import { ResourceControlViewModel } from '../models/ResourceControlViewModel';
 interface Props {
   resourceControl?: ResourceControlViewModel;
   resourceType: ResourceControlType;
+  isAuthorisedToFetchUsers?: boolean;
 }
 
 export function AccessControlPanelDetails({
   resourceControl,
   resourceType,
+  isAuthorisedToFetchUsers = false,
 }: Props) {
   const inheritanceMessage = getInheritanceMessage(
     resourceType,
@@ -38,57 +43,75 @@ export function AccessControlPanelDetails({
     TeamAccesses: restrictedToTeams = [],
   } = resourceControl || {};
 
-  const users = useAuthorizedUsers(restrictedToUsers.map((ra) => ra.UserId));
+  const users = useAuthorizedUsers(
+    restrictedToUsers.map((ra) => ra.UserId),
+    isAuthorisedToFetchUsers
+  );
   const teams = useAuthorizedTeams(restrictedToTeams.map((ra) => ra.TeamId));
+
+  const teamsLength = teams.data ? teams.data.length : 0;
+  const unauthoisedTeams = restrictedToTeams.length - teamsLength;
+
+  let teamsMessage = teams.data && teams.data.join(', ');
+  if (unauthoisedTeams > 0 && teams.isFetched) {
+    teamsMessage += teamsLength > 0 ? ' and' : '';
+    teamsMessage += ` ${unauthoisedTeams} ${pluralize(
+      unauthoisedTeams,
+      'team'
+    )} you are not part of`;
+  }
+
+  const userMessage = users.data
+    ? users.data.join(', ')
+    : `${restrictedToUsers.length} ${pluralize(
+        restrictedToUsers.length,
+        'user'
+      )}`;
 
   return (
     <table className="table">
-      <tbody>
-        <tr data-cy="access-ownership">
-          <td>所有权</td>
-          <td>
-            <i
-              className={clsx(ownershipIcon(ownership), 'space-right')}
-              aria-hidden="true"
-              aria-label="ownership-icon"
-            />
-            <span aria-label="ownership">{ownership}</span>
-            <Tooltip message={getOwnershipTooltip(ownership)} />
-          </td>
-        </tr>
-        {inheritanceMessage}
-        {restrictedToUsers.length > 0 && (
-          <tr data-cy="access-authorisedUsers">
-            <td>授权用户</td>
-            <td aria-label="authorized-users">
-              {users.data && users.data.join(', ')}
-            </td>
-          </tr>
-        )}
-        {restrictedToTeams.length > 0 && (
-          <tr data-cy="access-authorisedTeams">
-            <td>授权团队</td>
-            <td aria-label="authorized-teams">
-              {teams.data && teams.data.join(', ')}
-            </td>
-          </tr>
-        )}
-      </tbody>
-    </table>
+  <tbody>
+    <tr data-cy="access-ownership">
+      <td className="w-1/5">所有权</td>
+      <td>
+        <i
+          className={clsx(ownershipIcon(ownership), 'space-right')}
+          aria-hidden="true"
+          aria-label="ownership-icon"
+        />
+        <span aria-label="ownership">{ownership}</span>
+        <Tooltip message={getOwnershipTooltip(ownership)} />
+      </td>
+    </tr>
+    {inheritanceMessage}
+    {restrictedToUsers.length > 0 && (
+      <tr data-cy="access-authorisedUsers">
+        <td>已授权用户</td>
+        <td aria-label="authorized-users">{userMessage}</td>
+      </tr>
+    )}
+    {restrictedToTeams.length > 0 && (
+      <tr data-cy="access-authorisedTeams">
+        <td>已授权团队</td>
+        <td aria-label="authorized-teams">{teamsMessage}</td>
+      </tr>
+    )}
+  </tbody>
+</table>
   );
 }
 
-function getOwnershipTooltip(ownership: ResourceControlOwnership) {
+function getOwnershipTooltip(ownership) {
   switch (ownership) {
     case ResourceControlOwnership.PRIVATE:
-      return '该资源的管理只限于一个用户。';
+      return '此资源的管理仅限于单个用户。';
     case ResourceControlOwnership.RESTRICTED:
-      return '该资源可由一组受限制的用户和/或团队管理。';
+      return '此资源可以由一组受限制的用户和/或团队来管理。';
     case ResourceControlOwnership.PUBLIC:
-      return '这个资源可以由任何有权限进入这个环境的用户管理。';
+      return '任何具有对此环境的访问权限的用户都可以管理此资源。';
     case ResourceControlOwnership.ADMINISTRATORS:
     default:
-      return '该资源只能由管理员管理。';
+      return '只有管理员才能管理此资源。';
   }
 }
 
@@ -108,8 +131,8 @@ function getInheritanceMessage(
     parentType === ResourceControlType.Service
   ) {
     return (
-      <InheritanceMessage tooltip="应用于一个服务的访问控制也应用于该服务的每个容器。">
-        该资源的访问控制继承自以下服务。
+      <InheritanceMessage tooltip="对服务应用的访问控制也会应用于该服务中的每个容器。">
+        此资源的访问控制从以下服务继承：
         <Link to="docker.services.service" params={{ id: resourceId }}>
           {truncate(resourceId)}
         </Link>
@@ -122,9 +145,8 @@ function getInheritanceMessage(
     parentType === ResourceControlType.Container
   ) {
     return (
-      <InheritanceMessage tooltip="在使用模板创建的容器上应用的访问控制也适用于与该容器相关的每个卷。">
-        该资源的访问控制继承自以下内容
-        容器：
+      <InheritanceMessage tooltip="对使用模板创建的容器应用的访问控制也会应用于与容器关联的每个存储卷。">
+        此资源的访问控制从以下容器继承：
         <Link to="docker.containers.container" params={{ id: resourceId }}>
           {truncate(resourceId)}
         </Link>
@@ -134,9 +156,9 @@ function getInheritanceMessage(
 
   if (parentType === ResourceControlType.Stack) {
     return (
-      <InheritanceMessage tooltip="应用于堆栈的访问控制也应用于堆栈中的每个资源。">
+      <InheritanceMessage tooltip="对堆栈应用的访问控制也会应用于堆栈中的每个资源。">
         <span className="space-right">
-        该资源的访问控制继承自以下堆栈：
+          此资源的访问控制从以下堆栈继承：
         </span>
         {removeEndpointIdFromStackResourceId(resourceId)}
       </InheritanceMessage>
@@ -169,7 +191,7 @@ function InheritanceMessage({
   return (
     <tr>
       <td colSpan={2} aria-label="inheritance-message">
-        <i className="fa fa-info-circle space-right" aria-hidden="true" />
+        <Icon icon={Info} mode="primary" className="mr-1" />
         {children}
         <Tooltip message={tooltip} />
       </td>
@@ -195,17 +217,22 @@ function useAuthorizedTeams(authorizedTeamIds: TeamId[]) {
   });
 }
 
-function useAuthorizedUsers(authorizedUserIds: UserId[]) {
-  return useUsers(false, 0, authorizedUserIds.length > 0, (users) => {
-    if (authorizedUserIds.length === 0) {
-      return [];
-    }
+function useAuthorizedUsers(authorizedUserIds: UserId[], enabled = true) {
+  return useUsers(
+    false,
+    0,
+    authorizedUserIds.length > 0 && enabled,
+    (users) => {
+      if (authorizedUserIds.length === 0) {
+        return [];
+      }
 
-    return _.compact(
-      authorizedUserIds.map((id) => {
-        const user = users.find((u) => u.Id === id);
-        return user?.Username;
-      })
-    );
-  });
+      return _.compact(
+        authorizedUserIds.map((id) => {
+          const user = users.find((u) => u.Id === id);
+          return user?.Username;
+        })
+      );
+    }
+  );
 }

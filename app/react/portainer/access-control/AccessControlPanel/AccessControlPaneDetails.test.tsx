@@ -4,6 +4,7 @@ import { createMockTeams, createMockUsers } from '@/react-tools/test-mocks';
 import { renderWithQueryClient } from '@/react-tools/test-utils';
 import { rest, server } from '@/setup-tests/server';
 import { Role } from '@/portainer/users/types';
+import { withUserProvider } from '@/react/test-utils/withUserProvider';
 
 import {
   ResourceControlOwnership,
@@ -21,7 +22,7 @@ test.each([
   [ResourceControlOwnership.PUBLIC],
   [ResourceControlOwnership.RESTRICTED],
 ])(
-  'when resource control with ownership %s is supplied, show its ownership',
+  '当提供具有所有权 %s 的资源控制时，显示其所有权',
   async (ownership) => {
     const resourceControl = buildViewModel(ownership);
     const { queryByLabelText } = await renderComponent(
@@ -33,7 +34,7 @@ test.each([
   }
 );
 
-test('when resource control is not supplied, show administrators', async () => {
+test('当未提供资源控制时，显示管理员', async () => {
   const { queryByLabelText } = await renderComponent(
     ResourceControlType.Container
   );
@@ -67,7 +68,7 @@ const inheritanceTests = [
 
 for (let i = 0; i < inheritanceTests.length; i += 1) {
   const { resourceType, parentType } = inheritanceTests[i];
-  test(`when resource is ${ResourceControlType[resourceType]} and resource control is ${ResourceControlType[parentType]}, show message`, async () => {
+  test(`当资源为${ResourceControlType[resourceType]}，资源控制为 ${ResourceControlType[parentType]}时，显示消息`, async () => {
     const resourceControl = buildViewModel(
       ResourceControlOwnership.ADMINISTRATORS,
       parentType
@@ -82,7 +83,7 @@ for (let i = 0; i < inheritanceTests.length; i += 1) {
   });
 }
 
-test('when resource is limited to specific users, show comma separated list of their names', async () => {
+test('当资源仅限制于特定用户时，显示用户数量', async () => {
   const users = createMockUsers(10, Role.Standard);
 
   server.use(rest.get('/api/users', (req, res, ctx) => res(ctx.json(users))));
@@ -106,11 +107,11 @@ test('when resource is limited to specific users, show comma separated list of t
   expect(queryByText(/Authorized users/)).toBeVisible();
 
   await expect(findByLabelText('authorized-users')).resolves.toHaveTextContent(
-    restrictedToUsers.map((user) => user.Username).join(', ')
+    `${restrictedToUsers.length} users`
   );
 });
 
-test('when resource is limited to specific teams, show comma separated list of their names', async () => {
+test('当资源仅限制于特定团队时，显示逗号分隔的团队名称列表', async () => {
   const teams = createMockTeams(10);
 
   server.use(rest.get('/api/teams', (req, res, ctx) => res(ctx.json(teams))));
@@ -143,13 +144,12 @@ async function renderComponent(
   resourceType: ResourceControlType = ResourceControlType.Container,
   resourceControl?: ResourceControlViewModel
 ) {
+  const WithUser = withUserProvider(AccessControlPanelDetails);
+
   const queries = renderWithQueryClient(
-    <AccessControlPanelDetails
-      resourceControl={resourceControl}
-      resourceType={resourceType}
-    />
+    <WithUser resourceControl={resourceControl} resourceType={resourceType} />
   );
-  await expect(queries.findByText('Ownership')).resolves.toBeVisible();
+  await expect(queries.findByText('所有权')).resolves.toBeVisible();
 
   return queries;
 }

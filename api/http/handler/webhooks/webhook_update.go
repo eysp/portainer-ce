@@ -28,6 +28,7 @@ func (payload *webhookUpdatePayload) Validate(r *http.Request) error {
 // @tags webhooks
 // @accept json
 // @produce json
+// @param id path int true "Webhook id"
 // @param body body webhookUpdatePayload true "Webhook data"
 // @success 200 {object} portainer.Webhook
 // @failure 400
@@ -47,7 +48,7 @@ func (handler *Handler) webhookUpdate(w http.ResponseWriter, r *http.Request) *h
 		return httperror.BadRequest("Invalid request payload", err)
 	}
 
-	webhook, err := handler.DataStore.Webhook().Webhook(webhookID)
+	webhook, err := handler.DataStore.Webhook().Read(webhookID)
 	if handler.DataStore.IsErrObjectNotFound(err) {
 		return httperror.NotFound("Unable to find a webhooks with the specified identifier inside the database", err)
 	} else if err != nil {
@@ -77,7 +78,7 @@ func (handler *Handler) webhookUpdate(w http.ResponseWriter, r *http.Request) *h
 
 	webhook.RegistryID = payload.RegistryID
 
-	err = handler.DataStore.Webhook().UpdateWebhook(portainer.WebhookID(id), webhook)
+	err = handler.DataStore.Webhook().Update(portainer.WebhookID(id), webhook)
 	if err != nil {
 		return httperror.InternalServerError("Unable to persist the webhook inside the database", err)
 	}

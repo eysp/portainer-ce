@@ -52,7 +52,7 @@ angular.module('portainer.docker').factory('ServiceService', [
           }
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to remove service', err: err });
+          deferred.reject({ msg: '无法删除服务', err: err });
         });
 
       return deferred.promise;

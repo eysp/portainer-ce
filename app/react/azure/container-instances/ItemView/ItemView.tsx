@@ -1,7 +1,7 @@
 import { useCurrentStateAndParams } from '@uirouter/react';
 import { useQueryClient } from 'react-query';
 
-import { useEnvironmentId } from '@/portainer/hooks/useEnvironmentId';
+import { useEnvironmentId } from '@/react/hooks/useEnvironmentId';
 import { AccessControlPanel } from '@/react/portainer/access-control/AccessControlPanel/AccessControlPanel';
 import { ResourceControlViewModel } from '@/react/portainer/access-control/models/ResourceControlViewModel';
 import { ResourceControlType } from '@/react/portainer/access-control/types';
@@ -73,99 +73,99 @@ export function ItemView() {
       <div className="row">
         <div className="col-sm-12">
           <Widget>
-            <WidgetBody className="form-horizontal">
-              <FormSectionTitle>Azure 设置</FormSectionTitle>
-              <FormControl label="订阅" inputId="subscription-input">
-                <Input
-                  name="subscription"
-                  id="subscription-input"
-                  value={container.subscriptionName}
-                  readOnly
-                />
-              </FormControl>
+          <WidgetBody className="form-horizontal">
+  <FormSectionTitle>Azure设置</FormSectionTitle>
+  <FormControl label="订阅" inputId="subscription-input">
+    <Input
+      name="subscription"
+      id="subscription-input"
+      value={container.subscriptionName}
+      readOnly
+    />
+  </FormControl>
 
-              <FormControl label="资源组" inputId="resourceGroup-input">
-                <Input
-                  name="resourceGroup"
-                  id="resourceGroup-input"
-                  value={container.resourceGroupName}
-                  readOnly
-                />
-              </FormControl>
+  <FormControl label="资源组" inputId="resourceGroup-input">
+    <Input
+      name="resourceGroup"
+      id="resourceGroup-input"
+      value={container.resourceGroupName}
+      readOnly
+    />
+  </FormControl>
 
-              <FormControl label="位置" inputId="location-input">
-                <Input
-                  name="location"
-                  id="location-input"
-                  value={container.location}
-                  readOnly
-                />
-              </FormControl>
+  <FormControl label="位置" inputId="location-input">
+    <Input
+      name="location"
+      id="location-input"
+      value={container.location}
+      readOnly
+    />
+  </FormControl>
 
-              <FormSectionTitle>容器配置</FormSectionTitle>
+  <FormSectionTitle>容器配置</FormSectionTitle>
 
-              <FormControl label="名称" inputId="name-input">
-                <Input
-                  name="name"
-                  id="name-input"
-                  readOnly
-                  value={container.name}
-                />
-              </FormControl>
+  <FormControl label="名称" inputId="name-input">
+    <Input
+      name="name"
+      id="name-input"
+      readOnly
+      value={container.name}
+    />
+  </FormControl>
 
-              <FormControl label="镜像" inputId="image-input">
-                <Input
-                  name="image"
-                  id="image-input"
-                  value={container.imageName}
-                  readOnly
-                />
-              </FormControl>
+  <FormControl label="镜像" inputId="image-input">
+    <Input
+      name="image"
+      id="image-input"
+      value={container.imageName}
+      readOnly
+    />
+  </FormControl>
 
-              <FormControl label="OS" inputId="os-input">
-                <Input
-                  name="os"
-                  id="os-input"
-                  readOnly
-                  value={container.osType}
-                />
-              </FormControl>
+  <FormControl label="操作系统" inputId="os-input">
+    <Input
+      name="os"
+      id="os-input"
+      readOnly
+      value={container.osType}
+    />
+  </FormControl>
 
-              <PortsMappingField value={container.ports} readOnly />
+  <PortsMappingField value={container.ports} readOnly />
 
-              <FormControl label="公网 IP" inputId="public-ip">
-                <Input
-                  name="public-ip"
-                  id="public-ip"
-                  readOnly
-                  value={container.ipAddress}
-                />
-              </FormControl>
+  <FormControl label="公共IP" inputId="public-ip">
+    <Input
+      name="public-ip"
+      id="public-ip"
+      readOnly
+      value={container.ipAddress}
+    />
+  </FormControl>
 
-              <FormSectionTitle>容器资源</FormSectionTitle>
+  <FormSectionTitle>容器资源</FormSectionTitle>
 
-              <FormControl label="CPU" inputId="cpu-input">
-                <Input
-                  name="cpu"
-                  id="cpu-input"
-                  type="number"
-                  placeholder="1"
-                  readOnly
-                  value={container.cpu}
-                />
-              </FormControl>
+  <FormControl label="CPU" inputId="cpu-input">
+    <Input
+      name="cpu"
+      id="cpu-input"
+      type="number"
+      placeholder="1"
+      readOnly
+      value={container.cpu}
+    />
+  </FormControl>
 
-              <FormControl label="内存" inputId="cpu-input">
-                <Input
-                  name="memory"
-                  id="memory-input"
-                  type="number"
-                  placeholder="1"
-                  readOnly
-                  value={container.memory}
-                />
-              </FormControl>
-            </WidgetBody>
+  <FormControl label="内存" inputId="cpu-input">
+    <Input
+      name="memory"
+      id="memory-input"
+      type="number"
+      placeholder="1"
+      readOnly
+      value={container.memory}
+    />
+  </FormControl>
+</WidgetBody>
           </Widget>
         </div>
       </div>
@@ -198,7 +198,7 @@ function parseId(id: string) {
   );
 
   if (!match) {
-    throw new Error('container id is missing details');
+    throw new Error('容器 ID 缺少详细信息');
   }
 
   const [, subscriptionId, resourceGroupId, , containerGroupId] = match;

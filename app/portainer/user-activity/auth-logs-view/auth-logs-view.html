@@ -1,11 +1,8 @@
-<page-header title="'用户活动'" breadcrumbs="['User authentication activity']" reload="true"> </page-header>
+<page-header title="'用户活动'" breadcrumbs="['用户认证活动']" reload="true"> </page-header>
 
-<div class="be-indicator-container limited-be">
-  <div class="overlay">
-    <div class="limited-be-link vertical-center"
-      ><be-feature-indicator feature="$ctrl.limitedFeature"></be-feature-indicator
-      ><portainer-tooltip message="'这个功能目前只限于商业版用户。 '"></portainer-tooltip
-    ></div>
+<div class="be-indicator-container limited-be mx-4">
+  <div>
+    <div class="limited-be-link vertical-center"><be-feature-indicator feature="$ctrl.limitedFeature"></be-feature-indicator></div>
     <div class="limited-be-content">
       <rd-widget>
         <rd-widget-body>
@@ -18,28 +15,17 @@
             </div>
           </div>
           <p class="text-muted small vertical-center">
-            <pr-icon icon="'info'" feather="true" class-name="'icon icon-sm icon-primary'"></pr-icon>
-            Portainer用户认证活动日志的最大保留时间为7天。
+            <pr-icon icon="'info'" class-name="'icon icon-sm icon-primary'"></pr-icon>
+            Portainer用户认证活动日志最长保留7天。
           </p>
           <div>
             <button type="button" class="btn btn-sm btn-primary" limited-feature-dir="{{::$ctrl.limitedFeature}}" limited-feature-class="limited-be" limited-feature-disabled
-              ><pr-icon icon="'download'" feather="true" icon-class="'icon icon-sm'"></pr-icon>导出为CSV
+              ><pr-icon icon="'download'" class-name="'icon icon-sm'"></pr-icon>以CSV格式导出
             </button>
           </div>
         </rd-widget-body>
       </rd-widget>
-    </div>
-  </div>
-</div>
-
-<div class="be-indicator-container limited-be">
-  <div class="overlay">
-    <div class="limited-be-link vertical-center"
-      ><be-feature-indicator feature="$ctrl.limitedFeature"></be-feature-indicator
-      ><portainer-tooltip message="'This feature is currently limited to Business Edition users only. '"></portainer-tooltip
-    ></div>
-    <div class="limited-be-content">
-      <div class="row">
+      <div class="row mt-5">
         <auth-logs-datatable
           logs="$ctrl.state.logs"
           keyword="$ctrl.state.keyword"

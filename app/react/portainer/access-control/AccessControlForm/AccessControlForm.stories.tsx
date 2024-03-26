@@ -2,7 +2,7 @@ import { Meta, Story } from '@storybook/react';
 import { useMemo, useState } from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
-import { UserContext } from '@/portainer/hooks/useUser';
+import { UserContext } from '@/react/hooks/useUser';
 import { UserViewModel } from '@/portainer/models/user';
 
 import { parseAccessControlFormData } from '../utils';
@@ -31,7 +31,7 @@ interface Args {
 
 function Template({ userRole }: Args) {
   const isAdmin = userRole === Role.Admin;
-  const defaults = parseAccessControlFormData(isAdmin);
+  const defaults = parseAccessControlFormData(isAdmin, 0);
 
   const [value, setValue] = useState(defaults);
 

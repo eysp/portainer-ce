@@ -2,7 +2,7 @@ import angular from 'angular';
 import _ from 'lodash-es';
 
 import { buildLdapSettingsModel, buildAdSettingsModel } from '@/portainer/settings/authentication/ldap/ldap-settings.model';
-import { options } from './options';
+import { options } from '@/react/portainer/settings/AuthenticationView/InternalAuth/options';
 
 angular.module('portainer.app').controller('SettingsAuthenticationController', SettingsAuthenticationController);
 
@@ -30,8 +30,8 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
         value: '24h',
       },
       { key: '1 周', value: `${24 * 7}h` },
-      { key: '1 月', value: `${24 * 30}h` },
-      { key: '6 月', value: `${24 * 30 * 6}h` },
+      { key: '1 个月', value: `${24 * 30}h` },
+      { key: '6 个月', value: `${24 * 30 * 6}h` },
       { key: '1 年', value: `${24 * 30 * 12}h` },
     ],
   };
@@ -109,12 +109,12 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
       .then(function success() {
         $scope.state.failedConnectivityCheck = false;
         $scope.state.successfulConnectivityCheck = true;
-        Notifications.success('Success', 'Connection to LDAP successful');
+        Notifications.success('Success', '连接 LDAP 成功');
       })
       .catch(function error(err) {
         $scope.state.failedConnectivityCheck = true;
         $scope.state.successfulConnectivityCheck = false;
-        Notifications.error('失败', err, 'Connection to LDAP failed');
+        Notifications.error('Failure', err, '连接 LDAP 失败');
       })
       .finally(function final() {
         $scope.state.uploadInProgress = false;
@@ -136,10 +136,10 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
         return SettingsService.update(settings);
       })
       .then(function success() {
-        Notifications.success('Success', 'Authentication settings updated');
+        Notifications.success('Success', '身份验证设置已更新');
       })
       .catch(function error(err) {
-        Notifications.error('失败', err, 'Unable to update authentication settings');
+        Notifications.error('Failure', err, '无法更新身份验证设置');
       })
       .finally(function final() {
         $scope.state.uploadInProgress = false;
@@ -166,6 +166,10 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
     }
 
     settings.URLs = settings.URLs.map((url) => {
+      if (url === undefined || url === '') {
+        return;
+      }
+
       if (url.includes(':')) {
         return url;
       }
@@ -244,7 +248,7 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
         }
       })
       .catch(function error(err) {
-        Notifications.error('失败', err, 'Unable to retrieve application settings');
+        Notifications.error('Failure', err, '无法检索应用程序设置');
       });
   }
 

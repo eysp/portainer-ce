@@ -1,14 +1,14 @@
 <page-header
   ng-if="ctrl.state.viewReady"
-  title="'Kubernetes features configuration'"
+  title="'Kubernetes 功能配置'"
   breadcrumbs="[
-    { label:'Environments', link:'portainer.endpoints' },
+    { label:'环境', link:'portainer.endpoints' },
     {
       label:ctrl.endpoint.Name,
       link: 'portainer.endpoints.endpoint',
       linkParams:{id: ctrl.endpoint.Id}
     },
-     'Kubernetes configuration'
+     'Kubernetes 配置'
      ]"
   reload="true"
 >
@@ -22,80 +22,92 @@
       <rd-widget>
         <rd-widget-body>
           <form class="form-horizontal" name="kubernetesClusterSetupForm">
-            <div class="col-sm-12 form-section-title"> 联网 </div>
+            <div class="col-sm-12 form-section-title">网络 - 服务</div>
 
             <div class="form-group">
               <div class="col-sm-12 text-muted small">
-                <p> 启用负载平衡器功能将允许用户通过云提供商分配的外部IP地址暴露他们部署的应用程序。 </p>
-                <p class="mt-1 vertical-center">
-                  <pr-icon icon="'alert-circle'" mode="'warning'" feather="true"></pr-icon>
-                  如果你想使用这个功能，请确保你的云供应商允许你创建负载平衡器。可能会产生费用。
-                </p>
+                <p>启用负载均衡器功能将允许用户通过云提供商分配的外部 IP 地址公开其部署的应用程序。</p>
+                <div class="!inline-flex gap-1 !align-top">
+                  <div class="icon icon-sm"><pr-icon icon="'alert-circle'" mode="'warning'"></pr-icon></div>
+                  <div>如果您想使用此功能，请确保您的云服务提供商允许您创建负载均衡器。可能会产生费用。</div>
+                </div>
               </div>
 
-              <div class="col-sm-12">
-                <label class="control-label text-left col-sm-5 col-lg-4 px-0"> 允许用户使用外部负载平衡器 </label>
+              <div class="col-sm-12 mt-4">
+                <label class="control-label col-sm-5 col-lg-4 px-0 text-left">允许用户使用外部负载均衡器</label>
                 <label class="switch col-sm-8 mb-0">
                   <input type="checkbox" ng-model="ctrl.formValues.UseLoadBalancer" /><span class="slider round" data-cy="kubeSetup-loadBalancerToggle"></span>
                 </label>
               </div>
             </div>
 
-            <ingress-class-datatable
-              on-change-controllers="(ctrl.onChangeControllers)"
-              allow-none-ingress-class="ctrl.formValues.AllowNoneIngressClass"
-              ingress-controllers="ctrl.originalIngressControllers"
-              is-loading="ctrl.isIngressControllersLoading"
-              description="'在你的集群中启用入口控制器，允许它们在Portainer用户界面中可用，以便用户通过HTTP/HTTPS发布应用程序。一个控制器必须有一个类名，才能被包含在这里'"
-              no-ingress-controller-label="'No supported ingress controllers found.'"
-              view="'cluster'"
-            ></ingress-class-datatable>
+            <div class="col-sm-12 form-section-title">网络 - 入口</div>
 
-            <label htmlFor="foldingButtonIngControllerSettings" class="col-sm-12 form-section-title cursor-pointer flex items-center">
-              <button
-                id="foldingButtonIngControllerSettings"
-                type="button"
-                class="border-0 mx-2 bg-transparent inline-flex justify-center items-center w-2 !ml-0"
-                ng-click="ctrl.toggleAdvancedIngSettings()"
-              >
-                <pr-icon ng-if="!ctrl.state.isIngToggleSectionExpanded" feather="true" icon="'chevron-right'"></pr-icon>
-                <pr-icon ng-if="ctrl.state.isIngToggleSectionExpanded" feather="true" icon="'chevron-down'"></pr-icon>
-              </button>
-              更多设置
-            </label>
-            <div ng-if="ctrl.state.isIngToggleSectionExpanded" class="ml-4">
-              <div class="form-group">
-                <div class="col-sm-12">
-                  <por-switch-field
-                    checked="ctrl.formValues.AllowNoneIngressClass"
-                    name="'allowNoIngressClass'"
-                    label="'允许将入口类设置为&quot;none&quot;'"
-                    tooltip="'这允许设置入口的用户选择&quot;none&quot;作为入口类别。'"
-                    on-change="(ctrl.onToggleAllowNoneIngressClass)"
-                    label-class="'col-sm-5 col-lg-4 px-0 !m-0'"
-                    switch-class="'col-sm-8'"
-                  >
-                  </por-switch-field>
-                </div>
+            <ingress-class-datatable
+    on-change-controllers="(ctrl.onChangeControllers)"
+    allow-none-ingress-class="ctrl.formValues.AllowNoneIngressClass"
+    ingress-controllers="ctrl.originalIngressControllers"
+    is-loading="ctrl.isIngressControllersLoading"
+    description="'在您的集群中启用入口控制器将使它们在 Portainer UI 中可用，以便用户通过 HTTP/HTTPS 发布应用程序。控制器必须具有类名才能在此处包含。'"
+    no-ingress-controller-label="'未找到支持的入口控制器。'"
+    view="'cluster'"
+></ingress-class-datatable>
+
+            <div class="form-group">
+              <div class="col-sm-12">
+                <por-switch-field
+                  checked="ctrl.formValues.AllowNoneIngressClass"
+                  name="'allowNoIngressClass'"
+                  label="'允许将入口类设置为 &quot;none&quot;'"
+                  tooltip="'这允许设置入口时选择 &quot;none&quot; 作为入口类。'"
+                  on-change="(ctrl.onToggleAllowNoneIngressClass)"
+                  label-class="'col-sm-5 col-lg-4 px-0 !m-0'"
+                  switch-class="'col-sm-8'"
+                >
+                </por-switch-field>
               </div>
-              <div class="form-group">
-                <div class="col-sm-12">
-                  <por-switch-field
-                    checked="ctrl.formValues.IngressAvailabilityPerNamespace"
-                    name="'ingressAvailabilityPerNamespace'"
-                    label="'配置每个命名空间的接入控制器可用性'"
-                    tooltip="'这允许管理员在每个命名空间配置哪些入口控制器，供用户在为应用程序设置入口时选择。'"
-                    on-change="(ctrl.onToggleIngressAvailabilityPerNamespace)"
-                    label-class="'col-sm-5 col-lg-4 px-0 !m-0'"
-                    switch-class="'col-sm-8'"
-                  >
-                  </por-switch-field>
-                </div>
+            </div>
+            <div class="form-group">
+              <div class="col-sm-12">
+                <por-switch-field
+                  checked="ctrl.formValues.IngressAvailabilityPerNamespace"
+                  name="'ingressAvailabilityPerNamespace'"
+                  label="'根据命名空间配置入口控制器的可用性'"
+                  tooltip="'这允许管理员在每个命名空间中配置哪些入口控制器将对用户可用，以便在为应用程序设置入口时进行选择。'"
+                  on-change="(ctrl.onToggleIngressAvailabilityPerNamespace)"
+                  label-class="'col-sm-5 col-lg-4 px-0 !m-0'"
+                  switch-class="'col-sm-8'"
+                >
+                </por-switch-field>
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="col-sm-12">
+                <por-switch-field
+                  checked="ctrl.formValues.RestrictStandardUserIngressW"
+                  name="'restrictStandardUserIngressW'"
+                  label="'仅允许管理员部署入口'"
+                  feature-id="ctrl.limitedFeatureIngressDeploy"
+                  tooltip="'强制只允许管理员部署入口（禁止标准用户这样做）。'"
+                  on-change="(ctrl.onToggleRestrictStandardUserIngressW)"
+                  label-class="'col-sm-5 col-lg-4 px-0 !m-0'"
+                  switch-class="'col-sm-8 text-muted'"
+                  data-cy="kubeSetup-restrictStandardUserIngressWToggle"
+                  disabled="!ctrl.isRBACEnabled"
+                >
+                </por-switch-field>
               </div>
             </div>
 
+            <div class="mb-4 !inline-flex gap-1 !align-top">
+              <div class="icon icon-sm"><pr-icon icon="'alert-circle'" mode="'primary'"></pr-icon></div>
+              <div class="text-muted small"
+                >您可以通过创建/编辑Ingress来设置Ingress的默认值（主机名和注释）。然后用户可以通过在创建/编辑应用程序时的主机名下拉菜单中选择它们。</div
+              >
+            </div>
+
             <!-- auto update window -->
-            <div class="col-sm-12 form-section-title"> 更改窗口设置 </div>
+            <div class="col-sm-12 form-section-title">更改窗口设置</div>
 
             <div class="form-group">
               <div class="col-sm-12">
@@ -104,7 +116,7 @@
                   name="'disableSysctlSettingForRegularUsers'"
                   label="'启用更改窗口'"
                   feature-id="ctrl.limitedFeatureAutoWindow"
-                  tooltip="'在定义的变化窗口之外的堆栈或应用程序的自动更新将不会发生。'"
+                  tooltip="'在定义的更改窗口之外对堆栈或应用程序进行GitOps更新将不会发生。'"
                   on-change="(ctrl.onToggleAutoUpdate)"
                   label-class="'col-sm-5 col-lg-4 px-0 !m-0'"
                   switch-class="'col-sm-8 text-muted'"
@@ -116,43 +128,64 @@
             <time-window-picker ng-show="ctrl.state.autoUpdateSettings.Enabled" time-window="ctrl.state.autoUpdateSettings" time-zone="ctrl.state.timeZone"></time-window-picker>
 
             <!-- #region SECURITY -->
-            <div class="col-sm-12 form-section-title"> 安全 </div>
+            <div class="col-sm-12 form-section-title">安全性</div>
+
+            <div
+              ng-if="!ctrl.isRBACEnabled"
+              class="small mt-1 mb-6 flex w-full gap-1 rounded-lg border border-solid border-warning-5 bg-warning-2 p-4 text-warning-8 th-highcontrast:bg-yellow-11 th-highcontrast:text-white th-dark:bg-yellow-11 th-dark:text-white"
+            >
+              <div class="mt-0.5">
+                <pr-icon icon="'alert-triangle'" feather="true" class-name="'text-warning-7 th-dark:text-white th-highcontrast:text-white'"></pr-icon>
+              </div>
+              <div>
+                <p>您的集群未启用 Kubernetes 基于角色的访问控制（RBAC）。</p>
+                <p>这意味着您无法使用 Portainer RBAC 功能根据用户角色来规范对环境资源的访问。</p>
+                <p class="mb-0">
+                    要启用 RBAC，请启动<a class="th-highcontrast:text-blue-4 th-dark:text-blue-7" href="https://kubernetes.io/docs/concepts/overview/components/#kube-apiserver" target="_blank">API server</a>时，使用<code class="bg-gray-4 box-decoration-clone th-highcontrast:bg-black th-dark:bg-black">--authorization-mode</code>标志设置为包含<code class="bg-gray-4 th-highcontrast:bg-black th-dark:bg-black">RBAC</code>的逗号分隔列表，例如：<code class="bg-gray-4 box-decoration-clone th-highcontrast:bg-black th-dark:bg-black">kube-apiserver --authorization-mode=Example1,RBAC,Example2</code>。
+                </p>
+            </div>
+            </div>
 
             <div class="form-group">
               <span class="col-sm-12 text-muted small">
-                默认情况下，所有用户都有对默认命名空间的访问权。启用该选项可以设置对默认命名空间的访问。
-              </span>
+                默认情况下，所有用户都可以访问默认命名空间。启用此选项可在默认命名空间上设置访问权限。
+            </span>
             </div>
 
             <div class="form-group">
               <div class="col-sm-12">
-                <label class="control-label text-left col-sm-5 col-lg-4 px-0"> 限制对默认命名空间的访问 </label>
-                <label class="switch col-sm-8">
-                  <input type="checkbox" ng-model="ctrl.formValues.RestrictDefaultNamespace" /><span class="slider round" data-cy="kubeSetup-restrictDefaultNsToggle"></span>
-                </label>
+                <por-switch-field
+                  checked="ctrl.formValues.RestrictDefaultNamespace"
+                  name="'restrictDefaultNs'"
+                  label="'Restrict access to the default namespace'"
+                  on-change="(ctrl.onToggleRestrictNs)"
+                  label-class="'col-sm-5 col-lg-4 px-0 !m-0'"
+                  switch-class="'col-sm-8 text-muted'"
+                  data-cy="kubeSetup-restrictDefaultNsToggle"
+                  disabled="!ctrl.isRBACEnabled"
+                >
+                </por-switch-field>
               </div>
             </div>
             <!-- #endregion -->
 
-            <div class="col-sm-12 form-section-title"> 资源和指标 </div>
+            <div class="col-sm-12 form-section-title">资源和指标</div>
 
             <div class="form-group">
               <div class="col-sm-12 text-muted small">
                 <p>
-                  通过启用资源过度承诺，你能够为命名空间分配比集群中实际可用的更多资源。这可能会导致意外的
-                  部署失败，如果没有足够的资源来满足需求。
+                    通过启用资源超配，您可以将更多资源分配给命名空间，而不受集群中实际可用资源的限制。如果资源不足以满足需求，则可能导致意外的部署失败。
                 </p>
-                <p class="mt-1 vertical-center">
-                  <pr-icon icon="'alert-circle'" mode="'warning'" feather="true"></pr-icon>
-                  通过禁用资源过度承诺（强烈推荐），你只能将资源分配给命名空间，这些资源（总和）小于集群总数
-                  减去任何系统资源保留。
-                </p>
-              </div>
+                <div class="mt-1 inline-flex gap-1 !align-top">
+                    <div class="icon icon-sm"><pr-icon icon="'alert-circle'" mode="'warning'"></pr-icon></div>
+                    <div>通过禁用资源超配（强烈推荐），您只能将资源分配给命名空间，其总量（总量）小于集群总量减去任何系统资源预留。</div>
+                </div>
+            </div>
 
-              <div class="col-sm-12">
+              <div class="col-sm-12 mt-2">
                 <por-switch-field
                   data-cy="'kubeSetup-resourceOverCommitToggle'"
-                  label="'Allow resource over-commit'"
+                  label="'允许资源超配'"
                   name="'resource-over-commit-switch'"
                   feature-id="ctrl.limitedFeature"
                   checked="ctrl.formValues.EnableResourceOverCommit"
@@ -165,59 +198,56 @@
 
             <div class="form-group">
               <div class="col-sm-12 text-muted small">
-                <p> 启用该功能将允许用户使用特定的功能，如自动缩放，并查看容器和节点的资源使用情况。 </p>
-                <p class="vertical-center mt-1">
-                  <pr-icon icon="'alert-circle'" mode="'warning'" feather="true"></pr-icon>
-                  确保 <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/resource-metrics-pipeline/#metrics-server" target="_blank">metrics 服务</a> 或
-                  <a href="https://github.com/kubernetes-sigs/prometheus-adapter" target="_blank">prometheus</a> 在你的集群内运行。
-                </p>
-              </div>
+                <p>启用此功能将允许用户使用特定功能，如自动缩放，并查看容器和节点资源使用情况。</p>
+                <div class="mt-1 !inline-flex gap-1 !align-top">
+                    <div class="icon icon-small"><pr-icon icon="'alert-circle'" mode="'warning'"></pr-icon></div>
+                    <div>确保<a href="https://kubernetes.io/docs/tasks/debug-application-cluster/resource-metrics-pipeline/#metrics-server" target="_blank">metrics server</a>或<a href="https://github.com/kubernetes-sigs/prometheus-adapter" target="_blank">prometheus</a>正在集群内运行。</div>
+                </div>
+            </div>
             </div>
             <div class="form-group">
               <div class="col-sm-12">
-                <label class="control-label text-left col-sm-5 col-lg-4 px-0"> 使用 metrics API 启用功能</label>
+                <label class="control-label col-sm-5 col-lg-4 px-0 text-left">使用度量 API 启用功能</label>
                 <label class="switch col-sm-8">
                   <input type="checkbox" ng-model="ctrl.formValues.UseServerMetrics" ng-change="ctrl.enableMetricsServer()" />
                   <span class="slider round" data-cy="kubeSetup-metricsToggle"></span>
                 </label>
               </div>
-              <div ng-if="ctrl.state.metrics.pending && ctrl.state.metrics.userClick" class="col-sm-12 small text-muted" style="margin-top: 5px">
-                检查metrics API... <pr-icon icon="'loader'" feather="true" class-name="'ml-0.5'"></pr-icon>
-              </div>
+              <div ng-if="ctrl.state.metrics.pending &amp;&amp; ctrl.state.metrics.userClick" class="col-sm-12 small text-muted" style="margin-top: 5px">
+                检查度量 API... <pr-icon icon="'loader'" class-name="'ml-0.5'"></pr-icon>
+            </div>
               <div
                 ng-if="!ctrl.state.metrics.pending && ctrl.state.metrics.isServerRunning && ctrl.state.metrics.userClick"
                 class="col-sm-12 small text-muted vertical-center"
                 style="margin-top: 5px"
               >
-                <pr-icon icon="'check'" mode="'success'" feather="true"></pr-icon> 成功地达到指标API
+                <pr-icon icon="'check'" mode="'success'"></pr-icon> 成功连接到度量 API
               </div>
               <div
                 ng-if="!ctrl.state.metrics.pending && !ctrl.state.metrics.isServerRunning && ctrl.state.metrics.userClick"
                 class="col-sm-12 small text-muted vertical-center mt-2"
               >
-                <pr-icon icon="'x'" mode="'danger'" feather="true"></pr-icon> 无法访问metrics API，确保度量衡服务器正确部署在该集群内。
+                <pr-icon icon="'x'" mode="'danger'"></pr-icon> 无法连接到度量 API，请确保度量服务器在集群内正确部署。
               </div>
             </div>
 
-            <div class="col-sm-12 form-section-title"> 可用的存储选项 </div>
+            <div class="col-sm-12 form-section-title">可用存储选项</div>
 
             <div class="form-group" ng-if="!ctrl.storageClassAvailable()">
               <div class="col-sm-12 small text-muted vertical-center">
-                <pr-icon icon="'alert-circle'" mode="'warning'" feather="true"></pr-icon>
-                无法检测到任何可用于持久化数据的存储类。用户将无法在这个集群内持久化应用数据。
+                <pr-icon icon="'alert-circle'" mode="'warning'"></pr-icon>
+                无法检测到任何可用的存储类来持久化数据。用户将无法在此集群内持久化应用程序数据。
               </div>
             </div>
 
             <div class="form-group" ng-if="ctrl.storageClassAvailable()">
               <span class="col-sm-12 text-muted small">
                 <p>
-                  选择哪些存储选项在部署应用程序时可以使用。请看一下你的存储驱动文档，以弄清要配置哪种访问策略，以及是否支持卷扩展功能。
-                  配置哪种访问策略，以及是否支持卷的扩展能力。
-                </p>
-                <p>
-                  你可以在
-                  <a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes" target="_blank">Kubernetes官方文档</a>中找到更多关于访问模式的信息。
-                </p>
+                  选择部署应用程序时可用的存储选项。查看您的存储驱动程序文档，以确定要配置的访问策略以及是否支持存储卷扩展功能。
+              </p>
+              <p>
+                您可以在<a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes" target="_blank">官方 Kubernetes 文档</a>中找到关于访问模式的更多信息。
+            </p>
               </span>
             </div>
 
@@ -227,12 +257,12 @@
                   <tbody>
                     <tr class="text-muted">
                       <td>存储</td>
-                      <td>共享访问政策</td>
+                      <td>共享访问策略</td>
                       <td>存储卷扩展</td>
-                    </tr>
+                  </tr>
                     <tr ng-repeat="class in ctrl.StorageClasses">
                       <td>
-                        <div class="flex flex-row items-center h-full">
+                        <div class="flex h-full flex-row items-center">
                           <label class="switch mr-2 mb-0">
                             <input type="checkbox" ng-model="class.selected" /><span class="slider round" data-cy="kubeSetup-storageToggle{{ class.Name }}"></span>
                           </label>
@@ -248,7 +278,7 @@
                         ></storage-access-mode-selector>
                       </td>
                       <td>
-                        <div class="flex flex-row items-center h-full">
+                        <div class="flex h-full flex-row items-center">
                           <label class="switch mr-2 mb-0"
                             ><input type="checkbox" ng-model="class.AllowVolumeExpansion" /><span
                               class="slider round"
@@ -263,8 +293,8 @@
               </div>
               <div class="col-sm-12">
                 <span ng-if="!ctrl.hasValidStorageConfiguration()" class="text-muted small vertical-center mt-2">
-                  <pr-icon icon="'alert-circle'" mode="'warning'" feather="true"></pr-icon>
-                  需要配置共享访问策略
+                  <pr-icon icon="'alert-circle'" mode="'warning'"></pr-icon>
+                  需要共享访问策略配置
                 </span>
               </div>
             </div>
@@ -287,7 +317,7 @@
                   data-cy="kubeSetup-saveConfigurationButton"
                 >
                   <span ng-hide="ctrl.state.actionInProgress">保存配置</span>
-                  <span ng-show="ctrl.state.actionInProgress">保存配置中...</span>
+                  <span ng-show="ctrl.state.actionInProgress">正在保存配置...</span>
                 </button>
               </div>
             </div>

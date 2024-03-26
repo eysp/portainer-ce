@@ -22,31 +22,30 @@ export function TeamsField({
   errors,
 }: Props) {
   return (
-    <FormControl
-      label="授权团队"
-      tooltip={
-        teams.length > 0
-          ? overrideTooltip ||
-            '你可以选择哪个（些）团队将能够管理该资源。'
-          : undefined
-      }
+<FormControl
+  label="授权团队"
+  tooltip={
+    teams.length > 0
+      ? overrideTooltip ||
+        '您可以选择哪些团队将能够管理此资源。'
+      : undefined
+  }
+  inputId="teams-selector"
+  errors={errors}
+>
+  {teams.length > 0 ? (
+    <TeamsSelector
+      name={name}
+      teams={teams}
+      onChange={onChange}
+      value={value}
       inputId="teams-selector"
-      errors={errors}
-    >
-      {teams.length > 0 ? (
-        <TeamsSelector
-          name={name}
-          teams={teams}
-          onChange={onChange}
-          value={value}
-          inputId="teams-selector"
-        />
-      ) : (
-        <span className="small text-muted">
-          你还没有创建任何团队。请到
-          <Link to="portainer.teams">团队视图</Link> 来管理团队。
-        </span>
-      )}
-    </FormControl>
+    />
+  ) : (
+    <span className="small text-muted">
+      您还没有创建任何团队。请前往<Link to="portainer.teams">团队视图</Link>管理团队。
+    </span>
+  )}
+</FormControl>
   );
 }

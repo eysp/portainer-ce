@@ -16,11 +16,11 @@ angular.module('portainer.docker').controller('ConfigController', [
     $scope.removeConfig = function removeConfig(configId) {
       ConfigService.remove(configId)
         .then(function success() {
-          Notifications.success('Success', 'Configuration successfully removed');
+          Notifications.success('成功', '配置已成功删除');
           $state.go('docker.configs', {});
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, 'Unable to remove config');
+          Notifications.error('失败', err, '无法删除配置');
         });
     };
 
@@ -30,7 +30,7 @@ angular.module('portainer.docker').controller('ConfigController', [
           $scope.config = data;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, 'Unable to retrieve config details');
+          Notifications.error('失败', err, '无法检索配置详情');
         });
     }
 

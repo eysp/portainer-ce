@@ -1,7 +1,7 @@
 import { Meta, Story } from '@storybook/react';
 import { useMemo } from 'react';
 
-import { UserContext } from '@/portainer/hooks/useUser';
+import { UserContext } from '@/react/hooks/useUser';
 import { UserViewModel } from '@/portainer/models/user';
 
 import { HeaderContainer } from './HeaderContainer';
@@ -41,5 +41,5 @@ function Template({ title }: StoryProps) {
 
 export const Primary: Story<StoryProps> = Template.bind({});
 Primary.args = {
-  title: 'Container details',
+  title: '容器详情',
 };

@@ -15,17 +15,7 @@ export async function getUsers(
 
     return includeAdministrators ? data : filterNonAdministratorUsers(data);
   } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to retrieve users');
-  }
-}
-
-export async function getUser(id: UserId) {
-  try {
-    const { data: user } = await axios.get<User>(buildUrl(id));
-
-    return user;
-  } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to retrieve user details');
+    throw parseAxiosError(e as Error, '无法检索用户');
   }
 }
 
@@ -36,11 +26,11 @@ export async function getUserMemberships(id: UserId) {
     );
     return data;
   } catch (err) {
-    throw parseAxiosError(err as Error, 'Unable to retrieve user memberships');
+    throw parseAxiosError(err as Error, '无法检索用户成员身份');
   }
 }
 
-function buildUrl(id?: UserId, entity?: string) {
+export function buildUrl(id?: UserId, entity?: string) {
   let url = '/users';
 
   if (id) {

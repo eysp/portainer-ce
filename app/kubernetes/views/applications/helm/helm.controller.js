@@ -23,7 +23,7 @@ export default class KubernetesHelmApplicationController {
         throw new PortainerError(`Release ${this.state.params.name} not found`);
       }
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to retrieve helm application details');
+      this.Notifications.error('Failure', err, 'Unable to retrieve helm application details');
     } finally {
       this.state.dataLoading = false;
     }

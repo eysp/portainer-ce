@@ -6,10 +6,11 @@ import {
 } from '@reach/menu-button';
 import { UISrefProps, useSref } from '@uirouter/react';
 import clsx from 'clsx';
-import { User, ChevronDown } from 'react-feather';
+import { User, ChevronDown } from 'lucide-react';
 
+import { queryClient } from '@/react-tools/react-query';
 import { AutomationTestingProps } from '@/types';
-import { useUser } from '@/portainer/hooks/useUser';
+import { useUser } from '@/react/hooks/useUser';
 
 import styles from './HeaderTitle.module.css';
 
@@ -24,17 +25,17 @@ export function UserMenu() {
           styles.menuButton
         )}
         data-cy="userMenu-button"
-        aria-label="用户菜单切换"
+        aria-label="User menu toggle"
       >
         <div
           className={clsx(
             styles.menuIcon,
-            'icon-badge text-lg !p-2 mr-1',
+            'icon-badge mr-1 !p-2 text-lg',
             'text-gray-8',
             'th-dark:text-gray-warm-7'
           )}
         >
-          <User className="feather" />
+          <User className="lucide" />
         </div>
         {user && <span>{user.Username}</span>}
         <ChevronDown className={styles.arrowDown} />
@@ -42,20 +43,19 @@ export function UserMenu() {
 
       <MenuList
         className={styles.menuList}
-        aria-label="用户菜单"
+        aria-label="User Menu"
         data-cy="userMenu"
       >
         <MenuLink
           to="portainer.account"
-          label="我的帐户"
+          label="我的账户"
           data-cy="userMenu-myAccount"
         />
 
         <MenuLink
           to="portainer.logout"
-          label="注销登陆"
+          label="注销登录"
           data-cy="userMenu-logOut"
-          params={{ performApiLogout: true }}
         />
       </MenuList>
     </Menu>
@@ -78,7 +78,10 @@ function MenuLink({
   return (
     <ReachMenuLink
       href={anchorProps.href}
-      onClick={anchorProps.onClick}
+      onClick={(e) => {
+        queryClient.clear();
+        anchorProps.onClick(e);
+      }}
       className={styles.menuLink}
       aria-label={label}
       data-cy={dataCy}

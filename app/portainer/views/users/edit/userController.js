@@ -1,14 +1,17 @@
+import { ModalType } from '@@/modals';
+import { buildConfirmButton } from '@@/modals/utils';
+import { confirm, confirmChangePassword, confirmDelete } from '@@/modals/confirm';
+
 angular.module('portainer.app').controller('UserController', [
   '$q',
   '$scope',
   '$state',
   '$transition$',
   'UserService',
-  'ModalService',
   'Notifications',
   'SettingsService',
   'Authentication',
-  function ($q, $scope, $state, $transition$, UserService, ModalService, Notifications, SettingsService, Authentication) {
+  function ($q, $scope, $state, $transition$, UserService, Notifications, SettingsService, Authentication) {
     $scope.state = {
       updatePasswordError: '',
     };
@@ -27,7 +30,7 @@ angular.module('portainer.app').controller('UserController', [
     };
 
     $scope.deleteUser = function () {
-      ModalService.confirmDeletion('你想删除这个用户吗？这个用户将不能再登录到Portainer。', function onConfirm(confirmed) {
+      confirmDelete('是否要删除此用户？此用户将无法再登录到Portainer。').then((confirmed) => {
         if (!confirmed) {
           return;
         }
@@ -39,29 +42,23 @@ angular.module('portainer.app').controller('UserController', [
       const role = $scope.formValues.Administrator ? 1 : 2;
       const oldUsername = $scope.user.Username;
       const username = $scope.formValues.username;
-      let promise = Promise.resolve(true);
+
       if (username != oldUsername) {
-        promise = new Promise((resolve) =>
-          ModalService.confirmWarn({
-            title: '你确定吗？',
-            message: `你确定你要把用户 ${oldUsername} 重命名为 ${username} 吗?`,
-            buttons: {
-              confirm: {
-                label: 'Update',
-                className: 'btn-primary',
-              },
-            },
-            callback: resolve,
-          })
-        );
+        const confirmed = await confirm({
+          title: '确定要更改用户名吗？',
+          modalType: ModalType.Warn,
+          message: `确定要将用户 ${oldUsername} 的用户名更改为 ${username} 吗？`,
+          confirmButton: buildConfirmButton('Update'),
+        });
+
+        if (!confirmed) {
+          return;
+        }
       }
-      const confirmed = await promise;
-      if (!confirmed) {
-        return;
-      }
+
       UserService.updateUser($scope.user.Id, { role, username })
         .then(function success() {
-          Notifications.success('Success', '用户成功更新');
+          Notifications.success('成功', '用户更新成功');
           $state.reload();
         })
         .catch(function error(err) {
@@ -71,13 +68,13 @@ angular.module('portainer.app').controller('UserController', [
 
     $scope.updatePassword = async function () {
       const isCurrentUser = Authentication.getUserDetails().ID === $scope.user.Id;
-      const confirmed = !isCurrentUser || (await ModalService.confirmChangePassword());
+      const confirmed = !isCurrentUser || (await confirmChangePassword());
       if (!confirmed) {
         return;
       }
-      UserService.updateUser($scope.user.Id, { password: $scope.formValues.newPassword })
+      UserService.updateUser($scope.user.Id, { newPassword: $scope.formValues.newPassword })
         .then(function success() {
-          Notifications.success('Success', '密码成功更新');
+          Notifications.success('成功', '密码更新成功');
 
           if (isCurrentUser) {
             $state.go('portainer.logout');
@@ -129,7 +126,7 @@ angular.module('portainer.app').controller('UserController', [
           $scope.requiredPasswordLength = data.settings.RequiredPasswordLength;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索到用户信息');
+          Notifications.error('失败', err, '无法检索用户信息');
         });
     }
 

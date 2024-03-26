@@ -1,4 +1,5 @@
 import _ from 'lodash-es';
+import { confirmDelete } from '@@/modals/confirm';
 
 angular.module('portainer.app').controller('UsersController', [
   '$q',
@@ -7,11 +8,10 @@ angular.module('portainer.app').controller('UsersController', [
   'UserService',
   'TeamService',
   'TeamMembershipService',
-  'ModalService',
   'Notifications',
   'Authentication',
   'SettingsService',
-  function ($q, $scope, $state, UserService, TeamService, TeamMembershipService, ModalService, Notifications, Authentication, SettingsService) {
+  function ($q, $scope, $state, UserService, TeamService, TeamMembershipService, Notifications, Authentication, SettingsService) {
     $scope.state = {
       userCreationError: '',
       validUsername: false,
@@ -47,7 +47,7 @@ angular.module('portainer.app').controller('UsersController', [
         }
       }
       $scope.state.validUsername = valid;
-      $scope.state.userCreationError = valid ? '' : '用户名已被占用';
+      $scope.state.userCreationError = valid ? '' : '用户名已存在';
     };
 
     $scope.addUser = function () {
@@ -58,7 +58,7 @@ angular.module('portainer.app').controller('UsersController', [
       var role = $scope.formValues.Administrator ? 1 : 2;
       UserService.createUser(username, password, role, $scope.formValues.TeamIds)
         .then(function success() {
-          Notifications.success('成功创建用户', username);
+          Notifications.success('用户创建成功', username);
           $state.reload();
         })
         .catch(function error(err) {
@@ -74,7 +74,7 @@ angular.module('portainer.app').controller('UsersController', [
       angular.forEach(selectedItems, function (user) {
         UserService.deleteUser(user.Id)
           .then(function success() {
-            Notifications.success('成功删除用户', user.Username);
+            Notifications.success('用户成功删除', user.Username);
             var index = $scope.users.indexOf(user);
             $scope.users.splice(index, 1);
           })
@@ -91,7 +91,7 @@ angular.module('portainer.app').controller('UsersController', [
     }
 
     $scope.removeAction = function (selectedItems) {
-      ModalService.confirmDeletion('你想删除所选的用户吗？他们将不能再登录到Portainer。', function onConfirm(confirmed) {
+      confirmDelete('Do you want to remove the selected users? They will not be able to login into Portainer anymore.').then((confirmed) => {
         if (!confirmed) {
           return;
         }
@@ -131,9 +131,10 @@ angular.module('portainer.app').controller('UsersController', [
           $scope.teams = _.orderBy(data.teams, 'Name', 'asc');
           $scope.AuthenticationMethod = data.settings.AuthenticationMethod;
           $scope.requiredPasswordLength = data.settings.RequiredPasswordLength;
+          $scope.teamSync = data.settings.TeamSync;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索到用户和团队');
+          Notifications.error('Failure', err, 'Unable to retrieve users and teams');
           $scope.users = [];
           $scope.teams = [];
         });

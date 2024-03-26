@@ -1,7 +1,7 @@
 import _ from 'lodash-es';
-import { isLimitedToBE } from '@/portainer/feature-flags/feature-flags.service';
+import { isLimitedToBE } from '@/react/portainer/feature-flags/feature-flags.service';
 
-import { getEnvironments } from '@/portainer/environments/environment.service';
+import { getEnvironments } from '@/react/portainer/environments/environment.service';
 import AccessViewerPolicyModel from '../../models/access';
 
 export default class AccessViewerController {
@@ -165,7 +165,7 @@ export default class AccessViewerController {
       const teamUsers = await this.teamMemberUsers(this.allUsers, this.teamMemberships);
       this.users = teamUsers.map((user) => ({ label: user.Username, value: user.Id }));
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to retrieve accesses');
+      this.Notifications.error('Failure', err, 'Unable to retrieve accesses');
     }
   }
 }

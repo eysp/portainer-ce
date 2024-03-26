@@ -1,15 +1,9 @@
 <!-- template -->
-<div ng-class="{ 'blocklist-item--selected': $ctrl.model.Selected }" class="blocklist-item template-item !mr-0 !my-0" ng-click="$ctrl.onSelect($ctrl.model)">
+<div ng-class="{ 'blocklist-item--selected': $ctrl.model.Selected }" class="blocklist-item template-item !my-0 !mr-0" ng-click="$ctrl.onSelect($ctrl.model)">
   <div class="blocklist-item-box">
     <!-- template-image -->
-    <div class="vertical-center justify-center min-w-[56px]">
-      <fallback-image
-        src="$ctrl.model.Logo"
-        fallback-icon="'svg-rocket'"
-        class-name="'blocklist-item-logo'"
-        fallback-class-name="'!h-14 !w-14 [&>*]:!h-8 [&>*]:!w-auto icon-nested-blue'"
-        fallback-mode="'primary'"
-      ></fallback-image>
+    <div class="vertical-center min-w-[56px] justify-center">
+      <fallback-image src="$ctrl.model.Logo" fallback-icon="'rocket'" class-name="'blocklist-item-logo'" size="'3xl'"></fallback-image>
     </div>
     <!-- !template-image -->
     <!-- template-details -->
@@ -19,10 +13,9 @@
         <span class="blocklist-item-title">
           {{ $ctrl.model.Title }}
         </span>
-        <div class="inline-flex items-center space-left blocklist-item-subtitle">
-          <div ng-if="$ctrl.model.Type != 3" class="vertical-center">
-            <i class="fab fa-linux space-right" aria-hidden="true" ng-if="$ctrl.model.Platform === 1 || $ctrl.model.Platform === 'linux' || !$ctrl.model.Platform"></i>
-            <span ng-if="!$ctrl.model.Platform"> &amp; </span>
+        <div class="space-left blocklist-item-subtitle inline-flex items-center">
+          <div ng-if="$ctrl.typeLabel !== 'manifest'" class="vertical-center gap-1">
+            <pr-icon ng-if="$ctrl.model.Platform === 1 || $ctrl.model.Platform === 'linux' || !$ctrl.model.Platform" icon="'svg-linux'" class="mr-1"></pr-icon>
             <pr-icon
               icon="'svg-microsoft'"
               ng-if="$ctrl.model.Platform === 2 || $ctrl.model.Platform === 'windows' || !$ctrl.model.Platform"
@@ -30,7 +23,8 @@
               size="'lg'"
             ></pr-icon>
           </div>
-          <div ng-if="$ctrl.model.Type === 3" class="vertical-center">
+          <!-- currently only kubernetes uses the typeLabel of 'manifest' -->
+          <div ng-if="$ctrl.typeLabel === 'manifest'" class="vertical-center">
             <pr-icon icon="'svg-kubernetes'" size="'lg'" class="align-bottom" class-name="'[&>*]:flex [&>*]:items-center'"></pr-icon>
           </div>
           {{ $ctrl.typeLabel }}

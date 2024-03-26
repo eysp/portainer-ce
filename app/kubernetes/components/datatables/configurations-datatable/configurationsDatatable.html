@@ -3,146 +3,151 @@
     <rd-widget-body classes="no-padding">
       <!-- table title and action menu -->
       <div class="toolBar !flex-col gap-1">
-        <div class="toolBar vertical-center !gap-x-5 !gap-y-1 flex-wrap !px-0 !py-1 w-full">
+        <div class="toolBar vertical-center w-full flex-wrap !gap-x-5 !gap-y-1 !px-0 !py-1">
           <div class="toolBarTitle">
             <div class="widget-icon space-right">
-              <pr-icon icon="'lock'" feather="true"></pr-icon>
+              <pr-icon icon="'lock'"></pr-icon>
             </div>
-            配置映射 & Secrets
+            配置图和秘密
           </div>
-          <div class="searchBar vertical-center w-72 !mr-0">
-            <pr-icon icon="'search'" feather="true" class-name="'icon !h-3'"></pr-icon>
+          <div class="searchBar vertical-center !mr-0 w-72">
+            <pr-icon icon="'search'" class-name="'icon !h-3'"></pr-icon>
             <input
               type="text"
               class="searchInput"
               ng-model="$ctrl.state.textFilter"
               ng-change="$ctrl.onTextFilterChange()"
-              placeholder="搜索配置映射和机密..."
+              placeholder="搜索配置图和秘密..."
               auto-focus
               ng-model-options="{ debounce: 300 }"
               data-cy="k8sConfig-searchInput"
             />
           </div>
           <!-- actions -->
-          <div class="actionBar !gap-3 !mr-0">
+          <div class="actionBar !mr-0 !gap-3">
             <button
               type="button"
-              class="btn btn-sm btn-dangerlight !ml-0 vertical-center"
+              class="btn btn-sm btn-dangerlight vertical-center !ml-0"
               ng-disabled="$ctrl.state.selectedItemCount === 0"
               ng-click="$ctrl.removeAction($ctrl.state.selectedItems)"
               data-cy="k8sConfig-removeConfigButton"
             >
-              <pr-icon icon="'trash-2'" feather="true"></pr-icon>删除
+              <pr-icon icon="'trash-2'"></pr-icon>删除
             </button>
-            <button type="button" class="btn btn-sm btn-secondary !ml-0 vertical-center" ui-sref="kubernetes.configurations.new" data-cy="k8sConfig-addConfigWithFormButton">
-              <pr-icon icon="'plus'" feather="true" class-name="'!h-3'"></pr-icon>添加表单
+            <button type="button" class="btn btn-sm btn-secondary vertical-center !ml-0" ui-sref="kubernetes.configurations.new" data-cy="k8sConfig-addConfigWithFormButton">
+              <pr-icon icon="'plus'" class-name="'!h-3'"></pr-icon>表单添加
             </button>
-            <button type="button" class="btn btn-sm btn-primary !ml-0 vertical-center" ui-sref="kubernetes.deploy" data-cy="k8sConfig-deployFromManifestButton">
-              <pr-icon icon="'plus'" feather="true" class-name="'!h-3'"></pr-icon>从清单创建
+            <button
+              type="button"
+              class="btn btn-sm btn-primary vertical-center !ml-0"
+              ui-sref="kubernetes.deploy({ referrer: 'kubernetes.configurations' })"
+              data-cy="k8sConfig-deployFromManifestButton"
+            >
+              <pr-icon icon="'plus'" class-name="'!h-3'"></pr-icon>从清单创建
             </button>
-          </div>
+        </div>
           <div class="settings">
             <span class="setting" ng-class="{ 'setting-active': $ctrl.settings.open }" uib-dropdown dropdown-append-to-body auto-close="disabled" is-open="$ctrl.settings.open">
               <span uib-dropdown-toggle aria-label="Settings">
-                <pr-icon icon="'more-vertical'" feather="true" class-name="'icon !mr-0 !h-4'"></pr-icon>
+                <pr-icon icon="'more-vertical'" class-name="'icon !mr-0 !h-4'"></pr-icon>
               </span>
               <div class="dropdown-menu dropdown-menu-right" uib-dropdown-menu>
                 <div class="tableMenu">
                   <div class="menuHeader"> 表格设置 </div>
                   <div class="menuContent">
-                    <div>
-                      <div class="md-checkbox" ng-if="$ctrl.isAdmin">
-                        <input
-                          id="setting_show_system"
-                          type="checkbox"
-                          ng-model="$ctrl.settings.showSystem"
-                          ng-change="$ctrl.onSettingsShowSystemChange()"
-                          data-cy="k8sConfig-systemResourceCheckbox"
-                        />
-                        <label for="setting_show_system">显示系统资源</label>
+                      <div>
+                          <div class="md-checkbox" ng-if="$ctrl.isAdmin">
+                              <input
+                                id="setting_show_system"
+                                type="checkbox"
+                                ng-model="$ctrl.settings.showSystem"
+                                ng-change="$ctrl.onSettingsShowSystemChange()"
+                                data-cy="k8sConfig-systemResourceCheckbox"
+                              />
+                              <label for="setting_show_system">显示系统资源</label>
+                          </div>
+                          <div class="md-checkbox">
+                              <input id="setting_auto_refresh" type="checkbox" ng-model="$ctrl.settings.repeater.autoRefresh" ng-change="$ctrl.onSettingsRepeaterChange()" />
+                              <label for="setting_auto_refresh">自动刷新</label>
+                          </div>
+                          <div ng-if="$ctrl.settings.repeater.autoRefresh">
+                              <label for="settings_refresh_rate"> 刷新频率 </label>
+                              <select id="settings_refresh_rate" ng-model="$ctrl.settings.repeater.refreshRate" ng-change="$ctrl.onSettingsRepeaterChange()" class="small-select">
+                                  <option value="10">10秒</option>
+                                  <option value="30">30秒</option>
+                                  <option value="60">1分钟</option>
+                                  <option value="120">2分钟</option>
+                                  <option value="300">5分钟</option>
+                              </select>
+                              <span>
+                                  <pr-icon id="refreshRateChange" icon="'check'" mode="'success'" style="display: none"></pr-icon>
+                              </span>
+                          </div>
                       </div>
-                      <div class="md-checkbox">
-                        <input id="setting_auto_refresh" type="checkbox" ng-model="$ctrl.settings.repeater.autoRefresh" ng-change="$ctrl.onSettingsRepeaterChange()" />
-                        <label for="setting_auto_refresh">自动刷新</label>
-                      </div>
-                      <div ng-if="$ctrl.settings.repeater.autoRefresh">
-                        <label for="settings_refresh_rate"> 刷新频率 </label>
-                        <select id="settings_refresh_rate" ng-model="$ctrl.settings.repeater.refreshRate" ng-change="$ctrl.onSettingsRepeaterChange()" class="small-select">
-                          <option value="10">10s</option>
-                          <option value="30">30s</option>
-                          <option value="60">1min</option>
-                          <option value="120">2min</option>
-                          <option value="300">5min</option>
-                        </select>
-                        <span>
-                          <pr-icon id="refreshRateChange" icon="'check'" feather="true" mode="'success'" size="'sm'"></pr-icon>
-                        </span>
-                      </div>
-                    </div>
                   </div>
                   <div>
-                    <a type="button" class="btn btn-default btn-sm" ng-click="$ctrl.settings.open = false;" data-cy="k8sConfig-closeSettingsButton">关闭</a>
+                      <a type="button" class="btn btn-default btn-sm" ng-click="$ctrl.settings.open = false;" data-cy="k8sConfig-closeSettingsButton">关闭</a>
                   </div>
-                </div>
+              </div>
               </div>
             </span>
           </div>
         </div>
-        <div ng-if="$ctrl.isAdmin && !$ctrl.settings.showSystem" class="flex flex-row w-full">
-          <span class="small text-muted mt-1 vertical-center">
-            <pr-icon icon="'info'" feather="true" mode="'primary'" class="vertical-center"></pr-icon>
-            <div> 系统资源被隐藏，这可以在表格设置中改变。 </div>
-          </span>
+        <div ng-if="$ctrl.isAdmin && !$ctrl.settings.showSystem" class="flex w-full flex-row">
+          <span class="small text-muted vertical-center mt-1">
+            <pr-icon icon="'info'" mode="'primary'" class="vertical-center"></pr-icon>
+            <div>系统资源已隐藏，可以在表格设置中更改。</div>
+        </span>
         </div>
       </div>
       <div class="table-responsive">
-        <table class="table table-hover nowrap-cells" data-cy="k8sConfig-tableSettingsButtonconfigsTable">
+        <table class="table-hover nowrap-cells table" data-cy="k8sConfig-tableSettingsButtonconfigsTable">
           <thead>
             <tr>
-              <th>
-                <div class="flex flex-nowrap items-center">
-                  <span class="md-checkbox vertical-center">
-                    <input id="select_all" type="checkbox" ng-model="$ctrl.state.selectAll" ng-change="$ctrl.selectAll()" />
-                    <label for="select_all"></label>
-                  </span>
-                  <table-column-header
-                    col-title="'Name'"
-                    can-sort="true"
-                    is-sorted="$ctrl.state.orderBy === 'Name'"
-                    is-sorted-desc="$ctrl.state.orderBy === 'Name' && $ctrl.state.reverseOrder"
-                    ng-click="$ctrl.changeOrderBy('Name')"
-                  ></table-column-header>
-                </div>
-              </th>
-              <th>
-                <table-column-header
-                  col-title="'Namespace'"
-                  can-sort="true"
-                  is-sorted="$ctrl.state.orderBy === 'Namespace'"
-                  is-sorted-desc="$ctrl.state.orderBy === 'Namespace' && $ctrl.state.reverseOrder"
-                  ng-click="$ctrl.changeOrderBy('Namespace')"
-                ></table-column-header>
-              </th>
-              <th>
-                <table-column-header
-                  col-title="'Kind'"
-                  can-sort="true"
-                  is-sorted="$ctrl.state.orderBy === 'Kind'"
-                  is-sorted-desc="$ctrl.state.orderBy === 'Kind' && $ctrl.state.reverseOrder"
-                  ng-click="$ctrl.changeOrderBy('Kind')"
-                ></table-column-header>
-              </th>
-              <th>
-                <table-column-header
-                  col-title="'Created'"
-                  can-sort="true"
-                  is-sorted="$ctrl.state.orderBy === 'CreationDate'"
-                  is-sorted-desc="$ctrl.state.orderBy === 'CreationDate' && $ctrl.state.reverseOrder"
-                  ng-click="$ctrl.changeOrderBy('CreationDate')"
-                ></table-column-header>
-              </th>
+                <th>
+                    <div class="flex flex-nowrap items-center">
+                        <span class="md-checkbox vertical-center">
+                            <input id="select_all" type="checkbox" ng-model="$ctrl.state.selectAll" ng-change="$ctrl.selectAll()" />
+                            <label for="select_all"></label>
+                        </span>
+                        <table-column-header
+                            col-title="'名称'"
+                            can-sort="true"
+                            is-sorted="$ctrl.state.orderBy === 'Name'"
+                            is-sorted-desc="$ctrl.state.orderBy === 'Name' && $ctrl.state.reverseOrder"
+                            ng-click="$ctrl.changeOrderBy('Name')"
+                        ></table-column-header>
+                    </div>
+                </th>
+                <th>
+                    <table-column-header
+                        col-title="'命名空间'"
+                        can-sort="true"
+                        is-sorted="$ctrl.state.orderBy === 'Namespace'"
+                        is-sorted-desc="$ctrl.state.orderBy === 'Namespace' && $ctrl.state.reverseOrder"
+                        ng-click="$ctrl.changeOrderBy('Namespace')"
+                    ></table-column-header>
+                </th>
+                <th>
+                    <table-column-header
+                        col-title="'类型'"
+                        can-sort="true"
+                        is-sorted="$ctrl.state.orderBy === 'Kind'"
+                        is-sorted-desc="$ctrl.state.orderBy === 'Kind' && $ctrl.state.reverseOrder"
+                        ng-click="$ctrl.changeOrderBy('Kind')"
+                    ></table-column-header>
+                </th>
+                <th>
+                    <table-column-header
+                        col-title="'创建时间'"
+                        can-sort="true"
+                        is-sorted="$ctrl.state.orderBy === 'CreationDate'"
+                        is-sorted-desc="$ctrl.state.orderBy === 'CreationDate' && $ctrl.state.reverseOrder"
+                        ng-click="$ctrl.changeOrderBy('CreationDate')"
+                    ></table-column-header>
+                </th>
             </tr>
-          </thead>
+        </thead>
           <tbody>
             <tr
               dir-paginate="item in ($ctrl.state.filteredDataSet = ($ctrl.dataset | filter:$ctrl.state.textFilter | filter:$ctrl.isDisplayed | orderBy:$ctrl.state.orderBy:$ctrl.state.reverseOrder | itemsPerPage: $ctrl.state.paginatedItemLimit))"
@@ -164,22 +169,22 @@
               <td>{{ item.CreationDate | getisodate }} {{ item.ConfigurationOwner ? 'by ' + item.ConfigurationOwner : '' }}</td>
             </tr>
             <tr ng-if="!$ctrl.dataset">
-              <td colspan="4" class="text-center text-muted">加载中...</td>
+              <td colspan="4" class="text-muted text-center">加载中...</td>
             </tr>
             <tr ng-if="$ctrl.state.filteredDataSet.length === 0">
-              <td colspan="4" class="text-center text-muted">没有可用的配置。</td>
+              <td colspan="4" class="text-muted text-center">没有可用的ConfigMaps或Secrets。</td>
             </tr>
           </tbody>
         </table>
       </div>
       <div class="footer pl-5" ng-if="$ctrl.dataset">
-        <div class="infoBar !ml-0" ng-if="$ctrl.state.selectedItemCount !== 0"> {{ $ctrl.state.selectedItemCount }} 所选项目 </div>
+        <div class="infoBar !ml-0" ng-if="$ctrl.state.selectedItemCount !== 0"> {{ $ctrl.state.selectedItemCount }} 项已选择 </div>
         <div class="paginationControls">
           <form class="form-inline">
             <span class="limitSelector">
-              <span style="margin-right: 5px"> 每页项目数 </span>
+              <span style="margin-right: 5px"> 每页项目 </span>
               <select class="form-control" ng-model="$ctrl.state.paginatedItemLimit" ng-change="$ctrl.changePaginationLimit()" data-cy="k8sConfig-paginationDropdown">
-                <option value="0">All</option>
+                <option value="0">全部</option>
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50">50</option>

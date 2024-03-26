@@ -7,7 +7,7 @@ interface Props {
 export function ItemsPerPageSelector({ value, onChange, showAll }: Props) {
   return (
     <span className="limitSelector">
-      <span className="space-right">每页项目数</span>
+      <span className="space-right">每页项目</span>
       <select
         className="form-control"
         value={value}

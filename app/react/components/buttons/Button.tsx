@@ -1,6 +1,7 @@
 import {
   AriaAttributes,
   ComponentType,
+  forwardRef,
   MouseEventHandler,
   PropsWithChildren,
   ReactNode,
@@ -21,12 +22,15 @@ type Color =
   | 'link'
   | 'light'
   | 'dangerlight'
+  | 'warninglight'
+  | 'warning'
   | 'none';
 type Size = 'xsmall' | 'small' | 'medium' | 'large';
 
-export interface Props extends AriaAttributes, AutomationTestingProps {
+export interface Props<TasProps = unknown>
+  extends AriaAttributes,
+    AutomationTestingProps {
   icon?: ReactNode | ComponentType<unknown>;
-  featherIcon?: boolean;
 
   color?: Color;
   size?: Size;
@@ -34,10 +38,20 @@ export interface Props extends AriaAttributes, AutomationTestingProps {
   title?: string;
   className?: string;
   type?: Type;
+  as?: ComponentType<TasProps> | string;
   onClick?: MouseEventHandler<HTMLButtonElement>;
+  mRef?: React.ForwardedRef<HTMLButtonElement>;
+  props?: TasProps;
 }
 
-export function Button({
+export const ButtonWithRef = forwardRef<HTMLButtonElement, Omit<Props, 'mRef'>>(
+  (props, ref) => (
+    // eslint-disable-next-line react/jsx-props-no-spreading
+    <Button {...props} mRef={ref} />
+  )
+);
+
+export function Button<TasProps = unknown>({
   type = 'button',
   color = 'primary',
   size = 'small',
@@ -46,32 +60,36 @@ export function Button({
   onClick,
   title,
   icon,
-  featherIcon,
   children,
-
+  as = 'button',
+  props,
+  mRef,
   ...ariaProps
-}: PropsWithChildren<Props>) {
+}: PropsWithChildren<Props<TasProps>>) {
+  const Component = as as 'button';
   return (
-    <button
+    <Component
+      ref={mRef}
       /* eslint-disable-next-line react/button-has-type */
       type={type}
       disabled={disabled}
-      className={clsx(`btn btn-${color}`, sizeClass(size), className)}
-      onClick={onClick}
+      className={clsx(`btn btn-${color}`, sizeClass(size), className, {
+        disabled,
+      })}
+      onClick={(e) => {
+        if (!disabled) {
+          onClick?.(e);
+        }
+      }}
       title={title}
       // eslint-disable-next-line react/jsx-props-no-spreading
       {...ariaProps}
+      // eslint-disable-next-line react/jsx-props-no-spreading
+      {...props}
     >
-      {icon && (
-        <Icon
-          icon={icon}
-          size={getIconSize(size)}
-          className="inline-flex"
-          feather={featherIcon}
-        />
-      )}
+      {icon && <Icon icon={icon} size={getIconSize(size)} />}
       {children}
-    </button>
+    </Component>
   );
 }
 

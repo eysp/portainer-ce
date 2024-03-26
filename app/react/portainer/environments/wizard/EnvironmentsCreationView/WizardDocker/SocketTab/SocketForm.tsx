@@ -1,38 +1,39 @@
 import { Field, Form, Formik, useFormikContext } from 'formik';
 import { useReducer } from 'react';
+import { Plug2 } from 'lucide-react';
 
-import { useCreateLocalDockerEnvironmentMutation } from '@/portainer/environments/queries/useCreateEnvironmentMutation';
-import { Hardware } from '@/react/portainer/environments/wizard/EnvironmentsCreationView/shared/Hardware/Hardware';
+import { useCreateLocalDockerEnvironmentMutation } from '@/react/portainer/environments/queries/useCreateEnvironmentMutation';
 import { notifySuccess } from '@/portainer/services/notifications';
-import { Environment } from '@/portainer/environments/types';
+import { Environment } from '@/react/portainer/environments/types';
 
 import { LoadingButton } from '@@/buttons/LoadingButton';
 import { FormControl } from '@@/form-components/FormControl';
 import { Input } from '@@/form-components/Input';
 import { SwitchField } from '@@/form-components/SwitchField';
-import { Icon } from '@@/Icon';
+import { InsightsBox } from '@@/InsightsBox';
 
 import { NameField } from '../../shared/NameField';
 import { MoreSettingsSection } from '../../shared/MoreSettingsSection';
 
-import { validation } from './SocketForm.validation';
+import { useValidation } from './SocketForm.validation';
 import { FormValues } from './types';
 
 interface Props {
   onCreate(environment: Environment): void;
+  isDockerStandalone?: boolean;
 }
 
-export function SocketForm({ onCreate }: Props) {
+export function SocketForm({ onCreate, isDockerStandalone }: Props) {
   const [formKey, clearForm] = useReducer((state) => state + 1, 0);
   const initialValues: FormValues = {
     name: '',
     socketPath: '',
     overridePath: false,
     meta: { groupId: 1, tagIds: [] },
-    gpus: [],
   };
 
   const mutation = useCreateLocalDockerEnvironmentMutation();
+  const validation = useValidation();
 
   return (
     <Formik
@@ -49,21 +50,40 @@ export function SocketForm({ onCreate }: Props) {
           <OverrideSocketFieldset />
 
           <MoreSettingsSection>
-            <Hardware />
+            {isDockerStandalone && (
+              <InsightsBox
+                content={
+                  <>
+                    <p>
+                      从2.18版本开始，Docker Standalone
+                      环境的可用GPU设置已经从添加环境和环境详情转移到主机-设置中，
+                      以与其他设置保持一致。
+                    </p>
+                    <p>
+                      添加了一个开关，用于在Portainer UI中启用/禁用GPU设置管理，
+                      以减轻显示这些设置的性能影响。
+                    </p>
+                    <p>
+                      更新了UI以澄清GPU设置的支持仅适用于Docker Standalone
+                      （而不适用于从未在UI中支持的Docker Swarm）。
+                    </p>
+                  </>
+                }
+                header="GPU设置更新"
+                insightCloseId="gpu-settings-update-closed"
+              />
+            )}
           </MoreSettingsSection>
 
           <div className="form-group">
             <div className="col-sm-12">
               <LoadingButton
                 className="wizard-connect-button vertical-center"
-                loadingText="连接环境..."
+                loadingText="正在连接环境..."
                 isLoading={mutation.isLoading}
                 disabled={!dirty || !isValid}
+                icon={Plug2}
               >
-                <Icon
-                  icon="svg-plug"
-                  className="icon icon-sm vertical-center"
-                />{' '}
                 连接
               </LoadingButton>
             </div>
@@ -78,12 +98,11 @@ export function SocketForm({ onCreate }: Props) {
       {
         name: values.name,
         socketPath: values.overridePath ? values.socketPath : '',
-        gpus: values.gpus,
         meta: values.meta,
       },
       {
         onSuccess(environment) {
-          notifySuccess('环境创建', environment.Name);
+          notifySuccess('环境创建成功', environment.Name);
           clearForm();
           onCreate(environment);
         },
@@ -102,20 +121,21 @@ function OverrideSocketFieldset() {
           <SwitchField
             checked={values.overridePath}
             onChange={(checked) => setFieldValue('overridePath', checked)}
-            label="覆盖默认的socket路径"
+            label="覆盖默认套接字路径"
+            labelClass="col-sm-3 col-lg-2"
           />
         </div>
       </div>
       {values.overridePath && (
         <FormControl
-          label="Socket 路径"
-          tooltip="Docker Socket的路径。记住要对套接字进行绑定挂载，更多信息请参见上面的重要通知。"
+          label="套接字路径"
+          tooltip="Docker套接字的路径。请记住要绑定挂载套接字，请查看上面的重要通知获取更多信息。"
           errors={errors.socketPath}
         >
           <Field
             name="socketPath"
             as={Input}
-            placeholder="例如 /var/run/docker.sock (on Linux) 或 //./pipe/docker_engine (on Windows)"
+            placeholder="例如： /var/run/docker.sock (在Linux上) or //./pipe/docker_engine (在Windows上)"
           />
         </FormControl>
       )}

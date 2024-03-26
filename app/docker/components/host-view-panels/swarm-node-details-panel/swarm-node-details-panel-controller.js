@@ -65,7 +65,7 @@ angular.module('portainer.docker').controller('SwarmNodeDetailsPanelController',
       }
 
       function notifyOnError(error) {
-        Notifications.error('失败', error, 'Failed to update node');
+        Notifications.error('Failure', error, 'Failed to update node');
       }
     }
 

@@ -1,5 +1,5 @@
 import { renderWithQueryClient } from '@/react-tools/test-utils';
-import { UserContext } from '@/portainer/hooks/useUser';
+import { UserContext } from '@/react/hooks/useUser';
 import { UserViewModel } from '@/portainer/models/user';
 
 import { NetworkContainer } from '../types';
@@ -25,7 +25,7 @@ jest.mock('@uirouter/react', () => ({
   })),
 }));
 
-test('网络容器的值应该是可见的，并且链接应该是有效的', async () => {
+test('网络容器的值应该可见，链接应该有效', async () => {
   const user = new UserViewModel({ Username: 'test', Role: 1 });
   const { findByText } = renderWithQueryClient(
     <UserContext.Provider value={{ user }}>
@@ -47,6 +47,6 @@ test('网络容器的值应该是可见的，并且链接应该是有效的', as
     findByText(networkContainers[0].MacAddress)
   ).resolves.toBeVisible();
   await expect(
-    findByText('断开网络', { exact: false })
+    findByText('Leave network', { exact: false })
   ).resolves.toBeVisible();
 });

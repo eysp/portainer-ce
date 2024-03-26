@@ -52,9 +52,9 @@ angular
           .catch(function error(err) {
             $scope.state.vouchersUploading = false;
             if ($scope.formValues.VoucherFiles.length === 1) {
-              Notifications.error('失败', err, 'Unable to upload the Ownership Voucher');
+              Notifications.error('失败', err, '无法上传所有权凭证');
             } else {
-              Notifications.error('失败', null, 'Unable to upload the Ownership Vouchers, please check the logs');
+              Notifications.error('失败', null, '无法上传所有权凭证，请检查日志');
             }
           });
       };
@@ -82,11 +82,10 @@ angular
                 null,
                 null,
                 null,
-                null,
-                true
+                null
               );
             } catch (err) {
-              Notifications.error('失败', err, 'Unable to create the environment');
+              Notifications.error('失败', err, '无法创建环境');
               $scope.state.actionInProgress = false;
               return;
             }
@@ -103,14 +102,14 @@ angular
             try {
               await configureDevice(deviceID, config);
             } catch (err) {
-              Notifications.error('失败', err, 'Unable to import device');
+              Notifications.error('失败', err, '无法导入设备');
               return;
             } finally {
               $scope.state.actionInProgress = false;
             }
           }
 
-          Notifications.success('Success', 'Device(s) successfully imported');
+          Notifications.success('成功', '设备成功导入');
           $state.go('edge.devices');
         });
       };
@@ -119,7 +118,7 @@ angular
         try {
           $scope.profiles = await getProfiles();
         } catch (err) {
-          Notifications.error('失败', err, 'Unable to load profiles');
+          Notifications.error('失败', err, '无法加载配置文件');
           return;
         }
 
@@ -130,7 +129,7 @@ angular
             $scope.groups = data.groups;
           })
           .catch(function error(err) {
-            Notifications.error('失败', err, 'Unable to load groups');
+            Notifications.error('失败', err, '无法加载分组');
           });
       }
 

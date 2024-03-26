@@ -3,27 +3,31 @@
 
   <div class="form-group" ng-if="$ctrl.isCreation">
     <div class="col-sm-12">
-      <button type="button" class="btn btn-link btn-sm hover:no-underline !ml-0 p-0" ng-if="$ctrl.formValues.IsSimple" ng-click="$ctrl.showAdvancedMode()">
-        <pr-icon icon="'list'" feather="true"></pr-icon> 高级模式
+      <button type="button" class="btn btn-link btn-sm !ml-0 p-0 hover:no-underline" ng-if="$ctrl.formValues.IsSimple" ng-click="$ctrl.showAdvancedMode()">
+        <pr-icon icon="'list'"></pr-icon> 高级模式
       </button>
-      <button type="button" class="btn btn-link btn-sm hover:no-underline !ml-0 p-0" ng-if="!$ctrl.formValues.IsSimple" ng-click="$ctrl.showSimpleMode()">
-        <pr-icon icon="'edit'" feather="true"></pr-icon> 简单模式
+      <button type="button" class="btn btn-link btn-sm !ml-0 p-0 hover:no-underline" ng-if="!$ctrl.formValues.IsSimple" ng-click="$ctrl.showSimpleMode()">
+        <pr-icon icon="'edit'"></pr-icon> 简单模式
       </button>
     </div>
     <div class="col-sm-12 small text-muted vertical-center" ng-if="$ctrl.formValues.IsSimple">
-      <pr-icon icon="'info'" mode="'primary'" feather="true"></pr-icon>
-      切换到高级模式来复制和粘贴多个键/值
+      <pr-icon icon="'info'" mode="'primary'"></pr-icon>
+      切换到高级模式以复制和粘贴多个键/值对
     </div>
-    <div class="col-sm-12 small text-muted vertical-center" ng-if="!$ctrl.formValues.IsSimple">
-      <pr-icon icon="'info'" mode="'primary'" feather="true"></pr-icon>
-      每行生成一个配置项，使用YAML格式
+    <div class="col-sm-12 small text-muted vertical-center" ng-if="!$ctrl.formValues.IsSimple && $ctrl.type === 'configmap'">
+      <pr-icon icon="'info'" mode="'primary'"></pr-icon>
+      每行生成一个 ConfigMap 条目，使用 YAML 格式
+    </div>
+    <div class="col-sm-12 small text-muted vertical-center" ng-if="!$ctrl.formValues.IsSimple && $ctrl.type === 'secret'">
+      <pr-icon icon="'info'" mode="'primary'"></pr-icon>
+      每行生成一个 Secret 条目，使用 YAML 格式
     </div>
   </div>
 
   <div class="form-group" ng-if="$ctrl.formValues.IsSimple">
     <div class="col-sm-12 vertical-center">
       <button type="button" class="btn btn-sm btn-default" style="margin-left: 0" ng-click="$ctrl.addEntry()" data-cy="k8sConfigCreate-createEntryButton">
-        <pr-icon class="vertical-center" icon="'plus'" feather="true"></pr-icon> 创建条目
+        <pr-icon class="vertical-center" icon="'plus'"></pr-icon> 创建条目
       </button>
       <button
         ng-if="
@@ -34,7 +38,7 @@
         ngf-select="$ctrl.addEntryFromFile($file)"
         data-cy="k8sConfigCreate-createConfigsFromFileButton"
       >
-        <pr-icon icon="'upload'" feather="true" class="vertical-center"></pr-icon> 从文件中创建 键/值
+        <pr-icon icon="'upload'" class="vertical-center"></pr-icon> 从文件创建键/值对
       </button>
       <button
         ng-if="$ctrl.isDockerConfig && $ctrl.formValues.Kind === $ctrl.KubernetesConfigurationKinds.SECRET"
@@ -44,7 +48,7 @@
         ngf-accept="'.json'"
         data-cy="k8sConfigCreate-createConfigsFromFileButton"
       >
-        <pr-icon icon="'upload'" feather="true" class="vertical-center"></pr-icon> 上传docker配置文件
+        <pr-icon icon="'upload'" class="vertical-center"></pr-icon> 上传 Docker 配置文件
       </button>
       <button
         ng-if="$ctrl.formValues.Type === $ctrl.KubernetesSecretTypeOptions.TLS.value && $ctrl.formValues.Kind === $ctrl.KubernetesConfigurationKinds.SECRET"
@@ -53,17 +57,17 @@
         ngf-select="$ctrl.addEntryFromFile($file)"
         data-cy="k8sConfigCreate-createConfigsFromFileButton"
       >
-        <pr-icon icon="'upload'" feather="true" class="vertical-center"></pr-icon> 上传TLS密钥/证书文件
+        <pr-icon icon="'upload'" class="vertical-center"></pr-icon> 上传 TLS 密钥/证书文件
       </button>
-      <portainer-tooltip message="'最大上传文件大小为1MB'"></portainer-tooltip>
+      <portainer-tooltip message="'最大上传文件大小为 1MB'"></portainer-tooltip>
     </div>
   </div>
 
   <div ng-repeat="(index, entry) in $ctrl.formValues.Data" ng-if="$ctrl.formValues.IsSimple">
     <div class="form-group">
-      <label for="configuration_data_key_{{ index }}" class="col-sm-3 col-lg-2 control-label text-left required"
-        >Key
-        <portainer-tooltip message="'密钥必须由字母数字字符、\'-\'、\'_\'或\'.\'组成，长度最多为253个字符。'"></portainer-tooltip>
+      <label for="configuration_data_key_{{ index }}" class="col-sm-3 col-lg-2 control-label required text-left"
+        >键
+        <portainer-tooltip message="'键必须由字母数字字符、'-'、'_' 或 '.' 组成，长度最多为 253 个字符。'"></portainer-tooltip>
       </label>
       <div class="col-sm-8 col-lg-9">
         <input
@@ -86,16 +90,16 @@
           "
         >
           <ng-messages for="kubernetesConfigurationDataCreationForm['configuration_data_key_' + index].$error">
-            <p ng-message="required" class="vertical-center"> <pr-icon icon="'alert-triangle'" feather="true" mode="'warning'"></pr-icon> 本栏为必填项。 </p>
+            <p ng-message="required" class="vertical-center"> <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 此字段为必填项。 </p>
           </ng-messages>
           <div>
             <p ng-if="$ctrl.state.duplicateKeys[index] !== undefined" class="vertical-center">
-              <pr-icon icon="'alert-triangle'" feather="true" mode="'warning'" class="vertical-center"></pr-icon>这个键已经被定义了。
+              <pr-icon icon="'alert-triangle'" mode="'warning'" class="vertical-center"></pr-icon> 此键已定义。
             </p>
           </div>
           <p ng-if="$ctrl.state.invalidKeys[index]" class="vertical-center">
-            <pr-icon icon="'alert-triangle'" feather="true" mode="'warning'" class="vertical-center"></pr-icon> 该值是无效的。一个有效的密钥必须由字母数字组成
-            字符、'-'、'_'或'.'
+            <pr-icon icon="'alert-triangle'" mode="'warning'" class="vertical-center"></pr-icon> 此键无效。有效的键必须由字母数字字符、'-'、'_'
+            或 '.' 组成。
           </p>
         </div>
       </div>
@@ -103,7 +107,7 @@
     </div>
 
     <div class="form-group" ng-if="$ctrl.formValues.IsSimple && !entry.IsBinary">
-      <label for="configuration_data_value_{{ index }}" class="col-sm-3 col-lg-2 control-label text-left required">Value</label>
+      <label for="configuration_data_value_{{ index }}" class="col-sm-3 col-lg-2 control-label required text-left">值</label>
       <div class="col-sm-8 col-lg-9">
         <textarea
           class="form-control"
@@ -116,16 +120,14 @@
         ></textarea>
         <div class="small text-warning" style="margin-top: 5px" ng-show="kubernetesConfigurationDataCreationForm['configuration_data_value_' + index].$invalid">
           <ng-messages for="kubernetesConfigurationDataCreationForm['configuration_data_value_' + index].$error">
-            <p ng-message="required" class="vertical-center"
-              ><pr-icon class="vertical-center" icon="'alert-triangle'" feather="true" mode="'warning'"></pr-icon> 本栏为必填项。</p
-            >
+            <p ng-message="required" class="vertical-center"><pr-icon class="vertical-center" icon="'alert-triangle'" mode="'warning'"></pr-icon> 此字段为必填项。</p>
           </ng-messages>
         </div>
       </div>
     </div>
 
     <div class="form-group" ng-if="$ctrl.formValues.IsSimple && entry.IsBinary">
-      <label for="configuration_data_value_{{ index }}" class="col-sm-3 col-lg-2 control-label text-left required">Value</label>
+      <label for="configuration_data_value_{{ index }}" class="col-sm-3 col-lg-2 control-label required text-left">值</label>
       <div class="col-sm-8 control-label small text-muted text-left"
         >二进制数据 <portainer-tooltip message="'此键保存二进制数据，无法显示。'"></portainer-tooltip
       ></div>
@@ -143,11 +145,11 @@
           ng-click="$ctrl.removeEntry(index, entry)"
           data-cy="k8sConfigDetail-removeEntryButton{{ index }}"
         >
-          <pr-icon class="vertical-center" icon="'trash-2'" feather="true"></pr-icon> 删除条目
+          <pr-icon class="vertical-center" icon="'trash-2'"></pr-icon> 删除条目
         </button>
         <span class="small text-muted" ng-if="entry.Used">
-          <pr-icon icon="'info'" feather="true" mode="'primary'"></pr-icon>
-          该键目前被一个或多个应用程序使用
+          <pr-icon icon="'info'" mode="'primary'"></pr-icon>
+          此键当前由一个或多个应用程序使用
         </span>
       </div>
     </div>
@@ -161,7 +163,7 @@
       value="$ctrl.formValues.DataYaml"
       on-change="($ctrl.editorUpdate)"
       yml="true"
-      placeholder="# 定义或粘贴键值，每行一组"
+      placeholder="定义或粘贴键值对，每行一个"
     >
     </web-editor-form>
   </div>

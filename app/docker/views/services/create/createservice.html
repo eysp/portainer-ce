@@ -1,4 +1,4 @@
-<page-header title="'Create service'" breadcrumbs="[{label:'Services', link:'docker.services'}, 'Add service']"> </page-header>
+<page-header title="'创建服务'" breadcrumbs="[{label:'服务', link:'docker.services'}, '添加服务']"> </page-header>
 
 <div class="row">
   <div class="col-lg-12 col-md-12 col-xs-12">
@@ -8,18 +8,18 @@
           <!-- name-input -->
           <div class="form-group">
             <label for="service_name" class="col-sm-2 control-label text-left">名称</label>
-            <div class="col-sm-10">
-              <input type="text" class="form-control" ng-model="formValues.Name" id="service_name" placeholder="例如 myService" />
+            <div class="col-sm-8">
+              <input type="text" class="form-control" ng-model="formValues.Name" id="service_name" placeholder="例如：myService" />
             </div>
           </div>
           <!-- !name-input -->
-          <div class="col-sm-12 form-section-title"> 镜像配置 </div>
+          <div class="col-sm-12 form-section-title"> 图像配置 </div>
           <!-- image-and-registry -->
           <por-image-registry
             model="formValues.RegistryModel"
             auto-complete="true"
-            label-class="col-sm-1"
-            input-class="col-sm-11"
+            label-class="col-sm-2"
+            input-class="col-sm-8"
             endpoint="endpoint"
             is-admin="isAdmin"
             check-rate-limits="true"
@@ -30,45 +30,45 @@
           <div class="col-sm-12 form-section-title"> 调度 </div>
           <!-- scheduling-mode -->
           <div class="form-group">
-            <div class="col-sm-12">
-              <label class="control-label text-left"> 调度模式 </label>
-              <div class="btn-group btn-group-sm" style="margin-left: 20px">
+            <div>
+              <label class="control-label col-sm-2 text-left">调度模式</label>
+              <div class="btn-group btn-group-sm col-sm-8">
                 <label class="btn btn-light" ng-model="formValues.Mode" uib-btn-radio="'global'">全局</label>
-                <label class="btn btn-light" ng-model="formValues.Mode" uib-btn-radio="'replicated'">复制的</label>
+                <label class="btn btn-light" ng-model="formValues.Mode" uib-btn-radio="'replicated'">复制</label>
               </div>
             </div>
           </div>
           <div class="form-group form-inline" ng-if="formValues.Mode === 'replicated'">
-            <div class="col-sm-12">
-              <label class="control-label text-left"> 复制副本 </label>
-              <input type="number" class="form-control" ng-model="formValues.Replicas" id="replicas" placeholder="例如 3" style="margin-left: 20px" />
+            <div>
+              <label class="control-label col-sm-2 text-left">副本数</label>
+              <div class="col-sm-8">
+                <input type="number" class="form-control" ng-model="formValues.Replicas" id="replicas" placeholder="例如：3" />
+              </div>
             </div>
           </div>
           <!-- !scheduling-mode -->
           <div class="col-sm-12 form-section-title"> 端口配置 </div>
           <!-- port-mapping -->
           <div class="form-group">
-            <div class="col-sm-12" style="margin-top: 5px">
-              <label class="control-label text-left">端口映射</label>
-              <span class="label label-default interactive vertical-center" style="margin-left: 10px" ng-click="addPortBinding()">
-                <pr-icon icon="'plus'" mode="'alt'" feather="true"></pr-icon> 映射附加端口
-              </span>
+            <label class="control-label col-sm-2 text-left">端口映射</label>
+            <div class="col-sm-8 pt-2">
+              <span class="label label-default interactive vertical-center" ng-click="addPortBinding()"> <pr-icon icon="'plus'" mode="'alt'"></pr-icon> 添加额外端口映射 </span>
             </div>
             <div class="col-sm-12 form-inline mt-2">
               <div ng-repeat="portBinding in formValues.Ports" class="mt-1">
                 <!-- host-port -->
                 <div class="input-group col-sm-3 input-group-sm">
                   <span class="input-group-addon">主机</span>
-                  <input type="text" class="form-control" ng-model="portBinding.PublishedPort" placeholder="例如 80 or 1.2.3.4:80 (optional)" />
+                  <input type="text" class="form-control" ng-model="portBinding.PublishedPort" placeholder="例如：80或1.2.3.4:80（可选）" />
                 </div>
                 <!-- !host-port -->
                 <span style="margin: 0 10px 0 10px">
-                  <i class="fa fa-long-arrow-alt-right" aria-hidden="true"></i>
+                  <pr-icon icon="'arrow-right'"></pr-icon>
                 </span>
                 <!-- container-port -->
                 <div class="input-group col-sm-3 input-group-sm">
                   <span class="input-group-addon">容器</span>
-                  <input type="text" class="form-control" ng-model="portBinding.TargetPort" placeholder="例如 80" />
+                  <input type="text" class="form-control" ng-model="portBinding.TargetPort" placeholder="例如：80" />
                 </div>
                 <!-- !container-port -->
                 <!-- protocol-actions -->
@@ -78,11 +78,11 @@
                     <label class="btn btn-light" ng-model="portBinding.Protocol" uib-btn-radio="'udp'">UDP</label>
                   </div>
                   <div class="btn-group btn-group-sm">
-                    <label class="btn btn-light" ng-model="portBinding.PublishMode" uib-btn-radio="'ingress'">Ingress</label>
+                    <label class="btn btn-light" ng-model="portBinding.PublishMode" uib-btn-radio="'ingress'">入口</label>
                     <label class="btn btn-light" ng-model="portBinding.PublishMode" uib-btn-radio="'host'">主机</label>
                   </div>
                   <button class="btn btn-dangerlight" type="button" ng-click="removePortBinding($index)">
-                    <pr-icon icon="'trash-2'" feather="true" size="'md'"></pr-icon>
+                    <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
                   </button>
                 </div>
                 <!-- !protocol-actions -->
@@ -99,9 +99,9 @@
                 <por-switch-field
                   label-class="'col-sm-2'"
                   checked="$ctrl.formValues.Webhook"
-                  label="'Create a service webhook'"
+                  label="'创建服务 Webhook'"
                   on-change="(handleWebHookChange)"
-                  tooltip="'创建一个webhook（或回调URI）来自动更新这个服务。向这个回调URI发送一个POST请求（不需要任何认证），将拉出相关图像的最新版本并重新部署这个服务。'"
+                  tooltip="'创建 Webhook（或回调 URI）以自动更新此服务。向此回调 URI 发送 POST 请求（不需要任何身份验证）将拉取与关联图像的最新版本并重新部署此服务。'"
                 ></por-switch-field>
               </div>
             </div>
@@ -122,7 +122,7 @@
                 button-spinner="state.actionInProgress"
               >
                 <span ng-hide="state.actionInProgress">创建服务</span>
-                <span ng-show="state.actionInProgress">创建服务中...</span>
+                <span ng-show="state.actionInProgress">正在创建服务...</span>
               </button>
               <span class="text-danger" ng-if="state.formValidationError" style="margin-left: 5px">{{ state.formValidationError }}</span>
             </div>
@@ -139,35 +139,35 @@
     <rd-widget>
       <rd-widget-body>
         <ul class="nav nav-pills nav-justified">
-          <li class="active interactive"><a data-target="#command" data-toggle="tab">命令 & 日志记录</a></li>
+          <li class="active interactive"><a data-target="#command" data-toggle="tab">命令 & 日志</a></li>
           <li class="interactive"><a data-target="#volumes" data-toggle="tab">存储卷</a></li>
           <li class="interactive"><a data-target="#network" data-toggle="tab">网络</a></li>
           <li class="interactive"><a data-target="#env" data-toggle="tab">环境变量</a></li>
           <li class="interactive"><a data-target="#labels" data-toggle="tab">标签</a></li>
           <li class="interactive"><a data-target="#update-config" data-toggle="tab">更新配置 & 重启</a></li>
-          <li class="interactive" ng-if="applicationState.endpoint.apiVersion >= 1.25"><a data-target="#secrets" data-toggle="tab">机密</a></li>
+          <li class="interactive" ng-if="applicationState.endpoint.apiVersion >= 1.25"><a data-target="#secrets" data-toggle="tab">秘密</a></li>
           <li class="interactive"><a data-target="#configs" data-toggle="tab" ng-if="applicationState.endpoint.apiVersion >= 1.3">配置</a></li>
-          <li class="interactive"><a data-target="#resources-placement" data-toggle="tab" ng-click="refreshSlider()">资源 & 限制</a></li>
+          <li class="interactive"><a data-target="#resources-placement" data-toggle="tab" ng-click="refreshSlider()">资源 & 放置</a></li>
         </ul>
         <!-- tab-content -->
         <div class="tab-content">
           <!-- tab-command -->
           <div class="tab-pane active" id="command">
             <form class="form-horizontal" style="margin-top: 15px">
-              <div class="col-sm-12 form-section-title"> 命令 </div>
+              <div class="col-sm-12 form-section-title">命令</div>
               <!-- command-input -->
               <div class="form-group">
                 <label for="service_command" class="col-sm-2 col-lg-1 control-label text-left">命令</label>
                 <div class="col-sm-9">
-                  <input type="text" class="form-control" ng-model="formValues.Command" id="service_command" placeholder="例如 /usr/bin/nginx -t -c /mynginx.conf" />
+                  <input type="text" class="form-control" ng-model="formValues.Command" id="service_command" placeholder="例如：/usr/bin/nginx -t -c /mynginx.conf" />
                 </div>
               </div>
               <!-- !command-input -->
               <!-- entrypoint-input -->
               <div class="form-group">
-                <label for="service_entrypoint" class="col-sm-2 col-lg-1 control-label text-left">Entrypoint</label>
+                <label for="service_entrypoint" class="col-sm-2 col-lg-1 control-label text-left">入口点</label>
                 <div class="col-sm-9">
-                  <input type="text" class="form-control" ng-model="formValues.EntryPoint" id="service_entrypoint" placeholder="例如 /bin/sh -c" />
+                  <input type="text" class="form-control" ng-model="formValues.EntryPoint" id="service_entrypoint" placeholder="例如：/bin/sh -c" />
                 </div>
               </div>
               <!-- !entrypoint-input -->
@@ -175,30 +175,29 @@
               <div class="form-group">
                 <label for="service_workingdir" class="col-sm-2 col-lg-1 control-label text-left">工作目录</label>
                 <div class="col-sm-4">
-                  <input type="text" class="form-control" ng-model="formValues.WorkingDir" id="service_workingdir" placeholder="例如 /myapp" />
+                  <input type="text" class="form-control" ng-model="formValues.WorkingDir" id="service_workingdir" placeholder="例如：/myapp" />
                 </div>
                 <label for="service_user" class="col-sm-1 control-label text-left">用户</label>
                 <div class="col-sm-4">
-                  <input type="text" class="form-control" ng-model="formValues.User" id="service_user" placeholder="例如 nginx" />
+                  <input type="text" class="form-control" ng-model="formValues.User" id="service_user" placeholder="例如：nginx" />
                 </div>
               </div>
               <!-- !workdir-user-input -->
-              <div class="col-sm-12 form-section-title"> 日志 </div>
+              <div class="col-sm-12 form-section-title">日志记录</div>
               <!-- logging-driver -->
               <div class="form-group">
-                <label for="log-driver" class="col-sm-2 col-lg-1 control-label text-left">驱动</label>
+                <label for="log-driver" class="col-sm-2 col-lg-1 control-label text-left">驱动程序</label>
                 <div class="col-sm-4">
                   <select class="form-control" ng-model="formValues.LogDriverName" id="log-driver">
-                    <option selected value="">默认的日志驱动</option>
+                    <option selected value="">默认日志驱动程序</option>
                     <option ng-repeat="driver in availableLoggingDrivers" ng-value="driver">{{ driver }}</option>
-                    <option value="none">none</option>
+                    <option value="none">无</option>
                   </select>
                 </div>
                 <div class="col-sm-5">
                   <p class="small text-muted">
-                    服务的日志驱动，将覆盖默认的docker daemon驱动
-如果你不想覆盖它，选择默认的日志驱动。支持的日志驱动
-                    <a href="https://docs.docker.com/engine/admin/logging/overview/#supported-logging-drivers" target="_blank">可以在 Docker文档</a>中找到。
+                    用于服务的日志记录驱动程序，将覆盖默认的Docker守护进程驱动程序。如果您不想覆盖它，请选择默认的日志驱动程序。支持的日志记录驱动程序可以在
+                    <a href="https://docs.docker.com/engine/admin/logging/overview/#supported-logging-drivers" target="_blank">Docker文档中找到</a>。
                   </p>
                 </div>
               </div>
@@ -206,9 +205,11 @@
               <!-- logging-opts -->
               <div class="form-group">
                 <div class="col-sm-12 mt-1">
-                  <label class="control-label text-left">选项 <portainer-tooltip
+                  <label class="control-label text-left">
+                    选项
+                    <portainer-tooltip
                       position="'top'"
-                      message="'除非选择了除无或默认之外的驱动程序，否则添加按钮将被禁用。选项是特定于所选驱动程序的，请参考驱动程序文档。'"
+                      message="'除非选择了none或默认驱动程序之外的驱动程序，否则添加按钮将被禁用。选项特定于所选驱动程序，请参阅驱动程序文档。'"
                     ></portainer-tooltip>
                   </label>
                   <span
@@ -216,22 +217,22 @@
                     style="margin-left: 10px"
                     ng-click="!formValues.LogDriverName || formValues.LogDriverName === 'none' || addLogDriverOpt(formValues.LogDriverName)"
                   >
-                    <pr-icon icon="'plus'" mode="'alt'" feather="true"></pr-icon> 增加日志驱动选项
+                    <pr-icon icon="'plus'" mode="'alt'"></pr-icon> 添加日志记录驱动程序选项
                   </span>
                 </div>
                 <!-- logging-opts-input-list -->
                 <div class="col-sm-12 form-inline mt-2">
                   <div ng-repeat="opt in formValues.LogDriverOpts" class="mt-1">
                     <div class="input-group col-sm-5 input-group-sm">
-                      <span class="input-group-addon">option</span>
-                      <input type="text" class="form-control" ng-model="opt.name" placeholder="例如 FOO" />
+                      <span class="input-group-addon">选项</span>
+                      <input type="text" class="form-control" ng-model="opt.name" placeholder="例如：FOO" />
                     </div>
                     <div class="input-group col-sm-5 input-group-sm">
-                      <span class="input-group-addon">value</span>
-                      <input type="text" class="form-control" ng-model="opt.value" placeholder="例如 bar" />
+                      <span class="input-group-addon">值</span>
+                      <input type="text" class="form-control" ng-model="opt.value" placeholder="例如：bar" />
                     </div>
                     <button class="btn btn-dangerlight" type="button" ng-click="removeLogDriverOpt($index)">
-                      <pr-icon icon="'trash-2'" feather="true" size="'md'"></pr-icon>
+                      <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
                     </button>
                   </div>
                 </div>
@@ -247,9 +248,9 @@
               <!-- volumes -->
               <div class="form-group">
                 <div class="col-sm-12" style="margin-top: 5px">
-                  <label class="control-label text-left">存储卷映射</label>
+                  <label class="control-label text-left">Volume mapping</label>
                   <span class="label label-default interactive" style="margin-left: 10px" ng-click="addVolume()">
-                    <pr-icon icon="'plus'" mode="'alt'" feather="true"></pr-icon> 添加额外存储卷
+                    <pr-icon icon="'plus'" mode="'alt'"></pr-icon> map additional volume
                   </span>
                 </div>
                 <!-- volumes-input-list -->
@@ -261,22 +262,20 @@
                         <!-- container-path -->
                         <div class="input-group col-sm-6">
                           <div class="input-group input-group-sm w-full">
-                            <span class="input-group-addon">容器</span>
+                            <span class="input-group-addon">container</span>
                             <input type="text" class="form-control" ng-model="volume.Target" placeholder="例如 /path/in/container" />
                           </div>
-                          <div class="small text-warning" ng-show="!volume.Target">
-                            <pr-icon icon="'alert-triangle'" mode="'warning'" feather="true"></pr-icon> 目标是必填的。
-                          </div>
+                          <div class="small text-warning" ng-show="!volume.Target"> <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> Target is required. </div>
                         </div>
                         <!-- !container-path -->
                         <!-- volume-type -->
                         <div class="input-group col-sm-5" style="margin-left: 5px; vertical-align: top">
                           <div class="btn-group btn-group-sm" ng-if="allowBindMounts">
-                            <label class="btn btn-light" ng-model="volume.Type" uib-btn-radio="'volume'" ng-click="volume.Source = null">存储卷</label>
-                            <label class="btn btn-light" ng-model="volume.Type" uib-btn-radio="'bind'" ng-click="volume.Source = null">绑定</label>
+                            <label class="btn btn-light" ng-model="volume.Type" uib-btn-radio="'volume'" ng-click="volume.Source = null">Volume</label>
+                            <label class="btn btn-light" ng-model="volume.Type" uib-btn-radio="'bind'" ng-click="volume.Source = null">Bind</label>
                           </div>
                           <button class="btn btn-dangerlight" type="button" ng-click="removeVolume($index)">
-                            <pr-icon icon="'trash-2'" feather="true" size="'md'"></pr-icon>
+                            <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
                           </button>
                         </div>
                         <!-- !volume-type -->
@@ -285,41 +284,37 @@
                       <!-- volume-line2 -->
                       <div class="col-sm-12 form-inline" style="margin-top: 5px">
                         <div style="height: 30px; display: inline-block; vertical-align: top; display: inline-flex; align-items: center">
-                          <i class="fa fa-long-arrow-alt-right" aria-hidden="true"></i>
+                          <pr-icon icon="'arrow-right'"></pr-icon>
                         </div>
                         <!-- volume -->
                         <div class="col-sm-6 input-group" ng-if="volume.Type === 'volume'" style="float: none; padding: 0">
                           <div class="input-group input-group-sm w-full">
-                            <span class="input-group-addon">存储卷</span>
+                            <span class="input-group-addon">volume</span>
                             <select
                               class="form-control"
                               ng-model="volume.Source"
                               ng-options="vol as ((vol.Id|truncate:30) + ' - ' + (vol.Driver|truncate:30)) for vol in availableVolumes"
                             >
-                              <option selected disabled value="">选择存储卷</option>
+                              <option selected disabled value="">Select a volume</option>
                             </select>
                           </div>
-                          <div class="small text-warning" ng-show="!volume.Source">
-                            <pr-icon icon="'alert-triangle'" mode="'warning'" feather="true"></pr-icon> 源是必填项。
-                          </div>
+                          <div class="small text-warning" ng-show="!volume.Source"> <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> Source is required. </div>
                         </div>
                         <!-- !volume -->
                         <!-- bind -->
                         <div class="input-group input-group-sm col-sm-6" ng-if="volume.Type === 'bind'">
                           <div class="input-group input-group-sm w-full">
-                            <span class="input-group-addon">主机</span>
+                            <span class="input-group-addon">host</span>
                             <input type="text" class="form-control" ng-model="volume.Source" placeholder="例如 /path/on/host" />
                           </div>
-                          <div class="small text-warning" ng-show="!volume.Source">
-                            <pr-icon icon="'alert-triangle'" mode="'warning'" feather="true"></pr-icon> 源是必填项。
-                          </div>
+                          <div class="small text-warning" ng-show="!volume.Source"> <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> Source is required. </div>
                         </div>
                         <!-- !bind -->
                         <!-- read-only -->
                         <div class="input-group input-group-sm col-sm-5" style="margin-left: 5px; vertical-align: top">
                           <div class="btn-group btn-group-sm">
-                            <label class="btn btn-light" ng-model="volume.ReadOnly" uib-btn-radio="false">读写</label>
-                            <label class="btn btn-light" ng-model="volume.ReadOnly" uib-btn-radio="true">只读</label>
+                            <label class="btn btn-light" ng-model="volume.ReadOnly" uib-btn-radio="false">Writable</label>
+                            <label class="btn btn-light" ng-model="volume.ReadOnly" uib-btn-radio="true">Read-only</label>
                           </div>
                         </div>
                         <!-- !read-only -->
@@ -352,9 +347,9 @@
               <!-- extra-networks -->
               <div class="form-group">
                 <div class="col-sm-12" style="margin-top: 5px">
-                  <label class="control-label text-left">额外的网络</label>
+                  <label class="control-label text-left">额外网络</label>
                   <span class="label label-default interactive" style="margin-left: 10px" ng-click="addExtraNetwork()">
-                    <pr-icon icon="'plus'" mode="'alt'" feather="true"></pr-icon> 添加额外网络
+                    <pr-icon icon="'plus'" mode="'alt'"></pr-icon> 添加额外网络
                   </span>
                 </div>
                 <!-- network-input-list -->
@@ -365,7 +360,7 @@
                       <option ng-repeat="net in availableNetworks" ng-value="net.Name">{{ net.Name }}</option>
                     </select>
                     <button class="btn btn-dangerlight" type="button" ng-click="removeExtraNetwork($index)">
-                      <pr-icon icon="'trash-2'" feather="true" size="'md'"></pr-icon>
+                      <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
                     </button>
                   </div>
                 </div>
@@ -377,18 +372,18 @@
                 <div class="col-sm-12" style="margin-top: 5px">
                   <label class="control-label text-left">主机文件条目</label>
                   <span class="label label-default interactive" style="margin-left: 10px" ng-click="addHostsEntry()">
-                    <pr-icon icon="'plus'" mode="'alt'" feather="true"></pr-icon> 添加附加条目
+                    <pr-icon icon="'plus'" mode="'alt'"></pr-icon> 添加额外条目
                   </span>
                 </div>
                 <!-- hosts-input-list -->
                 <div class="col-sm-12 form-inline" style="margin-top: 10px">
                   <div ng-repeat="variable in formValues.HostsEntries" style="margin-top: 2px">
                     <div class="input-group col-sm-5 input-group-sm">
-                      <span class="input-group-addon">value</span>
-                      <input type="text" class="form-control" ng-model="variable.value" placeholder="例如 host:IP" />
+                      <span class="input-group-addon">值</span>
+                      <input type="text" class="form-control" ng-model="variable.value" placeholder="例如：host:IP" />
                     </div>
                     <button class="btn btn-dangerlight" type="button" ng-click="removeHostsEntry($index)">
-                      <pr-icon icon="'trash-2'" feather="true" size="'md'"></pr-icon>
+                      <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
                     </button>
                   </div>
                 </div>
@@ -400,11 +395,13 @@
           <!-- !tab-network -->
           <!-- tab-env -->
           <div class="tab-pane" id="env">
-            <environment-variables-panel
-              ng-model="formValues.Env"
-              explanation="这些值将在创建时应用于服务"
-              on-change="(handleEnvVarChange)"
-            ></environment-variables-panel>
+            <div class="form-horizontal">
+              <environment-variables-panel
+                values="formValues.Env"
+                explanation="'创建服务时将应用这些值'"
+                on-change="(handleEnvVarChange)"
+              ></environment-variables-panel>
+            </div>
           </div>
           <!-- !tab-env -->
           <!-- tab-labels -->
@@ -415,7 +412,7 @@
                 <div class="col-sm-12" style="margin-top: 5px">
                   <label class="control-label text-left">服务标签</label>
                   <span class="label label-default interactive" style="margin-left: 10px" ng-click="addLabel()">
-                    <pr-icon icon="'plus'" mode="'alt'" feather="true"></pr-icon> 添加服务标签
+                    <pr-icon icon="'plus'" mode="'alt'"></pr-icon> 添加服务标签
                   </span>
                 </div>
                 <!-- labels-input-list -->
@@ -426,11 +423,11 @@
                       <input type="text" class="form-control" ng-model="label.key" placeholder="例如 com.example.foo" />
                     </div>
                     <div class="input-group col-sm-5 input-group-sm">
-                      <span class="input-group-addon">value</span>
+                      <span class="input-group-addon">值</span>
                       <input type="text" class="form-control" ng-model="label.value" placeholder="例如 bar" />
                     </div>
                     <button class="btn btn-dangerlight" type="button" ng-click="removeLabel($index)">
-                      <pr-icon icon="'trash-2'" feather="true" size="'md'"></pr-icon>
+                      <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
                     </button>
                   </div>
                 </div>
@@ -442,7 +439,7 @@
                 <div class="col-sm-12" style="margin-top: 5px">
                   <label class="control-label text-left">容器标签</label>
                   <span class="label label-default interactive" style="margin-left: 10px" ng-click="addContainerLabel()">
-                    <pr-icon icon="'plus'" mode="'alt'" feather="true"></pr-icon> 添加容器标签
+                    <pr-icon icon="'plus'" mode="'alt'"></pr-icon> 添加容器标签
                   </span>
                 </div>
                 <!-- container-labels-input-list -->
@@ -453,11 +450,11 @@
                       <input type="text" class="form-control" ng-model="label.key" placeholder="例如 com.example.foo" />
                     </div>
                     <div class="input-group col-sm-5 input-group-sm">
-                      <span class="input-group-addon">value</span>
+                      <span class="input-group-addon">值</span>
                       <input type="text" class="form-control" ng-model="label.value" placeholder="例如 bar" />
                     </div>
                     <button class="btn btn-dangerlight" type="button" ng-click="removeContainerLabel($index)">
-                      <pr-icon icon="'trash-2'" feather="true" size="'md'"></pr-icon>
+                      <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
                     </button>
                   </div>
                 </div>

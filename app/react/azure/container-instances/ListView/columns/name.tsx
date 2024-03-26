@@ -1,24 +1,21 @@
-import { CellProps, Column } from 'react-table';
+import { CellContext } from '@tanstack/react-table';
 
 import { ContainerGroup } from '@/react/azure/types';
 
 import { Link } from '@@/Link';
 
-export const name: Column<ContainerGroup> = {
-  Header: '名称',
-  accessor: (container) => container.name,
-  id: 'name',
-  Cell: NameCell,
-  disableFilters: true,
-  Filter: () => null,
-  canHide: true,
-  sortType: 'string',
-};
+import { columnHelper } from './helper';
+
+export const name = columnHelper.accessor('name', {
+  header: '名称',
+  cell: NameCell,
+});
 
 export function NameCell({
-  value: name,
+  getValue,
   row: { original: container },
-}: CellProps<ContainerGroup, string>) {
+}: CellContext<ContainerGroup, string>) {
+  const name = getValue();
   return (
     <Link
       to="azure.containerinstances.container"

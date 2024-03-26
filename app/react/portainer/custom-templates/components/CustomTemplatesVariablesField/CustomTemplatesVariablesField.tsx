@@ -22,7 +22,7 @@ export function CustomTemplatesVariablesField({
   }
 
   return (
-    <FormSection title="Template Variables">
+    <FormSection title="模板变量">
       {definitions.map((def) => {
         const inputId = `${def.name}-input`;
         const variable = value[def.name] || '';

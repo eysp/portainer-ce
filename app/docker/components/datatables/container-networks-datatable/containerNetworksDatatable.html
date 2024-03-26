@@ -1,6 +1,6 @@
 <div class="datatable">
   <rd-widget>
-    <rd-widget-header icon="{{ $ctrl.titleIcon }}" feather-icon="true" title-text="{{ $ctrl.titleText }}"></rd-widget-header>
+    <rd-widget-header icon="{{ $ctrl.titleIcon }}" title-text="{{ $ctrl.titleText }}"></rd-widget-header>
     <rd-widget-body classes="no-padding">
       <div class="actionBar">
         <form class="form-horizontal">
@@ -21,25 +21,26 @@
                 button-spinner="$ctrl.joinNetworkActionInProgress"
               >
                 <span ng-hide="$ctrl.joinNetworkActionInProgress">加入网络</span>
-                <span ng-show="$ctrl.joinNetworkActionInProgress">加入网络中...</span>
+                <span ng-show="$ctrl.joinNetworkActionInProgress">正在加入网络...</span>
               </button>
             </div>
           </div>
         </form>
       </div>
       <div class="table-responsive">
-        <table class="table table-hover nowrap-cells">
+        <table class="table-hover nowrap-cells table">
           <thead>
             <tr>
               <th>网络</th>
               <th>
-                IP 地址
+                IP地址
                 <a ng-click="$ctrl.expandAll()" ng-if="$ctrl.hasExpandableItems()">
-                  <i ng-class="{ 'fas fa-angle-down': $ctrl.state.expandAll, 'fas fa-angle-right': !$ctrl.state.expandAll }" aria-hidden="true"></i>
+                  <pr-icon ng-if="$ctrl.state.expandAll" icon="'chevron-down'"></pr-icon>
+                  <pr-icon ng-if="!$ctrl.state.expandAll" icon="'chevron-right'"></pr-icon>
                 </a>
               </th>
               <th>网关</th>
-              <th>MAC 地址</th>
+              <th>MAC地址</th>
               <th authorization="DockerNetworkDisconnect">操作</th>
             </tr>
           </thead>
@@ -51,7 +52,8 @@
             >
               <td>
                 <button class="btn btn-none" ng-if="$ctrl.itemCanExpand(value)" type="button">
-                  <i ng-class="{ 'fas fa-angle-down': value.Expanded, 'fas fa-angle-right': !value.Expanded }" class="space-right" aria-hidden="true"></i>
+                  <pr-icon ng-if="value.Expanded" icon="'chevron-down'" class-name="'mr-1'"></pr-icon>
+                  <pr-icon ng-if="!value.Expanded" icon="'chevron-right'" class-name="'mr-1'"></pr-icon>
                 </button>
                 <a ui-sref="docker.networks.network({ id: key, nodeName: $ctrl.nodeName })">{{ key }}</a>
               </td>
@@ -61,13 +63,13 @@
               <td authorization="DockerNetworkDisconnect">
                 <button
                   type="button"
-                  class="btn btn-xs btn-dangerlight h-fit vertical-center !ml-0"
+                  class="btn btn-xs btn-dangerlight vertical-center !ml-0 h-fit"
                   ng-disabled="$ctrl.leaveNetworkActionInProgress || $ctrl.container.IsPortainer"
                   button-spinner="$ctrl.leaveNetworkActionInProgress"
                   ng-click="$ctrl.leaveNetworkAction($ctrl.container, key)"
                 >
-                  <span ng-if="!$ctrl.leaveNetworkActionInProgress" class="vertical-center !ml-0"> <pr-icon icon="'trash-2'" feather="true"></pr-icon> 断开网络</span>
-                  <span ng-if="$ctrl.leaveNetworkActionInProgress">断开网络中...</span>
+                  <span ng-if="!$ctrl.leaveNetworkActionInProgress" class="vertical-center !ml-0"> <pr-icon icon="'trash-2'"></pr-icon> 离开网络</span>
+                  <span ng-if="$ctrl.leaveNetworkActionInProgress">正在离开网络...</span>
                 </button>
               </td>
             </tr>
@@ -85,10 +87,10 @@
               </td>
             </tr>
             <tr ng-if="!$ctrl.dataset">
-              <td colspan="5" class="text-center text-muted">加载中...</td>
+              <td colspan="5" class="text-muted text-center">加载中...</td>
             </tr>
             <tr ng-if="$ctrl.dataset.length === 0">
-              <td colspan="5" class="text-center text-muted">没有可用的网络。</td>
+              <td colspan="5" class="text-muted text-center">没有可用网络。</td>
             </tr>
           </tbody>
         </table>
@@ -97,9 +99,9 @@
         <div class="paginationControls">
           <form class="form-inline">
             <span class="limitSelector vertical-center">
-              <span style="margin-right: 5px"> 每页项目数 </span>
+              <span style="margin-right: 5px"> 每页项目 </span>
               <select class="form-control" ng-model="$ctrl.state.paginatedItemLimit" ng-change="$ctrl.changePaginationLimit()" data-cy="component-paginationSelect">
-                <option value="0">All</option>
+                <option value="0">全部</option>
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50">50</option>

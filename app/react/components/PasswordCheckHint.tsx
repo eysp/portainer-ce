@@ -1,3 +1,5 @@
+import { AlertTriangle, Check } from 'lucide-react';
+
 import { usePublicSettings } from '@/react/portainer/settings/queries';
 
 import { Icon } from '@@/Icon';
@@ -17,12 +19,12 @@ export function PasswordCheckHint({
   return (
     <div>
       <p className="text-warning vertical-center">
-        <Icon icon="alert-triangle" className="icon-warning" feather />
+        <Icon icon={AlertTriangle} className="icon-warning" />
         {forceChangePassword &&
-          '管理员已经改变了你的密码要求， '}
-        密码必须至少是 {minPasswordLength} 字符的长度。
+          '管理员已更改您的密码要求， '}
+        密码长度必须至少为 {minPasswordLength} 个字符。
         {passwordValid && (
-          <i className="fa fa-check green-icon space-left" aria-hidden="true" />
+          <Icon icon={Check} className="!ml-1" mode="success" />
         )}
       </p>
     </div>

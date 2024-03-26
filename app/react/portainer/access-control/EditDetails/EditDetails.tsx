@@ -1,10 +1,9 @@
 import { useCallback } from 'react';
 import { FormikErrors } from 'formik';
 
-import { useUser } from '@/portainer/hooks/useUser';
-import { EnvironmentId } from '@/portainer/environments/types';
+import { useUser } from '@/react/hooks/useUser';
+import { EnvironmentId } from '@/react/portainer/environments/types';
 
-import { BoxSelector } from '@@/BoxSelector';
 import { FormError } from '@@/form-components/FormError';
 
 import { ResourceControlOwnership, AccessControlFormData } from '../types';
@@ -12,7 +11,7 @@ import { ResourceControlOwnership, AccessControlFormData } from '../types';
 import { UsersField } from './UsersField';
 import { TeamsField } from './TeamsField';
 import { useLoadState } from './useLoadState';
-import { useOptions } from './useOptions';
+import { AccessTypeSelector } from './AccessTypeSelector';
 
 interface Props {
   values: AccessControlFormData;
@@ -33,9 +32,7 @@ export function EditDetails({
 }: Props) {
   const { user, isAdmin } = useUser();
 
-  const { users, teams, isLoading } = useLoadState(environmentId);
-  const options = useOptions(isAdmin, teams, isPublicVisible);
-
+  const { users, teams, isLoading } = useLoadState(environmentId, isAdmin);
   const handleChange = useCallback(
     (partialValues: Partial<typeof values>) => {
       onChange({ ...values, ...partialValues });
@@ -44,17 +41,19 @@ export function EditDetails({
     [values, onChange]
   );
 
-  if (isLoading || !teams || !users) {
+  if (isLoading || !teams || (isAdmin && !users) || !values.authorizedUsers) {
     return null;
   }
 
   return (
     <>
-      <BoxSelector
-        radioName={withNamespace('ownership')}
+      <AccessTypeSelector
+        onChange={handleChangeOwnership}
+        name={withNamespace('ownership')}
         value={values.ownership}
-        options={options}
-        onChange={(ownership) => handleChangeOwnership(ownership)}
+        isAdmin={isAdmin}
+        isPublicVisible={isPublicVisible}
+        teams={teams}
       />
 
       {values.ownership === ResourceControlOwnership.RESTRICTED && (
@@ -62,7 +61,7 @@ export function EditDetails({
           {isAdmin && (
             <UsersField
               name={withNamespace('authorizedUsers')}
-              users={users}
+              users={users || []}
               onChange={(authorizedUsers) => handleChange({ authorizedUsers })}
               value={values.authorizedUsers}
               errors={errors?.authorizedUsers}
@@ -75,7 +74,7 @@ export function EditDetails({
               teams={teams}
               overrideTooltip={
                 !isAdmin && teams.length > 1
-                  ? '由于你是多个团队的成员，你可以选择哪些团队将能够管理该资源。'
+                  ? '由于您是多个团队的成员，您可以选择哪些团队将能够管理此资源。'
                   : undefined
               }
               onChange={(authorizedTeams) => handleChange({ authorizedTeams })}
@@ -109,6 +108,12 @@ export function EditDetails({
     if (ownership === ResourceControlOwnership.RESTRICTED) {
       authorizedUsers = [];
       authorizedTeams = [];
+      // Non admin team leaders/members under only one team can
+      // automatically grant the resource access to all members
+      // under the team
+      if (!isAdmin && teams && teams.length === 1) {
+        authorizedTeams = teams.map((team) => team.Id);
+      }
     }
 
     handleChange({ ownership, authorizedTeams, authorizedUsers });

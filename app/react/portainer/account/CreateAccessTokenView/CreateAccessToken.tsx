@@ -38,7 +38,7 @@ export function CreateAccessToken({
 
   useEffect(() => {
     if (description.length === 0) {
-      setErrorText(t('this field is required'));
+      setErrorText(t('此字段为必填项'));
     } else setErrorText('');
   }, [description, t]);
 
@@ -52,7 +52,7 @@ export function CreateAccessToken({
       const response = await onSubmit(description);
       setAccessToken(response.rawAPIKey);
     } catch (err) {
-      onError('Failure', err, 'Failed to generate access token');
+      onError('失败', err, '生成访问令牌失败');
     } finally {
       setIsLoading(false);
     }
@@ -64,7 +64,7 @@ export function CreateAccessToken({
         <div className="form-horizontal">
           <FormControl
             inputId="input"
-            label={t('Description')}
+            label={t('描述')}
             errors={errorText}
           >
             <Input
@@ -78,31 +78,32 @@ export function CreateAccessToken({
               disabled={!!errorText || !!accessToken}
               onClick={() => generateAccessToken()}
             >
-              {t('Add access token')}
+              {t('添加访问令牌')}
             </Button>
           </div>
         </div>
         {accessToken && (
           <div className="mt-5">
             <FormSectionTitle>
-              <Trans ns={translationNS}>New access token</Trans>
+              <Trans ns={translationNS}>新访问令牌</Trans>
             </FormSectionTitle>
             <TextTip>
               <Trans ns={translationNS}>
-                Please copy the new access token. You won&#39;t be able to view
-                the token again.
+                请复制新的访问令牌。您将无法再次查看该令牌。
               </Trans>
             </TextTip>
             <Code>{accessToken}</Code>
-            <CopyButton copyText={accessToken}>
-              <Trans ns={translationNS}>Copy access token</Trans>
-            </CopyButton>
+            <div className="mt-2">
+              <CopyButton copyText={accessToken}>
+                <Trans ns={translationNS}>复制访问令牌</Trans>
+              </CopyButton>
+            </div>
             <hr />
             <Button
               type="button"
               onClick={() => router.stateService.go('portainer.account')}
             >
-              <Trans ns={translationNS}>Done</Trans>
+              <Trans ns={translationNS}>完成</Trans>
             </Button>
           </div>
         )}

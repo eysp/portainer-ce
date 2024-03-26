@@ -17,7 +17,7 @@ test('when ownership not restricted, should be valid', async () => {
   });
 });
 
-test('when ownership is restricted and no teams or users, should be invalid', async () => {
+test('当所有权受到限制并且没有团队或用户时，应该无效', async () => {
   [true, false].forEach(async (isAdmin) => {
     const schema = validationSchema(isAdmin);
 
@@ -34,7 +34,7 @@ test('when ownership is restricted and no teams or users, should be invalid', as
   });
 });
 
-test('when ownership is restricted, and the user is admin should have either teams or users', async () => {
+test('当所有权受到限制并且用户是管理员时，应该拥有团队或用户', async () => {
   const schema = validationSchema(true);
   const teams = {
     ownership: ResourceControlOwnership.RESTRICTED,
@@ -67,7 +67,7 @@ test('when ownership is restricted, and the user is admin should have either tea
   );
 });
 
-test('when  ownership is restricted, user is not admin with teams, should be valid', async () => {
+test('当所有权受到限制时，用户不是团队的管理员，应该有效', async () => {
   const schema = validationSchema(false);
 
   const object = {

@@ -4,18 +4,18 @@
       <div class="toolBar">
         <div class="toolBarTitle vertical-center">
           <div class="widget-icon space-right">
-            <pr-icon icon="$ctrl.titleIcon" feather="true"></pr-icon>
+            <pr-icon icon="$ctrl.titleIcon"></pr-icon>
           </div>
           {{ $ctrl.titleText }}
         </div>
         <div class="searchBar vertical-center">
-          <pr-icon icon="'search'" feather="true" class-name="'searchIcon'"></pr-icon>
+          <pr-icon icon="'search'" class-name="'searchIcon'"></pr-icon>
           <input
             type="text"
             class="searchInput"
             ng-model="$ctrl.state.textFilter"
             ng-change="$ctrl.onTextFilterChange()"
-            placeholder="Search for a node..."
+            placeholder="搜索节点..."
             auto-focus
             ng-model-options="{ debounce: 300 }"
             data-cy="node-searchInput"
@@ -24,7 +24,7 @@
         <div class="settings">
           <span class="setting" ng-class="{ 'setting-active': $ctrl.settings.open }" uib-dropdown dropdown-append-to-body auto-close="disabled" is-open="$ctrl.settings.open">
             <span uib-dropdown-toggle aria-label="Settings">
-              <pr-icon icon="'more-vertical'" feather="true"></pr-icon>
+              <pr-icon icon="'more-vertical'"></pr-icon>
             </span>
             <div class="dropdown-menu dropdown-menu-right" uib-dropdown-menu>
               <div class="tableMenu">
@@ -38,14 +38,14 @@
                     <div ng-if="$ctrl.settings.repeater.autoRefresh">
                       <label for="settings_refresh_rate"> 刷新频率 </label>
                       <select id="settings_refresh_rate" ng-model="$ctrl.settings.repeater.refreshRate" ng-change="$ctrl.onSettingsRepeaterChange()" class="small-select">
-                        <option value="10">10s</option>
-                        <option value="30">30s</option>
-                        <option value="60">1min</option>
-                        <option value="120">2min</option>
-                        <option value="300">5min</option>
+                        <option value="10">10秒</option>
+                        <option value="30">30秒</option>
+                        <option value="60">1分钟</option>
+                        <option value="120">2分钟</option>
+                        <option value="300">5分钟</option>
                       </select>
                       <span>
-                        <i id="refreshRateChange" class="fa fa-check green-icon" aria-hidden="true" style="margin-top: 7px; display: none"></i>
+                        <pr-icon id="refreshRateChange" icon="'check'" mode="'success'" style="display: none"></pr-icon>
                       </span>
                     </div>
                   </div>
@@ -59,7 +59,7 @@
         </div>
       </div>
       <div class="table-responsive">
-        <table class="table table-hover nowrap-cells">
+        <table class="table-hover nowrap-cells table">
           <thead>
             <tr>
               <th>
@@ -100,7 +100,7 @@
               </th>
               <th>
                 <table-column-header
-                  col-title="'引擎'"
+                  col-title="'引擎版本'"
                   can-sort="true"
                   is-sorted="$ctrl.state.orderBy === 'EngineVersion'"
                   is-sorted-desc="$ctrl.state.orderBy === 'EngineVersion' && $ctrl.state.reverseOrder"
@@ -127,7 +127,7 @@
               </th>
               <th>
                 <table-column-header
-                  col-title="'可用'"
+                  col-title="'可用性'"
                   can-sort="true"
                   is-sorted="$ctrl.state.orderBy === 'Availability'"
                   is-sorted-desc="$ctrl.state.orderBy === 'Availability' && $ctrl.state.reverseOrder"
@@ -158,10 +158,10 @@
               >
             </tr>
             <tr ng-if="!$ctrl.dataset">
-              <td colspan="7" class="text-center text-muted">加载中...</td>
+              <td colspan="7" class="text-muted text-center">加载中...</td>
             </tr>
             <tr ng-if="$ctrl.state.filteredDataSet.length === 0">
-              <td colspan="7" class="text-center text-muted">No node available.</td>
+              <td colspan="7" class="text-muted text-center">暂无节点可用。</td>
             </tr>
           </tbody>
         </table>
@@ -170,9 +170,9 @@
         <div class="paginationControls">
           <form class="form-inline vertical-center">
             <span class="limitSelector">
-              <span style="margin-right: 5px"> 每页项目数 </span>
+              <span style="margin-right: 5px"> 每页项目 </span>
               <select class="form-control" ng-model="$ctrl.state.paginatedItemLimit" ng-change="$ctrl.changePaginationLimit()" data-cy="component-paginationSelect">
-                <option value="0">All</option>
+                <option value="0">全部</option>
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50">50</option>

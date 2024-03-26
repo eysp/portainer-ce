@@ -1,22 +1,23 @@
 <ng-form name="$ctrl.webEditorForm">
-  <div class="web-editor overflow-auto">
+  <div class="web-editor overflow-x-hidden">
     <div ng-if="!$ctrl.hideTitle" class="col-sm-12 form-section-title pr-0"
-      >网络编辑
+      >Web编辑器
       <div class="text-muted small vertical-center float-right mt-0">
-        <span ng-if="$ctrl.BROWSER_OS_PLATFORM !== 'mac'" class="vertical-center">Ctrl+F搜索</span>
-        <span ng-if="$ctrl.BROWSER_OS_PLATFORM === 'mac'" class="vertical-center">Cmd+F进行搜索</span>
+        <span ng-if="$ctrl.BROWSER_OS_PLATFORM !== 'mac'" class="vertical-center">Ctrl+F 搜索</span>
+        <span ng-if="$ctrl.BROWSER_OS_PLATFORM === 'mac'" class="vertical-center">Cmd+F 搜索</span>
         <portainer-tooltip
           ng-if="$ctrl.BROWSER_OS_PLATFORM !== 'mac'"
           message="'Ctrl+F - 开始搜索 <br />
               Ctrl+G - 查找下一个 <br />
               Ctrl+Shift+G - 查找上一个 <br />
               Ctrl+Shift+F - 替换 <br />
-              Ctrl+Shift+R - 全部替换 <br />
+              Ctrl+Shift+R - 替换全部 <br />
               Alt+G - 跳转到行 <br />
-              Alt+F - 持续搜索： <br />
+              Alt+F - 持续搜索: <br />
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enter - 查找下一个 <br />
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Shift+Enter - 查找上一个 <br />'"
           class-name="'[&>span]:!text-left'"
+          set-html-message="true"
         >
         </portainer-tooltip>
         <portainer-tooltip
@@ -25,12 +26,13 @@
               Cmd+G - 查找下一个 <br />
               Cmd+Shift+G - 查找上一个 <br />
               Cmd+Option+F - 替换 <br />
-              Cmd+Option+R - 全部替换 <br />
+              Cmd+Option+R - 替换全部 <br />
               Option+G - 跳转到行 <br />
-              Option+F - 持续搜索： <br />
+              Option+F - 持续搜索: <br />
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enter - 查找下一个 <br />
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Shift+Enter - 查找上一个 <br />'"
           class-name="'[&>span]:!text-left'"
+          set-html-message="true"
         >
         </portainer-tooltip>
       </div>
@@ -44,7 +46,8 @@
           read-only="$ctrl.readOnly"
           yml="$ctrl.yml"
           value="$ctrl.value"
-          on-change="($ctrl.editorUpdate)"
+          on-change="($ctrl.onChange)"
+          height="{{ $ctrl.height }}"
         ></code-editor>
       </div>
     </div>

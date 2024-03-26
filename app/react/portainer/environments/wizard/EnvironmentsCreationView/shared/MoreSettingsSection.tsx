@@ -6,7 +6,7 @@ import { MetadataFieldset } from './MetadataFieldset';
 
 export function MoreSettingsSection({ children }: PropsWithChildren<unknown>) {
   return (
-    <FormSection title="更多设置" isFoldable>
+    <FormSection title="More settings" isFoldable>
       <div className="ml-8">
         {children}
 

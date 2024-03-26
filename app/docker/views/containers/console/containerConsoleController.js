@@ -60,13 +60,12 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
       ContainerService.container(attachId)
         .then((details) => {
           if (!details.State.Running) {
-            Notifications.error('失败', details, '容器 ' + attachId + ' 没有运行!');
+            Notifications.error('失败', details, '容器 ' + attachId + ' 未运行！');
             $scope.disconnect();
             return;
           }
 
           const params = {
-            token: LocalStorage.getJWT(),
             endpointId: $state.params.endpointId,
             id: attachId,
           };
@@ -82,7 +81,7 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
           initTerm(url, ContainerService.resizeTTY.bind(this, attachId));
         })
         .catch(function error(err) {
-          Notifications.error('Error', err, '无法检索到容器的详细信息');
+          Notifications.error('错误', err, '无法检索容器详情');
           $scope.disconnect();
         });
     };
@@ -107,7 +106,6 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
       ContainerService.createExec(execConfig)
         .then(function success(data) {
           const params = {
-            token: LocalStorage.getJWT(),
             endpointId: $state.params.endpointId,
             id: data.Id,
           };
@@ -123,7 +121,7 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
           initTerm(url, ExecService.resizeTTY.bind(this, params.id));
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法执行到容器中');
+          Notifications.error('失败', err, '无法执行进入容器操作');
           $scope.disconnect();
         });
     };
@@ -135,7 +133,7 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
       if ($scope.state > states.disconnected) {
         $scope.state = states.disconnected;
         if (term) {
-          term.write('\n\r(connection closed)');
+          term.write('\n\r(连接已关闭)');
           term.dispose();
         }
       }
@@ -166,6 +164,9 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
       if ($transition$.params().nodeName) {
         url += '&nodeName=' + $transition$.params().nodeName;
       }
+
+      url += '&token=' + LocalStorage.getJWT();
+
       if (url.indexOf('https') > -1) {
         url = url.replace('https://', 'wss://');
       } else {
@@ -239,7 +240,7 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
           $scope.loaded = true;
         })
         .catch(function error(err) {
-          Notifications.error('Error', err, '无法检索到容器的详细信息');
+          Notifications.error('错误', err, '无法检索容器详情');
         });
     };
 

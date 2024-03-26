@@ -4,21 +4,21 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/gorilla/mux"
 	httperror "github.com/portainer/libhttp/error"
-	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/adminmonitor"
 	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/demo"
 	"github.com/portainer/portainer/api/http/middlewares"
 	"github.com/portainer/portainer/api/http/offlinegate"
 	"github.com/portainer/portainer/api/http/security"
+
+	"github.com/gorilla/mux"
 )
 
 // Handler is an http handler responsible for backup and restore portainer state
 type Handler struct {
 	*mux.Router
-	bouncer         *security.RequestBouncer
+	bouncer         security.BouncerService
 	dataStore       dataservices.DataStore
 	gate            *offlinegate.OfflineGate
 	filestorePath   string
@@ -28,7 +28,7 @@ type Handler struct {
 
 // NewHandler creates an new instance of backup handler
 func NewHandler(
-	bouncer *security.RequestBouncer,
+	bouncer security.BouncerService,
 	dataStore dataservices.DataStore,
 	gate *offlinegate.OfflineGate,
 	filestorePath string,
@@ -62,20 +62,14 @@ func adminAccess(next http.Handler) http.Handler {
 		securityContext, err := security.RetrieveRestrictedRequestContext(r)
 		if err != nil {
 			httperror.WriteError(w, http.StatusInternalServerError, "Unable to retrieve user info from request context", err)
+			return
 		}
 
 		if !securityContext.IsAdmin {
 			httperror.WriteError(w, http.StatusUnauthorized, "User is not authorized to perform the action", nil)
+			return
 		}
 
 		next.ServeHTTP(w, r)
 	})
-}
-
-func systemWasInitialized(dataStore dataservices.DataStore) (bool, error) {
-	users, err := dataStore.User().UsersByRole(portainer.AdministratorRole)
-	if err != nil {
-		return false, err
-	}
-	return len(users) > 0, nil
 }

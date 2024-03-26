@@ -15,7 +15,7 @@
           <form class="form-horizontal" autocomplete="off" name="resourcePoolCreationForm">
             <!-- #region NAME INPUT -->
             <div class="form-group">
-              <label for="pool_name" class="col-sm-3 col-lg-2 control-label text-left required">名称</label>
+              <label for="pool_name" class="col-sm-3 col-lg-2 control-label required text-left">名称</label>
               <div class="col-sm-8">
                 <input
                   type="text"
@@ -33,22 +33,26 @@
                   <div class="form-group" ng-show="resourcePoolCreationForm.pool_name.$invalid || $ctrl.state.isAlreadyExist || $ctrl.state.hasPrefixKube">
                     <div class="col-sm-12 small text-warning">
                       <div ng-messages="resourcePoolCreationForm.pool_name.$error">
-                        <p class="vertical-center" ng-message="required"><pr-icon icon="'alert-triangle'" feather="true" mode="'warning'"></pr-icon>本栏为必填项。</p>
+                        <p class="vertical-center" ng-message="required"><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>此字段为必填项。</p>
                         <p class="vertical-center" ng-message="pattern"
-                          ><pr-icon icon="'alert-triangle'" feather="true" mode="'warning'"></pr-icon> This field must consist of lower case alphanumeric characters or '-', and
-                          contain at most 63 characters, and must start and end with an alphanumeric character.</p
+                          ><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> This field must consist of lower case alphanumeric characters or '-', and contain at most 63
+                          characters, and must start and end with an alphanumeric character.</p
                         >
                       </div>
                       <p class="vertical-center" ng-if="$ctrl.state.hasPrefixKube"
-                        ><pr-icon icon="'alert-triangle'" feather="true" mode="'warning'"></pr-icon> Prefix "kube-" is reserved for Kubernetes system namespaces.</p
+                        ><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> Prefix "kube-" is reserved for Kubernetes system namespaces.</p
                       >
                       <p class="vertical-center" ng-if="$ctrl.state.isAlreadyExist">
-                        <pr-icon icon="'alert-triangle'" feather="true" mode="'warning'"></pr-icon> A namespace with the same name already exists.
+                        <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> A namespace with the same name already exists.
                       </p>
                     </div>
                   </div>
                 </span>
               </div>
+            </div>
+
+            <div class="col-sm-12 !p-0">
+              <annotations-be-teaser></annotations-be-teaser>
             </div>
 
             <!-- #endregion -->
@@ -59,7 +63,7 @@
             <div class="form-group">
               <div class="col-sm-12 small text-muted">
                 <p class="vertical-center">
-                  <pr-icon class="vertical-center" icon="'info'" feather="true" mode="'primary'"></pr-icon>
+                  <pr-icon class="vertical-center" icon="'info'" mode="'primary'"></pr-icon>
                   A namespace segments the underlying physical Kubernetes cluster into smaller virtual clusters. You should assign a capped limit of resources to this namespace or
                   disable for the safe operation of your platform.
                 </p>
@@ -82,15 +86,14 @@
                 <div class="form-group">
                   <span class="col-sm-12 small text-warning" ng-switch on="$ctrl.formValues.HasQuota && !$ctrl.isQuotaValid()">
                     <p class="vertical-center mb-0" ng-switch-when="true"
-                      ><pr-icon class="vertical-center" icon="'alert-triangle'" feather="true" mode="'warning'"></pr-icon> At least a single limit must be set for the quota to be
-                      valid.
+                      ><pr-icon class="vertical-center" icon="'alert-triangle'" mode="'warning'"></pr-icon> At least a single limit must be set for the quota to be valid.
                     </p>
                     <p class="vertical-center mb-0" ng-switch-default></p>
                   </span>
                 </div>
 
                 <!-- memory-limit-input -->
-                <div class="form-group flex flex-row !mb-0">
+                <div class="form-group !mb-0 flex flex-row">
                   <label for="memory-limit" class="col-sm-3 col-lg-2 control-label text-left"> Memory limit (MB) </label>
                   <div class="col-xs-6">
                     <por-slider
@@ -118,15 +121,14 @@
                     />
                   </div>
                 </div>
-                <div class="flex flex-row w-full">
+                <div class="flex w-full flex-row">
                   <span class="col-sm-3 col-lg-2"></span>
                   <span class="help-block col-sm-9 col-lg-10">
                     <div ng-show="resourcePoolCreationForm.memory_limit.$invalid">
                       <div class="small text-warning">
                         <div ng-messages="resourcePoolCreationForm.pool_name.$error">
                           <p class="vertical-center"
-                            ><pr-icon class="vertical-center" icon="'alert-triangle'" feather="true" mode="'warning'"></pr-icon> Value must be between
-                            {{ $ctrl.defaults.MemoryLimit }} and
+                            ><pr-icon class="vertical-center" icon="'alert-triangle'" mode="'warning'"></pr-icon> Value must be between {{ $ctrl.defaults.MemoryLimit }} and
                             {{ $ctrl.state.sliderMaxMemory }}
                           </p>
                         </div>
@@ -161,7 +163,7 @@
 
             <div class="form-group">
               <span class="col-sm-12 text-muted small vertical-center">
-                <pr-icon icon="'info'" feather="true" mode="'primary'" class="vertical-center"></pr-icon>
+                <pr-icon icon="'info'" mode="'primary'" class="vertical-center"></pr-icon>
                 You can set a quota on the amount of external load balancers that can be created inside this namespace. Set this quota to 0 to effectively disable the use of load
                 balancers in this namespace.
               </span>
@@ -200,14 +202,14 @@
             <div class="form-group">
               <div class="col-sm-12 small text-muted">
                 <p class="vertical-center">
-                  <pr-icon icon="'info'" mode="'primary'" feather="true"></pr-icon>
+                  <pr-icon icon="'info'" mode="'primary'"></pr-icon>
                   Define which registries can be used by users who have access to this namespace.
                 </p>
               </div>
             </div>
 
             <div class="form-group">
-              <label class="col-sm-3 col-lg-2 control-label text-left !pt-0" for="registries-selector"> Select registries </label>
+              <label class="col-sm-3 col-lg-2 control-label !pt-0 text-left" for="registries-selector"> Select registries </label>
               <div class="col-sm-8 col-lg-9">
                 <span class="small text-muted" ng-if="!$ctrl.registries.length && $ctrl.state.isAdmin">
                   No registries available. Head over to the <a ui-sref="portainer.registries">registry view</a> to define a container registry.
@@ -231,7 +233,7 @@
 
             <div class="form-group">
               <span class="col-sm-12 text-muted small vertical-center">
-                <pr-icon icon="'info'" mode="'primary'" feather="true"></pr-icon>
+                <pr-icon icon="'info'" mode="'primary'"></pr-icon>
                 Quotas can be set on each storage option to prevent users from exceeding a specific threshold when deploying applications. You can set a quota to 0 to effectively
                 prevent the usage of a specific storage option inside this namespace.
               </span>
@@ -249,7 +251,7 @@
             <kubernetes-summary-view ng-if="resourcePoolCreationForm.$valid && !$ctrl.isCreateButtonDisabled()" form-values="$ctrl.formValues"></kubernetes-summary-view>
             <!-- !summary -->
 
-            <div class="col-sm-12 form-section-title"> 操作 </div>
+            <div class="col-sm-12 form-section-title"> Actions </div>
             <!-- #region ACTIONS -->
             <div class="form-group">
               <div class="col-sm-12">
@@ -261,7 +263,7 @@
                   button-spinner="$ctrl.state.actionInProgress"
                 >
                   <span ng-hide="$ctrl.state.actionInProgress" data-cy="k8sNamespace-createNamespaceButton">Create namespace</span>
-                  <span ng-show="$ctrl.state.actionInProgress">正在创建中...</span>
+                  <span ng-show="$ctrl.state.actionInProgress">Creation in progress...</span>
                 </button>
               </div>
             </div>

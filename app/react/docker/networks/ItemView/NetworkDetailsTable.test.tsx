@@ -1,5 +1,5 @@
 import { render } from '@/react-tools/test-utils';
-import { UserContext } from '@/portainer/hooks/useUser';
+import { UserContext } from '@/react/hooks/useUser';
 import { UserViewModel } from '@/portainer/models/user';
 
 import { DockerNetwork } from '../types';
@@ -13,7 +13,7 @@ jest.mock('@uirouter/react', () => ({
   })),
 }));
 
-test('网络详细信息值应可见', async () => {
+test('网络详情的值应该可见', async () => {
   const network = getNetwork('test');
 
   const { findByText } = await renderComponent(true, network);
@@ -23,10 +23,10 @@ test('网络详细信息值应可见', async () => {
   await expect(findByText(network.Driver)).resolves.toBeVisible();
   await expect(findByText(network.Scope)).resolves.toBeVisible();
   await expect(
-    findByText(network.IPAM?.Config[0].Gateway || 'not found', { exact: false })
+    findByText(network.IPAM?.Config[0].Gateway || '未找到', { exact: false })
   ).resolves.toBeVisible();
   await expect(
-    findByText(network.IPAM?.Config[0].Subnet || 'not found', { exact: false })
+    findByText(network.IPAM?.Config[0].Subnet || '未找到', { exact: false })
   ).resolves.toBeVisible();
 });
 
@@ -38,7 +38,7 @@ test(`系统网络不应显示删除按钮`, async () => {
   expect(deleteButton).toBeNull();
 });
 
-test('非系统网络应具有删除按钮', async () => {
+test('非系统网络应该有一个删除按钮', async () => {
   const nonSystemNetwork = getNetwork('non system network');
 
   const { queryByText } = await renderComponent(true, nonSystemNetwork);
@@ -59,7 +59,7 @@ async function renderComponent(isAdmin: boolean, network: DockerNetwork) {
     </UserContext.Provider>
   );
 
-  await expect(queries.findByText('Network details')).resolves.toBeVisible();
+  await expect(queries.findByText('网络详情')).resolves.toBeVisible();
 
   return queries;
 }

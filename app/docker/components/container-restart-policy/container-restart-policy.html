@@ -1,15 +1,15 @@
 <div>
-  <table class="table table-bordered table-condensed">
+  <table class="table-bordered table-condensed table">
     <tr>
       <td class="col-md-3">
         <span>名称</span>
       </td>
       <td>
         <select class="form-control" ng-model="$ctrl.state.editModel.name" disable-authorization="DockerContainerUpdate">
-          <option value="no">没有</option>
-          <option value="on-failure">非正常退出时重启</option>
-          <option value="always">总是重启</option>
-          <option value="unless-stopped">排除崩溃，总是重启</option>
+          <option value="no">无</option>
+          <option value="on-failure">失败时</option>
+          <option value="always">始终</option>
+          <option value="unless-stopped">除非停止</option>
         </select>
       </td>
       <td class="col-md-2" authorization="DockerContainerUpdate">

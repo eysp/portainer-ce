@@ -1,9 +1,9 @@
 import { ComponentType } from 'react';
 import clsx from 'clsx';
 import { FormikErrors } from 'formik';
+import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react';
 
-import { AddButton, Button } from '@@/buttons';
-import { Icon } from '@@/Icon';
+import { Button } from '@@/buttons';
 import { Tooltip } from '@@/Tip/Tooltip';
 import { TextTip } from '@@/Tip/TextTip';
 
@@ -13,12 +13,25 @@ import { FormError } from '../FormError';
 import styles from './InputList.module.css';
 import { arrayMove } from './utils';
 
+type ArrElement<ArrType> = ArrType extends readonly (infer ElementType)[]
+  ? ElementType
+  : never;
+
+export type ArrayError<T> =
+  | FormikErrors<ArrElement<T>>[]
+  | string
+  | string[]
+  | undefined;
+export type ItemError<T> = FormikErrors<T> | string | undefined;
+
 export interface ItemProps<T> {
   item: T;
   onChange(value: T): void;
-  error?: string | FormikErrors<T>;
+  error?: ItemError<T>;
   disabled?: boolean;
   readOnly?: boolean;
+  // eslint-disable-next-line react/no-unused-prop-types
+  index: number;
 }
 type Key = string | number;
 type ChangeType = 'delete' | 'create' | 'update';
@@ -38,11 +51,12 @@ type OnChangeEvent<T> =
 type RenderItemFunction<T> = (
   item: T,
   onChange: (value: T) => void,
-  error?: string | FormikErrors<T>
+  index: number,
+  error?: ItemError<T>
 ) => React.ReactNode;
 
 interface Props<T> {
-  label: string;
+  label?: string;
   value: T[];
   onChange(value: T[], e: OnChangeEvent<T>): void;
   itemBuilder?(): T;
@@ -52,11 +66,12 @@ interface Props<T> {
   addLabel?: string;
   itemKeyGetter?(item: T, index: number): Key;
   movable?: boolean;
-  errors?: FormikErrors<T>[] | string | string[];
+  errors?: ArrayError<T[]>;
   textTip?: string;
   isAddButtonHidden?: boolean;
   disabled?: boolean;
   readOnly?: boolean;
+  'aria-label'?: string;
 }
 
 export function InputList<T = DefaultType>({
@@ -75,23 +90,22 @@ export function InputList<T = DefaultType>({
   isAddButtonHidden = false,
   disabled,
   readOnly,
+  'aria-label': ariaLabel,
 }: Props<T>) {
+  const isAddButtonVisible = !(isAddButtonHidden || readOnly);
   return (
-    <div className={clsx('form-group', styles.root)}>
-      <div className={clsx('col-sm-12', styles.header)}>
-        <div className={clsx('control-label text-left', styles.label)}>
-          {label}
-          {tooltip && <Tooltip message={tooltip} />}
+    <div
+      className={clsx('form-group', styles.root)}
+      aria-label={ariaLabel || label}
+    >
+      {label && (
+        <div className={clsx('col-sm-12', styles.header)}>
+          <span className="control-label space-right pt-2 text-left !font-bold">
+            {label}
+            {tooltip && <Tooltip message={tooltip} />}
+          </span>
         </div>
-        {!(isAddButtonHidden || readOnly) && (
-          <AddButton
-            label={addLabel}
-            className="space-left"
-            onClick={handleAdd}
-            disabled={disabled}
-          />
-        )}
-      </div>
+      )}
 
       {textTip && (
         <div className="col-sm-12 mt-5">
@@ -99,72 +113,90 @@ export function InputList<T = DefaultType>({
         </div>
       )}
 
-      <div className={clsx('col-sm-12', styles.items, 'space-y-4')}>
-        {value.map((item, index) => {
-          const key = itemKeyGetter(item, index);
-          const error = typeof errors === 'object' ? errors[index] : undefined;
+      {value.length > 0 && (
+        <div className="col-sm-12 mt-5 flex flex-col gap-y-5">
+          {value.map((item, index) => {
+            const key = itemKeyGetter(item, index);
+            const error =
+              typeof errors === 'object' ? errors[index] : undefined;
 
-          return (
-            <div
-              key={key}
-              className={clsx(
-                styles.itemLine,
-                { [styles.hasError]: !!error },
-                'vertical-center'
-              )}
-            >
-              {Item ? (
-                <Item
-                  item={item}
-                  onChange={(value: T) => handleChangeItem(key, value)}
-                  error={error}
-                  disabled={disabled}
-                  readOnly={readOnly}
-                />
-              ) : (
-                renderItem(
-                  item,
-                  (value: T) => handleChangeItem(key, value),
-                  error
-                )
-              )}
-              <div className={clsx(styles.itemActions, 'items-start')}>
-                {!readOnly && movable && (
-                  <>
-                    <Button
-                      size="medium"
-                      disabled={disabled || index === 0}
-                      onClick={() => handleMoveUp(index)}
-                      className="vertical-center btn-only-icon"
-                    >
-                      <Icon icon="arrow-up" feather />
-                    </Button>
-                    <Button
-                      size="medium"
-                      type="button"
-                      disabled={disabled || index === value.length - 1}
-                      onClick={() => handleMoveDown(index)}
-                      className="vertical-center btn-only-icon"
-                    >
-                      <Icon icon="arrow-down" feather />
-                    </Button>
-                  </>
+            return (
+              <div
+                key={key}
+                className={clsx(
+                  styles.itemLine,
+                  { [styles.hasError]: !!error },
+                  'vertical-center'
                 )}
-                {!readOnly && (
-                  <Button
-                    color="dangerlight"
-                    size="medium"
-                    onClick={() => handleRemoveItem(key, item)}
-                    className="vertical-center btn-only-icon"
-                  >
-                    <Icon icon="trash-2" feather size="md" />
-                  </Button>
+              >
+                {Item ? (
+                  <Item
+                    item={item}
+                    onChange={(value: T) => handleChangeItem(key, value)}
+                    error={error}
+                    disabled={disabled}
+                    readOnly={readOnly}
+                    index={index}
+                  />
+                ) : (
+                  renderItem(
+                    item,
+                    (value: T) => handleChangeItem(key, value),
+                    index,
+                    error
+                  )
                 )}
+                <div className="items-start">
+                  {!readOnly && movable && (
+                    <>
+                      <Button
+                        size="medium"
+                        disabled={disabled || index === 0}
+                        onClick={() => handleMoveUp(index)}
+                        className="vertical-center btn-only-icon"
+                        icon={ArrowUp}
+                      />
+                      <Button
+                        size="medium"
+                        type="button"
+                        disabled={disabled || index === value.length - 1}
+                        onClick={() => handleMoveDown(index)}
+                        className="vertical-center btn-only-icon"
+                        icon={ArrowDown}
+                      />
+                    </>
+                  )}
+                  {!readOnly && (
+                    <Button
+                      color="dangerlight"
+                      size="medium"
+                      onClick={() => handleRemoveItem(key, item)}
+                      className="vertical-center btn-only-icon"
+                      icon={Trash2}
+                    />
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
+
+      {isAddButtonVisible && (
+        <div className="col-sm-12 mt-5">
+          <Button
+            onClick={handleAdd}
+            disabled={disabled}
+            type="button"
+            color="default"
+            className="!ml-0"
+            size="small"
+            icon={Plus}
+          >
+            {addLabel}
+          </Button>
+        </div>
+      )}
     </div>
   );
 
@@ -252,7 +284,10 @@ function DefaultItem({
 function renderDefaultItem(
   item: DefaultType,
   onChange: (value: DefaultType) => void,
-  error?: FormikErrors<DefaultType>
+  index: number,
+  error?: ItemError<DefaultType>
 ) {
-  return <DefaultItem item={item} onChange={onChange} error={error} />;
+  return (
+    <DefaultItem item={item} onChange={onChange} error={error} index={index} />
+  );
 }

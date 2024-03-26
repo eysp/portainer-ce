@@ -13,7 +13,7 @@ angular.module('portainer.app').factory('SupportService', [
           deferred.resolve(data);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve support options', err: err });
+          deferred.reject({ msg: '无法获取支持选项', err: err });
         });
 
       return deferred.promise;

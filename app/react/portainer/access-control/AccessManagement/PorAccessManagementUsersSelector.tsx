@@ -1,4 +1,4 @@
-import { User as UserIcon, Users as TeamIcon } from 'react-feather';
+import { User as UserIcon, Users as TeamIcon } from 'lucide-react';
 import { OptionProps, components, MultiValueGenericProps } from 'react-select';
 
 import { Select } from '@@/form-components/ReactSelect';
@@ -22,11 +22,11 @@ export function PorAccessManagementUsersSelector({
         className="col-sm-3 col-lg-2 control-label text-left"
         htmlFor="users-selector"
       >
-        选择用户/或团队
+        选择用户和/或团队
       </label>
       <div className="col-sm-9 col-lg-4">
         {options.length === 0 ? (
-          <span className="small text-muted">没有用户或团队可用。</span>
+          <span className="small text-muted">没有可用的用户或团队。</span>
         ) : (
           <Select
             isMulti
@@ -76,7 +76,7 @@ function Label({ option }: { option: Option }) {
   const Icon = option.Type === 'user' ? UserIcon : TeamIcon;
 
   return (
-    <div className="flex gap-1 items-center">
+    <div className="flex items-center gap-1">
       <Icon />
       <span>{option.Name}</span>
     </div>

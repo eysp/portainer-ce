@@ -1,25 +1,16 @@
 package edgejob
 
 import (
-	"fmt"
-
 	portainer "github.com/portainer/portainer/api"
-
-	"github.com/rs/zerolog/log"
+	"github.com/portainer/portainer/api/dataservices"
 )
 
-const (
-	// BucketName represents the name of the bucket where this service stores data.
-	BucketName = "edgejobs"
-)
+// BucketName represents the name of the bucket where this service stores data.
+const BucketName = "edgejobs"
 
 // Service represents a service for managing edge jobs data.
 type Service struct {
-	connection portainer.Connection
-}
-
-func (service *Service) BucketName() string {
-	return BucketName
+	dataservices.BaseDataService[portainer.EdgeJob, portainer.EdgeJobID]
 }
 
 // NewService creates a new instance of a service.
@@ -30,69 +21,50 @@ func NewService(connection portainer.Connection) (*Service, error) {
 	}
 
 	return &Service{
-		connection: connection,
+		BaseDataService: dataservices.BaseDataService[portainer.EdgeJob, portainer.EdgeJobID]{
+			Bucket:     BucketName,
+			Connection: connection,
+		},
 	}, nil
 }
 
-// EdgeJobs returns a list of Edge jobs
-func (service *Service) EdgeJobs() ([]portainer.EdgeJob, error) {
-	var edgeJobs = make([]portainer.EdgeJob, 0)
-
-	err := service.connection.GetAll(
-		BucketName,
-		&portainer.EdgeJob{},
-		func(obj interface{}) (interface{}, error) {
-			job, ok := obj.(*portainer.EdgeJob)
-			if !ok {
-				log.Debug().Str("obj", fmt.Sprintf("%#v", obj)).Msg("failed to convert to EdgeJob object")
-				return nil, fmt.Errorf("Failed to convert to EdgeJob object: %s", obj)
-			}
-
-			edgeJobs = append(edgeJobs, *job)
-
-			return &portainer.EdgeJob{}, nil
-		})
-
-	return edgeJobs, err
-}
-
-// EdgeJob returns an Edge job by ID
-func (service *Service) EdgeJob(ID portainer.EdgeJobID) (*portainer.EdgeJob, error) {
-	var edgeJob portainer.EdgeJob
-	identifier := service.connection.ConvertToKey(int(ID))
-
-	err := service.connection.GetObject(BucketName, identifier, &edgeJob)
-	if err != nil {
-		return nil, err
+func (service *Service) Tx(tx portainer.Transaction) ServiceTx {
+	return ServiceTx{
+		BaseDataServiceTx: dataservices.BaseDataServiceTx[portainer.EdgeJob, portainer.EdgeJobID]{
+			Bucket:     BucketName,
+			Connection: service.Connection,
+			Tx:         tx,
+		},
 	}
-
-	return &edgeJob, nil
 }
 
 // Create creates a new EdgeJob
-func (service *Service) Create(ID portainer.EdgeJobID, edgeJob *portainer.EdgeJob) error {
+func (service *Service) Create(edgeJob *portainer.EdgeJob) error {
+	return service.CreateWithID(portainer.EdgeJobID(service.GetNextIdentifier()), edgeJob)
+}
+
+// CreateWithID creates a new EdgeJob
+func (service *Service) CreateWithID(ID portainer.EdgeJobID, edgeJob *portainer.EdgeJob) error {
 	edgeJob.ID = ID
 
-	return service.connection.CreateObjectWithId(
+	return service.Connection.CreateObjectWithId(
 		BucketName,
 		int(edgeJob.ID),
 		edgeJob,
 	)
 }
 
-// UpdateEdgeJob updates an Edge job by ID
-func (service *Service) UpdateEdgeJob(ID portainer.EdgeJobID, edgeJob *portainer.EdgeJob) error {
-	identifier := service.connection.ConvertToKey(int(ID))
-	return service.connection.UpdateObject(BucketName, identifier, edgeJob)
-}
+// UpdateEdgeJobFunc updates an edge job inside a transaction avoiding data races.
+func (service *Service) UpdateEdgeJobFunc(ID portainer.EdgeJobID, updateFunc func(edgeJob *portainer.EdgeJob)) error {
+	id := service.Connection.ConvertToKey(int(ID))
+	edgeJob := &portainer.EdgeJob{}
 
-// DeleteEdgeJob deletes an Edge job
-func (service *Service) DeleteEdgeJob(ID portainer.EdgeJobID) error {
-	identifier := service.connection.ConvertToKey(int(ID))
-	return service.connection.DeleteObject(BucketName, identifier)
+	return service.Connection.UpdateObjectFunc(BucketName, id, edgeJob, func() {
+		updateFunc(edgeJob)
+	})
 }
 
 // GetNextIdentifier returns the next identifier for an environment(endpoint).
 func (service *Service) GetNextIdentifier() int {
-	return service.connection.GetNextIdentifier(BucketName)
+	return service.Connection.GetNextIdentifier(BucketName)
 }

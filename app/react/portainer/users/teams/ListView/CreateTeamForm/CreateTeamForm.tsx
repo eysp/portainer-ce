@@ -1,16 +1,18 @@
 import { Formik, Field, Form } from 'formik';
 import { useMutation, useQueryClient } from 'react-query';
 import { useReducer } from 'react';
+import { Plus } from 'lucide-react';
 
-import { Icon } from '@/react/components/Icon';
 import { User } from '@/portainer/users/types';
 import { notifySuccess } from '@/portainer/services/notifications';
+import { usePublicSettings } from '@/react/portainer/settings/queries';
 
 import { FormControl } from '@@/form-components/FormControl';
 import { Widget } from '@@/Widget';
 import { Input } from '@@/form-components/Input';
 import { UsersSelector } from '@@/UsersSelector';
 import { LoadingButton } from '@@/buttons/LoadingButton';
+import { TextTip } from '@@/Tip/TextTip';
 
 import { createTeam } from '../../teams.service';
 import { Team } from '../../types';
@@ -26,6 +28,9 @@ interface Props {
 export function CreateTeamForm({ users, teams }: Props) {
   const addTeamMutation = useAddTeamMutation();
   const [formKey, incFormKey] = useReducer((state: number) => state + 1, 0);
+  const teamSyncQuery = usePublicSettings<boolean>({
+    select: (settings) => settings.TeamSync,
+  });
 
   const initialValues = {
     name: '',
@@ -37,9 +42,8 @@ export function CreateTeamForm({ users, teams }: Props) {
       <div className="col-lg-12 col-md-12 col-xs-12">
         <Widget>
           <Widget.Title
-            icon="plus"
-            title="添加新团队"
-            featherIcon
+            icon={Plus}
+            title="新增团队"
             className="vertical-center"
           />
           <Widget.Body>
@@ -74,7 +78,7 @@ export function CreateTeamForm({ users, teams }: Props) {
                       name="name"
                       id="team_name"
                       required
-                      placeholder="例如 development"
+                      placeholder="例如：development"
                       data-cy="team-teamNameInput"
                     />
                   </FormControl>
@@ -82,8 +86,8 @@ export function CreateTeamForm({ users, teams }: Props) {
                   {users.length > 0 && (
                     <FormControl
                       inputId="users-input"
-                      label="选择团队领导"
-                      tooltip="您可以为此团队指派一个或多个领导者。团队领导者可以管理他们的团队用户和资源。"
+                      label="选择团队负责人"
+                      tooltip="您可以指定一个或多个负责人来管理该团队的用户和资源。"
                       errors={errors.leaders}
                     >
                       <UsersSelector
@@ -94,9 +98,20 @@ export function CreateTeamForm({ users, teams }: Props) {
                         users={users}
                         dataCy="team-teamLeaderSelect"
                         inputId="users-input"
-                        placeholder="选择一个或多个团队领导"
+                        placeholder="选择一个或多个团队负责人"
+                        disabled={teamSyncQuery.data}
                       />
                     </FormControl>
+                  )}
+
+                  {teamSyncQuery.data && (
+                    <div className="form-group">
+                      <div className="col-sm-12">
+                        <TextTip color="orange">
+                        当前启用了团队同步的外部身份验证，因此团队负责人功能已禁用。
+                        </TextTip>
+                      </div>
+                    </div>
                   )}
 
                   <div className="form-group">
@@ -105,9 +120,9 @@ export function CreateTeamForm({ users, teams }: Props) {
                         disabled={!isValid}
                         data-cy="team-createTeamButton"
                         isLoading={isSubmitting || addTeamMutation.isLoading}
-                        loadingText="创建团队中..."
+                        loadingText="正在创建团队..."
+                        icon={Plus}
                       >
-                        <Icon icon="plus" feather size="md" />
                         创建团队
                       </LoadingButton>
                     </div>
@@ -125,7 +140,7 @@ export function CreateTeamForm({ users, teams }: Props) {
     addTeamMutation.mutate(values, {
       onSuccess() {
         incFormKey();
-        notifySuccess('团队已成功添加', '');
+        notifySuccess('团队添加成功', '');
       },
     });
   }
@@ -139,8 +154,8 @@ export function useAddTeamMutation() {
     {
       meta: {
         error: {
-          title: 'Failure',
-          message: '未能创建团队',
+          title: '失败',
+          message: '团队创建失败',
         },
       },
       onSuccess() {

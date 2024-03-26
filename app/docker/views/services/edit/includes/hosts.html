@@ -1,9 +1,9 @@
 <div>
   <rd-widget>
-    <rd-widget-header icon="list" feather-icon="true" title-text="主机文件条目">
+    <rd-widget-header icon="list" title-text="Hosts文件条目">
       <div class="nopadding" authorization="DockerServiceUpdate">
         <a class="btn btn-secondary btn-sm pull-right" ng-click="isUpdating ||addHostsEntry(service)" ng-disabled="isUpdating">
-          <pr-icon icon="'plus'" feather="true"></pr-icon> 添加主机条目
+          <pr-icon icon="'plus'"></pr-icon> 添加主机条目
         </a>
       </div>
     </rd-widget-header>
@@ -15,7 +15,7 @@
         <thead>
           <tr>
             <th>主机名</th>
-            <th>IP</th>
+            <th>IP地址</th>
           </tr>
         </thead>
         <tbody>
@@ -26,7 +26,7 @@
                   type="text"
                   class="form-control"
                   ng-model="entry.hostname"
-                  placeholder="例如 example.com"
+                  placeholder="例如：example.com"
                   ng-change="updateHostsEntry(service, entry)"
                   ng-disabled="isUpdating"
                   disable-authorization="DockerServiceUpdate"
@@ -39,14 +39,14 @@
                   type="text"
                   class="form-control"
                   ng-model="entry.ip"
-                  placeholder="例如 10.0.1.1"
+                  placeholder="例如：10.0.1.1"
                   ng-change="updateHostsEntry(service, entry)"
                   ng-disabled="isUpdating"
                   disable-authorization="DockerServiceUpdate"
                 />
                 <span class="input-group-btn" authorization="DockerServiceUpdate">
                   <button class="btn btn-dangerlight" type="button" ng-click="removeHostsEntry(service, $index)" ng-disabled="isUpdating">
-                    <pr-icon icon="'trash-2'" feather="true" size="'md'"></pr-icon>
+                    <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
                   </button>
                 </span>
               </div>
@@ -63,7 +63,7 @@
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu">
-            <li><a ng-click="cancelChanges(service, ['Hosts'])">重置变更</a></li>
+            <li><a ng-click="cancelChanges(service, ['Hosts'])">重置更改</a></li>
             <li><a ng-click="cancelChanges(service)">重置所有更改</a></li>
           </ul>
         </div>

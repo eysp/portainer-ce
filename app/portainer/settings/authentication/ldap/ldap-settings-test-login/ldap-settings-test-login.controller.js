@@ -1,7 +1,7 @@
 const TEST_STATUS = {
   LOADING: 'LOADING',
   SUCCESS: 'SUCCESS',
-  FAILURE: '失败',
+  FAILURE: 'FAILURE',
 };
 
 export default class LdapSettingsTestLogin {
@@ -23,7 +23,7 @@ export default class LdapSettingsTestLogin {
         const response = await this.LDAPService.testLogin(this.settings, username, password);
         this.state.testStatus = response.valid ? TEST_STATUS.SUCCESS : TEST_STATUS.FAILURE;
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to test login');
+        this.Notifications.error('Failure', err, '无法测试登录');
         this.state.testStatus = TEST_STATUS.FAILURE;
       }
     });

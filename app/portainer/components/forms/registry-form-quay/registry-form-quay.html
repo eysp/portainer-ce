@@ -1,20 +1,20 @@
 <form class="form-horizontal" name="$ctrl.registryFormQuay" ng-submit="$ctrl.formAction()">
-  <div class="col-sm-12 form-section-title"> Quay account details </div>
+  <div class="col-sm-12 form-section-title"> Quay 账户详情 </div>
   <!-- name-input -->
   <div class="form-group">
-    <label for="registry_name" class="col-sm-3 col-lg-2 control-label text-left required">名称</label>
+    <label for="registry_name" class="col-sm-3 col-lg-2 control-label required text-left">名称</label>
     <div class="col-sm-9 col-lg-10">
       <input type="text" class="form-control" id="registry_name" name="registry_name" ng-model="$ctrl.model.Name" placeholder="Quay" required />
       <div class="help-block" ng-show="$ctrl.registryFormQuay.registry_name.$invalid">
         <div class="small text-warning">
           <div ng-messages="$ctrl.registryFormQuay.registry_name.$error">
             <p ng-message="required" class="vertical-center">
-              <pr-icon icon="'alert-triangle'" feather="true"></pr-icon>
-              本栏为必填项。
+              <pr-icon icon="'alert-triangle'"></pr-icon>
+              此字段为必填项。
             </p>
             <p ng-message="used" class="vertical-center">
-              <pr-icon icon="'alert-triangle'" feather="true"></pr-icon>
-              A registry with the same name already exists.
+              <pr-icon icon="'alert-triangle'"></pr-icon>
+              已存在同名的注册表。
             </p>
           </div>
         </div>
@@ -24,15 +24,15 @@
   <!-- !name-input -->
   <!-- credentials-user -->
   <div class="form-group">
-    <label for="registry_username" class="col-sm-3 col-lg-2 control-label text-left required">用户名</label>
+    <label for="registry_username" class="col-sm-3 col-lg-2 control-label required text-left">用户名</label>
     <div class="col-sm-9 col-lg-10">
       <input type="text" class="form-control" id="registry_username" name="registry_username" ng-model="$ctrl.model.Username" required auto-focus />
       <div class="help-block" ng-show="$ctrl.registryFormQuay.registry_username.$invalid">
         <div class="small text-warning">
           <div ng-messages="$ctrl.registryFormQuay.registry_username.$error">
             <p ng-message="required" class="vertical-center">
-              <pr-icon icon="'alert-triangle'" feather="true"></pr-icon>
-              本栏为必填项。
+              <pr-icon icon="'alert-triangle'"></pr-icon>
+              此字段为必填项。
             </p>
           </div>
         </div>
@@ -42,15 +42,15 @@
   <!-- !credentials-user -->
   <!-- credentials-password -->
   <div class="form-group">
-    <label for="registry_password" class="col-sm-3 col-lg-2 control-label text-left required">密码</label>
+    <label for="registry_password" class="col-sm-3 col-lg-2 control-label required text-left">密码</label>
     <div class="col-sm-9 col-lg-10">
       <input type="password" class="form-control" id="registry_password" name="registry_password" ng-model="$ctrl.model.Password" required />
       <div class="help-block" ng-show="$ctrl.registryFormQuay.registry_password.$invalid">
         <div class="small text-warning">
           <div ng-messages="$ctrl.registryFormQuay.registry_password.$error">
             <p ng-message="required" class="vertical-center">
-              <pr-icon icon="'alert-triangle'" feather="true"></pr-icon>
-              本栏为必填项。
+              <pr-icon icon="'alert-triangle'"></pr-icon>
+              此字段为必填项。
             </p>
           </div>
         </div>
@@ -63,7 +63,7 @@
   <div class="form-group">
     <div class="col-sm-12">
       <por-switch-field
-        label="'Use organisation registry'"
+        label="'使用组织注册表'"
         checked="$ctrl.model.Quay.useOrganisation"
         on-change="($ctrl.toggleOrganisation)"
         label-class="'col-sm-2'"
@@ -74,15 +74,15 @@
   <div ng-if="$ctrl.model.Quay.useOrganisation">
     <!-- organisation_name -->
     <div class="form-group">
-      <label for="organisation_name" class="col-sm-3 col-lg-2 control-label text-left required">Organisation name</label>
+      <label for="organisation_name" class="col-sm-3 col-lg-2 control-label required text-left">组织名称</label>
       <div class="col-sm-9 col-lg-10">
         <input type="text" class="form-control" id="organisation_name" name="organisation_name" ng-model="$ctrl.model.Quay.organisationName" required />
         <div class="help-block" ng-show="$ctrl.registryFormQuay.organisation_name.$invalid">
           <div class="small text-warning">
             <div ng-messages="$ctrl.registryFormQuay.organisation_name.$error">
               <p ng-message="required" class="vertical-center">
-                <pr-icon icon="'alert-triangle'" feather="true"></pr-icon>
-                本栏为必填项。
+                <pr-icon icon="'alert-triangle'"></pr-icon>
+                此字段为必填项。
               </p>
             </div>
           </div>
@@ -107,7 +107,7 @@
         analytics-properties="{ metadata: { type: 'quay' } }"
       >
         <span ng-hide="$ctrl.actionInProgress">{{ $ctrl.formActionLabel }}</span>
-        <span ng-show="$ctrl.actionInProgress">正在进行中...</span>
+        <span ng-show="$ctrl.actionInProgress">进行中...</span>
       </button>
     </div>
   </div>

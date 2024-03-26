@@ -1,6 +1,6 @@
 import moment from 'moment';
 
-import { FeatureId } from '@/portainer/feature-flags/enums';
+import { FeatureId } from '@/react/portainer/feature-flags/enums';
 export default class ActivityLogsViewController {
   /* @ngInject */
   constructor($async, $scope, Notifications) {
@@ -76,7 +76,7 @@ export default class ActivityLogsViewController {
         this.state.logs = logs;
         this.state.totalItems = totalCount;
       } catch (err) {
-        this.Notifications.error('失败', err, 'Failed loading user activity logs');
+        this.Notifications.error('F失败', err, '加载用户活动日志失败');
       }
     });
   }

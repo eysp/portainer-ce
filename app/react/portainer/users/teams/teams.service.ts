@@ -41,7 +41,7 @@ export async function createTeam(name: string, leaders: UserId[]) {
       )
     );
   } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to create team');
+    throw parseAxiosError(e as Error, '无法创建团队');
   }
 }
 
@@ -52,7 +52,7 @@ export async function getTeamMemberships(teamId: TeamId) {
     );
     return data;
   } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to get team memberships');
+    throw parseAxiosError(e as Error, '无法获取团队成员');
   }
 }
 

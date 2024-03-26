@@ -1,6 +1,8 @@
 import clsx from 'clsx';
+import { ComponentProps } from 'react';
+import uuid from 'uuid';
 
-import { FeatureId } from '@/portainer/feature-flags/enums';
+import { FeatureId } from '@/react/portainer/feature-flags/enums';
 
 import { Tooltip } from '@@/Tip/Tooltip';
 
@@ -10,10 +12,12 @@ import { Switch } from './Switch';
 export interface Props {
   label: string;
   checked: boolean;
-  onChange(value: boolean): void;
+  onChange(value: boolean, index?: number): void;
 
+  index?: number;
   name?: string;
-  tooltip?: string;
+  tooltip?: ComponentProps<typeof Tooltip>['message'];
+  setTooltipHtmlMessage?: ComponentProps<typeof Tooltip>['setHtmlMessage'];
   labelClass?: string;
   switchClass?: string;
   fieldClass?: string;
@@ -26,7 +30,8 @@ export function SwitchField({
   tooltip,
   checked,
   label,
-  name,
+  index,
+  name = uuid(),
   labelClass,
   fieldClass,
   dataCy,
@@ -34,21 +39,21 @@ export function SwitchField({
   onChange,
   featureId,
   switchClass,
+  setTooltipHtmlMessage,
 }: Props) {
   const toggleName = name ? `toggle_${name}` : '';
 
   return (
-    <label className={clsx(styles.root, fieldClass)}>
-      <span
-        className={clsx(
-          'text-left space-right control-label',
-          styles.label,
-          labelClass
-        )}
+    <div className={clsx(styles.root, fieldClass)}>
+      <label
+        className={clsx('space-right control-label !p-0 text-left', labelClass)}
+        htmlFor={toggleName}
       >
         {label}
-        {tooltip && <Tooltip message={tooltip} />}
-      </span>
+        {tooltip && (
+          <Tooltip message={tooltip} setHtmlMessage={setTooltipHtmlMessage} />
+        )}
+      </label>
       <Switch
         className={clsx('space-right', switchClass)}
         name={toggleName}
@@ -56,9 +61,10 @@ export function SwitchField({
         checked={checked}
         disabled={disabled}
         onChange={onChange}
+        index={index}
         featureId={featureId}
         dataCy={dataCy}
       />
-    </label>
+    </div>
   );
 }

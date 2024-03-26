@@ -11,7 +11,7 @@ import { buildUrl } from './urls';
 
 interface Update {
   id: EdgeUpdateSchedule['id'];
-  values: FormValues;
+  values: Partial<FormValues>;
 }
 
 async function update({ id, values }: Update) {
@@ -22,7 +22,7 @@ async function update({ id, values }: Update) {
   } catch (err) {
     throw parseAxiosError(
       err as Error,
-      'Failed to update edge update schedule'
+      '更新边缘更新计划失败'
     );
   }
 }
@@ -30,7 +30,7 @@ async function update({ id, values }: Update) {
 export function useUpdateMutation() {
   const queryClient = useQueryClient();
   return useMutation(update, {
-    ...withInvalidate(queryClient, [queryKeys.list()]),
+    ...withInvalidate(queryClient, [queryKeys.base()]),
     ...withError(),
   });
 }

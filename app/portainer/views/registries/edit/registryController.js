@@ -36,13 +36,13 @@ export default class RegistryController {
     const type = this.registry.Type;
     switch (type) {
       case RegistryTypes.ECR:
-        return 'AWS Secret Access Key';
+        return 'AWS秘密访问密钥';
       case RegistryTypes.DOCKERHUB:
-        return 'Access token';
+        return '访问令牌';
       case RegistryTypes.GITLAB:
-        return 'Personal Access Token';
+        return '个人访问令牌';
       default:
-        return 'Password';
+        return '密码';
     }
   }
 
@@ -54,10 +54,10 @@ export default class RegistryController {
         registry.Password = this.Password;
 
         await this.RegistryService.updateRegistry(registry);
-        this.Notifications.success('Success', 'Registry successfully updated');
+        this.Notifications.success('成功', '注册表更新成功');
         this.$state.go('portainer.registries');
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to update registry');
+        this.Notifications.error('失败', err, '无法更新注册表');
       } finally {
         this.state.actionInProgress = false;
       }
@@ -111,7 +111,7 @@ export default class RegistryController {
       _.pullAllBy(registries, [registry], 'Id');
       this.registriesNames = _.map(registries, 'Name');
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to retrieve registry details');
+      this.Notifications.error('Failure', err, '无法检索注册表详细信息');
     } finally {
       this.state.loading = false;
     }

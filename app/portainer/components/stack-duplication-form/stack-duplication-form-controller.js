@@ -1,4 +1,4 @@
-import { STACK_NAME_VALIDATION_REGEX } from '@/constants';
+import { STACK_NAME_VALIDATION_REGEX } from '@/react/constants';
 
 angular.module('portainer.app').controller('StackDuplicationFormController', [
   'Notifications',
@@ -45,7 +45,7 @@ angular.module('portainer.app').controller('StackDuplicationFormController', [
 
     function duplicateStack() {
       if (!ctrl.formValues.newName) {
-        Notifications.error('失败', null, 'Stack name is required for duplication');
+        Notifications.error('失败', null, '复制时堆栈名称是必填的');
         return;
       }
       ctrl.state.duplicationInProgress = true;

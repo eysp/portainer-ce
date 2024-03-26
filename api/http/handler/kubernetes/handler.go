@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	portainer "github.com/portainer/portainer/api"
-	portainerDsErrors "github.com/portainer/portainer/api/dataservices/errors"
 	"github.com/portainer/portainer/api/kubernetes"
 
 	"github.com/gorilla/mux"
@@ -25,21 +24,21 @@ import (
 type Handler struct {
 	*mux.Router
 	authorizationService     *authorization.Service
-	dataStore                dataservices.DataStore
-	kubernetesClientFactory  *cli.ClientFactory
-	jwtService               dataservices.JWTService
+	DataStore                dataservices.DataStore
+	KubernetesClientFactory  *cli.ClientFactory
+	JwtService               dataservices.JWTService
 	kubeClusterAccessService kubernetes.KubeClusterAccessService
 }
 
 // NewHandler creates a handler to process pre-proxied requests to external APIs.
-func NewHandler(bouncer *security.RequestBouncer, authorizationService *authorization.Service, dataStore dataservices.DataStore, jwtService dataservices.JWTService, kubeClusterAccessService kubernetes.KubeClusterAccessService, kubernetesClientFactory *cli.ClientFactory, kubernetesClient portainer.KubeClient) *Handler {
+func NewHandler(bouncer security.BouncerService, authorizationService *authorization.Service, dataStore dataservices.DataStore, jwtService dataservices.JWTService, kubeClusterAccessService kubernetes.KubeClusterAccessService, kubernetesClientFactory *cli.ClientFactory, kubernetesClient portainer.KubeClient) *Handler {
 	h := &Handler{
 		Router:                   mux.NewRouter(),
 		authorizationService:     authorizationService,
-		dataStore:                dataStore,
-		jwtService:               jwtService,
+		DataStore:                dataStore,
+		JwtService:               jwtService,
 		kubeClusterAccessService: kubeClusterAccessService,
-		kubernetesClientFactory:  kubernetesClientFactory,
+		KubernetesClientFactory:  kubernetesClientFactory,
 	}
 
 	kubeRouter := h.PathPrefix("/kubernetes").Subrouter()
@@ -54,14 +53,20 @@ func NewHandler(bouncer *security.RequestBouncer, authorizationService *authoriz
 	endpointRouter.Use(h.kubeClient)
 
 	endpointRouter.PathPrefix("/nodes_limits").Handler(httperror.LoggerHandler(h.getKubernetesNodesLimits)).Methods(http.MethodGet)
+	endpointRouter.Path("/metrics/nodes").Handler(httperror.LoggerHandler(h.getKubernetesMetricsForAllNodes)).Methods(http.MethodGet)
+	endpointRouter.Path("/metrics/nodes/{name}").Handler(httperror.LoggerHandler(h.getKubernetesMetricsForNode)).Methods(http.MethodGet)
+	endpointRouter.Path("/metrics/pods/namespace/{namespace}").Handler(httperror.LoggerHandler(h.getKubernetesMetricsForAllPods)).Methods(http.MethodGet)
+	endpointRouter.Path("/metrics/pods/namespace/{namespace}/{name}").Handler(httperror.LoggerHandler(h.getKubernetesMetricsForPod)).Methods(http.MethodGet)
 	endpointRouter.Handle("/ingresscontrollers", httperror.LoggerHandler(h.getKubernetesIngressControllers)).Methods(http.MethodGet)
 	endpointRouter.Handle("/ingresscontrollers", httperror.LoggerHandler(h.updateKubernetesIngressControllers)).Methods(http.MethodPut)
 	endpointRouter.Handle("/ingresses/delete", httperror.LoggerHandler(h.deleteKubernetesIngresses)).Methods(http.MethodPost)
 	endpointRouter.Handle("/services/delete", httperror.LoggerHandler(h.deleteKubernetesServices)).Methods(http.MethodPost)
+	endpointRouter.Path("/rbac_enabled").Handler(httperror.LoggerHandler(h.isRBACEnabled)).Methods(http.MethodGet)
 	endpointRouter.Path("/namespaces").Handler(httperror.LoggerHandler(h.createKubernetesNamespace)).Methods(http.MethodPost)
 	endpointRouter.Path("/namespaces").Handler(httperror.LoggerHandler(h.updateKubernetesNamespace)).Methods(http.MethodPut)
 	endpointRouter.Path("/namespaces").Handler(httperror.LoggerHandler(h.getKubernetesNamespaces)).Methods(http.MethodGet)
-	endpointRouter.Path("/namespace/{namespace}").Handler(httperror.LoggerHandler(h.deleteKubernetesNamespaces)).Methods(http.MethodDelete)
+	endpointRouter.Path("/namespace/{namespace}").Handler(httperror.LoggerHandler(h.deleteKubernetesNamespace)).Methods(http.MethodDelete)
+	endpointRouter.Path("/namespaces/{namespace}").Handler(httperror.LoggerHandler(h.getKubernetesNamespace)).Methods(http.MethodGet)
 
 	// namespaces
 	// in the future this piece of code might be in another package (or a few different packages - namespaces/namespace?)
@@ -70,7 +75,7 @@ func NewHandler(bouncer *security.RequestBouncer, authorizationService *authoriz
 	namespaceRouter.Handle("/system", bouncer.RestrictedAccess(httperror.LoggerHandler(h.namespacesToggleSystem))).Methods(http.MethodPut)
 	namespaceRouter.Handle("/ingresscontrollers", httperror.LoggerHandler(h.getKubernetesIngressControllersByNamespace)).Methods(http.MethodGet)
 	namespaceRouter.Handle("/ingresscontrollers", httperror.LoggerHandler(h.updateKubernetesIngressControllersByNamespace)).Methods(http.MethodPut)
-	namespaceRouter.Handle("/configmaps", httperror.LoggerHandler(h.getKubernetesConfigMaps)).Methods(http.MethodGet)
+	namespaceRouter.Handle("/configuration", httperror.LoggerHandler(h.getKubernetesConfigMapsAndSecrets)).Methods(http.MethodGet)
 	namespaceRouter.Handle("/ingresses", httperror.LoggerHandler(h.createKubernetesIngress)).Methods(http.MethodPost)
 	namespaceRouter.Handle("/ingresses", httperror.LoggerHandler(h.updateKubernetesIngress)).Methods(http.MethodPut)
 	namespaceRouter.Handle("/ingresses", httperror.LoggerHandler(h.getKubernetesIngresses)).Methods(http.MethodGet)
@@ -118,8 +123,8 @@ func (handler *Handler) kubeClient(next http.Handler) http.Handler {
 			return
 		}
 
-		endpoint, err := handler.dataStore.Endpoint().Endpoint(portainer.EndpointID(endpointID))
-		if err == portainerDsErrors.ErrObjectNotFound {
+		endpoint, err := handler.DataStore.Endpoint().Endpoint(portainer.EndpointID(endpointID))
+		if handler.DataStore.IsErrObjectNotFound(err) {
 			httperror.WriteError(
 				w,
 				http.StatusNotFound,
@@ -137,7 +142,7 @@ func (handler *Handler) kubeClient(next http.Handler) http.Handler {
 			return
 		}
 
-		if handler.kubernetesClientFactory == nil {
+		if handler.KubernetesClientFactory == nil {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -152,7 +157,7 @@ func (handler *Handler) kubeClient(next http.Handler) http.Handler {
 			)
 			return
 		}
-		bearerToken, err := handler.jwtService.GenerateTokenForKubeconfig(tokenData)
+		bearerToken, err := handler.JwtService.GenerateTokenForKubeconfig(tokenData)
 		if err != nil {
 			httperror.WriteError(
 				w,
@@ -165,21 +170,13 @@ func (handler *Handler) kubeClient(next http.Handler) http.Handler {
 		singleEndpointList := []portainer.Endpoint{
 			*endpoint,
 		}
-		config, handlerErr := handler.buildConfig(
+		config := handler.buildConfig(
 			r,
 			tokenData,
 			bearerToken,
 			singleEndpointList,
+			true,
 		)
-		if err != nil {
-			httperror.WriteError(
-				w,
-				http.StatusInternalServerError,
-				"Unable to build endpoint kubeconfig",
-				handlerErr.Err,
-			)
-			return
-		}
 
 		if len(config.Clusters) == 0 {
 			httperror.WriteError(
@@ -204,7 +201,7 @@ func (handler *Handler) kubeClient(next http.Handler) http.Handler {
 			return
 		}
 		serverURL.Scheme = "https"
-		serverURL.Host = "localhost" + handler.kubernetesClientFactory.AddrHTTPS
+		serverURL.Host = "localhost" + handler.KubernetesClientFactory.AddrHTTPS
 		config.Clusters[0].Cluster.Server = serverURL.String()
 
 		yaml, err := cli.GenerateYAML(config)
@@ -217,7 +214,7 @@ func (handler *Handler) kubeClient(next http.Handler) http.Handler {
 			)
 			return
 		}
-		kubeCli, err := handler.kubernetesClientFactory.CreateKubeClientFromKubeConfig(endpoint.Name, []byte(yaml))
+		kubeCli, err := handler.KubernetesClientFactory.CreateKubeClientFromKubeConfig(endpoint.Name, []byte(yaml))
 		if err != nil {
 			httperror.WriteError(
 				w,
@@ -228,7 +225,7 @@ func (handler *Handler) kubeClient(next http.Handler) http.Handler {
 			return
 		}
 
-		handler.kubernetesClientFactory.SetProxyKubeClient(strconv.Itoa(int(endpoint.ID)), r.Header.Get("Authorization"), kubeCli)
+		handler.KubernetesClientFactory.SetProxyKubeClient(strconv.Itoa(int(endpoint.ID)), r.Header.Get("Authorization"), kubeCli)
 		next.ServeHTTP(w, r)
 	})
 }

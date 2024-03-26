@@ -1,9 +1,30 @@
-import { boolean, number, object } from 'yup';
+import { boolean, object, SchemaOf, string } from 'yup';
 
-export function validationSchema() {
-  return object().shape({
-    EdgeAgentCheckinInterval: number().required('此字段必填。'),
-    EnableEdgeComputeFeatures: boolean().required('此字段必填。'),
-    EnforceEdgeID: boolean().required('此字段必填。'),
-  });
+import { validation as tunnelValidation } from '@/react/portainer/common/PortainerTunnelAddrField';
+import { validation as urlValidation } from '@/react/portainer/common/PortainerUrlField';
+import { isBE } from '@/react/portainer/feature-flags/feature-flags.service';
+
+import { FormValues } from './types';
+
+export function validationSchema(): SchemaOf<FormValues> {
+  return object()
+    .shape({
+      EnableEdgeComputeFeatures: boolean().required('此字段为必填项。'),
+      EnforceEdgeID: boolean().required('此字段为必填项。'),
+    })
+    .concat(
+      isBE
+        ? object({
+            EdgePortainerUrl: urlValidation(),
+            Edge: object({
+              TunnelServerAddress: tunnelValidation(),
+            }),
+          })
+        : object({
+            EdgePortainerUrl: string().default(''),
+            Edge: object({
+              TunnelServerAddress: string().default(''),
+            }),
+          })
+    );
 }

@@ -13,7 +13,7 @@ const options: NetworkOptions = {
   'com.docker.network.driver.mtu': '1500',
 };
 
-test('网络选项值应该是可见的', async () => {
+test('网络选项的值应该可见', async () => {
   const { findByText, findAllByText } = render(
     <NetworkOptionsTable options={options} />
   );

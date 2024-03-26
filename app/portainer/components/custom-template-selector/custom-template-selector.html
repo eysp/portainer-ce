@@ -9,10 +9,10 @@
         ng-options="template.Id as template.label for template in $ctrl.templates"
         ng-change="$ctrl.handleChangeTemplate($ctrl.value)"
       >
-        <option value="" label="Select a Custom template" disabled selected="selected"> </option>
+        <option value="" label="选择自定义模板" disabled selected="selected"> </option>
       </select>
       <span class="small text-muted pt-[7px]" ng-if="!$ctrl.templates.length">
-        没有可用的自定义模板。请到 <a ui-state="$ctrl.newTemplatePath">自定义模板视图</a> 中创建一个。
+        没有可用的自定义模板。前往<a ui-state="$ctrl.newTemplatePath">自定义模板视图</a>创建一个。
       </span>
     </div>
   </div>

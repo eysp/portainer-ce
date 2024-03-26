@@ -1,4 +1,4 @@
-<page-header title="'环境组细节'" breadcrumbs="[{label:'Groups', link:'portainer.groups'}, group.Name]"> </page-header>
+<page-header title="'环境组详情'" breadcrumbs="[{label:'组', link:'portainer.groups'}, group.Name]"> </page-header>
 
 <div class="row">
   <div class="col-sm-12">
@@ -6,15 +6,12 @@
       <rd-widget-body>
         <group-form
           loaded="loaded"
-          page-type="edit"
           model="group"
-          available-endpoints="availableEndpoints"
           associated-endpoints="associatedEndpoints"
-          add-label-action="addLabel"
-          remove-label-action="removeLabel"
           form-action="update"
-          form-action-label="Update the group"
+          form-action-label="更新组"
           action-in-progress="state.actionInProgress"
+          on-change-environments="(onChangeEnvironments)"
         ></group-form>
       </rd-widget-body>
     </rd-widget>

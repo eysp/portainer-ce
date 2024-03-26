@@ -1,46 +1,46 @@
 <div>
   <rd-widget>
-    <rd-widget-header icon="list" feather-icon="true" title-text="容器规格"></rd-widget-header>
+    <rd-widget-header icon="list" title-text="Container spec"></rd-widget-header>
     <rd-widget-body classes="no-padding">
-      <table class="table">
+      <table class="!mb-0 table">
         <tbody>
           <tr>
-            <td>CMD</td>
+            <td class="w-1/5">CMD</td>
             <td
               ><code ng-if="service.Command">{{ service.Command | command }}</code></td
             >
             <td>
-              <p class="small text-muted" style="margin-top: 10px"> 要执行的命令。 </p>
+              <p class="small text-muted" style="margin-top: 10px"> Command to execute. </p>
             </td>
           </tr>
           <tr>
-            <td>参数</td>
+            <td>Args</td>
             <td
               ><code ng-if="service.Arguments">{{ service.Arguments }}</code></td
             >
             <td>
-              <p class="small text-muted" style="margin-top: 10px"> 传递给容器中命令的参数。 </p>
+              <p class="small text-muted" style="margin-top: 10px"> Arguments passed to command in container. </p>
             </td>
           </tr>
           <tr>
-            <td>用户</td>
+            <td>User</td>
             <td>{{ service.User }}</td>
             <td>
-              <p class="small text-muted" style="margin-top: 10px"> 用户名或UID。 </p>
+              <p class="small text-muted" style="margin-top: 10px"> Username or UID. </p>
             </td>
           </tr>
           <tr>
-            <td>工作目录</td>
+            <td>Working directory</td>
             <td>{{ service.Dir }}</td>
             <td>
-              <p class="small text-muted" style="margin-top: 10px"> 容器内的工作目录。 </p>
+              <p class="small text-muted" style="margin-top: 10px"> Working directory inside the container. </p>
             </td>
           </tr>
           <tr>
-            <td>停止宽限时间</td>
+            <td>Stop grace period</td>
             <td>{{ service.StopGracePeriod }}</td>
             <td>
-              <p class="small text-muted" style="margin-top: 10px"> 强制终止一个容器之前的等待时间（默认为无）。 </p>
+              <p class="small text-muted" style="margin-top: 10px"> Time to wait before force killing a container (default none). </p>
             </td>
           </tr>
         </tbody>

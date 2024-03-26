@@ -1,22 +1,33 @@
 import _ from 'lodash';
+import { getFilePreview } from '@/react/portainer/gitops/gitops.service';
 import { ResourceControlViewModel } from '@/react/portainer/access-control/models/ResourceControlViewModel';
+import { TEMPLATE_NAME_VALIDATION_REGEX } from '@/constants';
 
 import { AccessControlFormData } from 'Portainer/components/accessControlForm/porAccessControlFormModel';
 import { getTemplateVariables, intersectVariables } from '@/react/portainer/custom-templates/components/utils';
-import { isBE } from '@/portainer/feature-flags/feature-flags.service';
+import { isBE } from '@/react/portainer/feature-flags/feature-flags.service';
+import { confirmWebEditorDiscard } from '@@/modals/confirm';
 
 class EditCustomTemplateViewController {
   /* @ngInject */
-  constructor($async, $state, $window, ModalService, Authentication, CustomTemplateService, FormValidator, Notifications, ResourceControlService) {
-    Object.assign(this, { $async, $state, $window, ModalService, Authentication, CustomTemplateService, FormValidator, Notifications, ResourceControlService });
+  constructor($async, $state, $window, Authentication, CustomTemplateService, FormValidator, Notifications, ResourceControlService) {
+    Object.assign(this, { $async, $state, $window, Authentication, CustomTemplateService, FormValidator, Notifications, ResourceControlService });
 
     this.isTemplateVariablesEnabled = isBE;
 
-    this.formValues = null;
+    this.formValues = {
+      Variables: [],
+      TLSSkipVerify: false,
+    };
     this.state = {
       formValidationError: '',
       isEditorDirty: false,
       isTemplateValid: true,
+      isEditorReadOnly: false,
+      templateLoadFailed: false,
+      templatePreviewFailed: false,
+      templatePreviewError: '',
+      templateNameRegex: TEMPLATE_NAME_VALIDATION_REGEX,
     };
     this.templates = [];
 
@@ -27,6 +38,7 @@ class EditCustomTemplateViewController {
     this.editorUpdate = this.editorUpdate.bind(this);
     this.onVariablesChange = this.onVariablesChange.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.previewFileFromGitRepository = this.previewFileFromGitRepository.bind(this);
   }
 
   getTemplate() {
@@ -34,14 +46,25 @@ class EditCustomTemplateViewController {
   }
   async getTemplateAsync() {
     try {
-      const [template, file] = await Promise.all([
-        this.CustomTemplateService.customTemplate(this.$state.params.id),
-        this.CustomTemplateService.customTemplateFile(this.$state.params.id),
-      ]);
-      template.FileContent = file;
+      const template = await this.CustomTemplateService.customTemplate(this.$state.params.id);
+
+      if (template.GitConfig !== null) {
+        this.state.isEditorReadOnly = true;
+      }
+
+      try {
+        template.FileContent = await this.CustomTemplateService.customTemplateFile(this.$state.params.id, template.GitConfig !== null);
+      } catch (err) {
+        this.state.templateLoadFailed = true;
+        throw err;
+      }
+
       template.Variables = template.Variables || [];
-      this.formValues = template;
+
+      this.formValues = { ...this.formValues, ...template };
+
       this.parseTemplate(template.FileContent);
+      this.parseGitConfig(template.GitConfig);
 
       this.oldFileContent = this.formValues.FileContent;
       if (template.ResourceControl) {
@@ -49,7 +72,7 @@ class EditCustomTemplateViewController {
       }
       this.formValues.AccessControlData = new AccessControlFormData();
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to retrieve custom template data');
+      this.Notifications.error('Failure', err, 'Unable to retrieve custom template data');
     }
   }
 
@@ -110,11 +133,11 @@ class EditCustomTemplateViewController {
       const userId = userDetails.ID;
       await this.ResourceControlService.applyResourceControl(userId, this.formValues.AccessControlData, this.formValues.ResourceControl);
 
-      this.Notifications.success('Success', 'Custom template successfully updated');
+      this.Notifications.success('成功', '自定义模板成功更新');
       this.state.isEditorDirty = false;
       this.$state.go('docker.templates.custom');
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to update custom template');
+      this.Notifications.error('失败', err, '无法更新自定义模板');
     } finally {
       this.actionInProgress = false;
     }
@@ -144,9 +167,65 @@ class EditCustomTemplateViewController {
     }
   }
 
+  parseGitConfig(config) {
+    if (config === null) {
+      return;
+    }
+
+    let flatConfig = {
+      RepositoryURL: config.URL,
+      RepositoryReferenceName: config.ReferenceName,
+      ComposeFilePathInRepository: config.ConfigFilePath,
+      RepositoryAuthentication: config.Authentication !== null,
+      TLSSkipVerify: config.TLSSkipVerify,
+    };
+
+    if (config.Authentication) {
+      flatConfig = {
+        ...flatConfig,
+        RepositoryUsername: config.Authentication.Username,
+        RepositoryPassword: config.Authentication.Password,
+      };
+    }
+
+    this.formValues = { ...this.formValues, ...flatConfig };
+  }
+
+  previewFileFromGitRepository() {
+    this.state.templatePreviewFailed = false;
+    this.state.templatePreviewError = '';
+
+    let creds = {};
+    if (this.formValues.RepositoryAuthentication) {
+      creds = {
+        username: this.formValues.RepositoryUsername,
+        password: this.formValues.RepositoryPassword,
+      };
+    }
+    const payload = {
+      repository: this.formValues.RepositoryURL,
+      targetFile: this.formValues.ComposeFilePathInRepository,
+      tlsSkipVerify: this.formValues.TLSSkipVerify,
+      ...creds,
+    };
+
+    this.$async(async () => {
+      try {
+        this.formValues.FileContent = await getFilePreview(payload);
+        this.state.isEditorDirty = true;
+
+        // check if the template contains mustache template symbol
+        this.parseTemplate(this.formValues.FileContent);
+      } catch (err) {
+        this.state.templatePreviewError = err.message;
+        this.state.templatePreviewFailed = true;
+      }
+    });
+  }
+
   async uiCanExit() {
     if (this.formValues.FileContent !== this.oldFileContent && this.state.isEditorDirty) {
-      return this.ModalService.confirmWebEditorDiscard();
+      return confirmWebEditorDiscard();
     }
   }
 
@@ -156,7 +235,7 @@ class EditCustomTemplateViewController {
     try {
       this.templates = await this.CustomTemplateService.customTemplates([1, 2]);
     } catch (err) {
-      this.Notifications.error('Failure loading', err, 'Failed loading custom templates');
+      this.Notifications.error('加载失败', err, '加载自定义模板失败');
     }
 
     this.$window.onbeforeunload = () => {

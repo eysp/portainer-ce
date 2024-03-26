@@ -3,11 +3,11 @@
 <div class="row">
   <div class="col-lg-12 col-md-12 col-xs-12">
     <rd-widget>
-      <rd-widget-header icon="user" feather-icon="true" title-text="用户详情"></rd-widget-header>
+      <rd-widget-header icon="user" title-text="用户详情"></rd-widget-header>
       <rd-widget-body>
         <form class="form-horizontal" style="margin-top: 15px">
           <div class="form-group">
-            <label for="username_field" class="col-sm-2 control-label text-left required">用户名</label>
+            <label for="username_field" class="col-sm-2 control-label required text-left">用户名</label>
             <div class="col-sm-8">
               <input class="form-control" ng-model="formValues.username" id="username_field" />
             </div>
@@ -18,8 +18,8 @@
               <por-switch-field
                 label-class="'col-sm-3 col-lg-2 control-label text-left'"
                 checked="formValues.Administrator"
-                label="'Administrator'"
-                tooltip="'管理员可以访问Portainer设置管理，以及对所有定义的环境及其资源的完全控制。'"
+                label="'管理员'"
+                tooltip="'管理员可以访问Portainer设置管理界面，以及对所有定义的环境和资源拥有完全控制的权限。'"
                 on-change="(handleAdministratorChange)"
               ></por-switch-field>
             </div>
@@ -29,7 +29,7 @@
             <div class="col-sm-4">
               <button class="btn btn-primary btn-sm" ng-disabled="!isSubmitEnabled()" ng-click="updateUser()">保存</button>
               <button class="btn btn-danger btn-sm vertical-center" ng-disabled="isDeleteDisabled()" ng-click="deleteUser()">
-                <pr-icon icon="'trash-2'" feather="true" size="'sm'" class="vertical-center"></pr-icon>删除此用户
+                <pr-icon icon="'trash-2'" size="'sm'" class="vertical-center"></pr-icon>删除此用户
               </button>
             </div>
           </div>
@@ -42,12 +42,12 @@
 <div class="row" ng-if="AuthenticationMethod === 1">
   <div class="col-lg-12 col-md-12 col-xs-12">
     <rd-widget>
-      <rd-widget-header icon="lock" feather-icon="true" title-text="更改用户密码"></rd-widget-header>
+      <rd-widget-header icon="lock" title-text="修改用户密码"></rd-widget-header>
       <rd-widget-body>
         <form name="form" class="form-horizontal" style="margin-top: 15px">
           <!-- new-password-input -->
           <div class="form-group">
-            <label for="new_password" class="col-sm-2 control-label text-left required">新密码</label>
+            <label for="new_password" class="col-sm-2 control-label required text-left">新密码</label>
             <div class="col-sm-8">
               <input type="password" class="form-control" ng-model="formValues.newPassword" id="new_password" name="new_password" ng-minlength="requiredPasswordLength" />
             </div>
@@ -55,23 +55,13 @@
           <!-- !new-password-input -->
           <!-- confirm-password-input -->
           <div class="form-group">
-            <label for="confirm_password" class="col-sm-2 control-label text-left required">确认密码</label>
+            <label for="confirm_password" class="col-sm-2 control-label required text-left">确认密码</label>
             <div class="col-sm-8">
               <div class="input-group">
                 <input type="password" class="form-control" ng-model="formValues.confirmPassword" id="confirm_password" />
                 <span class="input-group-addon">
-                  <pr-icon
-                    icon="'check'"
-                    feather="true"
-                    class="icon-success"
-                    ng-if="form.new_password.$viewValue !== '' && form.new_password.$viewValue === formValues.confirmPassword"
-                  ></pr-icon>
-                  <pr-icon
-                    icon="'x'"
-                    feather="true"
-                    class="icon-danger"
-                    ng-if="!(form.new_password.$viewValue !== '' && form.new_password.$viewValue === formValues.confirmPassword)"
-                  ></pr-icon>
+                  <pr-icon icon="'check'" class="icon-success" ng-if="form.new_password.$viewValue !== '' && form.new_password.$viewValue === formValues.confirmPassword"></pr-icon>
+                  <pr-icon icon="'x'" class="icon-danger" ng-if="!(form.new_password.$viewValue !== '' && form.new_password.$viewValue === formValues.confirmPassword)"></pr-icon>
                 </span>
               </div>
             </div>

@@ -1,11 +1,11 @@
-<page-header title="'创建注册表'" breadcrumbs="[{label:'Registries', link:'portainer.registries'}, '添加注册表']"> </page-header>
+<page-header title="'创建镜像仓库'" breadcrumbs="[{label:'镜像仓库', link:'portainer.registries'}, '添加镜像仓库']"> </page-header>
 
 <div class="row">
   <div class="col-sm-12">
     <rd-widget>
       <rd-widget-body>
         <form class="form-horizontal">
-          <div class="col-sm-12 form-section-title"> 注册表提供商 </div>
+          <div class="col-sm-12 form-section-title"> 镜像仓库提供商 </div>
 
           <box-selector radio-name="'availableRegistry'" value="$ctrl.state.registryValue" options="$ctrl.state.availableRegistry" on-change="($ctrl.setRegistry)"></box-selector>
 

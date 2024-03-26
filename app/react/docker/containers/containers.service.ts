@@ -1,4 +1,4 @@
-import { EnvironmentId } from '@/portainer/environments/types';
+import { EnvironmentId } from '@/react/portainer/environments/types';
 import PortainerError from '@/portainer/error';
 import axios from '@/portainer/services/axios';
 import { genericHandler } from '@/docker/rest/response/handlers';
@@ -21,6 +21,16 @@ export async function stopContainer(
   id: ContainerId
 ) {
   await axios.post<void>(urlBuilder(endpointId, id, 'stop'), {});
+}
+
+export async function recreateContainer(
+  endpointId: EnvironmentId,
+  id: ContainerId,
+  pullImage: boolean
+) {
+  await axios.post<void>(`/docker/${endpointId}/containers/${id}/recreate`, {
+    PullImage: pullImage,
+  });
 }
 
 export async function restartContainer(

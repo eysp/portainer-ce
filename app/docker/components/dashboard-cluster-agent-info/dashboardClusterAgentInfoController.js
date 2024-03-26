@@ -5,12 +5,12 @@ angular.module('portainer.docker').controller('DashboardClusterAgentInfoControll
     var ctrl = this;
 
     this.$onInit = function () {
-      AgentService.agents()
+      AgentService.agents(ctrl.endpointId)
         .then(function success(data) {
           ctrl.agentCount = data.length;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, 'Unable to retrieve agent information');
+          Notifications.error('失败', err, '无法检索代理信息');
         });
     };
   },

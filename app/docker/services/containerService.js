@@ -8,6 +8,7 @@ import {
   resumeContainer,
   startContainer,
   stopContainer,
+  recreateContainer,
 } from '@/react/docker/containers/containers.service';
 import { ContainerDetailsViewModel, ContainerStatsViewModel, ContainerViewModel } from '../models/container';
 import { formatLogs } from '../helpers/logHelper';
@@ -24,6 +25,7 @@ function ContainerServiceFactory($q, Container, $timeout, EndpointProvider) {
     resumeContainer: withEndpointId(resumeContainer),
     startContainer: withEndpointId(startContainer),
     stopContainer: withEndpointId(stopContainer),
+    recreateContainer: withEndpointId(recreateContainer),
     remove: withEndpointId(removeContainer),
     updateRestartPolicy,
     updateLimits,
@@ -38,7 +40,7 @@ function ContainerServiceFactory($q, Container, $timeout, EndpointProvider) {
         deferred.resolve(container);
       })
       .catch(function error(err) {
-        deferred.reject({ msg: 'Unable to retrieve container information', err: err });
+        deferred.reject({ msg: '无法检索容器信息', err: err });
       });
 
     return deferred.promise;
@@ -54,7 +56,7 @@ function ContainerServiceFactory($q, Container, $timeout, EndpointProvider) {
         deferred.resolve(containers);
       })
       .catch(function error(err) {
-        deferred.reject({ msg: 'Unable to retrieve containers', err: err });
+        deferred.reject({ msg: '无法检索容器', err: err });
       });
 
     return deferred.promise;
@@ -67,13 +69,13 @@ function ContainerServiceFactory($q, Container, $timeout, EndpointProvider) {
       Container.resize({}, { id: id, height: height, width: width })
         .$promise.then(function success(data) {
           if (data.message) {
-            deferred.reject({ msg: 'Unable to resize tty of container ' + id, err: data.message });
+            deferred.reject({ msg: '无法调整容器 ' + id + ' 的 tty 大小', err: data.message });
           } else {
             deferred.resolve(data);
           }
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to resize tty of container ' + id, err: err });
+          deferred.reject({ msg: '无法调整容器 ' + id + ' 的 tty 大小', err: err });
         });
     }, timeout);
 
@@ -105,7 +107,7 @@ function ContainerServiceFactory($q, Container, $timeout, EndpointProvider) {
         deferred.resolve(data);
       })
       .catch(function error(err) {
-        deferred.reject({ msg: 'Unable to create container', err: err });
+        deferred.reject({ msg: '无法创建容器', err: err });
       });
     return deferred.promise;
   };

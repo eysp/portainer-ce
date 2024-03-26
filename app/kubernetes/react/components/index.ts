@@ -6,8 +6,20 @@ import { NamespacesSelector } from '@/react/kubernetes/cluster/RegistryAccessVie
 import { StorageAccessModeSelector } from '@/react/kubernetes/cluster/ConfigureView/StorageAccessModeSelector';
 import { NamespaceAccessUsersSelector } from '@/react/kubernetes/namespaces/AccessView/NamespaceAccessUsersSelector';
 import { CreateNamespaceRegistriesSelector } from '@/react/kubernetes/namespaces/CreateView/CreateNamespaceRegistriesSelector';
+import { KubeApplicationAccessPolicySelector } from '@/react/kubernetes/applications/CreateView/KubeApplicationAccessPolicySelector';
+import { KubeServicesForm } from '@/react/kubernetes/applications/CreateView/application-services/KubeServicesForm';
+import { kubeServicesValidation } from '@/react/kubernetes/applications/CreateView/application-services/kubeServicesValidation';
+import { KubeApplicationDeploymentTypeSelector } from '@/react/kubernetes/applications/CreateView/KubeApplicationDeploymentTypeSelector';
+import { withReactQuery } from '@/react-tools/withReactQuery';
+import { withUIRouter } from '@/react-tools/withUIRouter';
+import {
+  ApplicationSummaryWidget,
+  ApplicationDetailsWidget,
+} from '@/react/kubernetes/applications/DetailsView';
+import { withFormValidation } from '@/react-tools/withFormValidation';
+import { withCurrentUser } from '@/react-tools/withCurrentUser';
 
-export const componentsModule = angular
+export const ngModule = angular
   .module('portainer.kubernetes.react.components', [])
   .component(
     'ingressClassDatatable',
@@ -63,4 +75,45 @@ export const componentsModule = angular
       'options',
       'value',
     ])
-  ).name;
+  )
+  .component(
+    'kubeApplicationAccessPolicySelector',
+    r2a(KubeApplicationAccessPolicySelector, [
+      'value',
+      'onChange',
+      'isEdit',
+      'persistedFoldersUseExistingVolumes',
+    ])
+  )
+  .component(
+    'kubeApplicationDeploymentTypeSelector',
+    r2a(KubeApplicationDeploymentTypeSelector, [
+      'value',
+      'onChange',
+      'supportGlobalDeployment',
+    ])
+  )
+  .component(
+    'applicationSummaryWidget',
+    r2a(
+      withUIRouter(withReactQuery(withCurrentUser(ApplicationSummaryWidget))),
+      []
+    )
+  )
+  .component(
+    'applicationDetailsWidget',
+    r2a(
+      withUIRouter(withReactQuery(withCurrentUser(ApplicationDetailsWidget))),
+      []
+    )
+  );
+
+export const componentsModule = ngModule.name;
+
+withFormValidation(
+  ngModule,
+  withUIRouter(withCurrentUser(withReactQuery(KubeServicesForm))),
+  'kubeServicesForm',
+  ['values', 'onChange', 'appName', 'selector', 'isEditMode', 'namespace'],
+  kubeServicesValidation
+);

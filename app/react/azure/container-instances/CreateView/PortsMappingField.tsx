@@ -1,10 +1,12 @@
 import { FormikErrors } from 'formik';
+import { ArrowRight } from 'lucide-react';
 
 import { ButtonSelector } from '@@/form-components/ButtonSelector/ButtonSelector';
 import { FormError } from '@@/form-components/FormError';
 import { InputGroup } from '@@/form-components/InputGroup';
 import { InputList } from '@@/form-components/InputList';
 import { ItemProps } from '@@/form-components/InputList/InputList';
+import { Icon } from '@@/Icon';
 
 import styles from './PortsMappingField.module.css';
 
@@ -70,7 +72,7 @@ function Item({
         <InputGroup size="small">
           <InputGroup.Addon>host</InputGroup.Addon>
           <InputGroup.Input
-            placeholder="e.g. 80"
+            placeholder="例如 80"
             value={item.host}
             onChange={(e) =>
               handleChange('host', parseInt(e.target.value || '0', 10))
@@ -82,13 +84,13 @@ function Item({
         </InputGroup>
 
         <span className="mx-3">
-          <i className="fa fa-long-arrow-alt-right" aria-hidden="true" />
+          <Icon icon={ArrowRight} />
         </span>
 
         <InputGroup size="small">
           <InputGroup.Addon>container</InputGroup.Addon>
           <InputGroup.Input
-            placeholder="e.g. 80"
+            placeholder="例如 80"
             value={item.container}
             onChange={(e) =>
               handleChange('container', parseInt(e.target.value || '0', 10))

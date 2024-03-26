@@ -13,10 +13,10 @@
             </div>
           </div>
           <!-- !name-input -->
-          <div class="col-sm-12 form-section-title"> 驱动程序配置 </div>
+          <div class="col-sm-12 form-section-title"> 驱动配置 </div>
           <!-- driver-input -->
           <div class="form-group">
-            <label for="volume_driver" class="col-sm-2 col-md-1 control-label text-left">Driver</label>
+            <label for="volume_driver" class="col-sm-2 col-md-1 control-label text-left">驱动</label>
             <div class="col-sm-10 col-md-11">
               <select class="form-control" ng-options="driver for driver in availableVolumeDrivers" ng-model="formValues.Driver" ng-if="availableVolumeDrivers.length > 0">
                 <option disabled hidden value="">选择驱动</option>
@@ -30,10 +30,10 @@
             <div class="col-sm-12" style="margin-top: 5px">
               <label class="control-label text-left">
                 驱动选项
-                <portainer-tooltip message="'驱动程序选项是特定于所选驱动程序的。请参考所选驱动程序的文件。'"></portainer-tooltip>
+                <portainer-tooltip message="'驱动选项是特定于所选驱动程序的。请参考所选驱动程序的文档。'"></portainer-tooltip>
               </label>
               <span class="label label-default interactive" style="margin-left: 10px" ng-click="addDriverOption()">
-                <pr-icon icon="'plus'" mode="'alt'" feather="true"></pr-icon> 添加驱动选项
+                <pr-icon icon="'plus'" mode="'alt'"></pr-icon> 添加驱动选项
               </span>
             </div>
             <!-- driver-options-input-list -->
@@ -44,11 +44,11 @@
                   <input type="text" class="form-control" ng-model="option.name" placeholder="例如 mountpoint" />
                 </div>
                 <div class="input-group col-sm-5 input-group-sm">
-                  <span class="input-group-addon">value</span>
+                  <span class="input-group-addon">值</span>
                   <input type="text" class="form-control" ng-model="option.value" placeholder="例如 /path/on/host" />
                 </div>
                 <button class="btn btn-sm btn-light" type="button" ng-click="removeDriverOption($index)">
-                  <pr-icon icon="'trash-2'" feather="true" class-name="'icon-secondary icon-md'"></pr-icon>
+                  <pr-icon icon="'trash-2'" class-name="'icon-secondary icon-md'"></pr-icon>
                 </button>
               </div>
             </div>
@@ -57,22 +57,22 @@
           <!-- !driver-options -->
           <!-- nfs-management -->
           <div class="form-group col-md-12">
-            <por-switch-field checked="formValues.NFSData.useNFS" label="'使用 NFS 存储卷'" on-change="(onUseNFSChange)"></por-switch-field>
-            <div ng-if="formValues.NFSData.useNFS" class="small text-muted" style="margin-top: 10px"> 确保<code>nfs-utils</code>已安装在你的宿主机上。 </div>
+            <por-switch-field checked="formValues.NFSData.useNFS" label="'使用NFS存储卷'" on-change="(onUseNFSChange)"></por-switch-field>
+            <div ng-if="formValues.NFSData.useNFS" class="small text-muted" style="margin-top: 10px"> 确保在主机上已安装 <code>nfs-utils</code>。 </div>
           </div>
           <volumes-nfs-form data="formValues.NFSData" ng-show="formValues.Driver === 'local'"></volumes-nfs-form>
           <!-- !nfs-management -->
           <!-- cifs-management -->
           <div class="form-group col-md-12">
-            <por-switch-field checked="formValues.CIFSData.useCIFS" label="'使用 CIFS 存储卷'" on-change="(onUseCIFSChange)"></por-switch-field>
-            <div ng-if="formValues.CIFSData.useCIFS" class="small text-muted" style="margin-top: 10px"> 确保<code>cifs-utils</code>已安装在你的宿主机上。 </div>
+            <por-switch-field checked="formValues.CIFSData.useCIFS" label="'使用CIFS存储卷'" on-change="(onUseCIFSChange)"></por-switch-field>
+            <div ng-if="formValues.CIFSData.useCIFS" class="small text-muted" style="margin-top: 10px"> 确保在主机上已安装 <code>cifs-utils</code>。 </div>
           </div>
           <volumes-cifs-form data="formValues.CIFSData" ng-show="formValues.Driver === 'local'"></volumes-cifs-form>
           <!-- !cifs-management -->
           <div ng-if="applicationState.endpoint.mode.agentProxy && applicationState.endpoint.mode.provider === 'DOCKER_SWARM_MODE' && formValues.Driver === 'local'">
             <div class="col-sm-12 form-section-title"> 部署 </div>
             <!-- node-selection -->
-            <node-selector model="formValues.NodeName"> </node-selector>
+            <node-selector model="formValues.NodeName" endpoint-id="endpoint.Id"> </node-selector>
             <!-- !node-selection -->
           </div>
           <!-- access-control -->
@@ -90,7 +90,7 @@
                 button-spinner="state.actionInProgress"
               >
                 <span ng-hide="state.actionInProgress">创建存储卷</span>
-                <span ng-show="state.actionInProgress">存储卷创建中...</span>
+                <span ng-show="state.actionInProgress">正在创建存储卷...</span>
               </button>
               <span class="text-danger" ng-if="state.formValidationError" style="margin-left: 5px">{{ state.formValidationError }}</span>
             </div>

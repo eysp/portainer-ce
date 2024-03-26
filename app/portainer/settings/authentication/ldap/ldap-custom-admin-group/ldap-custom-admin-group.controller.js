@@ -29,7 +29,7 @@ export default class LdapCustomAdminGroupController {
         this.groups = groups.map((group) => ({ label: group.name, value: group.name }));
         this.enableAssignAdminGroup = this.groups && this.groups.length > 0;
       } catch (error) {
-        this.Notifications.error('失败', error, 'Failed to search groups');
+        this.Notifications.error('Failure', error, 'Failed to search groups');
       }
     });
   }

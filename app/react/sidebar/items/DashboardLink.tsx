@@ -1,6 +1,6 @@
-import { Layout } from 'react-feather';
+import { Layout } from 'lucide-react';
 
-import { EnvironmentId } from '@/portainer/environments/types';
+import { EnvironmentId } from '@/react/portainer/environments/types';
 import { AutomationTestingProps } from '@/types';
 
 import { SidebarItem } from '../SidebarItem';
@@ -20,7 +20,7 @@ export function DashboardLink({
       to={`${platformPath}.dashboard`}
       params={{ endpointId: environmentId }}
       icon={Layout}
-      label="仪表板"
+      label="仪表盘"
       data-cy={dataCy}
     />
   );

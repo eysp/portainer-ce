@@ -2,15 +2,15 @@
   <div class="toolBar vertical-center pl-0 pr-0">
     <div class="toolBarTitle vertical-center">
       <div>
-        <div class="form-section-title mb-1">访问</div>
+        <div class="form-section-title mb-1">访问权限</div>
         <div class="vertical-center">
-          <pr-icon icon="'info'" mode="'primary'" feather="true" size="'sm'" class="vertical-center"></pr-icon>
-          <span class="small text-muted"> 每个环境的有效角色将显示给所选用户 </span>
+          <pr-icon icon="'info'" mode="'primary'" size="'sm'" class="vertical-center"></pr-icon>
+          <span class="small text-muted"> 将为所选用户显示每个环境的有效角色 </span>
         </div>
       </div>
     </div>
     <div class="searchBar vertical-center">
-      <pr-icon icon="'search'" class="vertical-center" feather="true"></pr-icon>
+      <pr-icon icon="'search'" class="vertical-center"></pr-icon>
       <input
         type="text"
         class="searchInput ml-1"
@@ -22,7 +22,7 @@
     </div>
   </div>
   <div class="table-responsive">
-    <table class="table table-hover nowrap-cells">
+    <table class="table-hover nowrap-cells table">
       <thead>
         <tr>
           <th>
@@ -53,33 +53,29 @@
           <td>{{ item.EndpointName }}</td>
           <td>{{ item.RoleName }}</td>
           <td
-            >{{ item.TeamName ? 'Team' : 'User' }} <code ng-if="item.TeamName">{{ item.TeamName }}</code> access defined on {{ item.AccessLocation }}
+            >{{ item.TeamName ? '团队' : '用户' }} <code ng-if="item.TeamName">{{ item.TeamName }}</code> 在 {{ item.AccessLocation }} 定义的访问权限
             <code ng-if="item.GroupName">{{ item.GroupName }}</code>
-            <a ng-if="!item.GroupName && $ctrl.isAdmin" ui-sref="portainer.endpoints.endpoint.access({id: item.EndpointId})"
-              ><pr-icon icon="'users'" feather="true"></pr-icon> 管理访问
-            </a>
-            <a ng-if="item.GroupName && $ctrl.isAdmin" ui-sref="portainer.groups.group.access({id: item.GroupId})"
-              ><pr-icon icon="'users'" feather="true"></pr-icon> 管理访问
-            </a>
+            <a ng-if="!item.GroupName && $ctrl.isAdmin" ui-sref="portainer.endpoints.endpoint.access({id: item.EndpointId})"><pr-icon icon="'users'"></pr-icon> 管理访问权限 </a>
+            <a ng-if="item.GroupName && $ctrl.isAdmin" ui-sref="portainer.groups.group.access({id: item.GroupId})"><pr-icon icon="'users'"></pr-icon> 管理访问权限 </a>
           </td>
         </tr>
         <tr ng-if="!$ctrl.dataset">
-          <td colspan="3" class="text-center text-muted">选择一个用户以显示相关的访问和角色</td>
+          <td colspan="3" class="text-muted text-center">选择一个用户以显示关联的访问权限和角色</td>
         </tr>
         <tr ng-if="$ctrl.state.filteredDataSet.length === 0">
-          <td colspan="3" class="text-center text-muted">所选用户没有访问任何环境的权限</td>
+          <td colspan="3" class="text-muted text-center">所选用户没有访问任何环境的权限</td>
         </tr>
       </tbody>
     </table>
   </div>
   <div class="footer" ng-if="$ctrl.dataset">
-    <div class="infoBar" ng-if="$ctrl.state.selectedItemCount !== 0"> {{ $ctrl.state.selectedItemCount }} 所选项目 </div>
+    <div class="infoBar" ng-if="$ctrl.state.selectedItemCount !== 0"> {{ $ctrl.state.selectedItemCount }} 项被选中 </div>
     <div class="paginationControls">
       <form class="form-inline">
         <span class="limitSelector">
-          <span style="margin-right: 5px"> 每页项目数 </span>
+          <span style="margin-right: 5px"> 每页项目 </span>
           <select class="form-control" ng-model="$ctrl.state.paginatedItemLimit" ng-change="$ctrl.changePaginationLimit()">
-            <option value="0">All</option>
+            <option value="0">所有</option>
             <option value="10">10</option>
             <option value="25">25</option>
             <option value="50">50</option>

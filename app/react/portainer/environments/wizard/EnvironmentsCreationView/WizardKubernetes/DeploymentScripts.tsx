@@ -1,12 +1,14 @@
 import { useState } from 'react';
+import { Info } from 'lucide-react';
 
 import { getAgentShortVersion } from '@/portainer/views/endpoints/helpers';
-import { useAgentDetails } from '@/portainer/environments/queries/useAgentDetails';
+import { useAgentDetails } from '@/react/portainer/environments/queries/useAgentDetails';
 
 import { CopyButton } from '@@/buttons/CopyButton';
 import { Code } from '@@/Code';
 import { FormSectionTitle } from '@@/form-components/FormSectionTitle';
 import { NavTabs } from '@@/NavTabs';
+import { Icon } from '@@/Icon';
 
 const deployments = [
   {
@@ -52,12 +54,11 @@ export function DeploymentScripts() {
 
   return (
     <>
-      <FormSectionTitle>Information</FormSectionTitle>
+      <FormSectionTitle>信息</FormSectionTitle>
 
       <div className="form-group">
         <span className="col-sm-12 text-muted small">
-          Ensure that you have deployed the Portainer agent in your cluster
-          first. Refer to the platform related command below to deploy it.
+          确保您先在集群中部署了Portainer代理。请参考下面与平台相关的命令来部署它。
         </span>
       </div>
 
@@ -97,17 +98,15 @@ function DeployCode({
     <>
       {showAgentSecretMessage && agentSecret && (
         <p className="text-muted small my-6">
-          <i
-            className="fa fa-info-circle blue-icon space-right"
-            aria-hidden="true"
-          />
-          Note that the environment variable AGENT_SECRET will need to be set to
-          <code>{agentSecret}</code>. Please update the manifest that will be
-          downloaded from the following script.
+          <Icon icon={Info} mode="primary" className="mr-1" />
+          请注意，环境变量AGENT_SECRET需要设置为
+          <code>{agentSecret}</code>。请更新从以下脚本下载的清单。
         </p>
       )}
       <Code>{code}</Code>
-      <CopyButton copyText={code}>Copy command</CopyButton>
+      <div className="mt-2">
+        <CopyButton copyText={code}>复制命令</CopyButton>
+      </div>
     </>
   );
 }

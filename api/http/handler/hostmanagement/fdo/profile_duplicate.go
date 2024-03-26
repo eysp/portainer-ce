@@ -3,13 +3,14 @@ package fdo
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"strconv"
+	"time"
+
 	httperror "github.com/portainer/libhttp/error"
 	"github.com/portainer/libhttp/request"
 	"github.com/portainer/libhttp/response"
 	portainer "github.com/portainer/portainer/api"
-	"net/http"
-	"strconv"
-	"time"
 )
 
 // @id duplicate
@@ -19,6 +20,7 @@ import (
 // @tags intel
 // @security jwt
 // @produce json
+// @param id path int true "FDO Profile identifier"
 // @success 200 "Success"
 // @failure 400 "Invalid request"
 // @failure 500 "Server error"
@@ -29,7 +31,7 @@ func (handler *Handler) duplicateProfile(w http.ResponseWriter, r *http.Request)
 		return httperror.BadRequest("Bad request", errors.New("missing 'id' query parameter"))
 	}
 
-	originalProfile, err := handler.DataStore.FDOProfile().FDOProfile(portainer.FDOProfileID(id))
+	originalProfile, err := handler.DataStore.FDOProfile().Read(portainer.FDOProfileID(id))
 	if handler.DataStore.IsErrObjectNotFound(err) {
 		return httperror.NotFound("Unable to find a FDO Profile with the specified identifier inside the database", err)
 	} else if err != nil {

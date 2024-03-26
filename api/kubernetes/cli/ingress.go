@@ -4,7 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"github.com/portainer/portainer/api/database/models"
+	models "github.com/portainer/portainer/api/http/models/kubernetes"
+	"github.com/portainer/portainer/api/stacks/stackutils"
 	"github.com/rs/zerolog/log"
 	netv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -101,6 +102,8 @@ func (kcl *KubeClient) GetIngresses(namespace string) ([]models.K8sIngressInfo, 
 		}
 		info.Type = classes[info.ClassName]
 		info.Annotations = ingress.Annotations
+		info.Labels = ingress.Labels
+		info.CreationDate = ingress.CreationTimestamp.Time
 
 		// Gather TLS information.
 		for _, v := range ingress.Spec.TLS {
@@ -150,7 +153,7 @@ func (kcl *KubeClient) GetIngresses(namespace string) ([]models.K8sIngressInfo, 
 }
 
 // CreateIngress creates a new ingress in a given namespace in a k8s endpoint.
-func (kcl *KubeClient) CreateIngress(namespace string, info models.K8sIngressInfo) error {
+func (kcl *KubeClient) CreateIngress(namespace string, info models.K8sIngressInfo, owner string) error {
 	ingressClient := kcl.cli.NetworkingV1().Ingresses(namespace)
 	var ingress netv1.Ingress
 
@@ -160,6 +163,10 @@ func (kcl *KubeClient) CreateIngress(namespace string, info models.K8sIngressInf
 		ingress.Spec.IngressClassName = &info.ClassName
 	}
 	ingress.Annotations = info.Annotations
+	if ingress.Labels == nil {
+		ingress.Labels = make(map[string]string)
+	}
+	ingress.Labels["io.portainer.kubernetes.ingress.owner"] = stackutils.SanitizeLabel(owner)
 
 	// Store TLS information.
 	var tls []netv1.IngressTLS
@@ -198,6 +205,16 @@ func (kcl *KubeClient) CreateIngress(namespace string, info models.K8sIngressInf
 				},
 			},
 		})
+	}
+
+	// Add rules for hosts that does not have paths.
+	// e.g. dafault ingress rule without path to support what we had in 2.15
+	for _, host := range info.Hosts {
+		if _, ok := rules[host]; !ok {
+			ingress.Spec.Rules = append(ingress.Spec.Rules, netv1.IngressRule{
+				Host: host,
+			})
+		}
 	}
 
 	_, err := ingressClient.Create(context.Background(), &ingress, metav1.CreateOptions{})
@@ -270,6 +287,16 @@ func (kcl *KubeClient) UpdateIngress(namespace string, info models.K8sIngressInf
 				},
 			},
 		})
+	}
+
+	// Add rules for hosts that does not have paths.
+	// e.g. dafault ingress rule without path to support what we had in 2.15
+	for _, host := range info.Hosts {
+		if _, ok := rules[host]; !ok {
+			ingress.Spec.Rules = append(ingress.Spec.Rules, netv1.IngressRule{
+				Host: host,
+			})
+		}
 	}
 
 	_, err := ingressClient.Update(context.Background(), &ingress, metav1.UpdateOptions{})

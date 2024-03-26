@@ -1,4 +1,5 @@
 import angular from 'angular';
+import { confirmDelete } from '@@/modals/confirm';
 
 class ConfigsController {
   /* @ngInject */
@@ -22,7 +23,7 @@ class ConfigsController {
     try {
       this.configs = await this.ConfigService.configs();
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to retrieve configs');
+      this.Notifications.error('失败', err, '无法检索配置');
     }
   }
 
@@ -31,7 +32,11 @@ class ConfigsController {
     this.getConfigs();
   }
 
-  removeAction(selectedItems) {
+  async removeAction(selectedItems) {
+    const confirmed = await confirmDelete('您是否要删除所选的配置？');
+    if (!confirmed) {
+      return null;
+    }
     return this.$async(this.removeActionAsync, selectedItems);
   }
 
@@ -40,11 +45,11 @@ class ConfigsController {
     for (const config of selectedItems) {
       try {
         await this.ConfigService.remove(config.Id);
-        this.Notifications.success('Config successfully removed', config.Name);
+        this.Notifications.success('配置已成功删除', config.Name);
         const index = this.configs.indexOf(config);
         this.configs.splice(index, 1);
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to remove config');
+        this.Notifications.error('失败', err, '无法删除配置');
       } finally {
         --actionCount;
         if (actionCount === 0) {

@@ -1,5 +1,6 @@
 .be-indicator {
-  border: solid 1px var(--BE-only);
+  @apply border border-solid border-gray-6;
+  @apply text-xs text-gray-6;
   border-radius: 15px;
   padding: 5px 10px;
   font-weight: 400;
@@ -9,18 +10,18 @@
 }
 
 .be-indicator .be-indicator-icon {
-  color: #000000;
+  @apply text-inherit;
 }
 
 .be-indicator:hover {
-  text-decoration: none;
+  @apply underline;
+  @apply border-blue-9 text-blue-9;
 }
 
 .be-indicator:hover .be-indicator-label {
-  text-decoration: underline;
+  @apply underline;
 }
 
 .be-indicator-container {
-  border: solid 1px var(--BE-only);
-  margin: 15px;
+  @apply relative;
 }

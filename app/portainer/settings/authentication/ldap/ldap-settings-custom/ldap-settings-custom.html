@@ -1,51 +1,46 @@
 <div>
-  <div class="col-sm-12 form-section-title"> 信息 </div>
+  <div class="col-sm-12 form-section-title">信息</div>
   <div class="form-group col-sm-12 text-muted small">
-    When using LDAP authentication, Portainer will delegate user authentication to a LDAP server and fallback to internal authentication if LDAP authentication fails.
+    在使用LDAP身份验证时，Portainer将委托用户身份验证给LDAP服务器，并在LDAP身份验证失败时退回到内部身份验证。
   </div>
 </div>
 
-<div class="col-sm-12 form-section-title"> LDAP configuration </div>
+<div class="col-sm-12 form-section-title">LDAP配置</div>
 
 <div class="form-group">
   <div class="col-sm-12 small text-muted">
     <p class="vertical-center">
-      <pr-icon icon="'info'" feather="true" mode="'primary'"></pr-icon>
-      You can configure multiple LDAP Servers for authentication fallback. Make sure all servers are using the same configuration (i.e. if TLS is enabled, they should all use the
-      same certificates).
+      <pr-icon icon="'info'" mode="'primary'"></pr-icon>
+      您可以配置多个LDAP服务器用于身份验证回退。确保所有服务器都使用相同的配置（即，如果启用了TLS，则它们应该都使用相同的证书）。
     </p>
   </div>
 </div>
 
 <div class="form-group">
-  <label for="ldap_url" class="col-sm-3 col-lg-2 control-label text-left flex flex-wrap">
-    LDAP Server
-    <button
-      type="button"
-      class="label label-default interactive no-border vertical-center"
-      ng-click="$ctrl.addLDAPUrl()"
-      limited-feature-dir="{{ $ctrl.limitedFeatureId }}"
-      limited-feature-disabled
-      limited-feature-class="limited-be"
-    >
-      <pr-icon icon="'plus-circle'" feather="true"></pr-icon>
-      Add additional server
-    </button>
-  </label>
+  <label for="ldap_url" class="col-sm-3 col-lg-2 control-label flex flex-wrap text-left">LDAP服务器</label>
   <div class="col-sm-9 col-lg-10">
     <div class="mb-3 flex" ng-repeat="url in $ctrl.settings.URLs track by $index">
-      <input type="text" class="form-control" id="ldap_url" ng-model="$ctrl.settings.URLs[$index]" placeholder="例如 10.0.0.10:389 or myldap.domain.tld:389" required />
+      <input type="text" class="form-control" id="ldap_url" ng-model="$ctrl.settings.URLs[$index]" placeholder="例如：10.0.0.10:389 或 myldap.domain.tld:389" required />
       <button ng-if="$index > 0" class="btn btn-sm btn-danger" type="button" ng-click="$ctrl.removeLDAPUrl($index)">
-        <pr-icon icon="'trash-2'" feather="true" size="'md'"></pr-icon>
+        <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
       </button>
     </div>
+  </div>
+  <div class="col-sm-12">
+    <be-teaser-button
+      feature-id="$ctrl.limitedFeatureId"
+      heading="'添加额外的服务器'"
+      message="'允许您添加一个额外的LDAP服务器。'"
+      button-text="'添加额外的服务器'"
+      button-class-name="'!ml-0'"
+    ></be-teaser-button>
   </div>
 </div>
 
 <div class="form-group">
-  <label for="anonymous_mode" class="control-label text-left col-sm-3 col-lg-2">
-    Anonymous mode
-    <portainer-tooltip message="'Enable this option if the server is configured for Anonymous access.'"></portainer-tooltip>
+  <label for="anonymous_mode" class="control-label col-sm-3 col-lg-2 text-left">
+    匿名模式
+    <portainer-tooltip message="'如果服务器配置为匿名访问，请启用此选项。'"></portainer-tooltip>
   </label>
   <div class="col-sm-9 col-lg-10">
     <label class="switch">
@@ -59,21 +54,21 @@
 <div ng-if="!$ctrl.settings.AnonymousMode">
   <div class="form-group">
     <label for="ldap_username" class="col-sm-3 col-lg-2 control-label text-left">
-      Reader DN
-      <portainer-tooltip message="'Account that will be used to search for users.'"></portainer-tooltip>
+      读取者 DN
+      <portainer-tooltip message="'将用于搜索用户的帐户。'"></portainer-tooltip>
     </label>
     <div class="col-sm-9 col-lg-10">
-      <input type="text" class="form-control" id="ldap_username" ng-model="$ctrl.settings.ReaderDN" placeholder="cn=user,dc=domain,dc=tld" />
+      <input type="text" class="form-control" id="ldap_username" ng-model="$ctrl.settings.ReaderDN" placeholder="例如：cn=user,dc=domain,dc=tld" />
     </div>
   </div>
 
   <div class="form-group">
     <label for="ldap_password" class="col-sm-3 col-lg-2 control-label text-left">
-      Password
-      <portainer-tooltip message="'If you do not enter a password, Portainer will leave the current password unchanged.'"></portainer-tooltip>
+      密码
+      <portainer-tooltip message="'如果不输入密码，Portainer将保持当前密码不变。'"></portainer-tooltip>
     </label>
     <div class="col-sm-9 col-lg-10">
-      <input type="password" class="form-control" id="ldap_password" ng-model="$ctrl.settings.Password" placeholder="password" autocomplete="new-password" />
+      <input type="password" class="form-control" id="ldap_password" ng-model="$ctrl.settings.Password" placeholder="密码" autocomplete="new-password" />
     </div>
   </div>
 </div>

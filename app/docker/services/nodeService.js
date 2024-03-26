@@ -20,7 +20,7 @@ angular.module('portainer.docker').factory('NodeService', [
           return deferred.resolve(node);
         })
         .catch(function onFailed(err) {
-          deferred.reject({ msg: 'Unable to retrieve node', err: err });
+          deferred.reject({ msg: '无法检索节点', err: err });
         });
 
       return deferred.promise;
@@ -37,7 +37,7 @@ angular.module('portainer.docker').factory('NodeService', [
           deferred.resolve(nodes);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve nodes', err: err });
+          deferred.reject({ msg: '无法检索节点', err: err });
         });
 
       return deferred.promise;
@@ -62,7 +62,7 @@ angular.module('portainer.docker').factory('NodeService', [
           }
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve nodes', err: err });
+          deferred.reject({ msg: '无法检索节点s', err: err });
         });
 
       return deferred.promise;

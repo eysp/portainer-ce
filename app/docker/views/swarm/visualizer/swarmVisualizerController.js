@@ -84,7 +84,7 @@ angular.module('portainer.docker').controller('SwarmVisualizerController', [
           })
           .catch(function error(err) {
             stopRepeater();
-            Notifications.error('失败', err, 'Unable to retrieve cluster information');
+            Notifications.error('失败', err, '无法获取集群信息');
           });
       }, refreshRate * 1000);
     }
@@ -159,7 +159,7 @@ angular.module('portainer.docker').controller('SwarmVisualizerController', [
           setUpdateRepeater();
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, 'Unable to initialize cluster visualizer');
+          Notifications.error('失败', err, '无法初始化集群可视化器');
         });
 
       loadState();

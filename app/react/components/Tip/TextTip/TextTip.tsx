@@ -1,41 +1,52 @@
-import clsx from 'clsx';
 import { PropsWithChildren } from 'react';
+import { AlertCircle } from 'lucide-react';
+import clsx from 'clsx';
 
-import { Icon } from '@@/Icon';
+import { Icon, IconMode } from '@@/Icon';
 
-type Color = 'orange' | 'blue';
+type Color = 'orange' | 'blue' | 'red' | 'green';
 
 export interface Props {
+  icon?: React.ReactNode;
   color?: Color;
+  className?: string;
+  childrenWrapperClassName?: string;
+  inline?: boolean;
 }
 
 export function TextTip({
   color = 'orange',
+  icon = AlertCircle,
+  inline = true,
+  className,
   children,
+  childrenWrapperClassName = 'text-muted',
 }: PropsWithChildren<Props>) {
-  let iconClass: string;
+  return (
+    <div
+      className={clsx(
+        className,
+        'small gap-1 align-top text-xs',
+        inline ? 'inline-flex' : 'flex'
+      )}
+    >
+      <Icon icon={icon} mode={getMode(color)} className="!mt-0.5 flex-none" />
 
+      <span className={childrenWrapperClassName}>{children}</span>
+    </div>
+  );
+}
+
+function getMode(color: Color): IconMode {
   switch (color) {
     case 'blue':
-      iconClass = 'icon-primary';
-      break;
+      return 'primary';
+    case 'red':
+      return 'danger';
+    case 'green':
+      return 'success';
     case 'orange':
-      iconClass = 'icon-warning';
-      break;
     default:
-      iconClass = 'icon-warning';
+      return 'warning';
   }
-
-  return (
-    <p className="small vertical-center">
-      <i className="icon-container">
-        <Icon
-          icon="alert-circle"
-          feather
-          className={clsx(`${iconClass}`, 'space-right')}
-        />
-      </i>
-      <span className="text-muted">{children}</span>
-    </p>
-  );
 }

@@ -11,7 +11,7 @@ export async function createTeamMembership(
   try {
     await axios.post(buildUrl(), { userId, teamId, role });
   } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to create team membership');
+    throw parseAxiosError(e as Error, '无法创建团队成员');
   }
 }
 
@@ -19,7 +19,7 @@ export async function deleteTeamMembership(id: TeamMembershipId) {
   try {
     await axios.delete(buildUrl(id));
   } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to delete team membership');
+    throw parseAxiosError(e as Error, '无法删除团队成员');
   }
 }
 
@@ -32,7 +32,7 @@ export async function updateTeamMembership(
   try {
     await axios.put(buildUrl(id), { userId, teamId, role });
   } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to update team membership');
+    throw parseAxiosError(e as Error, '无法更新团队成员');
   }
 }
 

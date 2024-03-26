@@ -1,6 +1,7 @@
-import { Package } from 'react-feather';
+import { Package } from 'lucide-react';
 
-import { useEnvironmentId } from '@/portainer/hooks/useEnvironmentId';
+import { useEnvironmentId } from '@/react/hooks/useEnvironmentId';
+import Subscription from '@/assets/ico/subscription.svg?c';
 
 import { PageHeader } from '@@/PageHeader';
 import { DashboardItem } from '@@/DashboardItem';
@@ -8,8 +9,6 @@ import { DashboardGrid } from '@@/DashboardItem/DashboardGrid';
 
 import { useResourceGroups } from '../queries/useResourceGroups';
 import { useSubscriptions } from '../queries/useSubscriptions';
-
-import SubscriptionsIcon from './icon-subscription.svg?c';
 
 export function DashboardView() {
   const environmentId = useEnvironmentId();
@@ -28,21 +27,24 @@ export function DashboardView() {
 
   return (
     <>
-      <PageHeader title="首页" breadcrumbs={[{ label: '仪表板' }]} />
+      <PageHeader title="首页" breadcrumbs={[{ label: '仪表盘' }]} />
 
       <div className="mx-4">
         {subscriptionsQuery.data && (
           <DashboardGrid>
             <DashboardItem
               value={subscriptionsCount as number}
-              icon={SubscriptionsIcon}
-              type="Subscription"
+              isLoading={subscriptionsQuery.isLoading}
+              isRefetching={subscriptionsQuery.isRefetching}
+              icon={Subscription}
+              type="订阅"
             />
             {!resourceGroupsQuery.isError && !resourceGroupsQuery.isLoading && (
               <DashboardItem
                 value={resourceGroupsCount}
+                isLoading={resourceGroupsQuery.isLoading}
                 icon={Package}
-                type="Resource group"
+                type="资源组"
               />
             )}
           </DashboardGrid>

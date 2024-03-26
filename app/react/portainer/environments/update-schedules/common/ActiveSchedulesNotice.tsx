@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import { Clock } from 'react-feather';
+import { Clock } from 'lucide-react';
 
-import { Environment } from '@/portainer/environments/types';
+import { Environment } from '@/react/portainer/environments/types';
 import { useEdgeGroups } from '@/react/edge/edge-groups/queries/useEdgeGroups';
 import { EdgeGroup } from '@/react/edge/edge-groups/types';
 
@@ -100,10 +100,10 @@ function ActiveSchedulesNoticeItem({
 }) {
   return (
     <div className="flex items-center gap-1 text-sm">
-      <Clock className="feather" />
-      {scheduleCount} edge devices in {name} are scheduled for{' '}
-      {scheduleType === ScheduleType.Rollback ? 'rollback' : 'update'} from{' '}
-      {currentVersion} to {version}
+      <Clock className="lucide" />
+      {scheduleCount}个边缘设备在{name}中计划
+      {scheduleType === ScheduleType.Rollback ? '回滚' : '更新'}，
+      从{currentVersion}更新到{version}
     </div>
   );
 }

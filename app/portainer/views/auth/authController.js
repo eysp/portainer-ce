@@ -1,6 +1,6 @@
 import angular from 'angular';
 import uuidv4 from 'uuid/v4';
-import { getEnvironments } from '@/portainer/environments/environment.service';
+import { getEnvironments } from '@/react/portainer/environments/environment.service';
 
 class AuthenticationController {
   /* @ngInject */
@@ -89,7 +89,7 @@ class AuthenticationController {
     if (!err) {
       err = {};
     }
-    this.Notifications.error('失败', err, message);
+    this.Notifications.error('Failure', err, message);
     this.state.loginInProgress = false;
   }
 
@@ -130,7 +130,7 @@ class AuthenticationController {
   async checkForEndpointsAsync() {
     try {
       const isAdmin = this.Authentication.isAdmin();
-      const endpoints = await getEnvironments({ limit: 1 });
+      const endpoints = await getEnvironments({ limit: 1, query: { excludeSnapshots: true } });
 
       if (this.Authentication.getUserDetails().forceChangePassword) {
         return this.$state.go('portainer.account');
@@ -142,7 +142,7 @@ class AuthenticationController {
         return this.$state.go('portainer.home');
       }
     } catch (err) {
-      this.error(err, '无法检索环境');
+      this.error(err, '无法获取环境');
     }
   }
 
@@ -167,7 +167,7 @@ class AuthenticationController {
       await this.Authentication.OAuthLogin(code);
       this.URLHelper.cleanParameters();
     } catch (err) {
-      this.error(err, '无法通过OAuth登录');
+      this.error(err, '无法通过OAuth进行登录');
     }
   }
 
@@ -211,7 +211,7 @@ class AuthenticationController {
     if (this.hasValidState(state)) {
       await this.oAuthLoginAsync(code);
     } else {
-      this.error(null, 'OAuth状态无效，请重试。');
+      this.error(null, '无效的OAuth状态，请重试。');
     }
   }
 

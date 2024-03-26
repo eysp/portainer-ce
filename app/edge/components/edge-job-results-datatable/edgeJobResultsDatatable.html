@@ -3,26 +3,26 @@
     <rd-widget-body classes="no-padding">
       <div class="toolBar">
         <div class="toolBarTitle vertical-center">
-          <span><pr-icon icon="$ctrl.titleIcon" feather="true"></pr-icon></span>
+          <span><pr-icon icon="$ctrl.titleIcon"></pr-icon></span>
           {{ $ctrl.titleText }}
         </div>
         <div class="searchBar">
-          <span><pr-icon icon="'search'" feather="true" class-name="'searchIcon'"></pr-icon></span>
-          <input type="text" class="searchInput" ng-model="$ctrl.state.textFilter" placeholder="搜索..." auto-focus ng-model-options="{ debounce: 300 }" />
+          <span><pr-icon icon="'search'" class-name="'searchIcon'"></pr-icon></span>
+          <input type="text" class="searchInput" ng-model="$ctrl.state.textFilter" placeholder="Search..." auto-focus ng-model-options="{ debounce: 300 }" />
         </div>
       </div>
       <div class="table-responsive">
-        <table class="table table-hover table-filters nowrap-cells">
+        <table class="table-hover table-filters nowrap-cells table">
           <thead>
             <tr>
               <th>
                 <a ng-click="$ctrl.changeOrderBy('Endpoint')">
-                  环境
-                  <span><pr-icon icon="'arrow-down'" feather="true" ng-if="$ctrl.state.orderBy === 'Endpoint' && !$ctrl.state.reverseOrder"></pr-icon></span>
-                  <span><pr-icon icon="'arrow-up'" feather="true" ng-if="$ctrl.state.orderBy === 'Endpoint' && $ctrl.state.reverseOrder"></pr-icon></span>
+                  Environment
+                  <span><pr-icon icon="'arrow-down'" ng-if="$ctrl.state.orderBy === 'Endpoint' && !$ctrl.state.reverseOrder"></pr-icon></span>
+                  <span><pr-icon icon="'arrow-up'" ng-if="$ctrl.state.orderBy === 'Endpoint' && $ctrl.state.reverseOrder"></pr-icon></span>
                 </a>
               </th>
-              <th> 操作 </th>
+              <th> Actions </th>
             </tr>
           </thead>
           <tbody>
@@ -34,16 +34,16 @@
               </td>
               <td>
                 <button ng-if="item.LogsStatus === 0 || item.LogsStatus === 1" class="btn btn-sm btn-primary" ng-click="$ctrl.collectLogs(item.EndpointId)"> Retrieve logs </button>
-                <button ng-if="item.LogsStatus === 3" class="btn btn-sm btn-primary" ng-click="$ctrl.onDownloadLogsClick(item.EndpointId)"> 下载日志 </button>
-                <button ng-if="item.LogsStatus === 3" class="btn btn-sm btn-primary" ng-click="$ctrl.onClearLogsClick(item.EndpointId)"> 清除日志 </button>
-                <span ng-if="item.LogsStatus === 2"> 日志标记为要收集，请等待日志可用。 </span>
+                <button ng-if="item.LogsStatus === 3" class="btn btn-sm btn-primary" ng-click="$ctrl.onDownloadLogsClick(item.EndpointId)"> Download logs </button>
+                <button ng-if="item.LogsStatus === 3" class="btn btn-sm btn-primary" ng-click="$ctrl.onClearLogsClick(item.EndpointId)"> Clear logs </button>
+                <span ng-if="item.LogsStatus === 2"> Logs marked for collection, please wait until the logs are available. </span>
               </td>
             </tr>
             <tr ng-if="!$ctrl.dataset">
-              <td colspan="9" class="text-center text-muted">加载中...</td>
+              <td colspan="9" class="text-muted text-center">加载中...</td>
             </tr>
             <tr ng-if="$ctrl.state.filteredDataSet.length === 0">
-              <td colspan="9" class="text-center text-muted">无可用结果。</td>
+              <td colspan="9" class="text-muted text-center">No result available.</td>
             </tr>
           </tbody>
         </table>
@@ -52,9 +52,9 @@
         <div class="paginationControls">
           <form class="form-inline">
             <span class="limitSelector">
-              <span class="mr-1"> 每页项目数 </span>
+              <span class="mr-1"> 每页项目 </span>
               <select class="form-control" ng-model="$ctrl.state.paginatedItemLimit" ng-change="$ctrl.changePaginationLimit()" data-cy="component-paginationSelect">
-                <option value="0">All</option>
+                <option value="0">全部</option>
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50">50</option>

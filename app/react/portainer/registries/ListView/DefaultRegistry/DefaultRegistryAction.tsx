@@ -1,6 +1,8 @@
+import { Eye, EyeOff } from 'lucide-react';
+
 import { notifySuccess } from '@/portainer/services/notifications';
-import { FeatureId } from '@/portainer/feature-flags/enums';
-import { isLimitedToBE } from '@/portainer/feature-flags/feature-flags.service';
+import { FeatureId } from '@/react/portainer/feature-flags/enums';
+import { isLimitedToBE } from '@/react/portainer/feature-flags/feature-flags.service';
 import {
   usePublicSettings,
   useUpdateDefaultRegistrySettingsMutation,
@@ -8,7 +10,6 @@ import {
 
 import { Tooltip } from '@@/Tip/Tooltip';
 import { Button } from '@@/buttons';
-import { Icon } from '@@/Icon';
 import { BEFeatureIndicator } from '@@/BEFeatureIndicator';
 
 export function DefaultRegistryAction() {
@@ -29,33 +30,29 @@ export function DefaultRegistryAction() {
       {!hideDefaultRegistry ? (
         <div className="vertical-center">
           <Button
-            className="btn btn-xs btn-light vertical-center"
+            color="danger"
+            icon={EyeOff}
             onClick={() => handleShowOrHide(true)}
             disabled={isLimited}
           >
-            <Icon icon="eye-off" feather />
-            对所有用户隐藏
+            隐藏所有用户
           </Button>
           <BEFeatureIndicator featureId={FeatureId.HIDE_DOCKER_HUB_ANONYMOUS} />
           {isLimited ? null : (
             <Tooltip
-              message="这将在任何注册表下拉提示中隐藏该选项，但并不妨碍用户通过YAML直接从Docker Hub匿名部署。
-              注意：如果用户没有其他注册表可用，Docker Hub（匿名）将继续显示为唯一的选项。"
+              message="这将隐藏任何注册表下拉提示中的选项，但不会阻止用户通过YAML直接匿名部署来自Docker Hub的镜像。
+              注意：如果用户没有其他可用的注册表选项，Docker Hub（匿名）将继续显示为唯一选项。"
             />
           )}
         </div>
       ) : (
         <div className="vertical-center">
-          <Button
-            className="btn btn-xs btn-success vertical-center"
-            onClick={() => handleShowOrHide(false)}
-          >
-            <Icon icon="eye" feather />
-            Show for all users
+          <Button icon={Eye} onClick={() => handleShowOrHide(false)}>
+            对所有用户显示
           </Button>
           <Tooltip
-            message="这将显示任何注册表下拉提示中的选项。
-            (但请注意，Docker Hub（匿名）选项只在用户没有可信的Docker Hub选项时显示）。"
+            message="这将在任何注册表下拉提示中显示选项。
+            （但请注意，如果用户没有凭证的Docker Hub选项可用，只会显示Docker Hub（匿名）选项）。"
           />
         </div>
       )}
@@ -70,8 +67,8 @@ export function DefaultRegistryAction() {
       {
         onSuccess() {
           notifySuccess(
-            'Success',
-            '默认注册表设置更新成功'
+            '成功',
+            '默认注册表设置已成功更新'
           );
         },
       }

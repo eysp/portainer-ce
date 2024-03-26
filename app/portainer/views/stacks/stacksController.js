@@ -1,11 +1,11 @@
-import { isOfflineEndpoint } from '@/portainer/helpers/endpointHelper';
+import { confirmDelete } from '@@/modals/confirm';
 
 angular.module('portainer.app').controller('StacksController', StacksController);
 
 /* @ngInject */
-function StacksController($scope, $state, Notifications, StackService, ModalService, Authentication, endpoint) {
+function StacksController($scope, $state, Notifications, StackService, Authentication, endpoint) {
   $scope.removeAction = function (selectedItems) {
-    ModalService.confirmDeletion('你想删除选定的堆栈吗？相关的服务也将被删除。', function onConfirm(confirmed) {
+    confirmDelete('您要删除选定的堆栈吗？关联的服务也将被删除。').then((confirmed) => {
       if (!confirmed) {
         return;
       }
@@ -19,12 +19,12 @@ function StacksController($scope, $state, Notifications, StackService, ModalServ
     angular.forEach(stacks, function (stack) {
       StackService.remove(stack, stack.External, endpointId)
         .then(function success() {
-          Notifications.success('堆栈成功删除', stack.Name);
+          Notifications.success('堆栈已成功删除', stack.Name);
           var index = $scope.stacks.indexOf(stack);
           $scope.stacks.splice(index, 1);
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, 'Unable to remove stack ' + stack.Name);
+          Notifications.error('删除失败', err, '无法删除堆栈 ' + stack.Name);
         })
         .finally(function final() {
           --actionCount;
@@ -35,7 +35,6 @@ function StacksController($scope, $state, Notifications, StackService, ModalServ
     });
   }
 
-  $scope.offlineMode = false;
   $scope.createEnabled = false;
 
   $scope.getStacks = getStacks;
@@ -48,11 +47,10 @@ function StacksController($scope, $state, Notifications, StackService, ModalServ
     StackService.stacks(true, endpointMode.provider === 'DOCKER_SWARM_MODE' && endpointMode.role === 'MANAGER', endpointId, includeOrphanedStacks)
       .then(function success(stacks) {
         $scope.stacks = stacks;
-        $scope.offlineMode = isOfflineEndpoint(endpoint);
       })
       .catch(function error(err) {
         $scope.stacks = [];
-        Notifications.error('失败', err, 'Unable to retrieve stacks');
+        Notifications.error('失败', err, '无法检索堆栈');
       });
   }
 
@@ -61,7 +59,7 @@ function StacksController($scope, $state, Notifications, StackService, ModalServ
   }
 
   async function initView() {
-    // if the user is not an admin, and stack management is disabled for non admins, then take the user to the dashboard
+    // 如果用户不是管理员，并且非管理员禁用了堆栈管理，则将用户导航到仪表板
     $scope.createEnabled = await canManageStacks();
     if (!$scope.createEnabled) {
       $state.go('docker.dashboard');

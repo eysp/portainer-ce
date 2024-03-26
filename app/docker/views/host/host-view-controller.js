@@ -1,5 +1,3 @@
-import { isOfflineEndpoint } from '@/portainer/helpers/endpointHelper';
-
 angular.module('portainer.docker').controller('HostViewController', [
   '$q',
   'SystemService',
@@ -16,7 +14,6 @@ angular.module('portainer.docker').controller('HostViewController', [
     ctrl.state = {
       isAgent: false,
       isAdmin: false,
-      offlineMode: false,
     };
 
     this.engineDetails = {};
@@ -40,18 +37,17 @@ angular.module('portainer.docker').controller('HostViewController', [
         .then(function success(data) {
           ctrl.engineDetails = buildEngineDetails(data);
           ctrl.hostDetails = buildHostDetails(data.info);
-          ctrl.state.offlineMode = isOfflineEndpoint(ctrl.endpoint);
           ctrl.jobs = data.jobs;
 
           if (ctrl.state.isAgent && agentApiVersion > 1 && ctrl.state.enableHostManagementFeatures) {
-            return AgentService.hostInfo(data.info.Hostname).then(function onHostInfoLoad(agentHostInfo) {
+            return AgentService.hostInfo(ctrl.endpoint.Id).then(function onHostInfoLoad(agentHostInfo) {
               ctrl.devices = agentHostInfo.PCIDevices;
               ctrl.disks = agentHostInfo.PhysicalDisks;
             });
           }
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索到引擎的详细信息');
+          Notifications.error('Failure', err, '无法检索引擎详细信息');
         });
     }
 

@@ -10,6 +10,7 @@ import { OptionProps } from 'react-select/dist/declarations/src/components/Optio
 import { Select } from '@@/form-components/ReactSelect';
 import { Switch } from '@@/form-components/SwitchField/Switch';
 import { Tooltip } from '@@/Tip/Tooltip';
+import { TextTip } from '@@/Tip/TextTip';
 
 interface Values {
   enabled: boolean;
@@ -35,39 +36,40 @@ export interface Props {
   gpus: GPU[];
   usedGpus: string[];
   usedAllGpus: boolean;
+  enableGpuManagement?: boolean;
 }
 
 const NvidiaCapabilitiesOptions = [
-  // Taken from https://github.com/containerd/containerd/blob/master/contrib/nvidia/nvidia.go#L40
+  // 从 https://github.com/containerd/containerd/blob/master/contrib/nvidia/nvidia.go#L40 获取
   {
     value: 'compute',
     label: 'compute',
-    description: 'CUDA和OpenCL应用所需的',
+    description: '用于 CUDA 和 OpenCL 应用程序',
   },
   {
     value: 'compat32',
     label: 'compat32',
-    description: '运行32位应用程序时需要',
+    description: '用于运行 32 位应用程序',
   },
   {
     value: 'graphics',
     label: 'graphics',
-    description: '运行OpenGL和Vulkan应用程序所需要的',
+    description: '用于运行 OpenGL 和 Vulkan 应用程序',
   },
   {
     value: 'utility',
     label: 'utility',
-    description: '使用nvidia-smi和NVML时需要',
+    description: '用于使用 nvidia-smi 和 NVML',
   },
   {
     value: 'video',
     label: 'video',
-    description: '使用视频编解码器SDK时需要',
+    description: '用于使用视频编解码器 SDK',
   },
   {
     value: 'display',
     label: 'display',
-    description: '需要利用X11显示',
+    description: '用于利用 X11 显示',
   },
 ];
 
@@ -103,6 +105,7 @@ export function Gpu({
   gpus = [],
   usedGpus = [],
   usedAllGpus,
+  enableGpuManagement,
 }: Props) {
   const options = useMemo(() => {
     const options = (gpus || []).map((gpu) => ({
@@ -115,7 +118,7 @@ export function Gpu({
 
     options.unshift({
       value: 'all',
-      label: '使用所有GPU',
+      label: '使用所有 GPUs',
     });
 
     return options;
@@ -181,38 +184,46 @@ export function Gpu({
 
   return (
     <div>
+      {!enableGpuManagement && (
+        <TextTip color="blue">
+        UI 中的 GPU 目前未在此环境中启用。
+      </TextTip>
+      )}
       <div className="form-group">
         <div className="col-sm-3 col-lg-2 control-label text-left">
           启用 GPU
           <Switch
             id="enabled"
             name="enabled"
-            checked={values.enabled}
+            checked={values.enabled && !!enableGpuManagement}
             onChange={toggleEnableGpu}
             className="ml-2"
+            disabled={enableGpuManagement === false}
           />
         </div>
-        <div className="col-sm-9 col-lg-10 text-left">
-          <Select<GpuOption, true>
-            isMulti
-            closeMenuOnSelect
-            value={gpuValue}
-            isClearable={false}
-            backspaceRemovesValue={false}
-            isDisabled={!values.enabled}
-            onChange={onChangeSelectedGpus}
-            options={options}
-            components={{ MultiValueRemove }}
-          />
-        </div>
+        {enableGpuManagement && values.enabled && (
+          <div className="col-sm-9 col-lg-10 text-left">
+            <Select<GpuOption, true>
+              isMulti
+              closeMenuOnSelect
+              value={gpuValue}
+              isClearable={false}
+              backspaceRemovesValue={false}
+              isDisabled={!values.enabled}
+              onChange={onChangeSelectedGpus}
+              options={options}
+              components={{ MultiValueRemove }}
+            />
+          </div>
+        )}
       </div>
 
       {values.enabled && (
         <>
           <div className="form-group">
             <div className="col-sm-3 col-lg-2 control-label text-left">
-            能力
-              <Tooltip message="计算 和 实用 功能由Portainer预选，因为当你没有用docker CLI的 '--gpus' 选项明确指定功能时，它们被默认为使用。" />
+              能力
+              <Tooltip message="‘compute’ 和 ‘utility’ 能力由 Portainer 预先选择，因为它们是默认使用的，当您没有使用 docker CLI 的 ‘--gpus’ 选项明确指定能力时。" />
             </div>
             <div className="col-sm-9 col-lg-10 text-left">
               <Select<GpuOption, true>
@@ -229,7 +240,7 @@ export function Gpu({
           <div className="form-group">
             <div className="col-sm-3 col-lg-2 control-label text-left">
               控制
-              <Tooltip message="这是根据你的设置生成的相当于 '--gpus' 的docker CLI参数。" />
+              <Tooltip message="这是基于您的设置生成的 '--gpus' docker CLI 参数的等效值" />
             </div>
             <div className="col-sm-9 col-lg-10">
               <code>{gpuCmd}</code>

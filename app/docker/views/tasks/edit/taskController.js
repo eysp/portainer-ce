@@ -17,7 +17,7 @@ angular.module('portainer.docker').controller('TaskController', [
           $scope.service = service;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, 'Unable to retrieve task details');
+          Notifications.error('Failure', err, '无法获取任务详情');
         });
     }
 

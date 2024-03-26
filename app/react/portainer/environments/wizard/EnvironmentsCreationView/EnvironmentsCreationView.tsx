@@ -2,9 +2,13 @@ import { useCurrentStateAndParams, useRouter } from '@uirouter/react';
 import { useState } from 'react';
 import _ from 'lodash';
 import clsx from 'clsx';
+import { ArrowLeft, ArrowRight, Wand2 } from 'lucide-react';
 
 import { notifyError } from '@/portainer/services/notifications';
-import { Environment, EnvironmentId } from '@/portainer/environments/types';
+import {
+  Environment,
+  EnvironmentId,
+} from '@/react/portainer/environments/types';
 import { useAnalytics } from '@/angulartics.matomo/analytics-services';
 
 import { Stepper } from '@@/Stepper';
@@ -14,8 +18,11 @@ import { Button } from '@@/buttons';
 import { FormSection } from '@@/form-components/FormSection';
 import { Icon } from '@@/Icon';
 
-import { environmentTypes } from '../EnvironmentTypeSelectView/environment-types';
-import { EnvironmentSelectorValue } from '../EnvironmentTypeSelectView/EnvironmentSelector';
+import {
+  EnvironmentOptionValue,
+  environmentTypes,
+  formTitles,
+} from '../EnvironmentTypeSelectView/environment-types';
 
 import { WizardDocker } from './WizardDocker';
 import { WizardAzure } from './WizardAzure';
@@ -62,21 +69,18 @@ export function EnvironmentCreationView() {
   return (
     <>
       <PageHeader
-        title="Quick Setup"
+        title="快速设置"
         breadcrumbs={[{ label: '环境向导' }]}
       />
 
       <div className={styles.wizardWrapper}>
         <Widget>
-          <WidgetTitle icon="svg-magic" title="环境向导" />
+          <WidgetTitle icon={Wand2} title="环境向导" />
           <WidgetBody>
             <Stepper steps={steps} currentStep={currentStepIndex + 1} />
 
             <div className="mt-12">
-              <FormSection
-                title={`连接到你的 ${currentStep.title}
-                    环境`}
-              >
+              <FormSection title={formTitles[currentStep.id]}>
                 <Component
                   onCreate={handleCreateEnvironment}
                   isDockerStandalone={isDockerStandalone}
@@ -89,11 +93,11 @@ export function EnvironmentCreationView() {
                   )}
                 >
                   <Button disabled={isFirstStep} onClick={onPreviousClick}>
-                    <Icon icon="arrow-left" feather /> 上一步
+                    <Icon icon={ArrowLeft} /> 上一步
                   </Button>
                   <Button onClick={onNextClick}>
                     {isLastStep ? '关闭' : '下一步'}
-                    <Icon icon="arrow-right" feather />
+                    <Icon icon={ArrowRight} />
                   </Button>
                 </div>
               </FormSection>
@@ -134,14 +138,14 @@ export function EnvironmentCreationView() {
   }
 }
 
-function useParamEnvironmentTypes(): EnvironmentSelectorValue[] {
+function useParamEnvironmentTypes(): EnvironmentOptionValue[] {
   const {
     params: { envType },
   } = useCurrentStateAndParams();
   const router = useRouter();
 
   if (!envType) {
-    notifyError('没有提供环境类型');
+    notifyError('未提供环境类型');
     router.stateService.go('portainer.wizard.endpoints');
     return [];
   }
@@ -150,7 +154,7 @@ function useParamEnvironmentTypes(): EnvironmentSelectorValue[] {
 }
 
 function useStepper(
-  steps: typeof environmentTypes[number][],
+  steps: (typeof environmentTypes)[number][],
   onFinish: () => void
 ) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -181,7 +185,7 @@ function useStepper(
     setCurrentStepIndex(currentStepIndex - 1);
   }
 
-  function getComponent(id: EnvironmentSelectorValue) {
+  function getComponent(id: EnvironmentOptionValue) {
     switch (id) {
       case 'dockerStandalone':
       case 'dockerSwarm':
@@ -191,7 +195,7 @@ function useStepper(
       case 'kubernetes':
         return WizardKubernetes;
       default:
-        throw new Error(`未知环境类型 ${id}`);
+        throw new Error(`未知的环境类型 ${id}`);
     }
   }
 }
@@ -201,12 +205,14 @@ function useAnalyticsState() {
     dockerAgent: 0,
     dockerApi: 0,
     kubernetesAgent: 0,
-    kubernetesEdgeAgent: 0,
+    kubernetesEdgeAgentAsync: 0,
+    kubernetesEdgeAgentStandard: 0,
     kaasAgent: 0,
     aciApi: 0,
     localEndpoint: 0,
-    nomadEdgeAgent: 0,
-    dockerEdgeAgent: 0,
+    nomadEdgeAgentStandard: 0,
+    dockerEdgeAgentAsync: 0,
+    dockerEdgeAgentStandard: 0,
   });
 
   return { analytics, setAnalytics };

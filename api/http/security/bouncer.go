@@ -1,8 +1,6 @@
 package security
 
 import (
-	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -12,9 +10,25 @@ import (
 	"github.com/portainer/portainer/api/apikey"
 	"github.com/portainer/portainer/api/dataservices"
 	httperrors "github.com/portainer/portainer/api/http/errors"
+
+	"github.com/pkg/errors"
 )
 
 type (
+	BouncerService interface {
+		PublicAccess(http.Handler) http.Handler
+		AdminAccess(http.Handler) http.Handler
+		RestrictedAccess(http.Handler) http.Handler
+		TeamLeaderAccess(http.Handler) http.Handler
+		AuthenticatedAccess(http.Handler) http.Handler
+		EdgeComputeOperation(http.Handler) http.Handler
+
+		AuthorizedEndpointOperation(*http.Request, *portainer.Endpoint) error
+		AuthorizedEdgeEndpointOperation(*http.Request, *portainer.Endpoint) error
+		TrustedEdgeEnvironmentAccess(dataservices.DataStoreTx, *portainer.Endpoint) error
+		JWTAuthLookup(*http.Request) *portainer.TokenData
+	}
+
 	// RequestBouncer represents an entity that manages API request accesses
 	RequestBouncer struct {
 		dataStore     dataservices.DataStore
@@ -46,16 +60,15 @@ func NewRequestBouncer(dataStore dataservices.DataStore, jwtService dataservices
 	}
 }
 
-// PublicAccess defines a security check for public API environments(endpoints).
-// No authentication is required to access these environments(endpoints).
+// PublicAccess defines a security check for public API endpoints.
+// No authentication is required to access these endpoints.
 func (bouncer *RequestBouncer) PublicAccess(h http.Handler) http.Handler {
-	h = mwSecureHeaders(h)
-	return h
+	return mwSecureHeaders(h)
 }
 
-// AdminAccess defines a security check for API environments(endpoints) that require an authorization check.
-// Authentication is required to access these environments(endpoints).
-// The administrator role is required to use these environments(endpoints).
+// AdminAccess defines a security check for API endpoints that require an authorization check.
+// Authentication is required to access these endpoints.
+// The administrator role is required to use these endpoints.
 // The request context will be enhanced with a RestrictedRequestContext object
 // that might be used later to inside the API operation for extra authorization validation
 // and resource filtering.
@@ -66,8 +79,8 @@ func (bouncer *RequestBouncer) AdminAccess(h http.Handler) http.Handler {
 	return h
 }
 
-// RestrictedAccess defines a security check for restricted API environments(endpoints).
-// Authentication is required to access these environments(endpoints).
+// RestrictedAccess defines a security check for restricted API endpoints.
+// Authentication is required to access these endpoints.
 // The request context will be enhanced with a RestrictedRequestContext object
 // that might be used later to inside the API operation for extra authorization validation
 // and resource filtering.
@@ -81,9 +94,9 @@ func (bouncer *RequestBouncer) RestrictedAccess(h http.Handler) http.Handler {
 // TeamLeaderAccess defines a security check for APIs require team leader privilege
 //
 // Bouncer operations are applied backwards:
-//  - Parse the JWT from the request and stored in context, user has to be authenticated
-//  - Upgrade to the restricted request
-//  - User is admin or team leader
+//   - Parse the JWT from the request and stored in context, user has to be authenticated
+//   - Upgrade to the restricted request
+//   - User is admin or team leader
 func (bouncer *RequestBouncer) TeamLeaderAccess(h http.Handler) http.Handler {
 	h = bouncer.mwIsTeamLeader(h)
 	h = bouncer.mwUpgradeToRestrictedRequest(h)
@@ -91,8 +104,8 @@ func (bouncer *RequestBouncer) TeamLeaderAccess(h http.Handler) http.Handler {
 	return h
 }
 
-// AuthenticatedAccess defines a security check for restricted API environments(endpoints).
-// Authentication is required to access these environments(endpoints).
+// AuthenticatedAccess defines a security check for restricted API endpoints.
+// Authentication is required to access these endpoints.
 // The request context will be enhanced with a RestrictedRequestContext object
 // that might be used later to inside the API operation for extra authorization validation
 // and resource filtering.
@@ -121,7 +134,7 @@ func (bouncer *RequestBouncer) AuthorizedEndpointOperation(r *http.Request, endp
 		return err
 	}
 
-	group, err := bouncer.dataStore.EndpointGroup().EndpointGroup(endpoint.GroupID)
+	group, err := bouncer.dataStore.EndpointGroup().Read(endpoint.GroupID)
 	if err != nil {
 		return err
 	}
@@ -148,13 +161,19 @@ func (bouncer *RequestBouncer) AuthorizedEdgeEndpointOperation(r *http.Request, 
 		return errors.New("invalid Edge identifier")
 	}
 
-	if endpoint.LastCheckInDate > 0 || endpoint.UserTrusted {
+	return nil
+}
+
+// TrustedEdgeEnvironmentAccess defines a security check for Edge environments, checks if
+// the request is coming from a trusted Edge environment
+func (bouncer *RequestBouncer) TrustedEdgeEnvironmentAccess(tx dataservices.DataStoreTx, endpoint *portainer.Endpoint) error {
+	if endpoint.UserTrusted {
 		return nil
 	}
 
-	settings, err := bouncer.dataStore.Settings().Settings()
+	settings, err := tx.Settings().Settings()
 	if err != nil {
-		return fmt.Errorf("could not retrieve the settings: %w", err)
+		return errors.WithMessage(err, "could not retrieve the settings")
 	}
 
 	if !settings.TrustOnFirstConnect {
@@ -198,8 +217,8 @@ func (bouncer *RequestBouncer) mwCheckPortainerAuthorizations(next http.Handler,
 			return
 		}
 
-		_, err = bouncer.dataStore.User().User(tokenData.ID)
-		if err != nil && bouncer.dataStore.IsErrObjectNotFound(err) {
+		_, err = bouncer.dataStore.User().Read(tokenData.ID)
+		if bouncer.dataStore.IsErrObjectNotFound(err) {
 			httperror.WriteError(w, http.StatusUnauthorized, "Unauthorized", httperrors.ErrUnauthorized)
 			return
 		} else if err != nil {
@@ -269,7 +288,7 @@ func (bouncer *RequestBouncer) mwAuthenticateFirst(tokenLookups []tokenLookup, n
 			return
 		}
 
-		_, err := bouncer.dataStore.User().User(token.ID)
+		_, err := bouncer.dataStore.User().Read(token.ID)
 		if err != nil && bouncer.dataStore.IsErrObjectNotFound(err) {
 			httperror.WriteError(w, http.StatusUnauthorized, "Unauthorized", httperrors.ErrUnauthorized)
 			return
@@ -328,9 +347,11 @@ func (bouncer *RequestBouncer) apiKeyLookup(r *http.Request) *portainer.TokenDat
 		return nil
 	}
 
-	// update the last used time of the key
-	apiKey.LastUsed = time.Now().UTC().Unix()
-	bouncer.apiKeyService.UpdateAPIKey(&apiKey)
+	if now := time.Now().UTC().Unix(); now-apiKey.LastUsed > 60 { // [seconds]
+		// update the last used time of the key
+		apiKey.LastUsed = now
+		bouncer.apiKeyService.UpdateAPIKey(&apiKey)
+	}
 
 	return tokenData
 }
@@ -375,8 +396,8 @@ func extractAPIKey(r *http.Request) (apikey string, ok bool) {
 // mwSecureHeaders provides secure headers middleware for handlers.
 func mwSecureHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("X-XSS-Protection", "1; mode=block")
-		w.Header().Add("X-Content-Type-Options", "nosniff")
+		w.Header().Set("X-XSS-Protection", "1; mode=block")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
 		next.ServeHTTP(w, r)
 	})
 }
@@ -409,7 +430,7 @@ func (bouncer *RequestBouncer) newRestrictedContextRequest(userID portainer.User
 	}, nil
 }
 
-// EdgeComputeOperation defines a restriced edge compute operation.
+// EdgeComputeOperation defines a restricted edge compute operation.
 // Use of this operation will only be authorized if edgeCompute is enabled in settings
 func (bouncer *RequestBouncer) EdgeComputeOperation(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

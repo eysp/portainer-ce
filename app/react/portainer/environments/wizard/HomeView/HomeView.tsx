@@ -1,5 +1,9 @@
-import { EnvironmentType } from '@/portainer/environments/types';
+import { Wand2, Plug2 } from 'lucide-react';
+
+import { EnvironmentType } from '@/react/portainer/environments/types';
 import { useAnalytics } from '@/angulartics.matomo/analytics-services';
+import DockerIcon from '@/assets/ico/vendor/docker-icon.svg?c';
+import Kube from '@/assets/ico/kube.svg?c';
 
 import { PageHeader } from '@@/PageHeader';
 import { Widget, WidgetBody, WidgetTitle } from '@@/Widget';
@@ -23,17 +27,17 @@ export function HomeView() {
       <div className="row">
         <div className="col-sm-12">
           <Widget>
-            <WidgetTitle title="环境向导" icon="svg-magic" />
+            <WidgetTitle title="环境向导" icon={Wand2} />
             <WidgetBody>
               <div className="row">
                 <div className="col-sm-12 form-section-title">
-                欢迎使用Portainer
+                  欢迎来到Portainer
                 </div>
                 <div className="text-muted small">
                   {localEnvironmentAdded.status === 'success' && (
                     <p>
-                      我们已经将你的本地环境{' '}
-                      {getTypeLabel(localEnvironmentAdded.type)} 连接到 Portainer.
+                      我们已经将您的{' '}
+                      {getTypeLabel(localEnvironmentAdded.type)} 本地环境与Portainer连接起来。
                     </p>
                   )}
 
@@ -41,8 +45,7 @@ export function HomeView() {
                     <p>
                       我们无法将您的本地环境连接到Portainer。
                       <br />
-                      请确保你的环境被正确曝光。关于
-                      帮助安装，请访问
+                      请确保您的环境正确暴露。获取安装帮助请访问
                       <a href="https://documentation.portainer.io/quickstart/">
                         https://documentation.portainer.io/quickstart
                       </a>
@@ -50,8 +53,7 @@ export function HomeView() {
                   )}
 
                   <p>
-                  在下面开始使用你的本地容器或连接更多的
-                    容器环境。
+                    在下面开始使用您的本地Portainer或连接更多容器环境。
                   </p>
                 </div>
 
@@ -61,11 +63,11 @@ export function HomeView() {
                       <Option
                         icon={
                           localEnvironmentAdded.type === EnvironmentType.Docker
-                            ? 'fab fa-docker'
-                            : 'fas fa-dharmachakra'
+                            ? DockerIcon
+                            : Kube
                         }
                         title="开始使用"
-                        description="使用Portainer正在运行的本地环境进行操作"
+                        description="继续使用Portainer运行的本地环境"
                         onClick={() => trackLocalEnvironmentAnalytics()}
                       />
                     </Link>
@@ -73,8 +75,8 @@ export function HomeView() {
                   <Link to="portainer.wizard.endpoints" className={styles.link}>
                     <Option
                       title="添加环境"
-                      icon="fa fa-plug"
-                      description="连接到其他环境"
+                      icon={Plug2}
+                      description="连接其他环境"
                     />
                   </Link>
                 </div>

@@ -1,6 +1,6 @@
 import moment from 'moment';
 
-import { FeatureId } from '@/portainer/feature-flags/enums';
+import { FeatureId } from '@/react/portainer/feature-flags/enums';
 
 export default class AuthLogsViewController {
   /* @ngInject */
@@ -89,7 +89,7 @@ export default class AuthLogsViewController {
         this.state.logs = decorateLogs(logs);
         this.state.totalItems = totalCount;
       } catch (err) {
-        this.Notifications.error('失败', err, 'Failed loading auth activity logs');
+        this.Notifications.error('Failure', err, 'Failed loading auth activity logs');
       }
     });
   }

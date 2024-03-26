@@ -14,22 +14,22 @@ export default {
 
 const definitions: VariableDefinition[] = [
   {
-    label: 'Image Name',
+    label: '镜像名称',
     name: 'image_name',
     defaultValue: 'nginx',
     description: '',
   },
   {
-    label: 'Required field',
+    label: '必填字段',
     name: 'required_field',
     defaultValue: '',
     description: '',
   },
   {
-    label: 'Required field with tooltip',
+    label: '带有工具提示的必填字段',
     name: 'required_field',
     defaultValue: '',
-    description: 'tooltip',
+    description: '工具提示',
   },
 ];
 

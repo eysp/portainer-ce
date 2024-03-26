@@ -1,11 +1,11 @@
-import { editor, git, template, upload } from '@@/BoxSelector/common-options/build-methods';
+import { editor, git, edgeStackTemplate, upload } from '@@/BoxSelector/common-options/build-methods';
 
 class DockerComposeFormController {
   /* @ngInject */
   constructor($async, EdgeTemplateService, Notifications) {
     Object.assign(this, { $async, EdgeTemplateService, Notifications });
 
-    this.methodOptions = [editor, upload, git, template];
+    this.methodOptions = [editor, upload, git, edgeStackTemplate];
 
     this.selectedTemplate = null;
 
@@ -16,8 +16,13 @@ class DockerComposeFormController {
     this.onChangeFormValues = this.onChangeFormValues.bind(this);
   }
 
-  onChangeFormValues(values) {
-    this.formValues = values;
+  onChangeFormValues(newValues) {
+    return this.$async(async () => {
+      this.formValues = {
+        ...this.formValues,
+        ...newValues,
+      };
+    });
   }
 
   onChangeMethod(method) {
@@ -33,7 +38,7 @@ class DockerComposeFormController {
         const fileContent = await this.EdgeTemplateService.edgeTemplate(template);
         this.formValues.StackFileContent = fileContent;
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to retrieve Template');
+        this.Notifications.error('Failure', err, 'Unable to retrieve Template');
       }
     });
   }
@@ -55,7 +60,7 @@ class DockerComposeFormController {
         const templates = await this.EdgeTemplateService.edgeTemplates();
         this.templates = templates.map((template) => ({ ...template, label: `${template.title} - ${template.description}` }));
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to retrieve Templates');
+        this.Notifications.error('Failure', err, 'Unable to retrieve Templates');
       }
     });
   }

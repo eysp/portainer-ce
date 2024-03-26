@@ -11,7 +11,7 @@ angular.module('portainer.docker').controller('HostBrowserViewController', [
           ctrl.host = host;
         })
         .catch(function onError(err) {
-          Notifications.error('无法检索到主机信息', err);
+          Notifications.error('无法检索主机信息', err);
         });
     }
   },

@@ -1,20 +1,24 @@
-import { PublicSettingsViewModel } from '@/portainer/models/settings';
 import axios, { parseAxiosError } from '@/portainer/services/axios';
 
-import { DefaultRegistry, PublicSettingsResponse, Settings } from './types';
+import { PublicSettingsResponse, DefaultRegistry, Settings } from './types';
 
 export async function getPublicSettings() {
   try {
     const { data } = await axios.get<PublicSettingsResponse>(
       buildUrl('public')
     );
-    return new PublicSettingsViewModel(data);
+    return data;
   } catch (e) {
     throw parseAxiosError(
       e as Error,
-      'Unable to retrieve application settings'
+      '无法检索应用程序设置'
     );
   }
+}
+
+export async function getGlobalDeploymentOptions() {
+  const publicSettings = await getPublicSettings();
+  return publicSettings.GlobalDeploymentOptions;
 }
 
 export async function getSettings() {
@@ -24,16 +28,21 @@ export async function getSettings() {
   } catch (e) {
     throw parseAxiosError(
       e as Error,
-      'Unable to retrieve application settings'
+      '无法检索应用程序设置'
     );
   }
 }
 
-export async function updateSettings(settings: Partial<Settings>) {
+type OptionalSettings = Omit<Partial<Settings>, 'Edge'> & {
+  Edge?: Partial<Settings['Edge']>;
+};
+
+export async function updateSettings(settings: OptionalSettings) {
   try {
-    await axios.put(buildUrl(), settings);
+    const { data } = await axios.put<Settings>(buildUrl(), settings);
+    return data;
   } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to update application settings');
+    throw parseAxiosError(e as Error, '无法更新应用程序设置');
   }
 }
 
@@ -45,12 +54,12 @@ export async function updateDefaultRegistry(
   } catch (e) {
     throw parseAxiosError(
       e as Error,
-      'Unable to update default registry settings'
+      '无法更新默认注册表设置'
     );
   }
 }
 
-function buildUrl(subResource?: string, action?: string) {
+export function buildUrl(subResource?: string, action?: string) {
   let url = 'settings';
   if (subResource) {
     url += `/${subResource}`;

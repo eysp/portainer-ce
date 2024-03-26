@@ -1,18 +1,14 @@
 package datastore
 
 import (
-	"github.com/gofrs/uuid"
+	"os"
+
 	portainer "github.com/portainer/portainer/api"
 )
 
 // Init creates the default data set.
 func (store *Store) Init() error {
-	err := store.checkOrCreateInstanceID()
-	if err != nil {
-		return err
-	}
-
-	err = store.checkOrCreateDefaultSettings()
+	err := store.checkOrCreateDefaultSettings()
 	if err != nil {
 		return err
 	}
@@ -25,21 +21,12 @@ func (store *Store) Init() error {
 	return store.checkOrCreateDefaultData()
 }
 
-func (store *Store) checkOrCreateInstanceID() error {
-	_, err := store.VersionService.InstanceID()
-	if store.IsErrObjectNotFound(err) {
-		uid, err := uuid.NewV4()
-		if err != nil {
-			return err
-		}
-
-		instanceID := uid.String()
-		return store.VersionService.StoreInstanceID(instanceID)
-	}
-	return err
-}
-
 func (store *Store) checkOrCreateDefaultSettings() error {
+	isDDExtention := false
+	if _, ok := os.LookupEnv("DOCKER_EXTENSION"); ok {
+		isDDExtention = true
+	}
+
 	// TODO: these need to also be applied when importing
 	settings, err := store.SettingsService.Settings()
 	if store.IsErrObjectNotFound(err) {
@@ -71,6 +58,8 @@ func (store *Store) checkOrCreateDefaultSettings() error {
 			UserSessionTimeout:       portainer.DefaultUserSessionTimeout,
 			KubeconfigExpiry:         portainer.DefaultKubeconfigExpiry,
 			KubectlShellImage:        portainer.DefaultKubectlShellImage,
+
+			IsDockerDesktopExtension: isDDExtention,
 		}
 
 		return store.SettingsService.UpdateSettings(defaultSettings)
@@ -83,12 +72,12 @@ func (store *Store) checkOrCreateDefaultSettings() error {
 		settings.UserSessionTimeout = portainer.DefaultUserSessionTimeout
 		return store.Settings().UpdateSettings(settings)
 	}
+
 	return nil
 }
 
 func (store *Store) checkOrCreateDefaultSSLSettings() error {
 	_, err := store.SSLSettings().Settings()
-
 	if store.IsErrObjectNotFound(err) {
 		defaultSSLSettings := &portainer.SSLSettings{
 			HTTPEnabled: true,
@@ -96,11 +85,12 @@ func (store *Store) checkOrCreateDefaultSSLSettings() error {
 
 		return store.SSLSettings().UpdateSettings(defaultSSLSettings)
 	}
+
 	return err
 }
 
 func (store *Store) checkOrCreateDefaultData() error {
-	groups, err := store.EndpointGroupService.EndpointGroups()
+	groups, err := store.EndpointGroupService.ReadAll()
 	if err != nil {
 		return err
 	}
@@ -120,5 +110,6 @@ func (store *Store) checkOrCreateDefaultData() error {
 			return err
 		}
 	}
+
 	return nil
 }

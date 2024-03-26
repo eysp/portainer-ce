@@ -116,6 +116,7 @@ angular.module('portainer.docker').factory('ContainerHelper', [
           }
         }
       }
+      config.HostConfig.Mounts = null;
       config.HostConfig.Binds = binds;
       config.Volumes = volumes;
       return config;
@@ -131,7 +132,7 @@ angular.module('portainer.docker').factory('ContainerHelper', [
         let hostPort = portBinding.hostPort;
         const containerPortRange = parsePortRange(portBinding.containerPort);
         if (!isValidPortRange(containerPortRange)) {
-          throw new Error('Invalid port specification: ' + portBinding.containerPort);
+          throw new Error('无效的端口规范: ' + portBinding.containerPort);
         }
 
         const startPort = containerPortRange[0];
@@ -144,7 +145,7 @@ angular.module('portainer.docker').factory('ContainerHelper', [
             const hostAndPort = _.split(hostPort, ']:');
 
             if (hostAndPort.length < 2) {
-              throw new Error('Invalid port specification: ' + portBinding.containerPort);
+              throw new Error('无效的端口规范: ' + portBinding.containerPort);
             }
 
             hostIp = hostAndPort[0].replace('[', '');
@@ -159,13 +160,13 @@ angular.module('portainer.docker').factory('ContainerHelper', [
 
           const hostPortRange = parsePortRange(hostPort);
           if (!isValidPortRange(hostPortRange)) {
-            throw new Error('Invalid port specification: ' + hostPort);
+            throw new Error('无效的端口规范: ' + hostPort);
           }
 
           startHostPort = hostPortRange[0];
           endHostPort = hostPortRange[1];
           if (endPort !== startPort && endPort - startPort !== endHostPort - startHostPort) {
-            throw new Error('Invalid port specification: ' + hostPort);
+            throw new Error('无效的端口规范: ' + hostPort);
           }
         }
 

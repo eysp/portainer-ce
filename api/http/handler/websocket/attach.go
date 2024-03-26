@@ -6,11 +6,14 @@ import (
 	"net/http/httputil"
 	"time"
 
-	"github.com/asaskevich/govalidator"
-	"github.com/gorilla/websocket"
 	httperror "github.com/portainer/libhttp/error"
 	"github.com/portainer/libhttp/request"
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/http/security"
+
+	"github.com/asaskevich/govalidator"
+	"github.com/gorilla/websocket"
+	"github.com/rs/zerolog/log"
 )
 
 // @summary Attach a websocket
@@ -66,13 +69,20 @@ func (handler *Handler) websocketAttach(w http.ResponseWriter, r *http.Request) 
 
 	err = handler.handleAttachRequest(w, r, params)
 	if err != nil {
-		return httperror.InternalServerError("An error occured during websocket attach operation", err)
+		return httperror.InternalServerError("An error occurred during websocket attach operation", err)
 	}
 
 	return nil
 }
 
 func (handler *Handler) handleAttachRequest(w http.ResponseWriter, r *http.Request, params *webSocketRequestParams) error {
+	tokenData, err := security.RetrieveTokenData(r)
+	if err != nil {
+		log.Warn().
+			Err(err).
+			Msg("unable to retrieve user details from authentication token")
+		return err
+	}
 
 	r.Header.Del("Origin")
 
@@ -88,10 +98,15 @@ func (handler *Handler) handleAttachRequest(w http.ResponseWriter, r *http.Reque
 	}
 	defer websocketConn.Close()
 
-	return hijackAttachStartOperation(websocketConn, params.endpoint, params.ID)
+	return hijackAttachStartOperation(websocketConn, params.endpoint, params.ID, tokenData.Token)
 }
 
-func hijackAttachStartOperation(websocketConn *websocket.Conn, endpoint *portainer.Endpoint, attachID string) error {
+func hijackAttachStartOperation(
+	websocketConn *websocket.Conn,
+	endpoint *portainer.Endpoint,
+	attachID string,
+	token string,
+) error {
 	dial, err := initDial(endpoint)
 	if err != nil {
 		return err
@@ -115,12 +130,7 @@ func hijackAttachStartOperation(websocketConn *websocket.Conn, endpoint *portain
 		return err
 	}
 
-	err = hijackRequest(websocketConn, httpConn, attachStartRequest)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return hijackRequest(websocketConn, httpConn, attachStartRequest, token)
 }
 
 func createAttachStartRequest(attachID string) (*http.Request, error) {

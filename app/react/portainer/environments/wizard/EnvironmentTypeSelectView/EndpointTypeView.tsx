@@ -1,50 +1,69 @@
 import { useState } from 'react';
 import { useRouter } from '@uirouter/react';
 import _ from 'lodash';
+import { Wand2 } from 'lucide-react';
 
 import { useAnalytics } from '@/angulartics.matomo/analytics-services';
 
 import { Button } from '@@/buttons';
 import { PageHeader } from '@@/PageHeader';
 import { Widget, WidgetBody, WidgetTitle } from '@@/Widget';
+import { FormSection } from '@@/form-components/FormSection';
 
-import { useCreateEdgeDeviceParam } from '../hooks/useCreateEdgeDeviceParam';
-
+import { EnvironmentSelector } from './EnvironmentSelector';
 import {
-  EnvironmentSelector,
-  EnvironmentSelectorValue,
-} from './EnvironmentSelector';
-import { environmentTypes } from './environment-types';
+  EnvironmentOptionValue,
+  existingEnvironmentTypes,
+  newEnvironmentTypes,
+} from './environment-types';
 
 export function EnvironmentTypeSelectView() {
-  const createEdgeDevice = useCreateEdgeDeviceParam();
-
-  const [types, setTypes] = useState<EnvironmentSelectorValue[]>([]);
+  const [types, setTypes] = useState<EnvironmentOptionValue[]>([]);
   const { trackEvent } = useAnalytics();
   const router = useRouter();
 
   return (
     <>
       <PageHeader
-        title="Quick Setup"
+        title="快速设置"
         breadcrumbs={[{ label: '环境向导' }]}
       />
 
       <div className="row">
         <div className="col-sm-12">
           <Widget>
-            <WidgetTitle icon="svg-magic" title="环境向导" />
+            <WidgetTitle icon={Wand2} title="环境向导" />
             <WidgetBody>
-              <EnvironmentSelector
-                value={types}
-                onChange={setTypes}
-                createEdgeDevice={createEdgeDevice}
-              />
+              <div className="form-horizontal">
+                <FormSection title="选择您的环境">
+                  <p className="text-muted small">
+                    您可以接入不同类型的环境，请选择适用的所有环境。
+                  </p>
+                  <p className="control-label !mb-2">
+                    连接到现有环境
+                  </p>
+                  <EnvironmentSelector
+                    value={types}
+                    onChange={setTypes}
+                    options={existingEnvironmentTypes}
+                  />
+                  <p className="control-label !mb-2">设置新环境</p>
+                  <EnvironmentSelector
+                    value={types}
+                    onChange={setTypes}
+                    options={newEnvironmentTypes}
+                    hiddenSpacingCount={
+                      existingEnvironmentTypes.length -
+                      newEnvironmentTypes.length
+                    }
+                  />
+                </FormSection>
+              </div>
               <Button
                 disabled={types.length === 0}
                 onClick={() => startWizard()}
               >
-                启动向导
+                开始向导
               </Button>
             </WidgetBody>
           </Widget>
@@ -58,6 +77,11 @@ export function EnvironmentTypeSelectView() {
       return;
     }
 
+    const environmentTypes = [
+      ...existingEnvironmentTypes,
+      ...newEnvironmentTypes,
+    ];
+
     const steps = _.compact(
       types.map((id) => environmentTypes.find((eType) => eType.id === id))
     );
@@ -65,13 +89,12 @@ export function EnvironmentTypeSelectView() {
     trackEvent('endpoint-wizard-endpoint-select', {
       category: 'portainer',
       metadata: {
-        environment: steps.map((step) => step.title).join('/'),
+        environment: steps.map((step) => step.label).join('/'),
       },
     });
 
     router.stateService.go('portainer.wizard.endpoints.create', {
       envType: types,
-      ...(createEdgeDevice ? { edgeDevice: createEdgeDevice } : {}),
     });
   }
 }

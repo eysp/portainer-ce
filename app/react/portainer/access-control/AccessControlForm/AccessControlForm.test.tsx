@@ -1,5 +1,5 @@
 import { server, rest } from '@/setup-tests/server';
-import { UserContext } from '@/portainer/hooks/useUser';
+import { UserContext } from '@/react/hooks/useUser';
 import { UserViewModel } from '@/portainer/models/user';
 import { renderWithQueryClient, within } from '@/react-tools/test-utils';
 import { Team, TeamId } from '@/react/portainer/users/teams/types';
@@ -24,12 +24,12 @@ test.each([
   [ResourceControlOwnership.PRIVATE],
   [ResourceControlOwnership.RESTRICTED],
 ])(
-  `当所有权为 %s 时，所有权选择器应该是可见的`,
+  `当所有权为 %s 时，所有权选择器应可见`,
   async (ownership) => {
     const values = buildFormData(ownership);
 
     const { findByRole, getByLabelText } = await renderComponent(values);
-    const accessSwitch = getByLabelText(/Enable access control/);
+    const accessSwitch = getByLabelText(/启用访问控制/);
 
     expect(accessSwitch).toBeEnabled();
 
@@ -42,7 +42,7 @@ test.each([
   [ResourceControlOwnership.PRIVATE],
   [ResourceControlOwnership.RESTRICTED],
 ])(
-  '当是管理员且所有权为 %s 时，所有权选择器应显示管理员和限制性选项。',
+  '当 isAdmin 为 true 且所有权为 %s 时，所有权选择器应显示管理员和受限选项',
   async (ownership) => {
     const values = buildFormData(ownership);
 
@@ -54,14 +54,14 @@ test.each([
 
     expect(ownershipSelector).toBeVisible();
     if (!ownershipSelector) {
-      throw new Error('selector is missing');
+      throw new Error('选择器缺失');
     }
 
     const selectorQueries = within(ownershipSelector);
     expect(
-      await selectorQueries.findByLabelText(/Administrator/)
+      await selectorQueries.findByLabelText(/管理员/)
     ).toBeVisible();
-    expect(await selectorQueries.findByLabelText(/Restricted/)).toBeVisible();
+    expect(await selectorQueries.findByLabelText(/受限/)).toBeVisible();
   }
 );
 
@@ -70,7 +70,7 @@ test.each([
   [ResourceControlOwnership.PRIVATE],
   [ResourceControlOwnership.RESTRICTED],
 ])(
-  `当用户不是管理员和 %s 并且没有团队时，应该只有私人选项。`,
+  `当用户不是管理员且所有权为 %s 时，且没有团队时，应只有私有选项可见`,
   async (ownership) => {
     const values = buildFormData(ownership);
 
@@ -83,8 +83,8 @@ test.each([
 
     const selectorQueries = within(ownershipSelector);
 
-    expect(selectorQueries.queryByLabelText(/Private/)).toBeVisible();
-    expect(selectorQueries.queryByLabelText(/Restricted/)).toBeNull();
+    expect(selectorQueries.queryByLabelText(/私有/)).toBeVisible();
+    expect(selectorQueries.queryByLabelText(/受限/)).toBeNull();
   }
 );
 
@@ -93,7 +93,7 @@ test.each([
   [ResourceControlOwnership.PRIVATE],
   [ResourceControlOwnership.RESTRICTED],
 ])(
-  `当用户不是管理员和 %s 并且有一个团队时，应该有私人和限制选项`,
+  `当用户不是管理员且所有权为 %s 时，且有 1 个团队时，应有私有和受限选项可见`,
   async (ownership) => {
     const values = buildFormData(ownership);
 
@@ -106,12 +106,12 @@ test.each([
 
     const selectorQueries = within(ownershipSelector);
 
-    expect(await selectorQueries.findByLabelText(/Private/)).toBeVisible();
-    expect(await selectorQueries.findByLabelText(/Restricted/)).toBeVisible();
+    expect(await selectorQueries.findByLabelText(/私有/)).toBeVisible();
+    expect(await selectorQueries.findByLabelText(/受限/)).toBeVisible();
   }
 );
 
-test('当所有权是公开的，所有权选择器应被隐藏。', async () => {
+test('当所有权为公开时，所有权选择器应该隐藏', async () => {
   const values = buildFormData(ResourceControlOwnership.PUBLIC);
 
   const { queryByRole } = await renderComponent(values);
@@ -119,17 +119,17 @@ test('当所有权是公开的，所有权选择器应被隐藏。', async () =>
   expect(queryByRole('radiogroup')).toBeNull();
 });
 
-test('when hideTitle is true, title should be hidden', async () => {
+test('当 hideTitle 为 true 时，标题应该隐藏', async () => {
   const values = buildFormData();
 
   const { queryByRole } = await renderComponent(values, jest.fn(), {
     hideTitle: true,
   });
 
-  expect(queryByRole('访问控制')).toBeNull();
+  expect(queryByRole('Access control')).toBeNull();
 });
 
-test('当 "管理" 和 "管理所有权"被选中时，没有额外的选项是可见的。', async () => {
+test('当 isAdmin 为 true 且选择了管理员所有权时，不应有其他选项可见', async () => {
   const values = buildFormData(ResourceControlOwnership.ADMINISTRATORS);
 
   const { findByRole, queryByLabelText } = await renderComponent(
@@ -144,18 +144,18 @@ test('当 "管理" 和 "管理所有权"被选中时，没有额外的选项是�
 
   expect(ownershipSelector).toBeVisible();
   if (!ownershipSelector) {
-    throw new Error('selector is missing');
+    throw new Error('选择器缺失');
   }
 
   const selectorQueries = within(ownershipSelector);
 
   expect(await selectorQueries.findByLabelText(/Administrator/)).toBeChecked();
-  expect(await selectorQueries.findByLabelText(/Restricted/)).not.toBeChecked();
+  expect(await selectorQueries.findByLabelText(/受限的/)).not.toBeChecked();
 
   expect(queryByLabelText('extra-options')).toBeNull();
 });
 
-test('当选择 "管理员" 和 "限制性所有权" 时，显示团队和用户选择器。', async () => {
+test('当 isAdmin 为 true 且选择了限制所有权时，应显示团队和用户选择器', async () => {
   const values = buildFormData(ResourceControlOwnership.RESTRICTED);
 
   const { findByRole, findByLabelText } = await renderComponent(
@@ -170,30 +170,30 @@ test('当选择 "管理员" 和 "限制性所有权" 时，显示团队和用户
 
   expect(ownershipSelector).toBeVisible();
   if (!ownershipSelector) {
-    throw new Error('selector is missing');
+    throw new Error('选择器缺失');
   }
 
   const selectorQueries = within(ownershipSelector);
 
   expect(
-    await selectorQueries.findByLabelText(/Administrator/)
+    await selectorQueries.findByLabelText(/管理员/)
   ).not.toBeChecked();
 
-  expect(await selectorQueries.findByLabelText(/Restricted/)).toBeChecked();
+  expect(await selectorQueries.findByLabelText(/受限的/)).toBeChecked();
 
   const extraOptions = await findByLabelText('extra-options');
   expect(extraOptions).toBeVisible();
 
   if (!extraOptions) {
-    throw new Error('extra options section is missing');
+    throw new Error('附加选项部分缺失');
   }
 
   const extraQueries = within(extraOptions);
-  expect(await extraQueries.findByText(/Authorized users/)).toBeVisible();
-  expect(await extraQueries.findByText(/Authorized teams/)).toBeVisible();
+  expect(await extraQueries.findByText(/授权用户/)).toBeVisible();
+  expect(await extraQueries.findByText(/授权团队/)).toBeVisible();
 });
 
-test('当用户不是管理员，有超过1个团队并且所有权受到限制时，团队选择器应该是可见的。', async () => {
+test('当用户不是管理员，团队数量超过1个且所有权被限制时，团队选择器应该可见', async () => {
   const values = buildFormData(ResourceControlOwnership.RESTRICTED);
 
   const { findByRole, findByLabelText } = await renderComponent(
@@ -205,26 +205,26 @@ test('当用户不是管理员，有超过1个团队并且所有权受到限制�
 
   expect(ownershipSelector).toBeVisible();
   if (!ownershipSelector) {
-    throw new Error('selector is missing');
+    throw new Error('选择器缺失');
   }
 
   const selectorQueries = within(ownershipSelector);
 
-  expect(await selectorQueries.findByLabelText(/Private/)).toBeVisible();
-  expect(await selectorQueries.findByLabelText(/Restricted/)).toBeVisible();
+  expect(await selectorQueries.findByLabelText(/私有的/)).toBeVisible();
+  expect(await selectorQueries.findByLabelText(/受限的/)).toBeVisible();
 
   const extraOptions = await findByLabelText('extra-options');
   expect(extraOptions).toBeVisible();
 
   if (!extraOptions) {
-    throw new Error('extra options section is missing');
+    throw new Error('附加选项部分缺失');
   }
 
   const extraQueries = within(extraOptions);
-  expect(extraQueries.queryByLabelText(/Authorized teams/)).toBeVisible();
+  expect(extraQueries.queryByLabelText(/授权团队/)).toBeVisible();
 });
 
-test('当用户不是管理员，有一个团队，并且所有权受到限制时，团队选择器不应该是可见的。', async () => {
+test('当用户不是管理员，团队数量为1个且所有权被限制时，团队选择器不应该可见', async () => {
   const values = buildFormData(ResourceControlOwnership.RESTRICTED);
 
   const { findByRole, findByLabelText } = await renderComponent(
@@ -240,26 +240,26 @@ test('当用户不是管理员，有一个团队，并且所有权受到限制�
 
   expect(ownershipSelector).toBeVisible();
   if (!ownershipSelector) {
-    throw new Error('selector is missing');
+    throw new Error('选择器缺失');
   }
 
   const selectorQueries = within(ownershipSelector);
 
-  expect(await selectorQueries.findByLabelText(/Private/)).toBeVisible();
-  expect(await selectorQueries.findByLabelText(/Restricted/)).toBeVisible();
+  expect(await selectorQueries.findByLabelText(/私有的/)).toBeVisible();
+  expect(await selectorQueries.findByLabelText(/受限的/)).toBeVisible();
 
   const extraOptions = await findByLabelText('extra-options');
   expect(extraOptions).toBeVisible();
 
   if (!extraOptions) {
-    throw new Error('extra options section is missing');
+    throw new Error('附加选项部分缺失');
   }
 
   const extraQueries = within(extraOptions);
-  expect(extraQueries.queryByText(/Authorized teams/)).toBeNull();
+  expect(extraQueries.queryByText(/授权团队/)).toBeNull();
 });
 
-test('当用户不是管理员，并且所有权受到限制时，用户选择器不应该是可见的。', async () => {
+test('当用户不是管理员且所有权被限制时，用户选择器不应该可见', async () => {
   const values = buildFormData(ResourceControlOwnership.RESTRICTED);
 
   const { findByRole, findByLabelText } = await renderComponent(
@@ -274,18 +274,18 @@ test('当用户不是管理员，并且所有权受到限制时，用户选择�
 
   expect(ownershipSelector).toBeVisible();
   if (!ownershipSelector) {
-    throw new Error('selector is missing');
+    throw new Error('选择器缺失');
   }
 
   const extraOptions = await findByLabelText('extra-options');
   expect(extraOptions).toBeVisible();
 
   if (!extraOptions) {
-    throw new Error('extra options section is missing');
+    throw new Error('附加选项部分缺失');
   }
   const extraQueries = within(extraOptions);
 
-  expect(extraQueries.queryByText(/Authorized users/)).toBeNull();
+  expect(extraQueries.queryByText(/授权用户/)).toBeNull();
 });
 
 interface AdditionalProps {
@@ -324,7 +324,7 @@ async function renderComponent(
   );
 
   await expect(
-    renderResult.findByLabelText(/Enable access control/)
+    renderResult.findByLabelText(/启用访问控制/)
   ).resolves.toBeVisible();
   return renderResult;
 }

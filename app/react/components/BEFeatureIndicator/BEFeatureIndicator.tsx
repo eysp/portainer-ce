@@ -1,10 +1,12 @@
 import { PropsWithChildren } from 'react';
 import clsx from 'clsx';
-import { Briefcase } from 'react-feather';
+import { Briefcase } from 'lucide-react';
 
 import './BEFeatureIndicator.css';
 
-import { FeatureId } from '@/portainer/feature-flags/enums';
+import { FeatureId } from '@/react/portainer/feature-flags/enums';
+
+import { Icon } from '@@/Icon';
 
 import { getFeatureDetails } from './utils';
 
@@ -27,16 +29,14 @@ export function BEFeatureIndicator({
   }
   return (
     <a
-      className={clsx('be-indicator vertical-center', className)}
+      className={clsx('be-indicator vertical-center text-xs', className)}
       href={url}
       target="_blank"
       rel="noopener noreferrer"
     >
       {children}
-      {showIcon && <Briefcase className="icon icon-sm vertical-center" />}
-      <span className="be-indicator-label break-words space-left">
-      商业版功能
-      </span>
+      {showIcon && <Icon icon={Briefcase} className="be-indicator-icon mr-1" />}
+      <span className="be-indicator-label break-words">业务功能</span>
     </a>
   );
 }

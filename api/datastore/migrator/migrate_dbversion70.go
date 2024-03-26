@@ -2,11 +2,12 @@ package migrator
 
 import (
 	portainer "github.com/portainer/portainer/api"
+
 	"github.com/rs/zerolog/log"
 )
 
 func (m *Migrator) migrateDBVersionToDB70() error {
-	log.Info().Msg("- add IngressAvailabilityPerNamespace field")
+	log.Info().Msg("add IngressAvailabilityPerNamespace field")
 	if err := m.updateIngressFieldsForEnvDB70(); err != nil {
 		return err
 	}

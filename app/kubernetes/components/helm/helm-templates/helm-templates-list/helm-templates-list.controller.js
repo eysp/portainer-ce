@@ -26,7 +26,7 @@ export default class HelmTemplatesListController {
       const availableCategories = [...new Set(annotationCategories)].sort(); // unique and sort
       this.state.categories = availableCategories.map((cat) => ({ label: cat, value: cat }));
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to retrieve helm charts categories');
+      this.Notifications.error('Failure', err, 'Unable to retrieve helm charts categories');
     }
   }
 

@@ -1,7 +1,7 @@
 import { useRouter } from '@uirouter/react';
 
 import { useUsers } from '@/portainer/users/queries';
-import { useUser } from '@/portainer/hooks/useUser';
+import { useUser } from '@/react/hooks/useUser';
 import { usePublicSettings } from '@/react/portainer/settings/queries';
 
 import { TextTip } from '@@/Tip/TextTip';
@@ -36,7 +36,7 @@ export function ItemView() {
   return (
     <>
       <PageHeader
-        title="团队详细信息"
+        title="Team details"
         breadcrumbs={[{ label: 'Teams' }, { label: team.Name }]}
       />
 
@@ -52,8 +52,8 @@ export function ItemView() {
         <div className="row">
           <div className="col-sm-12">
             <TextTip color="orange">
-            团队领导的功能被禁用，因为目前团队同步的外部认证已经启用。
-              目前启用了团队同步的外部认证。
+              The team leader feature is disabled as external authentication is
+              currently enabled with team sync.
             </TextTip>
           </div>
         </div>

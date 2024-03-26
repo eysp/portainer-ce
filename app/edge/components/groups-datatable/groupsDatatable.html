@@ -2,15 +2,15 @@
   <rd-widget>
     <rd-widget-body classes="no-padding">
       <div class="toolBar">
-        <div class="toolBarTitle vertical-center"> <pr-icon icon="'grid'" feather="true"></pr-icon> Edge Groups </div>
+        <div class="toolBarTitle vertical-center"> <pr-icon icon="'layout-grid'"></pr-icon> Edge Groups </div>
         <div class="searchBar vertical-center leading-none">
-          <pr-icon icon="'search'" feather="true" class-name="'searchIcon'"></pr-icon>
+          <pr-icon icon="'search'" class-name="'searchIcon'"></pr-icon>
           <input
             type="text"
             class="searchInput"
             ng-model="$ctrl.state.textFilter"
             ng-change="$ctrl.onTextFilterChange()"
-            placeholder="搜索..."
+            placeholder="Search..."
             ng-model-options="{ debounce: 300 }"
             data-cy="edgeGroup-searchInput"
           />
@@ -23,15 +23,15 @@
             ng-click="$ctrl.removeAction($ctrl.state.selectedItems)"
             data-cy="edgeGroup-removeEdgeGroupButton"
           >
-            <pr-icon icon="'trash-2'" feather="true"></pr-icon> Remove
+            <pr-icon icon="'trash-2'"></pr-icon> Remove
           </button>
           <button type="button" class="btn btn-sm btn-primary" ui-sref="edge.groups.new" data-cy="edgeGroup-addEdgeGroupButton">
-            <pr-icon icon="'plus'" feather="true"></pr-icon> Add Edge group
+            <pr-icon icon="'plus'"></pr-icon> Add Edge group
           </button>
         </div>
       </div>
       <div class="table-responsive">
-        <table class="table table-hover nowrap-cells" data-cy="edgeGroup-edgeGroupTable">
+        <table class="table-hover nowrap-cells table" data-cy="edgeGroup-edgeGroupTable">
           <thead>
             <tr>
               <th class="flex">
@@ -74,32 +74,38 @@
             >
               <td>
                 <span class="md-checkbox">
-                  <input id="select_{{ $index }}" type="checkbox" ng-model="item.Checked" ng-disabled="item.HasEdgeStack" ng-click="$ctrl.selectItem(item, $event)" />
+                  <input
+                    id="select_{{ $index }}"
+                    type="checkbox"
+                    ng-model="item.Checked"
+                    ng-disabled="item.HasEdgeStack || item.HasEdgeJob"
+                    ng-click="$ctrl.selectItem(item, $event)"
+                  />
                   <label for="select_{{ $index }}"></label>
                 </span>
                 <a ui-sref="edge.groups.edit({groupId: item.Id})">{{ item.Name }}</a>
-                <span ng-if="item.HasEdgeStack" class="label label-info image-tag space-left">in use</span>
+                <span ng-if="item.HasEdgeStack || item.HasEdgeJob" class="label label-info image-tag space-left">in use</span>
               </td>
               <td>{{ item.Endpoints.length }}</td>
               <td>{{ item.Dynamic ? 'Dynamic' : 'Static' }}</td>
             </tr>
             <tr ng-if="!$ctrl.dataset">
-              <td colspan="4" class="text-center text-muted">加载中...</td>
+              <td colspan="4" class="text-muted text-center">加载中...</td>
             </tr>
             <tr ng-if="$ctrl.state.filteredDataSet.length === 0">
-              <td colspan="4" class="text-center text-muted"> No Edge group available. </td>
+              <td colspan="4" class="text-muted text-center"> No Edge group available. </td>
             </tr>
           </tbody>
         </table>
       </div>
       <div class="footer" ng-if="$ctrl.dataset">
-        <div class="infoBar" ng-if="$ctrl.state.selectedItemCount !== 0"> {{ $ctrl.state.selectedItemCount }} 所选项目 </div>
+        <div class="infoBar" ng-if="$ctrl.state.selectedItemCount !== 0"> {{ $ctrl.state.selectedItemCount }} 项已选择 </div>
         <div class="paginationControls">
           <form class="form-inline">
             <span class="limitSelector">
-              <span class="mr-1"> 每页项目数 </span>
+              <span class="mr-1"> 每页项目 </span>
               <select class="form-control" ng-model="$ctrl.state.paginatedItemLimit" ng-change="$ctrl.changePaginationLimit()" data-cy="component-paginationSelect">
-                <option value="0">All</option>
+                <option value="0">全部</option>
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50">50</option>

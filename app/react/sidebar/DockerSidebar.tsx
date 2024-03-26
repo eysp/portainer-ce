@@ -9,18 +9,13 @@ import {
   Trello,
   Clipboard,
   Edit,
-} from 'react-feather';
+} from 'lucide-react';
 
 import {
   type Environment,
   type EnvironmentId,
-  EnvironmentStatus,
-} from '@/portainer/environments/types';
-import {
-  Authorized,
-  useUser,
-  isEnvironmentAdmin,
-} from '@/portainer/hooks/useUser';
+} from '@/react/portainer/environments/types';
+import { Authorized, useUser, isEnvironmentAdmin } from '@/react/hooks/useUser';
 import { useInfo, useVersion } from '@/docker/services/system.service';
 
 import { SidebarItem } from './SidebarItem';
@@ -51,11 +46,9 @@ export function DockerSidebar({ environmentId, environment }: Props) {
   const isSwarmManager = envInfoQuery.data;
   const apiVersion = envVersionQuery.data || 0;
 
-  const offlineMode = environment.Status === EnvironmentStatus.Down;
-
   const setupSubMenuProps = isSwarmManager
     ? {
-        label: '集群',
+        label: 'Swarm',
         icon: Trello,
         to: 'docker.swarm',
         dataCy: 'portainerSidebar-swarm',
@@ -76,132 +69,132 @@ export function DockerSidebar({ environmentId, environment }: Props) {
 
   return (
     <>
-      <DashboardLink
+    <DashboardLink
         environmentId={environmentId}
         platformPath="docker"
         data-cy="dockerSidebar-dashboard"
-      />
+    />
 
-      <SidebarItem
-        label="应用程序模板"
+    <SidebarItem
+        label="应用模板"
         icon={Edit}
         to="docker.templates"
         params={{ endpointId: environmentId }}
         data-cy="portainerSidebar-appTemplates"
-      >
+    >
         <SidebarItem
-          label="自定义模板"
-          to="docker.templates.custom"
-          params={{ endpointId: environmentId }}
-          data-cy="dockerSidebar-customTemplates"
+            label="自定义模板"
+            to="docker.templates.custom"
+            params={{ endpointId: environmentId }}
+            data-cy="dockerSidebar-customTemplates"
         />
-      </SidebarItem>
+    </SidebarItem>
 
-      {areStacksVisible && (
+    {areStacksVisible && (
         <SidebarItem
-          to="docker.stacks"
-          params={{ endpointId: environmentId }}
-          icon={Layers}
-          label="堆栈"
-          data-cy="dockerSidebar-stacks"
+            to="docker.stacks"
+            params={{ endpointId: environmentId }}
+            icon={Layers}
+            label="堆栈"
+            data-cy="dockerSidebar-stacks"
         />
-      )}
+    )}
 
-      {isSwarmManager && (
+    {isSwarmManager && (
         <SidebarItem
-          to="docker.services"
-          params={{ endpointId: environmentId }}
-          icon={Shuffle}
-          label="服务"
-          data-cy="dockerSidebar-services"
+            to="docker.services"
+            params={{ endpointId: environmentId }}
+            icon={Shuffle}
+            label="服务"
+            data-cy="dockerSidebar-services"
         />
-      )}
+    )}
 
-      <SidebarItem
+    <SidebarItem
         to="docker.containers"
         params={{ endpointId: environmentId }}
         icon={Box}
         label="容器"
         data-cy="dockerSidebar-containers"
-      />
+    />
 
-      <SidebarItem
+    <SidebarItem
         to="docker.images"
         params={{ endpointId: environmentId }}
         icon={List}
         label="镜像"
         data-cy="dockerSidebar-images"
-      />
+    />
 
-      <SidebarItem
+    <SidebarItem
         to="docker.networks"
         params={{ endpointId: environmentId }}
         icon={Share2}
         label="网络"
         data-cy="dockerSidebar-networks"
-      />
+    />
 
-      <VolumesLink
+    <VolumesLink
         environmentId={environmentId}
         platformPath="docker"
         data-cy="dockerSidebar-volumes"
-      />
+    />
 
-      {apiVersion >= 1.3 && isSwarmManager && (
+    {apiVersion >= 1.3 && isSwarmManager && (
         <SidebarItem
-          to="docker.configs"
-          params={{ endpointId: environmentId }}
-          icon={Clipboard}
-          label="配置"
-          data-cy="dockerSidebar-configs"
+            to="docker.configs"
+            params={{ endpointId: environmentId }}
+            icon={Clipboard}
+            label="配置"
+            data-cy="dockerSidebar-configs"
         />
-      )}
+    )}
 
-      {apiVersion >= 1.25 && isSwarmManager && (
+    {apiVersion >= 1.25 && isSwarmManager && (
         <SidebarItem
-          to="docker.secrets"
-          params={{ endpointId: environmentId }}
-          icon={Lock}
-          label="机密"
-          data-cy="dockerSidebar-secrets"
+            to="docker.secrets"
+            params={{ endpointId: environmentId }}
+            icon={Lock}
+            label="密钥"
+            data-cy="dockerSidebar-secrets"
         />
-      )}
+    )}
 
-      {!isSwarmManager && isAdmin && !offlineMode && (
+    {!isSwarmManager && isAdmin && (
         <SidebarItem
-          to="docker.events"
-          params={{ endpointId: environmentId }}
-          icon={Clock}
-          label="事件"
-          data-cy="dockerSidebar-events"
+            to="docker.events"
+            params={{ endpointId: environmentId }}
+            icon={Clock}
+            label="事件"
+            data-cy="dockerSidebar-events"
         />
-      )}
+    )}
 
-      <SidebarItem
+    <SidebarItem
         label={setupSubMenuProps.label}
         icon={setupSubMenuProps.icon}
         to={setupSubMenuProps.to}
         params={{ endpointId: environmentId }}
         data-cy={setupSubMenuProps.dataCy}
-      >
+    >
         <Authorized
-          authorizations="PortainerEndpointUpdateSettings"
-          adminOnlyCE
-          environmentId={environmentId}
+            authorizations="PortainerEndpointUpdateSettings"
+            adminOnlyCE
+            environmentId={environmentId}
         >
-          <SidebarItem
-            to={featSubMenuTo}
-            params={{ endpointId: environmentId }}
-            label="设置"
-          />
+            <SidebarItem
+                to={featSubMenuTo}
+                params={{ endpointId: environmentId }}
+                label="设置"
+            />
         </Authorized>
 
         <SidebarItem
-          to={registrySubMenuTo}
-          params={{ endpointId: environmentId }}
-          label="注册表"
+            to={registrySubMenuTo}
+            params={{ endpointId: environmentId }}
+            label="注册表"
         />
-      </SidebarItem>
-    </>
+    </SidebarItem>
+</>
   );
 }

@@ -5,6 +5,7 @@ import KubernetesVolumeHelper from 'Kubernetes/helpers/volumeHelper';
 import KubernetesEventHelper from 'Kubernetes/helpers/eventHelper';
 import { KubernetesStorageClassAccessPolicies } from 'Kubernetes/models/storage-class/models';
 import KubernetesNamespaceHelper from 'Kubernetes/helpers/namespaceHelper';
+import { confirmRedeploy } from '@/react/kubernetes/volumes/ItemView/ConfirmRedeployModal';
 
 class KubernetesVolumeController {
   /* @ngInject */
@@ -17,7 +18,6 @@ class KubernetesVolumeController {
     KubernetesEventService,
     KubernetesApplicationService,
     KubernetesPersistentVolumeClaimService,
-    ModalService,
     KubernetesPodService
   ) {
     this.$async = $async;
@@ -29,7 +29,6 @@ class KubernetesVolumeController {
     this.KubernetesEventService = KubernetesEventService;
     this.KubernetesApplicationService = KubernetesApplicationService;
     this.KubernetesPersistentVolumeClaimService = KubernetesPersistentVolumeClaimService;
-    this.ModalService = ModalService;
     this.KubernetesPodService = KubernetesPodService;
 
     this.onInit = this.onInit.bind(this);
@@ -98,18 +97,15 @@ class KubernetesVolumeController {
 
       this.$state.reload(this.$state.current);
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to update volume.');
+      this.Notifications.error('Failure', err, 'Unable to update volume.');
     }
   }
 
   updateVolume() {
     if (KubernetesVolumeHelper.isUsed(this.volume)) {
-      this.ModalService.confirmRedeploy(
-        'One or multiple applications are currently using this volume.</br> For the change to be taken into account these applications will need to be redeployed. Do you want us to reschedule it now?',
-        (redeploy) => {
-          return this.$async(this.updateVolumeAsync, redeploy);
-        }
-      );
+      confirmRedeploy().then((redeploy) => {
+        return this.$async(this.updateVolumeAsync, redeploy);
+      });
     } else {
       return this.$async(this.updateVolumeAsync, false);
     }
@@ -129,7 +125,7 @@ class KubernetesVolumeController {
       this.state.volumeSizeUnit = volume.PersistentVolumeClaim.Storage.slice(-2);
       this.state.oldVolumeSize = filesizeParser(volume.PersistentVolumeClaim.Storage, { base: 10 });
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to retrieve volume');
+      this.Notifications.error('Failure', err, 'Unable to retrieve volume');
     }
   }
 
@@ -151,7 +147,7 @@ class KubernetesVolumeController {
       this.events = _.filter(events, (event) => event.Involved.uid === this.volume.PersistentVolumeClaim.Id);
       this.state.eventWarningCount = KubernetesEventHelper.warningCount(this.events);
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to retrieve application related events');
+      this.Notifications.error('Failure', err, 'Unable to retrieve application related events');
     } finally {
       this.state.eventsLoading = false;
     }
@@ -201,7 +197,7 @@ class KubernetesVolumeController {
         });
       }
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to load view data');
+      this.Notifications.error('Failure', err, 'Unable to load view data');
     } finally {
       this.state.viewReady = true;
     }

@@ -4,25 +4,27 @@ import { server, rest } from '@/setup-tests/server';
 
 import { TagSelector } from './TagSelector';
 
-test('should show a message when no tags and allowCreate is false', async () => {
+test('当没有标签且allowCreate为false时，应显示一条消息', async () => {
   const { getByText } = await renderComponent({ allowCreate: false }, []);
 
   expect(
-    getByText('No tags available. Head over to the', {
+    getByText('没有可用的标签。请前往', {
       exact: false,
     })
   ).toBeInTheDocument();
 });
 
-test('should show the selected tags', async () => {
+test('应显示所选的标签', async () => {
   const tags: Tag[] = [
     {
       ID: 1,
       Name: 'tag1',
+      Endpoints: {},
     },
     {
       ID: 2,
       Name: 'tag2',
+      Endpoints: {},
     },
   ];
 

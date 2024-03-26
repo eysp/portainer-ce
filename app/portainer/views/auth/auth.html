@@ -1,6 +1,6 @@
 <div class="page-wrapper">
   <!-- login box -->
-  <div class="container simple-box">
+  <div class="simple-box container">
     <div class="col-sm-4 col-sm-offset-4">
       <!-- login box logo -->
       <div class="row">
@@ -9,9 +9,9 @@
       </div>
       <!-- !login box logo -->
 
-      <div class="row text-center p-5">
-        <p class="text-xl">登录到您的账户</p>
-        <p class="text-md text-muted fw-bold">欢迎回来! 请输入你的详细资料</p>
+      <div class="row p-5 text-center">
+        <p class="text-xl">登录到您的帐户</p>
+        <p class="text-md text-muted fw-bold">欢迎回来！请输入您的详细信息</p>
       </div>
 
       <!-- login panel -->
@@ -23,16 +23,20 @@
               <div class="col-sm-12" style="display: flex; justify-content: center" ng-if="ctrl.state.showOAuthLogin">
                 <a ng-href="{{ ctrl.OAuthLoginURI }}">
                   <div class="btn btn-primary btn-lg btn-block" ng-if="ctrl.state.OAuthProvider === 'Microsoft'">
-                    <i class="fab fa-microsoft" aria-hidden="true"></i> 用微软登录
+                    <pr-icon icon="'svg-microsoft'"></pr-icon>
+                    使用Microsoft登录
                   </div>
                   <div class="btn btn-primary btn-lg btn-block" ng-if="ctrl.state.OAuthProvider === 'Google'">
-                    <i class="fab fa-google" aria-hidden="true"></i> 用谷歌登录
+                    <pr-icon icon="'svg-google'"></pr-icon>
+                    使用Google登录
                   </div>
                   <div class="btn btn-primary btn-lg btn-block" ng-if="ctrl.state.OAuthProvider === 'Github'">
-                    <i class="fab fa-github" aria-hidden="true"></i> 用Github登录
+                    <pr-icon icon="'svg-github'"></pr-icon>
+                    使用GitHub登录
                   </div>
                   <div class="btn btn-primary btn-lg btn-block" ng-if="ctrl.state.OAuthProvider === 'OAuth'">
-                    <i class="fa fa-sign-in-alt" aria-hidden="true"></i> 用OAuth登录
+                    <pr-icon icon="'log-in'"></pr-icon>
+                    使用OAuth登录
                   </div>
                 </a>
               </div>
@@ -41,14 +45,14 @@
             <!-- divider -->
             <div class="form-group" ng-if="ctrl.state.showOAuthLogin">
               <div class="col-sm-12" style="display: flex; align-items: center; justify-content: center">
-                <div class="striketext small text-muted" style="display: flex; align-items: center; justify-content: center; width: 90%">or</div>
+                <div class="striketext small text-muted" style="display: flex; align-items: center; justify-content: center; width: 90%">或</div>
               </div>
             </div>
 
             <!-- use internal auth button -->
             <div class="form-group" ng-if="ctrl.state.showOAuthLogin && !ctrl.state.showStandardLogin">
               <div class="col-sm-12" style="display: flex; justify-content: center">
-                <div class="btn btn-primary btn-md btn-block" style="margin-left: 2px" ng-click="ctrl.toggleStandardLogin()"> 使用内部验证 </div>
+                <div class="btn btn-primary btn-md btn-block" style="margin-left: 2px" ng-click="ctrl.toggleStandardLogin()"> 使用内部身份验证 </div>
               </div>
             </div>
 
@@ -63,7 +67,7 @@
                 ng-model="ctrl.formValues.Username"
                 auto-focus
                 data-cy="auth-usernameInput"
-                placeholder="输入你的用户名"
+                placeholder="请输入您的用户名"
               />
             </div>
 
@@ -79,20 +83,20 @@
                   ng-model="ctrl.formValues.Password"
                   autocomplete="off"
                   data-cy="auth-passwordInput"
-                  placeholder="输入你的密码"
+                  placeholder="请输入您的密码"
                   ng-trim="false"
                 />
                 <button
                   data-cy="auth-passwordInputToggle"
                   type="button"
                   ng-click="ctrl.toggleShowPassword()"
-                  class="absolute top-0 right-0 h-[34px] w-[50px] border-none flex justify-center items-center bg-transparent"
+                  class="absolute top-0 right-0 flex h-[34px] w-[50px] items-center justify-center border-none bg-transparent"
                   tooltip-append-to-body="true"
                   tooltip-placement="top"
                   tooltip-class="portainer-tooltip"
                   uib-tooltip="{{ ctrl.state.passwordInputType === 'password' ? '显示密码' : '隐藏密码' }}"
                 >
-                  <pr-icon icon="ctrl.state.passwordInputType === 'password' ? 'eye-off' : 'eye'" feather="true" size="'md'"></pr-icon>
+                  <pr-icon icon="ctrl.state.passwordInputType === 'password' ? 'eye-off' : 'eye'" size="'md'"></pr-icon>
                 </button>
               </div>
             </div>
@@ -108,8 +112,8 @@
                   ng-disabled="ctrl.state.loginInProgress"
                   data-cy="auth-loginButton"
                 >
-                  <span ng-hide="ctrl.state.loginInProgress">登陆</span>
-                  <span ng-show="ctrl.state.loginInProgress">登录进行中...</span>
+                  <span ng-hide="ctrl.state.loginInProgress">登录</span>
+                  <span ng-show="ctrl.state.loginInProgress">登录中...</span>
                 </button>
               </div>
             </div>
@@ -118,7 +122,7 @@
 
           <!-- error message -->
           <div class="pull-right" ng-if="ctrl.state.AuthenticationError">
-            <i class="fa fa-exclamation-triangle red-icon" aria-hidden="true" style="margin-right: 2px"></i>
+            <pr-icon icon="'alert-triangle'" mode="'danger'"></pr-icon>
             <span class="small text-danger">{{ ctrl.state.AuthenticationError }}</span>
           </div>
         </div>
@@ -128,7 +132,7 @@
       <div class="panel panel-default" ng-show="ctrl.state.loginInProgress">
         <div class="panel-body">
           <div class="form-group text-center">
-            <span class="small text-muted">认证正在进行中... <span button-spinner="true"></span></span>
+            <span class="small text-muted">认证进行中... <span button-spinner="true"></span></span>
           </div>
         </div>
       </div>

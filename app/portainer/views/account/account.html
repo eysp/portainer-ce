@@ -1,16 +1,16 @@
-<page-header title="'用户设置'" breadcrumbs="['User settings']"> </page-header>
+<page-header title="'用户设置'" breadcrumbs="['用户设置']"> </page-header>
 
-<demo-feature-indicator ng-if="isDemoUser" content="'在Portainer的演示版本中，你不能改变该账户的密码。'"> </demo-feature-indicator>
+<demo-feature-indicator ng-if="isDemoUser" content="'您无法在Portainer的演示版本中更改此帐户的密码。'"> </demo-feature-indicator>
 
 <div class="row">
   <div class="col-lg-12 col-md-12 col-xs-12">
     <rd-widget>
-      <rd-widget-header icon="lock" feather-icon="true" title-text="更改用户密码"></rd-widget-header>
+      <rd-widget-header icon="lock" title-text="更改用户密码"></rd-widget-header>
       <rd-widget-body>
         <form name="form" class="form-horizontal" style="margin-top: 15px">
           <!-- current-password-input -->
           <div class="form-group">
-            <label for="current_password" class="col-sm-2 control-label text-left required">当前密码</label>
+            <label for="current_password" class="col-sm-2 control-label required text-left">当前密码</label>
             <div class="col-sm-8">
               <input type="password" class="form-control" ng-model="formValues.currentPassword" id="current_password" />
             </div>
@@ -18,7 +18,7 @@
           <!-- !current-password-input -->
           <!-- new-password-input -->
           <div class="form-group">
-            <label for="new_password" class="col-sm-2 control-label text-left required">新密码</label>
+            <label for="new_password" class="col-sm-2 control-label required text-left">新密码</label>
             <div class="col-sm-8">
               <input type="password" class="form-control" ng-model="formValues.newPassword" ng-minlength="requiredPasswordLength" id="new_password" name="new_password" />
             </div>
@@ -27,13 +27,13 @@
 
           <!-- confirm-password-input -->
           <div class="form-group">
-            <label for="confirm_password" class="col-sm-2 control-label text-left required">确认密码</label>
+            <label for="confirm_password" class="col-sm-2 control-label required text-left">确认密码</label>
             <div class="col-sm-8">
               <div class="input-group">
                 <input type="password" class="form-control" ng-model="formValues.confirmPassword" id="confirm_password" />
                 <span class="input-group-addon">
-                  <pr-icon icon="'check'" feather="true" class="icon-success" ng-if="formValues.newPassword === formValues.confirmPassword"></pr-icon>
-                  <pr-icon icon="'x'" feather="true" class="icon-danger" ng-if="!(formValues.newPassword === formValues.confirmPassword)"></pr-icon>
+                  <pr-icon icon="'check'" class="icon-success" ng-if="formValues.newPassword === formValues.confirmPassword"></pr-icon>
+                  <pr-icon icon="'x'" class="icon-danger" ng-if="!(formValues.newPassword === formValues.confirmPassword)"></pr-icon>
                 </span>
               </div>
             </div>
@@ -56,29 +56,34 @@
                 更新密码
               </button>
               <button type="submit" class="btn btn-primary btn-sm" ng-click="skipPasswordChange()" ng-if="forceChangePassword && timesPasswordChangeSkipped < 2">
-                稍后提醒我
+                以后再提醒我
               </button>
               <span class="text-muted small vertical-center" style="margin-left: 5px" ng-if="AuthenticationMethod === 2 && !isInitialAdmin">
-                <pr-icon icon="'alert-triangle'" mode="'warning'" feather="true"></pr-icon>
-                使用LDAP身份验证时不能更改密码。
+                <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
+                当使用LDAP身份验证时，您无法更改密码。
               </span>
               <span class="text-muted small vertical-center" style="margin-left: 5px" ng-if="AuthenticationMethod === 3 && !isInitialAdmin">
-                <pr-icon icon="'alert-triangle'" mode="'warning'" feather="true"></pr-icon>
-                使用OAuth身份验证时不能更改密码。
+                <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
+                当使用OAuth验证时，您无法更改密码。
               </span>
             </div>
           </div>
           <div ng-if="userRole === 1">
             <p class="text-muted vertical-center">
-              <pr-icon icon="'alert-circle'" class-name="'icon-primary'" feather="true"></pr-icon>
-              <a ui-sref="portainer.settings.authentication">此处</a>设置了最小密码长度。
+              <pr-icon icon="'alert-circle'" class-name="'icon-primary'"></pr-icon>
+              最低密码长度在<a ui-sref="portainer.settings.authentication">这里</a>。
             </p>
           </div>
         </form>
       </rd-widget-body>
     </rd-widget>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-12 col-md-12 col-xs-12">
     <access-tokens-datatable
-      title-text="Access tokens"
+      title-text="访问令牌"
       title-icon="key"
       dataset="tokens"
       table-key="tokens"
@@ -86,6 +91,11 @@
       remove-action="removeAction"
       ui-can-exit="uiCanExit"
     ></access-tokens-datatable>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-12 col-md-12 col-xs-12">
     <theme-settings></theme-settings>
   </div>
 </div>

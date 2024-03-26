@@ -36,7 +36,7 @@ angular.module('portainer.docker').controller('ImportImageController', [
         try {
           await ImageService.tagImage(id, image.fromImage);
         } catch (err) {
-          Notifications.error('失败', err, '无法标记镜像');
+          Notifications.error('失败', err, '无法对镜像进行标记');
         }
       }
     }
@@ -58,9 +58,9 @@ angular.module('portainer.docker').controller('ImportImageController', [
             await tagImage(imageIds[1]);
             $state.go('docker.images.image', { id: imageIds[1] }, { reload: true });
           }
-          Notifications.success('成功', '镜像成功上传');
+          Notifications.success('成功', '镜像上传成功');
         } else {
-          Notifications.success('成功', '上传的tar文件包含多个镜像。因此，提供的标记已被忽略。');
+          Notifications.success('成功', '上传的tar文件包含多个镜像。因此提供的标签已被忽略。');
         }
       } catch (err) {
         Notifications.error('失败', err, '无法上传镜像');

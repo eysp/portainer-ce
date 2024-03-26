@@ -99,7 +99,7 @@ class porImageRegistryController {
           this.model.Registry = showDefaultRegistry ? this.defaultRegistry : this.registries[0];
         }
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to retrieve registries');
+        this.Notifications.error('Failure', err, '无法检索注册表');
       }
     });
   }
@@ -115,7 +115,7 @@ class porImageRegistryController {
         const images = await this.ImageService.images();
         this.images = this.ImageService.getUniqueTagListFromImages(images);
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to retrieve images');
+        this.Notifications.error('Failure', err, '无法检索镜像');
       }
     });
   }

@@ -29,7 +29,7 @@ function Example({ title }: Args) {
         value={value}
         title={title}
         description={
-          <span>You can upload a Compose file from your computer.</span>
+          <span>您可以从计算机上传一个Compose文件。</span>
         }
       />
     </div>

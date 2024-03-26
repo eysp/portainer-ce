@@ -1,0 +1,9 @@
+go 1.19
+
+use (
+	./api
+	./pkg/featureflags
+	./pkg/libhelm
+	./pkg/libstack
+	./third_party/digest
+)

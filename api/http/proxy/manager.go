@@ -5,18 +5,18 @@ import (
 	"net/http"
 
 	"github.com/portainer/portainer/api/dataservices"
+	dockerclient "github.com/portainer/portainer/api/docker/client"
 	"github.com/portainer/portainer/api/http/proxy/factory/kubernetes"
 
 	cmap "github.com/orcaman/concurrent-map"
 	"github.com/portainer/portainer/api/kubernetes/cli"
 
 	portainer "github.com/portainer/portainer/api"
-	"github.com/portainer/portainer/api/docker"
 	"github.com/portainer/portainer/api/http/proxy/factory"
 )
 
 type (
-	// Manager represents a service used to manage proxies to environments (endpoints).
+	// Manager represents a service used to manage proxies to environments (endpoints) and extensions.
 	Manager struct {
 		proxyFactory     *factory.ProxyFactory
 		endpointProxies  cmap.ConcurrentMap
@@ -25,7 +25,7 @@ type (
 )
 
 // NewManager initializes a new proxy Service
-func NewManager(dataStore dataservices.DataStore, signatureService portainer.DigitalSignatureService, tunnelService portainer.ReverseTunnelService, clientFactory *docker.ClientFactory, kubernetesClientFactory *cli.ClientFactory, kubernetesTokenCacheManager *kubernetes.TokenCacheManager, gitService portainer.GitService) *Manager {
+func NewManager(dataStore dataservices.DataStore, signatureService portainer.DigitalSignatureService, tunnelService portainer.ReverseTunnelService, clientFactory *dockerclient.ClientFactory, kubernetesClientFactory *cli.ClientFactory, kubernetesTokenCacheManager *kubernetes.TokenCacheManager, gitService portainer.GitService) *Manager {
 	return &Manager{
 		endpointProxies:  cmap.New(),
 		k8sClientFactory: kubernetesClientFactory,
@@ -66,7 +66,10 @@ func (manager *Manager) GetEndpointProxy(endpoint *portainer.Endpoint) http.Hand
 // is currently only called for edge connection clean up and when endpoint is updated
 func (manager *Manager) DeleteEndpointProxy(endpointID portainer.EndpointID) {
 	manager.endpointProxies.Remove(fmt.Sprint(endpointID))
-	manager.k8sClientFactory.RemoveKubeClient(endpointID)
+
+	if manager.k8sClientFactory != nil {
+		manager.k8sClientFactory.RemoveKubeClient(endpointID)
+	}
 }
 
 // CreateGitlabProxy creates a new HTTP reverse proxy that can be used to send requests to the Gitlab API

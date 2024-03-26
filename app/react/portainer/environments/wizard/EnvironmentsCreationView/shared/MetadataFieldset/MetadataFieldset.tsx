@@ -1,6 +1,6 @@
 import { useField } from 'formik';
 
-import { useUser } from '@/portainer/hooks/useUser';
+import { useUser } from '@/react/hooks/useUser';
 
 import { TagSelector } from '@@/TagSelector';
 import { FormSection } from '@@/form-components/FormSection';
@@ -13,7 +13,7 @@ export function MetadataFieldset() {
   const { isAdmin } = useUser();
 
   return (
-    <FormSection title="元数据">
+    <FormSection title="Metadata">
       <GroupField />
 
       <TagSelector

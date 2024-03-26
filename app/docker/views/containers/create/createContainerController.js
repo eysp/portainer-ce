@@ -1,9 +1,12 @@
 import _ from 'lodash-es';
 
+import * as envVarsUtils from '@/react/components/form-components/EnvironmentVariablesFieldset/utils';
 import { PorImageRegistryModel } from 'Docker/models/porImageRegistry';
 
-import * as envVarsUtils from '@/portainer/helpers/env-vars';
-import { FeatureId } from 'Portainer/feature-flags/enums';
+import { confirmDestructive } from '@@/modals/confirm';
+import { FeatureId } from '@/react/portainer/feature-flags/enums';
+import { buildConfirmButton } from '@@/modals/utils';
+
 import { ContainerCapabilities, ContainerCapability } from '../../../models/containerCapabilities';
 import { AccessControlFormData } from '../../../../portainer/components/accessControlForm/porAccessControlFormModel';
 import { ContainerDetailsViewModel } from '../../../models/container';
@@ -18,6 +21,7 @@ angular.module('portainer.docker').controller('CreateContainerController', [
   '$timeout',
   '$transition$',
   '$filter',
+  '$analytics',
   'Container',
   'ContainerHelper',
   'Image',
@@ -30,9 +34,9 @@ angular.module('portainer.docker').controller('CreateContainerController', [
   'ContainerService',
   'ImageService',
   'FormValidator',
-  'ModalService',
   'RegistryService',
   'SystemService',
+  'SettingsService',
   'PluginService',
   'HttpRequestHelper',
   'endpoint',
@@ -44,6 +48,7 @@ angular.module('portainer.docker').controller('CreateContainerController', [
     $timeout,
     $transition$,
     $filter,
+    $analytics,
     Container,
     ContainerHelper,
     Image,
@@ -56,9 +61,9 @@ angular.module('portainer.docker').controller('CreateContainerController', [
     ContainerService,
     ImageService,
     FormValidator,
-    ModalService,
     RegistryService,
     SystemService,
+    SettingsService,
     PluginService,
     HttpRequestHelper,
     endpoint
@@ -338,7 +343,7 @@ angular.module('portainer.docker').controller('CreateContainerController', [
       var container = $scope.formValues.NetworkContainer;
       var containerName = container;
       if (container && typeof container === 'object') {
-        containerName = $filter('trimcontainername')(container.Names[0]);
+        containerName = container.Names[0];
       }
       var networkMode = mode;
       if (containerName) {
@@ -497,7 +502,11 @@ angular.module('portainer.docker').controller('CreateContainerController', [
       }
       deviceRequest.Capabilities = [gpuOptions.capabilities];
 
-      config.HostConfig.DeviceRequests.push(deviceRequest);
+      if (config.HostConfig.DeviceRequests) {
+        config.HostConfig.DeviceRequests.push(deviceRequest);
+      } else {
+        config.HostConfig.DeviceRequests = [deviceRequest];
+      }
     }
 
     function prepareConfiguration() {
@@ -689,7 +698,7 @@ angular.module('portainer.docker').controller('CreateContainerController', [
           $scope.formValues.RegistryModel = model;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索到注册表');
+          Notifications.error('失败', err, '无法检索注册表');
         });
     }
 
@@ -742,9 +751,17 @@ angular.module('portainer.docker').controller('CreateContainerController', [
       Container.get({ id: $transition$.params().from })
         .$promise.then(function success(d) {
           var fromContainer = new ContainerDetailsViewModel(d);
-          if (fromContainer.ResourceControl && fromContainer.ResourceControl.Public) {
-            $scope.formValues.AccessControlData.AccessControlEnabled = false;
+          if (fromContainer.ResourceControl) {
+            if (fromContainer.ResourceControl.Public) {
+              $scope.formValues.AccessControlData.AccessControlEnabled = false;
+            }
+
+            // When the container is create by duplicate/edit, the access permission
+            // shouldn't be copied
+            fromContainer.ResourceControl.UserAccesses = [];
+            fromContainer.ResourceControl.TeamAccesses = [];
           }
+
           $scope.fromContainer = fromContainer;
           $scope.state.mode = 'duplicate';
           $scope.config = ContainerHelper.configFromContainer(fromContainer.Model);
@@ -815,7 +832,7 @@ angular.module('portainer.docker').controller('CreateContainerController', [
           }
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索到网络');
+          Notifications.error('失败', err, '无法检索网络');
         });
 
       Container.query(
@@ -833,7 +850,7 @@ angular.module('portainer.docker').controller('CreateContainerController', [
           }
         },
         function (e) {
-          Notifications.error('失败', e, '无法检索到正在运行的容器');
+          Notifications.error('失败', e, '无法检索正在运行的容器');
         }
       );
 
@@ -850,7 +867,7 @@ angular.module('portainer.docker').controller('CreateContainerController', [
           }
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索到引擎的详细信息');
+          Notifications.error('失败', err, '无法检索引擎详情');
         });
 
       $scope.allowBindMounts = $scope.isAdminOrEndpointAdmin || endpoint.SecuritySettings.allowBindMountsForRegularUsers;
@@ -892,7 +909,7 @@ angular.module('portainer.docker').controller('CreateContainerController', [
         } else {
           await ContainerService.updateLimits($transition$.params().from, config);
           $scope.config = config;
-          Notifications.success('Success', '限制已更新');
+          Notifications.success('成功', '限制已更新');
         }
       } catch (err) {
         Notifications.error('失败', err, '更新限制失败');
@@ -979,7 +996,7 @@ angular.module('portainer.docker').controller('CreateContainerController', [
         if (!oldContainer) {
           return;
         }
-        return ContainerService.renameContainer(oldContainer.Id, oldContainer.Names[0].substring(1));
+        return ContainerService.renameContainer(oldContainer.Id, oldContainer.Names[0]);
       }
 
       function confirmCreateContainer(container) {
@@ -992,18 +1009,12 @@ angular.module('portainer.docker').controller('CreateContainerController', [
         function showConfirmationModal() {
           var deferred = $q.defer();
 
-          ModalService.confirmDestructive({
-            title: '你确定吗？',
-            message: '一个同名的容器已经存在。Portainer可以自动删除它并重新创建一个。你想替换它吗？',
-            buttons: {
-              confirm: {
-                label: '替换',
-                className: 'btn-danger',
-              },
-            },
-            callback: function onConfirm(confirmed) {
-              deferred.resolve(confirmed);
-            },
+          confirmDestructive({
+            title: '您确定吗？',
+            message: '已存在相同名称的容器。Portainer 可以自动删除它并重新创建一个。您要替换它吗？',
+            confirmButton: buildConfirmButton('替换', 'danger'),
+          }).then(function onConfirm(confirmed) {
+            deferred.resolve(confirmed);
           });
 
           return deferred.promise;
@@ -1025,7 +1036,7 @@ angular.module('portainer.docker').controller('CreateContainerController', [
       }
 
       function renameContainer() {
-        return ContainerService.renameContainer(oldContainer.Id, oldContainer.Names[0].substring(1) + '-old');
+        return ContainerService.renameContainer(oldContainer.Id, oldContainer.Names[0] + '-old');
       }
 
       function pullImageIfNeeded() {
@@ -1037,6 +1048,18 @@ angular.module('portainer.docker').controller('CreateContainerController', [
           const config = prepareConfiguration();
           return await ContainerService.createAndStartContainer(config);
         });
+      }
+
+      async function sendAnalytics() {
+        const publicSettings = await SettingsService.publicSettings();
+        const analyticsAllowed = publicSettings.EnableTelemetry;
+        const image = `${$scope.formValues.RegistryModel.Registry.URL}/${$scope.formValues.RegistryModel.Image}`;
+        if (analyticsAllowed && $scope.formValues.GPU.enabled) {
+          $analytics.eventTrack('gpuContainerCreated', {
+            category: 'docker',
+            metadata: { gpu: $scope.formValues.GPU, containerImage: image },
+          });
+        }
       }
 
       function applyResourceControl(newContainer) {
@@ -1098,8 +1121,9 @@ angular.module('portainer.docker').controller('CreateContainerController', [
         return validateForm(accessControlData, $scope.isAdmin);
       }
 
-      function onSuccess() {
-        Notifications.success('Success', '已成功创建容器');
+      async function onSuccess() {
+        await sendAnalytics();
+        Notifications.success('成功', '容器已成功创建');
         $state.go('docker.containers', {}, { reload: true });
       }
     }

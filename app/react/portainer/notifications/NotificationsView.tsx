@@ -1,27 +1,30 @@
-import { Bell, Trash2 } from 'react-feather';
+import { Bell, Trash2 } from 'lucide-react';
 import { useStore } from 'zustand';
 import { useCurrentStateAndParams } from '@uirouter/react';
 
 import { withCurrentUser } from '@/react-tools/withCurrentUser';
 import { react2angular } from '@/react-tools/react2angular';
-import { useUser } from '@/portainer/hooks/useUser';
+import { useUser } from '@/react/hooks/useUser';
 import { withUIRouter } from '@/react-tools/withUIRouter';
 import { withReactQuery } from '@/react-tools/withReactQuery';
 
 import { PageHeader } from '@@/PageHeader';
 import { Datatable } from '@@/datatables';
 import { Button } from '@@/buttons';
+import { createPersistedStore } from '@@/datatables/types';
+import { useTableState } from '@@/datatables/useTableState';
 
 import { notificationsStore } from './notifications-store';
 import { ToastNotification } from './types';
 import { columns } from './columns';
-import { createStore } from './datatable-store';
 
 const storageKey = 'notifications-list';
-const useSettingsStore = createStore(storageKey, 'time', true);
+const settingsStore = createPersistedStore(storageKey, {
+  id: 'time',
+  desc: true,
+});
 
 export function NotificationsView() {
-  const settingsStore = useSettingsStore();
   const { user } = useUser();
 
   const userNotifications: ToastNotification[] =
@@ -29,9 +32,10 @@ export function NotificationsView() {
     [];
 
   const breadcrumbs = 'Notifications';
+  const tableState = useTableState(settingsStore, storageKey);
 
   const {
-    params: { id },
+    params: { id: activeItemId },
   } = useCurrentStateAndParams();
 
   return (
@@ -39,19 +43,16 @@ export function NotificationsView() {
       <PageHeader title="通知" breadcrumbs={breadcrumbs} reload />
       <Datatable
         columns={columns}
-        titleOptions={{
-          title: '通知',
-          icon: Bell,
-        }}
+        title="通知"
+        titleIcon={Bell}
         dataset={userNotifications}
-        settingsStore={settingsStore}
-        storageKey="notifications"
+        settingsManager={tableState}
         emptyContentLabel="没有找到通知"
-        totalCount={userNotifications.length}
         renderTableActions={(selectedRows) => (
           <TableActions selectedRows={selectedRows} />
         )}
-        initialActiveItem={id}
+        getRowId={(row) => row.id}
+        highlightedItemId={activeItemId}
       />
     </>
   );
@@ -67,7 +68,7 @@ function TableActions({ selectedRows }: { selectedRows: ToastNotification[] }) {
       onClick={() => handleRemove()}
       disabled={selectedRows.length === 0}
     >
-      Remove
+      删除
     </Button>
   );
 

@@ -2,6 +2,7 @@ package apikey
 
 import (
 	"crypto/sha256"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -21,8 +22,7 @@ func Test_SatisfiesAPIKeyServiceInterface(t *testing.T) {
 func Test_GenerateApiKey(t *testing.T) {
 	is := assert.New(t)
 
-	_, store, teardown := datastore.MustNewTestStore(t, true, true)
-	defer teardown()
+	_, store := datastore.MustNewTestStore(t, true, true)
 
 	service := NewAPIKeyService(store.APIKeyRepository(), store.User())
 
@@ -75,8 +75,7 @@ func Test_GenerateApiKey(t *testing.T) {
 func Test_GetAPIKey(t *testing.T) {
 	is := assert.New(t)
 
-	_, store, teardown := datastore.MustNewTestStore(t, true, true)
-	defer teardown()
+	_, store := datastore.MustNewTestStore(t, true, true)
 
 	service := NewAPIKeyService(store.APIKeyRepository(), store.User())
 
@@ -95,8 +94,7 @@ func Test_GetAPIKey(t *testing.T) {
 func Test_GetAPIKeys(t *testing.T) {
 	is := assert.New(t)
 
-	_, store, teardown := datastore.MustNewTestStore(t, true, true)
-	defer teardown()
+	_, store := datastore.MustNewTestStore(t, true, true)
 
 	service := NewAPIKeyService(store.APIKeyRepository(), store.User())
 
@@ -116,8 +114,7 @@ func Test_GetAPIKeys(t *testing.T) {
 func Test_GetDigestUserAndKey(t *testing.T) {
 	is := assert.New(t)
 
-	_, store, teardown := datastore.MustNewTestStore(t, true, true)
-	defer teardown()
+	_, store := datastore.MustNewTestStore(t, true, true)
 
 	service := NewAPIKeyService(store.APIKeyRepository(), store.User())
 
@@ -152,8 +149,7 @@ func Test_GetDigestUserAndKey(t *testing.T) {
 func Test_UpdateAPIKey(t *testing.T) {
 	is := assert.New(t)
 
-	_, store, teardown := datastore.MustNewTestStore(t, true, true)
-	defer teardown()
+	_, store := datastore.MustNewTestStore(t, true, true)
 
 	service := NewAPIKeyService(store.APIKeyRepository(), store.User())
 
@@ -170,11 +166,9 @@ func Test_UpdateAPIKey(t *testing.T) {
 		_, apiKeyGot, err := service.GetDigestUserAndKey(apiKey.Digest)
 		is.NoError(err)
 
-		log.Debug().Msgf("%+v", apiKey)
-		log.Debug().Msgf("%+v", apiKeyGot)
+		log.Debug().Str("wanted", fmt.Sprintf("%+v", apiKey)).Str("got", fmt.Sprintf("%+v", apiKeyGot)).Msg("")
 
 		is.Equal(apiKey.LastUsed, apiKeyGot.LastUsed)
-
 	})
 
 	t.Run("Successfully updates api-key in cache upon api-key update", func(t *testing.T) {
@@ -200,8 +194,7 @@ func Test_UpdateAPIKey(t *testing.T) {
 func Test_DeleteAPIKey(t *testing.T) {
 	is := assert.New(t)
 
-	_, store, teardown := datastore.MustNewTestStore(t, true, true)
-	defer teardown()
+	_, store := datastore.MustNewTestStore(t, true, true)
 
 	service := NewAPIKeyService(store.APIKeyRepository(), store.User())
 
@@ -241,8 +234,7 @@ func Test_DeleteAPIKey(t *testing.T) {
 func Test_InvalidateUserKeyCache(t *testing.T) {
 	is := assert.New(t)
 
-	_, store, teardown := datastore.MustNewTestStore(t, true, true)
-	defer teardown()
+	_, store := datastore.MustNewTestStore(t, true, true)
 
 	service := NewAPIKeyService(store.APIKeyRepository(), store.User())
 

@@ -1,9 +1,13 @@
 import angular from 'angular';
+import { editor } from '@@/BoxSelector/common-options/build-methods';
 import { getProfile, updateProfile } from 'Portainer/hostmanagement/fdo/fdo.service';
 
 angular.module('portainer.app').controller('EditProfileController', EditProfileController);
 
-export default function EditProfileController($scope, $async, $state, $window, ModalService, Authentication, Notifications) {
+/* @ngInject */
+export default function EditProfileController($scope, $async, $state, $window, Notifications) {
+  $scope.buildMethods = [editor];
+
   $scope.formValues = {
     name: '',
     profileFileContent: '',
@@ -36,7 +40,7 @@ export default function EditProfileController($scope, $async, $state, $window, M
       const fileContent = $scope.formValues.profileFileContent;
 
       if (method !== 'editor' && fileContent === '') {
-        $scope.state.formValidationError = 'Profile file content must not be empty';
+        $scope.state.formValidationError = '配置文件内容不能为空';
         return;
       }
 
@@ -44,14 +48,14 @@ export default function EditProfileController($scope, $async, $state, $window, M
 
       try {
         await updateProfile($scope.state.profileID, name, fileContent);
-        Notifications.success('Success', 'Profile successfully updated');
+        Notifications.success('成功', '配置文件更新成功');
         $scope.state.isEditorDirty = false;
         $state.go('portainer.settings.edgeCompute');
-      } catch (err) {
-        Notifications.error('失败', err, 'Unable to update Profile');
-      } finally {
+    } catch (err) {
+        Notifications.error('失败', err, '无法更新配置文件');
+    } finally {
         $scope.state.actionInProgress = false;
-      }
+    }
     });
   };
 
@@ -75,7 +79,7 @@ export default function EditProfileController($scope, $async, $state, $window, M
         };
         $scope.state.isEditorDirty = false;
       } catch (err) {
-        Notifications.error('失败', err, 'Unable to retrieve profile details');
+        Notifications.error('失败', err, '无法获取配置文件详情');
       }
     });
   }

@@ -1,12 +1,12 @@
 import { useUsers } from '@/portainer/users/queries';
-import { useUser } from '@/portainer/hooks/useUser';
+import { useUser } from '@/react/hooks/useUser';
 
 import { PageHeader } from '@@/PageHeader';
 
 import { useTeams } from '../queries';
 
 import { CreateTeamForm } from './CreateTeamForm';
-import { TeamsDatatableContainer } from './TeamsDatatable/TeamsDatatable';
+import { TeamsDatatable } from './TeamsDatatable';
 
 export function ListView() {
   const { isAdmin } = useUser();
@@ -16,14 +16,14 @@ export function ListView() {
 
   return (
     <>
-      <PageHeader title="Teams" breadcrumbs={[{ label: '团队管理' }]} />
+      <PageHeader title="团队" breadcrumbs={[{ label: '团队管理' }]} />
 
-      {usersQuery.data && teamsQuery.data && (
+      {isAdmin && usersQuery.data && teamsQuery.data && (
         <CreateTeamForm users={usersQuery.data} teams={teamsQuery.data} />
       )}
 
       {teamsQuery.data && (
-        <TeamsDatatableContainer teams={teamsQuery.data} isAdmin={isAdmin} />
+        <TeamsDatatable teams={teamsQuery.data} isAdmin={isAdmin} />
       )}
     </>
   );

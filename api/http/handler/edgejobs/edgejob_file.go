@@ -20,7 +20,7 @@ type edgeJobFileResponse struct {
 // @security ApiKeyAuth
 // @security jwt
 // @produce json
-// @param id path string true "EdgeJob Id"
+// @param id path int true "EdgeJob Id"
 // @success 200 {object} edgeJobFileResponse
 // @failure 500
 // @failure 400
@@ -32,7 +32,7 @@ func (handler *Handler) edgeJobFile(w http.ResponseWriter, r *http.Request) *htt
 		return httperror.BadRequest("Invalid Edge job identifier route variable", err)
 	}
 
-	edgeJob, err := handler.DataStore.EdgeJob().EdgeJob(portainer.EdgeJobID(edgeJobID))
+	edgeJob, err := handler.DataStore.EdgeJob().Read(portainer.EdgeJobID(edgeJobID))
 	if handler.DataStore.IsErrObjectNotFound(err) {
 		return httperror.NotFound("Unable to find an Edge job with the specified identifier inside the database", err)
 	} else if err != nil {

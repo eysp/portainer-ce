@@ -9,60 +9,60 @@
       </span>
     </div>
     <div class="searchBar">
-      <pr-icon icon="'search'" class="vertical-center" feather="true"></pr-icon>
+      <pr-icon icon="'search'" class="vertical-center"></pr-icon>
       <input
         type="text"
         class="searchInput ml-1"
         ng-model="$ctrl.state.textFilter"
         ng-change="$ctrl.onTextFilterChange()"
-        placeholder="Search for a node..."
+        placeholder="搜索节点..."
         auto-focus
         ng-model-options="{ debounce: 300 }"
       />
     </div>
     <div class="settings">
       <span class="setting" ng-class="{ 'setting-active': $ctrl.settings.open }" uib-dropdown dropdown-append-to-body auto-close="disabled" is-open="$ctrl.settings.open">
-        <span uib-dropdown-toggle><pr-icon icon="'more-vertical'" feather="true"></pr-icon></span>
+        <span uib-dropdown-toggle><pr-icon icon="'more-vertical'"></pr-icon></span>
         <div class="dropdown-menu dropdown-menu-right" uib-dropdown-menu>
           <div class="tableMenu">
-            <div class="menuHeader"> 表格设置 </div>
+            <div class="menuHeader">表格设置</div>
             <div class="menuContent">
-              <div>
-                <div class="md-checkbox">
-                  <input id="setting_auto_refresh" type="checkbox" ng-model="$ctrl.settings.repeater.autoRefresh" ng-change="$ctrl.onSettingsRepeaterChange()" />
-                  <label for="setting_auto_refresh">自动刷新</label>
+                <div>
+                    <div class="md-checkbox">
+                        <input id="setting_auto_refresh" type="checkbox" ng-model="$ctrl.settings.repeater.autoRefresh" ng-change="$ctrl.onSettingsRepeaterChange()" />
+                        <label for="setting_auto_refresh">自动刷新</label>
+                    </div>
+                    <div ng-if="$ctrl.settings.repeater.autoRefresh">
+                        <label for="settings_refresh_rate">刷新频率</label>
+                        <select id="settings_refresh_rate" ng-model="$ctrl.settings.repeater.refreshRate" ng-change="$ctrl.onSettingsRepeaterChange()" class="small-select">
+                            <option value="10">10秒</option>
+                            <option value="30">30秒</option>
+                            <option value="60">1分钟</option>
+                            <option value="120">2分钟</option>
+                            <option value="300">5分钟</option>
+                        </select>
+                        <span>
+                            <pr-icon id="refreshRateChange" style="display: none" icon="'check'" mode="'success'"></pr-icon>
+                        </span>
+                    </div>
                 </div>
-                <div ng-if="$ctrl.settings.repeater.autoRefresh">
-                  <label for="settings_refresh_rate"> 刷新频率 </label>
-                  <select id="settings_refresh_rate" ng-model="$ctrl.settings.repeater.refreshRate" ng-change="$ctrl.onSettingsRepeaterChange()" class="small-select">
-                    <option value="10">10s</option>
-                    <option value="30">30s</option>
-                    <option value="60">1min</option>
-                    <option value="120">2min</option>
-                    <option value="300">5min</option>
-                  </select>
-                  <span>
-                    <pr-icon id="refreshRateChange" style="display: none" icon="'check'" mode="'success'" feather="true"></pr-icon>
-                  </span>
-                </div>
-              </div>
             </div>
             <div>
-              <a type="button" class="btn btn-default btn-sm" ng-click="$ctrl.settings.open = false;">关闭</a>
+                <a type="button" class="btn btn-default btn-sm" ng-click="$ctrl.settings.open = false;">关闭</a>
             </div>
-          </div>
+        </div>
         </div>
       </span>
     </div>
   </div>
   <div class="table-responsive border-none">
-    <table class="table table-hover nowrap-cells">
+    <table class="table-hover nowrap-cells table">
       <thead>
         <tr>
           <th style="width: 2%">
             <a ng-click="$ctrl.expandAll()" ng-if="$ctrl.hasExpandableItems()">
-              <pr-icon icon="'chevron-down'" feather="true" ng-if="$ctrl.state.expandAll"></pr-icon>
-              <pr-icon icon="'chevron-up'" feather="true" ng-if="!$ctrl.state.expandAll"></pr-icon>
+              <pr-icon icon="'chevron-down'" ng-if="$ctrl.state.expandAll"></pr-icon>
+              <pr-icon icon="'chevron-up'" ng-if="!$ctrl.state.expandAll"></pr-icon>
             </a>
           </th>
           <th style="width: 98%">
@@ -85,11 +85,11 @@
         >
           <td>
             <a ng-if="$ctrl.itemCanExpand(item)">
-              <pr-icon icon="'chevron-down'" class="mr-1" feather="true" ng-if="item.Expanded"></pr-icon>
-              <pr-icon icon="'chevron-up'" class="mr-1" feather="true" ng-if="!item.Expanded"></pr-icon>
+              <pr-icon icon="'chevron-down'" class="mr-1" ng-if="item.Expanded"></pr-icon>
+              <pr-icon icon="'chevron-up'" class="mr-1" ng-if="!item.Expanded"></pr-icon>
             </a>
-            <pr-icon icon="'check'" ng-if="item.AcceptsApplication" mode="'success'" feather="true"></pr-icon>
-            <pr-icon icon="'x'" ng-if="!item.AcceptsApplication" mode="'error'" feather="true"></pr-icon>
+            <pr-icon icon="'check'" ng-if="item.AcceptsApplication" mode="'success'"></pr-icon>
+            <pr-icon icon="'x'" ng-if="!item.AcceptsApplication" mode="'error'"></pr-icon>
           </td>
           <td>
             {{ item.Name }}
@@ -103,7 +103,7 @@
           ng-class="{ 'datatable-highlighted': item.Highlighted, 'datatable-unhighlighted': !item.Highlighted }"
         >
           <td colspan="2">
-            This application is missing a toleration for the taint <code>{{ taint.Key }}{{ taint.Value ? '=' + taint.Value : '' }}:{{ taint.Effect }}</code>
+            此应用程序缺少对污点 <code>{{ taint.Key }}{{ taint.Value ? '=' + taint.Value : '' }}:{{ taint.Effect }}</code> 的容忍。
           </td>
         </tr>
         <!-- !ADMIN + UNMET TAINTS -->
@@ -113,7 +113,7 @@
           ng-show="item.Expanded"
           ng-class="{ 'datatable-highlighted': item.Highlighted, 'datatable-unhighlighted': !item.Highlighted }"
         >
-          <td colspan="2"> Placement constraint not respected for that node. </td>
+        <td colspan="2">该节点上未遵守放置约束。</td>
         </tr>
         <!-- ! USER + UNMET TAINTS -->
         <!-- ADMIN + UNMET NODE SELECTOR LABELS -->
@@ -123,9 +123,9 @@
           ng-repeat="label in item.UnmatchedNodeSelectorLabels"
           ng-class="{ 'datatable-highlighted': item.Highlighted, 'datatable-unhighlighted': !item.Highlighted }"
         >
-          <td colspan="2">
-            This application can only be scheduled on a node where the label <code>{{ label.key }}</code> is set to <code>{{ label.value }}</code>
-          </td>
+        <td colspan="2">
+          此应用程序只能被调度到标签 <code>{{ label.key }}</code> 设置为 <code>{{ label.value }}</code> 的节点上。
+      </td>
         </tr>
         <!-- ! ADMIN + UNMET NODE SELECTOR LABELS -->
         <!-- USER + UNMET NODE SELECTOR LABELS || UNMET NODE AFFINITIES -->
@@ -134,7 +134,7 @@
           ng-show="item.Expanded"
           ng-class="{ 'datatable-highlighted': item.Highlighted, 'datatable-unhighlighted': !item.Highlighted }"
         >
-          <td colspan="2"> Placement label not respected for that node. </td>
+        <td colspan="2">该节点上未遵守放置标签约束。</td>
         </tr>
         <!-- ! USER + UNMET NODE SELECTOR LABELS || UNMET NODE AFFINITIES -->
         <!-- ADMIN + UNMET NODE AFFINITIES -->
@@ -143,7 +143,7 @@
           ng-show="item.Expanded && item.UnmatchedNodeAffinities.length"
           ng-class="{ 'datatable-highlighted': item.Highlighted, 'datatable-unhighlighted': !item.Highlighted }"
         >
-          <td colspan="2"> This application can only be scheduled on nodes respecting one of the following labels combination: </td>
+        <td colspan="2">此应用程序只能被调度到符合以下标签组合之一的节点上：</td>
         </tr>
         <tr
           dir-paginate-end
@@ -155,29 +155,29 @@
           <td></td>
           <td>
             <code ng-repeat-start="term in aff track by $index">
-              {{ term.key }} {{ term.operator }} {{ term.values | kubernetesApplicationConstraintNodeAffinityValue: term.operator }}
+              {{ term.key }} {{ term.operator }} {{ term.values | kubernetesApplicationConstraintNodeAffinityValue : term.operator }}
             </code>
             <span ng-repeat-end>{{ $last ? '' : ' + ' }}</span>
           </td>
         </tr>
         <!-- ! ADMIN + UNMET NODE AFFINITIES -->
         <tr ng-if="$ctrl.loading">
-          <td colspan="2" class="text-center text-muted">加载中...</td>
+          <td colspan="2" class="text-muted text-center">加载中...</td>
         </tr>
         <tr ng-if="!$ctrl.loading && (!$ctrl.dataset || $ctrl.state.filteredDataSet.length === 0)">
-          <td colspan="2" class="text-center text-muted">No node available.</td>
+          <td colspan="2" class="text-muted text-center">暂无可用节点。</td>
         </tr>
       </tbody>
     </table>
   </div>
   <div class="footer" ng-if="$ctrl.dataset">
-    <div class="infoBar" ng-if="$ctrl.state.selectedItemCount !== 0"> {{ $ctrl.state.selectedItemCount }} 所选项目 </div>
+    <div class="infoBar" ng-if="$ctrl.state.selectedItemCount !== 0"> {{ $ctrl.state.selectedItemCount }} 项已选择 </div>
     <div class="paginationControls">
       <form class="form-inline">
         <span class="limitSelector">
-          <span style="margin-right: 5px"> 每页项目数 </span>
+          <span style="margin-right: 5px"> 每页项目 </span>
           <select class="form-control" ng-model="$ctrl.state.paginatedItemLimit" ng-change="$ctrl.changePaginationLimit()" data-cy="component-paginationSelect">
-            <option value="0">All</option>
+            <option value="0">全部</option>
             <option value="10">10</option>
             <option value="25">25</option>
             <option value="50">50</option>

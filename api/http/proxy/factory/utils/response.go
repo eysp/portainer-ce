@@ -2,12 +2,12 @@ package utils
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 )
 
@@ -18,7 +18,10 @@ func GetResponseAsJSONObject(response *http.Response) (map[string]interface{}, e
 		return nil, err
 	}
 
-	responseObject := responseData.(map[string]interface{})
+	responseObject, ok := responseData.(map[string]interface{})
+	if !ok {
+		return nil, nil
+	}
 	return responseObject, nil
 }
 
@@ -27,6 +30,9 @@ func GetResponseAsJSONArray(response *http.Response) ([]interface{}, error) {
 	responseData, err := getResponseBody(response)
 	if err != nil {
 		return nil, err
+	}
+	if responseData == nil {
+		return nil, nil
 	}
 
 	switch responseObject := responseData.(type) {
@@ -71,12 +77,12 @@ func RewriteAccessDeniedResponse(response *http.Response) error {
 // RewriteResponse will replace the existing response body and status code with the one specified
 // in parameters
 func RewriteResponse(response *http.Response, newResponseData interface{}, statusCode int) error {
-	data, err := marshal(getContentType(response.Header), newResponseData)
+	data, err := marshal(getContentType(response), newResponseData)
 	if err != nil {
 		return err
 	}
 
-	body := ioutil.NopCloser(bytes.NewReader(data))
+	body := io.NopCloser(bytes.NewReader(data))
 
 	response.StatusCode = statusCode
 	response.Body = body
@@ -92,14 +98,13 @@ func RewriteResponse(response *http.Response, newResponseData interface{}, statu
 
 func getResponseBody(response *http.Response) (interface{}, error) {
 	isGzip := response.Header.Get("Content-Encoding") == "gzip"
-
 	if isGzip {
 		response.Header.Del("Content-Encoding")
 	}
 
-	return getBody(response.Body, getContentType(response.Header), isGzip)
+	return getBody(response.Body, getContentType(response), isGzip)
 }
 
-func getContentType(headers http.Header) string {
-	return headers.Get("Content-type")
+func getContentType(response *http.Response) string {
+	return response.Header.Get("Content-type")
 }

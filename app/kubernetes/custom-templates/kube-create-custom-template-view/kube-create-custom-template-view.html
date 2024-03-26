@@ -1,15 +1,19 @@
-<page-header title="'创建自定义模板'" breadcrumbs="[{label:'Custom Templates', link:'kubernetes.templates.custom'}, '创建自定义模板']"> </page-header>
+<page-header title="'Create Custom template'" breadcrumbs="[{label:'Custom Templates', link:'kubernetes.templates.custom'}, 'Create Custom template']"> </page-header>
 
 <div class="row">
   <div class="col-sm-12">
     <rd-widget>
       <rd-widget-body>
         <form class="form-horizontal" name="$ctrl.form">
-          <custom-template-common-fields form-values="$ctrl.formValues"></custom-template-common-fields>
+          <custom-template-common-fields
+            form-values="$ctrl.formValues"
+            name-regex="$ctrl.state.templateNameRegex"
+            name-regex-error="'This field must consist of lower-case alphanumeric characters, \'.\', \'_\' or \'-\', must start and end with an alphanumeric character and must be 63 characters or less (例如 \'my-name\', or \'abc-123\').'"
+          ></custom-template-common-fields>
 
           <!-- build-method -->
           <div class="col-sm-12 form-section-title"> Build method </div>
-          <box-selector radio-name="'method'" value="$ctrl.state.method" options="$ctrl.methodOptions" on-change="($ctrl.onChangeMethod)"></box-selector>
+          <box-selector slim="true" radio-name="'method'" value="$ctrl.state.method" options="$ctrl.methodOptions" on-change="($ctrl.onChangeMethod)"></box-selector>
 
           <div class="mt-4">
             <web-editor-form
@@ -19,7 +23,7 @@
               on-change="($ctrl.onChangeFileContent)"
               ng-required="true"
               yml="true"
-              placeholder="# Define or paste the content of your manifest file here"
+              placeholder="Define or paste the content of your manifest file here"
             >
               <editor-description>
                 <p>Templates allow deploying any kind of Kubernetes resource (Deployment, Secret, ConfigMap...)</p>
@@ -35,6 +39,8 @@
             <file-upload-description> You can upload a Manifest file from your computer. </file-upload-description>
           </file-upload-form>
 
+          <git-form deploy-method="kubernetes" ng-if="$ctrl.state.method === 'repository'" value="$ctrl.formValues" on-change="($ctrl.handleChange)"></git-form>
+
           <custom-templates-variables-definition-field
             ng-if="$ctrl.isTemplateVariablesEnabled"
             value="$ctrl.formValues.Variables"
@@ -45,7 +51,7 @@
           <por-access-control-form form-data="$ctrl.formValues.AccessControlData"></por-access-control-form>
 
           <!-- actions -->
-          <div class="col-sm-12 form-section-title"> 操作 </div>
+          <div class="col-sm-12 form-section-title"> Actions </div>
           <div class="form-group">
             <div class="col-sm-12">
               <button
@@ -55,8 +61,8 @@
                 ng-click="$ctrl.createCustomTemplate()"
                 button-spinner="$ctrl.state.actionInProgress"
               >
-                <span ng-hide="$ctrl.state.actionInProgress">创建自定义模板</span>
-                <span ng-show="$ctrl.state.actionInProgress">正在创建中...</span>
+                <span ng-hide="$ctrl.state.actionInProgress">Create custom template</span>
+                <span ng-show="$ctrl.state.actionInProgress">Creation in progress...</span>
               </button>
               <span class="text-danger" ng-if="$ctrl.state.formValidationError" style="margin-left: 5px">
                 {{ $ctrl.state.formValidationError }}

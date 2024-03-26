@@ -5,25 +5,26 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/datastore"
+	"github.com/portainer/portainer/api/internal/testhelpers"
 
 	"github.com/gofrs/uuid"
-	portainer "github.com/portainer/portainer/api"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestHandler_webhookInvoke(t *testing.T) {
-	_, store, teardown := datastore.MustNewTestStore(t, true, true)
-	defer teardown()
+	_, store := datastore.MustNewTestStore(t, true, true)
 
 	webhookID := newGuidString(t)
 	store.StackService.Create(&portainer.Stack{
-		AutoUpdate: &portainer.StackAutoUpdate{
+		ID: 1,
+		AutoUpdate: &portainer.AutoUpdateSettings{
 			Webhook: webhookID,
 		},
 	})
 
-	h := NewHandler(nil)
+	h := NewHandler(testhelpers.NewTestRequestBouncer())
 	h.DataStore = store
 
 	t.Run("invalid uuid results in http.StatusBadRequest", func(t *testing.T) {
@@ -32,12 +33,14 @@ func TestHandler_webhookInvoke(t *testing.T) {
 		h.Router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusBadRequest, w.Code)
 	})
+
 	t.Run("registered webhook ID in http.StatusNoContent", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req := newRequest(webhookID)
 		h.Router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusNoContent, w.Code)
 	})
+
 	t.Run("unregistered webhook ID in http.StatusNotFound", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req := newRequest(newGuidString(t))

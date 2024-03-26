@@ -4,27 +4,20 @@ import { KubernetesStorageClass, KubernetesStorageClassAccessPolicies } from 'Ku
 import { KubernetesFormValidationReferences } from 'Kubernetes/models/application/formValues';
 import { KubernetesIngressClassTypes } from 'Kubernetes/ingress/constants';
 import KubernetesNamespaceHelper from 'Kubernetes/helpers/namespaceHelper';
-import { FeatureId } from '@/portainer/feature-flags/enums';
+import { FeatureId } from '@/react/portainer/feature-flags/enums';
 
 import { getIngressControllerClassMap, updateIngressControllerClassMap } from '@/react/kubernetes/cluster/ingressClass/utils';
+import { buildConfirmButton } from '@@/modals/utils';
+import { confirm } from '@@/modals/confirm';
+import { getIsRBACEnabled } from '@/react/kubernetes/cluster/getIsRBACEnabled';
+import { ModalType } from '@@/modals/Modal/types';
+import { getMetricsForAllNodes } from '@/react/kubernetes/services/service.ts';
 
 class KubernetesConfigureController {
   /* #region  CONSTRUCTOR */
 
   /* @ngInject */
-  constructor(
-    $async,
-    $state,
-    $scope,
-    Notifications,
-    KubernetesStorageService,
-    EndpointService,
-    EndpointProvider,
-    ModalService,
-    KubernetesResourcePoolService,
-    KubernetesIngressService,
-    KubernetesMetricsService
-  ) {
+  constructor($async, $state, $scope, Notifications, KubernetesStorageService, EndpointService, EndpointProvider, KubernetesResourcePoolService, KubernetesIngressService) {
     this.$async = $async;
     this.$state = $state;
     this.$scope = $scope;
@@ -32,10 +25,8 @@ class KubernetesConfigureController {
     this.KubernetesStorageService = KubernetesStorageService;
     this.EndpointService = EndpointService;
     this.EndpointProvider = EndpointProvider;
-    this.ModalService = ModalService;
     this.KubernetesResourcePoolService = KubernetesResourcePoolService;
     this.KubernetesIngressService = KubernetesIngressService;
-    this.KubernetesMetricsService = KubernetesMetricsService;
 
     this.IngressClassTypes = KubernetesIngressClassTypes;
 
@@ -43,15 +34,18 @@ class KubernetesConfigureController {
     this.configureAsync = this.configureAsync.bind(this);
     this.areControllersChanged = this.areControllersChanged.bind(this);
     this.areFormValuesChanged = this.areFormValuesChanged.bind(this);
+    this.areStorageClassesChanged = this.areStorageClassesChanged.bind(this);
     this.onBeforeOnload = this.onBeforeOnload.bind(this);
     this.limitedFeature = FeatureId.K8S_SETUP_DEFAULT;
     this.limitedFeatureAutoWindow = FeatureId.HIDE_AUTO_UPDATE_WINDOW;
+    this.limitedFeatureIngressDeploy = FeatureId.K8S_ADM_ONLY_USR_INGRESS_DEPLY;
     this.onToggleAutoUpdate = this.onToggleAutoUpdate.bind(this);
     this.onChangeControllers = this.onChangeControllers.bind(this);
     this.onChangeEnableResourceOverCommit = this.onChangeEnableResourceOverCommit.bind(this);
     this.onToggleIngressAvailabilityPerNamespace = this.onToggleIngressAvailabilityPerNamespace.bind(this);
     this.onToggleAllowNoneIngressClass = this.onToggleAllowNoneIngressClass.bind(this);
     this.onChangeStorageClassAccessMode = this.onChangeStorageClassAccessMode.bind(this);
+    this.onToggleRestrictNs = this.onToggleRestrictNs.bind(this);
   }
   /* #endregion */
 
@@ -80,7 +74,9 @@ class KubernetesConfigureController {
     return _.find(this.formValues.IngressClasses, { Type: this.IngressClassTypes.TRAEFIK });
   }
 
-  toggleAdvancedIngSettings() {
+  toggleAdvancedIngSettings($event) {
+    $event.stopPropagation();
+    $event.preventDefault();
     this.$scope.$evalAsync(() => {
       this.state.isIngToggleSectionExpanded = !this.state.isIngToggleSectionExpanded;
     });
@@ -154,14 +150,17 @@ class KubernetesConfigureController {
       return;
     }
     const promises = [];
-    const oldEndpointID = this.EndpointProvider.endpointID();
-    this.EndpointProvider.setEndpointID(this.endpoint.Id);
+    const oldEndpoint = this.EndpointProvider.currentEndpoint();
+    this.EndpointProvider.setCurrentEndpoint(this.endpoint);
 
     try {
       const allResourcePools = await this.KubernetesResourcePoolService.get();
       const resourcePools = _.filter(
         allResourcePools,
-        (resourcePool) => !KubernetesNamespaceHelper.isSystemNamespace(resourcePool.Namespace.Name) && !KubernetesNamespaceHelper.isDefaultNamespace(resourcePool.Namespace.Name)
+        (resourcePool) =>
+          !KubernetesNamespaceHelper.isSystemNamespace(resourcePool.Namespace.Name) &&
+          !KubernetesNamespaceHelper.isDefaultNamespace(resourcePool.Namespace.Name) &&
+          resourcePool.Namespace.Status === 'Active'
       );
 
       ingressesToDel.forEach((ingress) => {
@@ -170,7 +169,7 @@ class KubernetesConfigureController {
         });
       });
     } finally {
-      this.EndpointProvider.setEndpointID(oldEndpointID);
+      this.EndpointProvider.setCurrentEndpoint(oldEndpoint);
     }
 
     const responses = await Promise.allSettled(promises);
@@ -182,24 +181,26 @@ class KubernetesConfigureController {
   }
 
   enableMetricsServer() {
-    if (this.formValues.UseServerMetrics) {
-      this.state.metrics.userClick = true;
-      this.state.metrics.pending = true;
-      this.KubernetesMetricsService.capabilities(this.endpoint.Id)
-        .then(() => {
+    return this.$async(async () => {
+      if (this.formValues.UseServerMetrics) {
+        this.state.metrics.userClick = true;
+        this.state.metrics.pending = true;
+        try {
+          await getMetricsForAllNodes(this.endpoint.Id);
           this.state.metrics.isServerRunning = true;
           this.state.metrics.pending = false;
+          this.state.metrics.userClick = true;
           this.formValues.UseServerMetrics = true;
-        })
-        .catch(() => {
+        } catch (_) {
           this.state.metrics.isServerRunning = false;
           this.state.metrics.pending = false;
           this.formValues.UseServerMetrics = false;
-        });
-    } else {
-      this.state.metrics.userClick = false;
-      this.formValues.UseServerMetrics = false;
-    }
+        }
+      } else {
+        this.state.metrics.userClick = false;
+        this.formValues.UseServerMetrics = false;
+      }
+    });
   }
 
   async configureAsync() {
@@ -221,17 +222,10 @@ class KubernetesConfigureController {
         }
       });
       await Promise.all(storagePromises);
-
-      const endpoints = this.EndpointProvider.endpoints();
-      const modifiedEndpoint = _.find(endpoints, (item) => item.Id === this.endpoint.Id);
-      if (modifiedEndpoint) {
-        this.assignFormValuesToEndpoint(modifiedEndpoint, storageClasses, ingressClasses);
-        this.EndpointProvider.setEndpoints(endpoints);
-      }
+      this.$state.reload();
       this.Notifications.success('Success', 'Configuration successfully applied');
-      this.$state.go('portainer.home');
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to apply configuration');
+      this.Notifications.error('Failure', err, 'Unable to apply configuration');
     } finally {
       this.state.actionInProgress = false;
     }
@@ -261,6 +255,12 @@ class KubernetesConfigureController {
       }
 
       storageClass.AccessModes = accessModes;
+    });
+  }
+
+  onToggleRestrictNs() {
+    this.$scope.$evalAsync(() => {
+      this.formValues.RestrictDefaultNamespace = !this.formValues.RestrictDefaultNamespace;
     });
   }
 
@@ -295,14 +295,21 @@ class KubernetesConfigureController {
       IngressAvailabilityPerNamespace: false,
     };
 
+    // default to true if error is thrown
+    this.isRBACEnabled = true;
+
     this.isIngressControllersLoading = true;
     try {
       this.availableAccessModes = new KubernetesStorageClassAccessPolicies();
 
-      [this.StorageClasses, this.endpoint] = await Promise.all([this.KubernetesStorageService.get(this.state.endpointId), this.EndpointService.endpoint(this.state.endpointId)]);
+      [this.StorageClasses, this.endpoint, this.isRBACEnabled] = await Promise.all([
+        this.KubernetesStorageService.get(this.state.endpointId),
+        this.EndpointService.endpoint(this.state.endpointId),
+        getIsRBACEnabled(this.state.endpointId),
+      ]);
 
       this.ingressControllers = await getIngressControllerClassMap({ environmentId: this.state.endpointId });
-      this.originalIngressControllers = structuredClone(this.ingressControllers);
+      this.originalIngressControllers = structuredClone(this.ingressControllers) || [];
 
       this.state.autoUpdateSettings = this.endpoint.ChangeWindow;
 
@@ -317,8 +324,6 @@ class KubernetesConfigureController {
         }
       });
 
-      this.oldStorageClasses = angular.copy(this.StorageClasses);
-
       this.formValues.UseLoadBalancer = this.endpoint.Kubernetes.Configuration.UseLoadBalancer;
       this.formValues.UseServerMetrics = this.endpoint.Kubernetes.Configuration.UseServerMetrics;
       this.formValues.EnableResourceOverCommit = this.endpoint.Kubernetes.Configuration.EnableResourceOverCommit;
@@ -332,9 +337,10 @@ class KubernetesConfigureController {
       this.formValues.IngressAvailabilityPerNamespace = this.endpoint.Kubernetes.Configuration.IngressAvailabilityPerNamespace;
       this.formValues.AllowNoneIngressClass = this.endpoint.Kubernetes.Configuration.AllowNoneIngressClass;
 
-      this.oldFormValues = Object.assign({}, this.formValues);
+      this.oldStorageClasses = angular.copy(this.StorageClasses);
+      this.oldFormValues = angular.copy(this.formValues);
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to retrieve environment configuration');
+      this.Notifications.error('Failure', err, 'Unable to retrieve environment configuration');
     } finally {
       this.state.viewReady = true;
       this.isIngressControllersLoading = false;
@@ -360,24 +366,28 @@ class KubernetesConfigureController {
     return !_.isEqual(this.formValues, this.oldFormValues);
   }
 
+  areStorageClassesChanged() {
+    // angular is pesky and modifies this.StorageClasses (adds $$hashkey to each item)
+    // angular.toJson removes this to make the comparison work
+    const storageClassesWithoutHashKey = angular.toJson(this.StorageClasses);
+    const oldStorageClassesWithoutHashKey = angular.toJson(this.oldStorageClasses);
+    return !_.isEqual(storageClassesWithoutHashKey, oldStorageClassesWithoutHashKey);
+  }
+
   onBeforeOnload(event) {
-    if (!this.state.isSaving && (this.areControllersChanged() || this.areFormValuesChanged())) {
+    if (!this.state.isSaving && (this.areControllersChanged() || this.areFormValuesChanged() || this.areStorageClassesChanged())) {
       event.preventDefault();
       event.returnValue = '';
     }
   }
 
   uiCanExit() {
-    if (!this.state.isSaving && (this.areControllersChanged() || this.areFormValuesChanged()) && !this.isIngressControllersLoading) {
-      return this.ModalService.confirmAsync({
-        title: '你确定吗？',
+    if (!this.state.isSaving && (this.areControllersChanged() || this.areFormValuesChanged() || this.areStorageClassesChanged()) && !this.isIngressControllersLoading) {
+      return confirm({
+        title: 'Are you sure?',
         message: 'You currently have unsaved changes in the cluster setup view. Are you sure you want to leave?',
-        buttons: {
-          confirm: {
-            label: 'Yes',
-            className: 'btn-danger',
-          },
-        },
+        modalType: ModalType.Warn,
+        confirmButton: buildConfirmButton('Yes', 'danger'),
       });
     }
   }

@@ -1,4 +1,4 @@
-import { Registry } from '@/portainer/environments/environment.service/registries';
+import { Registry } from '@/react/portainer/registries/types';
 
 import { Select } from '@@/form-components/ReactSelect';
 
@@ -26,7 +26,7 @@ export function CreateNamespaceRegistriesSelector({
       onChange={onChange}
       inputId={inputId}
       data-cy="namespaceCreate-registrySelect"
-      placeholder="选择一个或多个注册表"
+      placeholder="Select one or more registry"
     />
   );
 }

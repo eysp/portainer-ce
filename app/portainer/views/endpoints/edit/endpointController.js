@@ -2,16 +2,17 @@ import _ from 'lodash-es';
 import uuidv4 from 'uuid/v4';
 
 import { PortainerEndpointTypes } from '@/portainer/models/endpoint/models';
-import { EndpointSecurityFormData } from '@/portainer/components/endpointSecurity/porEndpointSecurityModel';
 import EndpointHelper from '@/portainer/helpers/endpointHelper';
 import { getAMTInfo } from 'Portainer/hostmanagement/open-amt/open-amt.service';
-import { confirmDestructiveAsync } from '@/portainer/services/modal.service/confirm';
-import { isEdgeEnvironment } from '@/portainer/environments/utils';
+import { confirmDestructive } from '@@/modals/confirm';
+import { isEdgeEnvironment, isDockerAPIEnvironment } from '@/react/portainer/environments/utils';
 
 import { commandsTabs } from '@/react/edge/components/EdgeScriptForm/scripts';
-import { GpusListAngular } from '@/react/portainer/environments/wizard/EnvironmentsCreationView/shared/Hardware/GpusList';
+import { confirmDisassociate } from '@/react/portainer/environments/ItemView/ConfirmDisassociateModel';
+import { buildConfirmButton } from '@@/modals/utils';
+import { getInfo } from '@/docker/services/system.service';
 
-angular.module('portainer.app').component('gpusList', GpusListAngular).controller('EndpointController', EndpointController);
+angular.module('portainer.app').controller('EndpointController', EndpointController);
 
 /* @ngInject */
 function EndpointController(
@@ -26,12 +27,13 @@ function EndpointController(
 
   Notifications,
   Authentication,
-  SettingsService,
-  ModalService
+  SettingsService
 ) {
   $scope.onChangeCheckInInterval = onChangeCheckInInterval;
   $scope.setFieldValue = setFieldValue;
   $scope.onChangeTags = onChangeTags;
+  $scope.onChangeTLSConfigFormValues = onChangeTLSConfigFormValues;
+
   const isBE = process.env.PORTAINER_EDITION === 'BE';
 
   $scope.state = {
@@ -52,6 +54,7 @@ function EndpointController(
     allowSelfSignedCerts: true,
     showAMTInfo: false,
     showNomad: isBE,
+    showTLSConfig: false,
     edgeScriptCommands: {
       linux: _.compact([commandsTabs.k8sLinux, commandsTabs.swarmLinux, commandsTabs.standaloneLinux, isBE && commandsTabs.nomadLinux]),
       win: [commandsTabs.swarmWindows, commandsTabs.standaloneWindow],
@@ -99,22 +102,18 @@ function EndpointController(
   };
 
   $scope.formValues = {
-    SecurityFormData: new EndpointSecurityFormData(),
-  };
-
-  $scope.copyEdgeAgentKey = function () {
-    clipboard.copyText($scope.endpoint.EdgeKey);
-    $('#copyNotificationEdgeKey').show().fadeOut(2500);
-  };
-
-  $scope.onToggleAllowSelfSignedCerts = function onToggleAllowSelfSignedCerts(checked) {
-    return $scope.$evalAsync(() => {
-      $scope.state.allowSelfSignedCerts = checked;
-    });
+    tlsConfig: {
+      tls: false,
+      skipVerify: false,
+      skipClientVerify: false,
+      caCertFile: null,
+      certFile: null,
+      keyFile: null,
+    },
   };
 
   $scope.onDisassociateEndpoint = async function () {
-    ModalService.confirmDisassociate((confirmed) => {
+    confirmDisassociate().then((confirmed) => {
       if (confirmed) {
         disassociateEndpoint();
       }
@@ -127,10 +126,10 @@ function EndpointController(
     try {
       $scope.state.actionInProgress = true;
       await EndpointService.disassociateEndpoint(endpoint.Id);
-      Notifications.success('Environment disassociated', $scope.endpoint.Name);
+      Notifications.success('环境已解除关联', $scope.endpoint.Name);
       $state.reload();
     } catch (err) {
-      Notifications.error('失败', err, 'Unable to disassociate environment');
+      Notifications.error('Failure', err, '无法解除环境关联');
     } finally {
       $scope.state.actionInProgress = false;
     }
@@ -144,6 +143,15 @@ function EndpointController(
     setFieldValue('TagIds', value);
   }
 
+  function onChangeTLSConfigFormValues(newValues) {
+    return this.$async(async () => {
+      $scope.formValues.tlsConfig = {
+        ...$scope.formValues.tlsConfig,
+        ...newValues,
+      };
+    });
+  }
+
   function setFieldValue(name, value) {
     return $scope.$evalAsync(() => {
       $scope.endpoint = {
@@ -152,8 +160,6 @@ function EndpointController(
       };
     });
   }
-
-  $scope.onGpusChange = onGpusChange;
 
   Array.prototype.indexOf = function (val) {
     for (var i = 0; i < this.length; i++) {
@@ -168,63 +174,27 @@ function EndpointController(
     }
   };
 
-  function onGpusChange(value) {
-    return $async(async () => {
-      $scope.endpoint.Gpus = value;
-    });
-  }
-
-  function verifyGpus() {
-    var i = ($scope.endpoint.Gpus || []).length;
-    while (i--) {
-      if ($scope.endpoint.Gpus[i].name === '' || $scope.endpoint.Gpus[i].name === null) {
-        $scope.endpoint.Gpus.splice(i, 1);
-      }
-    }
-  }
-
   $scope.updateEndpoint = async function () {
     var endpoint = $scope.endpoint;
-    var securityData = $scope.formValues.SecurityFormData;
-    var TLS = securityData.TLS;
-    var TLSMode = securityData.TLSMode;
-    var TLSSkipVerify = TLS && (TLSMode === 'tls_client_noca' || TLSMode === 'tls_only');
-    var TLSSkipClientVerify = TLS && (TLSMode === 'tls_ca' || TLSMode === 'tls_only');
 
     if (isEdgeEnvironment(endpoint.Type) && _.difference($scope.initialTagIds, endpoint.TagIds).length > 0) {
-      let confirmed = await confirmDestructiveAsync({
-        title: '确认操作',
-        message: '当使用动态分组时，从这个环境中删除标签将删除相应的边缘堆栈。',
-        buttons: {
-          cancel: {
-            label: '取消',
-            className: 'btn-default',
-          },
-          confirm: {
-            label: '确认',
-            className: 'btn-primary',
-          },
-        },
+      let confirmed = await confirmDestructive({
+          title: '确认操作',
+          message: '从此环境中删除标签将会在使用动态分组时删除相应的边缘堆栈',
+          confirmButton: buildConfirmButton(),
       });
-
+  
       if (!confirmed) {
-        return;
+          return;
       }
-    }
+   }
 
-    verifyGpus();
     var payload = {
       Name: endpoint.Name,
       PublicURL: endpoint.PublicURL,
       Gpus: endpoint.Gpus,
       GroupID: endpoint.GroupId,
       TagIds: endpoint.TagIds,
-      TLS: TLS,
-      TLSSkipVerify: TLSSkipVerify,
-      TLSSkipClientVerify: TLSSkipClientVerify,
-      TLSCACert: TLSSkipVerify || securityData.TLSCACert === endpoint.TLSConfig.TLSCACert ? null : securityData.TLSCACert,
-      TLSCert: TLSSkipClientVerify || securityData.TLSCert === endpoint.TLSConfig.TLSCert ? null : securityData.TLSCert,
-      TLSKey: TLSSkipClientVerify || securityData.TLSKey === endpoint.TLSConfig.TLSKey ? null : securityData.TLSKey,
       AzureApplicationID: endpoint.AzureCredentials.ApplicationID,
       AzureTenantID: endpoint.AzureCredentials.TenantID,
       AzureAuthenticationKey: endpoint.AzureCredentials.AuthenticationKey,
@@ -238,6 +208,18 @@ function EndpointController(
       endpoint.Type !== PortainerEndpointTypes.AgentOnKubernetesEnvironment
     ) {
       payload.URL = 'tcp://' + endpoint.URL;
+
+      if (endpoint.Type === PortainerEndpointTypes.DockerEnvironment) {
+        var tlsConfig = $scope.formValues.tlsConfig;
+        payload.TLS = tlsConfig.tls;
+        payload.TLSSkipVerify = tlsConfig.skipVerify;
+        if (tlsConfig.tls && !tlsConfig.skipVerify) {
+          payload.TLSSkipClientVerify = tlsConfig.skipClientVerify;
+          payload.TLSCACert = tlsConfig.caCertFile;
+          payload.TLSCert = tlsConfig.certFile;
+          payload.TLSKey = tlsConfig.keyFile;
+        }
+      }
     }
 
     if (endpoint.Type === PortainerEndpointTypes.AgentOnKubernetesEnvironment) {
@@ -252,10 +234,10 @@ function EndpointController(
     EndpointService.updateEndpoint(endpoint.Id, payload).then(
       function success() {
         Notifications.success('Environment updated', $scope.endpoint.Name);
-        $state.go('portainer.endpoints', {}, { reload: true });
+        $state.go($state.params.redirectTo || 'portainer.endpoints', {}, { reload: true });
       },
       function error(err) {
-        Notifications.error('失败', err, 'Unable to update environment');
+        Notifications.error('Failure', err, 'Unable to update environment');
         $scope.state.actionInProgress = false;
       },
       function update(evt) {
@@ -304,10 +286,36 @@ function EndpointController(
     }
   }
 
+  function configureTLS(endpoint) {
+    $scope.formValues = {
+      tlsConfig: {
+        tls: endpoint.TLSConfig.TLS || false,
+        skipVerify: endpoint.TLSConfig.TLSSkipVerify || false,
+        skipClientVerify: endpoint.TLSConfig.TLSSkipClientVerify || false,
+      },
+    };
+  }
+
   async function initView() {
     return $async(async () => {
       try {
         const [endpoint, groups, settings] = await Promise.all([EndpointService.endpoint($transition$.params().id), GroupService.groups(), SettingsService.settings()]);
+
+        if (isDockerAPIEnvironment(endpoint)) {
+          $scope.state.showTLSConfig = true;
+        }
+
+        // Check if the environment is docker standalone, to decide whether to show the GPU insights box
+        const isDockerEnvironment = endpoint.Type === PortainerEndpointTypes.DockerEnvironment;
+        if (isDockerEnvironment) {
+          try {
+            const dockerInfo = await getInfo(endpoint.Id);
+            const isDockerSwarmEnv = dockerInfo.Swarm && dockerInfo.Swarm.NodeID;
+            $scope.isDockerStandaloneEnv = !isDockerSwarmEnv;
+          } catch (err) {
+            // $scope.isDockerStandaloneEnv is only used to show the "GPU insights box", so fail quietly on error
+          }
+        }
 
         if (endpoint.URL.indexOf('unix://') === 0 || endpoint.URL.indexOf('npipe://') === 0) {
           $scope.endpointType = 'local';
@@ -330,11 +338,13 @@ function EndpointController(
 
         configureState();
 
+        configureTLS(endpoint);
+
         if (EndpointHelper.isDockerEndpoint(endpoint) && $scope.state.edgeAssociated) {
           $scope.state.showAMTInfo = settings && settings.openAMTConfiguration && settings.openAMTConfiguration.enabled;
         }
       } catch (err) {
-        Notifications.error('失败', err, 'Unable to retrieve environment details');
+        Notifications.error('Failure', err, '无法检索环境详细信息');
       }
 
       if ($scope.state.showAMTInfo) {
@@ -347,7 +357,7 @@ function EndpointController(
             clearAMTManagementInfo(amtInfo.RawOutput);
           }
         } catch (err) {
-          clearAMTManagementInfo('Unable to retrieve AMT environment details');
+          clearAMTManagementInfo('无法检索 AMT 环境详细信息');
         }
       }
     });

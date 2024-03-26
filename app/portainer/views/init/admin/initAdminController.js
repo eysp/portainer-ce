@@ -1,4 +1,5 @@
-import { getEnvironments } from '@/portainer/environments/environment.service';
+import { getEnvironments } from '@/react/portainer/environments/environment.service';
+import { restoreOptions } from '@/react/portainer/init/InitAdminView/restore-options';
 
 angular.module('portainer.app').controller('InitAdminController', [
   '$scope',
@@ -11,6 +12,8 @@ angular.module('portainer.app').controller('InitAdminController', [
   'BackupService',
   'StatusService',
   function ($scope, $state, Notifications, Authentication, StateManager, SettingsService, UserService, BackupService, StatusService) {
+    $scope.restoreOptions = restoreOptions;
+
     $scope.uploadBackup = uploadBackup;
 
     $scope.logo = StateManager.getState().application.logo;
@@ -34,6 +37,13 @@ angular.module('portainer.app').controller('InitAdminController', [
       $scope.state.showInitPassword = !$scope.state.showInitPassword;
       $scope.state.showRestorePortainer = !$scope.state.showRestorePortainer;
     };
+
+    $scope.onChangeRestoreType = onChangeRestoreType;
+    function onChangeRestoreType(value) {
+      $scope.$evalAsync(() => {
+        $scope.formValues.restoreFormType = value;
+      });
+    }
 
     $scope.createAdminUser = function () {
       var username = $scope.formValues.Username;
@@ -62,7 +72,7 @@ angular.module('portainer.app').controller('InitAdminController', [
         })
         .catch(function error(err) {
           handleError(err);
-          Notifications.error('失败', err, '无法创建管理员用户');
+          Notifications.error('Failure', err, '无法创建管理员用户');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -85,7 +95,7 @@ angular.module('portainer.app').controller('InitAdminController', [
           $scope.requiredPasswordLength = data.RequiredPasswordLength;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索应用程序设置');
+          Notifications.error('Failure', err, '无法检索应用程序设置');
         });
 
       UserService.administratorExists()
@@ -95,7 +105,7 @@ angular.module('portainer.app').controller('InitAdminController', [
           }
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法验证管理员账户的存在');
+          Notifications.error('Failure', err, '无法验证管理员帐户是否存在');
         });
     }
 
@@ -115,7 +125,7 @@ angular.module('portainer.app').controller('InitAdminController', [
         await restoreAsyncFn();
       } catch (err) {
         handleError(err);
-        Notifications.error('失败', err, '无法恢复备份');
+        Notifications.error('Failure', err, '无法恢复备份');
         $scope.state.backupInProgress = false;
 
         return;
@@ -123,11 +133,11 @@ angular.module('portainer.app').controller('InitAdminController', [
 
       try {
         await waitPortainerRestart();
-        Notifications.success('Success', '备份已经成功恢复了');
+        Notifications.success('Success', '备份已成功恢复');
         $state.go('portainer.auth');
       } catch (err) {
         handleError(err);
-        Notifications.error('失败', err, '无法检查状态');
+        Notifications.error('Failure', err, '无法检查状态');
         await wait(2);
         location.reload();
       }
@@ -147,7 +157,7 @@ angular.module('portainer.app').controller('InitAdminController', [
           // pass
         }
       }
-      throw new Error('等待Portainer重新启动的超时时间');
+      throw new Error('等待 Portainer 重新启动超时');
     }
   },
 ]);

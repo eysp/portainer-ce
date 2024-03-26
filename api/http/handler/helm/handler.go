@@ -4,24 +4,20 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/portainer/libhelm"
-	"github.com/portainer/libhelm/options"
 	httperror "github.com/portainer/libhttp/error"
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/http/middlewares"
 	"github.com/portainer/portainer/api/http/security"
 	"github.com/portainer/portainer/api/kubernetes"
+	"github.com/portainer/portainer/pkg/libhelm"
+	"github.com/portainer/portainer/pkg/libhelm/options"
 )
-
-type requestBouncer interface {
-	AuthenticatedAccess(h http.Handler) http.Handler
-}
 
 // Handler is the HTTP handler used to handle environment(endpoint) group operations.
 type Handler struct {
 	*mux.Router
-	requestBouncer           requestBouncer
+	requestBouncer           security.BouncerService
 	dataStore                dataservices.DataStore
 	jwtService               dataservices.JWTService
 	kubeClusterAccessService kubernetes.KubeClusterAccessService
@@ -30,7 +26,7 @@ type Handler struct {
 }
 
 // NewHandler creates a handler to manage endpoint group operations.
-func NewHandler(bouncer requestBouncer, dataStore dataservices.DataStore, jwtService dataservices.JWTService, kubernetesDeployer portainer.KubernetesDeployer, helmPackageManager libhelm.HelmPackageManager, kubeClusterAccessService kubernetes.KubeClusterAccessService) *Handler {
+func NewHandler(bouncer security.BouncerService, dataStore dataservices.DataStore, jwtService dataservices.JWTService, kubernetesDeployer portainer.KubernetesDeployer, helmPackageManager libhelm.HelmPackageManager, kubeClusterAccessService kubernetes.KubeClusterAccessService) *Handler {
 	h := &Handler{
 		Router:                   mux.NewRouter(),
 		requestBouncer:           bouncer,
@@ -64,7 +60,7 @@ func NewHandler(bouncer requestBouncer, dataStore dataservices.DataStore, jwtSer
 }
 
 // NewTemplateHandler creates a template handler to manage environment(endpoint) group operations.
-func NewTemplateHandler(bouncer requestBouncer, helmPackageManager libhelm.HelmPackageManager) *Handler {
+func NewTemplateHandler(bouncer security.BouncerService, helmPackageManager libhelm.HelmPackageManager) *Handler {
 	h := &Handler{
 		Router:             mux.NewRouter(),
 		helmPackageManager: helmPackageManager,
@@ -110,7 +106,7 @@ func (handler *Handler) getHelmClusterAccess(r *http.Request) (*options.Kubernet
 		hostURL = r.Host
 	}
 
-	kubeConfigInternal := handler.kubeClusterAccessService.GetData(hostURL, endpoint.ID)
+	kubeConfigInternal := handler.kubeClusterAccessService.GetClusterDetails(hostURL, endpoint.ID, true)
 	return &options.KubernetesClusterAccess{
 		ClusterServerURL:         kubeConfigInternal.ClusterServerURL,
 		CertificateAuthorityFile: kubeConfigInternal.CertificateAuthorityFile,

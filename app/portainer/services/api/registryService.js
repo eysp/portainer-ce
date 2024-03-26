@@ -37,7 +37,7 @@ angular.module('portainer.app').factory('RegistryService', [
           deferred.resolve(registries);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve registries', err: err });
+          deferred.reject({ msg: '无法检索注册表', err: err });
         });
 
       return deferred.promise;
@@ -52,7 +52,7 @@ angular.module('portainer.app').factory('RegistryService', [
           deferred.resolve(registry);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve registry details', err: err });
+          deferred.reject({ msg: '无法检索注册表详细信息', err: err });
         });
 
       return deferred.promise;
@@ -137,7 +137,7 @@ angular.module('portainer.app').factory('RegistryService', [
           match4 = match4 || registry;
         }
 
-        if (_.includes(repository, getURL(registry))) {
+        if (repository.startsWith(getURL(registry))) {
           match3 = registry;
         }
       }
@@ -174,7 +174,7 @@ angular.module('portainer.app').factory('RegistryService', [
           const regs = await EndpointService.registries(endpointId, namespace);
           return retrievePorRegistryModelFromRepositoryWithRegistries(repository, regs, registryId);
         } catch (err) {
-          throw { msg: 'Unable to retrieve the registry associated to the repository', err: err };
+          throw { msg: '无法检索与存储库关联的注册表', err: err };
         }
       });
     }
@@ -191,7 +191,7 @@ angular.module('portainer.app').factory('RegistryService', [
 
           return registries;
         } catch (err) {
-          throw { msg: 'Unable to retrieve the registries', err: err };
+          throw { msg: '无法检索注册表', err: err };
         }
       });
     }

@@ -2,37 +2,37 @@
   title="'容器控制台'"
   breadcrumbs="[
     { label:'容器', link:'docker.containers' },
-    { 
+    {
       label:(container.Name | trimcontainername),
-      link: 'docker.containers.container', 
-      linkParams:container.Id
-    }, 'Console']"
+      link: 'docker.containers.container',
+      linkParams: { id: container.Id },
+    }, '控制台']"
 >
 </page-header>
 
 <div class="row" ng-init="autoconnectAttachView()" ng-show="loaded">
   <div class="col-lg-12 col-md-12 col-xs-12">
     <rd-widget>
-      <rd-widget-header icon="terminal" feather-icon="true" title-text="Attach"></rd-widget-header>
+      <rd-widget-header icon="terminal" title-text="附加"></rd-widget-header>
       <rd-widget-body>
         <div class="small text-warning" ng-if="!container.Config.OpenStdin">
           <p>
-            <pr-icon icon="'alert-triangle'" mode="'warning'" feather="true"></pr-icon>
-            没有设置交互式标志。你可能无法正常使用控制台。
+            <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
+            未设置交互标志。您可能无法正确使用控制台。
           </p>
         </div>
 
         <div class="small text-warning" ng-if="!container.Config.Tty">
           <p>
-            <pr-icon icon="'alert-triangle'" mode="'warning'" feather="true"></pr-icon>
-            TTY-flag 没有设置。你可能无法正常使用控制台。
+            <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
+            未设置 TTY 标志。您可能无法正确使用控制台。
           </p>
         </div>
 
         <div class="small text-warning" ng-hide="container.State.Running">
           <p>
-            <pr-icon icon="'alert-triangle'" mode="'warning'" feather="true"></pr-icon>
-            容器没有运行。
+            <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
+            容器未运行。
           </p>
         </div>
 
@@ -42,9 +42,9 @@
           ng-disabled="state === states.connecting || !container.State.Running"
           ng-click="state == states.disconnected ? connectAttach() : disconnect()"
         >
-          <span ng-show="state === states.disconnected">附在容器上</span>
-          <span ng-show="state === states.connected">断开</span>
-          <span ng-show="state === states.connecting">附上中...</span>
+          <span ng-show="state === states.disconnected">附加到容器</span>
+          <span ng-show="state === states.connected">分离</span>
+          <span ng-show="state === states.connecting">附加中...</span>
         </button>
       </rd-widget-body>
     </rd-widget>

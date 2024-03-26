@@ -1,6 +1,6 @@
 import angular from 'angular';
 
-import { FeatureId } from '@/portainer/feature-flags/enums';
+import { FeatureId } from '@/react/portainer/feature-flags/enums';
 
 class EndpointAccessController {
   /* @ngInject */
@@ -24,7 +24,7 @@ class EndpointAccessController {
       this.endpoint = await this.EndpointService.endpoint(this.$transition$.params().id);
       this.group = await this.GroupService.group(this.endpoint.GroupId);
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to retrieve environment information');
+      this.Notifications.error('Failure', err, '无法检索环境信息');
     }
   }
 
@@ -36,11 +36,11 @@ class EndpointAccessController {
     try {
       this.state.actionInProgress = true;
       await this.EndpointService.updateEndpoint(this.$transition$.params().id, this.endpoint);
-      this.Notifications.success('Success', 'Access successfully updated');
+      this.Notifications.success('Success', '访问权限已成功更新');
       this.$state.reload(this.$state.current);
     } catch (err) {
       this.state.actionInProgress = false;
-      this.Notifications.error('失败', err, 'Unable to update accesses');
+      this.Notifications.error('Failure', err, '无法更新访问权限');
     }
   }
 }

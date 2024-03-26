@@ -74,7 +74,7 @@ function TemplateListController($scope, $async, $state, DatatableService, Notifi
       }
       $state.go('docker.templates.custom.new', { fileContent, type });
     } catch (err) {
-      Notifications.error('失败', err, 'Failed to duplicate template');
+      Notifications.error('Failure', err, '复制模板失败');
     }
   }
 
@@ -124,7 +124,7 @@ function TemplateListController($scope, $async, $state, DatatableService, Notifi
     }
 
     this.initalTemplates = this.templates;
-    this.state.orderByFields = ['Title', 'Categories', 'Description'];
+    this.state.orderByFields = ['Title', '类别', 'Description'];
     this.state.typeFilters = ['Container', 'Stack'];
   };
 
@@ -137,7 +137,7 @@ function TemplateListController($scope, $async, $state, DatatableService, Notifi
   function getSorter(orderBy) {
     let sorter;
     switch (orderBy) {
-      case 'Categories':
+      case '类别':
         sorter = categorySorter;
         break;
       default:

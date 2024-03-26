@@ -1,4 +1,4 @@
-import { UserContext } from '@/portainer/hooks/useUser';
+import { UserContext } from '@/react/hooks/useUser';
 import { UserViewModel } from '@/portainer/models/user';
 import { render, within } from '@/react-tools/test-utils';
 
@@ -8,9 +8,9 @@ import { AzureSidebar } from './AzureSidebar';
 
 test('dashboard items should render correctly', () => {
   const { getByLabelText } = renderComponent();
-  const dashboardItem = getByLabelText('仪表板);
+  const dashboardItem = getByLabelText('Dashboard');
   expect(dashboardItem).toBeVisible();
-  expect(dashboardItem).toHaveTextContent('仪表板');
+  expect(dashboardItem).toHaveTextContent('Dashboard');
 
   const dashboardItemElements = within(dashboardItem);
   expect(

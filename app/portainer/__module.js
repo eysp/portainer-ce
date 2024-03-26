@@ -1,26 +1,44 @@
 import _ from 'lodash-es';
 
+import featureFlagModule from '@/react/portainer/feature-flags';
+
 import './rbac';
+
 import componentsModule from './components';
 import settingsModule from './settings';
-import featureFlagModule from './feature-flags';
 import userActivityModule from './user-activity';
 import servicesModule from './services';
 import { reactModule } from './react';
 import { sidebarModule } from './react/views/sidebar';
 import environmentsModule from './environments';
+import { helpersModule } from './helpers';
+import { AXIOS_UNAUTHENTICATED } from './services/axios';
 
 async function initAuthentication(authManager, Authentication, $rootScope, $state) {
   authManager.checkAuthOnRefresh();
+
+  function handleUnauthenticated(data, performReload) {
+    if (!_.includes(data.config.url, '/v2/') && !_.includes(data.config.url, '/api/v4/') && isTransitionRequiresAuthentication($state.transition)) {
+      $state.go('portainer.logout', { error: '您的会话已过期' });
+      if (performReload) {
+        window.location.reload();
+      }
+    }
+  }
+
   // The unauthenticated event is broadcasted by the jwtInterceptor when
   // hitting a 401. We're using this instead of the usual combination of
   // authManager.redirectWhenUnauthenticated() + unauthenticatedRedirector
   // to have more controls on which URL should trigger the unauthenticated state.
   $rootScope.$on('unauthenticated', function (event, data) {
-    if (!_.includes(data.config.url, '/v2/') && !_.includes(data.config.url, '/api/v4/') && isTransitionRequiresAuthentication($state.transition)) {
-      $state.go('portainer.logout', { error: 'Your session has expired' });
-      window.location.reload();
-    }
+    handleUnauthenticated(data, true);
+  });
+
+  // the AXIOS_UNAUTHENTICATED event is emitted by axios when a request returns with a 401 code
+  // the event contains the entire AxiosError in detail.err
+  window.addEventListener(AXIOS_UNAUTHENTICATED, (event) => {
+    const data = event.detail.err;
+    handleUnauthenticated(data);
   });
 
   return await Authentication.init();
@@ -39,6 +57,7 @@ angular
     reactModule,
     sidebarModule,
     environmentsModule,
+    helpersModule,
   ])
   .config([
     '$stateRegistryProvider',
@@ -60,7 +79,7 @@ angular
                 return Promise.reject('Unauthenticated');
               }
             } catch (err) {
-              Notifications.error('失败', err, 'Unable to retrieve application settings');
+              Notifications.error('失败', err, '无法检索应用程序设置');
               throw err;
             }
           });
@@ -93,7 +112,7 @@ angular
 
                 return endpoint;
               } catch (e) {
-                Notifications.error('Failed loading environment', e);
+                Notifications.error('加载环境失败', e);
                 $state.go('portainer.home', {}, { reload: true });
                 return;
               }
@@ -144,12 +163,12 @@ angular
           'sidebar@': {},
         },
       };
+
       const logout = {
         name: 'portainer.logout',
         url: '/logout',
         params: {
           error: '',
-          performApiLogout: false,
         },
         views: {
           'content@': {
@@ -166,14 +185,17 @@ angular
         url: '/endpoints',
         views: {
           'content@': {
-            component: 'endpointsView',
+            component: 'environmentsListView',
           },
         },
       };
 
       var endpoint = {
         name: 'portainer.endpoints.endpoint',
-        url: '/:id',
+        url: '/:id?redirectTo',
+        params: {
+          redirectTo: '',
+        },
         views: {
           'content@': {
             templateUrl: './views/endpoints/edit/endpoint.html',
@@ -189,6 +211,16 @@ angular
           'content@': {
             templateUrl: './views/devices/import/importDevice.html',
             controller: 'ImportDeviceController',
+          },
+        },
+      };
+
+      const edgeAutoCreateScript = {
+        name: 'portainer.endpoints.edgeAutoCreateScript',
+        url: '/aeec',
+        views: {
+          'content@': {
+            component: 'edgeAutoCreateScriptView',
           },
         },
       };
@@ -282,7 +314,7 @@ angular
 
       var home = {
         name: 'portainer.home',
-        url: '/home',
+        url: '/home?redirect&environmentId&environmentName&route',
         views: {
           'content@': {
             component: 'homeView',
@@ -296,18 +328,6 @@ angular
         url: '/init',
         views: {
           'sidebar@': {},
-        },
-      };
-
-      var initEndpoint = {
-        name: 'portainer.init.endpoint',
-        url: '/endpoint',
-        views: {
-          'content@': {
-            templateUrl: './views/init/endpoint/initEndpoint.html',
-            controller: 'InitEndpointController',
-            controllerAs: 'ctrl',
-          },
         },
       };
 
@@ -358,8 +378,7 @@ angular
         url: '/settings',
         views: {
           'content@': {
-            templateUrl: './views/settings/settings.html',
-            controller: 'SettingsController',
+            component: 'settingsView',
           },
         },
       };
@@ -429,6 +448,7 @@ angular
       $stateRegistryProvider.register(endpoint);
       $stateRegistryProvider.register(endpointAccess);
       $stateRegistryProvider.register(endpointKVM);
+      $stateRegistryProvider.register(edgeAutoCreateScript);
       $stateRegistryProvider.register(deviceImport);
       $stateRegistryProvider.register(addFDOProfile);
       $stateRegistryProvider.register(editFDOProfile);
@@ -438,7 +458,6 @@ angular
       $stateRegistryProvider.register(groupCreation);
       $stateRegistryProvider.register(home);
       $stateRegistryProvider.register(init);
-      $stateRegistryProvider.register(initEndpoint);
       $stateRegistryProvider.register(initAdmin);
       $stateRegistryProvider.register(registries);
       $stateRegistryProvider.register(registry);

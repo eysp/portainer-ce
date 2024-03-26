@@ -3,13 +3,15 @@ import clsx from 'clsx';
 import { useMutation } from 'react-query';
 import { object } from 'yup';
 
-import { useUser } from '@/portainer/hooks/useUser';
-import { confirmAsync } from '@/portainer/services/modal.service/confirm';
+import { useCurrentUser } from '@/react/hooks/useUser';
 import { notifySuccess } from '@/portainer/services/notifications';
-import { EnvironmentId } from '@/portainer/environments/types';
+import { EnvironmentId } from '@/react/portainer/environments/types';
 
+import { confirm } from '@@/modals/confirm';
 import { Button } from '@@/buttons';
 import { LoadingButton } from '@@/buttons/LoadingButton';
+import { buildConfirmButton } from '@@/modals/utils';
+import { ModalType } from '@@/modals';
 
 import { EditDetails } from '../EditDetails';
 import { parseAccessControlFormData } from '../utils';
@@ -41,7 +43,7 @@ export function AccessControlPanelForm({
   onCancelClick,
   onUpdateSuccess,
 }: Props) {
-  const { isAdmin } = useUser();
+  const { isAdmin, user } = useCurrentUser();
 
   const updateAccess = useMutation(
     (variables: AccessControlFormData) =>
@@ -53,7 +55,7 @@ export function AccessControlPanelForm({
       ),
     {
       meta: {
-        error: { title: 'Failure', message: '无法更新访问控制' },
+        error: { title: '失败', message: '无法更新访问控制' },
       },
       onSuccess() {
         return onUpdateSuccess();
@@ -62,7 +64,11 @@ export function AccessControlPanelForm({
   );
 
   const initialValues = {
-    accessControl: parseAccessControlFormData(isAdmin, resourceControl),
+    accessControl: parseAccessControlFormData(
+      isAdmin,
+      user.Id,
+      resourceControl
+    ),
   };
 
   return (
@@ -98,7 +104,7 @@ export function AccessControlPanelForm({
                 type="submit"
                 isLoading={isSubmitting}
                 disabled={!isValid}
-                loadingText="更新所有权"
+                loadingText="正在更新所有权"
               >
                 更新所有权
               </LoadingButton>
@@ -121,22 +127,18 @@ export function AccessControlPanelForm({
 
     updateAccess.mutate(accessControl, {
       onSuccess() {
-        notifySuccess('Success', '访问控制已成功更新');
+        notifySuccess('成功', '访问控制更新成功');
       },
     });
   }
 }
 
 function confirmAccessControlUpdate() {
-  return confirmAsync({
-    title: '你确定吗？',
+  return confirm({
+    modalType: ModalType.Warn,
+    title: '您确定吗？',
     message:
-      '改变该资源的所有权将有可能限制其对某些用户的管理。',
-    buttons: {
-      confirm: {
-        label: '更改所有权',
-        className: 'btn-primary',
-      },
-    },
+      '更改此资源的所有权可能会限制某些用户对其的管理。',
+    confirmButton: buildConfirmButton('更改所有权'),
   });
 }

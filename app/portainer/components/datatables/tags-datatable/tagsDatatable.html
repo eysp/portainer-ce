@@ -4,29 +4,29 @@
       <div class="toolBar">
         <div class="toolBarTitle vertical-center">
           <div class="widget-icon space-right">
-            <pr-icon icon="$ctrl.titleIcon" feather="true"></pr-icon>
+            <pr-icon icon="$ctrl.titleIcon"></pr-icon>
           </div>
           {{ $ctrl.titleText }}
         </div>
         <div class="searchBar vertical-center">
-          <pr-icon icon="'search'" feather="true"></pr-icon>
+          <pr-icon icon="'search'"></pr-icon>
           <input
             type="text"
             class="searchInput"
             ng-model="$ctrl.state.textFilter"
             ng-change="$ctrl.onTextFilterChange()"
-            placeholder="搜索标记..."
+            placeholder="搜索标签..."
             ng-model-options="{ debounce: 300 }"
           />
         </div>
         <div class="actionBar !gap-3">
           <button type="button" class="btn btn-sm btn-dangerlight h-fit" ng-disabled="$ctrl.state.selectedItemCount === 0" ng-click="$ctrl.removeAction($ctrl.state.selectedItems)">
-            <pr-icon icon="'trash-2'" feather="true"></pr-icon>删除
+            <pr-icon icon="'trash-2'"></pr-icon>删除
           </button>
         </div>
       </div>
       <div class="table-responsive">
-        <table class="table table-hover nowrap-cells">
+        <table class="table-hover nowrap-cells table">
           <thead>
             <tr>
               <th>
@@ -60,22 +60,22 @@
               </td>
             </tr>
             <tr ng-if="!$ctrl.dataset">
-              <td colspan="1" class="text-center text-muted">加载中...</td>
+              <td colspan="1" class="text-muted text-center">加载中...</td>
             </tr>
             <tr ng-if="$ctrl.state.filteredDataSet.length === 0">
-              <td colspan="1" class="text-center text-muted">没有可用的标记。</td>
+              <td colspan="1" class="text-muted text-center">没有可用的标签。</td>
             </tr>
           </tbody>
         </table>
       </div>
       <div class="footer" ng-if="$ctrl.dataset">
-        <div class="infoBar" ng-if="$ctrl.state.selectedItemCount !== 0"> {{ $ctrl.state.selectedItemCount }} 所选项目 </div>
+        <div class="infoBar" ng-if="$ctrl.state.selectedItemCount !== 0"> {{ $ctrl.state.selectedItemCount }} 项已选择 </div>
         <div class="paginationControls">
           <form class="form-inline vertical-center">
             <span class="limitSelector">
-              <span class="space-right"> 每页项目数 </span>
+              <span class="space-right"> 每页项目 </span>
               <select class="form-control" ng-model="$ctrl.state.paginatedItemLimit" ng-change="$ctrl.changePaginationLimit()" data-cy="component-paginationSelect">
-                <option value="0">All</option>
+                <option value="0">全部</option>
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50">50</option>

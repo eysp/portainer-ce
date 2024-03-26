@@ -3,7 +3,7 @@ import { loadProgressBar } from 'axios-progress-bar';
 
 import 'axios-progress-bar/dist/nprogress.css';
 import PortainerError from '@/portainer/error';
-import { get as localStorageGet } from '@/portainer/hooks/useLocalStorage';
+import { get as localStorageGet } from '@/react/hooks/useLocalStorage';
 
 import {
   portainerAgentManagerOperation,
@@ -27,6 +27,8 @@ axios.interceptors.request.use(async (config) => {
   return newConfig;
 });
 
+export const agentTargetHeader = 'X-PortainerAgent-Target';
+
 export function agentInterceptor(config: AxiosRequestConfig) {
   if (!config.url || !config.url.includes('/docker/')) {
     return config;
@@ -35,7 +37,7 @@ export function agentInterceptor(config: AxiosRequestConfig) {
   const newConfig = { headers: config.headers || {}, ...config };
   const target = portainerAgentTargetHeader();
   if (target) {
-    newConfig.headers['X-PortainerAgent-Target'] = target;
+    newConfig.headers[agentTargetHeader] = target;
   }
 
   if (portainerAgentManagerOperation()) {
@@ -47,15 +49,24 @@ export function agentInterceptor(config: AxiosRequestConfig) {
 
 axios.interceptors.request.use(agentInterceptor);
 
+export const AXIOS_UNAUTHENTICATED = '__axios__unauthenticated__';
+
+/**
+ * Parses an Axios error and returns a PortainerError.
+ * @param err The original error.
+ * @param msg An optional error message to prepend.
+ * @param parseError A function to parse AxiosErrors. Defaults to defaultErrorParser.
+ * @returns A PortainerError with the parsed error message and details.
+ */
 export function parseAxiosError(
-  err: Error,
+  err: unknown,
   msg = '',
   parseError = defaultErrorParser
 ) {
   let resultErr = err;
   let resultMsg = msg;
 
-  if ('isAxiosError' in err) {
+  if (isAxiosError(err)) {
     const { error, details } = parseError(err as AxiosError);
     resultErr = error;
     if (msg && details) {
@@ -63,14 +74,30 @@ export function parseAxiosError(
     } else {
       resultMsg = msg || details;
     }
+    // dispatch an event for unauthorized errors that AngularJS can catch
+    if (err.response?.status === 401) {
+      dispatchEvent(
+        new CustomEvent(AXIOS_UNAUTHENTICATED, {
+          detail: {
+            err,
+          },
+        })
+      );
+    }
   }
 
   return new PortainerError(resultMsg, resultErr);
 }
 
-function defaultErrorParser(axiosError: AxiosError) {
+export function defaultErrorParser(axiosError: AxiosError) {
   const message = axiosError.response?.data.message || '';
   const details = axiosError.response?.data.details || message;
   const error = new Error(message);
   return { error, details };
+}
+
+export function isAxiosError<
+  ResponseType = { message: string; details: string }
+>(error: unknown): error is AxiosError<ResponseType> {
+  return axiosOrigin.isAxiosError(error);
 }

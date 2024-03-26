@@ -29,8 +29,7 @@ func TestService_StackByWebhookID(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode. Normally takes ~1s to run.")
 	}
-	_, store, teardown := datastore.MustNewTestStore(t, true, true)
-	defer teardown()
+	_, store := datastore.MustNewTestStore(t, true, true)
 
 	b := stackBuilder{t: t, store: store}
 	b.createNewStack(newGuidString(t))
@@ -59,7 +58,7 @@ func (b *stackBuilder) createNewStack(webhookID string) portainer.Stack {
 		Type:         portainer.DockerComposeStack,
 		EndpointID:   2,
 		EntryPoint:   filesystem.ComposeFileDefaultName,
-		Env:          []portainer.Pair{{"Name1", "Value1"}},
+		Env:          []portainer.Pair{{Name: "Name1", Value: "Value1"}},
 		Status:       portainer.StackStatusActive,
 		CreationDate: time.Now().Unix(),
 		ProjectPath:  "/tmp/project",
@@ -68,13 +67,13 @@ func (b *stackBuilder) createNewStack(webhookID string) portainer.Stack {
 
 	if webhookID == "" {
 		if b.count%2 == 0 {
-			stack.AutoUpdate = &portainer.StackAutoUpdate{
+			stack.AutoUpdate = &portainer.AutoUpdateSettings{
 				Interval: "",
 				Webhook:  "",
 			}
 		} // else keep AutoUpdate nil
 	} else {
-		stack.AutoUpdate = &portainer.StackAutoUpdate{Webhook: webhookID}
+		stack.AutoUpdate = &portainer.AutoUpdateSettings{Webhook: webhookID}
 	}
 
 	err := b.store.StackService.Create(&stack)
@@ -87,12 +86,11 @@ func Test_RefreshableStacks(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode. Normally takes ~1s to run.")
 	}
-	_, store, teardown := datastore.MustNewTestStore(t, true, true)
-	defer teardown()
+	_, store := datastore.MustNewTestStore(t, true, true)
 
 	staticStack := portainer.Stack{ID: 1}
-	stackWithWebhook := portainer.Stack{ID: 2, AutoUpdate: &portainer.StackAutoUpdate{Webhook: "webhook"}}
-	refreshableStack := portainer.Stack{ID: 3, AutoUpdate: &portainer.StackAutoUpdate{Interval: "1m"}}
+	stackWithWebhook := portainer.Stack{ID: 2, AutoUpdate: &portainer.AutoUpdateSettings{Webhook: "webhook"}}
+	refreshableStack := portainer.Stack{ID: 3, AutoUpdate: &portainer.AutoUpdateSettings{Interval: "1m"}}
 
 	for _, stack := range []*portainer.Stack{&staticStack, &stackWithWebhook, &refreshableStack} {
 		err := store.Stack().Create(stack)

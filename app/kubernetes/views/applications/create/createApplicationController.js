@@ -3,6 +3,8 @@ import _ from 'lodash-es';
 import filesizeParser from 'filesize-parser';
 import * as JsonPatch from 'fast-json-patch';
 import { RegistryTypes } from '@/portainer/models/registryTypes';
+import { getServices } from '@/react/kubernetes/networks/services/service';
+import { KubernetesConfigurationKinds } from 'Kubernetes/models/configuration/models';
 
 import {
   KubernetesApplicationDataAccessPolicies,
@@ -20,7 +22,6 @@ import {
   KubernetesApplicationEnvironmentVariableFormValue,
   KubernetesApplicationFormValues,
   KubernetesApplicationPersistedFolderFormValue,
-  KubernetesApplicationPublishedPortFormValue,
   KubernetesApplicationPlacementFormValue,
   KubernetesFormValidationReferences,
 } from 'Kubernetes/models/application/formValues';
@@ -32,8 +33,12 @@ import KubernetesApplicationHelper from 'Kubernetes/helpers/application/index';
 import KubernetesVolumeHelper from 'Kubernetes/helpers/volumeHelper';
 import KubernetesNamespaceHelper from 'Kubernetes/helpers/namespaceHelper';
 import { KubernetesNodeHelper } from 'Kubernetes/node/helper';
-import { updateIngress, getIngresses } from '@/kubernetes/react/views/networks/ingresses/service';
-import { confirmUpdateAppIngress } from '@/portainer/services/modal.service/prompt';
+import { updateIngress, getIngresses } from '@/react/kubernetes/ingresses/service';
+import { confirmUpdateAppIngress } from '@/react/kubernetes/applications/CreateView/UpdateIngressPrompt';
+import { confirm, confirmUpdate, confirmWebEditorDiscard } from '@@/modals/confirm';
+import { buildConfirmButton } from '@@/modals/utils';
+import { ModalType } from '@@/modals';
+import { placementOptions } from '@/react/kubernetes/applications/CreateView/placementTypes';
 
 class KubernetesCreateApplicationController {
   /* #region  CONSTRUCTOR */
@@ -45,7 +50,6 @@ class KubernetesCreateApplicationController {
     $state,
     Notifications,
     Authentication,
-    ModalService,
     KubernetesResourcePoolService,
     KubernetesApplicationService,
     KubernetesStackService,
@@ -63,7 +67,6 @@ class KubernetesCreateApplicationController {
     this.$state = $state;
     this.Notifications = Notifications;
     this.Authentication = Authentication;
-    this.ModalService = ModalService;
     this.KubernetesResourcePoolService = KubernetesResourcePoolService;
     this.KubernetesApplicationService = KubernetesApplicationService;
     this.KubernetesStackService = KubernetesStackService;
@@ -84,6 +87,8 @@ class KubernetesCreateApplicationController {
     this.ApplicationConfigurationFormValueOverridenKeyTypes = KubernetesApplicationConfigurationFormValueOverridenKeyTypes;
     this.ServiceTypes = KubernetesServiceTypes;
     this.KubernetesDeploymentTypes = KubernetesDeploymentTypes;
+
+    this.placementOptions = placementOptions;
 
     this.state = {
       appType: this.KubernetesDeploymentTypes.APPLICATION_FORM,
@@ -116,19 +121,15 @@ class KubernetesCreateApplicationController {
       duplicates: {
         environmentVariables: new KubernetesFormValidationReferences(),
         persistedFolders: new KubernetesFormValidationReferences(),
-        configurationPaths: new KubernetesFormValidationReferences(),
+        configMapPaths: new KubernetesFormValidationReferences(),
+        secretPaths: new KubernetesFormValidationReferences(),
         existingVolumes: new KubernetesFormValidationReferences(),
-        publishedPorts: {
-          containerPorts: new KubernetesFormValidationReferences(),
-          nodePorts: new KubernetesFormValidationReferences(),
-          ingressRoutes: new KubernetesFormValidationReferences(),
-          loadBalancerPorts: new KubernetesFormValidationReferences(),
-        },
         placements: new KubernetesFormValidationReferences(),
       },
       isEdit: this.$state.params.namespace && this.$state.params.name,
       persistedFoldersUseExistingVolumes: false,
       pullImageValidity: false,
+      nodePortServices: [],
     };
 
     this.isAdmin = this.Authentication.isAdmin();
@@ -145,11 +146,27 @@ class KubernetesCreateApplicationController {
     this.deployApplicationAsync = this.deployApplicationAsync.bind(this);
     this.setPullImageValidity = this.setPullImageValidity.bind(this);
     this.onChangeFileContent = this.onChangeFileContent.bind(this);
-    this.onServicePublishChange = this.onServicePublishChange.bind(this);
     this.checkIngressesToUpdate = this.checkIngressesToUpdate.bind(this);
     this.confirmUpdateApplicationAsync = this.confirmUpdateApplicationAsync.bind(this);
+    this.onDataAccessPolicyChange = this.onDataAccessPolicyChange.bind(this);
+    this.onChangeDeploymentType = this.onChangeDeploymentType.bind(this);
+    this.supportGlobalDeployment = this.supportGlobalDeployment.bind(this);
+    this.onChangePlacementType = this.onChangePlacementType.bind(this);
+    this.onServicesChange = this.onServicesChange.bind(this);
   }
   /* #endregion */
+
+  onChangePlacementType(value) {
+    this.$scope.$evalAsync(() => {
+      this.formValues.PlacementType = value;
+    });
+  }
+
+  onChangeDeploymentType(value) {
+    this.$scope.$evalAsync(() => {
+      this.formValues.DeploymentType = value;
+    });
+  }
 
   onChangeFileContent(value) {
     if (this.stackFileContent.replace(/(\r\n|\n|\r)/gm, '') !== value.replace(/(\r\n|\n|\r)/gm, '')) {
@@ -158,28 +175,32 @@ class KubernetesCreateApplicationController {
     }
   }
 
+  onDataAccessPolicyChange(value) {
+    this.$scope.$evalAsync(() => {
+      this.formValues.DataAccessPolicy = value;
+      this.resetDeploymentType();
+    });
+  }
+
   async updateApplicationViaWebEditor() {
     return this.$async(async () => {
       try {
-        const confirmed = await this.ModalService.confirmAsync({
-          title: '你确定吗？',
-          message: 'Any changes to this application will be overriden and may cause a service interruption. Do you wish to continue?',
-          buttons: {
-            confirm: {
-              label: 'Update',
-              className: 'btn-warning',
-            },
-          },
+        const confirmed = await confirm({
+          title: '你确定吗',
+          message: '对此应用程序的任何更改都将被覆盖，可能会导致服务中断。您确定要继续吗？',
+          confirmButton: buildConfirmButton('更新', 'warning'),
+          modalType: ModalType.Warn,
         });
         if (!confirmed) {
           return;
         }
+
         this.state.updateWebEditorInProgress = true;
-        await this.StackService.updateKubeStack({ EndpointId: this.endpoint.Id, Id: this.application.StackId }, this.stackFileContent, null);
+        await this.StackService.updateKubeStack({ EndpointId: this.endpoint.Id, Id: this.application.StackId }, { stackFile: this.stackFileContent });
         this.state.isEditorDirty = false;
         await this.$state.reload(this.$state.current);
       } catch (err) {
-        this.Notifications.error('失败', err, 'Failed redeploying application');
+        this.Notifications.error('失败', err, '重新部署应用程序失败');
       } finally {
         this.state.updateWebEditorInProgress = false;
       }
@@ -188,7 +209,7 @@ class KubernetesCreateApplicationController {
 
   async uiCanExit() {
     if (this.stackFileContent && this.state.isEditorDirty) {
-      return this.ModalService.confirmWebEditorDiscard();
+      return confirmWebEditorDiscard();
     }
   }
 
@@ -213,20 +234,20 @@ class KubernetesCreateApplicationController {
   }
   /* #endregion */
 
-  /* #region  CONFIGURATION UI MANAGEMENT */
-  addConfiguration() {
+  /* #region CONFIGMAP UI MANAGEMENT */
+  addConfigMap() {
     let config = new KubernetesApplicationConfigurationFormValue();
-    config.SelectedConfiguration = this.configurations[0];
-    this.formValues.Configurations.push(config);
+    config.SelectedConfiguration = this.configMaps[0];
+    this.formValues.ConfigMaps.push(config);
   }
 
-  removeConfiguration(index) {
-    this.formValues.Configurations.splice(index, 1);
-    this.onChangeConfigurationPath();
+  removeConfigMap(index) {
+    this.formValues.ConfigMaps.splice(index, 1);
+    this.onChangeConfigMapPath();
   }
 
-  overrideConfiguration(index) {
-    const config = this.formValues.Configurations[index];
+  overrideConfigMap(index) {
+    const config = this.formValues.ConfigMaps[index];
     config.Overriden = true;
     config.OverridenKeys = _.map(_.keys(config.SelectedConfiguration.Data), (key) => {
       const res = new KubernetesApplicationConfigurationFormValueOverridenKey();
@@ -235,22 +256,22 @@ class KubernetesCreateApplicationController {
     });
   }
 
-  resetConfiguration(index) {
-    const config = this.formValues.Configurations[index];
+  resetConfigMap(index) {
+    const config = this.formValues.ConfigMaps[index];
     config.Overriden = false;
     config.OverridenKeys = [];
-    this.onChangeConfigurationPath();
+    this.onChangeConfigMapPath();
   }
 
-  clearConfigurations() {
-    this.formValues.Configurations = [];
+  clearConfigMaps() {
+    this.formValues.ConfigMaps = [];
   }
 
-  onChangeConfigurationPath() {
-    this.state.duplicates.configurationPaths.refs = [];
+  onChangeConfigMapPath() {
+    this.state.duplicates.configMapPaths.refs = [];
 
     const paths = _.reduce(
-      this.formValues.Configurations,
+      this.formValues.ConfigMaps,
       (result, config) => {
         const uniqOverridenKeysPath = _.uniq(_.map(config.OverridenKeys, 'Path'));
         return _.concat(result, uniqOverridenKeysPath);
@@ -260,16 +281,76 @@ class KubernetesCreateApplicationController {
 
     const duplicatePaths = KubernetesFormValidationHelper.getDuplicates(paths);
 
-    _.forEach(this.formValues.Configurations, (config, index) => {
+    _.forEach(this.formValues.ConfigMaps, (config, index) => {
       _.forEach(config.OverridenKeys, (overridenKey, keyIndex) => {
         const findPath = _.find(duplicatePaths, (path) => path === overridenKey.Path);
         if (findPath) {
-          this.state.duplicates.configurationPaths.refs[index + '_' + keyIndex] = findPath;
+          this.state.duplicates.configMapPaths.refs[index + '_' + keyIndex] = findPath;
         }
       });
     });
 
-    this.state.duplicates.configurationPaths.hasRefs = Object.keys(this.state.duplicates.configurationPaths.refs).length > 0;
+    this.state.duplicates.configMapPaths.hasRefs = Object.keys(this.state.duplicates.configMapPaths.refs).length > 0;
+  }
+  /* #endregion */
+
+  /* #region SECRET UI MANAGEMENT */
+  addSecret() {
+    let secret = new KubernetesApplicationConfigurationFormValue();
+    secret.SelectedConfiguration = this.secrets[0];
+    this.formValues.Secrets.push(secret);
+  }
+
+  removeSecret(index) {
+    this.formValues.Secrets.splice(index, 1);
+    this.onChangeSecretPath();
+  }
+
+  overrideSecret(index) {
+    const secret = this.formValues.Secrets[index];
+    secret.Overriden = true;
+    secret.OverridenKeys = _.map(_.keys(secret.SelectedConfiguration.Data), (key) => {
+      const res = new KubernetesApplicationConfigurationFormValueOverridenKey();
+      res.Key = key;
+      return res;
+    });
+  }
+
+  resetSecret(index) {
+    const secret = this.formValues.Secrets[index];
+    secret.Overriden = false;
+    secret.OverridenKeys = [];
+    this.onChangeSecretPath();
+  }
+
+  clearSecrets() {
+    this.formValues.Secrets = [];
+  }
+
+  onChangeSecretPath() {
+    this.state.duplicates.secretPaths.refs = [];
+
+    const paths = _.reduce(
+      this.formValues.Secrets,
+      (result, secret) => {
+        const uniqOverridenKeysPath = _.uniq(_.map(secret.OverridenKeys, 'Path'));
+        return _.concat(result, uniqOverridenKeysPath);
+      },
+      []
+    );
+
+    const duplicatePaths = KubernetesFormValidationHelper.getDuplicates(paths);
+
+    _.forEach(this.formValues.Secrets, (secret, index) => {
+      _.forEach(secret.OverridenKeys, (overridenKey, keyIndex) => {
+        const findPath = _.find(duplicatePaths, (path) => path === overridenKey.Path);
+        if (findPath) {
+          this.state.duplicates.secretPaths.refs[index + '_' + keyIndex] = findPath;
+        }
+      });
+    });
+
+    this.state.duplicates.secretPaths.hasRefs = Object.keys(this.state.duplicates.secretPaths.refs).length > 0;
   }
   /* #endregion */
 
@@ -428,147 +509,22 @@ class KubernetesCreateApplicationController {
 
   /* #endregion */
 
-  /* #region  PUBLISHED PORTS UI MANAGEMENT */
-  onServicePublishChange() {
-    // enable publishing with no previous ports exposed
-    if (this.formValues.IsPublishingService && !this.formValues.PublishedPorts.length) {
-      this.addPublishedPort();
-      return;
-    }
-
-    // service update
-    if (this.formValues.IsPublishingService) {
-      this.formValues.PublishedPorts.forEach((port) => (port.NeedsDeletion = false));
-    } else {
-      // delete new ports, mark old ports to be deleted
-      this.formValues.PublishedPorts = this.formValues.PublishedPorts.filter((port) => !port.IsNew).map((port) => ({ ...port, NeedsDeletion: true }));
-    }
-  }
-
-  addPublishedPort() {
-    const p = new KubernetesApplicationPublishedPortFormValue();
-    const ingresses = this.ingresses;
-    if (this.formValues.PublishingType === KubernetesApplicationPublishingTypes.INGRESS) {
-      p.IngressName = ingresses && ingresses.length ? ingresses[0].Name : undefined;
-      p.IngressHost = ingresses && ingresses.length ? ingresses[0].Hosts[0] : undefined;
-      p.IngressHosts = ingresses && ingresses.length ? ingresses[0].Hosts : undefined;
-    }
-    if (this.formValues.PublishedPorts.length) {
-      p.Protocol = this.formValues.PublishedPorts[0].Protocol;
-    }
-    this.formValues.PublishedPorts.push(p);
-  }
-
-  resetPublishedPorts() {
-    const ingresses = this.ingresses;
-    _.forEach(this.formValues.PublishedPorts, (p) => {
-      p.IngressName = ingresses && ingresses.length ? ingresses[0].Name : undefined;
-      p.IngressHost = ingresses && ingresses.length ? ingresses[0].Hosts[0] : undefined;
-    });
-  }
-
-  restorePublishedPort(index) {
-    this.formValues.PublishedPorts[index].NeedsDeletion = false;
-    this.onChangePublishedPorts();
-  }
-
-  removePublishedPort(index) {
-    if (this.state.isEdit && !this.formValues.PublishedPorts[index].IsNew) {
-      this.formValues.PublishedPorts[index].NeedsDeletion = true;
-    } else {
-      this.formValues.PublishedPorts.splice(index, 1);
-    }
-    this.onChangePublishedPorts();
-  }
-  /* #endregion */
-
-  /* #region  PUBLISHED PORTS ON CHANGE VALIDATION */
-  onChangePublishedPorts() {
-    this.onChangePortMappingContainerPort();
-    this.onChangePortMappingNodePort();
-    this.onChangePortMappingIngressRoute();
-    this.onChangePortMappingLoadBalancer();
-    this.onChangePortProtocol();
-  }
-
-  onChangePortMappingContainerPort() {
-    const state = this.state.duplicates.publishedPorts.containerPorts;
-    if (this.formValues.PublishingType !== KubernetesApplicationPublishingTypes.INGRESS) {
-      const source = _.map(this.formValues.PublishedPorts, (p) => (p.NeedsDeletion ? undefined : p.ContainerPort + p.Protocol));
-      const duplicates = KubernetesFormValidationHelper.getDuplicates(source);
-      state.refs = duplicates;
-      state.hasRefs = Object.keys(duplicates).length > 0;
-    } else {
-      state.refs = {};
-      state.hasRefs = false;
-    }
-  }
-
-  onChangePortMappingNodePort() {
-    const state = this.state.duplicates.publishedPorts.nodePorts;
-    if (this.formValues.PublishingType === KubernetesApplicationPublishingTypes.NODE_PORT) {
-      const source = _.map(this.formValues.PublishedPorts, (p) => (p.NeedsDeletion ? undefined : p.NodePort));
-      const duplicates = KubernetesFormValidationHelper.getDuplicates(source);
-      state.refs = duplicates;
-      state.hasRefs = Object.keys(duplicates).length > 0;
-    } else {
-      state.refs = {};
-      state.hasRefs = false;
-    }
-  }
-
-  onChangePortMappingIngress(index) {
-    const publishedPort = this.formValues.PublishedPorts[index];
-    const ingress = _.find(this.ingresses, { Name: publishedPort.IngressName });
-    publishedPort.IngressHosts = ingress.Hosts;
-    this.ingressHostnames = ingress.Hosts;
-    publishedPort.IngressHost = this.ingressHostnames.length ? this.ingressHostnames[0] : [];
-    this.onChangePublishedPorts();
-  }
-
-  onChangePortMappingIngressRoute() {
-    const state = this.state.duplicates.publishedPorts.ingressRoutes;
-
-    if (this.formValues.PublishingType === KubernetesApplicationPublishingTypes.INGRESS) {
-      const newRoutes = _.map(this.formValues.PublishedPorts, (p) => (p.IsNew && p.IngressRoute ? `${p.IngressHost || p.IngressName}${p.IngressRoute}` : undefined));
-      const toDelRoutes = _.map(this.formValues.PublishedPorts, (p) => (p.NeedsDeletion && p.IngressRoute ? `${p.IngressHost || p.IngressName}${p.IngressRoute}` : undefined));
-      const allRoutes = _.flatMap(this.ingresses, (i) => _.map(i.Paths, (p) => `${p.Host || i.Name}${p.Path}`));
-      const duplicates = KubernetesFormValidationHelper.getDuplicates(newRoutes);
-      _.forEach(newRoutes, (route, idx) => {
-        if (_.includes(allRoutes, route) && !_.includes(toDelRoutes, route)) {
-          duplicates[idx] = route;
+  /* #region SERVICES UI MANAGEMENT */
+  onServicesChange(services) {
+    return this.$async(async () => {
+      // if the ingress isn't found in the currently loaded ingresses, then refresh the ingresses
+      const ingressNamesUsed = services.flatMap((s) => s.Ports.flatMap((p) => (p.ingressPaths ? p.ingressPaths.flatMap((ip) => ip.IngressName || []) : [])));
+      if (ingressNamesUsed.length) {
+        const uniqueIngressNamesUsed = Array.from(new Set(ingressNamesUsed)); // get the unique ingress names used
+        const ingressNamesLoaded = this.ingresses.map((i) => i.Name);
+        const areAllIngressesLoaded = uniqueIngressNamesUsed.every((ingressNameUsed) => ingressNamesLoaded.includes(ingressNameUsed));
+        if (!areAllIngressesLoaded) {
+          this.refreshIngresses();
         }
-      });
-      state.refs = duplicates;
-      state.hasRefs = Object.keys(duplicates).length > 0;
-    } else {
-      state.refs = {};
-      state.hasRefs = false;
-    }
-  }
-
-  onChangePortMappingLoadBalancer() {
-    const state = this.state.duplicates.publishedPorts.loadBalancerPorts;
-    if (this.formValues.PublishingType === KubernetesApplicationPublishingTypes.LOAD_BALANCER) {
-      const source = _.map(this.formValues.PublishedPorts, (p) => (p.NeedsDeletion ? undefined : p.LoadBalancerPort));
-      const duplicates = KubernetesFormValidationHelper.getDuplicates(source);
-      state.refs = duplicates;
-      state.hasRefs = Object.keys(duplicates).length > 0;
-    } else {
-      state.refs = {};
-      state.hasRefs = false;
-    }
-  }
-
-  onChangePortProtocol(index) {
-    if (this.formValues.PublishingType === KubernetesApplicationPublishingTypes.LOAD_BALANCER) {
-      const newPorts = _.filter(this.formValues.PublishedPorts, { IsNew: true });
-      _.forEach(newPorts, (port) => {
-        port.Protocol = index ? this.formValues.PublishedPorts[index].Protocol : newPorts[0].Protocol;
-      });
-      this.onChangePortMappingLoadBalancer();
-    }
-    this.onChangePortMappingContainerPort();
+      }
+      // update the services
+      this.formValues.Services = services;
+    });
   }
   /* #endregion */
 
@@ -578,12 +534,9 @@ class KubernetesCreateApplicationController {
       !this.state.alreadyExists &&
       !this.state.duplicates.environmentVariables.hasRefs &&
       !this.state.duplicates.persistedFolders.hasRefs &&
-      !this.state.duplicates.configurationPaths.hasRefs &&
-      !this.state.duplicates.existingVolumes.hasRefs &&
-      !this.state.duplicates.publishedPorts.containerPorts.hasRefs &&
-      !this.state.duplicates.publishedPorts.nodePorts.hasRefs &&
-      !this.state.duplicates.publishedPorts.ingressRoutes.hasRefs &&
-      !this.state.duplicates.publishedPorts.loadBalancerPorts.hasRefs
+      !this.state.duplicates.configMapPaths.hasRefs &&
+      !this.state.duplicates.secretPaths.hasRefs &&
+      !this.state.duplicates.existingVolumes.hasRefs
     );
   }
 
@@ -616,6 +569,7 @@ class KubernetesCreateApplicationController {
     if (hasFolders && (hasRWOOnly || isIsolated)) {
       return false;
     }
+
     return true;
   }
 
@@ -650,7 +604,7 @@ class KubernetesCreateApplicationController {
       if (folder.StorageClass && _.isEqual(folder.StorageClass.AccessModes, ['RWO'])) {
         storageOptions.push(folder.StorageClass.Name);
       } else {
-        storageOptions.push('<no storage option available>');
+        storageOptions.push('<无可用存储选项>');
       }
     }
 
@@ -728,10 +682,6 @@ class KubernetesCreateApplicationController {
     return this.nodesLimits.overflowForReplica(cpu, memory, instances);
   }
 
-  publishViaLoadBalancerEnabled() {
-    return this.state.useLoadBalancer && this.state.maxLoadBalancersQuota !== 0;
-  }
-
   publishViaIngressEnabled() {
     return this.ingresses.length;
   }
@@ -767,20 +717,8 @@ class KubernetesCreateApplicationController {
   }
   /* #endregion */
 
-  isEditAndNotNewPublishedPort(index) {
-    return this.state.isEdit && !this.formValues.PublishedPorts[index].IsNew;
-  }
-
-  hasNoPublishedPorts() {
-    return this.formValues.PublishedPorts.filter((port) => !port.NeedsDeletion).length === 0;
-  }
-
   isEditAndNotNewPlacement(index) {
     return this.state.isEdit && !this.formValues.Placements[index].IsNew;
-  }
-
-  isNewAndNotFirst(index) {
-    return !this.state.isEdit && index !== 0;
   }
 
   showPlacementPolicySection() {
@@ -804,8 +742,7 @@ class KubernetesCreateApplicationController {
     const invalid = !this.isValid();
     const hasNoChanges = this.isEditAndNoChangesMade();
     const nonScalable = this.isNonScalable();
-    const isPublishingWithoutPorts = this.formValues.IsPublishingService && this.hasNoPublishedPorts();
-    return overflow || autoScalerOverflow || inProgress || invalid || hasNoChanges || nonScalable || isPublishingWithoutPorts;
+    return overflow || autoScalerOverflow || inProgress || invalid || hasNoChanges || nonScalable;
   }
 
   isExternalApplication() {
@@ -815,38 +752,11 @@ class KubernetesCreateApplicationController {
       return false;
     }
   }
-
-  disableLoadBalancerEdit() {
-    return (
-      this.state.isEdit &&
-      this.application.ServiceType === this.ServiceTypes.LOAD_BALANCER &&
-      !this.application.LoadBalancerIPAddress &&
-      this.formValues.PublishingType === this.ApplicationPublishingTypes.LOAD_BALANCER
-    );
-  }
-
-  isPublishingTypeEditDisabled() {
-    const ports = _.filter(this.formValues.PublishedPorts, { IsNew: false, NeedsDeletion: false });
-    return this.state.isEdit && this.formValues.PublishedPorts.length > 0 && ports.length > 0;
-  }
-
-  isEditLBWithPorts() {
-    return this.formValues.PublishingType === KubernetesApplicationPublishingTypes.LOAD_BALANCER && _.filter(this.formValues.PublishedPorts, { IsNew: false }).length === 0;
-  }
-
-  isProtocolOptionDisabled(index, protocol) {
-    return (
-      this.disableLoadBalancerEdit() ||
-      (this.isEditAndNotNewPublishedPort(index) && this.formValues.PublishedPorts[index].Protocol !== protocol) ||
-      (this.isEditLBWithPorts() && this.formValues.PublishedPorts[index].Protocol !== protocol && this.isNewAndNotFirst(index))
-    );
-  }
-
   /* #endregion */
 
   /* #region  DATA AUTO REFRESH */
-  updateSliders() {
-    const quota = this.formValues.ResourcePool.Quota;
+  updateSliders(namespaceWithQuota) {
+    const quota = namespaceWithQuota.Quota;
     let minCpu = 0,
       minMemory = 0,
       maxCpu = this.state.namespaceLimits.cpu,
@@ -879,33 +789,36 @@ class KubernetesCreateApplicationController {
     }
   }
 
-  updateNamespaceLimits() {
-    let maxCpu = this.state.nodes.cpu;
-    let maxMemory = this.state.nodes.memory;
-    const quota = this.formValues.ResourcePool.Quota;
+  updateNamespaceLimits(namespaceWithQuota) {
+    return this.$async(async () => {
+      let maxCpu = this.state.nodes.cpu;
+      let maxMemory = this.state.nodes.memory;
 
-    this.state.resourcePoolHasQuota = false;
+      const quota = namespaceWithQuota.Quota;
 
-    if (quota) {
-      if (quota.CpuLimit) {
-        this.state.resourcePoolHasQuota = true;
-        maxCpu = quota.CpuLimit - quota.CpuLimitUsed;
-        if (this.state.isEdit && this.savedFormValues.CpuLimit) {
-          maxCpu += this.savedFormValues.CpuLimit * this.effectiveInstances();
+      this.state.resourcePoolHasQuota = false;
+
+      if (quota) {
+        if (quota.CpuLimit) {
+          this.state.resourcePoolHasQuota = true;
+          maxCpu = quota.CpuLimit - quota.CpuLimitUsed;
+          if (this.state.isEdit && this.savedFormValues.CpuLimit) {
+            maxCpu += this.savedFormValues.CpuLimit * this.effectiveInstances();
+          }
+        }
+
+        if (quota.MemoryLimit) {
+          this.state.resourcePoolHasQuota = true;
+          maxMemory = quota.MemoryLimit - quota.MemoryLimitUsed;
+          if (this.state.isEdit && this.savedFormValues.MemoryLimit) {
+            maxMemory += KubernetesResourceReservationHelper.bytesValue(this.savedFormValues.MemoryLimit) * this.effectiveInstances();
+          }
         }
       }
 
-      if (quota.MemoryLimit) {
-        this.state.resourcePoolHasQuota = true;
-        maxMemory = quota.MemoryLimit - quota.MemoryLimitUsed;
-        if (this.state.isEdit && this.savedFormValues.MemoryLimit) {
-          maxMemory += KubernetesResourceReservationHelper.bytesValue(this.savedFormValues.MemoryLimit) * this.effectiveInstances();
-        }
-      }
-    }
-
-    this.state.namespaceLimits.cpu = maxCpu;
-    this.state.namespaceLimits.memory = maxMemory;
+      this.state.namespaceLimits.cpu = maxCpu;
+      this.state.namespaceLimits.memory = maxMemory;
+    });
   }
 
   refreshStacks(namespace) {
@@ -913,7 +826,7 @@ class KubernetesCreateApplicationController {
       try {
         this.stacks = await this.KubernetesStackService.get(namespace);
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to retrieve stacks');
+        this.Notifications.error('失败', err, '无法检索堆栈');
       }
     });
   }
@@ -922,8 +835,10 @@ class KubernetesCreateApplicationController {
     return this.$async(async () => {
       try {
         this.configurations = await this.KubernetesConfigurationService.get(namespace);
+        this.configMaps = this.configurations.filter((configuration) => configuration.Kind === KubernetesConfigurationKinds.CONFIGMAP);
+        this.secrets = this.configurations.filter((configuration) => configuration.Kind === KubernetesConfigurationKinds.SECRET);
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to retrieve configurations');
+        this.Notifications.error('失败', err, '无法检索配置');
       }
     });
   }
@@ -933,7 +848,7 @@ class KubernetesCreateApplicationController {
       try {
         this.applications = await this.KubernetesApplicationService.get(namespace);
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to retrieve applications');
+        this.Notifications.error('失败', err, '无法检索应用程序');
       }
     });
   }
@@ -954,7 +869,7 @@ class KubernetesCreateApplicationController {
         });
         this.availableVolumes = filteredVolumes;
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to retrieve volumes');
+        this.Notifications.error('失败', err, '无法检索到存储卷');
       }
     });
   }
@@ -963,6 +878,7 @@ class KubernetesCreateApplicationController {
     return this.$async(async () => {
       try {
         this.ingresses = await this.KubernetesIngressService.get(namespace);
+        this.ingressPaths = this.ingresses.flatMap((ingress) => ingress.Paths);
         this.ingressHostnames = this.ingresses.length ? this.ingresses[0].Hosts : [];
         if (!this.publishViaIngressEnabled()) {
           if (this.savedFormValues) {
@@ -973,7 +889,7 @@ class KubernetesCreateApplicationController {
         }
         this.formValues.OriginalIngresses = this.ingresses;
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to retrieve ingresses');
+        this.Notifications.error('失败', err, '无法检索到入口');
       }
     });
   }
@@ -992,16 +908,17 @@ class KubernetesCreateApplicationController {
   }
 
   resetFormValues() {
-    this.clearConfigurations();
+    this.clearConfigMaps();
+    this.clearSecrets();
     this.resetPersistedFolders();
-    this.resetPublishedPorts();
   }
 
   onResourcePoolSelectionChange() {
     return this.$async(async () => {
+      const namespaceWithQuota = await this.KubernetesResourcePoolService.get(this.formValues.ResourcePool.Namespace.Name);
       const namespace = this.formValues.ResourcePool.Namespace.Name;
-      this.updateNamespaceLimits();
-      this.updateSliders();
+      this.updateNamespaceLimits(namespaceWithQuota);
+      this.updateSliders(namespaceWithQuota);
       await this.refreshNamespaceData(namespace);
       this.resetFormValues();
     });
@@ -1013,9 +930,10 @@ class KubernetesCreateApplicationController {
     this.state.actionInProgress = true;
     try {
       this.formValues.ApplicationOwner = this.Authentication.getUserDetails().username;
+      // combine the secrets and configmap form values when submitting the form
       _.remove(this.formValues.Configurations, (item) => item.SelectedConfiguration === undefined);
-      await this.KubernetesApplicationService.create(this.formValues);
-      this.Notifications.success('应用程序成功部署', this.formValues.Name);
+      await this.KubernetesApplicationService.create(this.formValues, this.originalServicePorts);
+      this.Notifications.success('成功提交部署应用程序的请求', this.formValues.Name);
       this.$state.go('kubernetes.applications');
     } catch (err) {
       this.Notifications.error('失败', err, '无法创建应用程序');
@@ -1024,20 +942,20 @@ class KubernetesCreateApplicationController {
     }
   }
 
-  async updateApplicationAsync(ingressesToUpdate, rulePlural) {
+  async updateApplicationAsync(ingressesToUpdate) {
     if (ingressesToUpdate.length) {
       try {
         await Promise.all(ingressesToUpdate.map((ing) => updateIngress(this.endpoint.Id, ing)));
-        this.Notifications.success('Success', `入口$ ${rulePlural} 成功更新了`);
+        this.Notifications.success('成功', `入口 ${ingressesToUpdate.length > 1 ? '规则s' : '规则'} 更新成功`);
       } catch (error) {
-        this.Notifications.error('失败', error, '无法更新接入点');
+        this.Notifications.error('Failure', error, 'Unable to update ingress');
       }
     }
 
     try {
       this.state.actionInProgress = true;
-      await this.KubernetesApplicationService.patch(this.savedFormValues, this.formValues);
-      this.Notifications.success('Success', '应用程序成功更新');
+      await this.KubernetesApplicationService.patch(this.savedFormValues, this.formValues, false, this.originalServicePorts);
+      this.Notifications.success('成功', '更新应用程序的请求已成功提交');
       this.$state.go('kubernetes.applications.application', { name: this.application.Name, namespace: this.application.ResourcePool });
     } catch (err) {
       this.Notifications.error('失败', err, '无法更新应用程序');
@@ -1050,33 +968,22 @@ class KubernetesCreateApplicationController {
     const [ingressesToUpdate, servicePortsToUpdate] = await this.checkIngressesToUpdate();
     // if there is an ingressesToUpdate, then show a warning modal with asking if they want to update the ingresses
     if (ingressesToUpdate.length) {
-      const rulePlural = ingressesToUpdate.length > 1 ? 'rules' : 'rule';
-      const noMatchSentence =
-        servicePortsToUpdate.length > 1
-          ? `此应用程序中的服务端口不再匹配入口 ${rulePlural}.`
-          : `该应用中的一个服务端口不再匹配入口 ${rulePlural} ，这可能会破坏入口规则路径。`;
-      const message = `
-        <ul class="ml-3">
-          <li>更新应用程序可能会导致服务中断。</li>
-          <li>${noMatchSentence}</li>
-        </ul>
-      `;
-      const inputLabel = `更新入口 ${rulePlural} 以匹配服务端口的变化`;
-      confirmUpdateAppIngress(`你确定吗？`, message, inputLabel, (value) => {
-        if (value === null) {
-          return;
-        }
-        if (value.length === 0) {
-          return this.$async(this.updateApplicationAsync, [], '');
-        }
-        if (value[0] === '1') {
-          return this.$async(this.updateApplicationAsync, ingressesToUpdate, rulePlural);
-        }
-      });
+      const result = await confirmUpdateAppIngress(ingressesToUpdate, servicePortsToUpdate);
+      if (!result) {
+        return;
+      }
+
+      const { noMatch } = result;
+      if (!noMatch) {
+        return this.$async(this.updateApplicationAsync, []);
+      }
+      if (noMatch) {
+        return this.$async(this.updateApplicationAsync, ingressesToUpdate);
+      }
     } else {
-      this.ModalService.confirmUpdate('更新应用程序可能会导致服务中断。您希望继续吗？', (confirmed) => {
+      confirmUpdate('更新应用程序可能会导致服务中断。是否继续？', (confirmed) => {
         if (confirmed) {
-          return this.$async(this.updateApplicationAsync, [], '');
+          return this.$async(this.updateApplicationAsync, []);
         }
       });
     }
@@ -1094,14 +1001,16 @@ class KubernetesCreateApplicationController {
       if (updatedService.Ingress && numberOfPortsInOldService && numberOfPortsInOldService <= updatedService.Ports.length) {
         const updatedOldPorts = updatedService.Ports.slice(0, numberOfPortsInOldService);
         const ingressesForService = fullIngresses.filter((ing) => {
-          const ingServiceNames = ing.Paths.map((path) => path.ServiceName);
-          if (ingServiceNames.includes(updatedService.Name)) {
-            return true;
+          if (ing.Paths) {
+            const ingServiceNames = ing.Paths.map((path) => path.ServiceName);
+            if (ingServiceNames.includes(updatedService.Name)) {
+              return true;
+            }
           }
         });
         ingressesForService.forEach((ingressForService) => {
           updatedOldPorts.forEach((servicePort, pIndex) => {
-            if (servicePort.ingress) {
+            if (servicePort.ingressPaths) {
               // if there isn't a ingress path that has a matching service name and port
               const doesIngressPathMatchServicePort = ingressForService.Paths.find((ingPath) => ingPath.ServiceName === updatedService.Name && ingPath.Port === servicePort.port);
               if (!doesIngressPathMatchServicePort) {
@@ -1158,7 +1067,7 @@ class KubernetesCreateApplicationController {
           this.KubernetesPersistentVolumeClaimService.get(namespace, storageClasses),
         ]);
       } catch (err) {
-        this.Notifications.error('失败', err, '无法检索到应用程序的详细信息');
+        this.Notifications.error('失败', err, '无法检索应用程序详情');
       }
     });
   }
@@ -1168,7 +1077,7 @@ class KubernetesCreateApplicationController {
       try {
         return await this.RegistryService.retrievePorRegistryModelFromRepository(imageModel.Image, this.endpoint.Id, imageModel.Registry.Id, this.$state.params.namespace);
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to retrieve registry');
+        this.Notifications.error('失败', err, '无法检索注册表');
         return imageModel;
       }
     });
@@ -1190,20 +1099,31 @@ class KubernetesCreateApplicationController {
         ]);
         this.nodesLimits = nodesLimits;
 
-        const nonSystemNamespaces = _.filter(resourcePools, (resourcePool) => !KubernetesNamespaceHelper.isSystemNamespace(resourcePool.Namespace.Name));
+        const nonSystemNamespaces = _.filter(
+          resourcePools,
+          (resourcePool) => !KubernetesNamespaceHelper.isSystemNamespace(resourcePool.Namespace.Name) && resourcePool.Namespace.Status === 'Active'
+        );
 
         this.allNamespaces = resourcePools.map(({ Namespace }) => Namespace.Name);
         this.resourcePools = _.sortBy(nonSystemNamespaces, ({ Namespace }) => (Namespace.Name === 'default' ? 0 : 1));
 
+        // this.state.nodes.memory and this.state.nodes.cpu are used to calculate the slider limits, so set them before calling updateSliders()
+        _.forEach(nodes, (item) => {
+          this.state.nodes.memory += filesizeParser(item.Memory);
+          this.state.nodes.cpu += item.CPU;
+        });
+
+        if (this.resourcePools.length) {
+          const namespaceWithQuota = await this.KubernetesResourcePoolService.get(this.resourcePools[0].Namespace.Name);
+          this.formValues.ResourcePool.Quota = namespaceWithQuota.Quota;
+          this.updateNamespaceLimits(namespaceWithQuota);
+          this.updateSliders(namespaceWithQuota);
+        }
         this.formValues.ResourcePool = this.resourcePools[0];
         if (!this.formValues.ResourcePool) {
           return;
         }
 
-        _.forEach(nodes, (item) => {
-          this.state.nodes.memory += filesizeParser(item.Memory);
-          this.state.nodes.cpu += item.CPU;
-        });
         this.nodesLabels = KubernetesNodeHelper.generateNodeLabelsFromNodes(nodes);
         this.nodeNumber = nodes.length;
 
@@ -1220,6 +1140,8 @@ class KubernetesCreateApplicationController {
             this.nodesLabels,
             this.ingresses
           );
+          this.originalServicePorts = structuredClone(this.formValues.Services.flatMap((service) => service.Ports));
+          this.originalIngressPaths = structuredClone(this.originalServicePorts.flatMap((port) => port.ingressPaths).filter((ingressPath) => ingressPath.Host));
 
           if (this.application.ApplicationKind) {
             this.state.appType = KubernetesDeploymentTypes[this.application.ApplicationKind.toUpperCase()];
@@ -1258,17 +1180,20 @@ class KubernetesCreateApplicationController {
           this.nodesLimits.excludesPods(this.application.Pods, this.formValues.CpuLimit, KubernetesResourceReservationHelper.bytesValue(this.formValues.MemoryLimit));
         }
 
-        this.formValues.IsPublishingService = this.formValues.PublishedPorts.length > 0;
-
         this.oldFormValues = angular.copy(this.formValues);
-
-        this.updateNamespaceLimits();
-        this.updateSliders();
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to load view data');
+        this.Notifications.error('失败', err, '无法加载视图数据');
       } finally {
         this.state.viewReady = true;
       }
+      // get all nodeport services in the cluster, to validate unique nodeports in the form
+      // this is below the try catch, to not block the page rendering
+      const allSettledServices = await Promise.allSettled(this.resourcePools.map((namespace) => getServices(this.endpoint.Id, namespace.Namespace.Name)));
+      const allServices = allSettledServices
+        .filter((settledService) => settledService.status === 'fulfilled' && settledService.value)
+        .map((fulfilledService) => fulfilledService.value)
+        .flat();
+      this.state.nodePortServices = allServices.filter((service) => service.Type === 'NodePort');
     });
   }
 

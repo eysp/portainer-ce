@@ -1,27 +1,18 @@
 import { useMutation, useQueryClient } from 'react-query';
 
 import { deleteContainerGroup } from '@/react/azure/services/container-groups.service';
-import { useEnvironmentId } from '@/portainer/hooks/useEnvironmentId';
+import { useEnvironmentId } from '@/react/hooks/useEnvironmentId';
 import { notifyError, notifySuccess } from '@/portainer/services/notifications';
-import { EnvironmentId } from '@/portainer/environments/types';
+import { EnvironmentId } from '@/react/portainer/environments/types';
 import { promiseSequence } from '@/portainer/helpers/promise-utils';
 import { useContainerGroups } from '@/react/azure/queries/useContainerGroups';
 import { useSubscriptions } from '@/react/azure/queries/useSubscriptions';
 
 import { PageHeader } from '@@/PageHeader';
-import { TableSettingsProvider } from '@@/datatables/useTableSettings';
 
 import { ContainersDatatable } from './ContainersDatatable';
-import { TableSettings } from './types';
 
 export function ListView() {
-  const defaultSettings: TableSettings = {
-    pageSize: 10,
-    sortBy: { id: 'state', desc: false },
-  };
-
-  const tableKey = 'containergroups';
-
   const environmentId = useEnvironmentId();
 
   const subscriptionsQuery = useSubscriptions(environmentId);
@@ -40,19 +31,17 @@ export function ListView() {
 
   return (
     <>
-      <PageHeader
-        breadcrumbs="Container instances"
+    <PageHeader
+        breadcrumbs="容器实例"
         reload
         title="容器列表"
-      />
-      <TableSettingsProvider defaults={defaultSettings} storageKey={tableKey}>
-        <ContainersDatatable
-          tableKey={tableKey}
-          dataset={groupsQuery.containerGroups}
-          onRemoveClick={handleRemove}
-        />
-      </TableSettingsProvider>
-    </>
+    />
+
+    <ContainersDatatable
+        dataset={groupsQuery.containerGroups}
+        onRemoveClick={handleRemove}
+    />
+</>
   );
 }
 
@@ -79,7 +68,7 @@ function useRemoveMutation(environmentId: EnvironmentId) {
         notifyError(
           'Failure',
           err as Error,
-          'Unable to remove container groups'
+          '无法删除容器组'
         );
       },
     }
@@ -90,7 +79,7 @@ function useRemoveMutation(environmentId: EnvironmentId) {
   async function handleRemove(groupIds: string[]) {
     deleteMutation.mutate(groupIds, {
       onSuccess: () => {
-        notifySuccess('Success', 'Container groups successfully removed');
+        notifySuccess('Success', '容器组已成功删除');
       },
     });
   }

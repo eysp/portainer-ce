@@ -1,19 +1,20 @@
 import { useState } from 'react';
+import { Zap, UploadCloud } from 'lucide-react';
+import _ from 'lodash';
 
-import {
-  Environment,
-  EnvironmentCreationTypes,
-} from '@/portainer/environments/types';
+import { Environment } from '@/react/portainer/environments/types';
 import { commandsTabs } from '@/react/edge/components/EdgeScriptForm/scripts';
-import { FeatureId } from '@/portainer/feature-flags/enums';
+import { FeatureId } from '@/react/portainer/feature-flags/enums';
+import { isBE } from '@/react/portainer/feature-flags/feature-flags.service';
+import EdgeAgentStandardIcon from '@/react/edge/components/edge-agent-standard.svg?c';
+import EdgeAgentAsyncIcon from '@/react/edge/components/edge-agent-async.svg?c';
 
 import { BoxSelectorOption } from '@@/BoxSelector/types';
 import { BoxSelector } from '@@/BoxSelector';
-import { BEFeatureIndicator } from '@@/BEFeatureIndicator';
+import { BEOverlay } from '@@/BEFeatureIndicator/BEOverlay';
 
 import { AnalyticsStateKey } from '../types';
 import { EdgeAgentTab } from '../shared/EdgeAgentTab';
-import { useFilterEdgeOptionsIfNeeded } from '../useOnlyEdgeOptions';
 
 import { AgentPanel } from './AgentPanel';
 import { KubeConfigTeaserForm } from './KubeConfigTeaserForm';
@@ -22,38 +23,49 @@ interface Props {
   onCreate(environment: Environment, analytics: AnalyticsStateKey): void;
 }
 
-const defaultOptions: BoxSelectorOption<EnvironmentCreationTypes>[] = [
-  {
-    id: 'agent_endpoint',
-    icon: 'svg-agent',
-    label: 'Agent',
-    value: EnvironmentCreationTypes.AgentEnvironment,
-    description: '',
-  },
-  {
-    id: 'edgeAgent',
-    icon: 'svg-edgeagent',
-    label: 'Edge Agent',
-    description: '',
-    value: EnvironmentCreationTypes.EdgeAgentEnvironment,
-    hide: window.ddExtension,
-  },
-  {
-    id: 'kubeconfig_endpoint',
-    icon: 'svg-cloudimport',
-    label: 'Import',
-    value: EnvironmentCreationTypes.KubeConfigEnvironment,
-    description: 'Import an existing Kubernetes config',
-    feature: FeatureId.K8S_CREATE_FROM_KUBECONFIG,
-  },
-];
+type CreationType =
+  | 'agent'
+  | 'edgeAgentStandard'
+  | 'edgeAgentAsync'
+  | 'kubeconfig';
+
+  const options: BoxSelectorOption<CreationType>[] = _.compact([
+    {
+      id: 'agent_endpoint',
+      icon: Zap,
+      iconType: 'badge',
+      label: '代理',
+      value: 'agent',
+      description: '',
+    },
+    {
+      id: 'edgeAgentStandard',
+      icon: EdgeAgentStandardIcon,
+      iconType: 'badge',
+      label: 'Edge Agent标准版',
+      description: '',
+      value: 'edgeAgentStandard',
+    },
+    isBE && {
+      id: 'edgeAgentAsync',
+      icon: EdgeAgentAsyncIcon,
+      iconType: 'badge',
+      label: 'Edge Agent异步版',
+      description: '',
+      value: 'edgeAgentAsync',
+    },
+    {
+      id: 'kubeconfig_endpoint',
+      icon: UploadCloud,
+      iconType: 'badge',
+      label: '导入',
+      value: 'kubeconfig',
+      description: '导入一个现有的Kubernetes配置',
+      feature: FeatureId.K8S_CREATE_FROM_KUBECONFIG,
+    },
+  ]);
 
 export function WizardKubernetes({ onCreate }: Props) {
-  const options = useFilterEdgeOptionsIfNeeded(
-    defaultOptions,
-    EnvironmentCreationTypes.EdgeAgentEnvironment
-  );
-
   const [creationType, setCreationType] = useState(options[0].value);
 
   const tab = getTab(creationType);
@@ -71,34 +83,43 @@ export function WizardKubernetes({ onCreate }: Props) {
     </div>
   );
 
-  function getTab(type: typeof options[number]['value']) {
+  function getTab(type: CreationType) {
     switch (type) {
-      case EnvironmentCreationTypes.AgentEnvironment:
+      case 'agent':
         return (
           <AgentPanel
             onCreate={(environment) => onCreate(environment, 'kubernetesAgent')}
           />
         );
-      case EnvironmentCreationTypes.EdgeAgentEnvironment:
+      case 'edgeAgentStandard':
         return (
           <EdgeAgentTab
             onCreate={(environment) =>
-              onCreate(environment, 'kubernetesEdgeAgent')
+              onCreate(environment, 'kubernetesEdgeAgentStandard')
             }
             commands={[{ ...commandsTabs.k8sLinux, label: 'Linux' }]}
           />
         );
-      case EnvironmentCreationTypes.KubeConfigEnvironment:
+      case 'edgeAgentAsync':
         return (
-          <div className="px-1 py-5 border border-solid border-orange-1">
-            <BEFeatureIndicator
-              featureId={options.find((o) => o.value === type)?.feature}
-            />
-            <KubeConfigTeaserForm />
+          <EdgeAgentTab
+            asyncMode
+            onCreate={(environment) =>
+              onCreate(environment, 'kubernetesEdgeAgentAsync')
+            }
+            commands={[{ ...commandsTabs.k8sLinux, label: 'Linux' }]}
+          />
+        );
+      case 'kubeconfig':
+        return (
+          <div className="mb-3">
+            <BEOverlay featureId={FeatureId.K8S_CREATE_FROM_KUBECONFIG}>
+              <KubeConfigTeaserForm />
+            </BEOverlay>
           </div>
         );
       default:
-        throw new Error('Creation type not supported');
+        throw new Error('不支持的创建类型');
     }
   }
 }

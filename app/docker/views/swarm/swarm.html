@@ -1,32 +1,32 @@
-<page-header title="'Cluster overview'" breadcrumbs="['Swarm']" reload="true"> </page-header>
+<page-header title="'集群概览'" breadcrumbs="['Swarm']" reload="true"> </page-header>
 
 <div class="row">
   <div class="col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="trello" feather-icon="true" title-text="Cluster status"></rd-widget-header>
+      <rd-widget-header icon="trello" title-text="集群状态"></rd-widget-header>
       <rd-widget-body classes="no-padding">
         <table class="table">
           <tbody>
             <tr>
-              <td>Nodes</td>
+              <td>节点数</td>
               <td>{{ info.Swarm.Nodes }}</td>
             </tr>
             <tr>
-              <td>Docker API version</td>
+              <td>Docker API版本</td>
               <td>{{ docker.ApiVersion }}</td>
             </tr>
             <tr>
-              <td>Total CPU</td>
+              <td>总CPU</td>
               <td>{{ totalCPU }}</td>
             </tr>
             <tr>
-              <td>Total memory</td>
-              <td>{{ totalMemory | humansize: 2 }}</td>
+              <td>总内存</td>
+              <td>{{ totalMemory | humansize : 2 }}</td>
             </tr>
             <tr>
               <td colspan="2">
                 <div class="btn-group" role="group" aria-label="...">
-                  <a ui-sref="docker.swarm.visualizer" class="vertical-center"><pr-icon icon="'trello'" feather="true" class-name="'icon'"></pr-icon>Go to cluster visualizer</a>
+                  <a ui-sref="docker.swarm.visualizer" class="vertical-center"><pr-icon icon="'trello'" class-name="'icon'"></pr-icon>前往集群可视化器</a>
                 </div>
               </td>
             </tr>
@@ -40,7 +40,7 @@
 <div class="row">
   <div class="col-sm-12">
     <nodes-datatable
-      title-text="Nodes"
+      title-text="节点"
       title-icon="trello"
       dataset="nodes"
       table-key="nodes"

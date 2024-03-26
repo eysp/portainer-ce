@@ -43,7 +43,7 @@ export function useUsers<T = User[]>(
     () => getUsers(includeAdministrator, environmentId),
     {
       meta: {
-        error: { title: 'Failure', message: 'Unable to load users' },
+        error: { title: '失败', message: '无法加载用户' },
       },
       enabled,
       select,

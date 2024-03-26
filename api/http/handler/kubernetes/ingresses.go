@@ -8,10 +8,25 @@ import (
 	"github.com/portainer/libhttp/request"
 	"github.com/portainer/libhttp/response"
 	portainer "github.com/portainer/portainer/api"
-	"github.com/portainer/portainer/api/database/models"
-	portainerDsErrors "github.com/portainer/portainer/api/dataservices/errors"
+	models "github.com/portainer/portainer/api/http/models/kubernetes"
+	"github.com/portainer/portainer/api/http/security"
 )
 
+// @id getKubernetesIngressControllers
+// @summary Get a list of ingress controllers
+// @description Get a list of ingress controllers for the given environment
+// @description **Access policy**: authenticated
+// @tags kubernetes
+// @security ApiKeyAuth
+// @security jwt
+// @accept json
+// @produce json
+// @param id path int true "Environment (Endpoint) identifier"
+// @param allowedOnly query boolean false "Only return allowed ingress controllers"
+// @success 200 {object} models.K8sIngressControllers "Success"
+// @failure 400 "Invalid request"
+// @failure 500 "Server error"
+// @router /kubernetes/{id}/ingresscontrollers [get]
 func (handler *Handler) getKubernetesIngressControllers(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	endpointID, err := request.RetrieveNumericRouteVariableValue(r, "id")
 	if err != nil {
@@ -21,8 +36,8 @@ func (handler *Handler) getKubernetesIngressControllers(w http.ResponseWriter, r
 		)
 	}
 
-	endpoint, err := handler.dataStore.Endpoint().Endpoint(portainer.EndpointID(endpointID))
-	if err == portainerDsErrors.ErrObjectNotFound {
+	endpoint, err := handler.DataStore.Endpoint().Endpoint(portainer.EndpointID(endpointID))
+	if handler.DataStore.IsErrObjectNotFound(err) {
 		return httperror.NotFound(
 			"Unable to find an environment with the specified identifier inside the database",
 			err,
@@ -42,7 +57,7 @@ func (handler *Handler) getKubernetesIngressControllers(w http.ResponseWriter, r
 		)
 	}
 
-	cli, err := handler.kubernetesClientFactory.GetKubeClient(endpoint)
+	cli, err := handler.KubernetesClientFactory.GetKubeClient(endpoint)
 	if err != nil {
 		return httperror.InternalServerError(
 			"Unable to create Kubernetes client",
@@ -92,7 +107,7 @@ func (handler *Handler) getKubernetesIngressControllers(w http.ResponseWriter, r
 	}
 
 	endpoint.Kubernetes.Configuration.IngressClasses = updatedClasses
-	err = handler.dataStore.Endpoint().UpdateEndpoint(
+	err = handler.DataStore.Endpoint().UpdateEndpoint(
 		portainer.EndpointID(endpointID),
 		endpoint,
 	)
@@ -117,6 +132,21 @@ func (handler *Handler) getKubernetesIngressControllers(w http.ResponseWriter, r
 	return response.JSON(w, controllers)
 }
 
+// @id getKubernetesIngressControllersByNamespace
+// @summary Get a list ingress controllers by namespace
+// @description Get a list of ingress controllers for the given environment in the provided namespace
+// @description **Access policy**: authenticated
+// @tags kubernetes
+// @security ApiKeyAuth
+// @security jwt
+// @accept json
+// @produce json
+// @param id path int true "Environment (Endpoint) identifier"
+// @param namespace path string true "Namespace"
+// @success 200 {object} models.K8sIngressControllers "Success"
+// @failure 400 "Invalid request"
+// @failure 500 "Server error"
+// @router /kubernetes/{id}/namespaces/{namespace}/ingresscontrollers [get]
 func (handler *Handler) getKubernetesIngressControllersByNamespace(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	endpointID, err := request.RetrieveNumericRouteVariableValue(r, "id")
 	if err != nil {
@@ -126,8 +156,8 @@ func (handler *Handler) getKubernetesIngressControllersByNamespace(w http.Respon
 		)
 	}
 
-	endpoint, err := handler.dataStore.Endpoint().Endpoint(portainer.EndpointID(endpointID))
-	if err == portainerDsErrors.ErrObjectNotFound {
+	endpoint, err := handler.DataStore.Endpoint().Endpoint(portainer.EndpointID(endpointID))
+	if handler.DataStore.IsErrObjectNotFound(err) {
 		return httperror.NotFound(
 			"Unable to find an environment with the specified identifier inside the database",
 			err,
@@ -147,7 +177,7 @@ func (handler *Handler) getKubernetesIngressControllersByNamespace(w http.Respon
 		)
 	}
 
-	cli, ok := handler.kubernetesClientFactory.GetProxyKubeClient(
+	cli, ok := handler.KubernetesClientFactory.GetProxyKubeClient(
 		strconv.Itoa(endpointID), r.Header.Get("Authorization"),
 	)
 	if !ok {
@@ -218,7 +248,7 @@ func (handler *Handler) getKubernetesIngressControllersByNamespace(w http.Respon
 	// Update the database to match the list of found controllers.
 	// This includes pruning out controllers which no longer exist.
 	endpoint.Kubernetes.Configuration.IngressClasses = updatedClasses
-	err = handler.dataStore.Endpoint().UpdateEndpoint(
+	err = handler.DataStore.Endpoint().UpdateEndpoint(
 		portainer.EndpointID(endpointID),
 		endpoint,
 	)
@@ -231,6 +261,21 @@ func (handler *Handler) getKubernetesIngressControllersByNamespace(w http.Respon
 	return response.JSON(w, controllers)
 }
 
+// @id updateKubernetesIngressControllers
+// @summary Update (block/unblock) ingress controllers
+// @description Update (block/unblock) ingress controllers
+// @description **Access policy**: authenticated
+// @tags kubernetes
+// @security ApiKeyAuth
+// @security jwt
+// @accept json
+// @produce json
+// @param id path int true "Environment (Endpoint) identifier"
+// @param body body []models.K8sIngressControllers true "Ingress controllers"
+// @success 200 {string} string "Success"
+// @failure 400 "Invalid request"
+// @failure 500 "Server error"
+// @router /kubernetes/{id}/ingresscontrollers [put]
 func (handler *Handler) updateKubernetesIngressControllers(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 
 	endpointID, err := request.RetrieveNumericRouteVariableValue(r, "id")
@@ -241,8 +286,8 @@ func (handler *Handler) updateKubernetesIngressControllers(w http.ResponseWriter
 		)
 	}
 
-	endpoint, err := handler.dataStore.Endpoint().Endpoint(portainer.EndpointID(endpointID))
-	if err == portainerDsErrors.ErrObjectNotFound {
+	endpoint, err := handler.DataStore.Endpoint().Endpoint(portainer.EndpointID(endpointID))
+	if handler.DataStore.IsErrObjectNotFound(err) {
 		return httperror.NotFound(
 			"Unable to find an environment with the specified identifier inside the database",
 			err,
@@ -263,7 +308,7 @@ func (handler *Handler) updateKubernetesIngressControllers(w http.ResponseWriter
 		)
 	}
 
-	cli, err := handler.kubernetesClientFactory.GetKubeClient(endpoint)
+	cli, err := handler.KubernetesClientFactory.GetKubeClient(endpoint)
 	if err != nil {
 		return httperror.InternalServerError(
 			"Unable to create Kubernetes client",
@@ -321,7 +366,7 @@ func (handler *Handler) updateKubernetesIngressControllers(w http.ResponseWriter
 	}
 
 	endpoint.Kubernetes.Configuration.IngressClasses = updatedClasses
-	err = handler.dataStore.Endpoint().UpdateEndpoint(
+	err = handler.DataStore.Endpoint().UpdateEndpoint(
 		portainer.EndpointID(endpointID),
 		endpoint,
 	)
@@ -334,6 +379,22 @@ func (handler *Handler) updateKubernetesIngressControllers(w http.ResponseWriter
 	return response.Empty(w)
 }
 
+// @id updateKubernetesIngressControllersByNamespace
+// @summary Update (block/unblock) ingress controllers by namespace
+// @description Update (block/unblock) ingress controllers by namespace for the provided environment
+// @description **Access policy**: authenticated
+// @tags kubernetes
+// @security ApiKeyAuth
+// @security jwt
+// @accept json
+// @produce json
+// @param id path int true "Environment (Endpoint) identifier"
+// @param namespace path string true "Namespace name"
+// @param body body []models.K8sIngressControllers true "Ingress controllers"
+// @success 200 {string} string "Success"
+// @failure 400 "Invalid request"
+// @failure 500 "Server error"
+// @router /kubernetes/{id}/namespaces/{namespace}/ingresscontrollers [put]
 func (handler *Handler) updateKubernetesIngressControllersByNamespace(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	endpointID, err := request.RetrieveNumericRouteVariableValue(r, "id")
 	if err != nil {
@@ -343,8 +404,8 @@ func (handler *Handler) updateKubernetesIngressControllersByNamespace(w http.Res
 		)
 	}
 
-	endpoint, err := handler.dataStore.Endpoint().Endpoint(portainer.EndpointID(endpointID))
-	if err == portainerDsErrors.ErrObjectNotFound {
+	endpoint, err := handler.DataStore.Endpoint().Endpoint(portainer.EndpointID(endpointID))
+	if handler.DataStore.IsErrObjectNotFound(err) {
 		return httperror.NotFound(
 			"Unable to find an environment with the specified identifier inside the database",
 			err,
@@ -387,7 +448,7 @@ PayloadLoop:
 			updatedClass.GloballyBlocked = existingClass.GloballyBlocked
 
 			// Handle "allow"
-			if p.Availability == true {
+			if p.Availability {
 				// remove the namespace from the list of blocked namespaces
 				// in the existingClass.
 				for _, blockedNS := range existingClass.BlockedNamespaces {
@@ -438,7 +499,7 @@ PayloadLoop:
 	}
 
 	endpoint.Kubernetes.Configuration.IngressClasses = updatedClasses
-	err = handler.dataStore.Endpoint().UpdateEndpoint(
+	err = handler.DataStore.Endpoint().UpdateEndpoint(
 		portainer.EndpointID(endpointID),
 		endpoint,
 	)
@@ -451,6 +512,22 @@ PayloadLoop:
 	return response.Empty(w)
 }
 
+// @id getKubernetesIngresses
+// @summary Get kubernetes ingresses by namespace
+// @description Get kubernetes ingresses by namespace for the provided environment
+// @description **Access policy**: authenticated
+// @tags kubernetes
+// @security ApiKeyAuth
+// @security jwt
+// @accept json
+// @produce json
+// @param id path int true "Environment (Endpoint) identifier"
+// @param namespace path string true "Namespace name"
+// @param body body []models.K8sIngressInfo true "Ingress details"
+// @success 200 {string} string "Success"
+// @failure 400 "Invalid request"
+// @failure 500 "Server error"
+// @router /kubernetes/{id}/namespaces/{namespace}/ingresses [get]
 func (handler *Handler) getKubernetesIngresses(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	namespace, err := request.RetrieveRouteVariableValue(r, "namespace")
 	if err != nil {
@@ -468,7 +545,7 @@ func (handler *Handler) getKubernetesIngresses(w http.ResponseWriter, r *http.Re
 		)
 	}
 
-	cli, ok := handler.kubernetesClientFactory.GetProxyKubeClient(
+	cli, ok := handler.KubernetesClientFactory.GetProxyKubeClient(
 		strconv.Itoa(endpointID), r.Header.Get("Authorization"),
 	)
 	if !ok {
@@ -489,6 +566,22 @@ func (handler *Handler) getKubernetesIngresses(w http.ResponseWriter, r *http.Re
 	return response.JSON(w, ingresses)
 }
 
+// @id createKubernetesIngress
+// @summary Create a kubernetes ingress by namespace
+// @description Create a kubernetes ingress by namespace for the provided environment
+// @description **Access policy**: authenticated
+// @tags kubernetes
+// @security ApiKeyAuth
+// @security jwt
+// @accept json
+// @produce json
+// @param id path int true "Environment (Endpoint) identifier"
+// @param namespace path string true "Namespace name"
+// @param body body models.K8sIngressInfo true "Ingress details"
+// @success 200 {string} string "Success"
+// @failure 400 "Invalid request"
+// @failure 500 "Server error"
+// @router /kubernetes/{id}/namespaces/{namespace}/ingresses [post]
 func (handler *Handler) createKubernetesIngress(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	namespace, err := request.RetrieveRouteVariableValue(r, "namespace")
 	if err != nil {
@@ -515,7 +608,13 @@ func (handler *Handler) createKubernetesIngress(w http.ResponseWriter, r *http.R
 		)
 	}
 
-	cli, ok := handler.kubernetesClientFactory.GetProxyKubeClient(
+	owner := "admin"
+	tokenData, err := security.RetrieveTokenData(r)
+	if err == nil && tokenData != nil {
+		owner = tokenData.Username
+	}
+
+	cli, ok := handler.KubernetesClientFactory.GetProxyKubeClient(
 		strconv.Itoa(endpointID), r.Header.Get("Authorization"),
 	)
 	if !ok {
@@ -525,7 +624,7 @@ func (handler *Handler) createKubernetesIngress(w http.ResponseWriter, r *http.R
 		)
 	}
 
-	err = cli.CreateIngress(namespace, payload)
+	err = cli.CreateIngress(namespace, payload, owner)
 	if err != nil {
 		return httperror.InternalServerError(
 			"Unable to retrieve the ingress",
@@ -535,6 +634,21 @@ func (handler *Handler) createKubernetesIngress(w http.ResponseWriter, r *http.R
 	return response.Empty(w)
 }
 
+// @id deleteKubernetesIngresses
+// @summary Delete kubernetes ingresses
+// @description Delete kubernetes ingresses for the provided environment
+// @description **Access policy**: authenticated
+// @tags kubernetes
+// @security ApiKeyAuth
+// @security jwt
+// @accept json
+// @produce json
+// @param id path int true "Environment (Endpoint) identifier"
+// @param body body models.K8sIngressDeleteRequests true "Ingress details"
+// @success 200 {string} string "Success"
+// @failure 400 "Invalid request"
+// @failure 500 "Server error"
+// @router /kubernetes/{id}/ingresses/delete [post]
 func (handler *Handler) deleteKubernetesIngresses(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	endpointID, err := request.RetrieveNumericRouteVariableValue(r, "id")
 	if err != nil {
@@ -544,7 +658,7 @@ func (handler *Handler) deleteKubernetesIngresses(w http.ResponseWriter, r *http
 		)
 	}
 
-	cli, ok := handler.kubernetesClientFactory.GetProxyKubeClient(
+	cli, ok := handler.KubernetesClientFactory.GetProxyKubeClient(
 		strconv.Itoa(endpointID), r.Header.Get("Authorization"),
 	)
 	if !ok {
@@ -570,6 +684,22 @@ func (handler *Handler) deleteKubernetesIngresses(w http.ResponseWriter, r *http
 	return response.Empty(w)
 }
 
+// @id updateKubernetesIngress
+// @summary Update kubernetes ingress rule
+// @description Update kubernetes ingress rule for the provided environment
+// @description **Access policy**: authenticated
+// @tags kubernetes
+// @security ApiKeyAuth
+// @security jwt
+// @accept json
+// @produce json
+// @param id path int true "Environment (Endpoint) identifier"
+// @param namespace path string true "Namespace name"
+// @param body body models.K8sIngressInfo true "Ingress details"
+// @success 200 {string} string "Success"
+// @failure 400 "Invalid request"
+// @failure 500 "Server error"
+// @router /kubernetes/{id}/namespaces/{namespace}/ingresses [put]
 func (handler *Handler) updateKubernetesIngress(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	namespace, err := request.RetrieveRouteVariableValue(r, "namespace")
 	if err != nil {
@@ -596,7 +726,7 @@ func (handler *Handler) updateKubernetesIngress(w http.ResponseWriter, r *http.R
 		)
 	}
 
-	cli, ok := handler.kubernetesClientFactory.GetProxyKubeClient(
+	cli, ok := handler.KubernetesClientFactory.GetProxyKubeClient(
 		strconv.Itoa(endpointID), r.Header.Get("Authorization"),
 	)
 	if !ok {
