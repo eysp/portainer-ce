@@ -1,21 +1,39 @@
 package security
 
 import (
-	"errors"
 	"net/http"
 	"strings"
+	"time"
 
 	httperror "github.com/portainer/libhttp/error"
 	portainer "github.com/portainer/portainer/api"
-	bolterrors "github.com/portainer/portainer/api/bolt/errors"
+	"github.com/portainer/portainer/api/apikey"
+	"github.com/portainer/portainer/api/dataservices"
 	httperrors "github.com/portainer/portainer/api/http/errors"
+
+	"github.com/pkg/errors"
 )
 
 type (
+	BouncerService interface {
+		PublicAccess(http.Handler) http.Handler
+		AdminAccess(http.Handler) http.Handler
+		RestrictedAccess(http.Handler) http.Handler
+		TeamLeaderAccess(http.Handler) http.Handler
+		AuthenticatedAccess(http.Handler) http.Handler
+		EdgeComputeOperation(http.Handler) http.Handler
+
+		AuthorizedEndpointOperation(*http.Request, *portainer.Endpoint) error
+		AuthorizedEdgeEndpointOperation(*http.Request, *portainer.Endpoint) error
+		TrustedEdgeEnvironmentAccess(dataservices.DataStoreTx, *portainer.Endpoint) error
+		JWTAuthLookup(*http.Request) *portainer.TokenData
+	}
+
 	// RequestBouncer represents an entity that manages API request accesses
 	RequestBouncer struct {
-		dataStore  portainer.DataStore
-		jwtService portainer.JWTService
+		dataStore     dataservices.DataStore
+		jwtService    dataservices.JWTService
+		apiKeyService apikey.APIKeyService
 	}
 
 	// RestrictedRequestContext is a data structure containing information
@@ -26,26 +44,31 @@ type (
 		UserID          portainer.UserID
 		UserMemberships []portainer.TeamMembership
 	}
+
+	// tokenLookup looks up a token in the request
+	tokenLookup func(*http.Request) *portainer.TokenData
 )
 
+const apiKeyHeader = "X-API-KEY"
+
 // NewRequestBouncer initializes a new RequestBouncer
-func NewRequestBouncer(dataStore portainer.DataStore, jwtService portainer.JWTService) *RequestBouncer {
+func NewRequestBouncer(dataStore dataservices.DataStore, jwtService dataservices.JWTService, apiKeyService apikey.APIKeyService) *RequestBouncer {
 	return &RequestBouncer{
-		dataStore:  dataStore,
-		jwtService: jwtService,
+		dataStore:     dataStore,
+		jwtService:    jwtService,
+		apiKeyService: apiKeyService,
 	}
 }
 
-// PublicAccess defines a security check for public API environments(endpoints).
-// No authentication is required to access these environments(endpoints).
+// PublicAccess defines a security check for public API endpoints.
+// No authentication is required to access these endpoints.
 func (bouncer *RequestBouncer) PublicAccess(h http.Handler) http.Handler {
-	h = mwSecureHeaders(h)
-	return h
+	return mwSecureHeaders(h)
 }
 
-// AdminAccess defines a security check for API environments(endpoints) that require an authorization check.
-// Authentication is required to access these environments(endpoints).
-// The administrator role is required to use these environments(endpoints).
+// AdminAccess defines a security check for API endpoints that require an authorization check.
+// Authentication is required to access these endpoints.
+// The administrator role is required to use these endpoints.
 // The request context will be enhanced with a RestrictedRequestContext object
 // that might be used later to inside the API operation for extra authorization validation
 // and resource filtering.
@@ -56,8 +79,8 @@ func (bouncer *RequestBouncer) AdminAccess(h http.Handler) http.Handler {
 	return h
 }
 
-// RestrictedAccess defines a security check for restricted API environments(endpoints).
-// Authentication is required to access these environments(endpoints).
+// RestrictedAccess defines a security check for restricted API endpoints.
+// Authentication is required to access these endpoints.
 // The request context will be enhanced with a RestrictedRequestContext object
 // that might be used later to inside the API operation for extra authorization validation
 // and resource filtering.
@@ -68,8 +91,21 @@ func (bouncer *RequestBouncer) RestrictedAccess(h http.Handler) http.Handler {
 	return h
 }
 
-// AuthenticatedAccess defines a security check for restricted API environments(endpoints).
-// Authentication is required to access these environments(endpoints).
+// TeamLeaderAccess defines a security check for APIs require team leader privilege
+//
+// Bouncer operations are applied backwards:
+//   - Parse the JWT from the request and stored in context, user has to be authenticated
+//   - Upgrade to the restricted request
+//   - User is admin or team leader
+func (bouncer *RequestBouncer) TeamLeaderAccess(h http.Handler) http.Handler {
+	h = bouncer.mwIsTeamLeader(h)
+	h = bouncer.mwUpgradeToRestrictedRequest(h)
+	h = bouncer.mwAuthenticatedUser(h)
+	return h
+}
+
+// AuthenticatedAccess defines a security check for restricted API endpoints.
+// Authentication is required to access these endpoints.
 // The request context will be enhanced with a RestrictedRequestContext object
 // that might be used later to inside the API operation for extra authorization validation
 // and resource filtering.
@@ -98,12 +134,12 @@ func (bouncer *RequestBouncer) AuthorizedEndpointOperation(r *http.Request, endp
 		return err
 	}
 
-	group, err := bouncer.dataStore.EndpointGroup().EndpointGroup(endpoint.GroupID)
+	group, err := bouncer.dataStore.EndpointGroup().Read(endpoint.GroupID)
 	if err != nil {
 		return err
 	}
 
-	if !authorizedEndpointAccess(endpoint, group, tokenData.ID, memberships) {
+	if !AuthorizedEndpointAccess(endpoint, group, tokenData.ID, memberships) {
 		return httperrors.ErrEndpointAccessDenied
 	}
 
@@ -128,11 +164,33 @@ func (bouncer *RequestBouncer) AuthorizedEdgeEndpointOperation(r *http.Request, 
 	return nil
 }
 
-// handlers are applied backwards to the incoming request:
-// - add secure handlers to the response
-// - parse the JWT token and put it into the http context.
+// TrustedEdgeEnvironmentAccess defines a security check for Edge environments, checks if
+// the request is coming from a trusted Edge environment
+func (bouncer *RequestBouncer) TrustedEdgeEnvironmentAccess(tx dataservices.DataStoreTx, endpoint *portainer.Endpoint) error {
+	if endpoint.UserTrusted {
+		return nil
+	}
+
+	settings, err := tx.Settings().Settings()
+	if err != nil {
+		return errors.WithMessage(err, "could not retrieve the settings")
+	}
+
+	if !settings.TrustOnFirstConnect {
+		return errors.New("the device has not been trusted yet")
+	}
+
+	return nil
+}
+
+// mwAuthenticatedUser authenticates a request by
+// - adding a secure handlers to the response
+// - authenticating the request with a valid token
 func (bouncer *RequestBouncer) mwAuthenticatedUser(h http.Handler) http.Handler {
-	h = bouncer.mwCheckAuthentication(h)
+	h = bouncer.mwAuthenticateFirst([]tokenLookup{
+		bouncer.JWTAuthLookup,
+		bouncer.apiKeyLookup,
+	}, h)
 	h = mwSecureHeaders(h)
 	return h
 }
@@ -159,8 +217,8 @@ func (bouncer *RequestBouncer) mwCheckPortainerAuthorizations(next http.Handler,
 			return
 		}
 
-		_, err = bouncer.dataStore.User().User(tokenData.ID)
-		if err != nil && err == bolterrors.ErrObjectNotFound {
+		_, err = bouncer.dataStore.User().Read(tokenData.ID)
+		if bouncer.dataStore.IsErrObjectNotFound(err) {
 			httperror.WriteError(w, http.StatusUnauthorized, "Unauthorized", httperrors.ErrUnauthorized)
 			return
 		} else if err != nil {
@@ -193,28 +251,45 @@ func (bouncer *RequestBouncer) mwUpgradeToRestrictedRequest(next http.Handler) h
 	})
 }
 
-// mwCheckAuthentication provides Authentication middleware for handlers
-//
-// It parses the JWT token and adds the parsed token data to the http context
-func (bouncer *RequestBouncer) mwCheckAuthentication(next http.Handler) http.Handler {
+// mwIsTeamLeader will verify that the user is an admin or a team leader
+func (bouncer *RequestBouncer) mwIsTeamLeader(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var tokenData *portainer.TokenData
-
-		// get token from the Authorization header or query parameter
-		token, err := ExtractBearerToken(r)
+		securityContext, err := RetrieveRestrictedRequestContext(r)
 		if err != nil {
-			httperror.WriteError(w, http.StatusUnauthorized, "Unauthorized", err)
+			httperror.WriteError(w, http.StatusInternalServerError, "Unable to retrieve restricted request context ", err)
 			return
 		}
 
-		tokenData, err = bouncer.jwtService.ParseAndVerifyToken(token)
-		if err != nil {
-			httperror.WriteError(w, http.StatusUnauthorized, "Invalid JWT token", err)
+		if !securityContext.IsAdmin && !securityContext.IsTeamLeader {
+			httperror.WriteError(w, http.StatusForbidden, "Access denied", httperrors.ErrUnauthorized)
 			return
 		}
 
-		_, err = bouncer.dataStore.User().User(tokenData.ID)
-		if err != nil && err == bolterrors.ErrObjectNotFound {
+		next.ServeHTTP(w, r)
+	})
+}
+
+// mwAuthenticateFirst authenticates a request an auth token.
+// A result of a first succeded token lookup would be used for the authentication.
+func (bouncer *RequestBouncer) mwAuthenticateFirst(tokenLookups []tokenLookup, next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var token *portainer.TokenData
+
+		for _, lookup := range tokenLookups {
+			token = lookup(r)
+
+			if token != nil {
+				break
+			}
+		}
+
+		if token == nil {
+			httperror.WriteError(w, http.StatusUnauthorized, "A valid authorisation token is missing", httperrors.ErrUnauthorized)
+			return
+		}
+
+		_, err := bouncer.dataStore.User().Read(token.ID)
+		if err != nil && bouncer.dataStore.IsErrObjectNotFound(err) {
 			httperror.WriteError(w, http.StatusUnauthorized, "Unauthorized", httperrors.ErrUnauthorized)
 			return
 		} else if err != nil {
@@ -222,13 +297,67 @@ func (bouncer *RequestBouncer) mwCheckAuthentication(next http.Handler) http.Han
 			return
 		}
 
-		ctx := StoreTokenData(r, tokenData)
+		ctx := StoreTokenData(r, token)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
-// ExtractBearerToken extracts the Bearer token from the request header or query parameter and returns the token.
-func ExtractBearerToken(r *http.Request) (string, error) {
+// JWTAuthLookup looks up a valid bearer in the request.
+func (bouncer *RequestBouncer) JWTAuthLookup(r *http.Request) *portainer.TokenData {
+	// get token from the Authorization header or query parameter
+	token, err := extractBearerToken(r)
+	if err != nil {
+		return nil
+	}
+
+	tokenData, err := bouncer.jwtService.ParseAndVerifyToken(token)
+	if err != nil {
+		return nil
+	}
+
+	return tokenData
+}
+
+// apiKeyLookup looks up an verifies an api-key by:
+// - computing the digest of the raw api-key
+// - verifying it exists in cache/database
+// - matching the key to a user (ID, Role)
+// If the key is valid/verified, the last updated time of the key is updated.
+// Successful verification of the key will return a TokenData object - since the downstream handlers
+// utilise the token injected in the request context.
+func (bouncer *RequestBouncer) apiKeyLookup(r *http.Request) *portainer.TokenData {
+	rawAPIKey, ok := extractAPIKey(r)
+	if !ok {
+		return nil
+	}
+
+	digest := bouncer.apiKeyService.HashRaw(rawAPIKey)
+
+	user, apiKey, err := bouncer.apiKeyService.GetDigestUserAndKey(digest)
+	if err != nil {
+		return nil
+	}
+
+	tokenData := &portainer.TokenData{
+		ID:       user.ID,
+		Username: user.Username,
+		Role:     user.Role,
+	}
+	if _, err := bouncer.jwtService.GenerateToken(tokenData); err != nil {
+		return nil
+	}
+
+	if now := time.Now().UTC().Unix(); now-apiKey.LastUsed > 60 { // [seconds]
+		// update the last used time of the key
+		apiKey.LastUsed = now
+		bouncer.apiKeyService.UpdateAPIKey(&apiKey)
+	}
+
+	return tokenData
+}
+
+// extractBearerToken extracts the Bearer token from the request header or query parameter and returns the token.
+func extractBearerToken(r *http.Request) (string, error) {
 	// Optionally, token might be set via the "token" query parameter.
 	// For example, in websocket requests
 	token := r.URL.Query().Get("token")
@@ -244,11 +373,31 @@ func ExtractBearerToken(r *http.Request) (string, error) {
 	return token, nil
 }
 
+// extractAPIKey extracts the api key from the api key request header or query params.
+func extractAPIKey(r *http.Request) (apikey string, ok bool) {
+	// extract the API key from the request header
+	apikey = r.Header.Get(apiKeyHeader)
+	if apikey != "" {
+		return apikey, true
+	}
+
+	// extract the API key from query params.
+	// Case-insensitive check for the "X-API-KEY" query param.
+	query := r.URL.Query()
+	for k, v := range query {
+		if strings.EqualFold(k, apiKeyHeader) {
+			return v[0], true
+		}
+	}
+
+	return "", false
+}
+
 // mwSecureHeaders provides secure headers middleware for handlers.
 func mwSecureHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("X-XSS-Protection", "1; mode=block")
-		w.Header().Add("X-Content-Type-Options", "nosniff")
+		w.Header().Set("X-XSS-Protection", "1; mode=block")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
 		next.ServeHTTP(w, r)
 	})
 }
@@ -281,7 +430,7 @@ func (bouncer *RequestBouncer) newRestrictedContextRequest(userID portainer.User
 	}, nil
 }
 
-// EdgeComputeOperation defines a restriced edge compute operation.
+// EdgeComputeOperation defines a restricted edge compute operation.
 // Use of this operation will only be authorized if edgeCompute is enabled in settings
 func (bouncer *RequestBouncer) EdgeComputeOperation(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

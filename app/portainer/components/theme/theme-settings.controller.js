@@ -1,70 +1,66 @@
-import { buildOption } from '@/portainer/components/box-selector';
+import { notifyError, notifySuccess } from '@/portainer/services/notifications';
+import { queryKeys } from '@/portainer/users/queries/queryKeys';
+import { queryClient } from '@/react-tools/react-query';
+import { options } from '@/react/portainer/account/AccountView/theme-options';
 
 export default class ThemeSettingsController {
   /* @ngInject */
-  constructor($async, Authentication, ThemeManager, StateManager, UserService, Notifications) {
+  constructor($async, Authentication, ThemeManager, StateManager, UserService) {
     this.$async = $async;
     this.Authentication = Authentication;
     this.ThemeManager = ThemeManager;
     this.StateManager = StateManager;
     this.UserService = UserService;
-    this.Notifications = Notifications;
 
-    this.setTheme = this.setTheme.bind(this);
+    this.setThemeColor = this.setThemeColor.bind(this);
   }
 
-  /** Theme Settings Panel */
-  async updateTheme() {
+  async setThemeColor(color) {
+    return this.$async(async () => {
+      if (color === 'auto' || !color) {
+        this.ThemeManager.autoTheme();
+      } else {
+        this.ThemeManager.setTheme(color);
+      }
+
+      this.state.themeColor = color;
+      this.updateThemeSettings({ color });
+    });
+  }
+
+  async updateThemeSettings(theme) {
     try {
-      await this.UserService.updateUserTheme(this.state.userId, this.state.userTheme);
-      this.state.themeInProgress = false;
-      this.Notifications.success('成功', '用户主题更新成功');
-    } catch (err) {
-      this.Notifications.error('失败', err, '无法更新用户主题');
-    }
-  }
+      if (!this.state.isDemo) {
+        await this.UserService.updateUserTheme(this.state.userId, theme);
+        await queryClient.invalidateQueries(queryKeys.user(this.state.userId));
+      }
 
-  setTheme(theme) {
-    this.ThemeManager.setTheme(theme);
-    this.state.themeInProgress = true;
+      notifySuccess('成功', '用户主题设置已成功更新');
+    } catch (err) {
+      notifyError('失败', err, '无法更新用户主题设置');
+    }
   }
 
   $onInit() {
     return this.$async(async () => {
+      const state = this.StateManager.getState();
+
       this.state = {
         userId: null,
-        userTheme: '',
-        initTheme: '',
-        defaultTheme: 'light',
-        themeInProgress: false,
+        themeColor: 'auto',
+        isDemo: state.application.demoEnvironment.enabled,
       };
 
-      this.state.availableThemes = [
-        buildOption('light', 'fas fa-sun', 'Light Theme', 'Default color mode', 'light'),
-        buildOption('dark', 'fas fa-moon', 'Dark Theme', 'Dark color mode', 'dark'),
-        buildOption('highcontrast', 'fas fa-adjust', 'High Contrast', 'High contrast color mode', 'highcontrast'),
-      ];
-
-      this.state.availableTheme = {
-        light: 'light',
-        dark: 'dark',
-        highContrast: 'highcontrast',
-      };
+      this.state.availableThemes = options;
 
       try {
         this.state.userId = await this.Authentication.getUserDetails().ID;
-        const data = await this.UserService.user(this.state.userId);
-        this.state.userTheme = data.UserTheme || this.state.defaultTheme;
-        this.state.initTheme = this.state.userTheme;
+        const user = await this.UserService.user(this.state.userId);
+
+        this.state.themeColor = user.ThemeSettings.color || this.state.themeColor;
       } catch (err) {
-        this.Notifications.error('失败', err, '无法获取用户详细信息');
+        notifyError('失败', err, '无法获取用户详细信息');
       }
     });
-  }
-
-  $onDestroy() {
-    if (this.state.themeInProgress) {
-      this.ThemeManager.setTheme(this.state.initTheme);
-    }
   }
 }

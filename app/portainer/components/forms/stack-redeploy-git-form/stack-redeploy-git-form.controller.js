@@ -1,22 +1,39 @@
-import uuidv4 from 'uuid/v4';
 import { RepositoryMechanismTypes } from 'Kubernetes/models/deploy';
+import { FeatureId } from '@/react/portainer/feature-flags/enums';
+import { confirmStackUpdate } from '@/react/common/stacks/common/confirm-stack-update';
+
+import { parseAutoUpdateResponse } from '@/react/portainer/gitops/AutoUpdateFieldset/utils';
+import { baseStackWebhookUrl, createWebhookId } from '@/portainer/helpers/webhookHelper';
+import { confirmEnableTLSVerify } from '@/react/portainer/gitops/utils';
+
 class StackRedeployGitFormController {
   /* @ngInject */
-  constructor($async, $state, StackService, ModalService, Notifications, WebhookHelper, FormHelper) {
+  constructor($async, $state, $compile, $scope, StackService, Notifications, FormHelper) {
     this.$async = $async;
     this.$state = $state;
+    this.$compile = $compile;
+    this.$scope = $scope;
     this.StackService = StackService;
-    this.ModalService = ModalService;
     this.Notifications = Notifications;
-    this.WebhookHelper = WebhookHelper;
     this.FormHelper = FormHelper;
-
+    $scope.stackPullImageFeature = FeatureId.STACK_PULL_IMAGE;
     this.state = {
       inProgress: false,
       redeployInProgress: false,
       showConfig: false,
       isEdit: false,
+
+      // isAuthEdit is used to preserve the editing state of the AuthFieldset component.
+      // Within the stack editing page, users have the option to turn the AuthFieldset on or off
+      // and save the stack setting. If the user enables the AuthFieldset, it implies that they
+      // must input new Git authentication, rather than edit existing authentication. Thus,
+      // a dedicated state tracker is required to differentiate between the editing state of
+      // AuthFieldset component and the whole stack
+      // When isAuthEdit is true, PAT field needs to be validated.
+      isAuthEdit: false,
       hasUnsavedChanges: false,
+      baseWebhookUrl: baseStackWebhookUrl(),
+      webhookId: createWebhookId(),
     };
 
     this.formValues = {
@@ -25,19 +42,21 @@ class StackRedeployGitFormController {
       RepositoryUsername: '',
       RepositoryPassword: '',
       Env: [],
-      // auto update
-      AutoUpdate: {
-        RepositoryAutomaticUpdates: false,
-        RepositoryMechanism: RepositoryMechanismTypes.INTERVAL,
-        RepositoryFetchInterval: '5m',
-        RepositoryWebhookURL: '',
+      PullImage: false,
+      Option: {
+        Prune: false,
       },
+      // auto update
+      AutoUpdate: parseAutoUpdateResponse(),
     };
 
     this.onChange = this.onChange.bind(this);
     this.onChangeRef = this.onChangeRef.bind(this);
     this.onChangeAutoUpdate = this.onChangeAutoUpdate.bind(this);
     this.onChangeEnvVar = this.onChangeEnvVar.bind(this);
+    this.onChangeOption = this.onChangeOption.bind(this);
+    this.onChangeGitAuth = this.onChangeGitAuth.bind(this);
+    this.onChangeTLSSkipVerify = this.onChangeTLSSkipVerify.bind(this);
   }
 
   buildAnalyticsProperties() {
@@ -60,57 +79,72 @@ class StackRedeployGitFormController {
   }
 
   onChange(values) {
-    this.formValues = {
-      ...this.formValues,
-      ...values,
-    };
-
-    this.state.hasUnsavedChanges = angular.toJson(this.savedFormValues) !== angular.toJson(this.formValues);
+    return this.$async(async () => {
+      this.formValues = {
+        ...this.formValues,
+        ...values,
+      };
+      this.state.hasUnsavedChanges = angular.toJson(this.savedFormValues) !== angular.toJson(this.formValues);
+    });
   }
 
   onChangeRef(value) {
     this.onChange({ RefName: value });
   }
 
-  onChangeAutoUpdate(values) {
+  onChangeEnvVar(value) {
+    this.onChange({ Env: value });
+  }
+
+  async onChangeTLSSkipVerify(value) {
+    return this.$async(async () => {
+      if (this.model.TLSSkipVerify && !value) {
+        const confirmed = await confirmEnableTLSVerify();
+
+        if (!confirmed) {
+          return;
+        }
+      }
+      this.onChange({ TLSSkipVerify: value });
+    });
+  }
+
+  onChangeOption(values) {
     this.onChange({
-      AutoUpdate: {
-        ...this.formValues.AutoUpdate,
+      Option: {
+        ...this.formValues.Option,
         ...values,
       },
     });
   }
 
-  onChangeEnvVar(value) {
-    this.onChange({ Env: value });
-  }
-
   async submit() {
-    return this.$async(async () => {
+    const isSwarmStack = this.stack.Type === 1;
+    const that = this;
+    confirmStackUpdate(
+      'Any changes to this stack or application made locally in Portainer will be overridden, which may cause service interruption. Do you wish to continue?',
+      isSwarmStack
+    ).then(async function (result) {
+      if (!result) {
+        return;
+      }
       try {
-        const confirmed = await this.ModalService.confirmAsync({
-          title: '你确定吗？',
-          message: '在Portainer中本地对此堆栈所做的任何更改都将被git中的定义覆盖，并可能导致服务中断。你想继续吗',
-          buttons: {
-            confirm: {
-              label: '更新',
-              className: 'btn-warning',
-            },
-          },
-        });
-        if (!confirmed) {
-          return;
-        }
+        that.state.redeployInProgress = true;
+        await that.StackService.updateGit(
+          that.stack.Id,
+          that.stack.EndpointId,
+          that.FormHelper.removeInvalidEnvVars(that.formValues.Env),
+          that.formValues.Option.Prune,
+          that.formValues,
+          result.pullImage
+        );
 
-        this.state.redeployInProgress = true;
-
-        await this.StackService.updateGit(this.stack.Id, this.stack.EndpointId, this.FormHelper.removeInvalidEnvVars(this.formValues.Env), false, this.formValues);
-        this.Notifications.success('已成功拉取并重新部署堆栈');
-        await this.$state.reload();
+        that.Notifications.success('Success', 'Pulled and redeployed stack successfully');
+        that.$state.reload();
       } catch (err) {
-        this.Notifications.error('失败', err, '重新部署堆栈失败');
+        that.Notifications.error('Failure', err, 'Failed redeploying stack');
       } finally {
-        this.state.redeployInProgress = false;
+        that.state.redeployInProgress = false;
       }
     });
   }
@@ -123,15 +157,22 @@ class StackRedeployGitFormController {
           this.stack.Id,
           this.stack.EndpointId,
           this.FormHelper.removeInvalidEnvVars(this.formValues.Env),
-          this.formValues
+          this.formValues,
+          this.state.webhookId
         );
         this.savedFormValues = angular.copy(this.formValues);
         this.state.hasUnsavedChanges = false;
-        this.Notifications.success('成功保存堆栈设置');
+        this.Notifications.success('Success', 'Save stack settings successfully');
 
+        if (!(this.stack.GitConfig && this.stack.GitConfig.Authentication)) {
+          // update the AuthFieldset setting
+          this.state.isAuthEdit = false;
+          this.formValues.RepositoryUsername = '';
+          this.formValues.RepositoryPassword = '';
+        }
         this.stack = stack;
       } catch (err) {
-        this.Notifications.error('失败', err, '无法保存堆栈设置');
+        this.Notifications.error('Failure', err, 'Unable to save stack settings');
       } finally {
         this.state.inProgress = false;
       }
@@ -148,30 +189,40 @@ class StackRedeployGitFormController {
     return isEnabled !== wasEnabled;
   }
 
-  $onInit() {
-    this.formValues.RefName = this.model.ReferenceName;
-    this.formValues.Env = this.stack.Env;
-    // Init auto update
-    if (this.stack.AutoUpdate && (this.stack.AutoUpdate.Interval || this.stack.AutoUpdate.Webhook)) {
-      this.formValues.AutoUpdate.RepositoryAutomaticUpdates = true;
+  onChangeGitAuth(values) {
+    this.onChange(values);
+  }
 
-      if (this.stack.AutoUpdate.Interval) {
-        this.formValues.AutoUpdate.RepositoryMechanism = RepositoryMechanismTypes.INTERVAL;
-        this.formValues.AutoUpdate.RepositoryFetchInterval = this.stack.AutoUpdate.Interval;
-      } else if (this.stack.AutoUpdate.Webhook) {
-        this.formValues.AutoUpdate.RepositoryMechanism = RepositoryMechanismTypes.WEBHOOK;
-        this.formValues.AutoUpdate.RepositoryWebhookURL = this.WebhookHelper.returnStackWebhookUrl(this.stack.AutoUpdate.Webhook);
-      }
+  onChangeAutoUpdate(values) {
+    this.onChange({
+      AutoUpdate: {
+        ...this.formValues.AutoUpdate,
+        ...values,
+      },
+    });
+  }
+
+  async $onInit() {
+    this.formValues.RefName = this.model.ReferenceName;
+    this.formValues.TLSSkipVerify = this.model.TLSSkipVerify;
+    this.formValues.Env = this.stack.Env;
+
+    if (this.stack.Option) {
+      this.formValues.Option = this.stack.Option;
     }
 
-    if (!this.formValues.AutoUpdate.RepositoryWebhookURL) {
-      this.formValues.AutoUpdate.RepositoryWebhookURL = this.WebhookHelper.returnStackWebhookUrl(uuidv4());
+    this.formValues.AutoUpdate = parseAutoUpdateResponse(this.stack.AutoUpdate);
+
+    if (this.stack.AutoUpdate && this.stack.AutoUpdate.Webhook) {
+      this.state.webhookId = this.stack.AutoUpdate.Webhook;
     }
 
     if (this.stack.GitConfig && this.stack.GitConfig.Authentication) {
       this.formValues.RepositoryUsername = this.stack.GitConfig.Authentication.Username;
+      this.formValues.RepositoryPassword = this.stack.GitConfig.Authentication.Password;
       this.formValues.RepositoryAuthentication = true;
       this.state.isEdit = true;
+      this.state.isAuthEdit = true;
     }
 
     this.savedFormValues = angular.copy(this.formValues);

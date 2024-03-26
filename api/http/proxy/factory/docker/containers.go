@@ -5,8 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
+	"strings"
 
 	"github.com/docker/docker/client"
 	portainer "github.com/portainer/portainer/api"
@@ -69,6 +70,11 @@ func (transport *Transport) containerListOperation(response *http.Response, exec
 		}
 	}
 
+	responseArray, err = transport.applyPortainerContainers(responseArray)
+	if err != nil {
+		return err
+	}
+
 	return utils.RewriteResponse(response, responseArray, http.StatusOK)
 }
 
@@ -87,6 +93,8 @@ func (transport *Transport) containerInspectOperation(response *http.Response, e
 		resourceType:                portainer.ContainerResourceControl,
 		labelsObjectSelector:        selectorContainerLabelsFromContainerInspectOperation,
 	}
+
+	responseObject, _ = transport.applyPortainerContainer(responseObject)
 
 	return transport.applyAccessControlOnResource(resourceOperationParameters, responseObject, response, executor)
 }
@@ -182,7 +190,7 @@ func (transport *Transport) decorateContainerCreationOperation(request *http.Req
 			return nil, err
 		}
 
-		body, err := ioutil.ReadAll(request.Body)
+		body, err := io.ReadAll(request.Body)
 		if err != nil {
 			return nil, err
 		}
@@ -214,10 +222,14 @@ func (transport *Transport) decorateContainerCreationOperation(request *http.Req
 		}
 
 		if !securitySettings.AllowBindMountsForRegularUsers && (len(partialContainer.HostConfig.Binds) > 0) {
-			return forbiddenResponse, errors.New("forbidden to use bind mounts")
+			for _, bind := range partialContainer.HostConfig.Binds {
+				if strings.HasPrefix(bind, "/") {
+					return forbiddenResponse, errors.New("forbidden to use bind mounts")
+				}
+			}
 		}
 
-		request.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+		request.Body = io.NopCloser(bytes.NewBuffer(body))
 	}
 
 	response, err := transport.executeDockerRequest(request)

@@ -1,7 +1,10 @@
 package webhooks
 
 import (
+	"errors"
 	"net/http"
+
+	"github.com/portainer/portainer/api/http/security"
 
 	httperror "github.com/portainer/libhttp/error"
 	"github.com/portainer/libhttp/request"
@@ -10,11 +13,10 @@ import (
 )
 
 // @summary Delete a webhook
-// @description
+// @description **Access policy**: authenticated
+// @security ApiKeyAuth
 // @security jwt
 // @tags webhooks
-// @accept json
-// @produce json
 // @param id path int true "Webhook id"
 // @success 202 "Webhook deleted"
 // @failure 400
@@ -23,12 +25,21 @@ import (
 func (handler *Handler) webhookDelete(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	id, err := request.RetrieveNumericRouteVariableValue(r, "id")
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid webhook id", err}
+		return httperror.BadRequest("Invalid webhook id", err)
 	}
 
-	err = handler.DataStore.Webhook().DeleteWebhook(portainer.WebhookID(id))
+	securityContext, err := security.RetrieveRestrictedRequestContext(r)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to remove the webhook from the database", err}
+		return httperror.InternalServerError("Unable to retrieve user info from request context", err)
+	}
+
+	if !securityContext.IsAdmin {
+		return httperror.Forbidden("Not authorized to delete a webhook", errors.New("not authorized to delete a webhook"))
+	}
+
+	err = handler.DataStore.Webhook().Delete(portainer.WebhookID(id))
+	if err != nil {
+		return httperror.InternalServerError("Unable to remove the webhook from the database", err)
 	}
 
 	return response.Empty(w)

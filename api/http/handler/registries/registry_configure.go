@@ -9,7 +9,6 @@ import (
 	"github.com/portainer/libhttp/request"
 	"github.com/portainer/libhttp/response"
 	portainer "github.com/portainer/portainer/api"
-	bolterrors "github.com/portainer/portainer/api/bolt/errors"
 	httperrors "github.com/portainer/portainer/api/http/errors"
 	"github.com/portainer/portainer/api/http/security"
 )
@@ -21,7 +20,8 @@ type registryConfigurePayload struct {
 	Username string `example:"registry_user"`
 	// Password used to authenticate against this registry. required when Authentication is true
 	Password string `example:"registry_password"`
-
+	// ECR region
+	Region string
 	// Use TLS
 	TLS bool `example:"true"`
 	// Skip the verification of the server TLS certificate
@@ -47,6 +47,9 @@ func (payload *registryConfigurePayload) Validate(r *http.Request) error {
 
 		password, _ := request.RetrieveMultiPartFormValue(r, "Password", true)
 		payload.Password = password
+
+		region, _ := request.RetrieveMultiPartFormValue(r, "Region", true)
+		payload.Region = region
 	}
 
 	useTLS, _ := request.RetrieveBooleanMultiPartFormValue(r, "TLS", true)
@@ -81,8 +84,9 @@ func (payload *registryConfigurePayload) Validate(r *http.Request) error {
 // @id RegistryConfigure
 // @summary Configures a registry
 // @description Configures a registry.
-// @description **Access policy**: admin
+// @description **Access policy**: restricted
 // @tags registries
+// @security ApiKeyAuth
 // @security jwt
 // @accept json
 // @produce json
@@ -97,46 +101,47 @@ func (payload *registryConfigurePayload) Validate(r *http.Request) error {
 func (handler *Handler) registryConfigure(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	securityContext, err := security.RetrieveRestrictedRequestContext(r)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve info from request context", err}
+		return httperror.InternalServerError("Unable to retrieve info from request context", err)
 	}
 	if !securityContext.IsAdmin {
-		return &httperror.HandlerError{http.StatusForbidden, "Permission denied to configure registry", httperrors.ErrResourceAccessDenied}
+		return httperror.Forbidden("Permission denied to configure registry", httperrors.ErrResourceAccessDenied)
 	}
 
 	payload := &registryConfigurePayload{}
 	err = payload.Validate(r)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid request payload", err}
+		return httperror.BadRequest("Invalid request payload", err)
 	}
 
 	registryID, err := request.RetrieveNumericRouteVariableValue(r, "id")
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid registry identifier route variable", err}
+		return httperror.BadRequest("Invalid registry identifier route variable", err)
 	}
 
-	registry, err := handler.DataStore.Registry().Registry(portainer.RegistryID(registryID))
-	if err == bolterrors.ErrObjectNotFound {
-		return &httperror.HandlerError{http.StatusNotFound, "Unable to find a registry with the specified identifier inside the database", err}
+	registry, err := handler.DataStore.Registry().Read(portainer.RegistryID(registryID))
+	if handler.DataStore.IsErrObjectNotFound(err) {
+		return httperror.NotFound("Unable to find a registry with the specified identifier inside the database", err)
 	} else if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to find a registry with the specified identifier inside the database", err}
-	}
-
-	registry.ManagementConfiguration = &portainer.RegistryManagementConfiguration{
-		Type: registry.Type,
+		return httperror.InternalServerError("Unable to find a registry with the specified identifier inside the database", err)
 	}
 
 	if payload.Authentication {
-		registry.ManagementConfiguration.Authentication = true
-		registry.ManagementConfiguration.Username = payload.Username
-		if payload.Username == registry.Username && payload.Password == "" {
-			registry.ManagementConfiguration.Password = registry.Password
-		} else {
-			registry.ManagementConfiguration.Password = payload.Password
+		registry.Authentication = true
+
+		registry.Username = payload.Username
+
+		if payload.Password != "" {
+			registry.Password = payload.Password
+		}
+
+		if payload.Region != "" {
+			registry.Ecr.Region = payload.Region
 		}
 	}
 
+	var tlsConfig portainer.TLSConfiguration
 	if payload.TLS {
-		registry.ManagementConfiguration.TLSConfig = portainer.TLSConfiguration{
+		tlsConfig = portainer.TLSConfiguration{
 			TLS:           true,
 			TLSSkipVerify: payload.TLSSkipVerify,
 		}
@@ -146,27 +151,30 @@ func (handler *Handler) registryConfigure(w http.ResponseWriter, r *http.Request
 
 			certPath, err := handler.FileService.StoreRegistryManagementFileFromBytes(folder, "cert.pem", payload.TLSCertFile)
 			if err != nil {
-				return &httperror.HandlerError{http.StatusInternalServerError, "Unable to persist TLS certificate file on disk", err}
+				return httperror.InternalServerError("Unable to persist TLS certificate file on disk", err)
 			}
-			registry.ManagementConfiguration.TLSConfig.TLSCertPath = certPath
+			tlsConfig.TLSCertPath = certPath
 
 			keyPath, err := handler.FileService.StoreRegistryManagementFileFromBytes(folder, "key.pem", payload.TLSKeyFile)
 			if err != nil {
-				return &httperror.HandlerError{http.StatusInternalServerError, "Unable to persist TLS key file on disk", err}
+				return httperror.InternalServerError("Unable to persist TLS key file on disk", err)
 			}
-			registry.ManagementConfiguration.TLSConfig.TLSKeyPath = keyPath
+			tlsConfig.TLSKeyPath = keyPath
 
 			cacertPath, err := handler.FileService.StoreRegistryManagementFileFromBytes(folder, "ca.pem", payload.TLSCACertFile)
 			if err != nil {
-				return &httperror.HandlerError{http.StatusInternalServerError, "Unable to persist TLS CA certificate file on disk", err}
+				return httperror.InternalServerError("Unable to persist TLS CA certificate file on disk", err)
 			}
-			registry.ManagementConfiguration.TLSConfig.TLSCACertPath = cacertPath
+			tlsConfig.TLSCACertPath = cacertPath
 		}
 	}
 
-	err = handler.DataStore.Registry().UpdateRegistry(registry.ID, registry)
+	registry.ManagementConfiguration = syncConfig(registry)
+	registry.ManagementConfiguration.TLSConfig = tlsConfig
+
+	err = handler.DataStore.Registry().Update(registry.ID, registry)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to persist registry changes inside the database", err}
+		return httperror.InternalServerError("Unable to persist registry changes inside the database", err)
 	}
 
 	return response.Empty(w)

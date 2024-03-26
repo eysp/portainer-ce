@@ -9,20 +9,11 @@ angular.module('portainer.app').factory('EndpointService', [
     var service = {
       updateSecuritySettings,
       registries,
-      registry,
       updateRegistryAccess,
     };
 
     service.endpoint = function (endpointID) {
       return Endpoints.get({ id: endpointID }).$promise;
-    };
-
-    service.endpoints = function (start, limit, { search, types, tagIds, endpointIds, tagsPartialMatch } = {}) {
-      if (tagIds && !tagIds.length) {
-        return Promise.resolve({ value: [], totalCount: 0 });
-      }
-      return Endpoints.query({ start, limit, search, types: JSON.stringify(types), tagIds: JSON.stringify(tagIds), endpointIds: JSON.stringify(endpointIds), tagsPartialMatch })
-        .$promise;
     };
 
     service.snapshotEndpoints = function () {
@@ -33,16 +24,12 @@ angular.module('portainer.app').factory('EndpointService', [
       return Endpoints.snapshot({ id: endpointID }, {}).$promise;
     };
 
-    service.endpointsByGroup = function (start, limit, search, groupId) {
-      return Endpoints.query({ start, limit, search, groupId }).$promise;
-    };
-
     service.updateAccess = function (id, userAccessPolicies, teamAccessPolicies) {
       return Endpoints.updateAccess({ id: id }, { UserAccessPolicies: userAccessPolicies, TeamAccessPolicies: teamAccessPolicies }).$promise;
     };
 
-    service.deassociateEndpoint = function (endpointID) {
-      return Endpoints.deassociate({ id: endpointID }).$promise;
+    service.disassociateEndpoint = function (endpointID) {
+      return Endpoints.disassociate({ id: endpointID }).$promise;
     };
 
     service.updateEndpoint = function (id, payload) {
@@ -57,7 +44,7 @@ angular.module('portainer.app').factory('EndpointService', [
         })
         .catch(function error(err) {
           deferred.notify({ upload: false });
-          deferred.reject({ msg: 'Unable to update environment', err: err });
+          deferred.reject({ msg: '无法更新环境', err: err });
         });
       return deferred.promise;
     };
@@ -84,7 +71,7 @@ angular.module('portainer.app').factory('EndpointService', [
           deferred.resolve(response.data);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to create environment', err: err });
+          deferred.reject({ msg: '无法创建环境', err: err });
         });
 
       return deferred.promise;
@@ -131,7 +118,7 @@ angular.module('portainer.app').factory('EndpointService', [
           deferred.resolve(response.data);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to create environment', err: err });
+          deferred.reject({ msg: '无法创建环境', err: err });
         });
 
       return deferred.promise;
@@ -145,7 +132,7 @@ angular.module('portainer.app').factory('EndpointService', [
           deferred.resolve(response.data);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to create environment', err: err });
+          deferred.reject({ msg: '无法创建环境', err: err });
         });
 
       return deferred.promise;
@@ -165,6 +152,10 @@ angular.module('portainer.app').factory('EndpointService', [
       return deferred.promise;
     };
 
+    service.trust = function (id) {
+      Endpoints.updateEndpoint({ id }, { UserTrusted: true }).$promise;
+    };
+
     function updateRegistryAccess(id, registryId, endpointAccesses) {
       return Endpoints.updateRegistryAccess({ registryId, id }, endpointAccesses).$promise;
     }
@@ -177,10 +168,6 @@ angular.module('portainer.app').factory('EndpointService', [
 
     function updateSecuritySettings(id, securitySettings) {
       return Endpoints.updateSecuritySettings({ id }, securitySettings).$promise;
-    }
-
-    function registry(endpointId, registryId) {
-      return Endpoints.registry({ registryId, id: endpointId }).$promise;
     }
   },
 ]);

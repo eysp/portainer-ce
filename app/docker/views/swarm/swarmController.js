@@ -76,7 +76,7 @@ angular.module('portainer.docker').controller('SwarmController', [
             $scope.nodes = nodes;
           })
           .catch(function error(err) {
-            Notifications.error('失败', err, 'Unable to retrieve cluster details');
+            Notifications.error('Failure', err, '无法获取集群详情');
           });
       }
     }
@@ -99,7 +99,7 @@ angular.module('portainer.docker').controller('SwarmController', [
           }
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, 'Unable to retrieve cluster details');
+          Notifications.error('Failure', err, '无法获取集群详情');
         });
     }
 

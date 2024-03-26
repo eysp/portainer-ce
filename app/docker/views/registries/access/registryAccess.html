@@ -1,16 +1,15 @@
-<rd-header>
-  <rd-header-title title-text="注册表访问"></rd-header-title>
-  <rd-header-content> <a ui-sref="docker.registries">注册表</a> &gt; {{ $ctrl.registry.Name }} &gt; 访问管理 </rd-header-content>
-</rd-header>
+<div ng-if="$ctrl.registry">
+  <page-header title="'注册表访问'" breadcrumbs="[{label:'注册表', link:$ctrl.registryTo,}, $ctrl.registry.Name, '访问管理']"> </page-header>
 
-<registry-details registry="$ctrl.registry" ng-if="$ctrl.registry"></registry-details>
+  <registry-details registry="$ctrl.registry"></registry-details>
 
-<por-access-management
-  ng-if="$ctrl.registry && $ctrl.endpointGroup"
-  access-controlled-entity="$ctrl.registryEndpointAccesses"
-  entity-type="registry"
-  action-in-progress="$ctrl.state.actionInProgress"
-  update-access="$ctrl.updateAccess"
-  filter-users="$ctrl.filterUsers"
->
-</por-access-management>
+  <por-access-management
+    ng-if="$ctrl.endpointGroup"
+    access-controlled-entity="$ctrl.registryEndpointAccesses"
+    entity-type="registry"
+    action-in-progress="$ctrl.state.actionInProgress"
+    update-access="$ctrl.updateAccess"
+    filter-users="$ctrl.filterUsers"
+  >
+  </por-access-management>
+</div>

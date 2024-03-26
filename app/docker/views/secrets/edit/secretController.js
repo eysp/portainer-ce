@@ -1,3 +1,5 @@
+import { ResourceControlType } from '@/react/portainer/access-control/types';
+
 angular.module('portainer.docker').controller('SecretController', [
   '$scope',
   '$transition$',
@@ -5,14 +7,20 @@ angular.module('portainer.docker').controller('SecretController', [
   'SecretService',
   'Notifications',
   function ($scope, $transition$, $state, SecretService, Notifications) {
+    $scope.resourceType = ResourceControlType.Secret;
+
+    $scope.onUpdateResourceControlSuccess = function () {
+      $state.reload();
+    };
+
     $scope.removeSecret = function removeSecret(secretId) {
       SecretService.remove(secretId)
         .then(function success() {
-          Notifications.success('Secret successfully removed');
+          Notifications.success('Success', 'Secret successfully removed');
           $state.go('docker.secrets', {});
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, 'Unable to remove secret');
+          Notifications.error('Failure', err, 'Unable to remove secret');
         });
     };
 
@@ -22,7 +30,7 @@ angular.module('portainer.docker').controller('SecretController', [
           $scope.secret = data;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, 'Unable to retrieve secret details');
+          Notifications.error('Failure', err, 'Unable to retrieve secret details');
         });
     }
 

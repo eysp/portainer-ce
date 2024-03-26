@@ -1,4 +1,5 @@
 import _ from 'lodash-es';
+import { joinCommand, trimSHA } from './utils';
 
 function includeString(text, values) {
   return values.some(function (val) {
@@ -113,7 +114,7 @@ angular
     'use strict';
     return function (name) {
       if (name) {
-        return name.indexOf('/') === 0 ? name.replace('/', '') : name;
+        return name.indexOf('/') === 0 ? name.slice(1) : name;
       }
       return '';
     };
@@ -160,8 +161,7 @@ angular
   .filter('containername', function () {
     'use strict';
     return function (container) {
-      var name = container.Names[0];
-      return name.substring(1, name.length);
+      return container.Names[0];
     };
   })
   .filter('swarmversion', function () {
@@ -173,7 +173,7 @@ angular
   .filter('swarmhostname', function () {
     'use strict';
     return function (container) {
-      return _.split(container.Names[0], '/')[1];
+      return container.Names[0];
     };
   })
   .filter('repotags', function () {
@@ -190,12 +190,7 @@ angular
     };
   })
   .filter('command', function () {
-    'use strict';
-    return function (command) {
-      if (command) {
-        return command.join(' ');
-      }
-    };
+    return joinCommand;
   })
   .filter('hideshasum', function () {
     'use strict';
@@ -235,49 +230,6 @@ angular
       return runningTasks;
     };
   })
-  .filter('runningcontainers', function () {
-    'use strict';
-    return function runningContainersFilter(containers) {
-      return containers.filter(function (container) {
-        return container.State === 'running';
-      }).length;
-    };
-  })
-  .filter('stoppedcontainers', function () {
-    'use strict';
-    return function stoppedContainersFilter(containers) {
-      return containers.filter(function (container) {
-        return container.State === 'exited';
-      }).length;
-    };
-  })
-  .filter('healthycontainers', function () {
-    'use strict';
-    return function healthyContainersFilter(containers) {
-      return containers.filter(function (container) {
-        return container.Status === 'healthy';
-      }).length;
-    };
-  })
-  .filter('unhealthycontainers', function () {
-    'use strict';
-    return function unhealthyContainersFilter(containers) {
-      return containers.filter(function (container) {
-        return container.Status === 'unhealthy';
-      }).length;
-    };
-  })
-  .filter('imagestotalsize', function () {
-    'use strict';
-    return function (images) {
-      var totalImageSize = 0;
-      for (var i = 0; i < images.length; i++) {
-        var item = images[i];
-        totalImageSize += item.VirtualSize;
-      }
-      return totalImageSize;
-    };
-  })
   .filter('tasknodename', function () {
     'use strict';
     return function (nodeId, nodes) {
@@ -291,20 +243,15 @@ angular
   .filter('imagelayercommand', function () {
     'use strict';
     return function (createdBy) {
+      if (!createdBy) {
+        return '';
+      }
       return createdBy.replace('/bin/sh -c #(nop) ', '').replace('/bin/sh -c ', 'RUN ');
     };
   })
   .filter('trimshasum', function () {
     'use strict';
-    return function (imageName) {
-      if (!imageName) {
-        return;
-      }
-      if (imageName.indexOf('sha256:') === 0) {
-        return imageName.substring(7, 19);
-      }
-      return _.split(imageName, '@sha256')[0];
-    };
+    return trimSHA;
   })
   .filter('trimversiontag', function () {
     'use strict';

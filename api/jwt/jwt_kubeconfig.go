@@ -1,8 +1,9 @@
 package jwt
 
 import (
-	portainer "github.com/portainer/portainer/api"
 	"time"
+
+	portainer "github.com/portainer/portainer/api"
 )
 
 // GenerateTokenForKubeconfig generates a new JWT token for Kubeconfig
@@ -22,5 +23,5 @@ func (service *Service) GenerateTokenForKubeconfig(data *portainer.TokenData) (s
 		expiryAt = 0
 	}
 
-	return service.generateSignedToken(data, expiryAt)
+	return service.generateSignedToken(data, expiryAt, kubeConfigScope)
 }

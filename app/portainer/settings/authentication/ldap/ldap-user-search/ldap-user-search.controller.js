@@ -30,7 +30,7 @@ export default class LdapUserSearchController {
         const users = await this.onSearchClick();
         this.users = _.compact(users);
       } catch (error) {
-        this.Notifications.error('失败', error, 'Failed to search users');
+        this.Notifications.error('失败', error, '搜索用户失败');
         this.showTable = false;
       }
     });

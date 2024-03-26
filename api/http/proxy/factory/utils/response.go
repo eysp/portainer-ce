@@ -2,11 +2,13 @@ package utils
 
 import (
 	"bytes"
-	"errors"
-	"io/ioutil"
-	"log"
+	"fmt"
+	"io"
 	"net/http"
 	"strconv"
+
+	"github.com/pkg/errors"
+	"github.com/rs/zerolog/log"
 )
 
 // GetResponseAsJSONObject returns the response content as a generic JSON object
@@ -16,7 +18,10 @@ func GetResponseAsJSONObject(response *http.Response) (map[string]interface{}, e
 		return nil, err
 	}
 
-	responseObject := responseData.(map[string]interface{})
+	responseObject, ok := responseData.(map[string]interface{})
+	if !ok {
+		return nil, nil
+	}
 	return responseObject, nil
 }
 
@@ -26,6 +31,9 @@ func GetResponseAsJSONArray(response *http.Response) ([]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+	if responseData == nil {
+		return nil, nil
+	}
 
 	switch responseObject := responseData.(type) {
 	case []interface{}:
@@ -34,10 +42,17 @@ func GetResponseAsJSONArray(response *http.Response) ([]interface{}, error) {
 		if responseObject["message"] != nil {
 			return nil, errors.New(responseObject["message"].(string))
 		}
-		log.Printf("[ERROR] [http,proxy,response] [message: invalid response format, expecting JSON array] [response: %+v]", responseObject)
+
+		log.Error().
+			Str("response", fmt.Sprintf("%+v", responseObject)).
+			Msg("invalid response format, expecting JSON array")
+
 		return nil, errors.New("unable to parse response: expected JSON array, got JSON object")
 	default:
-		log.Printf("[ERROR] [http,proxy,response] [message: invalid response format, expecting JSON array] [response: %+v]", responseObject)
+		log.Error().
+			Str("response", fmt.Sprintf("%+v", responseObject)).
+			Msg("invalid response format, expecting JSON array")
+
 		return nil, errors.New("unable to parse response: expected JSON array")
 	}
 }
@@ -50,6 +65,7 @@ type errorResponse struct {
 func WriteAccessDeniedResponse() (*http.Response, error) {
 	response := &http.Response{}
 	err := RewriteResponse(response, errorResponse{Message: "access denied to resource"}, http.StatusForbidden)
+
 	return response, err
 }
 
@@ -61,12 +77,12 @@ func RewriteAccessDeniedResponse(response *http.Response) error {
 // RewriteResponse will replace the existing response body and status code with the one specified
 // in parameters
 func RewriteResponse(response *http.Response, newResponseData interface{}, statusCode int) error {
-	data, err := marshal(getContentType(response.Header), newResponseData)
+	data, err := marshal(getContentType(response), newResponseData)
 	if err != nil {
 		return err
 	}
 
-	body := ioutil.NopCloser(bytes.NewReader(data))
+	body := io.NopCloser(bytes.NewReader(data))
 
 	response.StatusCode = statusCode
 	response.Body = body
@@ -82,14 +98,13 @@ func RewriteResponse(response *http.Response, newResponseData interface{}, statu
 
 func getResponseBody(response *http.Response) (interface{}, error) {
 	isGzip := response.Header.Get("Content-Encoding") == "gzip"
-
 	if isGzip {
 		response.Header.Del("Content-Encoding")
 	}
 
-	return getBody(response.Body, getContentType(response.Header), isGzip)
+	return getBody(response.Body, getContentType(response), isGzip)
 }
 
-func getContentType(headers http.Header) string {
-	return headers.Get("Content-type")
+func getContentType(response *http.Response) string {
+	return response.Header.Get("Content-type")
 }

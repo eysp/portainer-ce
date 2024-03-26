@@ -4,8 +4,7 @@ angular.module('portainer.docker').controller('ServicesDatatableController', [
   '$scope',
   '$controller',
   'DatatableService',
-  'EndpointProvider',
-  function ($scope, $controller, DatatableService, EndpointProvider) {
+  function ($scope, $controller, DatatableService) {
     angular.extend(this, $controller('GenericDatatableController', { $scope: $scope }));
 
     var ctrl = this;
@@ -13,8 +12,34 @@ angular.module('portainer.docker').controller('ServicesDatatableController', [
     this.state = Object.assign(this.state, {
       expandAll: false,
       expandedItems: [],
-      publicURL: EndpointProvider.endpointPublicURL(),
     });
+
+    this.columnVisibility = {
+      columns: {
+        image: {
+          label: '镜像',
+          display: true,
+        },
+        ownership: {
+          label: '所有权',
+          display: true,
+        },
+        ports: {
+          label: '已发布端口',
+          display: true,
+        },
+        updated: {
+          label: '最后更新',
+          display: true,
+        },
+      },
+    };
+
+    this.onColumnVisibilityChange = onColumnVisibilityChange.bind(this);
+    function onColumnVisibilityChange(columns) {
+      this.columnVisibility.columns = columns;
+      DatatableService.setColumnVisibilitySettings(this.tableKey, this.columnVisibility);
+    }
 
     this.expandAll = function () {
       this.state.expandAll = !this.state.expandAll;
@@ -109,6 +134,10 @@ angular.module('portainer.docker').controller('ServicesDatatableController', [
         this.settings.open = false;
       }
       this.onSettingsRepeaterChange();
+      var storedColumnVisibility = DatatableService.getColumnVisibilitySettings(this.tableKey);
+      if (storedColumnVisibility !== null) {
+        this.columnVisibility = storedColumnVisibility;
+      }
     };
   },
 ]);

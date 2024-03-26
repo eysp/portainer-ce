@@ -1,13 +1,11 @@
 <div id="service-resources">
   <rd-widget>
-    <rd-widget-header icon="fa-list-alt" title-text="Resource limits and reservations"> </rd-widget-header>
+    <rd-widget-header icon="list" title-text="资源限制和预留"> </rd-widget-header>
     <rd-widget-body classes="no-padding">
       <table class="table">
         <tbody>
           <tr>
-            <td style="vertical-align: middle;">
-              内存保留 (MB)
-            </td>
+            <td style="vertical-align: middle">内存预留（MB）</td>
             <td>
               <input
                 class="input-sm"
@@ -19,16 +17,12 @@
                 disable-authorization="DockerServiceUpdate"
               />
             </td>
-            <td style="vertical-align: middle;">
-              <p class="small text-muted">
-                节点上可用于运行任务的最小内存（设置为0表示无限制）
-              </p>
+            <td style="vertical-align: middle">
+              <p class="small text-muted">节点上运行任务时所需的最小内存（设置为0表示无限制）</p>
             </td>
           </tr>
           <tr>
-            <td style="vertical-align: middle;">
-              内存限制 (MB)
-            </td>
+            <td style="vertical-align: middle">内存限制（MB）</td>
             <td>
               <input
                 class="input-sm"
@@ -40,17 +34,13 @@
                 disable-authorization="DockerServiceUpdate"
               />
             </td>
-            <td style="vertical-align: middle;">
-              <p class="small text-muted">
-                每个任务的最大内存使用量（设置为0表示无限制）
-              </p>
+            <td style="vertical-align: middle">
+              <p class="small text-muted">每个任务的最大内存使用量（设置为0表示无限制）</p>
             </td>
           </tr>
           <tr>
-            <td style="vertical-align: middle;">
-              <div>
-                CPU 保留
-              </div>
+            <td style="vertical-align: middle">
+              <div> CPU预留 </div>
             </td>
             <td>
               <slider
@@ -64,17 +54,13 @@
                 disable-authorization="DockerServiceUpdate"
               ></slider>
             </td>
-            <td style="vertical-align: middle;">
-              <p class="small text-muted">
-                节点上运行任务可用的最小CPU数
-              </p>
+            <td style="vertical-align: middle">
+              <p class="small text-muted">节点上运行任务所需的最小CPU</p>
             </td>
           </tr>
           <tr>
-            <td style="vertical-align: middle;">
-              <div>
-                CPU 限制
-              </div>
+            <td style="vertical-align: middle">
+              <div> CPU限制 </div>
             </td>
             <td>
               <slider
@@ -88,10 +74,8 @@
                 disable-authorization="DockerServiceUpdate"
               ></slider>
             </td>
-            <td style="vertical-align: middle;">
-              <p class="small text-muted">
-                每个任务的最大CPU使用率
-              </p>
+            <td style="vertical-align: middle">
+              <p class="small text-muted">每个任务的最大CPU使用量</p>
             </td>
           </tr>
         </tbody>

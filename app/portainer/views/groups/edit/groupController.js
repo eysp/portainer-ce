@@ -1,7 +1,12 @@
-angular.module('portainer.app').controller('GroupController', function GroupController($q, $async, $scope, $state, $transition$, GroupService, TagService, Notifications) {
+import { getEnvironments } from '@/react/portainer/environments/environment.service';
+import { notifyError, notifySuccess } from '@/portainer/services/notifications';
+
+angular.module('portainer.app').controller('GroupController', function GroupController($async, $q, $scope, $state, $transition$, GroupService, Notifications) {
   $scope.state = {
     actionInProgress: false,
   };
+  $scope.onChangeEnvironments = onChangeEnvironments;
+  $scope.associatedEndpoints = [];
 
   $scope.update = function () {
     var model = $scope.group;
@@ -9,28 +14,51 @@ angular.module('portainer.app').controller('GroupController', function GroupCont
     $scope.state.actionInProgress = true;
     GroupService.updateGroup(model)
       .then(function success() {
-        Notifications.success('群组更新成功');
+        Notifications.success('Success', 'Group successfully updated');
         $state.go('portainer.groups', {}, { reload: true });
       })
       .catch(function error(err) {
-        Notifications.error('失败', err, '无法更新群组');
+        Notifications.error('Failure', err, 'Unable to update group');
       })
       .finally(function final() {
         $scope.state.actionInProgress = false;
       });
   };
 
-  $scope.onCreateTag = function onCreateTag(tagName) {
-    return $async(onCreateTagAsync, tagName);
-  };
+  function onChangeEnvironments(value, meta) {
+    return $async(async () => {
+      let success = false;
+      if (meta.type === 'add') {
+        success = await onAssociate(meta.value);
+      } else if (meta.type === 'remove') {
+        success = await onDisassociate(meta.value);
+      }
 
-  async function onCreateTagAsync(tagName) {
+      if (success) {
+        $scope.associatedEndpoints = value;
+      }
+    });
+  }
+
+  async function onAssociate(endpointId) {
     try {
-      const tag = await TagService.createTag(tagName);
-      $scope.availableTags = $scope.availableTags.concat(tag);
-      $scope.group.TagIds = $scope.group.TagIds.concat(tag.Id);
+      await GroupService.addEndpoint($scope.group.Id, endpointId);
+
+      notifySuccess('Success', `Environment successfully added to group`);
+      return true;
     } catch (err) {
-      Notifications.error('失败', err, '无法创建标签');
+      notifyError('Failure', err, `Unable to add environment to group`);
+    }
+  }
+
+  async function onDisassociate(endpointId) {
+    try {
+      await GroupService.removeEndpoint($scope.group.Id, endpointId);
+
+      notifySuccess('Success', `Environment successfully removed to group`);
+      return true;
+    } catch (err) {
+      notifyError('Failure', err, `Unable to remove environment to group`);
     }
   }
 
@@ -39,15 +67,15 @@ angular.module('portainer.app').controller('GroupController', function GroupCont
 
     $q.all({
       group: GroupService.group(groupId),
-      tags: TagService.tags(),
+      endpoints: getEnvironments({ query: { groupIds: [groupId] } }),
     })
       .then(function success(data) {
         $scope.group = data.group;
-        $scope.availableTags = data.tags;
+        $scope.associatedEndpoints = data.endpoints.value.map((endpoint) => endpoint.Id);
         $scope.loaded = true;
       })
       .catch(function error(err) {
-        Notifications.error('失败', err, '无法加载组详细信息');
+        Notifications.error('Failure', err, 'Unable to load group details');
       });
   }
 

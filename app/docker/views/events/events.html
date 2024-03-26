@@ -1,14 +1,3 @@
-<rd-header>
-  <rd-header-title title-text="事件列表">
-    <a data-toggle="tooltip" title="刷新" ui-sref="docker.events" ui-sref-opts="{reload: true}">
-      <i class="fa fa-sync" aria-hidden="true"></i>
-    </a>
-  </rd-header-title>
-  <rd-header-content>事件</rd-header-content>
-</rd-header>
+<page-header title="'事件列表'" breadcrumbs="['事件']" reload="true"> </page-header>
 
-<div class="row">
-  <div class="col-sm-12">
-    <events-datatable title-text="事件" title-icon="fa-history" dataset="events" table-key="events" order-by="Time" reverse-order="true"></events-datatable>
-  </div>
-</div>
+<docker-events-datatable dataset="events"></docker-events-datatable>

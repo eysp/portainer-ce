@@ -1,4 +1,4 @@
-import { RBAC_ROLES } from '@/portainer/feature-flags/feature-ids';
+import { FeatureId } from '@/react/portainer/feature-flags/enums';
 
 angular.module('portainer.app').controller('GroupAccessController', [
   '$scope',
@@ -7,18 +7,18 @@ angular.module('portainer.app').controller('GroupAccessController', [
   'GroupService',
   'Notifications',
   function ($scope, $state, $transition$, GroupService, Notifications) {
-    $scope.limitedFeature = RBAC_ROLES;
+    $scope.limitedFeature = FeatureId.RBAC_ROLES;
 
     $scope.updateAccess = function () {
       $scope.state.actionInProgress = true;
       GroupService.updateGroup($scope.group, $scope.group.AssociatedEndpoints)
         .then(() => {
-          Notifications.success('Access successfully updated');
+          Notifications.success('Success', 'Access successfully updated');
           $state.reload();
         })
         .catch((err) => {
           $scope.state.actionInProgress = false;
-          Notifications.error('失败', err, 'Unable to update accesses');
+          Notifications.error('Failure', err, 'Unable to update accesses');
         });
     };
 
@@ -31,7 +31,7 @@ angular.module('portainer.app').controller('GroupAccessController', [
           $scope.group = data;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, 'Unable to load view');
+          Notifications.error('Failure', err, 'Unable to load view');
         });
     }
 

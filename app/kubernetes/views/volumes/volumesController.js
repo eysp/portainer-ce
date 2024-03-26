@@ -3,6 +3,7 @@ import filesizeParser from 'filesize-parser';
 import angular from 'angular';
 import KubernetesVolumeHelper from 'Kubernetes/helpers/volumeHelper';
 import KubernetesResourceQuotaHelper from 'Kubernetes/helpers/resourceQuotaHelper';
+import { confirmDelete } from '@@/modals/confirm';
 
 function buildStorages(storages, volumes) {
   _.forEach(storages, (s) => {
@@ -21,25 +22,12 @@ function computeSize(volumes) {
 
 class KubernetesVolumesController {
   /* @ngInject */
-  constructor(
-    $async,
-    $state,
-    Notifications,
-    Authentication,
-    ModalService,
-    LocalStorage,
-    EndpointProvider,
-    KubernetesStorageService,
-    KubernetesVolumeService,
-    KubernetesApplicationService
-  ) {
+  constructor($async, $state, Notifications, Authentication, LocalStorage, KubernetesStorageService, KubernetesVolumeService, KubernetesApplicationService) {
     this.$async = $async;
     this.$state = $state;
     this.Notifications = Notifications;
     this.Authentication = Authentication;
-    this.ModalService = ModalService;
     this.LocalStorage = LocalStorage;
-    this.EndpointProvider = EndpointProvider;
     this.KubernetesStorageService = KubernetesStorageService;
     this.KubernetesVolumeService = KubernetesVolumeService;
     this.KubernetesApplicationService = KubernetesApplicationService;
@@ -60,11 +48,11 @@ class KubernetesVolumesController {
     for (const volume of selectedItems) {
       try {
         await this.KubernetesVolumeService.delete(volume);
-        this.Notifications.success('已成功删除存储卷', volume.PersistentVolumeClaim.Name);
+        this.Notifications.success('Volume successfully removed', volume.PersistentVolumeClaim.Name);
         const index = this.volumes.indexOf(volume);
         this.volumes.splice(index, 1);
       } catch (err) {
-        this.Notifications.error('失败', err, '无法删除存储卷');
+        this.Notifications.error('Failure', err, 'Unable to remove volume');
       } finally {
         --actionCount;
         if (actionCount === 0) {
@@ -75,7 +63,7 @@ class KubernetesVolumesController {
   }
 
   removeAction(selectedItems) {
-    this.ModalService.confirmDeletion('是否要删除所选存储卷？', (confirmed) => {
+    confirmDelete('Do you want to remove the selected volume(s)?').then((confirmed) => {
       if (confirmed) {
         return this.$async(this.removeActionAsync, selectedItems);
       }
@@ -83,11 +71,12 @@ class KubernetesVolumesController {
   }
 
   async getVolumesAsync() {
+    const storageClasses = this.endpoint.Kubernetes.Configuration.StorageClasses;
     try {
       const [volumes, applications, storages] = await Promise.all([
-        this.KubernetesVolumeService.get(),
+        this.KubernetesVolumeService.get(undefined, storageClasses),
         this.KubernetesApplicationService.get(),
-        this.KubernetesStorageService.get(this.state.endpointId),
+        this.KubernetesStorageService.get(this.endpoint.Id),
       ]);
 
       this.volumes = _.map(volumes, (volume) => {
@@ -96,7 +85,7 @@ class KubernetesVolumesController {
       });
       this.storages = buildStorages(storages, volumes);
     } catch (err) {
-      this.Notifications.error('失败', err, '无法检索 namespaces');
+      this.Notifications.error('Failure', err, 'Unable to retreive namespaces');
     }
   }
 
@@ -107,9 +96,7 @@ class KubernetesVolumesController {
   async onInit() {
     this.state = {
       viewReady: false,
-      // endpointId: this.$transition$.params().endpointId, // TODO: use this when moving to endpointID in URL
       currentName: this.$state.$current.name,
-      endpointId: this.EndpointProvider.endpointID(),
       activeTab: this.LocalStorage.getActiveTab('volumes'),
       isAdmin: this.Authentication.isAdmin(),
     };

@@ -3,23 +3,22 @@ package helm
 import (
 	"net/http"
 
-	"github.com/portainer/libhelm/options"
 	httperror "github.com/portainer/libhttp/error"
 	"github.com/portainer/libhttp/request"
 	"github.com/portainer/libhttp/response"
+	"github.com/portainer/portainer/pkg/libhelm/options"
 )
 
 // @id HelmDelete
 // @summary Delete Helm Release
 // @description
-// @description **Access policy**: authorized
+// @description **Access policy**: authenticated
 // @tags helm
+// @security ApiKeyAuth
 // @security jwt
-// @accept json
-// @produce json
 // @param id path int true "Environment(Endpoint) identifier"
 // @param release path string true "The name of the release/application to uninstall"
-// @param namespace query string true "An optional namespace"
+// @param namespace query string false "An optional namespace"
 // @success 204 "Success"
 // @failure 400 "Invalid environment(endpoint) id or bad request"
 // @failure 401 "Unauthorized"
@@ -29,7 +28,7 @@ import (
 func (handler *Handler) helmDelete(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	release, err := request.RetrieveRouteVariableValue(r, "release")
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "No release specified", err}
+		return httperror.BadRequest("No release specified", err)
 	}
 
 	clusterAccess, httperr := handler.getHelmClusterAccess(r)
@@ -49,7 +48,7 @@ func (handler *Handler) helmDelete(w http.ResponseWriter, r *http.Request) *http
 
 	err = handler.helmPackageManager.Uninstall(uninstallOpts)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Helm returned an error", err}
+		return httperror.InternalServerError("Helm returned an error", err)
 	}
 
 	return response.Empty(w)

@@ -3,20 +3,21 @@ package kubernetes
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"io/ioutil"
-	"log"
+	"io"
 	"net/http"
 	"path"
 	"regexp"
 	"strconv"
 	"strings"
 
+	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/http/security"
 	"github.com/portainer/portainer/api/kubernetes/cli"
 
-	portainer "github.com/portainer/portainer/api"
+	"github.com/pkg/errors"
+	"github.com/rs/zerolog/log"
 )
 
 type baseTransport struct {
@@ -24,10 +25,10 @@ type baseTransport struct {
 	tokenManager     *tokenManager
 	endpoint         *portainer.Endpoint
 	k8sClientFactory *cli.ClientFactory
-	dataStore        portainer.DataStore
+	dataStore        dataservices.DataStore
 }
 
-func newBaseTransport(httpTransport *http.Transport, tokenManager *tokenManager, endpoint *portainer.Endpoint, k8sClientFactory *cli.ClientFactory, dataStore portainer.DataStore) *baseTransport {
+func newBaseTransport(httpTransport *http.Transport, tokenManager *tokenManager, endpoint *portainer.Endpoint, k8sClientFactory *cli.ClientFactory, dataStore dataservices.DataStore) *baseTransport {
 	return &baseTransport{
 		httpTransport:    httpTransport,
 		tokenManager:     tokenManager,
@@ -42,10 +43,23 @@ func newBaseTransport(httpTransport *http.Transport, tokenManager *tokenManager,
 // proxyKubernetesRequest intercepts a Kubernetes API request and apply logic based
 // on the requested operation.
 func (transport *baseTransport) proxyKubernetesRequest(request *http.Request) (*http.Response, error) {
-	apiVersionRe := regexp.MustCompile(`^(/kubernetes)?/api/v[0-9](\.[0-9])?`)
+	// URL path examples:
+	// http://localhost:9000/api/endpoints/3/kubernetes/api/v1/namespaces
+	// http://localhost:9000/api/endpoints/3/kubernetes/apis/apps/v1/namespaces/default/deployments
+	apiVersionRe := regexp.MustCompile(`^(/kubernetes)?/(api|apis/apps)/v[0-9](\.[0-9])?`)
 	requestPath := apiVersionRe.ReplaceAllString(request.URL.Path, "")
 
+	endpointRe := regexp.MustCompile(`([0-9]+)`)
+	endpointIDMatch := endpointRe.FindAllString(request.RequestURI, 1)
+	endpointID := 0
+	if len(endpointIDMatch) > 0 {
+		endpointID, _ = strconv.Atoi(endpointIDMatch[0])
+	}
+
 	switch {
+	case strings.EqualFold(requestPath, "/namespaces/portainer/configmaps/portainer-config") && (request.Method == "PUT" || request.Method == "POST"):
+		defer transport.tokenManager.UpdateUserServiceAccountsForEndpoint(portainer.EndpointID(endpointID))
+		return transport.executeKubernetesRequest(request)
 	case strings.EqualFold(requestPath, "/namespaces"):
 		return transport.executeKubernetesRequest(request)
 	case strings.HasPrefix(requestPath, "/namespaces"):
@@ -66,6 +80,10 @@ func (transport *baseTransport) proxyNamespacedRequest(request *http.Request, fu
 	}
 
 	switch {
+	case strings.HasPrefix(requestPath, "pods"):
+		return transport.proxyPodsRequest(request, namespace, requestPath)
+	case strings.HasPrefix(requestPath, "deployments"):
+		return transport.proxyDeploymentsRequest(request, namespace, requestPath)
 	case requestPath == "" && request.Method == "DELETE":
 		return transport.proxyNamespaceDeleteOperation(request, namespace)
 	default:
@@ -124,7 +142,10 @@ func (transport *baseTransport) getRoundTripToken(request *http.Request, tokenMa
 	} else {
 		token, err = tokenManager.GetUserServiceAccountToken(int(tokenData.ID), transport.endpoint.ID)
 		if err != nil {
-			log.Printf("Failed retrieving service account token: %v", err)
+			log.Debug().
+				Err(err).
+				Msg("failed retrieving service account token")
+
 			return "", err
 		}
 	}
@@ -136,18 +157,17 @@ func (transport *baseTransport) getRoundTripToken(request *http.Request, tokenMa
 
 // #region DECORATE FUNCTIONS
 
-func decorateAgentRequest(r *http.Request, dataStore portainer.DataStore) error {
+func decorateAgentRequest(r *http.Request, dataStore dataservices.DataStore) error {
 	requestPath := strings.TrimPrefix(r.URL.Path, "/v2")
 
-	switch {
-	case strings.HasPrefix(requestPath, "/dockerhub"):
+	if strings.HasPrefix(requestPath, "/dockerhub") {
 		return decorateAgentDockerHubRequest(r, dataStore)
 	}
 
 	return nil
 }
 
-func decorateAgentDockerHubRequest(r *http.Request, dataStore portainer.DataStore) error {
+func decorateAgentDockerHubRequest(r *http.Request, dataStore dataservices.DataStore) error {
 	requestPath, registryIdString := path.Split(r.URL.Path)
 
 	registryID, err := strconv.Atoi(registryIdString)
@@ -162,7 +182,7 @@ func decorateAgentDockerHubRequest(r *http.Request, dataStore portainer.DataStor
 	}
 
 	if registryID != 0 {
-		registry, err = dataStore.Registry().Registry(portainer.RegistryID(registryID))
+		registry, err = dataStore.Registry().Read(portainer.RegistryID(registryID))
 		if err != nil {
 			return fmt.Errorf("failed fetching registry: %w", err)
 		}
@@ -178,7 +198,7 @@ func decorateAgentDockerHubRequest(r *http.Request, dataStore portainer.DataStor
 	}
 
 	r.Method = http.MethodPost
-	r.Body = ioutil.NopCloser(bytes.NewReader(newBody))
+	r.Body = io.NopCloser(bytes.NewReader(newBody))
 	r.ContentLength = int64(len(newBody))
 
 	return nil

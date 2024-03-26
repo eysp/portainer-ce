@@ -1,5 +1,3 @@
-import _ from 'lodash-es';
-
 import angular from 'angular';
 import PortainerError from 'Portainer/error';
 import { KubernetesCommonParams } from 'Kubernetes/models/common/params';
@@ -9,14 +7,17 @@ import $allSettled from 'Portainer/services/allSettled';
 
 class KubernetesNamespaceService {
   /* @ngInject */
-  constructor($async, KubernetesNamespaces) {
+  constructor($async, KubernetesNamespaces, LocalStorage) {
     this.$async = $async;
     this.KubernetesNamespaces = KubernetesNamespaces;
+    this.LocalStorage = LocalStorage;
 
     this.getAsync = this.getAsync.bind(this);
     this.getAllAsync = this.getAllAsync.bind(this);
     this.createAsync = this.createAsync.bind(this);
     this.deleteAsync = this.deleteAsync.bind(this);
+    this.getJSONAsync = this.getJSONAsync.bind(this);
+    this.updateFinalizeAsync = this.updateFinalizeAsync.bind(this);
   }
 
   /**
@@ -36,12 +37,40 @@ class KubernetesNamespaceService {
     }
   }
 
+  /**
+   * GET namesspace in JSON format
+   */
+  async getJSONAsync(name) {
+    try {
+      const params = new KubernetesCommonParams();
+      params.id = name;
+      await this.KubernetesNamespaces().status(params).$promise;
+      return await this.KubernetesNamespaces().getJSON(params).$promise;
+    } catch (err) {
+      throw new PortainerError('Unable to retrieve namespace', err);
+    }
+  }
+
+  /**
+   * Update finalize
+   */
+  async updateFinalizeAsync(namespace) {
+    try {
+      return await this.KubernetesNamespaces().update({ id: namespace.metadata.name, action: 'finalize' }, namespace).$promise;
+    } catch (err) {
+      throw new PortainerError('Unable to update namespace', err);
+    }
+  }
+
   async getAllAsync() {
     try {
+      // get the list of all namespaces (RBAC allows users to see the list of namespaces)
       const data = await this.KubernetesNamespaces().get().$promise;
-      const promises = _.map(data.items, (item) => this.KubernetesNamespaces().status({ id: item.metadata.name }).$promise);
+      // get the status of each namespace (RBAC will give permission denied for status of unauthorised namespaces)
+      const promises = data.items.map((item) => this.KubernetesNamespaces().status({ id: item.metadata.name }).$promise);
       const namespaces = await $allSettled(promises);
-      const allNamespaces = _.map(namespaces.fulfilled, (item) => {
+      // only return namespaces if the user has access to namespaces
+      const allNamespaces = namespaces.fulfilled.map((item) => {
         return KubernetesNamespaceConverter.apiToNamespace(item);
       });
       updateNamespaces(allNamespaces);
@@ -51,11 +80,13 @@ class KubernetesNamespaceService {
     }
   }
 
-  get(name) {
+  async get(name) {
     if (name) {
       return this.$async(this.getAsync, name);
     }
-    return this.$async(this.getAllAsync);
+    const allowedNamespaces = await this.getAllAsync();
+    updateNamespaces(allowedNamespaces);
+    return allowedNamespaces;
   }
 
   /**

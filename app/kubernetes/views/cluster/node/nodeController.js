@@ -8,6 +8,8 @@ import { KubernetesNodeLabelFormValues, KubernetesNodeTaintFormValues } from 'Ku
 import { KubernetesNodeTaintEffects, KubernetesNodeAvailabilities } from 'Kubernetes/node/models';
 import KubernetesFormValidationHelper from 'Kubernetes/helpers/formValidationHelper';
 import { KubernetesNodeHelper } from 'Kubernetes/node/helper';
+import { confirmUpdateNode } from '@/react/kubernetes/cluster/NodeView/ConfirmUpdateNode';
+import { getMetricsForNode } from '@/react/kubernetes/services/service.ts';
 
 class KubernetesNodeController {
   /* @ngInject */
@@ -16,26 +18,22 @@ class KubernetesNodeController {
     $state,
     Notifications,
     LocalStorage,
-    ModalService,
     KubernetesNodeService,
     KubernetesEventService,
     KubernetesPodService,
     KubernetesApplicationService,
     KubernetesEndpointService,
-    KubernetesMetricsService,
     Authentication
   ) {
     this.$async = $async;
     this.$state = $state;
     this.Notifications = Notifications;
     this.LocalStorage = LocalStorage;
-    this.ModalService = ModalService;
     this.KubernetesNodeService = KubernetesNodeService;
     this.KubernetesEventService = KubernetesEventService;
     this.KubernetesPodService = KubernetesPodService;
     this.KubernetesApplicationService = KubernetesApplicationService;
     this.KubernetesEndpointService = KubernetesEndpointService;
-    this.KubernetesMetricsService = KubernetesMetricsService;
     this.Authentication = Authentication;
 
     this.onInit = this.onInit.bind(this);
@@ -179,9 +177,9 @@ class KubernetesNodeController {
     for (const pod of pods) {
       try {
         await this.KubernetesPodService.eviction(pod);
-        this.Notifications.success('Pod 成功驱逐', pod.Name);
+        this.Notifications.success('Pod successfully evicted', pod.Name);
       } catch (err) {
-        this.Notifications.error('失败', err, '无法驱逐 pod');
+        this.Notifications.error('Failure', err, 'Unable to evict pod');
         this.formValues.Availability = this.availabilities.PAUSE;
         await this.KubernetesNodeService.patch(this.node, this.formValues);
       } finally {
@@ -238,7 +236,7 @@ class KubernetesNodeController {
         });
       }
     } catch (err) {
-      this.Notifications.error('失败', err, '无法检索环境');
+      this.Notifications.error('Failure', err, 'Unable to retrieve environments');
     }
   }
 
@@ -252,10 +250,10 @@ class KubernetesNodeController {
       if (this.formValues.Availability === 'Drain') {
         await this.drainNode();
       }
-      this.Notifications.success('节点更新成功');
+      this.Notifications.success('Success', 'Node updated successfully');
       this.$state.reload(this.$state.current);
     } catch (err) {
-      this.Notifications.error('失败', err, '无法更新节点');
+      this.Notifications.error('Failure', err, 'Unable to update node');
     }
   }
 
@@ -265,51 +263,12 @@ class KubernetesNodeController {
     const cordonWarning = this.computeCordonWarning();
     const drainWarning = this.computeDrainWarning();
 
-    if (taintsWarning && !labelsWarning) {
-      this.ModalService.confirmUpdate(
-        '对污点的更改将立即取消调度在此节点上运行的应用程序，而没有相应的容忍度。 你想继续吗？',
-        (confirmed) => {
-          if (confirmed) {
-            return this.$async(this.updateNodeAsync);
-          }
+    if (taintsWarning || labelsWarning || cordonWarning || drainWarning) {
+      confirmUpdateNode(taintsWarning, labelsWarning, cordonWarning, drainWarning).then((confirmed) => {
+        if (confirmed) {
+          return this.$async(this.updateNodeAsync);
         }
-      );
-    } else if (!taintsWarning && labelsWarning) {
-      this.ModalService.confirmUpdate(
-        '删除或更改使用的标签可能会阻止应用程序将来在此节点上调度。 你想继续吗？',
-        (confirmed) => {
-          if (confirmed) {
-            return this.$async(this.updateNodeAsync);
-          }
-        }
-      );
-    } else if (taintsWarning && labelsWarning) {
-      this.ModalService.confirmUpdate(
-        '对污点的更改将立即取消在此节点上运行的应用程序的调度，而没有相应的容忍度。<br/></br/>删除或更改所使用的标签可能会阻止应用程序将来在此节点上调度。\n\n您是吗？ 想继续吗？',
-        (confirmed) => {
-          if (confirmed) {
-            return this.$async(this.updateNodeAsync);
-          }
-        }
-      );
-    } else if (cordonWarning) {
-      this.ModalService.confirmUpdate(
-        '将此节点标记为不可调度将有效地封锁该节点并防止在该节点上调度任何新的工作负载。 你确定吗？',
-        (confirmed) => {
-          if (confirmed) {
-            return this.$async(this.updateNodeAsync);
-          }
-        }
-      );
-    } else if (drainWarning) {
-      this.ModalService.confirmUpdate(
-        '耗尽此节点将导致所有工作负载从该节点驱逐。 这可能会导致某些服务中断。 你确定吗？',
-        (confirmed) => {
-          if (confirmed) {
-            return this.$async(this.updateNodeAsync);
-          }
-        }
-      );
+      });
     } else {
       return this.$async(this.updateNodeAsync);
     }
@@ -323,7 +282,7 @@ class KubernetesNodeController {
       this.node = _.find(this.nodes, { Name: nodeName });
       this.state.isDrainOperation = _.find(this.nodes, { Availability: this.availabilities.DRAIN });
     } catch (err) {
-      this.Notifications.error('失败', err, '无法检索节点');
+      this.Notifications.error('Failure', err, 'Unable to retrieve node');
     } finally {
       this.state.dataLoading = false;
     }
@@ -340,12 +299,12 @@ class KubernetesNodeController {
   async getNodeUsageAsync() {
     try {
       const nodeName = this.$transition$.params().name;
-      const node = await this.KubernetesMetricsService.getNode(nodeName);
+      const node = await getMetricsForNode(this.$state.params.endpointId, nodeName);
       this.resourceUsage = new KubernetesResourceReservation();
       this.resourceUsage.CPU = KubernetesResourceReservationHelper.parseCPU(node.usage.cpu);
       this.resourceUsage.Memory = KubernetesResourceReservationHelper.megaBytesValue(node.usage.memory);
     } catch (err) {
-      this.Notifications.error('失败', '无法检索节点资源使用情况', err);
+      this.Notifications.error('Failure', err, 'Unable to retrieve node resource usage');
     }
   }
 
@@ -364,7 +323,7 @@ class KubernetesNodeController {
       this.events = events.filter((item) => item.Involved.kind === 'Node');
       this.state.eventWarningCount = KubernetesEventHelper.warningCount(this.events);
     } catch (err) {
-      this.Notifications.error('失败', err, '无法检索节点事件');
+      this.Notifications.error('Failure', err, 'Unable to retrieve node events');
     } finally {
       this.state.eventsLoading = false;
     }
@@ -406,7 +365,7 @@ class KubernetesNodeController {
         await this.getNodeUsage();
       }
     } catch (err) {
-      this.Notifications.error('失败', err, '无法检索应用程序');
+      this.Notifications.error('Failure', err, 'Unable to retrieve applications');
     } finally {
       this.state.applicationsLoading = false;
     }

@@ -1,15 +1,20 @@
 import _ from 'lodash';
 import { AccessControlFormData } from 'Portainer/components/accessControlForm/porAccessControlFormModel';
+import { TEMPLATE_NAME_VALIDATION_REGEX } from '@/constants';
+import { getTemplateVariables, intersectVariables } from '@/react/portainer/custom-templates/components/utils';
+import { isBE } from '@/react/portainer/feature-flags/feature-flags.service';
+import { editor, upload, git } from '@@/BoxSelector/common-options/build-methods';
+import { confirmWebEditorDiscard } from '@@/modals/confirm';
 
 class CreateCustomTemplateViewController {
   /* @ngInject */
-  constructor($async, $state, $window, Authentication, ModalService, CustomTemplateService, FormValidator, Notifications, ResourceControlService, StackService, StateManager) {
+  constructor($async, $state, $scope, $window, Authentication, CustomTemplateService, FormValidator, Notifications, ResourceControlService, StackService, StateManager) {
     Object.assign(this, {
       $async,
       $state,
       $window,
+      $scope,
       Authentication,
-      ModalService,
       CustomTemplateService,
       FormValidator,
       Notifications,
@@ -17,6 +22,10 @@ class CreateCustomTemplateViewController {
       StackService,
       StateManager,
     });
+
+    this.buildMethods = [editor, upload, git];
+
+    this.isTemplateVariablesEnabled = isBE;
 
     this.formValues = {
       Title: '',
@@ -34,6 +43,8 @@ class CreateCustomTemplateViewController {
       Platform: 1,
       Type: 1,
       AccessControlData: new AccessControlFormData(),
+      Variables: [],
+      TLSSkipVerify: false,
     };
 
     this.state = {
@@ -43,7 +54,10 @@ class CreateCustomTemplateViewController {
       fromStack: false,
       loading: true,
       isEditorDirty: false,
+      templateNameRegex: TEMPLATE_NAME_VALIDATION_REGEX,
+      isTemplateValid: true,
     };
+
     this.templates = [];
 
     this.createCustomTemplate = this.createCustomTemplate.bind(this);
@@ -55,16 +69,34 @@ class CreateCustomTemplateViewController {
     this.createCustomTemplateFromGitRepository = this.createCustomTemplateFromGitRepository.bind(this);
     this.editorUpdate = this.editorUpdate.bind(this);
     this.onChangeMethod = this.onChangeMethod.bind(this);
-    this.onChangeFormValues = this.onChangeFormValues.bind(this);
+    this.onVariablesChange = this.onVariablesChange.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+  }
+
+  onVariablesChange(value) {
+    this.handleChange({ Variables: value });
+  }
+
+  handleChange(values) {
+    return this.$async(async () => {
+      this.formValues = {
+        ...this.formValues,
+        ...values,
+      };
+    });
   }
 
   createCustomTemplate() {
     return this.$async(this.createCustomTemplateAsync);
   }
 
-  onChangeMethod() {
-    this.formValues.FileContent = '';
-    this.selectedTemplate = null;
+  onChangeMethod(method) {
+    return this.$scope.$evalAsync(() => {
+      this.formValues.FileContent = '';
+      this.formValues.Variables = [];
+      this.selectedTemplate = null;
+      this.state.Method = method;
+    });
   }
 
   async createCustomTemplateAsync() {
@@ -87,11 +119,11 @@ class CreateCustomTemplateViewController {
       const userId = userDetails.ID;
       await this.ResourceControlService.applyResourceControl(userId, accessControlData, customTemplate.ResourceControl);
 
-      this.Notifications.success('已成功创建自定义模板');
+      this.Notifications.success('Success', 'Custom template successfully created');
       this.state.isEditorDirty = false;
       this.$state.go('docker.templates.custom');
     } catch (err) {
-      this.Notifications.error('失败', err, '具有相同名称的模板已存在');
+      this.Notifications.error('Failure', err, 'A template with the same name already exists');
     } finally {
       this.state.actionInProgress = false;
     }
@@ -101,14 +133,14 @@ class CreateCustomTemplateViewController {
     this.state.formValidationError = '';
 
     if (method === 'editor' && this.formValues.FileContent === '') {
-      this.state.formValidationError = '模板文件内容不能为空';
+      this.state.formValidationError = 'Template file content must not be empty';
       return false;
     }
 
     const title = this.formValues.Title;
     const isNotUnique = _.some(this.templates, (template) => template.Title === title);
     if (isNotUnique) {
-      this.state.formValidationError = '具有相同名称的模板已存在';
+      this.state.formValidationError = 'A template with the same name already exists';
       return false;
     }
 
@@ -147,13 +179,26 @@ class CreateCustomTemplateViewController {
     return this.CustomTemplateService.createCustomTemplateFromGitRepository(this.formValues);
   }
 
-  editorUpdate(cm) {
-    this.formValues.FileContent = cm.getValue();
+  editorUpdate(value) {
+    this.formValues.FileContent = value;
     this.state.isEditorDirty = true;
+    this.parseTemplate(value);
   }
 
-  onChangeFormValues(newValues) {
-    this.formValues = newValues;
+  parseTemplate(templateStr) {
+    if (!this.isTemplateVariablesEnabled) {
+      return;
+    }
+
+    const variables = getTemplateVariables(templateStr);
+
+    const isValid = !!variables;
+
+    this.state.isTemplateValid = isValid;
+
+    if (isValid) {
+      this.onVariablesChange(intersectVariables(this.formValues.Variables, variables));
+    }
   }
 
   async $onInit() {
@@ -162,6 +207,7 @@ class CreateCustomTemplateViewController {
     this.state.endpointMode = applicationState.endpoint.mode;
     let stackType = 0;
     if (this.state.endpointMode.provider === 'DOCKER_STANDALONE') {
+      this.isDockerStandalone = true;
       stackType = 2;
     } else if (this.state.endpointMode.provider === 'DOCKER_SWARM_MODE') {
       stackType = 1;
@@ -178,7 +224,7 @@ class CreateCustomTemplateViewController {
     try {
       this.templates = await this.CustomTemplateService.customTemplates([1, 2]);
     } catch (err) {
-      this.Notifications.error('加载失败', err, '加载自定义模板失败');
+      this.Notifications.error('Failure loading', err, 'Failed loading custom templates');
     }
 
     this.state.loading = false;
@@ -196,7 +242,7 @@ class CreateCustomTemplateViewController {
 
   async uiCanExit() {
     if (this.state.Method === 'editor' && this.formValues.FileContent && this.state.isEditorDirty) {
-      return this.ModalService.confirmWebEditorDiscard();
+      return confirmWebEditorDiscard();
     }
   }
 }

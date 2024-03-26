@@ -1,4 +1,5 @@
 import _ from 'lodash-es';
+import { confirmDelete } from '@@/modals/confirm';
 
 export class EdgeGroupsController {
   /* @ngInject */
@@ -17,7 +18,7 @@ export class EdgeGroupsController {
       this.items = await this.EdgeGroupService.groups();
     } catch (err) {
       this.items = [];
-      this.Notifications.error('失败', err, 'Unable to retrieve Edge groups');
+      this.Notifications.error('Failure', err, 'Unable to retrieve Edge groups');
     }
   }
 
@@ -26,6 +27,10 @@ export class EdgeGroupsController {
   }
 
   async removeActionAsync(selectedItems) {
+    if (!(await confirmDelete('Do you want to remove the selected Edge Group(s)?'))) {
+      return;
+    }
+
     for (let item of selectedItems) {
       try {
         await this.EdgeGroupService.remove(item.Id);
@@ -33,7 +38,7 @@ export class EdgeGroupsController {
         this.Notifications.success('Edge Group successfully removed', item.Name);
         _.remove(this.items, item);
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to remove Edge Group');
+        this.Notifications.error('Failure', err, 'Unable to remove Edge Group');
       }
     }
 

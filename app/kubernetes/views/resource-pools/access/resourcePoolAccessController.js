@@ -3,25 +3,26 @@ import _ from 'lodash-es';
 import { KubernetesPortainerConfigMapConfigName, KubernetesPortainerConfigMapNamespace, KubernetesPortainerConfigMapAccessKey } from 'Kubernetes/models/config-map/models';
 import { UserAccessViewModel, TeamAccessViewModel } from 'Portainer/models/access';
 import KubernetesConfigMapHelper from 'Kubernetes/helpers/configMapHelper';
+import { getIsRBACEnabled } from '@/react/kubernetes/cluster/getIsRBACEnabled';
 
 class KubernetesResourcePoolAccessController {
   /* @ngInject */
-  constructor($async, $state, Notifications, KubernetesResourcePoolService, KubernetesConfigMapService, EndpointProvider, EndpointService, GroupService, AccessService) {
+  constructor($async, $state, $scope, Notifications, KubernetesResourcePoolService, KubernetesConfigMapService, GroupService, AccessService, EndpointProvider) {
     this.$async = $async;
     this.$state = $state;
+    this.$scope = $scope;
+    this.EndpointProvider = EndpointProvider;
     this.Notifications = Notifications;
     this.KubernetesResourcePoolService = KubernetesResourcePoolService;
     this.KubernetesConfigMapService = KubernetesConfigMapService;
 
-    this.EndpointProvider = EndpointProvider;
-    this.EndpointService = EndpointService;
     this.GroupService = GroupService;
     this.AccessService = AccessService;
 
     this.onInit = this.onInit.bind(this);
     this.authorizeAccessAsync = this.authorizeAccessAsync.bind(this);
     this.unauthorizeAccessAsync = this.unauthorizeAccessAsync.bind(this);
-
+    this.onUsersAndTeamsChange = this.onUsersAndTeamsChange.bind(this);
     this.unauthorizeAccess = this.unauthorizeAccess.bind(this);
   }
 
@@ -36,6 +37,7 @@ class KubernetesResourcePoolAccessController {
    * Init
    */
   async onInit() {
+    const endpoint = this.endpoint;
     this.state = {
       actionInProgress: false,
       viewReady: false,
@@ -45,15 +47,16 @@ class KubernetesResourcePoolAccessController {
       multiselectOutput: [],
     };
 
-    this.endpointId = this.EndpointProvider.endpointID();
+    // default to true if error is thrown
+    this.isRBACEnabled = true;
 
     try {
       const name = this.$transition$.params().id;
-      let [endpoint, pool, configMap] = await Promise.all([
-        this.EndpointService.endpoint(this.endpointId),
+      let [pool, configMap] = await Promise.all([
         this.KubernetesResourcePoolService.get(name),
         this.KubernetesConfigMapService.getAccess(KubernetesPortainerConfigMapNamespace, KubernetesPortainerConfigMapConfigName),
       ]);
+      this.isRBACEnabled = await getIsRBACEnabled(this.EndpointProvider.endpointID());
       const group = await this.GroupService.group(endpoint.GroupId);
       const roles = [];
       const endpointAccesses = await this.AccessService.accesses(endpoint, group, roles);
@@ -76,9 +79,10 @@ class KubernetesResourcePoolAccessController {
           return false;
         });
       }
+
       this.availableUsersAndTeams = _.without(endpointAccesses.authorizedUsersAndTeams, ...this.authorizedUsersAndTeams);
     } catch (err) {
-      this.Notifications.error('失败', err, '无法检索namespace信息');
+      this.Notifications.error('Failure', err, 'Unable to retrieve namespace information');
     } finally {
       this.state.viewReady = true;
     }
@@ -97,11 +101,17 @@ class KubernetesResourcePoolAccessController {
       const newAccesses = _.concat(this.authorizedUsersAndTeams, this.formValues.multiselectOutput);
       const accessConfigMap = KubernetesConfigMapHelper.modifiyNamespaceAccesses(angular.copy(this.accessConfigMap), this.pool.Namespace.Name, newAccesses);
       await this.KubernetesConfigMapService.updateAccess(accessConfigMap);
-      this.Notifications.success('已成功创建访问权限');
+      this.Notifications.success('Success', 'Access successfully created');
       this.$state.reload(this.$state.current);
     } catch (err) {
-      this.Notifications.error('失败', err, '无法创建访问权限');
+      this.Notifications.error('Failure', err, 'Unable to create accesses');
     }
+  }
+
+  onUsersAndTeamsChange(value) {
+    this.$scope.$evalAsync(() => {
+      this.formValues.multiselectOutput = value;
+    });
   }
 
   authorizeAccess() {
@@ -117,10 +127,10 @@ class KubernetesResourcePoolAccessController {
       const newAccesses = _.without(this.authorizedUsersAndTeams, ...selectedItems);
       const accessConfigMap = KubernetesConfigMapHelper.modifiyNamespaceAccesses(angular.copy(this.accessConfigMap), this.pool.Namespace.Name, newAccesses);
       await this.KubernetesConfigMapService.updateAccess(accessConfigMap);
-      this.Notifications.success('已成功删除访问权限');
+      this.Notifications.success('Success', 'Access successfully removed');
       this.$state.reload(this.$state.current);
     } catch (err) {
-      this.Notifications.error('失败', err, '无法删除访问权限');
+      this.Notifications.error('Failure', err, 'Unable to remove accesses');
     } finally {
       this.state.actionInProgress = false;
     }

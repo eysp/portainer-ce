@@ -30,6 +30,7 @@ import KubernetesPersistentVolumeClaimConverter from 'Kubernetes/converters/pers
 import PortainerError from 'Portainer/error';
 import { KubernetesIngressHelper } from 'Kubernetes/ingress/helper';
 import KubernetesCommonHelper from 'Kubernetes/helpers/commonHelper';
+import { KubernetesConfigurationKinds } from 'Kubernetes/models/configuration/models';
 
 function _apiPortsToPublishedPorts(pList, pRefs) {
   const ports = _.map(pList, (item) => {
@@ -120,6 +121,8 @@ class KubernetesApplicationConverter {
       res.ServiceType = serviceType;
       res.ServiceId = service.metadata.uid;
       res.ServiceName = service.metadata.name;
+      res.ClusterIp = service.spec.clusterIP;
+      res.ExternalIp = service.spec.externalIP;
 
       if (serviceType === KubernetesServiceTypes.LOAD_BALANCER) {
         if (service.status.loadBalancer.ingress && service.status.loadBalancer.ingress.length > 0) {
@@ -211,6 +214,7 @@ class KubernetesApplicationConverter {
               configurationVolume.fileMountPath = matchingVolumeMount.mountPath;
               configurationVolume.rootMountPath = matchingVolumeMount.mountPath;
               configurationVolume.configurationName = configurationName;
+              configurationVolume.configurationType = volume.configMap ? KubernetesConfigurationKinds.CONFIGMAP : KubernetesConfigurationKinds.SECRET;
 
               acc.push(configurationVolume);
             } else {
@@ -220,6 +224,7 @@ class KubernetesApplicationConverter {
                 configurationVolume.rootMountPath = matchingVolumeMount.mountPath;
                 configurationVolume.configurationKey = item.key;
                 configurationVolume.configurationName = configurationName;
+                configurationVolume.configurationType = volume.configMap ? KubernetesConfigurationKinds.CONFIGMAP : KubernetesConfigurationKinds.SECRET;
 
                 acc.push(configurationVolume);
               });
@@ -279,6 +284,8 @@ class KubernetesApplicationConverter {
     res.ApplicationType = app.ApplicationType;
     res.ResourcePool = _.find(resourcePools, ['Namespace.Name', app.ResourcePool]);
     res.Name = app.Name;
+    res.Services = KubernetesApplicationHelper.generateServicesFormValuesFromServices(app);
+    res.Selector = KubernetesApplicationHelper.generateSelectorFromService(app);
     res.StackName = app.StackName;
     res.ApplicationOwner = app.ApplicationOwner;
     res.ImageModel.Image = app.Image;
@@ -290,7 +297,18 @@ class KubernetesApplicationConverter {
     res.DataAccessPolicy = app.DataAccessPolicy;
     res.EnvironmentVariables = KubernetesApplicationHelper.generateEnvVariablesFromEnv(app.Env);
     res.PersistedFolders = KubernetesApplicationHelper.generatePersistedFoldersFormValuesFromPersistedFolders(app.PersistedFolders, persistentVolumeClaims); // generate from PVC and app.PersistedFolders
-    res.Configurations = KubernetesApplicationHelper.generateConfigurationFormValuesFromEnvAndVolumes(app.Env, app.ConfigurationVolumes, configurations);
+    res.Secrets = KubernetesApplicationHelper.generateConfigurationFormValuesFromEnvAndVolumes(
+      app.Env,
+      app.ConfigurationVolumes,
+      configurations,
+      KubernetesConfigurationKinds.SECRET
+    );
+    res.ConfigMaps = KubernetesApplicationHelper.generateConfigurationFormValuesFromEnvAndVolumes(
+      app.Env,
+      app.ConfigurationVolumes,
+      configurations,
+      KubernetesConfigurationKinds.CONFIGMAP
+    );
     res.AutoScaler = KubernetesApplicationHelper.generateAutoScalerFormValueFromHorizontalPodAutoScaler(app.AutoScaler, res.ReplicaCount);
     res.PublishedPorts = KubernetesApplicationHelper.generatePublishedPortsFormValuesFromPublishedPorts(app.ServiceType, app.PublishedPorts, ingresses);
     res.Containers = app.Containers;
@@ -356,7 +374,9 @@ class KubernetesApplicationConverter {
       service = undefined;
     }
 
-    return [app, headlessService, service, claims];
+    let services = KubernetesServiceConverter.applicationFormValuesToServices(formValues);
+
+    return [app, headlessService, services, service, claims];
   }
 }
 

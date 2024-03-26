@@ -7,7 +7,6 @@ import (
 	"github.com/portainer/libhttp/request"
 	"github.com/portainer/libhttp/response"
 	portainer "github.com/portainer/portainer/api"
-	"github.com/portainer/portainer/api/bolt/errors"
 )
 
 // @id ResourceControlDelete
@@ -15,6 +14,7 @@ import (
 // @description Remove a resource control.
 // @description **Access policy**: administrator
 // @tags resource_controls
+// @security ApiKeyAuth
 // @security jwt
 // @param id path int true "Resource control identifier"
 // @success 204 "Success"
@@ -25,19 +25,19 @@ import (
 func (handler *Handler) resourceControlDelete(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	resourceControlID, err := request.RetrieveNumericRouteVariableValue(r, "id")
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid resource control identifier route variable", err}
+		return httperror.BadRequest("Invalid resource control identifier route variable", err)
 	}
 
-	_, err = handler.DataStore.ResourceControl().ResourceControl(portainer.ResourceControlID(resourceControlID))
-	if err == errors.ErrObjectNotFound {
-		return &httperror.HandlerError{http.StatusNotFound, "Unable to find a resource control with the specified identifier inside the database", err}
+	_, err = handler.DataStore.ResourceControl().Read(portainer.ResourceControlID(resourceControlID))
+	if handler.DataStore.IsErrObjectNotFound(err) {
+		return httperror.NotFound("Unable to find a resource control with the specified identifier inside the database", err)
 	} else if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to find a resource control with with the specified identifier inside the database", err}
+		return httperror.InternalServerError("Unable to find a resource control with with the specified identifier inside the database", err)
 	}
 
-	err = handler.DataStore.ResourceControl().DeleteResourceControl(portainer.ResourceControlID(resourceControlID))
+	err = handler.DataStore.ResourceControl().Delete(portainer.ResourceControlID(resourceControlID))
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to remove the resource control from the database", err}
+		return httperror.InternalServerError("Unable to remove the resource control from the database", err)
 	}
 
 	return response.Empty(w)

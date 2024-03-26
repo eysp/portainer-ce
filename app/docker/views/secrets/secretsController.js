@@ -1,10 +1,15 @@
+import { confirmDelete } from '@@/modals/confirm';
 angular.module('portainer.docker').controller('SecretsController', [
   '$scope',
   '$state',
   'SecretService',
   'Notifications',
   function ($scope, $state, SecretService, Notifications) {
-    $scope.removeAction = function (selectedItems) {
+    $scope.removeAction = async function (selectedItems) {
+      const confirmed = await confirmDelete('Do you want to remove the selected secret(s)?');
+      if (!confirmed) {
+        return null;
+      }
       var actionCount = selectedItems.length;
       angular.forEach(selectedItems, function (secret) {
         SecretService.remove(secret.Id)
@@ -14,7 +19,7 @@ angular.module('portainer.docker').controller('SecretsController', [
             $scope.secrets.splice(index, 1);
           })
           .catch(function error(err) {
-            Notifications.error('失败', err, 'Unable to remove secret');
+            Notifications.error('Failure', err, 'Unable to remove secret');
           })
           .finally(function final() {
             --actionCount;
@@ -34,7 +39,7 @@ angular.module('portainer.docker').controller('SecretsController', [
         })
         .catch(function error(err) {
           $scope.secrets = [];
-          Notifications.error('失败', err, 'Unable to retrieve secrets');
+          Notifications.error('Failure', err, 'Unable to retrieve secrets');
         });
     }
 

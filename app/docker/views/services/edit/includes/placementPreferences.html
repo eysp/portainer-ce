@@ -1,21 +1,21 @@
 <div ng-if="service.ServicePreferences" id="service-placement-preferences">
   <rd-widget>
-    <rd-widget-header icon="fa-tasks" title-text="Placement preferences">
+    <rd-widget-header icon="list" title-text="放置首选项">
       <div class="nopadding" authorization="DockerServiceUpdate">
-        <a class="btn btn-default btn-sm pull-right" ng-click="isUpdating || addPlacementPreference(service)" ng-disabled="isUpdating">
-          <i class="fa fa-plus-circle" aria-hidden="true"></i> 放置偏好
+        <a class="btn btn-secondary btn-sm pull-right" ng-click="isUpdating || addPlacementPreference(service)" ng-disabled="isUpdating">
+          <pr-icon icon="'plus'"></pr-icon> 放置首选项
         </a>
       </div>
     </rd-widget-header>
     <rd-widget-body ng-if="service.ServicePreferences.length === 0">
-      <p>此服务没有放置偏好。</p>
+      <p>此服务没有放置首选项。</p>
     </rd-widget-body>
     <rd-widget-body ng-if="service.ServicePreferences.length > 0" classes="no-padding">
       <table class="table">
         <thead>
           <tr>
             <th>策略</th>
-            <th>Value</th>
+            <th>值</th>
           </tr>
         </thead>
         <tbody>
@@ -26,7 +26,7 @@
                   type="text"
                   class="form-control"
                   ng-model="preference.strategy"
-                  placeholder="例如 node.role"
+                  placeholder="例如：node.role"
                   ng-change="updatePlacementPreference(service, preference)"
                   ng-disabled="isUpdating"
                   disable-authorization="DockerServiceUpdate"
@@ -39,14 +39,14 @@
                   type="text"
                   class="form-control"
                   ng-model="preference.value"
-                  placeholder="例如 manager"
+                  placeholder="例如：manager"
                   ng-change="updatePlacementPreference(service, preference)"
                   ng-disabled="isUpdating"
                   disable-authorization="DockerServiceUpdate"
                 />
                 <span class="input-group-btn" authorization="DockerServiceUpdate">
-                  <button class="btn btn-sm btn-danger" type="button" ng-click="removePlacementPreference(service, $index)" ng-disabled="isUpdating">
-                    <i class="fa fa-trash" aria-hidden="true"></i>
+                  <button class="btn btn-dangerlight" type="button" ng-click="removePlacementPreference(service, $index)" ng-disabled="isUpdating">
+                    <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
                   </button>
                 </span>
               </div>

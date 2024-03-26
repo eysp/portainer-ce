@@ -2,7 +2,8 @@ import angular from 'angular';
 
 angular.module('portainer.agent').factory('VolumeBrowserService', VolumeBrowserServiceFactory);
 
-function VolumeBrowserServiceFactory(StateManager, Browse, BrowseVersion1, API_ENDPOINT_ENDPOINTS, EndpointProvider, Upload) {
+/* @ngInject */
+function VolumeBrowserServiceFactory(StateManager, Browse, BrowseVersion1, API_ENDPOINT_ENDPOINTS, Upload) {
   return {
     ls,
     get,
@@ -21,33 +22,33 @@ function VolumeBrowserServiceFactory(StateManager, Browse, BrowseVersion1, API_E
     return agentVersion > 1 ? Browse : BrowseVersion1;
   }
 
-  function ls(volumeId, path) {
-    return getBrowseService().ls({ volumeID: volumeId, path, version: getAgentApiVersion() }).$promise;
+  function ls(endpointId, volumeId, path) {
+    return getBrowseService().ls({ endpointId, volumeID: volumeId, path, version: getAgentApiVersion() }).$promise;
   }
 
-  function get(volumeId, path) {
-    return getBrowseService().get({ volumeID: volumeId, path, version: getAgentApiVersion() }).$promise;
+  function get(endpointId, volumeId, path) {
+    return getBrowseService().get({ endpointId, volumeID: volumeId, path, version: getAgentApiVersion() }).$promise;
   }
 
-  function deletePath(volumeId, path) {
-    return getBrowseService().delete({ volumeID: volumeId, path, version: getAgentApiVersion() }).$promise;
+  function deletePath(endpointId, volumeId, path) {
+    return getBrowseService().delete({ endpointId, volumeID: volumeId, path, version: getAgentApiVersion() }).$promise;
   }
 
-  function rename(volumeId, path, newPath) {
+  function rename(endpointId, volumeId, path, newPath) {
     const payload = {
       CurrentFilePath: path,
       NewFilePath: newPath,
     };
-    return getBrowseService().rename({ volumeID: volumeId, version: getAgentApiVersion() }, payload).$promise;
+    return getBrowseService().rename({ endpointId, volumeID: volumeId, version: getAgentApiVersion() }, payload).$promise;
   }
 
-  function upload(path, file, volumeId, onProgress) {
+  function upload(endpointId, path, file, volumeId, onProgress) {
     const agentVersion = StateManager.getAgentApiVersion();
     if (agentVersion < 2) {
       throw new Error('upload is not supported on this agent version');
     }
 
-    const url = `${API_ENDPOINT_ENDPOINTS}/${EndpointProvider.endpointID()}/docker/v${agentVersion}/browse/put?volumeID=${volumeId}`;
+    const url = `${API_ENDPOINT_ENDPOINTS}/${endpointId}/docker/v${agentVersion}/browse/put?volumeID=${volumeId}`;
 
     return new Promise((resolve, reject) => {
       Upload.upload({

@@ -3,7 +3,6 @@ package exec
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -11,6 +10,10 @@ import (
 	"testing"
 
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/internal/testhelpers"
+	"github.com/portainer/portainer/pkg/libstack/compose"
+
+	"github.com/rs/zerolog/log"
 )
 
 const composeFile = `version: "3.9"
@@ -41,16 +44,23 @@ func setup(t *testing.T) (*portainer.Stack, *portainer.Endpoint) {
 
 func Test_UpAndDown(t *testing.T) {
 
+	testhelpers.IntegrationTest(t)
+
 	stack, endpoint := setup(t)
 
-	w, err := NewComposeStackManager("", "", nil)
+	deployer, err := compose.NewComposeDeployer("", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	w, err := NewComposeStackManager(deployer, nil)
 	if err != nil {
 		t.Fatalf("Failed creating manager: %s", err)
 	}
 
 	ctx := context.TODO()
 
-	err = w.Up(ctx, stack, endpoint)
+	err = w.Up(ctx, stack, endpoint, false)
 	if err != nil {
 		t.Fatalf("Error calling docker-compose up: %s", err)
 	}
@@ -74,7 +84,7 @@ func containerExists(containerName string) bool {
 
 	out, err := cmd.Output()
 	if err != nil {
-		log.Fatalf("failed to list containers: %s", err)
+		log.Fatal().Err(err).Msg("failed to list containers")
 	}
 
 	return strings.Contains(string(out), containerName)

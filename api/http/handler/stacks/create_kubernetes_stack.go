@@ -3,23 +3,21 @@ package stacks
 import (
 	"fmt"
 	"net/http"
-	"os"
-	"strconv"
-	"time"
-
-	"github.com/pkg/errors"
 
 	"github.com/asaskevich/govalidator"
+	"github.com/pkg/errors"
 
 	httperror "github.com/portainer/libhttp/error"
 	"github.com/portainer/libhttp/request"
 	"github.com/portainer/libhttp/response"
 	portainer "github.com/portainer/portainer/api"
-	"github.com/portainer/portainer/api/filesystem"
-	gittypes "github.com/portainer/portainer/api/git/types"
-	"github.com/portainer/portainer/api/http/client"
-	"github.com/portainer/portainer/api/internal/stackutils"
+	"github.com/portainer/portainer/api/git/update"
+	"github.com/portainer/portainer/api/internal/endpointutils"
+	"github.com/portainer/portainer/api/internal/registryutils"
 	k "github.com/portainer/portainer/api/kubernetes"
+	"github.com/portainer/portainer/api/stacks/deployments"
+	"github.com/portainer/portainer/api/stacks/stackbuilders"
+	"github.com/portainer/portainer/api/stacks/stackutils"
 )
 
 type kubernetesStringDeploymentPayload struct {
@@ -27,6 +25,18 @@ type kubernetesStringDeploymentPayload struct {
 	ComposeFormat    bool
 	Namespace        string
 	StackFileContent string
+	// Whether the stack is from a app template
+	FromAppTemplate bool `example:"false"`
+}
+
+func createStackPayloadFromK8sFileContentPayload(name, namespace, fileContent string, composeFormat, fromAppTemplate bool) stackbuilders.StackPayload {
+	return stackbuilders.StackPayload{
+		StackName:        name,
+		Namespace:        namespace,
+		StackFileContent: fileContent,
+		ComposeFormat:    composeFormat,
+		FromAppTemplate:  fromAppTemplate,
+	}
 }
 
 type kubernetesGitDeploymentPayload struct {
@@ -40,7 +50,28 @@ type kubernetesGitDeploymentPayload struct {
 	RepositoryPassword       string
 	ManifestFile             string
 	AdditionalFiles          []string
-	AutoUpdate               *portainer.StackAutoUpdate
+	AutoUpdate               *portainer.AutoUpdateSettings
+	// TLSSkipVerify skips SSL verification when cloning the Git repository
+	TLSSkipVerify bool `example:"false"`
+}
+
+func createStackPayloadFromK8sGitPayload(name, repoUrl, repoReference, repoUsername, repoPassword string, repoAuthentication, composeFormat bool, namespace, manifest string, additionalFiles []string, autoUpdate *portainer.AutoUpdateSettings, repoSkipSSLVerify bool) stackbuilders.StackPayload {
+	return stackbuilders.StackPayload{
+		StackName: name,
+		RepositoryConfigPayload: stackbuilders.RepositoryConfigPayload{
+			URL:            repoUrl,
+			ReferenceName:  repoReference,
+			Authentication: repoAuthentication,
+			Username:       repoUsername,
+			Password:       repoPassword,
+			TLSSkipVerify:  repoSkipSSLVerify,
+		},
+		Namespace:       namespace,
+		ComposeFormat:   composeFormat,
+		ManifestFile:    manifest,
+		AdditionalFiles: additionalFiles,
+		AutoUpdate:      autoUpdate,
+	}
 }
 
 type kubernetesManifestURLDeploymentPayload struct {
@@ -50,12 +81,18 @@ type kubernetesManifestURLDeploymentPayload struct {
 	ManifestURL   string
 }
 
+func createStackPayloadFromK8sUrlPayload(name, namespace, manifestUrl string, composeFormat bool) stackbuilders.StackPayload {
+	return stackbuilders.StackPayload{
+		StackName:     name,
+		Namespace:     namespace,
+		ManifestURL:   manifestUrl,
+		ComposeFormat: composeFormat,
+	}
+}
+
 func (payload *kubernetesStringDeploymentPayload) Validate(r *http.Request) error {
 	if govalidator.IsNull(payload.StackFileContent) {
 		return errors.New("Invalid stack file content")
-	}
-	if govalidator.IsNull(payload.Namespace) {
-		return errors.New("Invalid namespace")
 	}
 	if govalidator.IsNull(payload.StackName) {
 		return errors.New("Invalid stack name")
@@ -64,9 +101,6 @@ func (payload *kubernetesStringDeploymentPayload) Validate(r *http.Request) erro
 }
 
 func (payload *kubernetesGitDeploymentPayload) Validate(r *http.Request) error {
-	if govalidator.IsNull(payload.Namespace) {
-		return errors.New("Invalid namespace")
-	}
 	if govalidator.IsNull(payload.RepositoryURL) || !govalidator.IsURL(payload.RepositoryURL) {
 		return errors.New("Invalid repository URL. Must correspond to a valid URL format")
 	}
@@ -76,10 +110,7 @@ func (payload *kubernetesGitDeploymentPayload) Validate(r *http.Request) error {
 	if govalidator.IsNull(payload.ManifestFile) {
 		return errors.New("Invalid manifest file in repository")
 	}
-	if govalidator.IsNull(payload.RepositoryReferenceName) {
-		payload.RepositoryReferenceName = defaultGitReferenceName
-	}
-	if err := validateStackAutoUpdate(payload.AutoUpdate); err != nil {
+	if err := update.ValidateAutoUpdateSettings(payload.AutoUpdate); err != nil {
 		return err
 	}
 	if govalidator.IsNull(payload.StackName) {
@@ -102,258 +133,204 @@ type createKubernetesStackResponse struct {
 	Output string `json:"Output"`
 }
 
+// @id StackCreateKubernetesFile
+// @summary Deploy a new kubernetes stack from a file
+// @description Deploy a new stack into a Docker environment specified via the environment identifier.
+// @description **Access policy**: authenticated
+// @tags stacks
+// @security ApiKeyAuth
+// @security jwt
+// @produce json
+// @param body body kubernetesStringDeploymentPayload true "stack config"
+// @param endpointId query int true "Identifier of the environment that will be used to deploy the stack"
+// @success 200 {object} portainer.Stack
+// @failure 400 "Invalid request"
+// @failure 500 "Server error"
+// @router /stacks/create/kubernetes/string [post]
 func (handler *Handler) createKubernetesStackFromFileContent(w http.ResponseWriter, r *http.Request, endpoint *portainer.Endpoint, userID portainer.UserID) *httperror.HandlerError {
+	if !endpointutils.IsKubernetesEndpoint(endpoint) {
+		return httperror.BadRequest("Environment type does not match", errors.New("Environment type does not match"))
+	}
+
 	var payload kubernetesStringDeploymentPayload
 	if err := request.DecodeAndValidateJSONPayload(r, &payload); err != nil {
-		return &httperror.HandlerError{StatusCode: http.StatusBadRequest, Message: "Invalid request payload", Err: err}
+		return httperror.BadRequest("Invalid request payload", err)
 	}
 
-	user, err := handler.DataStore.User().User(userID)
+	user, err := handler.DataStore.User().Read(userID)
 	if err != nil {
-		return &httperror.HandlerError{StatusCode: http.StatusInternalServerError, Message: "Unable to load user information from the database", Err: err}
+		return httperror.InternalServerError("Unable to load user information from the database", err)
 	}
-	isUnique, err := handler.checkUniqueStackName(endpoint, payload.StackName, 0)
+	isUnique, err := handler.checkUniqueStackNameInKubernetes(endpoint, payload.StackName, 0, payload.Namespace)
 	if err != nil {
-		return &httperror.HandlerError{StatusCode: http.StatusInternalServerError, Message: "Unable to check for name collision", Err: err}
+		return httperror.InternalServerError("Unable to check for name collision", err)
 	}
 	if !isUnique {
-		return &httperror.HandlerError{StatusCode: http.StatusConflict, Message: fmt.Sprintf("A stack with the name '%s' already exists", payload.StackName), Err: errStackAlreadyExists}
+		return &httperror.HandlerError{StatusCode: http.StatusConflict, Message: fmt.Sprintf("A stack with the name '%s' already exists", payload.StackName), Err: stackutils.ErrStackAlreadyExists}
 	}
 
-	stackID := handler.DataStore.Stack().GetNextIdentifier()
-	stack := &portainer.Stack{
-		ID:              portainer.StackID(stackID),
-		Type:            portainer.KubernetesStack,
-		EndpointID:      endpoint.ID,
-		EntryPoint:      filesystem.ManifestFileDefaultName,
-		Name:            payload.StackName,
-		Namespace:       payload.Namespace,
-		Status:          portainer.StackStatusActive,
-		CreationDate:    time.Now().Unix(),
-		CreatedBy:       user.Username,
-		IsComposeFormat: payload.ComposeFormat,
+	stackPayload := createStackPayloadFromK8sFileContentPayload(payload.StackName, payload.Namespace, payload.StackFileContent, payload.ComposeFormat, payload.FromAppTemplate)
+
+	k8sStackBuilder := stackbuilders.CreateK8sStackFileContentBuilder(handler.DataStore,
+		handler.FileService,
+		handler.StackDeployer,
+		handler.KubernetesDeployer,
+		user)
+
+	// Refresh ECR registry secret if needed
+	// RefreshEcrSecret method checks if the namespace has any ECR registry
+	// otherwise return nil
+	cli, err := handler.KubernetesClientFactory.GetKubeClient(endpoint)
+	if err == nil {
+		registryutils.RefreshEcrSecret(cli, endpoint, handler.DataStore, payload.Namespace)
 	}
 
-	stackFolder := strconv.Itoa(int(stack.ID))
-	projectPath, err := handler.FileService.StoreStackFileFromBytes(stackFolder, stack.EntryPoint, []byte(payload.StackFileContent))
-	if err != nil {
-		fileType := "Manifest"
-		if stack.IsComposeFormat {
-			fileType = "Compose"
-		}
-		errMsg := fmt.Sprintf("Unable to persist Kubernetes %s file on disk", fileType)
-		return &httperror.HandlerError{StatusCode: http.StatusInternalServerError, Message: errMsg, Err: err}
-	}
-	stack.ProjectPath = projectPath
-
-	doCleanUp := true
-	defer handler.cleanUp(stack, &doCleanUp)
-
-	output, err := handler.deployKubernetesStack(user.ID, endpoint, stack, k.KubeAppLabels{
-		StackID:   stackID,
-		StackName: stack.Name,
-		Owner:     stack.CreatedBy,
-		Kind:      "content",
-	})
-
-	if err != nil {
-		return &httperror.HandlerError{StatusCode: http.StatusInternalServerError, Message: "Unable to deploy Kubernetes stack", Err: err}
-	}
-
-	err = handler.DataStore.Stack().CreateStack(stack)
-	if err != nil {
-		return &httperror.HandlerError{StatusCode: http.StatusInternalServerError, Message: "Unable to persist the Kubernetes stack inside the database", Err: err}
+	stackBuilderDirector := stackbuilders.NewStackBuilderDirector(k8sStackBuilder)
+	_, httpErr := stackBuilderDirector.Build(&stackPayload, endpoint)
+	if httpErr != nil {
+		return httpErr
 	}
 
 	resp := &createKubernetesStackResponse{
-		Output: output,
+		Output: k8sStackBuilder.GetResponse(),
 	}
 
-	doCleanUp = false
 	return response.JSON(w, resp)
 }
 
+// @id StackCreateKubernetesGit
+// @summary Deploy a new kubernetes stack from a git repository
+// @description Deploy a new stack into a Docker environment specified via the environment identifier.
+// @description **Access policy**: authenticated
+// @tags stacks
+// @security ApiKeyAuth
+// @security jwt
+// @produce json
+// @param body body kubernetesGitDeploymentPayload true "stack config"
+// @param endpointId query int true "Identifier of the environment that will be used to deploy the stack"
+// @success 200 {object} portainer.Stack
+// @failure 400 "Invalid request"
+// @failure 500 "Server error"
+// @router /stacks/create/kubernetes/repository [post]
 func (handler *Handler) createKubernetesStackFromGitRepository(w http.ResponseWriter, r *http.Request, endpoint *portainer.Endpoint, userID portainer.UserID) *httperror.HandlerError {
-	var payload kubernetesGitDeploymentPayload
-	if err := request.DecodeAndValidateJSONPayload(r, &payload); err != nil {
-		return &httperror.HandlerError{StatusCode: http.StatusBadRequest, Message: "Invalid request payload", Err: err}
+	if !endpointutils.IsKubernetesEndpoint(endpoint) {
+		return httperror.BadRequest("Environment type does not match", errors.New("Environment type does not match"))
 	}
 
-	user, err := handler.DataStore.User().User(userID)
-	if err != nil {
-		return &httperror.HandlerError{StatusCode: http.StatusInternalServerError, Message: "Unable to load user information from the database", Err: err}
+	var payload kubernetesGitDeploymentPayload
+	if err := request.DecodeAndValidateJSONPayload(r, &payload); err != nil {
+		return httperror.BadRequest("Invalid request payload", err)
 	}
-	isUnique, err := handler.checkUniqueStackName(endpoint, payload.StackName, 0)
+
+	user, err := handler.DataStore.User().Read(userID)
 	if err != nil {
-		return &httperror.HandlerError{StatusCode: http.StatusInternalServerError, Message: "Unable to check for name collision", Err: err}
+		return httperror.InternalServerError("Unable to load user information from the database", err)
+	}
+	isUnique, err := handler.checkUniqueStackNameInKubernetes(endpoint, payload.StackName, 0, payload.Namespace)
+	if err != nil {
+		return httperror.InternalServerError("Unable to check for name collision", err)
 	}
 	if !isUnique {
-		return &httperror.HandlerError{StatusCode: http.StatusConflict, Message: fmt.Sprintf("A stack with the name '%s' already exists", payload.StackName), Err: errStackAlreadyExists}
+		return &httperror.HandlerError{StatusCode: http.StatusConflict, Message: fmt.Sprintf("A stack with the name '%s' already exists", payload.StackName), Err: stackutils.ErrStackAlreadyExists}
 	}
 
 	//make sure the webhook ID is unique
 	if payload.AutoUpdate != nil && payload.AutoUpdate.Webhook != "" {
 		isUnique, err := handler.checkUniqueWebhookID(payload.AutoUpdate.Webhook)
 		if err != nil {
-			return &httperror.HandlerError{StatusCode: http.StatusInternalServerError, Message: "Unable to check for webhook ID collision", Err: err}
+			return httperror.InternalServerError("Unable to check for webhook ID collision", err)
 		}
 		if !isUnique {
-			return &httperror.HandlerError{StatusCode: http.StatusConflict, Message: fmt.Sprintf("Webhook ID: %s already exists", payload.AutoUpdate.Webhook), Err: errWebhookIDAlreadyExists}
+			return &httperror.HandlerError{StatusCode: http.StatusConflict, Message: fmt.Sprintf("Webhook ID: %s already exists", payload.AutoUpdate.Webhook), Err: stackutils.ErrWebhookIDAlreadyExists}
 		}
 	}
 
-	stackID := handler.DataStore.Stack().GetNextIdentifier()
-	stack := &portainer.Stack{
-		ID:         portainer.StackID(stackID),
-		Type:       portainer.KubernetesStack,
-		EndpointID: endpoint.ID,
-		EntryPoint: payload.ManifestFile,
-		GitConfig: &gittypes.RepoConfig{
-			URL:            payload.RepositoryURL,
-			ReferenceName:  payload.RepositoryReferenceName,
-			ConfigFilePath: payload.ManifestFile,
-		},
-		Namespace:       payload.Namespace,
-		Name:            payload.StackName,
-		Status:          portainer.StackStatusActive,
-		CreationDate:    time.Now().Unix(),
-		CreatedBy:       user.Username,
-		IsComposeFormat: payload.ComposeFormat,
-		AutoUpdate:      payload.AutoUpdate,
-		AdditionalFiles: payload.AdditionalFiles,
-	}
+	stackPayload := createStackPayloadFromK8sGitPayload(payload.StackName,
+		payload.RepositoryURL,
+		payload.RepositoryReferenceName,
+		payload.RepositoryUsername,
+		payload.RepositoryPassword,
+		payload.RepositoryAuthentication,
+		payload.ComposeFormat,
+		payload.Namespace,
+		payload.ManifestFile,
+		payload.AdditionalFiles,
+		payload.AutoUpdate,
+		payload.TLSSkipVerify,
+	)
 
-	if payload.RepositoryAuthentication {
-		stack.GitConfig.Authentication = &gittypes.GitAuthentication{
-			Username: payload.RepositoryUsername,
-			Password: payload.RepositoryPassword,
-		}
-	}
+	k8sStackBuilder := stackbuilders.CreateKubernetesStackGitBuilder(handler.DataStore,
+		handler.FileService,
+		handler.GitService,
+		handler.Scheduler,
+		handler.StackDeployer,
+		handler.KubernetesDeployer,
+		user)
 
-	projectPath := handler.FileService.GetStackProjectPath(strconv.Itoa(int(stack.ID)))
-	stack.ProjectPath = projectPath
-
-	doCleanUp := true
-	defer handler.cleanUp(stack, &doCleanUp)
-
-	commitID, err := handler.latestCommitID(payload.RepositoryURL, payload.RepositoryReferenceName, payload.RepositoryAuthentication, payload.RepositoryUsername, payload.RepositoryPassword)
-	if err != nil {
-		return &httperror.HandlerError{StatusCode: http.StatusInternalServerError, Message: "Unable to fetch git repository id", Err: err}
-	}
-	stack.GitConfig.ConfigHash = commitID
-
-	repositoryUsername := payload.RepositoryUsername
-	repositoryPassword := payload.RepositoryPassword
-	if !payload.RepositoryAuthentication {
-		repositoryUsername = ""
-		repositoryPassword = ""
-	}
-
-	err = handler.GitService.CloneRepository(projectPath, payload.RepositoryURL, payload.RepositoryReferenceName, repositoryUsername, repositoryPassword)
-	if err != nil {
-		return &httperror.HandlerError{StatusCode: http.StatusInternalServerError, Message: "Failed to clone git repository", Err: err}
-	}
-
-	output, err := handler.deployKubernetesStack(user.ID, endpoint, stack, k.KubeAppLabels{
-		StackID:   stackID,
-		StackName: stack.Name,
-		Owner:     stack.CreatedBy,
-		Kind:      "git",
-	})
-
-	if err != nil {
-		return &httperror.HandlerError{StatusCode: http.StatusInternalServerError, Message: "Unable to deploy Kubernetes stack", Err: err}
-	}
-
-	if payload.AutoUpdate != nil && payload.AutoUpdate.Interval != "" {
-		jobID, e := startAutoupdate(stack.ID, stack.AutoUpdate.Interval, handler.Scheduler, handler.StackDeployer, handler.DataStore, handler.GitService)
-		if e != nil {
-			return e
-		}
-
-		stack.AutoUpdate.JobID = jobID
-	}
-
-	err = handler.DataStore.Stack().CreateStack(stack)
-	if err != nil {
-		return &httperror.HandlerError{StatusCode: http.StatusInternalServerError, Message: "Unable to persist the stack inside the database", Err: err}
+	stackBuilderDirector := stackbuilders.NewStackBuilderDirector(k8sStackBuilder)
+	_, httpErr := stackBuilderDirector.Build(&stackPayload, endpoint)
+	if httpErr != nil {
+		return httpErr
 	}
 
 	resp := &createKubernetesStackResponse{
-		Output: output,
+		Output: k8sStackBuilder.GetResponse(),
 	}
 
-	doCleanUp = false
 	return response.JSON(w, resp)
 }
 
+// @id StackCreateKubernetesUrl
+// @summary Deploy a new kubernetes stack from a url
+// @description Deploy a new stack into a Docker environment specified via the environment identifier.
+// @description **Access policy**: authenticated
+// @tags stacks
+// @security ApiKeyAuth
+// @security jwt
+// @produce json
+// @param body body kubernetesManifestURLDeploymentPayload true "stack config"
+// @param endpointId query int true "Identifier of the environment that will be used to deploy the stack"
+// @success 200 {object} portainer.Stack
+// @failure 400 "Invalid request"
+// @failure 500 "Server error"
+// @router /stacks/create/kubernetes/url [post]
 func (handler *Handler) createKubernetesStackFromManifestURL(w http.ResponseWriter, r *http.Request, endpoint *portainer.Endpoint, userID portainer.UserID) *httperror.HandlerError {
 	var payload kubernetesManifestURLDeploymentPayload
 	if err := request.DecodeAndValidateJSONPayload(r, &payload); err != nil {
-		return &httperror.HandlerError{StatusCode: http.StatusBadRequest, Message: "Invalid request payload", Err: err}
+		return httperror.BadRequest("Invalid request payload", err)
 	}
 
-	user, err := handler.DataStore.User().User(userID)
+	user, err := handler.DataStore.User().Read(userID)
 	if err != nil {
-		return &httperror.HandlerError{StatusCode: http.StatusInternalServerError, Message: "Unable to load user information from the database", Err: err}
+		return httperror.InternalServerError("Unable to load user information from the database", err)
 	}
-	isUnique, err := handler.checkUniqueStackName(endpoint, payload.StackName, 0)
+	isUnique, err := handler.checkUniqueStackNameInKubernetes(endpoint, payload.StackName, 0, payload.Namespace)
 	if err != nil {
-		return &httperror.HandlerError{StatusCode: http.StatusInternalServerError, Message: "Unable to check for name collision", Err: err}
+		return httperror.InternalServerError("Unable to check for name collision", err)
 	}
 	if !isUnique {
-		return &httperror.HandlerError{StatusCode: http.StatusConflict, Message: fmt.Sprintf("A stack with the name '%s' already exists", payload.StackName), Err: errStackAlreadyExists}
+		return &httperror.HandlerError{StatusCode: http.StatusConflict, Message: fmt.Sprintf("A stack with the name '%s' already exists", payload.StackName), Err: stackutils.ErrStackAlreadyExists}
 	}
 
-	stackID := handler.DataStore.Stack().GetNextIdentifier()
-	stack := &portainer.Stack{
-		ID:              portainer.StackID(stackID),
-		Type:            portainer.KubernetesStack,
-		EndpointID:      endpoint.ID,
-		EntryPoint:      filesystem.ManifestFileDefaultName,
-		Namespace:       payload.Namespace,
-		Name:            payload.StackName,
-		Status:          portainer.StackStatusActive,
-		CreationDate:    time.Now().Unix(),
-		CreatedBy:       user.Username,
-		IsComposeFormat: payload.ComposeFormat,
+	stackPayload := createStackPayloadFromK8sUrlPayload(payload.StackName,
+		payload.Namespace,
+		payload.ManifestURL,
+		payload.ComposeFormat)
+
+	k8sStackBuilder := stackbuilders.CreateKubernetesStackUrlBuilder(handler.DataStore,
+		handler.FileService,
+		handler.StackDeployer,
+		handler.KubernetesDeployer,
+		user)
+
+	stackBuilderDirector := stackbuilders.NewStackBuilderDirector(k8sStackBuilder)
+	_, httpErr := stackBuilderDirector.Build(&stackPayload, endpoint)
+	if httpErr != nil {
+		return httpErr
 	}
-
-	var manifestContent []byte
-	manifestContent, err = client.Get(payload.ManifestURL, 30)
-	if err != nil {
-		return &httperror.HandlerError{StatusCode: http.StatusInternalServerError, Message: "Unable to retrieve manifest from URL", Err: err}
-	}
-
-	stackFolder := strconv.Itoa(int(stack.ID))
-	projectPath, err := handler.FileService.StoreStackFileFromBytes(stackFolder, stack.EntryPoint, manifestContent)
-	if err != nil {
-		return &httperror.HandlerError{StatusCode: http.StatusInternalServerError, Message: "Unable to persist Kubernetes manifest file on disk", Err: err}
-	}
-	stack.ProjectPath = projectPath
-
-	doCleanUp := true
-	defer handler.cleanUp(stack, &doCleanUp)
-
-	output, err := handler.deployKubernetesStack(user.ID, endpoint, stack, k.KubeAppLabels{
-		StackID:   stackID,
-		StackName: stack.Name,
-		Owner:     stack.CreatedBy,
-		Kind:      "url",
-	})
-	if err != nil {
-		return &httperror.HandlerError{StatusCode: http.StatusInternalServerError, Message: "Unable to deploy Kubernetes stack", Err: err}
-	}
-
-	err = handler.DataStore.Stack().CreateStack(stack)
-	if err != nil {
-		return &httperror.HandlerError{StatusCode: http.StatusInternalServerError, Message: "Unable to persist the Kubernetes stack inside the database", Err: err}
-	}
-
-	doCleanUp = false
 
 	resp := &createKubernetesStackResponse{
-		Output: output,
+		Output: k8sStackBuilder.GetResponse(),
 	}
 
 	return response.JSON(w, resp)
@@ -363,10 +340,18 @@ func (handler *Handler) deployKubernetesStack(userID portainer.UserID, endpoint 
 	handler.stackCreationMutex.Lock()
 	defer handler.stackCreationMutex.Unlock()
 
-	manifestFilePaths, tempDir, err := stackutils.CreateTempK8SDeploymentFiles(stack, handler.KubernetesDeployer, appLabels)
+	user := &portainer.User{
+		ID: userID,
+	}
+	k8sDeploymentConfig, err := deployments.CreateKubernetesStackDeploymentConfig(stack, handler.KubernetesDeployer, appLabels, user, endpoint)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to create temp kub deployment files")
 	}
-	defer os.RemoveAll(tempDir)
-	return handler.KubernetesDeployer.Deploy(userID, endpoint, manifestFilePaths, stack.Namespace)
+
+	err = k8sDeploymentConfig.Deploy()
+	if err != nil {
+		return "", err
+	}
+
+	return k8sDeploymentConfig.GetResponse(), nil
 }

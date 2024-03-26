@@ -1,53 +1,49 @@
+import { confirmDelete } from '@@/modals/confirm';
+import { confirmServiceForceUpdate } from '@/react/docker/services/common/update-service-modal';
+
 angular.module('portainer.docker').controller('ServicesDatatableActionsController', [
   '$q',
   '$state',
   'ServiceService',
   'ServiceHelper',
   'Notifications',
-  'ModalService',
   'ImageHelper',
   'WebhookService',
-  'EndpointProvider',
-  function ($q, $state, ServiceService, ServiceHelper, Notifications, ModalService, ImageHelper, WebhookService, EndpointProvider) {
+  function ($q, $state, ServiceService, ServiceHelper, Notifications, ImageHelper, WebhookService) {
+    const ctrl = this;
+
     this.scaleAction = function scaleService(service) {
       var config = ServiceHelper.serviceToConfig(service.Model);
       config.Mode.Replicated.Replicas = service.Replicas;
       ServiceService.update(service, config)
         .then(function success() {
-          Notifications.success('服务已成功扩展', '新副本数: ' + service.Replicas);
+          Notifications.success('Service successfully scaled', 'New replica count: ' + service.Replicas);
           $state.reload();
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法扩展服务');
+          Notifications.error('Failure', err, 'Unable to scale service');
           service.Scale = false;
           service.Replicas = service.ReplicaCount;
         });
     };
 
     this.removeAction = function (selectedItems) {
-      ModalService.confirmDeletion(
-        '您要删除选定的服务吗？ 与所选服务关联的所有容器也将被删除。',
-        function onConfirm(confirmed) {
-          if (!confirmed) {
-            return;
-          }
-          removeServices(selectedItems);
+      confirmDelete('Do you want to remove the selected service(s)? All the containers associated to the selected service(s) will be removed too.').then((confirmed) => {
+        if (!confirmed) {
+          return;
         }
-      );
+        removeServices(selectedItems);
+      });
     };
 
     this.updateAction = function (selectedItems) {
-      ModalService.confirmServiceForceUpdate(
-        '是否要强制更新所选服务？ 将重新创建与所选服务关联的所有任务。',
-        function (result) {
+      confirmServiceForceUpdate('Do you want to force an update of the selected service(s)? All the tasks associated to the selected service(s) will be recreated.').then(
+        (result) => {
           if (!result) {
             return;
           }
-          var pullImage = false;
-          if (result[0]) {
-            pullImage = true;
-          }
-          forceUpdateServices(selectedItems, pullImage);
+
+          forceUpdateServices(selectedItems, result.pullLatest);
         }
       );
     };
@@ -65,10 +61,10 @@ angular.module('portainer.docker').controller('ServicesDatatableActionsControlle
         config.TaskTemplate.ForceUpdate++;
         ServiceService.update(service, config)
           .then(function success() {
-            Notifications.success('服务更新成功', service.Name);
+            Notifications.success('Service successfully updated', service.Name);
           })
           .catch(function error(err) {
-            Notifications.error('失败', err, '无法强制更新服务', service.Name);
+            Notifications.error('Failure', err, 'Unable to force update service' + service.Name);
           })
           .finally(function final() {
             --actionCount;
@@ -84,16 +80,16 @@ angular.module('portainer.docker').controller('ServicesDatatableActionsControlle
       angular.forEach(services, function (service) {
         ServiceService.remove(service)
           .then(function success() {
-            return WebhookService.webhooks(service.Id, EndpointProvider.endpointID());
+            return WebhookService.webhooks(service.Id, ctrl.endpointId);
           })
           .then(function success(data) {
             return $q.when(data.length !== 0 && WebhookService.deleteWebhook(data[0].Id));
           })
           .then(function success() {
-            Notifications.success('服务已成功删除', service.Name);
+            Notifications.success('Service successfully removed', service.Name);
           })
           .catch(function error(err) {
-            Notifications.error('失败', err, '无法删除服务');
+            Notifications.error('Failure', err, 'Unable to remove service');
           })
           .finally(function final() {
             --actionCount;

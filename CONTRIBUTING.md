@@ -25,7 +25,7 @@ Each commit message should include a **type**, a **scope** and a **subject**:
  <type>(<scope>): <subject>
 ```
 
-Lines should not exceed 100 characters. This allows the message to be easier to read on github as well as in various git tools and produces a nice, neat commit log ie:
+Lines should not exceed 100 characters. This allows the message to be easier to read on GitHub as well as in various git tools and produces a nice, neat commit log ie:
 
 ```
  #271 feat(containers): add exposed ports in the containers view
@@ -63,7 +63,7 @@ The subject contains succinct description of the change:
 
 ## Contribution process
 
-Our contribution process is described below. Some of the steps can be visualized inside Github via specific `status/` labels, such as `status/1-functional-review` or `status/2-technical-review`.
+Our contribution process is described below. Some of the steps can be visualized inside GitHub via specific `status/` labels, such as `status/1-functional-review` or `status/2-technical-review`.
 
 ### Bug report
 
@@ -75,25 +75,45 @@ The feature request process is similar to the bug report process but has an extr
 
 ![portainer_featurerequest_workflow](https://user-images.githubusercontent.com/5485061/45727229-5ad39f00-bbf5-11e8-9550-16ba66c50615.png)
 
-## Build Portainer locally
+## Build and run Portainer locally
 
 Ensure you have Docker, Node.js, yarn, and Golang installed in the correct versions.
 
-Install dependencies with yarn:
+Install dependencies:
 
 ```sh
-$ yarn
+$ make deps
 ```
 
-Then build and run the project:
+Then build and run the project in a Docker container:
 
 ```sh
-$ yarn start
+$ make dev
 ```
 
-Portainer can now be accessed at <https://localhost:9443>.
+Portainer server can now be accessed at <https://localhost:9443>. and UI dev server runs on <http://localhost:8999>.
 
-Find more detailed steps at <https://documentation.portainer.io/contributing/instructions/>.
+if you want to build the project you can run:
+
+```sh
+make build-all
+```
+
+For additional make commands, run `make help`.
+
+Find more detailed steps at <https://docs.portainer.io/contribute/build>.
+
+### Build customization
+
+You can customize the following settings:
+
+- `PORTAINER_DATA`: The host dir or volume name used by portainer (default is `/tmp/portainer`, which won't persist over reboots).
+- `PORTAINER_PROJECT`: The root dir of the repository - `${portainerRoot}/dist/` is imported into the container to get the build artifacts and external tools (defaults to `your current dir`).
+- `PORTAINER_FLAGS`: a list of flags to be used on the portainer commandline, in the form `--admin-password=<pwd hash> --feat fdo=false --feat open-amt` (default: `""`).
+
+## Testing your build
+
+The `--log-level=DEBUG` flag can be passed to the Portainer container in order to provide additional debug output which may be useful when troubleshooting your builds. Please note that this flag was originally intended for internal use and as such the format, functionality and output may change between releases without warning.
 
 ## Adding api docs
 
@@ -112,6 +132,7 @@ When adding a new route to an existing handler use the following as a template (
 // @description
 // @description **Access policy**:
 // @tags
+// @security ApiKeyAuth
 // @security jwt
 // @accept json
 // @produce json

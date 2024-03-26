@@ -1,209 +1,188 @@
 <div class="page-wrapper">
-  <!-- simple box -->
-  <div class="container simple-box">
+  <!-- 简单盒子 -->
+  <div class="simple-box container">
     <div class="col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1">
-      <!-- simple box logo -->
+      <!-- 简单盒子Logo -->
       <div class="row">
         <img ng-if="logo" ng-src="{{ logo }}" class="simple-box-logo" />
         <img ng-if="!logo" src="~@/assets/images/logo_alt.svg" class="simple-box-logo" alt="Portainer" />
       </div>
-      <!-- !simple box logo -->
-      <!-- init password panel -->
+      <!-- !简单盒子Logo -->
+      <!-- 初始密码面板 -->
       <div class="panel panel-default">
         <div class="panel-body">
-          <!-- toggle -->
-          <div style="padding-bottom: 12px;">
-            <a ng-click="togglePanel()">
-              <i ng-class="{ true: 'glyphicon glyphicon-chevron-down', false: 'glyphicon glyphicon-chevron-right' }[state.showInitPassword]" aria-hidden="true"></i
-              ><span style="padding-left: 10px;">新Portainer安装</span>
+          <!-- 切换 -->
+          <div>
+            <a ng-click="togglePanel()" class="vertical-center">
+              <span>
+                <pr-icon icon="'chevron-down'" ng-if="state.showInitPassword" size="'lg'" class-name="'icon-primary'"></pr-icon>
+                <pr-icon icon="'chevron-right'" ng-if="!state.showInitPassword" size="'lg'" class-name="'icon-primary'"></pr-icon>
+              </span>
+              <span class="form-section-title">新Portainer安装</span>
             </a>
           </div>
-          <!-- !toggle -->
+          <!-- !切换 -->
 
-          <!-- init password form -->
-          <form class="simple-box-form form-horizontal" style="padding-left: 30px;" ng-if="state.showInitPassword">
-            <!-- note -->
+          <!-- 初始密码表单 -->
+          <form name="form" class="simple-box-form form-horizontal padding-top" ng-if="state.showInitPassword">
+            <!-- 注释 -->
             <div class="form-group">
               <div class="col-sm-12">
-                <span class="small text-muted">
-                  请创建初始管理员用户。
-                </span>
+                <span class="small text-muted"> 请创建初始管理员用户。 </span>
               </div>
             </div>
-            <!-- !note -->
-            <!-- username-input -->
+            <!-- !注释 -->
+            <!-- 用户名输入 -->
             <div class="form-group">
-              <label for="username" class="col-sm-4 control-label text-left">
-                用户名
-              </label>
+              <label for="username" class="col-sm-4 control-label text-left"> 用户名 </label>
               <div class="col-sm-8">
-                <input type="text" class="form-control" id="username" ng-model="formValues.Username" placeholder="例如 admin" />
+                <input type="text" class="form-control" id="username" ng-model="formValues.Username" placeholder="例如：admin" />
               </div>
             </div>
-            <!-- !username-input -->
-            <!-- new-password-input -->
+            <!-- !用户名输入 -->
+            <!-- 新密码输入 -->
             <div class="form-group">
               <label for="password" class="col-sm-4 control-label text-left">密码</label>
               <div class="col-sm-8">
-                <input type="password" class="form-control" ng-model="formValues.Password" id="password" auto-focus />
+                <input type="password" class="form-control" ng-model="formValues.Password" id="password" name="password" ng-minlength="requiredPasswordLength" auto-focus />
               </div>
             </div>
-            <!-- !new-password-input -->
-            <!-- confirm-password-input -->
+            <!-- !新密码输入 -->
+            <!-- 确认密码输入 -->
             <div class="form-group">
               <label for="confirm_password" class="col-sm-4 control-label text-left">确认密码</label>
               <div class="col-sm-8">
                 <div class="input-group">
                   <input type="password" class="form-control" ng-model="formValues.ConfirmPassword" id="confirm_password" />
-                  <span class="input-group-addon"
-                    ><i
-                      ng-class="{ true: 'fa fa-check green-icon', false: 'fa fa-times red-icon' }[formValues.Password !== '' && formValues.Password === formValues.ConfirmPassword]"
-                      aria-hidden="true"
-                    ></i
-                  ></span>
+                  <span class="input-group-addon !rounded-r-[5px]">
+                    <pr-icon ng-if="form.password.$viewValue !== '' && form.password.$viewValue === formValues.ConfirmPassword" icon="'check'" mode="'success'"></pr-icon>
+                    <pr-icon ng-if="form.password.$viewValue === '' || form.password.$viewValue !== formValues.ConfirmPassword" icon="'x'" mode="'danger'"></pr-icon>
+                  </span>
                 </div>
               </div>
             </div>
-            <!-- !confirm-password-input -->
-            <!-- note -->
+            <!-- !确认密码输入 -->
+            <!-- 注释 -->
             <div class="form-group">
-              <div class="col-sm-12">
-                <span class="small text-muted">
-                  <i ng-class="{ true: 'fa fa-check green-icon', false: 'fa fa-times red-icon' }[formValues.Password.length >= 8]" aria-hidden="true"></i>
-                  密码长度必须至少为 8 个字符
-                </span>
+              <div class="col-sm-12 text-warning">
+                <p class="vertical-center">
+                  <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
+                  <span>密码长度必须至少为{{ requiredPasswordLength }}个字符。</span>
+                  <pr-icon mode="'success'" icon="'check'" ng-if="form.password.$valid && formValues.Password"></pr-icon>
+                </p>
               </div>
             </div>
-            <!-- !note -->
-            <!-- actions -->
+            <!-- !注释 -->
+            <!-- 操作 -->
             <div class="form-group">
               <div class="col-sm-12">
                 <button
                   type="submit"
                   class="btn btn-primary btn-sm"
-                  ng-disabled="state.actionInProgress || formValues.Password.length < 8 || formValues.Password !== formValues.ConfirmPassword"
+                  ng-disabled="state.actionInProgress || form.$invalid || !formValues.Password || !formValues.ConfirmPassword ||  form.password.$viewValue !== formValues.ConfirmPassword"
                   ng-click="createAdminUser()"
                   button-spinner="state.actionInProgress"
                 >
-                  <span ng-hide="state.actionInProgress"><i class="fa fa-user-plus" aria-hidden="true"></i> 创建用户</span>
+                  <span ng-hide="state.actionInProgress">创建用户</span>
                   <span ng-show="state.actionInProgress">正在创建用户...</span>
                 </button>
               </div>
             </div>
-            <!-- !actions -->
-            <!-- enableTelemetry-->
+            <!-- !操作 -->
+            <!-- 启用遥测 -->
             <div class="form-group">
-              <div class="col-sm-12">
+              <div class="col-sm-12 vertical-center">
                 <input type="checkbox" name="toggle_enableTelemetry" ng-model="formValues.enableTelemetry" />
-                <span class="text-muted small" style="margin-left: 2px;"
-                  >允许收集匿名统计信息。 您可以在我们的
-                  <a href="https://www.portainer.io/documentation/in-app-analytics-and-privacy-policy/" target="_blank">隐私政策</a>中找到更多相关信息。</span
+                <span class="text-muted small"
+                  >允许收集匿名统计信息。您可以在我们的<a class="hyperlink" href="https://www.portainer.io/documentation/in-app-analytics-and-privacy-policy/" target="_blank">隐私政策</a>中找到更多信息。</span
                 >
               </div>
             </div>
-            <!-- !enableTelemetry-->
+            <!-- !启用遥测 -->
           </form>
-          <!-- !init password form -->
+          <!-- !初始密码表单 -->
         </div>
       </div>
-      <!-- !init password panel -->
+      <!-- !初始密码面板 -->
 
-      <!-- restore backup panel -->
+      <!-- 恢复备份面板 -->
       <div class="panel panel-default">
         <div class="panel-body">
-          <!-- toggle -->
-          <div style="padding-bottom: 12px;">
-            <a ng-click="togglePanel()">
-              <i ng-class="{ true: 'glyphicon glyphicon-chevron-down', false: 'glyphicon glyphicon-chevron-right' }[state.showRestorePortainer]" aria-hidden="true"></i
-              ><span style="padding-left: 10px;">从备份中恢复 Portainer</span>
+          <!-- 切换 -->
+          <div>
+            <a ng-click="togglePanel()" data-cy="init-installPortainerFromBackup" class="vertical-center">
+              <span
+                ><pr-icon icon="'chevron-down'" ng-if="state.showRestorePortainer" size="'lg'" class-name="'icon-primary'"></pr-icon>
+                <pr-icon icon="'chevron-right'" ng-if="!state.showRestorePortainer" size="'lg'" class-name="'icon-primary'"></pr-icon
+              ></span>
+              <span class="form-section-title">从备份恢复Portainer</span>
             </a>
           </div>
-          <!-- !toggle -->
+          <!-- !切换 -->
 
-          <!-- restore form -->
-          <form class="simple-box-form form-horizontal" style="padding-left: 30px;" ng-if="state.showRestorePortainer">
-            <!-- note -->
+          <!-- 恢复表单 -->
+          <form class="simple-box-form form-horizontal padding-top" ng-if="state.showRestorePortainer">
+            <!-- 注释 -->
             <div class="form-group">
               <div class="col-sm-9">
                 <span class="small text-muted">
-                  这将恢复 Portainer 元数据，其中包含有关环境、堆栈和应用程序以及已配置用户的信息。
+                  这将恢复Portainer元数据，包括环境、堆栈和应用程序的信息，以及配置的用户。
                 </span>
               </div>
             </div>
-            <!-- !note -->
-            <div class="form-group">
-              <div class="boxselector_wrapper">
-                <div>
-                  <input type="radio" id="restore_file" checked="checked" />
-                  <label for="restore_file" style="padding-bottom: 20px;">
-                    <div class="boxselector_header">
-                      <i class="fa fa-upload" aria-hidden="true" style="margin-right: 2px;"></i>
-                      上传备份文件
-                    </div>
-                    <p></p>
-                  </label>
-                </div>
-                <div>
-                  <input type="radio" id="restore_s3" disabled />
-                  <label for="restore_s3" class="boxselector_disabled" style="background-color: #ffffff;">
-                    <div class="boxselector_header">
-                      <i class="fa fa-download" aria-hidden="true" style="margin-right: 2px;"></i>
-                      从 S3 检索
-                    </div>
-                    <p>此功能在 <a href="https://www.portainer.io/business-upsell?from=restore-s3-form" target="_blank">Portainer 商业版</a>中可用</p>
-                  </label>
-                </div>
-              </div>
-            </div>
-            <!-- note -->
+
+            <box-selector slim="true" options="restoreOptions" value="formValues.restoreFormType" on-change="(onChangeRestoreType)" radio-name="'restore-type'"></box-selector>
+
             <div class="form-group">
               <div class="col-sm-12">
-                <span class="small text-muted">
-                  您可以从计算机上传备份文件。
-                </span>
+                <span class="small text-muted"> 您可以从计算机上传备份文件。 </span>
               </div>
             </div>
-            <!-- !note -->
-            <!-- select-file-input -->
+            <!-- !注释 -->
+            <!-- 选择文件输入 -->
             <div class="form-group">
-              <div class="col-sm-12">
-                <button class="btn btn-sm btn-primary" ngf-select accept=".tar.gz,.encrypted" ng-model="formValues.BackupFile" auto-focus>选择文件</button>
-                <span style="margin-left: 5px;">
+              <div class="col-sm-12 vertical-center">
+                <button
+                  class="btn btn-sm btn-primary"
+                  ngf-select
+                  accept=".gz,.encrypted"
+                  ngf-accept="'application/x-tar,application/x-gzip'"
+                  ng-model="formValues.BackupFile"
+                  auto-focus
+                  data-cy="init-selectBackupFileButton"
+                  >选择文件</button
+                >
+                <span class="space-left vertical-center">
                   {{ formValues.BackupFile.name }}
-                  <i class="fa fa-times red-icon" ng-if="!formValues.BackupFile" aria-hidden="true"></i>
+                  <pr-icon icon="'x-circle'" class-name="'icon-danger'" ng-if="!formValues.BackupFile"></pr-icon>
                 </span>
               </div>
             </div>
-            <!-- !select-file-input -->
-            <!-- password-input -->
+            <!-- !选择文件输入 -->
+            <!-- 密码输入 -->
             <div class="form-group">
               <label for="password" class="col-sm-3 control-label text-left">
                 密码
                 <portainer-tooltip
-                  position="bottom"
-                  message="如果备份受密码保护，请提供密码以提取备份文件，否则此字段可以留空。"
+                  message="'如果备份受密码保护，请提供密码以解压备份文件，否则该字段可以留空。'"
                 ></portainer-tooltip>
               </label>
               <div class="col-sm-4">
-                <input type="password" class="form-control" ng-model="formValues.Password" id="password" />
+                <input type="password" class="form-control" ng-model="formValues.Password" id="password" data-cy="init-backupPasswordInput" />
               </div>
             </div>
-            <!-- !password-input -->
-            <!-- note -->
+            <!-- !密码输入 -->
+            <!-- 注释 -->
             <div class="form-group">
               <div class="col-sm-12">
-                <span class="small text-muted">
-                  您即将从此备份恢复 Portainer。
-                </span>
+                <span class="small text-muted"> 您将要从此备份恢复Portainer。 </span>
               </div>
               <div class="col-sm-12">
-                <span class="small text-muted">
-                 恢复完成后，请以被恢复的 Portainer 已知的用户身份登录。
-                </span>
+                <span class="small text-muted"> 恢复完成后，请使用被恢复的Portainer知道的用户登录。 </span>
               </div>
             </div>
-            <!-- !note -->
-            <!-- actions -->
+            <!-- !注释 -->
+            <!-- 操作 -->
             <div class="form-group">
               <div class="col-sm-12">
                 <button
@@ -212,19 +191,20 @@
                   ng-disabled="!formValues.BackupFile || state.backupInProgress"
                   ng-click="uploadBackup()"
                   button-spinner="state.backupInProgress"
+                  data-cy="init-restorePortainerButton"
                 >
                   <span ng-hide="state.backupInProgress">恢复Portainer</span>
-                  <span ng-show="state.backupInProgress">恢复Portainer中...</span>
+                  <span ng-show="state.backupInProgress">正在恢复Portainer...</span>
                 </button>
               </div>
             </div>
-            <!-- !actions -->
+            <!-- !操作 -->
           </form>
-          <!-- !restore backup form -->
+          <!-- !恢复备份表单 -->
         </div>
       </div>
-      <!-- !restore backup panel -->
+      <!-- !恢复备份面板 -->
     </div>
   </div>
-  <!-- !simple box -->
+  <!-- !简单盒子 -->
 </div>

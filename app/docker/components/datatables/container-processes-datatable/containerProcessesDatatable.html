@@ -2,14 +2,28 @@
   <rd-widget>
     <rd-widget-body classes="no-padding">
       <div class="toolBar">
-        <div class="toolBarTitle"> <i class="fa" ng-class="$ctrl.titleIcon" aria-hidden="true" style="margin-right: 2px;"></i> {{ $ctrl.titleText }} </div>
-      </div>
-      <div class="searchBar">
-        <i class="fa fa-search searchIcon" aria-hidden="true"></i>
-        <input type="text" class="searchInput" ng-model="$ctrl.state.textFilter" placeholder="搜索..." auto-focus ng-model-options="{ debounce: 300 }" />
+        <div class="toolBarTitle vertical-center">
+          <div class="widget-icon space-right">
+            <pr-icon icon="$ctrl.titleIcon"></pr-icon>
+          </div>
+          {{ $ctrl.titleText }}
+        </div>
+        <div class="searchBar vertical-center">
+          <pr-icon icon="'search'" class-name="'searchIcon'"></pr-icon>
+          <input
+            type="text"
+            class="searchInput"
+            ng-model="$ctrl.state.textFilter"
+            ng-change="$ctrl.onTextFilterChange()"
+            placeholder="搜索进程..."
+            auto-focus
+            ng-model-options="{ debounce: 300 }"
+            data-cy="process-searchInput"
+          />
+        </div>
       </div>
       <div class="table-responsive">
-        <table class="table table-hover nowrap-cells">
+        <table class="table-hover nowrap-cells table">
           <thead>
             <tr>
               <th ng-repeat="header in $ctrl.headerset">
@@ -22,21 +36,19 @@
               <td ng-repeat="info in item track by $index">{{ info }}</td>
             </tr>
             <tr ng-if="!$ctrl.dataset">
-              <td colspan="{{ $ctrl.headerset.length }}" class="text-center text-muted">加载中...</td>
+              <td colspan="{{ $ctrl.headerset.length }}" class="text-muted text-center">加载中...</td>
             </tr>
             <tr ng-if="$ctrl.state.filteredProcesses.length === 0">
-              <td colspan="{{ $ctrl.headerset.length }}" class="text-center text-muted">没有可用的进程。</td>
+              <td colspan="{{ $ctrl.headerset.length }}" class="text-muted text-center">暂无可用进程。</td>
             </tr>
           </tbody>
         </table>
       </div>
       <div class="footer" ng-if="$ctrl.dataset">
         <div class="paginationControls">
-          <form class="form-inline">
+          <form class="form-inline vertical-center">
             <span class="limitSelector">
-              <span style="margin-right: 5px;">
-                每页项目数
-              </span>
+              <span style="margin-right: 5px"> 每页项目 </span>
               <select class="form-control" ng-model="$ctrl.state.paginatedItemLimit" ng-change="$ctrl.changePaginationLimit()" data-cy="component-paginationSelect">
                 <option value="0">全部</option>
                 <option value="10">10</option>

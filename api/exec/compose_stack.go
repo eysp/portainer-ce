@@ -3,19 +3,18 @@ package exec
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"path"
-	"path/filepath"
 	"strings"
-
-	"github.com/pkg/errors"
-
-	libstack "github.com/portainer/docker-compose-wrapper"
-	"github.com/portainer/docker-compose-wrapper/compose"
 
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/http/proxy"
 	"github.com/portainer/portainer/api/http/proxy/factory"
+	"github.com/portainer/portainer/api/stacks/stackutils"
+	"github.com/portainer/portainer/pkg/libstack"
+
+	"github.com/pkg/errors"
 )
 
 // ComposeStackManager is a wrapper for docker-compose binary
@@ -25,11 +24,7 @@ type ComposeStackManager struct {
 }
 
 // NewComposeStackManager returns a docker-compose wrapper if corresponding binary present, otherwise nil
-func NewComposeStackManager(binaryPath string, configPath string, proxyManager *proxy.Manager) (*ComposeStackManager, error) {
-	deployer, err := compose.NewComposeDeployer(binaryPath, configPath)
-	if err != nil {
-		return nil, err
-	}
+func NewComposeStackManager(deployer libstack.Deployer, proxyManager *proxy.Manager) (*ComposeStackManager, error) {
 
 	return &ComposeStackManager{
 		deployer:     deployer,
@@ -43,7 +38,7 @@ func (manager *ComposeStackManager) ComposeSyntaxMaxVersion() string {
 }
 
 // Up builds, (re)creates and starts containers in the background. Wraps `docker-compose up -d` command
-func (manager *ComposeStackManager) Up(ctx context.Context, stack *portainer.Stack, endpoint *portainer.Endpoint) error {
+func (manager *ComposeStackManager) Up(ctx context.Context, stack *portainer.Stack, endpoint *portainer.Endpoint, forceRecreate bool) error {
 	url, proxy, err := manager.fetchEndpointProxy(endpoint)
 	if err != nil {
 		return errors.Wrap(err, "failed to fetch environment proxy")
@@ -58,12 +53,20 @@ func (manager *ComposeStackManager) Up(ctx context.Context, stack *portainer.Sta
 		return errors.Wrap(err, "failed to create env file")
 	}
 
-	filePaths := getStackFiles(stack)
-	err = manager.deployer.Deploy(ctx, stack.ProjectPath, url, stack.Name, filePaths, envFilePath)
+	filePaths := stackutils.GetStackFilePaths(stack, true)
+	err = manager.deployer.Deploy(ctx, filePaths, libstack.DeployOptions{
+		Options: libstack.Options{
+			WorkingDir:  stack.ProjectPath,
+			EnvFilePath: envFilePath,
+			Host:        url,
+			ProjectName: stack.Name,
+		},
+		ForceRecreate: forceRecreate,
+	})
 	return errors.Wrap(err, "failed to deploy a stack")
 }
 
-// Down stops and removes containers, networks, images, and volumes. Wraps `docker-compose down --remove-orphans` command
+// Down stops and removes containers, networks, images, and volumes
 func (manager *ComposeStackManager) Down(ctx context.Context, stack *portainer.Stack, endpoint *portainer.Endpoint) error {
 	url, proxy, err := manager.fetchEndpointProxy(endpoint)
 	if err != nil {
@@ -73,9 +76,44 @@ func (manager *ComposeStackManager) Down(ctx context.Context, stack *portainer.S
 		defer proxy.Close()
 	}
 
-	filePaths := getStackFiles(stack)
-	err = manager.deployer.Remove(ctx, stack.ProjectPath, url, stack.Name, filePaths)
+	envFilePath, err := createEnvFile(stack)
+	if err != nil {
+		return errors.Wrap(err, "failed to create env file")
+	}
+
+	err = manager.deployer.Remove(ctx, stack.Name, nil, libstack.Options{
+		WorkingDir:  stack.ProjectPath,
+		EnvFilePath: envFilePath,
+		Host:        url,
+	})
+
 	return errors.Wrap(err, "failed to remove a stack")
+}
+
+// Pull an image associated with a service defined in a docker-compose.yml or docker-stack.yml file,
+// but does not start containers based on those images.
+func (manager *ComposeStackManager) Pull(ctx context.Context, stack *portainer.Stack, endpoint *portainer.Endpoint) error {
+	url, proxy, err := manager.fetchEndpointProxy(endpoint)
+	if err != nil {
+		return err
+	}
+	if proxy != nil {
+		defer proxy.Close()
+	}
+
+	envFilePath, err := createEnvFile(stack)
+	if err != nil {
+		return errors.Wrap(err, "failed to create env file")
+	}
+
+	filePaths := stackutils.GetStackFilePaths(stack, true)
+	err = manager.deployer.Pull(ctx, filePaths, libstack.Options{
+		WorkingDir:  stack.ProjectPath,
+		EnvFilePath: envFilePath,
+		Host:        url,
+		ProjectName: stack.Name,
+	})
+	return errors.Wrap(err, "failed to pull images of the stack")
 }
 
 // NormalizeStackName returns a new stack name with unsupported characters replaced
@@ -96,46 +134,42 @@ func (manager *ComposeStackManager) fetchEndpointProxy(endpoint *portainer.Endpo
 	return fmt.Sprintf("tcp://127.0.0.1:%d", proxy.Port), proxy, nil
 }
 
+// createEnvFile creates a file that would hold both "in-place" and default environment variables.
+// It will return the name of the file if the stack has "in-place" env vars, otherwise empty string.
 func createEnvFile(stack *portainer.Stack) (string, error) {
-	if stack.Env == nil || len(stack.Env) == 0 {
+	if len(stack.Env) == 0 {
 		return "", nil
 	}
 
 	envFilePath := path.Join(stack.ProjectPath, "stack.env")
-
 	envfile, err := os.OpenFile(envFilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return "", err
 	}
+	defer envfile.Close()
+
+	copyDefaultEnvFile(stack, envfile)
 
 	for _, v := range stack.Env {
 		envfile.WriteString(fmt.Sprintf("%s=%s\n", v.Name, v.Value))
 	}
-	envfile.Close()
 
 	return "stack.env", nil
 }
 
-// getStackFiles returns list of stack's confile file paths.
-// items in the list would be sanitized according to following criterias:
-// 1. no empty paths
-// 2. no "../xxx" paths that are trying to escape stack folder
-// 3. no dir paths
-// 4. root paths would be made relative
-func getStackFiles(stack *portainer.Stack) []string {
-	paths := make([]string, 0, len(stack.AdditionalFiles)+1)
-
-	for _, p := range append([]string{stack.EntryPoint}, stack.AdditionalFiles...) {
-		if strings.HasPrefix(p, "/") {
-			p = `.` + p
-		}
-
-		if p == `` || p == `.` || strings.HasPrefix(p, `..`) || strings.HasSuffix(p, string(filepath.Separator)) {
-			continue
-		}
-
-		paths = append(paths, p)
+// copyDefaultEnvFile copies the default .env file if it exists to the provided writer
+func copyDefaultEnvFile(stack *portainer.Stack, w io.Writer) {
+	defaultEnvFile, err := os.Open(path.Join(path.Join(stack.ProjectPath, path.Dir(stack.EntryPoint)), ".env"))
+	if err != nil {
+		// If cannot open a default file, then don't need to copy it.
+		// We could as well stat it and check if it exists, but this is more efficient.
+		return
 	}
 
-	return paths
+	defer defaultEnvFile.Close()
+
+	if _, err = io.Copy(w, defaultEnvFile); err == nil {
+		io.WriteString(w, "\n")
+	}
+	// If couldn't copy the .env file, then ignore the error and try to continue
 }

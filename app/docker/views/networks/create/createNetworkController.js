@@ -14,7 +14,10 @@ angular.module('portainer.docker').controller('CreateNetworkController', [
   'ResourceControlService',
   'FormValidator',
   'HttpRequestHelper',
-  function ($q, $scope, $state, PluginService, Notifications, NetworkService, LabelHelper, Authentication, ResourceControlService, FormValidator, HttpRequestHelper) {
+  'endpoint',
+  function ($q, $scope, $state, PluginService, Notifications, NetworkService, LabelHelper, Authentication, ResourceControlService, FormValidator, HttpRequestHelper, endpoint) {
+    $scope.endpoint = endpoint;
+
     $scope.formValues = {
       DriverOptions: [],
       IPV4: {
@@ -202,6 +205,18 @@ angular.module('portainer.docker').controller('CreateNetworkController', [
       }
     }
 
+    $scope.onChangeInternal = function (enable) {
+      $scope.$evalAsync(() => {
+        $scope.config.Internal = enable;
+      });
+    };
+
+    $scope.onChangeAttachable = function (enable) {
+      $scope.$evalAsync(() => {
+        $scope.config.Attachable = enable;
+      });
+    };
+
     function validateForm(accessControlData, isAdmin) {
       $scope.state.formValidationError = '';
       var error = '';
@@ -227,7 +242,7 @@ angular.module('portainer.docker').controller('CreateNetworkController', [
           return ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl);
         })
         .then(function success() {
-          Notifications.success('网络已成功创建');
+          Notifications.success('Success', '网络创建成功');
           if (context.reload) {
             $state.go(
               'docker.networks',
@@ -239,7 +254,7 @@ angular.module('portainer.docker').controller('CreateNetworkController', [
           }
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '网络创建过程中发生错误');
+          Notifications.error('Failure', err, '创建网络时发生错误');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -307,7 +322,7 @@ angular.module('portainer.docker').controller('CreateNetworkController', [
           $scope.availableNetworkDrivers = _.filter($scope.availableNetworkDrivers, (driver) => driver !== 'host' && driver !== 'null');
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索网络驱动程序');
+          Notifications.error('Failure', err, '无法检索网络驱动程序');
         });
     }
 

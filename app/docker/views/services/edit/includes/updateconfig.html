@@ -1,11 +1,11 @@
 <div id="service-update-config">
   <rd-widget>
-    <rd-widget-header icon="fa-list-alt" title-text="更新并行性"> </rd-widget-header>
+    <rd-widget-header icon="list" title-text="更新配置"> </rd-widget-header>
     <rd-widget-body classes="no-padding">
-      <table class="table">
+      <table class="mb-0 table">
         <tbody>
           <tr>
-            <td>更新并行性</td>
+            <td>更新并行度</td>
             <td>
               <input
                 class="input-sm"
@@ -16,9 +16,7 @@
               />
             </td>
             <td>
-              <p class="small text-muted" style="margin-top: 10px;">
-                同时更新的最大任务数（0表示一次更新所有任务）。
-              </p>
+              <p class="small text-muted" style="margin-top: 10px"> 同时更新的任务的最大数量（0 表示一次性更新所有任务）。 </p>
             </td>
           </tr>
           <tr>
@@ -34,16 +32,14 @@
               />
             </td>
             <td>
-              <p class="small text-muted" style="margin-top: 10px;">
-                更新之间的时间量，以数字后跟单位表示 (ns|us|ms|s|m|h). 示例: 1m.
-              </p>
+              <p class="small text-muted" style="margin-top: 10px"> 以数字加单位（ns|us|ms|s|m|h）表示的更新时间间隔。例如：1m。 </p>
             </td>
           </tr>
           <tr>
-            <td>更新失败操作</td>
+            <td>更新失败动作</td>
             <td>
-              <div class="form-group">
-                <label class="radio-inline">
+              <div class="form-group !mb-0">
+                <label class="radio-inline align-baseline">
                   <input
                     type="radio"
                     name="failure_action"
@@ -54,7 +50,7 @@
                   />
                   继续
                 </label>
-                <label class="radio-inline">
+                <label class="radio-inline align-baseline">
                   <input
                     type="radio"
                     name="failure_action"
@@ -68,15 +64,13 @@
               </div>
             </td>
             <td>
-              <p class="small text-muted" style="margin-top: 10px;">
-                更新后启动失败时采取的操作。
-              </p>
+              <p class="small text-muted" style="margin-top: 10px"> 更新后启动失败时采取的动作。 </p>
             </td>
           </tr>
           <tr ng-if="applicationState.endpoint.apiVersion >= 1.29">
-            <td>排序</td>
+            <td>顺序</td>
             <td>
-              <div class="form-group">
+              <div class="form-group !mb-0">
                 <label class="radio-inline">
                   <input
                     type="radio"
@@ -86,7 +80,7 @@
                     ng-change="updateServiceAttribute(service, 'UpdateOrder')"
                     disable-authorization="DockerServiceUpdate"
                   />
-                  先开始
+                  先启动
                 </label>
                 <label class="radio-inline">
                   <input
@@ -102,9 +96,7 @@
               </div>
             </td>
             <td>
-              <p class="small text-muted" style="margin-top: 10px;">
-                故障时的操作指令。
-              </p>
+              <p class="small text-muted" style="margin-top: 10px"> 失败时的操作顺序。 </p>
             </td>
           </tr>
         </tbody>

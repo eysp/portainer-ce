@@ -1,83 +1,13 @@
-<rd-header>
-  <rd-header-title title-text="创建注册表"></rd-header-title>
-  <rd-header-content> <a ui-sref="portainer.registries">注册表</a> &gt; 添加注册表 </rd-header-content>
-</rd-header>
+<page-header title="'创建镜像仓库'" breadcrumbs="[{label:'镜像仓库', link:'portainer.registries'}, '添加镜像仓库']"> </page-header>
 
 <div class="row">
   <div class="col-sm-12">
     <rd-widget>
       <rd-widget-body>
         <form class="form-horizontal">
-          <div class="col-sm-12 form-section-title">
-            注册表提供程序
-          </div>
+          <div class="col-sm-12 form-section-title"> 镜像仓库提供商 </div>
 
-          <div class="form-group"></div>
-
-          <div class="form-group" style="margin-bottom: 0;">
-            <div class="boxselector_wrapper">
-              <div>
-                <input type="radio" id="registry_dockerhub" ng-model="$ctrl.model.Type" ng-value="$ctrl.RegistryTypes.DOCKERHUB" />
-                <label for="registry_dockerhub" ng-click="$ctrl.selectDockerHub()">
-                  <div class="boxselector_header">
-                    <i class="fa fa-database" aria-hidden="true" style="margin-right: 2px;"></i>
-                    DockerHub
-                  </div>
-                  <p>DockerHub 认证帐户</p>
-                </label>
-              </div>
-              <div>
-                <input type="radio" id="registry_quay" ng-model="$ctrl.model.Type" ng-value="$ctrl.RegistryTypes.QUAY" />
-                <label for="registry_quay" ng-click="$ctrl.selectQuayRegistry()">
-                  <div class="boxselector_header">
-                    <i class="fa fa-database" aria-hidden="true" style="margin-right: 2px;"></i>
-                    Quay.io
-                  </div>
-                  <p>Quay 容器注册表</p>
-                </label>
-              </div>
-              <div>
-                <input type="radio" id="registry_proget" ng-model="$ctrl.model.Type" ng-value="$ctrl.RegistryTypes.PROGET" />
-                <label for="registry_proget" ng-click="$ctrl.selectProGetRegistry()">
-                  <div class="boxselector_header">
-                    <i class="fa fa-database" aria-hidden="true" style="margin-right: 2px;"></i>
-                    ProGet
-                  </div>
-                  <p>ProGet 容器注册表</p>
-                </label>
-              </div>
-              <div>
-                <input type="radio" id="registry_azure" ng-model="$ctrl.model.Type" ng-value="$ctrl.RegistryTypes.AZURE" />
-                <label for="registry_azure" ng-click="$ctrl.selectAzureRegistry()">
-                  <div class="boxselector_header">
-                    <i class="fab fa-microsoft" aria-hidden="true" style="margin-right: 2px;"></i>
-                    Azure
-                  </div>
-                  <p>Azure 容器注册表</p>
-                </label>
-              </div>
-              <div>
-                <input type="radio" id="registry_gitlab" ng-model="$ctrl.model.Type" ng-value="$ctrl.RegistryTypes.GITLAB" />
-                <label for="registry_gitlab" ng-click="$ctrl.selectGitlabRegistry()">
-                  <div class="boxselector_header">
-                    <i class="fab fa-gitlab" aria-hidden="true" style="margin-right: 2px;"></i>
-                    Gitlab
-                  </div>
-                  <p>Gitlab 容器注册表</p>
-                </label>
-              </div>
-              <div>
-                <input type="radio" id="registry_custom" ng-model="$ctrl.model.Type" ng-value="$ctrl.RegistryTypes.CUSTOM" />
-                <label for="registry_custom" ng-click="$ctrl.selectCustomRegistry()">
-                  <div class="boxselector_header">
-                    <i class="fa fa-database" aria-hidden="true" style="margin-right: 2px;"></i>
-                    自定义注册表
-                  </div>
-                  <p>定义您自己的注册表</p>
-                </label>
-              </div>
-            </div>
-          </div>
+          <box-selector radio-name="'availableRegistry'" value="$ctrl.state.registryValue" options="$ctrl.state.availableRegistry" on-change="($ctrl.setRegistry)"></box-selector>
 
           <registry-form-quay
             ng-if="$ctrl.model.Type === $ctrl.RegistryTypes.QUAY"
@@ -85,6 +15,7 @@
             form-action="$ctrl.createRegistry"
             form-action-label="添加注册表"
             action-in-progress="$ctrl.state.actionInProgress"
+            name-is-used="($ctrl.nameIsUsed)"
           ></registry-form-quay>
 
           <registry-form-azure
@@ -93,6 +24,7 @@
             form-action="$ctrl.createRegistry"
             form-action-label="添加注册表"
             action-in-progress="$ctrl.state.actionInProgress"
+            name-is-used="($ctrl.nameIsUsed)"
           ></registry-form-azure>
 
           <registry-form-custom
@@ -101,7 +33,17 @@
             form-action="$ctrl.createRegistry"
             form-action-label="添加注册表"
             action-in-progress="$ctrl.state.actionInProgress"
+            name-is-used="($ctrl.nameIsUsed)"
           ></registry-form-custom>
+
+          <registry-form-ecr
+            ng-if="$ctrl.model.Type === $ctrl.RegistryTypes.ECR"
+            model="$ctrl.model"
+            form-action="$ctrl.createRegistry"
+            form-action-label="添加注册表"
+            action-in-progress="$ctrl.state.actionInProgress"
+            name-is-used="($ctrl.nameIsUsed)"
+          ></registry-form-ecr>
 
           <registry-form-proget
             ng-if="$ctrl.model.Type === $ctrl.RegistryTypes.PROGET"
@@ -109,6 +51,7 @@
             form-action="$ctrl.createRegistry"
             form-action-label="添加注册表"
             action-in-progress="$ctrl.state.actionInProgress"
+            name-is-used="($ctrl.nameIsUsed)"
           ></registry-form-proget>
 
           <registry-form-gitlab
@@ -121,13 +64,13 @@
             action-in-progress="$ctrl.state.actionInProgress"
             reset-defaults="$ctrl.useDefaultGitlabConfiguration"
           ></registry-form-gitlab>
-
           <registry-form-dockerhub
             ng-if="$ctrl.model.Type === $ctrl.RegistryTypes.DOCKERHUB"
             model="$ctrl.model"
             form-action="$ctrl.createRegistry"
             form-action-label="添加注册表"
             action-in-progress="$ctrl.state.actionInProgress"
+            name-is-used="($ctrl.nameIsUsed)"
           ></registry-form-dockerhub>
         </form>
       </rd-widget-body>

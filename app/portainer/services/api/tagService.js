@@ -18,7 +18,7 @@ angular.module('portainer.app').factory('TagService', [
           deferred.resolve(tags);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: '无法检索标签', err: err });
+          deferred.reject({ msg: '无法获取标签', err: err });
         });
       return deferred.promise;
     };
@@ -33,7 +33,7 @@ angular.module('portainer.app').factory('TagService', [
           deferred.resolve(tags);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: '无法检索标签', err: err });
+          deferred.reject({ msg: '无法获取标签', err: err });
         });
       return deferred.promise;
     };

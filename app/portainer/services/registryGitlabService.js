@@ -28,7 +28,7 @@ angular.module('portainer.app').factory('RegistryGitlabService', [
         const data = await _getProjectsPage({ url: url, token: token }, { page: 1 }, []);
         return _.map(data, (project) => new RegistryGitlabProject(project));
       } catch (error) {
-        throw { msg: 'Unable to retrieve projects', err: error };
+        throw { msg: '无法检索项目', err: error };
       }
     }
 
@@ -50,17 +50,18 @@ angular.module('portainer.app').factory('RegistryGitlabService', [
       return repositories;
     }
 
-    async function repositoriesAsync(registry) {
+    async function repositoriesAsync(registry, endpointId) {
       try {
         const params = {
           id: registry.Id,
+          endpointId: endpointId,
           projectId: registry.Gitlab.ProjectId,
           page: 1,
         };
         const data = await _getRepositoriesPage(params, []);
         return _.map(data, (r) => new RegistryRepositoryGitlabViewModel(r));
       } catch (error) {
-        throw { msg: 'Unable to retrieve repositories', err: error };
+        throw { msg: '无法检索存储库', err: error };
       }
     }
 
@@ -76,8 +77,8 @@ angular.module('portainer.app').factory('RegistryGitlabService', [
       return $async(projectsAsync, url, token);
     }
 
-    function repositories(registry) {
-      return $async(repositoriesAsync, registry);
+    function repositories(registry, endpointId) {
+      return $async(repositoriesAsync, registry, endpointId);
     }
 
     service.projects = projects;

@@ -1,10 +1,10 @@
+import { formatLogs } from '../helpers/logHelper';
 import { TaskViewModel } from '../models/task';
 
 angular.module('portainer.docker').factory('TaskService', [
   '$q',
   'Task',
-  'LogHelper',
-  function TaskServiceFactory($q, Task, LogHelper) {
+  function TaskServiceFactory($q, Task) {
     'use strict';
     var service = {};
 
@@ -17,7 +17,7 @@ angular.module('portainer.docker').factory('TaskService', [
           deferred.resolve(task);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: '无法检索任务详细信息', err: err });
+          deferred.reject({ msg: '无法检索任务详情', err: err });
         });
 
       return deferred.promise;
@@ -54,7 +54,7 @@ angular.module('portainer.docker').factory('TaskService', [
 
       Task.logs(parameters)
         .$promise.then(function success(data) {
-          var logs = LogHelper.formatLogs(data.logs, true);
+          var logs = formatLogs(data.logs, { stripHeaders: true, withTimestamps: !!timestamps });
           deferred.resolve(logs);
         })
         .catch(function error(err) {

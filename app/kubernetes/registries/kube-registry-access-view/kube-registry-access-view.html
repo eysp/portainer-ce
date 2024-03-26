@@ -1,37 +1,29 @@
-<rd-header>
-  <rd-header-title title-text="注册表访问"></rd-header-title>
-  <rd-header-content> <a ui-sref="kubernetes.registries">注册表</a> &gt; {{ $ctrl.registry.Name }} &gt; 访问管理 </rd-header-content>
-</rd-header>
+<page-header title="'Registry access'" breadcrumbs="[{label:'Registries', link:'kubernetes.registries'}, $ctrl.registry.Name, 'Access management']"> </page-header>
 
 <registry-details registry="$ctrl.registry" ng-if="$ctrl.registry"></registry-details>
 
 <div class="row">
   <div class="col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="fa-user-lock" title-text="Create access"></rd-widget-header>
+      <rd-widget-header icon="user-x" title-text="Create access"></rd-widget-header>
       <rd-widget-body>
         <form class="form-horizontal">
           <div class="form-group">
-            <label class="col-sm-3 col-lg-2 control-label text-left" style="padding-top: 0;">
-              选择 namespaces
-            </label>
-            <div class="col-sm-9 col-lg-4">
-              <span class="small text-muted" ng-if="!$ctrl.resourcePools.length">
-                没有 namespaces 可用.
-              </span>
-              <span
-                isteven-multi-select
+            <label class="col-sm-3 col-lg-2 control-label text-left" style="padding-top: 0"> Select namespaces </label>
+            <div class="col-sm-9 col-lg-4" style="margin-bottom: 15px">
+              <span class="small text-muted" ng-if="!$ctrl.resourcePools.length"> No namespaces available. </span>
+
+              <namespaces-selector
                 ng-if="$ctrl.resourcePools.length"
-                input-model="$ctrl.resourcePools"
-                output-model="$ctrl.selectedResourcePools"
-                button-label="name"
-                item-label="name"
-                tick-property="ticked"
-                helper-elements="filter"
-                search-property="name"
-                translation="{nothingSelected: '选择一个或多个 namespaces', search: '搜索...'}"
-              >
-              </span>
+                value="$ctrl.selectedResourcePools"
+                namespaces="$ctrl.resourcePools"
+                placeholder="'Select one or more namespaces'"
+                on-change="($ctrl.onChangeResourcePools)"
+              ></namespaces-selector>
+            </div>
+            <div class="col-sm-12 small text-muted vertical-center">
+              <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
+              Adding this registry will expose the registry credentials to all users of this namespace.
             </div>
           </div>
 
@@ -40,13 +32,13 @@
             <div class="col-sm-12">
               <button
                 type="submit"
-                class="btn btn-primary btn-sm"
+                class="btn btn-primary btn-sm !ml-0"
                 ng-disabled="$ctrl.selectedResourcePools.length === 0 || $ctrl.state.actionInProgress"
                 ng-click="$ctrl.submit()"
                 button-spinner="$ctrl.state.actionInProgress"
               >
-                <span ng-hide="$ctrl.state.actionInProgress"><i class="fa fa-plus" aria-hidden="true"></i> 创建访问权限</span>
-                <span ng-show="$ctrl.state.actionInProgress">创建访问权限中...</span>
+                <span ng-hide="$ctrl.state.actionInProgress" class="vertical-center"><pr-icon icon="'plus'" size="'sm'"></pr-icon> Create access</span>
+                <span ng-show="$ctrl.state.actionInProgress">Creating access...</span>
               </button>
             </div>
           </div>
@@ -60,7 +52,7 @@
   <div class="col-sm-12">
     <strings-datatable
       title-text="Access"
-      title-icon="fa-user-lock"
+      title-icon="user-x"
       table-key="access_registry_resourcepools"
       dataset="$ctrl.savedResourcePools"
       empty-dataset-message="No namespace has been authorized yet."

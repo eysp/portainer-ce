@@ -2,26 +2,46 @@ export function SettingsViewModel(data) {
   this.LogoURL = data.LogoURL;
   this.BlackListedLabels = data.BlackListedLabels;
   this.AuthenticationMethod = data.AuthenticationMethod;
+  this.InternalAuthSettings = data.InternalAuthSettings;
   this.LDAPSettings = data.LDAPSettings;
   this.OAuthSettings = new OAuthSettingsViewModel(data.OAuthSettings);
+  this.openAMTConfiguration = data.openAMTConfiguration;
+  this.fdoConfiguration = data.fdoConfiguration;
   this.SnapshotInterval = data.SnapshotInterval;
   this.TemplatesURL = data.TemplatesURL;
   this.EdgeAgentCheckinInterval = data.EdgeAgentCheckinInterval;
   this.EnableEdgeComputeFeatures = data.EnableEdgeComputeFeatures;
+  this.FeatureFlagSettings = data.FeatureFlagSettings;
   this.UserSessionTimeout = data.UserSessionTimeout;
   this.EnableTelemetry = data.EnableTelemetry;
   this.KubeconfigExpiry = data.KubeconfigExpiry;
   this.HelmRepositoryURL = data.HelmRepositoryURL;
+  this.TrustOnFirstConnect = data.TrustOnFirstConnect;
+  this.EnforceEdgeID = data.EnforceEdgeID;
+  this.AgentSecret = data.AgentSecret;
+  this.EdgePortainerUrl = data.EdgePortainerUrl;
 }
 
 export function PublicSettingsViewModel(settings) {
   this.AuthenticationMethod = settings.AuthenticationMethod;
+  this.TeamSync = settings.TeamSync;
+  this.RequiredPasswordLength = settings.RequiredPasswordLength;
   this.EnableEdgeComputeFeatures = settings.EnableEdgeComputeFeatures;
+  this.EnforceEdgeID = settings.EnforceEdgeID;
   this.LogoURL = settings.LogoURL;
   this.OAuthLoginURI = settings.OAuthLoginURI;
   this.EnableTelemetry = settings.EnableTelemetry;
   this.OAuthLogoutURI = settings.OAuthLogoutURI;
   this.KubeconfigExpiry = settings.KubeconfigExpiry;
+  this.Features = settings.Features;
+  this.Edge = new EdgeSettingsViewModel(settings.Edge);
+  this.DefaultRegistry = settings.DefaultRegistry;
+  this.IsAMTEnabled = settings.IsAMTEnabled;
+  this.IsFDOEnabled = settings.IsFDOEnabled;
+}
+
+export function InternalAuthSettingsViewModel(data) {
+  this.RequiredPasswordLength = data.RequiredPasswordLength;
 }
 
 export function LDAPSettingsViewModel(data) {
@@ -58,4 +78,11 @@ export function OAuthSettingsViewModel(data) {
   this.DefaultTeamID = data.DefaultTeamID;
   this.SSO = data.SSO;
   this.LogoutURI = data.LogoutURI;
+}
+
+export function EdgeSettingsViewModel(data = {}) {
+  this.CheckinInterval = data.CheckinInterval;
+  this.PingInterval = data.PingInterval;
+  this.SnapshotInterval = data.SnapshotInterval;
+  this.CommandInterval = data.CommandInterval;
 }

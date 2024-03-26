@@ -14,10 +14,12 @@ export function RegistryViewModel(data) {
   this.Checked = false;
   this.Gitlab = data.Gitlab;
   this.Quay = data.Quay;
+  this.Ecr = data.Ecr;
 }
 
 export function RegistryManagementConfigurationDefaultModel(registry) {
-  this.Authentication = false;
+  this.Authentication = registry.Authentication;
+  this.Username = registry.Username;
   this.Password = '';
   this.TLS = false;
   this.TLSSkipVerify = false;
@@ -25,13 +27,18 @@ export function RegistryManagementConfigurationDefaultModel(registry) {
   this.TLSCertFile = null;
   this.TLSKeyFile = null;
 
-  if (registry.Type === RegistryTypes.QUAY || registry.Type === RegistryTypes.AZURE) {
+  if (registry.Type === RegistryTypes.ECR) {
+    this.Region = registry.Ecr.Region;
+    this.TLSSkipVerify = true;
+  }
+
+  if (registry.Type === RegistryTypes.QUAY || registry.Type === RegistryTypes.ECR) {
     this.Authentication = true;
     this.Username = registry.Username;
     this.TLS = true;
   }
 
-  if ((registry.Type === RegistryTypes.CUSTOM || registry.Type === RegistryTypes.PROGET) && registry.Authentication) {
+  if ((registry.Type === RegistryTypes.CUSTOM || registry.Type === RegistryTypes.PROGET || registry.Type === RegistryTypes.AZURE) && registry.Authentication) {
     this.Authentication = true;
     this.Username = registry.Username;
   }
@@ -62,6 +69,9 @@ export function RegistryCreateRequest(model) {
       InstanceURL: model.Gitlab.InstanceURL,
       ProjectPath: model.Gitlab.ProjectPath,
     };
+  }
+  if (model.Type === RegistryTypes.ECR) {
+    this.Ecr = model.Ecr;
   }
   if (model.Type === RegistryTypes.QUAY) {
     this.Quay = {

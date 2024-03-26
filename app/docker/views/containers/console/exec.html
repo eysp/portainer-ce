@@ -1,25 +1,30 @@
-<rd-header>
-  <rd-header-title title-text="容器控制台"></rd-header-title>
-  <rd-header-content>
-    <a ui-sref="docker.containers">容器</a> &gt; <a ui-sref="docker.containers.container({id: container.Id})">{{ container.Name | trimcontainername }}</a> &gt; 控制台
-  </rd-header-content>
-</rd-header>
+<page-header
+  title="'容器控制台'"
+  breadcrumbs="[
+    { label:'容器', link:'docker.containers' },
+    {
+      label:(container.Name | trimcontainername),
+      link: 'docker.containers.container',
+      linkParams: { id: container.Id },
+    }, '控制台']"
+>
+</page-header>
 
 <div class="row" ng-init="initView()" ng-show="loaded">
   <div class="col-lg-12 col-md-12 col-xs-12">
     <rd-widget>
-      <rd-widget-header icon="fa-terminal" title-text="执行"></rd-widget-header>
+      <rd-widget-header icon="terminal" title-text="执行"></rd-widget-header>
       <rd-widget-body>
         <form class="form-horizontal">
           <div ng-if="state === states.disconnected">
-            <!-- command-list -->
+            <!-- 命令列表 -->
             <div class="form-group">
-              <label for="command" class="col-lg-1 text-left col-sm-2 control-label">命令</label>
+              <label for="command" class="col-lg-1 col-sm-2 control-label text-left">命令</label>
               <div class="col-lg-11 col-sm-10">
                 <div class="input-group" ng-if="!formValues.isCustomCommand">
                   <span class="input-group-addon">
-                    <i class="fab fa-linux" aria-hidden="true" ng-if="imageOS == 'linux'"></i>
-                    <i class="fab fa-windows" aria-hidden="true" ng-if="imageOS == 'windows'"></i>
+                    <pr-icon ng-if="imageOS == 'linux'" icon="'svg-linux'"></pr-icon>
+                    <pr-icon ng-if="imageOS == 'windows'" icon="'layout-grid'"></pr-icon>
                   </span>
                   <select class="form-control" ng-model="formValues.command" id="command">
                     <option value="ash" ng-if="imageOS == 'linux'">/bin/ash</option>
@@ -33,18 +38,22 @@
                 <input class="form-control" ng-if="formValues.isCustomCommand" type="text" name="custom-command" ng-model="formValues.customCommand" placeholder="例如 ps aux" />
               </div>
             </div>
-            <!-- !command-list -->
+            <!-- !命令列表 -->
             <div class="form-group col-lg-12">
-              <label for="command" class="text-left control-label">使用自定义命令</label>
-              <label class="switch" style="margin-left: 20px;"> <input type="checkbox" ng-model="formValues.isCustomCommand" /><i></i> </label>
+              <por-switch-field
+                label-class="'col-sm-1'"
+                checked="formValues.isCustomCommand"
+                label="'使用自定义命令'"
+                on-change="(handleIsCustomCommandChange)"
+              ></por-switch-field>
             </div>
             <div class="form-group">
-              <label for="username" class="col-lg-1 text-left col-sm-2 control-label">
+              <label class="col-lg-1 col-sm-2 control-label text-left">
                 用户
-                <portainer-tooltip position="bottom" message="格式为：user、user:group、uid或uid:gid之一"></portainer-tooltip>
+                <portainer-tooltip message="'格式为其中之一：用户，用户:组，uid 或 uid:gid'"></portainer-tooltip>
               </label>
               <div class="col-lg-11 col-sm-10">
-                <input class="form-control" type="text" name="username" ng-model="formValues.user" placeholder="root" />
+                <input class="form-control" type="text" ng-model="formValues.user" placeholder="root" />
               </div>
             </div>
             <div class="form-group">
@@ -52,21 +61,20 @@
                 <button type="button" class="btn btn-primary" ng-disabled="!container.State.Running" ng-click="connectExec()">
                   <span>连接</span>
                 </button>
-                <span class="small text-danger" ng-hide="container.State.Running">
-                  <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-                  容器没有运行。
+                <span class="small text-danger vertical-center" ng-hide="container.State.Running">
+                  <pr-icon icon="'alert-triangle'" mode="'danger'"></pr-icon>
+                  容器未运行。
                 </span>
               </div>
             </div>
           </div>
           <div ng-if="state !== states.disconnected">
             <label
-              >使用命令 <code>{{ ::formValues.user || 'default user' }}</code> 执行到容器中
-              <code>{{ formValues.isCustomCommand ? formValues.customCommand : formValues.command }}</code></label
+              >以<code>{{ ::formValues.user || '默认用户' }}</code>身份使用命令<code>{{ formValues.isCustomCommand ? formValues.customCommand : formValues.command }}</code>进入容器</label
             >
             <button type="button" class="btn btn-primary" ng-click="disconnect()">
-              <span ng-show="state === states.connected">断开</span>
-              <span ng-show="state === states.connecting">正在连接...</span>
+              <span ng-show="state === states.connected">断开连接</span>
+              <span ng-show="state === states.connecting">连接中...</span>
             </button>
           </div>
         </form>

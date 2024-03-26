@@ -23,28 +23,45 @@ angular.module('portainer.app').factory('StackHelper', [
       );
     }
 
-    helper.validateYAML = function (yaml, containerNames) {
-      let yamlObject;
-
-      try {
-        yamlObject = YAML.parse(yaml);
-      } catch (err) {
-        return 'yaml 语法有错误: ' + err;
-      }
-
-      const names = _.uniq(GenericHelper.findDeepAll(yamlObject, 'container_name'));
-      const duplicateContainers = _.intersection(containerNames, names);
-
-      if (duplicateContainers.length === 0) return;
-
-      return (
-        (duplicateContainers.length === 1 ? '这个容器名称是' : '这些容器名称是') +
-        ' 已被在此环境中运行的另一个容器使用: ' +
-        _.join(duplicateContainers, ', ') +
-        '.'
-      );
-    };
+    helper.validateYAML = validateYAML;
 
     return helper;
   },
 ]);
+
+function validateYAML(yaml, containerNames, originalContainersNames = []) {
+  let yamlObject;
+
+  try {
+    yamlObject = YAML.parse(yaml);
+  } catch (err) {
+    return 'YAML 语法错误: ' + err;
+  }
+
+  const names = _.uniq(GenericHelper.findDeepAll(yamlObject, 'container_name'));
+
+  const duplicateContainers = _.intersection(_.difference(containerNames, originalContainersNames), names);
+
+  if (duplicateContainers.length === 0) {
+    return '';
+  }
+
+  return (
+    (duplicateContainers.length === 1 ? '该容器名称已被' : '这些容器名称已被') +
+    ' 此环境中其他正在运行的容器使用: ' +
+    _.join(duplicateContainers, ', ') +
+    '.'
+  );
+}
+
+export function extractContainerNames(yaml = '') {
+  let yamlObject;
+
+  try {
+    yamlObject = YAML.parse(yaml);
+  } catch (err) {
+    return [];
+  }
+
+  return _.uniq(GenericHelper.findDeepAll(yamlObject, 'container_name'));
+}

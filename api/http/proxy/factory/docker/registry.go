@@ -2,7 +2,9 @@ package docker
 
 import (
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/http/security"
+	"github.com/portainer/portainer/api/internal/registryutils"
 )
 
 type (
@@ -21,20 +23,21 @@ type (
 	}
 
 	portainerRegistryAuthenticationHeader struct {
-		RegistryId portainer.RegistryID `json:"registryId"`
+		RegistryId *portainer.RegistryID `json:"registryId"`
 	}
 )
 
-func createRegistryAuthenticationHeader(registryId portainer.RegistryID, accessContext *registryAccessContext) *registryAuthenticationHeader {
-	var authenticationHeader *registryAuthenticationHeader
-
+func createRegistryAuthenticationHeader(
+	dataStore dataservices.DataStore,
+	registryId portainer.RegistryID,
+	accessContext *registryAccessContext,
+) (authenticationHeader registryAuthenticationHeader, err error) {
 	if registryId == 0 { // dockerhub (anonymous)
-		authenticationHeader = &registryAuthenticationHeader{
-			Serveraddress: "docker.io",
-		}
+		authenticationHeader.Serveraddress = "docker.io"
 	} else { // any "custom" registry
 		var matchingRegistry *portainer.Registry
 		for _, registry := range accessContext.registries {
+			registry := registry
 			if registry.ID == registryId &&
 				(accessContext.isAdmin ||
 					security.AuthorizedRegistryAccess(&registry, accessContext.user, accessContext.teamMemberships, accessContext.endpointID)) {
@@ -44,13 +47,14 @@ func createRegistryAuthenticationHeader(registryId portainer.RegistryID, accessC
 		}
 
 		if matchingRegistry != nil {
-			authenticationHeader = &registryAuthenticationHeader{
-				Username:      matchingRegistry.Username,
-				Password:      matchingRegistry.Password,
-				Serveraddress: matchingRegistry.URL,
+			err = registryutils.EnsureRegTokenValid(dataStore, matchingRegistry)
+			if err != nil {
+				return
 			}
+			authenticationHeader.Serveraddress = matchingRegistry.URL
+			authenticationHeader.Username, authenticationHeader.Password, err = registryutils.GetRegEffectiveCredential(matchingRegistry)
 		}
 	}
 
-	return authenticationHeader
+	return
 }

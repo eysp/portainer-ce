@@ -1,12 +1,16 @@
+import { getOptions } from '@/react/docker/networks/CreateView/macvlanOptions';
+
 angular.module('portainer.docker').controller('NetworkMacvlanFormController', [
   '$q',
   'NodeService',
   'NetworkService',
   'Notifications',
-  'StateManager',
+  '$scope',
   'Authentication',
-  function ($q, NodeService, NetworkService, Notifications, StateManager, Authentication) {
+  function ($q, NodeService, NetworkService, Notifications, $scope, Authentication) {
     var ctrl = this;
+
+    this.options = [];
 
     ctrl.requiredNodeSelection = function () {
       if (ctrl.data.Scope !== 'local' || ctrl.data.DatatableState === undefined) {
@@ -21,6 +25,13 @@ angular.module('portainer.docker').controller('NetworkMacvlanFormController', [
       }
       return !ctrl.data.SelectedNetworkConfig;
     };
+
+    this.onChangeScope = onChangeScope.bind(this);
+    function onChangeScope(value) {
+      return $scope.$evalAsync(() => {
+        this.data.Scope = value;
+      });
+    }
 
     this.$onInit = $onInit;
     function $onInit() {
@@ -40,9 +51,11 @@ angular.module('portainer.docker').controller('NetworkMacvlanFormController', [
           ctrl.availableNetworks = data.networks.filter(function (item) {
             return item.ConfigOnly === true;
           });
+
+          ctrl.options = getOptions(ctrl.availableNetworks.length > 0);
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索 macvlan 的信息');
+          Notifications.error('Failure', err, '无法检索 macvlan 信息');
         });
     }
   },

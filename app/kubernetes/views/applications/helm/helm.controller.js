@@ -20,10 +20,10 @@ export default class KubernetesHelmApplicationController {
       if (releases.length > 0) {
         this.state.release = releases[0];
       } else {
-        throw new PortainerError(`Release ${this.state.params.name} 未找到`);
+        throw new PortainerError(`Release ${this.state.params.name} not found`);
       }
     } catch (err) {
-      this.Notifications.error('失败', err, '无法检索 helm 应用程序详细信息');
+      this.Notifications.error('Failure', err, 'Unable to retrieve helm application details');
     } finally {
       this.state.dataLoading = false;
     }

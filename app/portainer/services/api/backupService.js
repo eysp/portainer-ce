@@ -23,7 +23,7 @@ angular.module('portainer.app').factory('BackupService', [
           deferred.resolve(data);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve backup S3 settings', err: err });
+          deferred.reject({ msg: '无法检索备份 S3 设置', err: err });
         });
 
       return deferred.promise;
@@ -37,7 +37,7 @@ angular.module('portainer.app').factory('BackupService', [
           deferred.resolve(data);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to save backup S3 settings', err: err });
+          deferred.reject({ msg: '无法保存备份 S3 设置', err: err });
         });
 
       return deferred.promise;
@@ -51,7 +51,7 @@ angular.module('portainer.app').factory('BackupService', [
           deferred.resolve(data);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to export backup', err: err });
+          deferred.reject({ msg: '无法导出备份', err: err });
         });
 
       return deferred.promise;
@@ -66,20 +66,6 @@ angular.module('portainer.app').factory('BackupService', [
         })
         .catch(function error(err) {
           deferred.reject({ msg: 'Unable to restore backup from S3', err: err });
-        });
-
-      return deferred.promise;
-    };
-
-    service.getBackupStatus = function () {
-      var deferred = $q.defer();
-
-      Backup.getBackupStatus()
-        .$promise.then(function success(data) {
-          deferred.resolve(data);
-        })
-        .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to retrieve backup status', err: err });
         });
 
       return deferred.promise;

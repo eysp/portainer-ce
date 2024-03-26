@@ -1,6 +1,6 @@
 import _ from 'lodash-es';
 
-import * as envVarsUtils from '@/portainer/helpers/env-vars';
+import * as envVarsUtils from '@/react/components/form-components/EnvironmentVariablesFieldset/utils';
 import { PorImageRegistryModel } from 'Docker/models/porImageRegistry';
 import { AccessControlFormData } from '../../../../portainer/components/accessControlForm/porAccessControlFormModel';
 
@@ -111,6 +111,14 @@ angular.module('portainer.docker').controller('CreateServiceController', [
 
     $scope.allowBindMounts = false;
 
+    $scope.handleWebHookChange = handleWebHookChange;
+
+    function handleWebHookChange(checked) {
+      return $scope.$evalAsync(() => {
+        $scope.formValues.Webhook = checked;
+      });
+    }
+
     $scope.handleEnvVarChange = handleEnvVarChange;
     function handleEnvVarChange(value) {
       $scope.formValues.Env = value;
@@ -165,6 +173,7 @@ angular.module('portainer.docker').controller('CreateServiceController', [
 
     $scope.removeConfig = function (index) {
       $scope.formValues.Configs.splice(index, 1);
+      $scope.checkIfConfigDuplicated();
     };
 
     $scope.addSecret = function () {
@@ -173,6 +182,7 @@ angular.module('portainer.docker').controller('CreateServiceController', [
 
     $scope.removeSecret = function (index) {
       $scope.formValues.Secrets.splice(index, 1);
+      $scope.checkIfSecretDuplicated();
     };
 
     $scope.addPlacementConstraint = function () {
@@ -213,6 +223,36 @@ angular.module('portainer.docker').controller('CreateServiceController', [
 
     $scope.removeLogDriverOpt = function (index) {
       $scope.formValues.LogDriverOpts.splice(index, 1);
+    };
+
+    $scope.checkIfSecretDuplicated = function () {
+      $scope.formValues.Secrets.$invalid = false;
+      [...$scope.formValues.Secrets]
+        .sort((a, b) => a.model.Id.localeCompare(b.model.Id))
+        .sort((a, b) => {
+          if (a.model.Id === b.model.Id) {
+            $scope.formValues.Secrets.$invalid = true;
+            $scope.formValues.Secrets.$error = 'Secret ' + a.model.Name + ' 不能多次分配。';
+          }
+        });
+      if (!$scope.formValues.Secrets.$invalid) {
+        $scope.formValues.Secrets.$error = '';
+      }
+    };
+
+    $scope.checkIfConfigDuplicated = function () {
+      $scope.formValues.Configs.$invalid = false;
+      [...$scope.formValues.Configs]
+        .sort((a, b) => a.model.Id.localeCompare(b.model.Id))
+        .sort((a, b) => {
+          if (a.model.Id === b.model.Id) {
+            $scope.formValues.Configs.$invalid = true;
+            $scope.formValues.Configs.$error = '配置 ' + a.model.Name + ' 不能多次分配。';
+          }
+        });
+      if (!$scope.formValues.Configs.$invalid) {
+        $scope.formValues.Configs.$error = '';
+      }
     };
 
     function prepareImageConfig(config, input) {
@@ -492,15 +532,16 @@ angular.module('portainer.docker').controller('CreateServiceController', [
           const resourceControl = data.Portainer.ResourceControl;
           const userId = Authentication.getUserDetails().ID;
           const rcPromise = ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl);
-          const webhookPromise = $q.when(endpoint.Type !== 4 && $scope.formValues.Webhook && WebhookService.createServiceWebhook(serviceId, endpoint.Id));
+          const registryID = $scope.formValues.RegistryModel.Registry.Id;
+          const webhookPromise = $q.when(endpoint.Type !== 4 && $scope.formValues.Webhook && WebhookService.createServiceWebhook(serviceId, endpoint.Id, registryID));
           return $q.all([rcPromise, webhookPromise]);
         })
         .then(function success() {
-          Notifications.success('服务创建成功');
+          Notifications.success('Success', '服务创建成功');
           $state.go('docker.services', {}, { reload: true });
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法创建服务');
+          Notifications.error('Failure', err, '无法创建服务');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -510,7 +551,7 @@ angular.module('portainer.docker').controller('CreateServiceController', [
     function validateForm(accessControlData, isAdmin) {
       $scope.state.formValidationError = '';
       var error = '';
-      error = FormValidator.validateAccessControl(accessControlData, isAdmin);
+      error = FormValidator.validateAccessControl(accessControlData, isAdmin) || $scope.formValues.Secrets.$error || $scope.formValues.Configs.$error;
 
       if (error) {
         $scope.state.formValidationError = error;
@@ -583,7 +624,7 @@ angular.module('portainer.docker').controller('CreateServiceController', [
           $scope.allowBindMounts = data.allowBindMounts;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法初始化视图');
+          Notifications.error('Failure', err, '无法初始化视图');
         });
     }
 

@@ -1,11 +1,7 @@
 class WebEditorFormController {
   /* @ngInject */
-  constructor() {
-    this.editorUpdate = this.editorUpdate.bind(this);
-  }
-
-  editorUpdate(cm) {
-    this.onChange(cm.getValue());
+  constructor(BROWSER_OS_PLATFORM) {
+    this.BROWSER_OS_PLATFORM = BROWSER_OS_PLATFORM;
   }
 }
 

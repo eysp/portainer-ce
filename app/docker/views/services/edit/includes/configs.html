@@ -1,31 +1,31 @@
 <form ng-if="applicationState.endpoint.apiVersion >= 1.3" id="service-configs" ng-submit="updateService(service)">
   <rd-widget>
-    <rd-widget-header icon="fa-tasks" title-text="配置"> </rd-widget-header>
+    <rd-widget-header icon="list" title-text="Configs"> </rd-widget-header>
     <rd-widget-body classes="no-padding">
-      <div class="form-inline" style="padding: 10px;" authorization="DockerServiceUpdate">
-        添加一个配置：
-        <select class="form-control" ng-options="config.Name for config in configs | orderBy: 'Name'" ng-model="newConfig">
-          <option selected disabled hidden value="">选择一个配置</option>
+      <div class="form-inline" style="padding: 10px" authorization="DockerServiceUpdate">
+        Add a config:
+        <select class="form-control !h-[30px] !text-[13px]" ng-options="config.Name for config in filterConfigs(configs) | orderBy: 'Name'" ng-model="newConfig">
+          <option selected disabled hidden value="">Select a config</option>
         </select>
-        <a class="btn btn-default btn-sm" ng-click="addConfig(service, newConfig)"> <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加配置 </a>
+        <a class="btn btn-default btn-sm" ng-click="addConfig(service, newConfig)"> <pr-icon icon="'plus'"></pr-icon> add config </a>
       </div>
-      <table class="table" style="margin-top: 5px;">
+      <table class="table" style="margin-top: 5px">
         <thead>
           <tr>
             <th>名称</th>
-            <th>容器中的路径</th>
+            <th>Path in container</th>
             <th>UID</th>
             <th>GID</th>
-            <th>模式</th>
+            <th>Mode</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
           <tr ng-repeat="config in service.ServiceConfigs">
-            <td
-              ><a ui-sref="docker.configs.config({id: config.Id})">{{ config.Name }}</a></td
-            >
             <td>
+              <a ui-sref="docker.configs.config({id: config.Id})">{{ config.Name }}</a>
+            </td>
+            <td ng-if="!config.credSpec">
               <input
                 class="form-control"
                 ng-model="config.FileName"
@@ -33,19 +33,21 @@
                 placeholder="例如 /path/in/container"
                 required
                 disable-authorization="DockerServiceUpdate"
+                ng-disabled="config.credSpec"
               />
             </td>
-            <td>{{ config.Uid }}</td>
-            <td>{{ config.Gid }}</td>
-            <td>{{ config.Mode }}</td>
+            <td ng-if="!config.credSpec">{{ config.Uid }}</td>
+            <td ng-if="!config.credSpec">{{ config.Gid }}</td>
+            <td ng-if="!config.credSpec">{{ config.Mode }}</td>
+            <td ng-if="config.credSpec" colspan="4">Credential Spec</td>
             <td authorization="DockerServiceUpdate">
-              <button class="btn btn-xs btn-danger pull-right" type="button" ng-click="removeConfig(service, $index)" ng-disabled="isUpdating">
-                <i class="fa fa-trash" aria-hidden="true"></i> 删除配置
+              <button class="btn btn-dangerlight pull-right" type="button" ng-click="removeConfig(service, $index)" ng-disabled="isUpdating">
+                <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
               </button>
             </td>
           </tr>
           <tr ng-if="service.ServiceConfigs.length === 0">
-            <td colspan="6" class="text-center text-muted">没有与此服务关联的配置。</td>
+            <td colspan="6" class="text-muted text-center">No configs associated to this service.</td>
           </tr>
         </tbody>
       </table>
@@ -53,13 +55,13 @@
     <rd-widget-footer authorization="DockerServiceUpdate">
       <div class="btn-toolbar" role="toolbar">
         <div class="btn-group" role="group">
-          <button type="submit" class="btn btn-primary btn-sm" ng-disabled="!hasChanges(service, ['ServiceConfigs'])">应用更改</button>
+          <button type="submit" class="btn btn-primary btn-sm" ng-disabled="!hasChanges(service, ['ServiceConfigs'])">Apply changes</button>
           <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu">
-            <li><a ng-click="cancelChanges(service, ['ServiceConfigs'])">重置更改</a></li>
-            <li><a ng-click="cancelChanges(service)">重置所有更改</a></li>
+            <li><a ng-click="cancelChanges(service, ['ServiceConfigs'])">Reset changes</a></li>
+            <li><a ng-click="cancelChanges(service)">Reset all changes</a></li>
           </ul>
         </div>
       </div>

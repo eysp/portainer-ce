@@ -6,20 +6,21 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"log"
+	"io"
 	"net/http"
 	"path"
 	"regexp"
 	"strconv"
 	"strings"
 
-	"github.com/docker/docker/client"
 	portainer "github.com/portainer/portainer/api"
-	"github.com/portainer/portainer/api/docker"
+	"github.com/portainer/portainer/api/dataservices"
+	dockerclient "github.com/portainer/portainer/api/docker/client"
 	"github.com/portainer/portainer/api/http/proxy/factory/utils"
 	"github.com/portainer/portainer/api/http/security"
 	"github.com/portainer/portainer/api/internal/authorization"
+
+	"github.com/rs/zerolog/log"
 )
 
 var apiVersionRe = regexp.MustCompile(`(/v[0-9]\.[0-9]*)?`)
@@ -30,20 +31,20 @@ type (
 	Transport struct {
 		HTTPTransport        *http.Transport
 		endpoint             *portainer.Endpoint
-		dataStore            portainer.DataStore
+		dataStore            dataservices.DataStore
 		signatureService     portainer.DigitalSignatureService
 		reverseTunnelService portainer.ReverseTunnelService
-		dockerClient         *client.Client
-		dockerClientFactory  *docker.ClientFactory
+		dockerClientFactory  *dockerclient.ClientFactory
+		gitService           portainer.GitService
 	}
 
 	// TransportParameters is used to create a new Transport
 	TransportParameters struct {
 		Endpoint             *portainer.Endpoint
-		DataStore            portainer.DataStore
+		DataStore            dataservices.DataStore
 		SignatureService     portainer.DigitalSignatureService
 		ReverseTunnelService portainer.ReverseTunnelService
-		DockerClientFactory  *docker.ClientFactory
+		DockerClientFactory  *dockerclient.ClientFactory
 	}
 
 	restrictedDockerOperationContext struct {
@@ -62,12 +63,7 @@ type (
 )
 
 // NewTransport returns a pointer to a new Transport instance.
-func NewTransport(parameters *TransportParameters, httpTransport *http.Transport) (*Transport, error) {
-	dockerClient, err := parameters.DockerClientFactory.CreateClient(parameters.Endpoint, "")
-	if err != nil {
-		return nil, err
-	}
-
+func NewTransport(parameters *TransportParameters, httpTransport *http.Transport, gitService portainer.GitService) (*Transport, error) {
 	transport := &Transport{
 		endpoint:             parameters.Endpoint,
 		dataStore:            parameters.DataStore,
@@ -75,7 +71,7 @@ func NewTransport(parameters *TransportParameters, httpTransport *http.Transport
 		reverseTunnelService: parameters.ReverseTunnelService,
 		dockerClientFactory:  parameters.DockerClientFactory,
 		HTTPTransport:        httpTransport,
-		dockerClient:         dockerClient,
+		gitService:           gitService,
 	}
 
 	return transport, nil
@@ -183,7 +179,7 @@ func (transport *Transport) proxyAgentRequest(r *http.Request) (*http.Response, 
 		}
 
 		if registryID != 0 {
-			registry, err = transport.dataStore.Registry().Registry(portainer.RegistryID(registryID))
+			registry, err = transport.dataStore.Registry().Read(portainer.RegistryID(registryID))
 			if err != nil {
 				return nil, fmt.Errorf("failed fetching registry: %w", err)
 			}
@@ -200,7 +196,7 @@ func (transport *Transport) proxyAgentRequest(r *http.Request) (*http.Response, 
 
 		r.Method = http.MethodPost
 
-		r.Body = ioutil.NopCloser(bytes.NewReader(newBody))
+		r.Body = io.NopCloser(bytes.NewReader(newBody))
 		r.ContentLength = int64(len(newBody))
 	}
 
@@ -278,6 +274,7 @@ func (transport *Transport) proxyServiceRequest(request *http.Request) (*http.Re
 		if match, _ := path.Match("/services/*/*", requestPath); match {
 			// Handle /services/{id}/{action} requests
 			serviceID := path.Base(path.Dir(requestPath))
+			transport.decorateRegistryAuthenticationHeader(request)
 			return transport.restrictedResourceOperation(request, serviceID, serviceID, portainer.ServiceResourceControl, false)
 		} else if match, _ := path.Match("/services/*", requestPath); match {
 			// Handle /services/{id} requests
@@ -386,7 +383,29 @@ func (transport *Transport) proxyTaskRequest(request *http.Request) (*http.Respo
 }
 
 func (transport *Transport) proxyBuildRequest(request *http.Request) (*http.Response, error) {
+	err := transport.updateDefaultGitBranch(request)
+	if err != nil {
+		return nil, err
+	}
 	return transport.interceptAndRewriteRequest(request, buildOperation)
+}
+
+func (transport *Transport) updateDefaultGitBranch(request *http.Request) error {
+	remote := request.URL.Query().Get("remote")
+	if strings.HasSuffix(remote, ".git") {
+		repositoryURL := remote[:len(remote)-4]
+		latestCommitID, err := transport.gitService.LatestCommitID(repositoryURL, "", "", "", false)
+		if err != nil {
+			return err
+		}
+		newRemote := fmt.Sprintf("%s#%s", remote, latestCommitID)
+
+		q := request.URL.Query()
+		q.Set("remote", newRemote)
+		request.URL.RawQuery = q.Encode()
+	}
+
+	return nil
 }
 
 func (transport *Transport) proxyImageRequest(request *http.Request) (*http.Response, error) {
@@ -402,9 +421,15 @@ func (transport *Transport) proxyImageRequest(request *http.Request) (*http.Resp
 }
 
 func (transport *Transport) replaceRegistryAuthenticationHeader(request *http.Request) (*http.Response, error) {
+	transport.decorateRegistryAuthenticationHeader(request)
+
+	return transport.decorateGenericResourceCreationOperation(request, serviceObjectIdentifier, portainer.ServiceResourceControl)
+}
+
+func (transport *Transport) decorateRegistryAuthenticationHeader(request *http.Request) error {
 	accessContext, err := transport.createRegistryAccessContext(request)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	originalHeader := request.Header.Get("X-Registry-Auth")
@@ -413,28 +438,44 @@ func (transport *Transport) replaceRegistryAuthenticationHeader(request *http.Re
 
 		decodedHeaderData, err := base64.StdEncoding.DecodeString(originalHeader)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		var originalHeaderData portainerRegistryAuthenticationHeader
 		err = json.Unmarshal(decodedHeaderData, &originalHeaderData)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
-		authenticationHeader := createRegistryAuthenticationHeader(originalHeaderData.RegistryId, accessContext)
+		// delete header and exist function without error if Front End
+		// passes empty json. This is to restore original behavior which
+		// never originally passed this header
+		if string(decodedHeaderData) == "{}" {
+			request.Header.Del("X-Registry-Auth")
+			return nil
+		}
+
+		// only set X-Registry-Auth if registryId is defined
+		if originalHeaderData.RegistryId == nil {
+			return nil
+		}
+
+		authenticationHeader, err := createRegistryAuthenticationHeader(transport.dataStore, *originalHeaderData.RegistryId, accessContext)
+		if err != nil {
+			return err
+		}
 
 		headerData, err := json.Marshal(authenticationHeader)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
-		header := base64.StdEncoding.EncodeToString(headerData)
+		header := base64.URLEncoding.EncodeToString(headerData)
 
 		request.Header.Set("X-Registry-Auth", header)
 	}
 
-	return transport.decorateGenericResourceCreationOperation(request, serviceObjectIdentifier, portainer.ServiceResourceControl)
+	return nil
 }
 
 func (transport *Transport) restrictedResourceOperation(request *http.Request, resourceID string, dockerResourceID string, resourceType portainer.ResourceControlType, volumeBrowseRestrictionCheck bool) (*http.Response, error) {
@@ -466,7 +507,7 @@ func (transport *Transport) restrictedResourceOperation(request *http.Request, r
 			userTeamIDs = append(userTeamIDs, membership.TeamID)
 		}
 
-		resourceControls, err := transport.dataStore.ResourceControl().ResourceControls()
+		resourceControls, err := transport.dataStore.ResourceControl().ReadAll()
 		if err != nil {
 			return nil, err
 		}
@@ -495,7 +536,6 @@ func (transport *Transport) restrictedResourceOperation(request *http.Request, r
 			return utils.WriteAccessDeniedResponse()
 		}
 	}
-
 	return transport.executeDockerRequest(request)
 }
 
@@ -562,7 +602,8 @@ func (transport *Transport) decorateGenericResourceCreationResponse(response *ht
 	}
 
 	if responseObject[resourceIdentifierAttribute] == nil {
-		log.Printf("[ERROR] [proxy,docker]")
+		log.Error().Msg("missing identifier in Docker resource creation response")
+
 		return errors.New("missing identifier in Docker resource creation response")
 	}
 
@@ -605,11 +646,15 @@ func (transport *Transport) executeGenericResourceDeletionOperation(request *htt
 	if response.StatusCode == http.StatusNoContent || response.StatusCode == http.StatusOK {
 		resourceControl, err := transport.dataStore.ResourceControl().ResourceControlByResourceIDAndType(resourceIdentifierAttribute, resourceType)
 		if err != nil {
+			if dataservices.IsErrObjectNotFound(err) {
+				return response, nil
+			}
+
 			return response, err
 		}
 
 		if resourceControl != nil {
-			err = transport.dataStore.ResourceControl().DeleteResourceControl(resourceControl.ID)
+			err = transport.dataStore.ResourceControl().Delete(resourceControl.ID)
 			if err != nil {
 				return response, err
 			}
@@ -625,7 +670,9 @@ func (transport *Transport) executeRequestAndRewriteResponse(request *http.Reque
 		return response, err
 	}
 
-	err = operation(response, executor)
+	if response.StatusCode == http.StatusOK {
+		err = operation(response, executor)
+	}
 	return response, err
 }
 
@@ -655,13 +702,13 @@ func (transport *Transport) createRegistryAccessContext(request *http.Request) (
 		endpointID: transport.endpoint.ID,
 	}
 
-	user, err := transport.dataStore.User().User(tokenData.ID)
+	user, err := transport.dataStore.User().Read(tokenData.ID)
 	if err != nil {
 		return nil, err
 	}
 	accessContext.user = user
 
-	registries, err := transport.dataStore.Registry().Registries()
+	registries, err := transport.dataStore.Registry().ReadAll()
 	if err != nil {
 		return nil, err
 	}
@@ -688,7 +735,7 @@ func (transport *Transport) createOperationContext(request *http.Request) (*rest
 		return nil, err
 	}
 
-	resourceControls, err := transport.dataStore.ResourceControl().ResourceControls()
+	resourceControls, err := transport.dataStore.ResourceControl().ReadAll()
 	if err != nil {
 		return nil, err
 	}
@@ -711,6 +758,7 @@ func (transport *Transport) createOperationContext(request *http.Request) (*rest
 		for _, membership := range teamMemberships {
 			userTeamIDs = append(userTeamIDs, membership.TeamID)
 		}
+
 		operationContext.userTeamIDs = userTeamIDs
 	}
 

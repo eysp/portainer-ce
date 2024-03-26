@@ -1,4 +1,5 @@
 import angular from 'angular';
+import PortainerError from 'Portainer/error';
 
 angular.module('portainer.app').factory('CustomTemplateService', CustomTemplateServiceFactory);
 
@@ -24,12 +25,12 @@ function CustomTemplateServiceFactory($sanitize, CustomTemplates, FileUploadServ
     return CustomTemplates.remove({ id }).$promise;
   };
 
-  service.customTemplateFile = async function customTemplateFile(id) {
+  service.customTemplateFile = async function customTemplateFile(id, remote = false) {
     try {
-      const { FileContent } = await CustomTemplates.file({ id }).$promise;
+      const { FileContent } = remote ? await CustomTemplates.gitFetch({ id }).$promise : await CustomTemplates.file({ id }).$promise;
       return FileContent;
     } catch (err) {
-      throw { msg: 'Unable to retrieve customTemplate content', err };
+      throw new PortainerError('无法检索自定义模板内容', err);
     }
   };
 
@@ -39,9 +40,9 @@ function CustomTemplateServiceFactory($sanitize, CustomTemplates, FileUploadServ
 
   service.createCustomTemplateFromFileContent = async function createCustomTemplateFromFileContent(payload) {
     try {
-      return await CustomTemplates.create({ method: 'string' }, payload).$promise;
+      return await CustomTemplates.create({}, { method: 'string', ...payload }).$promise;
     } catch (err) {
-      throw { msg: 'Unable to create the customTemplate', err };
+      throw { msg: '无法创建自定义模板', err };
     }
   };
 
@@ -50,15 +51,15 @@ function CustomTemplateServiceFactory($sanitize, CustomTemplates, FileUploadServ
       const { data } = await FileUploadService.createCustomTemplate(payload);
       return data;
     } catch (err) {
-      throw { msg: 'Unable to create the customTemplate', err };
+      throw { msg: '无法创建自定义模板', err };
     }
   };
 
   service.createCustomTemplateFromGitRepository = async function createCustomTemplateFromGitRepository(payload) {
     try {
-      return await CustomTemplates.create({ method: 'repository' }, payload).$promise;
+      return await CustomTemplates.create({}, { method: 'repository', ...payload }).$promise;
     } catch (err) {
-      throw { msg: 'Unable to create the customTemplate', err };
+      throw { msg: '无法创建自定义模板', err };
     }
   };
 

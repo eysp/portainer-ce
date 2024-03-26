@@ -1,6 +1,6 @@
 <div id="service-container-image" authorization="DockerServiceUpdate">
   <rd-widget>
-    <rd-widget-header icon="fa-clone" title-text="更改容器镜像"> </rd-widget-header>
+    <rd-widget-header icon="list" title-text="更改容器镜像"> </rd-widget-header>
     <rd-widget-body ng-if="!isUpdating">
       <form class="form-horizontal">
         <por-image-registry
@@ -17,7 +17,7 @@
       </form>
     </rd-widget-body>
     <rd-widget-body ng-if="isUpdating">
-      <p>在更新服务时禁用镜像修改。</p>
+      <p>服务正在更新时禁用镜像修改。</p>
     </rd-widget-body>
     <rd-widget-footer authorization="DockerServiceUpdate">
       <div class="btn-toolbar" role="toolbar">

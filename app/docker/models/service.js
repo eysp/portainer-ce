@@ -1,4 +1,4 @@
-import { ResourceControlViewModel } from 'Portainer/models/resourceControl/resourceControl';
+import { ResourceControlViewModel } from '@/react/portainer/access-control/models/ResourceControlViewModel';
 
 export function ServiceViewModel(data, runningTasks, allTasks) {
   this.Model = data;
@@ -92,7 +92,7 @@ export function ServiceViewModel(data, runningTasks, allTasks) {
   this.VirtualIPs = data.Endpoint ? data.Endpoint.VirtualIPs : [];
 
   if (data.Spec.UpdateConfig) {
-    this.UpdateParallelism = typeof data.Spec.UpdateConfig.Parallelism !== undefined ? data.Spec.UpdateConfig.Parallelism || 0 : 1;
+    this.UpdateParallelism = typeof data.Spec.UpdateConfig.Parallelism !== 'undefined' ? data.Spec.UpdateConfig.Parallelism || 0 : 1;
     this.UpdateDelay = data.Spec.UpdateConfig.Delay || 0;
     this.UpdateFailureAction = data.Spec.UpdateConfig.FailureAction || 'pause';
     this.UpdateOrder = data.Spec.UpdateConfig.Order || 'stop-first';

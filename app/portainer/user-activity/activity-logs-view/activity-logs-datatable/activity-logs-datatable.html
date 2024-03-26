@@ -1,36 +1,67 @@
 <div class="datatable datatable-empty">
   <rd-widget>
     <rd-widget-body classes="no-padding">
-      <datatable-titlebar title="活动日志" icon="fa-history" feature="{{::$ctrl.feature}}"></datatable-titlebar>
-      <datatable-searchbar on-change="($ctrl.onChangeKeyword)" ng-model="$ctrl.keyword"></datatable-searchbar>
+      <div class="toolBar vertical-center flex-wrap !gap-x-5 !gap-y-1">
+        <div class="toolBarTitle vertical-center">
+          <div class="widget-icon space-right">
+            <pr-icon icon="'history'"></pr-icon>
+          </div>
+          活动日志
+        </div>
+        <div class="vertical-center">
+          <datatable-searchbar on-change="($ctrl.onChangeKeyword)" value="$ctrl.keyword"></datatable-searchbar>
+        </div>
+      </div>
       <div class="table-responsive">
-        <table class="table table-hover">
+        <table class="table-hover table">
           <thead>
             <tr>
               <th class="small-column">
-                <a ng-click="$ctrl.changeSort('Timestamp')">
-                  时间
-                  <datatable-sort-icon key="Timestamp" selected-sort-key="{{ $ctrl.sort.key }}" reverse-order="$ctrl.sort.desc"></datatable-sort-icon>
-                </a>
+                <div class="vertical-center">
+                  <table-column-header
+                    col-title="'时间'"
+                    can-sort="true"
+                    is-sorted="$ctrl.sort.key === 'Timestamp'"
+                    is-sorted-desc="$ctrl.sort.key === 'Timestamp' && $ctrl.sort.desc"
+                    ng-click="$ctrl.changeSort('Timestamp')"
+                  >
+                  </table-column-header>
+                </div>
               </th>
               <th class="small-column">
-                <a ng-click="$ctrl.changeSort('Username')">
-                  用户
-                  <datatable-sort-icon key="Username" selected-sort-key="{{ $ctrl.sort.key }}" reverse-order="$ctrl.sort.desc"></datatable-sort-icon>
-                </a>
+                <div class="vertical-center">
+                  <table-column-header
+                    col-title="'用户'"
+                    can-sort="true"
+                    is-sorted="$ctrl.sort.key === 'Username'"
+                    is-sorted-desc="$ctrl.sort.key === 'Username' && $ctrl.sort.desc"
+                    ng-click="$ctrl.changeSort('Username')"
+                  >
+                  </table-column-header>
+                </div>
               </th>
               <th class="small-column">
-                <a ng-click="$ctrl.changeSort('Context')">
-                  环境
-                  <datatable-sort-icon key="Context" selected-sort-key="{{ $ctrl.sort.key }}" reverse-order="$ctrl.sort.desc"></datatable-sort-icon>
-                </a>
+                <div class="vertical-center">
+                  <table-column-header
+                    col-title="'环境'"
+                    can-sort="true"
+                    is-sorted="$ctrl.sort.key === 'Context'"
+                    is-sorted-desc="$ctrl.sort.key === 'Context' && $ctrl.sort.desc"
+                    ng-click="$ctrl.changeSort('Context')"
+                  >
+                  </table-column-header>
+                </div>
               </th>
 
               <th>
-                操作
+                <div class="vertical-center">
+                  <table-column-header col-title="'操作'" can-sort="false"> </table-column-header>
+                </div>
               </th>
               <th>
-                负载
+                <div class="vertical-center">
+                  <table-column-header col-title="'负载'" can-sort="false"> </table-column-header>
+                </div>
               </th>
             </tr>
           </thead>
@@ -48,12 +79,10 @@
               </td>
             </tr>
             <tr ng-if="!$ctrl.logs">
-              <td class="text-center text-muted" colspan="5">加载中...</td>
+              <td class="text-muted text-center" colspan="5">加载中...</td>
             </tr>
             <tr ng-if="$ctrl.logs.length === 0">
-              <td class="text-center text-muted" colspan="8">
-                没有可用的日志。
-              </td>
+              <td class="text-muted text-center" colspan="8">暂无日志可用。</td>
             </tr>
           </tbody>
         </table>

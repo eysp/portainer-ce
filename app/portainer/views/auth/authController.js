@@ -1,5 +1,6 @@
 import angular from 'angular';
 import uuidv4 from 'uuid/v4';
+import { getEnvironments } from '@/react/portainer/environments/environment.service';
 
 class AuthenticationController {
   /* @ngInject */
@@ -12,7 +13,6 @@ class AuthenticationController {
     $window,
     Authentication,
     UserService,
-    EndpointService,
     StateManager,
     Notifications,
     SettingsService,
@@ -28,7 +28,6 @@ class AuthenticationController {
     this.$window = $window;
     this.Authentication = Authentication;
     this.UserService = UserService;
-    this.EndpointService = EndpointService;
     this.StateManager = StateManager;
     this.Notifications = Notifications;
     this.SettingsService = SettingsService;
@@ -42,6 +41,7 @@ class AuthenticationController {
       Password: '',
     };
     this.state = {
+      passwordInputType: 'password',
       showOAuthLogin: false,
       showStandardLogin: false,
       AuthenticationError: '',
@@ -50,7 +50,6 @@ class AuthenticationController {
     };
 
     this.checkForEndpointsAsync = this.checkForEndpointsAsync.bind(this);
-    this.checkForLatestVersionAsync = this.checkForLatestVersionAsync.bind(this);
     this.postLoginSteps = this.postLoginSteps.bind(this);
 
     this.oAuthLoginAsync = this.oAuthLoginAsync.bind(this);
@@ -67,6 +66,16 @@ class AuthenticationController {
    * UTILS FUNCTIONS SECTION
    */
 
+  toggleShowPassword() {
+    this.state.passwordInputType = this.state.passwordInputType === 'text' ? 'password' : 'text';
+  }
+
+  // set the password input type to password, so that browser autofills don't treat the input as text
+  setPasswordInputType(inputType) {
+    this.state.passwordInputType = inputType;
+    document.getElementById('password').setAttribute('type', inputType);
+  }
+
   logout(error) {
     this.Authentication.logout();
     this.state.loginInProgress = false;
@@ -80,7 +89,7 @@ class AuthenticationController {
     if (!err) {
       err = {};
     }
-    this.Notifications.error('失败', err, message);
+    this.Notifications.error('Failure', err, message);
     this.state.loginInProgress = false;
   }
 
@@ -120,8 +129,12 @@ class AuthenticationController {
 
   async checkForEndpointsAsync() {
     try {
-      const endpoints = await this.EndpointService.endpoints(0, 1);
       const isAdmin = this.Authentication.isAdmin();
+      const endpoints = await getEnvironments({ limit: 1, query: { excludeSnapshots: true } });
+
+      if (this.Authentication.getUserDetails().forceChangePassword) {
+        return this.$state.go('portainer.account');
+      }
 
       if (endpoints.value.length === 0 && isAdmin) {
         return this.$state.go('portainer.wizard');
@@ -129,24 +142,7 @@ class AuthenticationController {
         return this.$state.go('portainer.home');
       }
     } catch (err) {
-      this.error(err, '无法检索环境');
-    }
-  }
-
-  async checkForLatestVersionAsync() {
-    let versionInfo = {
-      UpdateAvailable: false,
-      LatestVersion: '',
-    };
-
-    try {
-      const versionStatus = await this.StatusService.version();
-      if (versionStatus.UpdateAvailable) {
-        versionInfo.UpdateAvailable = true;
-        versionInfo.LatestVersion = versionStatus.LatestVersion;
-      }
-    } finally {
-      this.StateManager.setVersionInfo(versionInfo);
+      this.error(err, '无法获取环境');
     }
   }
 
@@ -157,7 +153,6 @@ class AuthenticationController {
     this.$analytics.setUserRole(isAdmin ? 'admin' : 'standard-user');
 
     await this.checkForEndpointsAsync();
-    await this.checkForLatestVersionAsync();
   }
   /**
    * END POST LOGIN STEPS SECTION
@@ -172,7 +167,7 @@ class AuthenticationController {
       await this.Authentication.OAuthLogin(code);
       this.URLHelper.cleanParameters();
     } catch (err) {
-      this.error(err, '无法通过OAuth登录');
+      this.error(err, '无法通过OAuth进行登录');
     }
   }
 
@@ -201,6 +196,7 @@ class AuthenticationController {
   }
 
   authenticateUser() {
+    this.setPasswordInputType('password');
     return this.$async(this.authenticateUserAsync);
   }
 
@@ -215,7 +211,7 @@ class AuthenticationController {
     if (this.hasValidState(state)) {
       await this.oAuthLoginAsync(code);
     } else {
-      this.error(null, 'OAuth状态无效，请重试。');
+      this.error(null, '无效的OAuth状态，请重试。');
     }
   }
 
@@ -249,7 +245,7 @@ class AuthenticationController {
         this.generateOAuthLoginURI();
         return;
       }
-      if(!this.logo){
+      if (!this.logo) {
         await this.StateManager.initialize();
         this.logo = this.StateManager.getState().application.logo;
       }

@@ -1,4 +1,5 @@
 import _ from 'lodash-es';
+import { confirmDelete } from '@@/modals/confirm';
 import { RegistryTypes } from 'Portainer/models/registryTypes';
 
 angular.module('portainer.app').controller('RegistriesController', [
@@ -6,9 +7,8 @@ angular.module('portainer.app').controller('RegistriesController', [
   '$scope',
   '$state',
   'RegistryService',
-  'ModalService',
   'Notifications',
-  function ($q, $scope, $state, RegistryService, ModalService, Notifications) {
+  function ($q, $scope, $state, RegistryService, Notifications) {
     $scope.state = {
       actionInProgress: false,
     };
@@ -20,11 +20,11 @@ angular.module('portainer.app').controller('RegistriesController', [
     };
 
     $scope.removeAction = function (selectedItems) {
-      const regAttrMsg = selectedItems.length > 1 ? 'hese' : 'his';
-      const registriesMsg = selectedItems.length > 1 ? 'registries' : 'registry';
-      const msg = `T${regAttrMsg} ${registriesMsg}可能被一个或多个环境中的应用程序使用。 删除 ${registriesMsg} 可能会导致使用 t${regAttrMsg} ${registriesMsg}的应用程序的服务中断。 您要删除选定的 ${registriesMsg}吗？`;
+      const regAttrMsg = selectedItems.length > 1 ? '这些' : '这个';
+      const registriesMsg = selectedItems.length > 1 ? '个注册表' : '个注册表';
+      const msg = `已有一个或多个环境中的应用程序使用${regAttrMsg}${registriesMsg}。删除这些${registriesMsg}可能导致使用${regAttrMsg}${registriesMsg}的应用程序服务中断。您确定要删除所选${registriesMsg}吗？`;
 
-      ModalService.confirmDeletion(msg, function onConfirm(confirmed) {
+      confirmDelete(msg).then((confirmed) => {
         if (!confirmed) {
           return;
         }

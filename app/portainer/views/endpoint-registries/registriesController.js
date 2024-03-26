@@ -1,26 +1,32 @@
+import _ from 'lodash-es';
 import { RegistryTypes } from 'Portainer/models/registryTypes';
 
 class EndpointRegistriesController {
   /* @ngInject */
-  constructor($async, Notifications, EndpointService) {
+  constructor($async, Notifications, EndpointService, Authentication) {
     this.$async = $async;
     this.Notifications = Notifications;
     this.EndpointService = EndpointService;
+    this.Authentication = Authentication;
 
     this.canManageAccess = this.canManageAccess.bind(this);
+    this.canBrowse = this.canBrowse.bind(this);
   }
 
   canManageAccess(item) {
-    return item.Type !== RegistryTypes.ANONYMOUS;
+    return item.Type !== RegistryTypes.ANONYMOUS && this.Authentication.isAdmin();
+  }
+
+  canBrowse(item) {
+    return !_.includes([RegistryTypes.ANONYMOUS, RegistryTypes.DOCKERHUB, RegistryTypes.QUAY], item.Type);
   }
 
   getRegistries() {
     return this.$async(async () => {
       try {
-        const registries = await this.EndpointService.registries(this.endpointId);
-        this.registries = registries;
+        this.registries = await this.EndpointService.registries(this.endpointId);
       } catch (err) {
-        this.Notifications.error('失败', err, '无法检索注册表');
+        this.Notifications.error('Failure', err, '无法检索注册表');
       }
     });
   }
@@ -36,7 +42,7 @@ class EndpointRegistriesController {
         this.endpointId = this.endpoint.Id;
         await this.getRegistries();
       } catch (err) {
-        this.Notifications.error('失败', err, '无法检索注册表');
+        this.Notifications.error('Failure', err, '无法检索注册表');
       } finally {
         this.state.viewReady = true;
       }

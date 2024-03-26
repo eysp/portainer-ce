@@ -29,7 +29,7 @@ angular.module('portainer.docker').factory('NetworkService', [
           deferred.resolve(network);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: '无法检索网络详细信息', err: err });
+          deferred.reject({ msg: '无法检索网络详情', err: err });
         });
 
       return deferred.promise;

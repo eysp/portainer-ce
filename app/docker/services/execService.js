@@ -13,13 +13,13 @@ angular.module('portainer.docker').factory('ExecService', [
         Exec.resize({}, { id: execId, height: height, width: width })
           .$promise.then(function success(data) {
             if (data.message) {
-              deferred.reject({ msg: '无法调整exec的tty大小', err: data.message });
+              deferred.reject({ msg: '无法调整执行命令的 tty 大小', err: data.message });
             } else {
               deferred.resolve(data);
             }
           })
           .catch(function error(err) {
-            deferred.reject({ msg: '无法调整exec的tty大小', err: err });
+            deferred.reject({ msg: '无法调整执行命令的 tty 大小', err: err });
           });
       }, timeout);
 

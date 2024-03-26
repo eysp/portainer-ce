@@ -1,10 +1,10 @@
 angular.module('portainer.app').service('ThemeManager', ThemeManager);
 
 /* @ngInject */
-
 export function ThemeManager(StateManager) {
   return {
     setTheme,
+    autoTheme,
     defaultTheme,
   };
 
@@ -13,8 +13,13 @@ export function ThemeManager(StateManager) {
       document.documentElement.removeAttribute('theme');
     } else {
       document.documentElement.setAttribute('theme', theme);
+      StateManager.updateTheme(theme);
     }
-    StateManager.updateTheme(theme);
+  }
+
+  function autoTheme() {
+    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : '';
+    this.setTheme(systemTheme);
   }
 
   function defaultTheme() {

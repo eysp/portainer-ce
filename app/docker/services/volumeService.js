@@ -32,7 +32,7 @@ angular.module('portainer.docker').factory('VolumeService', [
           deferred.resolve(volume);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: '无法检索存储卷详细信息', err: err });
+          deferred.reject({ msg: '无法检索存储卷详情', err: err });
         });
       return deferred.promise;
     };

@@ -4,40 +4,36 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const WebpackBuildNotifierPlugin = require('webpack-build-notifier');
 const CleanTerminalPlugin = require('clean-terminal-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const Dotenv = require('dotenv-webpack');
 
+const CopyPlugin = require('copy-webpack-plugin');
 const pkg = require('../package.json');
 const projectRoot = path.resolve(__dirname, '..');
 
+/** @type {import('webpack').Configuration} */
 module.exports = {
   entry: {
-    main: './app/__module.js',
+    main: './app',
   },
   output: {
-    filename: '[name].[hash].js',
+    filename: '[name].[contenthash].js',
     path: path.resolve(projectRoot, 'dist/public'),
   },
   module: {
     rules: [
       {
         test: /\.js$/,
+        type: 'javascript/auto',
         enforce: 'pre',
-        use: [
-          {
-            loader: 'source-map-loader',
-            options: {
-              filterSourceMappingUrl: (_, resourcePath) => {
-                // ignores pkgs missing sourcemaps
-                return ['chardet', 'tokenize-ansi'].every((pkg) => !resourcePath.includes(pkg));
-              },
-            },
-          },
-        ],
+        exclude: /node_modules/,
+        use: ['source-map-loader'],
       },
       {
-        test: /\.js$/,
+        test: /\.(js|ts)(x)?$/,
         exclude: /node_modules/,
         use: ['babel-loader', 'auto-ngtemplate-loader'],
       },
@@ -57,25 +53,61 @@ module.exports = {
 
       {
         test: /.xml$/,
-        use: 'file-loader',
+        type: 'asset/resource',
+      },
+      {
+        test: /\.(gif|png|jpe?g)$/i,
+        type: 'asset/resource',
+      },
+      {
+        test: /\.svg$/i,
+        type: 'asset',
+        resourceQuery: { not: [/c/] }, // exclude react component if *.svg?url
+      },
+      {
+        test: /\.svg$/i,
+        issuer: /\.(js|ts)(x)?$/,
+        resourceQuery: /c/, // *.svg?c
+        use: [{ loader: '@svgr/webpack', options: { icon: true } }],
       },
       {
         test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, { loader: 'css-loader', options: { importLoaders: 1 } }, 'postcss-loader'],
+        use: [
+          MiniCssExtractPlugin.loader,
+          {
+            loader: 'css-loader',
+            options: {
+              importLoaders: 1,
+              modules: {
+                localIdentName: '[path][name]__[local]',
+                auto: true,
+                exportLocalsConvention: 'camelCaseOnly',
+              },
+            },
+          },
+          {
+            loader: 'postcss-loader',
+          },
+        ],
       },
     ],
   },
   devServer: {
-    contentBase: path.join(__dirname, '.tmp'),
+    static: {
+      directory: path.join(__dirname, 'public'),
+    },
     compress: true,
     port: 8999,
     proxy: {
       '/api': 'http://localhost:9000',
     },
     open: true,
-    writeToDisk: true,
+    devMiddleware: {
+      writeToDisk: true,
+    },
   },
   plugins: [
+    new Dotenv({ defaults: true }),
     new ESLintPlugin(),
     new HtmlWebpackPlugin({
       template: './app/index.html',
@@ -84,6 +116,14 @@ module.exports = {
         author: pkg.author,
       },
       manifest: './assets/ico/manifest.json',
+    }),
+    new HtmlWebpackPlugin({
+      template: './app/timeout.ejs',
+      filename: 'timeout.html',
+      templateParameters: {
+        name: pkg.name,
+        author: pkg.author,
+      },
     }),
     new WebpackBuildNotifierPlugin({
       title: 'Portainer build',
@@ -101,21 +141,31 @@ module.exports = {
       jsyaml: 'js-yaml',
     }),
     new MiniCssExtractPlugin({
-      filename: '[name].[hash].css',
+      filename: '[name].[contenthash].css',
       chunkFilename: '[name].[id].css',
-      sourceMap: true,
     }),
-    new CleanWebpackPlugin(['dist/public']),
-    new IgnorePlugin(/^\.\/locale$/, /moment$/),
+    new CleanWebpackPlugin(),
+    new IgnorePlugin({ resourceRegExp: /^.\/locale$/, contextRegExp: /moment$/ }),
     // new BundleAnalyzerPlugin()
     new LodashModuleReplacementPlugin({
       shorthands: true,
       collections: true,
       paths: true,
     }),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: 'translations',
+          to: 'locales',
+        },
+      ],
+    }),
   ],
   optimization: {
+    moduleIds: 'deterministic',
+    runtimeChunk: 'single',
     splitChunks: {
+      chunks: 'all',
       cacheGroups: {
         vendor: {
           test: /node_modules/,
@@ -129,12 +179,20 @@ module.exports = {
   },
   resolve: {
     alias: {
+      '@@': path.resolve(projectRoot, 'app/react/components'),
+      '@': path.resolve(projectRoot, 'app'),
       Agent: path.resolve(projectRoot, 'app/agent'),
       Azure: path.resolve(projectRoot, 'app/azure'),
       Docker: path.resolve(projectRoot, 'app/docker'),
       Kubernetes: path.resolve(projectRoot, 'app/kubernetes'),
       Portainer: path.resolve(projectRoot, 'app/portainer'),
-      '@': path.resolve(projectRoot, 'app'),
+      'lodash-es': 'lodash',
     },
+    extensions: ['.js', '.ts', '.tsx'],
+    plugins: [
+      new TsconfigPathsPlugin({
+        extensions: ['.js', '.ts', '.tsx'],
+      }),
+    ],
   },
 };

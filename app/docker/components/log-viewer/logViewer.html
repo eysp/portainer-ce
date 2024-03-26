@@ -1,90 +1,79 @@
 <div class="row">
   <div class="col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="fa-file-alt" title-text="日志查看器设置"></rd-widget-header>
+      <rd-widget-header icon="file" title-text="日志查看器设置"></rd-widget-header>
       <rd-widget-body>
         <form class="form-horizontal">
           <div class="form-group">
             <div class="col-sm-12">
-              <label for="tls" class="control-label text-left">
-                自动刷新日志
-                <portainer-tooltip position="bottom" message="禁用此选项允许您暂停日志收集过程和自动滚动。"></portainer-tooltip>
-              </label>
-              <label class="switch" style="margin-left: 20px;">
-                <input
-                  type="checkbox"
-                  ng-model="$ctrl.state.logCollection"
-                  ng-change="$ctrl.state.autoScroll = $ctrl.state.logCollection; $ctrl.logCollectionChange($ctrl.state.logCollection)"
-                /><i></i>
-              </label>
+              <por-switch-field
+                label-class="'col-sm-2'"
+                checked="$ctrl.state.logCollection"
+                label="'自动刷新日志'"
+                tooltip="'禁用此选项可以暂停日志收集过程和自动滚动。'"
+                on-change="($ctrl.handleLogsCollectionChange)"
+              ></por-switch-field>
             </div>
           </div>
           <div class="form-group">
             <div class="col-sm-12">
-              <label for="tls" class="control-label text-left">
-                换行
-              </label>
-              <label class="switch" style="margin-left: 20px;"> <input type="checkbox" ng-model="$ctrl.state.wrapLines" /><i></i> </label>
+              <por-switch-field label-class="'col-sm-2'" checked="$ctrl.state.wrapLines" label="'自动换行'" on-change="($ctrl.handleLogsWrapLinesChange)"></por-switch-field>
             </div>
           </div>
           <div class="form-group">
             <div class="col-sm-12">
-              <label for="tls" class="control-label text-left">
-                显示时间戳
-              </label>
-              <label class="switch" style="margin-left: 20px;"> <input type="checkbox" ng-model="$ctrl.displayTimestamps" /><i></i> </label>
+              <por-switch-field
+                label-class="'col-sm-2'"
+                checked="$ctrl.displayTimestamps"
+                label="'显示时间戳'"
+                on-change="($ctrl.handleDisplayTimestampsChange)"
+              ></por-switch-field>
             </div>
           </div>
           <div class="form-group">
-            <label for="logs_since" class="col-sm-1 control-label text-left">
-              取
-            </label>
+            <label for="logs_since" class="col-sm-2 control-label text-left"> 抓取 </label>
             <div class="col-sm-2">
               <select class="form-control" ng-model="$ctrl.sinceTimestamp" id="logs_since">
-                <option selected value="">全部日志</option>
+                <option selected value="">所有日志</option>
                 <option ng-repeat="dt in $ctrl.state.availableSinceDatetime" ng-value="dt.value" title="{{ dt.value }}">{{ dt.desc }}</option>
               </select>
             </div>
           </div>
           <div class="form-group">
-            <label for="logs_search" class="col-sm-1 control-label text-left">
-              搜索
-            </label>
-            <div class="col-sm-11">
-              <input class="form-control" type="text" name="logs_search" ng-model="$ctrl.state.search" ng-change="$ctrl.state.selectedLines.length = 0;" placeholder="筛选..." />
+            <label for="logs_search" class="col-sm-2 control-label text-left"> 搜索 </label>
+            <div class="col-sm-8">
+              <input class="form-control" type="text" name="logs_search" ng-model="$ctrl.state.search" ng-change="$ctrl.state.selectedLines.length = 0;" placeholder="过滤..." />
             </div>
           </div>
           <div class="form-group">
-            <label for="lines_count" class="col-sm-1 control-label text-left">
-              行数
-            </label>
-            <div class="col-sm-11">
+            <label for="lines_count" class="col-sm-2 control-label text-left"> 行数 </label>
+            <div class="col-sm-8">
               <input class="form-control" type="number" name="lines_count" ng-model="$ctrl.lineCount" placeholder="输入行数..." />
             </div>
           </div>
           <div class="form-group" ng-if="$ctrl.state.copySupported">
-            <label class="col-sm-1 control-label text-left">
-              操作
-            </label>
-            <div class="col-sm-11">
-              <button class="btn btn-primary btn-sm" type="button" ng-click="$ctrl.downloadLogs()" style="margin-left: 0;"><i class="fa fa-download"></i> 下载日志</button>
+            <label class="col-sm-2 control-label text-left"> 操作 </label>
+            <div class="col-sm-10">
+              <button class="btn btn-primary btn-sm" type="button" ng-click="$ctrl.downloadLogs()" style="margin-left: 0"
+                ><pr-icon icon="'download'"></pr-icon> 下载日志</button
+              >
               <button
                 class="btn btn-primary btn-sm"
                 ng-click="$ctrl.copy()"
                 ng-disabled="($ctrl.state.filteredLogs.length === 1 && !$ctrl.state.filteredLogs[0].line) || !$ctrl.state.filteredLogs.length"
-                ><i class="fa fa-copy space-right" aria-hidden="true"></i>复制</button
+                ><pr-icon icon="'copy'" class-name="'space-right'"></pr-icon>复制</button
               >
               <button
                 class="btn btn-primary btn-sm"
                 ng-click="$ctrl.copySelection()"
                 ng-disabled="($ctrl.state.filteredLogs.length === 1 && !$ctrl.state.filteredLogs[0].line) || !$ctrl.state.filteredLogs.length || !$ctrl.state.selectedLines.length"
-                ><i class="fa fa-copy space-right" aria-hidden="true"></i>复制选定的行</button
+                ><pr-icon icon="'copy'" class-name="'space-right'"></pr-icon>复制选定行</button
               >
               <button class="btn btn-primary btn-sm" ng-click="$ctrl.clearSelection()" ng-disabled="$ctrl.state.selectedLines.length === 0"
-                ><i class="fa fa-times space-right" aria-hidden="true"></i>取消选择</button
+                ><pr-icon icon="'x'" class-name="'space-right'"></pr-icon>取消选择</button
               >
               <span>
-                <i id="refreshRateChange" class="fa fa-check green-icon" aria-hidden="true" style="margin-left: 7px; display: none;"></i>
+                <pr-icon id="refreshRateChange" icon="'check'" mode="'success'" style="display: none"></pr-icon>
               </span>
             </div>
           </div>
@@ -94,12 +83,12 @@
   </div>
 </div>
 
-<div class="row" style="height: 54%;">
-  <div class="col-sm-12" style="height: 100%;">
+<div class="row" style="height: 54%">
+  <div class="col-sm-12" style="height: 100%">
     <pre ng-class="{ wrap_lines: $ctrl.state.wrapLines }" class="log_viewer" scroll-glue="$ctrl.state.autoScroll" force-glue>
-      <div ng-repeat="log in $ctrl.state.filteredLogs = ($ctrl.data | filter:{ 'line': $ctrl.state.search }) track by $index" class="line" ng-if="log.line"><p class="inner_line" ng-click="$ctrl.selectLine(log.line)" ng-class="{ 'line_selected': $ctrl.state.selectedLines.indexOf(log.line) > -1 }"><span ng-repeat="span in log.spans" ng-style="{ 'color': span.foregroundColor, 'background-color': span.backgroundColor }">{{ span.text }}</span></p></div>
-      <div ng-if="!$ctrl.state.filteredLogs.length" class="line"><p class="inner_line">没有匹配的日志行 '{{ $ctrl.state.search }}' 筛选</p></div>
-      <div ng-if="$ctrl.state.filteredLogs.length === 1 && !$ctrl.state.filteredLogs[0].line" class="line"><p class="inner_line">没有可用的日志</p></div>
+      <div ng-repeat="log in $ctrl.state.filteredLogs = ($ctrl.data | filter:{ 'line': $ctrl.state.search }) track by $index" class="line" ng-if="log.line"><p class="inner_line" ng-click="$ctrl.selectLine(log.line)" ng-class="{ 'line_selected': $ctrl.state.selectedLines.indexOf(log.line) > -1 }"><span ng-repeat="span in log.spans track by $index" ng-style="{ 'color': span.fgColor, 'background-color': span.bgColor, 'font-weight': span.fontWeight }">{{ span.text }}</span></p></div>
+      <div ng-if="!$ctrl.state.filteredLogs.length" class="line"><p class="inner_line">没有与 '{{ $ctrl.state.search }}' 过滤条件匹配的日志行</p></div>
+      <div ng-if="$ctrl.state.filteredLogs.length === 1 && !$ctrl.state.filteredLogs[0].line" class="line"><p class="inner_line">没有可用日志</p></div>
     </pre>
   </div>
 </div>

@@ -1,5 +1,6 @@
+import { FeatureId } from '@/react/portainer/feature-flags/enums';
 import { PortainerEndpointTypes } from 'Portainer/models/endpoint/models';
-import { REGISTRY_MANAGEMENT } from '@/portainer/feature-flags/feature-ids';
+
 angular.module('portainer.docker').controller('RegistriesDatatableController', RegistriesDatatableController);
 
 /* @ngInject */
@@ -26,7 +27,7 @@ function RegistriesDatatableController($scope, $controller, $state, Authenticati
       this.endpointType === PortainerEndpointTypes.AgentOnDockerEnvironment ||
       this.endpointType === PortainerEndpointTypes.EdgeAgentOnDockerEnvironment
     ) {
-      $state.go('docker.registries.registry', { id: item.Id });
+      $state.go('docker.host.registries.registry', { id: item.Id });
     } else {
       $state.go('portainer.registries.registry', { id: item.Id });
     }
@@ -40,12 +41,16 @@ function RegistriesDatatableController($scope, $controller, $state, Authenticati
     ) {
       $state.go('kubernetes.registries.access', { id: item.Id });
     } else {
-      $state.go('docker.registries.access', { id: item.Id });
+      if (window.location.hash.endsWith('/docker/swarm/registries')) {
+        $state.go('docker.swarm.registries.access', { id: item.Id });
+      } else {
+        $state.go('docker.host.registries.access', { id: item.Id });
+      }
     }
   };
 
   this.$onInit = function () {
-    this.limitedFeature = REGISTRY_MANAGEMENT;
+    this.limitedFeature = FeatureId.REGISTRY_MANAGEMENT;
     this.isAdmin = Authentication.isAdmin();
     this.setDefaults();
     this.prepareTableFromDataset();

@@ -1,6 +1,6 @@
 <div id="service-restart-policy">
   <rd-widget>
-    <rd-widget-header icon="fa-list-alt" title-text="重启策略"> </rd-widget-header>
+    <rd-widget-header icon="list" title-text="重启策略"> </rd-widget-header>
     <rd-widget-body classes="no-padding">
       <table class="table">
         <tbody>
@@ -9,21 +9,19 @@
             <td>
               <div class="input-group input-group-sm">
                 <select
-                  class="selectpicker form-control"
+                  class="selectpicker form-control !rounded"
                   ng-model="service.RestartCondition"
                   ng-change="updateServiceAttribute(service, 'RestartCondition')"
                   disable-authorization="DockerServiceUpdate"
                 >
-                  <option value="none">None</option>
-                  <option value="on-failure">On failure</option>
-                  <option value="any">Any</option>
+                  <option value="none">无</option>
+                  <option value="on-failure">失败时</option>
+                  <option value="any">总是重启</option>
                 </select>
               </div>
             </td>
             <td>
-              <p class="small text-muted" style="margin-top: 10px;">
-                重新启动的条件。
-              </p>
+              <p class="small text-muted" style="margin-top: 10px">重启的条件。</p>
             </td>
           </tr>
           <tr>
@@ -39,13 +37,13 @@
               />
             </td>
             <td>
-              <p class="small text-muted" style="margin-top: 10px;">
-                重启尝试之间的延迟，用数字后跟单位表示(ns|us|ms|s|m|h). 默认值为 5s, 5秒.
+              <p class="small text-muted" style="margin-top: 10px">
+                重启尝试之间的延迟，由数字加单位（ns|us|ms|s|m|h）表示。默认值为5s，即5秒。
               </p>
             </td>
           </tr>
           <tr>
-            <td>重新启动最大尝试次数</td>
+            <td>重启最大尝试次数</td>
             <td>
               <input
                 class="input-sm"
@@ -56,13 +54,11 @@
               />
             </td>
             <td>
-              <p class="small text-muted" style="margin-top: 10px;">
-                放弃前重新启动给定任务的最大尝试次数（默认值为0，表示无限制）。
-              </p>
+              <p class="small text-muted" style="margin-top: 10px">在放弃之前尝试重启给定任务的最大次数（默认值为0，表示无限次）。</p>
             </td>
           </tr>
           <tr>
-            <td>重新启动窗口</td>
+            <td>重启窗口</td>
             <td>
               <input
                 class="input-sm"
@@ -74,8 +70,8 @@
               />
             </td>
             <td>
-              <p class="small text-muted" style="margin-top: 10px;">
-                评估重启尝试的时间窗口，用数字后跟单位表示（ns | us | ms | s | m | h）。默认值为0秒，无限制。
+              <p class="small text-muted" style="margin-top: 10px">
+                评估重启尝试的时间窗口，由数字加单位（ns|us|ms|s|m|h）表示。默认值为0秒，表示无限制。
               </p>
             </td>
           </tr>

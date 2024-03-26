@@ -1,4 +1,5 @@
-import _ from 'lodash-es';
+import _ from 'lodash';
+import { getUniqueTagListFromImages } from '@/react/docker/images/utils';
 import { ImageViewModel } from '../models/image';
 import { ImageDetailsViewModel } from '../models/imageDetails';
 import { ImageLayerViewModel } from '../models/imageLayer';
@@ -27,7 +28,7 @@ angular.module('portainer.docker').factory('ImageService', [
           }
         })
         .catch(function error(err) {
-          deferred.reject({ msg: '无法检索镜像详细信息', err: err });
+          deferred.reject({ msg: '无法检索镜像详情', err: err });
         });
       return deferred.promise;
     };
@@ -41,15 +42,10 @@ angular.module('portainer.docker').factory('ImageService', [
       })
         .then(function success(data) {
           var containers = data.containers;
+          const containerByImageId = _.groupBy(containers, 'ImageID');
 
           var images = data.images.map(function (item) {
-            item.ContainerCount = 0;
-            for (var i = 0; i < containers.length; i++) {
-              var container = containers[i];
-              if (container.ImageID === item.Id) {
-                item.ContainerCount++;
-              }
-            }
+            item.Used = !!containerByImageId[item.Id] && containerByImageId[item.Id].length > 0;
             return new ImageViewModel(item);
           });
 
@@ -78,7 +74,7 @@ angular.module('portainer.docker').factory('ImageService', [
           }
         })
         .catch(function error(err) {
-          deferred.reject({ msg: '无法检索镜像详细信息', err: err });
+          deferred.reject({ msg: '无法检索镜像详情', err: err });
         });
       return deferred.promise;
     };
@@ -105,7 +101,7 @@ angular.module('portainer.docker').factory('ImageService', [
           }
         })
         .catch(function error(err) {
-          deferred.reject({ msg: '无法推送镜像标记', err: err });
+          deferred.reject({ msg: '无法推送镜像标签', err: err });
         });
       return deferred.promise;
     }
@@ -200,16 +196,7 @@ angular.module('portainer.docker').factory('ImageService', [
       return deferred.promise;
     };
 
-    service.getUniqueTagListFromImages = function (availableImages) {
-      return _.uniq(
-        _.flatMap(availableImages, function (image) {
-          _.remove(image.RepoTags, function (item) {
-            return item.indexOf('<none>') !== -1;
-          });
-          return image.RepoTags ? _.uniqWith(image.RepoTags, _.isEqual) : [];
-        })
-      );
-    };
+    service.getUniqueTagListFromImages = getUniqueTagListFromImages;
 
     return service;
   },

@@ -2,14 +2,12 @@ package archive
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
 	"testing"
 
-	"github.com/docker/docker/pkg/ioutils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -27,22 +25,18 @@ func listFiles(dir string) []string {
 }
 
 func Test_shouldCreateArhive(t *testing.T) {
-	tmpdir, _ := ioutils.TempDir("", "backup")
-	defer os.RemoveAll(tmpdir)
-
+	tmpdir := t.TempDir()
 	content := []byte("content")
-	ioutil.WriteFile(path.Join(tmpdir, "outer"), content, 0600)
+	os.WriteFile(path.Join(tmpdir, "outer"), content, 0600)
 	os.MkdirAll(path.Join(tmpdir, "dir"), 0700)
-	ioutil.WriteFile(path.Join(tmpdir, "dir", ".dotfile"), content, 0600)
-	ioutil.WriteFile(path.Join(tmpdir, "dir", "inner"), content, 0600)
+	os.WriteFile(path.Join(tmpdir, "dir", ".dotfile"), content, 0600)
+	os.WriteFile(path.Join(tmpdir, "dir", "inner"), content, 0600)
 
 	gzPath, err := TarGzDir(tmpdir)
 	assert.Nil(t, err)
 	assert.Equal(t, filepath.Join(tmpdir, fmt.Sprintf("%s.tar.gz", filepath.Base(tmpdir))), gzPath)
 
-	extractionDir, _ := ioutils.TempDir("", "extract")
-	defer os.RemoveAll(extractionDir)
-
+	extractionDir := t.TempDir()
 	cmd := exec.Command("tar", "-xzf", gzPath, "-C", extractionDir)
 	err = cmd.Run()
 	if err != nil {
@@ -53,7 +47,7 @@ func Test_shouldCreateArhive(t *testing.T) {
 	wasExtracted := func(p string) {
 		fullpath := path.Join(extractionDir, p)
 		assert.Contains(t, extractedFiles, fullpath)
-		copyContent, _ := ioutil.ReadFile(fullpath)
+		copyContent, _ := os.ReadFile(fullpath)
 		assert.Equal(t, content, copyContent)
 	}
 
@@ -63,22 +57,18 @@ func Test_shouldCreateArhive(t *testing.T) {
 }
 
 func Test_shouldCreateArhiveXXXXX(t *testing.T) {
-	tmpdir, _ := ioutils.TempDir("", "backup")
-	defer os.RemoveAll(tmpdir)
-
+	tmpdir := t.TempDir()
 	content := []byte("content")
-	ioutil.WriteFile(path.Join(tmpdir, "outer"), content, 0600)
+	os.WriteFile(path.Join(tmpdir, "outer"), content, 0600)
 	os.MkdirAll(path.Join(tmpdir, "dir"), 0700)
-	ioutil.WriteFile(path.Join(tmpdir, "dir", ".dotfile"), content, 0600)
-	ioutil.WriteFile(path.Join(tmpdir, "dir", "inner"), content, 0600)
+	os.WriteFile(path.Join(tmpdir, "dir", ".dotfile"), content, 0600)
+	os.WriteFile(path.Join(tmpdir, "dir", "inner"), content, 0600)
 
 	gzPath, err := TarGzDir(tmpdir)
 	assert.Nil(t, err)
 	assert.Equal(t, filepath.Join(tmpdir, fmt.Sprintf("%s.tar.gz", filepath.Base(tmpdir))), gzPath)
 
-	extractionDir, _ := ioutils.TempDir("", "extract")
-	defer os.RemoveAll(extractionDir)
-
+	extractionDir := t.TempDir()
 	r, _ := os.Open(gzPath)
 	ExtractTarGz(r, extractionDir)
 	if err != nil {
@@ -89,7 +79,7 @@ func Test_shouldCreateArhiveXXXXX(t *testing.T) {
 	wasExtracted := func(p string) {
 		fullpath := path.Join(extractionDir, p)
 		assert.Contains(t, extractedFiles, fullpath)
-		copyContent, _ := ioutil.ReadFile(fullpath)
+		copyContent, _ := os.ReadFile(fullpath)
 		assert.Equal(t, content, copyContent)
 	}
 

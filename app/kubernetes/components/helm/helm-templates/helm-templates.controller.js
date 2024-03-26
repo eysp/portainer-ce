@@ -1,8 +1,10 @@
+import _ from 'lodash-es';
 import KubernetesNamespaceHelper from 'Kubernetes/helpers/namespaceHelper';
+import { confirmWebEditorDiscard } from '@@/modals/confirm';
 
 export default class HelmTemplatesController {
   /* @ngInject */
-  constructor($analytics, $async, $state, $window, $anchorScroll, Authentication, HelmService, KubernetesResourcePoolService, Notifications, ModalService) {
+  constructor($analytics, $async, $state, $window, $anchorScroll, Authentication, HelmService, KubernetesResourcePoolService, Notifications) {
     this.$analytics = $analytics;
     this.$async = $async;
     this.$window = $window;
@@ -12,7 +14,6 @@ export default class HelmTemplatesController {
     this.HelmService = HelmService;
     this.KubernetesResourcePoolService = KubernetesResourcePoolService;
     this.Notifications = Notifications;
-    this.ModalService = ModalService;
 
     this.editorUpdate = this.editorUpdate.bind(this);
     this.uiCanExit = this.uiCanExit.bind(this);
@@ -30,8 +31,7 @@ export default class HelmTemplatesController {
     };
   }
 
-  editorUpdate(content) {
-    const contentvalues = content.getValue();
+  editorUpdate(contentvalues) {
     if (this.state.originalvalues === contentvalues) {
       this.state.isEditorDirty = false;
     } else {
@@ -42,7 +42,7 @@ export default class HelmTemplatesController {
 
   async uiCanExit() {
     if (this.state.isEditorDirty) {
-      return this.ModalService.confirmWebEditorDiscard();
+      return confirmWebEditorDiscard();
     }
   }
 
@@ -57,7 +57,7 @@ export default class HelmTemplatesController {
         Namespace: this.state.resourcePool.Namespace.Name,
       };
       await this.HelmService.install(this.endpoint.Id, payload);
-      this.Notifications.success('Helm Chart successfully installed');
+      this.Notifications.success('Success', 'Helm Chart successfully installed');
       this.$analytics.eventTrack('kubernetes-helm-install', { category: 'kubernetes', metadata: { 'chart-name': this.state.chart.name } });
       this.state.isEditorDirty = false;
       this.$state.go('kubernetes.applications');
@@ -75,14 +75,14 @@ export default class HelmTemplatesController {
       this.state.values = values;
       this.state.originalvalues = values;
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to retrieve helm chart values.');
+      this.Notifications.error('Failure', err, 'Unable to retrieve helm chart values.');
     } finally {
       this.state.loadingValues = false;
     }
   }
 
   async selectHelmChart(chart) {
-    this.$anchorScroll('view-top');
+    window.scrollTo(0, 0);
     this.state.showCustomValues = false;
     this.state.chart = chart;
     await this.getHelmValues();
@@ -97,12 +97,13 @@ export default class HelmTemplatesController {
     try {
       // fetch globally set helm repo and user helm repos (parallel)
       const { GlobalRepository, UserRepositories } = await this.HelmService.getHelmRepositories(this.endpoint.Id);
+      this.state.globalRepository = GlobalRepository;
       const userHelmReposUrls = UserRepositories.map((repo) => repo.URL);
-      const uniqueHelmRepos = [...new Set([GlobalRepository, ...userHelmReposUrls])].map((url) => url.toLowerCase()); // remove duplicates, to lowercase
+      const uniqueHelmRepos = [...new Set([GlobalRepository, ...userHelmReposUrls])].map((url) => url.toLowerCase()).filter((url) => url); // remove duplicates and blank, to lowercase
       this.state.repos = uniqueHelmRepos;
       return uniqueHelmRepos;
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to retrieve helm repo urls.');
+      this.Notifications.error('Failure', err, 'Unable to retrieve helm repo urls.');
     } finally {
       this.state.reposLoading = false;
     }
@@ -129,7 +130,7 @@ export default class HelmTemplatesController {
 
       this.state.charts = latestCharts;
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to retrieve helm repo charts.');
+      this.Notifications.error('Failure', err, 'Unable to retrieve helm repo charts.');
     } finally {
       this.state.chartsLoading = false;
     }
@@ -140,11 +141,13 @@ export default class HelmTemplatesController {
     try {
       const resourcePools = await this.KubernetesResourcePoolService.get();
 
-      const nonSystemNamespaces = resourcePools.filter((resourcePool) => !KubernetesNamespaceHelper.isSystemNamespace(resourcePool.Namespace.Name));
-      this.state.resourcePools = nonSystemNamespaces;
-      this.state.resourcePool = nonSystemNamespaces[0];
+      const nonSystemNamespaces = resourcePools.filter(
+        (resourcePool) => !KubernetesNamespaceHelper.isSystemNamespace(resourcePool.Namespace.Name) && resourcePool.Namespace.Status === 'Active'
+      );
+      this.state.resourcePools = _.sortBy(nonSystemNamespaces, ({ Namespace }) => (Namespace.Name === 'default' ? 0 : 1));
+      this.state.resourcePool = this.state.resourcePools[0];
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to retrieve initial helm data.');
+      this.Notifications.error('Failure', err, 'Unable to retrieve initial helm data.');
     } finally {
       this.state.resourcePoolsLoading = false;
     }
@@ -168,6 +171,8 @@ export default class HelmTemplatesController {
         chartsLoading: false,
         resourcePoolsLoading: false,
         viewReady: false,
+        isAdmin: this.Authentication.isAdmin(),
+        globalRepository: undefined,
       };
 
       const helmRepos = await this.getHelmRepoURLs();

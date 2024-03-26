@@ -8,13 +8,14 @@ import (
 	"net/http/httputil"
 	"time"
 
-	"github.com/portainer/portainer/api/bolt/errors"
-
-	"github.com/asaskevich/govalidator"
-	"github.com/gorilla/websocket"
 	httperror "github.com/portainer/libhttp/error"
 	"github.com/portainer/libhttp/request"
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/http/security"
+
+	"github.com/asaskevich/govalidator"
+	"github.com/gorilla/websocket"
+	"github.com/rs/zerolog/log"
 )
 
 type execStartOperationPayload struct {
@@ -26,7 +27,8 @@ type execStartOperationPayload struct {
 // @description If the nodeName query parameter is present, the request will be proxied to the underlying agent environment(endpoint).
 // @description If the nodeName query parameter is not specified, the request will be upgraded to the websocket protocol and
 // @description an ExecStart operation HTTP request will be created and hijacked.
-// @description Authentication and access is controlled via the mandatory token query parameter.
+// @**Access policy**: authenticated
+// @security ApiKeyAuth
 // @security jwt
 // @tags websocket
 // @accept json
@@ -42,27 +44,27 @@ type execStartOperationPayload struct {
 func (handler *Handler) websocketExec(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	execID, err := request.RetrieveQueryParameter(r, "id", false)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid query parameter: id", err}
+		return httperror.BadRequest("Invalid query parameter: id", err)
 	}
 	if !govalidator.IsHexadecimal(execID) {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid query parameter: id (must be hexadecimal identifier)", err}
+		return httperror.BadRequest("Invalid query parameter: id (must be hexadecimal identifier)", err)
 	}
 
 	endpointID, err := request.RetrieveNumericQueryParameter(r, "endpointId", false)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid query parameter: endpointId", err}
+		return httperror.BadRequest("Invalid query parameter: endpointId", err)
 	}
 
 	endpoint, err := handler.DataStore.Endpoint().Endpoint(portainer.EndpointID(endpointID))
-	if err == errors.ErrObjectNotFound {
-		return &httperror.HandlerError{http.StatusNotFound, "Unable to find the environment associated to the stack inside the database", err}
+	if handler.DataStore.IsErrObjectNotFound(err) {
+		return httperror.NotFound("Unable to find the environment associated to the stack inside the database", err)
 	} else if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to find the environment associated to the stack inside the database", err}
+		return httperror.InternalServerError("Unable to find the environment associated to the stack inside the database", err)
 	}
 
 	err = handler.requestBouncer.AuthorizedEndpointOperation(r, endpoint)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusForbidden, "Permission denied to access environment", err}
+		return httperror.Forbidden("Permission denied to access environment", err)
 	}
 
 	params := &webSocketRequestParams{
@@ -73,13 +75,21 @@ func (handler *Handler) websocketExec(w http.ResponseWriter, r *http.Request) *h
 
 	err = handler.handleExecRequest(w, r, params)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "An error occured during websocket exec operation", err}
+		return httperror.InternalServerError("An error occurred during websocket exec operation", err)
 	}
 
 	return nil
 }
 
 func (handler *Handler) handleExecRequest(w http.ResponseWriter, r *http.Request, params *webSocketRequestParams) error {
+	tokenData, err := security.RetrieveTokenData(r)
+	if err != nil {
+		log.Warn().
+			Err(err).
+			Msg("unable to retrieve user details from authentication token")
+		return err
+	}
+
 	r.Header.Del("Origin")
 
 	if params.endpoint.Type == portainer.AgentOnDockerEnvironment {
@@ -94,10 +104,15 @@ func (handler *Handler) handleExecRequest(w http.ResponseWriter, r *http.Request
 	}
 	defer websocketConn.Close()
 
-	return hijackExecStartOperation(websocketConn, params.endpoint, params.ID)
+	return hijackExecStartOperation(websocketConn, params.endpoint, params.ID, tokenData.Token)
 }
 
-func hijackExecStartOperation(websocketConn *websocket.Conn, endpoint *portainer.Endpoint, execID string) error {
+func hijackExecStartOperation(
+	websocketConn *websocket.Conn,
+	endpoint *portainer.Endpoint,
+	execID string,
+	token string,
+) error {
 	dial, err := initDial(endpoint)
 	if err != nil {
 		return err
@@ -121,12 +136,7 @@ func hijackExecStartOperation(websocketConn *websocket.Conn, endpoint *portainer
 		return err
 	}
 
-	err = hijackRequest(websocketConn, httpConn, execStartRequest)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return hijackRequest(websocketConn, httpConn, execStartRequest, token)
 }
 
 func createExecStartRequest(execID string) (*http.Request, error) {

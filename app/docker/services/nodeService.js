@@ -62,7 +62,7 @@ angular.module('portainer.docker').factory('NodeService', [
           }
         })
         .catch(function error(err) {
-          deferred.reject({ msg: '无法检索节点', err: err });
+          deferred.reject({ msg: '无法检索节点s', err: err });
         });
 
       return deferred.promise;

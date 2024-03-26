@@ -3,7 +3,13 @@
   <span ng-if="$ctrl.show">{{ $ctrl.value }}</span>
 </div>
 
-<button type="button" class="btn btn-link nopadding" ng-click="$ctrl.show = !$ctrl.show" title="Show/Hide value">
-  <div ng-if="!$ctrl.show"> <i class="fa fa-eye-slash"></i> 显示</div>
-  <div ng-if="$ctrl.show"> <i class="fa fa-eye"></i> 隐藏</div>
+<button type="button" class="btn btn-link nopadding" ng-click="$ctrl.show = !$ctrl.show" title="显示/隐藏值">
+  <div ng-if="!$ctrl.show">
+    <pr-icon icon="'eye-off'"></pr-icon>
+    显示</div
+  >
+  <div ng-if="$ctrl.show">
+    <pr-icon icon="'eye'"></pr-icon>
+    隐藏</div
+  >
 </button>

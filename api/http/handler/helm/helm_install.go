@@ -2,14 +2,11 @@ package helm
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/portainer/libhelm/options"
-	"github.com/portainer/libhelm/release"
 	httperror "github.com/portainer/libhttp/error"
 	"github.com/portainer/libhttp/request"
 	"github.com/portainer/libhttp/response"
@@ -17,6 +14,8 @@ import (
 	"github.com/portainer/portainer/api/http/security"
 	"github.com/portainer/portainer/api/kubernetes"
 	"github.com/portainer/portainer/api/kubernetes/validation"
+	"github.com/portainer/portainer/pkg/libhelm/options"
+	"github.com/portainer/portainer/pkg/libhelm/release"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -36,8 +35,9 @@ var errChartNameInvalid = errors.New("invalid chart name. " +
 // @id HelmInstall
 // @summary Install Helm Chart
 // @description
-// @description **Access policy**: authorized
+// @description **Access policy**: authenticated
 // @tags helm
+// @security ApiKeyAuth
 // @security jwt
 // @accept json
 // @produce json
@@ -52,20 +52,12 @@ func (handler *Handler) helmInstall(w http.ResponseWriter, r *http.Request) *htt
 	var payload installChartPayload
 	err := request.DecodeAndValidateJSONPayload(r, &payload)
 	if err != nil {
-		return &httperror.HandlerError{
-			StatusCode: http.StatusBadRequest,
-			Message:    "Invalid Helm install payload",
-			Err:        err,
-		}
+		return httperror.BadRequest("Invalid Helm install payload", err)
 	}
 
 	release, err := handler.installChart(r, payload)
 	if err != nil {
-		return &httperror.HandlerError{
-			StatusCode: http.StatusInternalServerError,
-			Message:    "Unable to install a chart",
-			Err:        err,
-		}
+		return httperror.InternalServerError("Unable to install a chart", err)
 	}
 
 	w.WriteHeader(http.StatusCreated)
@@ -159,7 +151,7 @@ func (handler *Handler) applyPortainerLabelsToHelmAppManifest(r *http.Request, i
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to retrieve user details from authentication token")
 	}
-	user, err := handler.dataStore.User().User(tokenData.ID)
+	user, err := handler.dataStore.User().Read(tokenData.ID)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to load user information from the database")
 	}
@@ -199,7 +191,7 @@ func (handler *Handler) updateHelmAppManifest(r *http.Request, manifest []byte, 
 	for _, resource := range yamlResources {
 		resource := resource // https://golang.org/doc/faq#closures_and_goroutines
 		g.Go(func() error {
-			tmpfile, err := ioutil.TempFile("", "helm-manifest-*")
+			tmpfile, err := os.CreateTemp("", "helm-manifest-*")
 			if err != nil {
 				return errors.Wrap(err, "failed to create a tmp helm manifest file")
 			}

@@ -1,6 +1,8 @@
 import angular from 'angular';
 import _ from 'lodash-es';
 import * as JsonPatch from 'fast-json-patch';
+import { FeatureId } from '@/react/portainer/feature-flags/enums';
+
 import {
   KubernetesApplicationDataAccessPolicies,
   KubernetesApplicationDeploymentTypes,
@@ -106,13 +108,12 @@ class KubernetesApplicationController {
     clipboard,
     Notifications,
     LocalStorage,
-    ModalService,
+    KubernetesResourcePoolService,
     KubernetesApplicationService,
     KubernetesEventService,
     KubernetesStackService,
     KubernetesPodService,
     KubernetesNodeService,
-    EndpointProvider,
     StackService
   ) {
     this.$async = $async;
@@ -120,7 +121,7 @@ class KubernetesApplicationController {
     this.clipboard = clipboard;
     this.Notifications = Notifications;
     this.LocalStorage = LocalStorage;
-    this.ModalService = ModalService;
+    this.KubernetesResourcePoolService = KubernetesResourcePoolService;
     this.StackService = StackService;
 
     this.KubernetesApplicationService = KubernetesApplicationService;
@@ -131,7 +132,6 @@ class KubernetesApplicationController {
 
     this.KubernetesApplicationDeploymentTypes = KubernetesApplicationDeploymentTypes;
     this.KubernetesApplicationTypes = KubernetesApplicationTypes;
-    this.EndpointProvider = EndpointProvider;
     this.KubernetesDeploymentTypes = KubernetesDeploymentTypes;
 
     this.ApplicationDataAccessPolicies = KubernetesApplicationDataAccessPolicies;
@@ -143,11 +143,6 @@ class KubernetesApplicationController {
     this.getApplicationAsync = this.getApplicationAsync.bind(this);
     this.getEvents = this.getEvents.bind(this);
     this.getEventsAsync = this.getEventsAsync.bind(this);
-    this.updateApplicationKindText = this.updateApplicationKindText.bind(this);
-    this.updateApplicationAsync = this.updateApplicationAsync.bind(this);
-    this.redeployApplicationAsync = this.redeployApplicationAsync.bind(this);
-    this.rollbackApplicationAsync = this.rollbackApplicationAsync.bind(this);
-    this.copyLoadBalancerIP = this.copyLoadBalancerIP.bind(this);
   }
 
   selectTab(index) {
@@ -163,120 +158,8 @@ class KubernetesApplicationController {
     return KubernetesNamespaceHelper.isSystemNamespace(this.application.ResourcePool);
   }
 
-  isExternalApplication() {
-    return KubernetesApplicationHelper.isExternalApplication(this.application);
-  }
-
-  copyLoadBalancerIP() {
-    this.clipboard.copyText(this.application.LoadBalancerIPAddress);
-    $('#copyNotificationLB').show().fadeOut(2500);
-  }
-
-  copyApplicationName() {
-    this.clipboard.copyText(this.application.Name);
-    $('#copyNotificationApplicationName').show().fadeOut(2500);
-  }
-
-  hasPersistedFolders() {
-    return this.application && this.application.PersistedFolders.length;
-  }
-
-  hasVolumeConfiguration() {
-    return this.application && this.application.ConfigurationVolumes.length;
-  }
-
   hasEventWarnings() {
     return this.state.eventWarningCount;
-  }
-
-  buildIngressRuleURL(rule) {
-    const hostname = rule.Host ? rule.Host : rule.IP;
-    return 'http://' + hostname + rule.Path;
-  }
-
-  portHasIngressRules(port) {
-    return port.IngressRules.length > 0;
-  }
-
-  ruleCanBeDisplayed(rule) {
-    return !rule.Host && !rule.IP ? false : true;
-  }
-
-  isStack() {
-    return this.application.StackId;
-  }
-
-  /**
-   * ROLLBACK
-   */
-  async rollbackApplicationAsync() {
-    try {
-      // await this.KubernetesApplicationService.rollback(this.application, this.formValues.SelectedRevision);
-      const revision = _.nth(this.application.Revisions, -2);
-      await this.KubernetesApplicationService.rollback(this.application, revision);
-      this.Notifications.success('应用程序已成功回滚');
-      this.$state.reload(this.$state.current);
-    } catch (err) {
-      this.Notifications.error('失败', err, '无法回滚应用程序');
-    }
-  }
-
-  rollbackApplication() {
-    this.ModalService.confirmUpdate('将应用程序回滚到以前的配置可能会导致服务中断。你想继续吗？', (confirmed) => {
-      if (confirmed) {
-        return this.$async(this.rollbackApplicationAsync);
-      }
-    });
-  }
-  /**
-   * REDEPLOY
-   */
-  async redeployApplicationAsync() {
-    try {
-      const promises = _.map(this.application.Pods, (item) => this.KubernetesPodService.delete(item));
-      await Promise.all(promises);
-      this.Notifications.success('已成功重新部署应用程序');
-      this.$state.reload(this.$state.current);
-    } catch (err) {
-      this.Notifications.error('失败', err, '无法重新部署应用程序');
-    }
-  }
-
-  redeployApplication() {
-    this.ModalService.confirmUpdate('重新部署应用程序可能会导致服务中断。你想继续吗？', (confirmed) => {
-      if (confirmed) {
-        return this.$async(this.redeployApplicationAsync);
-      }
-    });
-  }
-
-  /**
-   * UPDATE
-   */
-  async updateApplicationAsync() {
-    try {
-      const application = angular.copy(this.application);
-      application.Note = this.formValues.Note;
-      await this.KubernetesApplicationService.patch(this.application, application, true);
-      this.Notifications.success('应用程序已成功更新');
-      this.$state.reload(this.$state.current);
-    } catch (err) {
-      this.Notifications.error('失败', err, '无法更新应用程序');
-    }
-  }
-
-  updateApplication() {
-    return this.$async(this.updateApplicationAsync);
-  }
-
-  updateApplicationKindText() {
-    if (this.application.ApplicationKind === this.KubernetesDeploymentTypes.GIT) {
-      this.state.appType = `git repository`;
-    } else if (this.application.ApplicationKind === this.KubernetesDeploymentTypes.CONTENT) {
-      this.state.appType = `manifest`;
-    } else if (this.application.ApplicationKind === this.KubernetesDeploymentTypes.URL) {
-      this.state.appType = `manifest`;
-    }
   }
 
   /**
@@ -295,7 +178,7 @@ class KubernetesApplicationController {
       );
       this.state.eventWarningCount = KubernetesEventHelper.warningCount(this.events);
     } catch (err) {
-      this.Notifications.error('失败', err, '无法检索与应用程序相关的事件');
+      this.Notifications.error('Failure', err, 'Unable to retrieve application related events');
     } finally {
       this.state.eventsLoading = false;
     }
@@ -317,17 +200,6 @@ class KubernetesApplicationController {
       ]);
       this.application = application;
       this.allContainers = KubernetesApplicationHelper.associateAllContainersAndApplication(application);
-      this.formValues.Note = this.application.Note;
-      if (this.application.Note) {
-        this.state.expandedNote = true;
-      }
-      if (this.application.CurrentRevision) {
-        this.formValues.SelectedRevision = _.find(this.application.Revisions, { revision: this.application.CurrentRevision.revision });
-      }
-
-      this.state.useIngress = _.find(application.PublishedPorts, (p) => {
-        return this.portHasIngressRules(p);
-      });
 
       this.placements = computePlacements(nodes, this.application);
       this.state.placementWarning = _.find(this.placements, { AcceptsApplication: true }) ? false : true;
@@ -337,7 +209,7 @@ class KubernetesApplicationController {
         this.stackFileContent = file;
       }
     } catch (err) {
-      this.Notifications.error('失败', err, '无法检索应用程序详细信息');
+      this.Notifications.error('Failure', err, 'Unable to retrieve application details');
     } finally {
       this.state.dataLoading = false;
     }
@@ -348,6 +220,8 @@ class KubernetesApplicationController {
   }
 
   async onInit() {
+    this.limitedFeature = FeatureId.K8S_ROLLING_RESTART;
+
     this.state = {
       activeTab: 0,
       currentName: this.$state.$current.name,
@@ -364,8 +238,8 @@ class KubernetesApplicationController {
       eventWarningCount: 0,
       placementWarning: false,
       expandedNote: false,
-      useIngress: false,
-      useServerMetrics: this.EndpointProvider.currentEndpoint().Kubernetes.Configuration.UseServerMetrics,
+      useServerMetrics: this.endpoint.Kubernetes.Configuration.UseServerMetrics,
+      publicUrl: this.endpoint.PublicURL,
     };
 
     this.state.activeTab = this.LocalStorage.getActiveTab('application');
@@ -377,7 +251,6 @@ class KubernetesApplicationController {
 
     await this.getApplication();
     await this.getEvents();
-    this.updateApplicationKindText();
     this.state.viewReady = true;
   }
 

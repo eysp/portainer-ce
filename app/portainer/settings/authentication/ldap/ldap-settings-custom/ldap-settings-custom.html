@@ -1,58 +1,52 @@
 <div>
-  <div class="col-sm-12 form-section-title">
-    信息
-  </div>
+  <div class="col-sm-12 form-section-title">信息</div>
   <div class="form-group col-sm-12 text-muted small">
-    使用 LDAP 身份验证时，Portainer 会将用户身份验证委托给 LDAP 服务器，如果 LDAP 身份验证失败，则回退到内部身份验证。
+    在使用LDAP身份验证时，Portainer将委托用户身份验证给LDAP服务器，并在LDAP身份验证失败时退回到内部身份验证。
   </div>
 </div>
 
-<div class="col-sm-12 form-section-title">
-  LDAP 配置
-</div>
+<div class="col-sm-12 form-section-title">LDAP配置</div>
 
 <div class="form-group">
   <div class="col-sm-12 small text-muted">
-    <p>
-      <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-      您可以配置多个 LDAP 服务器以进行身份验证回退。 确保所有服务器都使用相同的配置（即如果启用了 TLS，它们应该都使用相同的证书）。
+    <p class="vertical-center">
+      <pr-icon icon="'info'" mode="'primary'"></pr-icon>
+      您可以配置多个LDAP服务器用于身份验证回退。确保所有服务器都使用相同的配置（即，如果启用了TLS，则它们应该都使用相同的证书）。
     </p>
   </div>
 </div>
 
 <div class="form-group">
-  <label for="ldap_url" class="col-sm-3 col-lg-2 control-label text-left" style="display: flex; flex-wrap: wrap;">
-    LDAP 服务器
-    <button
-      type="button"
-      class="label label-default interactive"
-      style="border: 0;"
-      ng-click="$ctrl.addLDAPUrl()"
-      limited-feature-dir="{{ $ctrl.limitedFeatureId }}"
-      limited-feature-disabled
-      limited-feature-class="limited-be"
-    >
-      <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加额外的服务器
-    </button>
-  </label>
+  <label for="ldap_url" class="col-sm-3 col-lg-2 control-label flex flex-wrap text-left">LDAP服务器</label>
   <div class="col-sm-9 col-lg-10">
-    <div ng-repeat="url in $ctrl.settings.URLs track by $index" style="display: flex; margin-bottom: 10px;">
-      <input type="text" class="form-control" id="ldap_url" ng-model="$ctrl.settings.URLs[$index]" placeholder="例如 10.0.0.10:389 or myldap.domain.tld:389" required />
+    <div class="mb-3 flex" ng-repeat="url in $ctrl.settings.URLs track by $index">
+      <input type="text" class="form-control" id="ldap_url" ng-model="$ctrl.settings.URLs[$index]" placeholder="例如：10.0.0.10:389 或 myldap.domain.tld:389" required />
       <button ng-if="$index > 0" class="btn btn-sm btn-danger" type="button" ng-click="$ctrl.removeLDAPUrl($index)">
-        <i class="fa fa-trash" aria-hidden="true"></i>
+        <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
       </button>
     </div>
   </div>
+  <div class="col-sm-12">
+    <be-teaser-button
+      feature-id="$ctrl.limitedFeatureId"
+      heading="'添加额外的服务器'"
+      message="'允许您添加一个额外的LDAP服务器。'"
+      button-text="'添加额外的服务器'"
+      button-class-name="'!ml-0'"
+    ></be-teaser-button>
+  </div>
 </div>
 
-<!-- Anonymous mode-->
 <div class="form-group">
-  <div class="col-sm-12">
-    <label for="anonymous_mode" class="control-label text-left">
-      匿名模式
-      <portainer-tooltip position="bottom" message="如果服务器配置为匿名访问，则启用此选项。"></portainer-tooltip>
+  <label for="anonymous_mode" class="control-label col-sm-3 col-lg-2 text-left">
+    匿名模式
+    <portainer-tooltip message="'如果服务器配置为匿名访问，请启用此选项。'"></portainer-tooltip>
+  </label>
+  <div class="col-sm-9 col-lg-10">
+    <label class="switch">
+      <input type="checkbox" id="anonymous_mode" ng-model="$ctrl.settings.AnonymousMode" limited-feature-dir="{{::$ctrl.limitedFeatureId}}" limited-feature-tabindex="-1" />
+      <span class="slider round"></span>
     </label>
-    <label class="switch" style="margin-left: 20px;"> <input type="checkbox" id="anonymous_mode" ng-model="$ctrl.settings.AnonymousMode" /><i></i> </label>
   </div>
 </div>
 <!-- !Anonymous mode-->
@@ -60,21 +54,21 @@
 <div ng-if="!$ctrl.settings.AnonymousMode">
   <div class="form-group">
     <label for="ldap_username" class="col-sm-3 col-lg-2 control-label text-left">
-      Reader DN
-      <portainer-tooltip position="bottom" message="将用于搜索用户的帐户。"></portainer-tooltip>
+      读取者 DN
+      <portainer-tooltip message="'将用于搜索用户的帐户。'"></portainer-tooltip>
     </label>
     <div class="col-sm-9 col-lg-10">
-      <input type="text" class="form-control" id="ldap_username" ng-model="$ctrl.settings.ReaderDN" placeholder="{{ $ctrl.clickToSetValues.readerDNPlaceholder }}" />
+      <input type="text" class="form-control" id="ldap_username" ng-model="$ctrl.settings.ReaderDN" placeholder="例如：cn=user,dc=domain,dc=tld" />
     </div>
   </div>
 
   <div class="form-group">
     <label for="ldap_password" class="col-sm-3 col-lg-2 control-label text-left">
       密码
-      <portainer-tooltip position="bottom" message="如果您不输入密码，Portainer 将保持当前密码不变。"></portainer-tooltip>
+      <portainer-tooltip message="'如果不输入密码，Portainer将保持当前密码不变。'"></portainer-tooltip>
     </label>
     <div class="col-sm-9 col-lg-10">
-      <input type="password" class="form-control" id="ldap_password" ng-model="$ctrl.settings.Password" placeholder="password" autocomplete="new-password" />
+      <input type="password" class="form-control" id="ldap_password" ng-model="$ctrl.settings.Password" placeholder="密码" autocomplete="new-password" />
     </div>
   </div>
 </div>
@@ -100,19 +94,43 @@
   connectivity-check="$ctrl.connectivityCheck"
 ></ldap-connectivity-check>
 
-<ldap-custom-user-search
-  style="margin-top: 5px;"
-  settings="$ctrl.settings.SearchSettings"
-  on-search-click="($ctrl.onSearchUsersClick)"
-  limited-feature-id="$ctrl.limitedFeatureId"
-></ldap-custom-user-search>
-<ldap-custom-group-search
-  style="margin-top: 5px;"
-  settings="$ctrl.settings.GroupSearchSettings"
-  on-search-click="($ctrl.onSearchGroupsClick)"
-  limited-feature-id="$ctrl.limitedFeatureId"
-></ldap-custom-group-search>
+<div class="space-y-10">
+  <ldap-custom-user-search
+    class="block"
+    settings="$ctrl.settings.SearchSettings"
+    on-search-click="($ctrl.onSearchUsersClick)"
+    limited-feature-id="$ctrl.limitedFeatureId"
+  ></ldap-custom-user-search>
 
-<div limited-feature-dir="{{ $ctrl.limitedFeatureId }}" limited-feature-class="limited-be">
-  <ldap-settings-test-login settings="$ctrl.settings" limited-feature-id="$ctrl.limitedFeatureId" show-be-indicator-if-needed="true"></ldap-settings-test-login>
+  <ldap-custom-group-search
+    class="block"
+    settings="$ctrl.settings.GroupSearchSettings"
+    on-search-click="($ctrl.onSearchGroupsClick)"
+    limited-feature-id="$ctrl.limitedFeatureId"
+  ></ldap-custom-group-search>
+
+  <ldap-custom-admin-group
+    class="block"
+    settings="$ctrl.settings"
+    on-search-click="($ctrl.onSearchAdminGroupsClick)"
+    selected-admin-groups="$ctrl.selectedAdminGroups"
+    default-admin-group-search-filter="'(objectClass=groupOfNames)'"
+    limited-feature-id="$ctrl.limitedFeatureId"
+    is-limited-feature-self-contained="true"
+  ></ldap-custom-admin-group>
+
+  <ldap-settings-test-login
+    class="block"
+    settings="$ctrl.settings"
+    limited-feature-id="$ctrl.limitedFeatureId"
+    show-be-indicator-if-needed="true"
+    is-limited-feature-self-contained="true"
+  ></ldap-settings-test-login>
 </div>
+
+<save-auth-settings-button
+  on-save-settings="($ctrl.onSaveSettings)"
+  save-button-state="($ctrl.saveButtonState)"
+  save-button-disabled="!$ctrl.saveButtonDisabled()"
+  limited-feature-dir="{{ $ctrl.limitedFeatureId }}"
+></save-auth-settings-button>

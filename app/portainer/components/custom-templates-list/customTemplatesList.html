@@ -1,49 +1,56 @@
 <div class="datatable">
   <rd-widget>
     <rd-widget-body classes="no-padding">
-      <div class="toolBar">
-        <div class="toolBarTitle"> <i class="fa" ng-class="$ctrl.titleIcon" aria-hidden="true" style="margin-right: 2px;"></i> {{ $ctrl.titleText }} </div>
-      </div>
-      <div class="actionBar">
-        <button type="button" class="btn btn-sm btn-primary" ui-state="$ctrl.createPath"> <i class="fa fa-plus space-right" aria-hidden="true"></i>添加自定义模板 </button>
-      </div>
+      <div class="toolBar vertical-center flex-wrap !gap-x-5 !gap-y-1">
+        <div class="toolBarTitle vertical-center">
+            <div class="widget-icon space-right">
+                <pr-icon icon="$ctrl.titleIcon"></pr-icon>
+            </div>
+            自定义模板
+        </div>
+        <div class="searchBar vertical-center !mr-0">
+            <pr-icon icon="'search'" class-name="'searchIcon'"></pr-icon>
+            <input
+                type="text"
+                class="searchInput"
+                ng-model="$ctrl.state.textFilter"
+                ng-change="$ctrl.onTextFilterChange()"
+                placeholder="搜索模板..."
+                auto-focus
+                ng-model-options="{ debounce: 300 }"
+            />
+        </div>
+        <div class="actionBar">
+            <button type="button" class="btn btn-sm btn-primary" ui-state="$ctrl.createPath">
+                <pr-icon icon="'plus'"></pr-icon>
+                添加自定义模板
+            </button>
+        </div>
+    </div>
 
-      <div class="searchBar">
-        <i class="fa fa-search searchIcon" aria-hidden="true"></i>
-        <input
-          type="text"
-          class="searchInput"
-          ng-model="$ctrl.state.textFilter"
-          ng-change="$ctrl.onTextFilterChange()"
-          placeholder="搜索..."
-          auto-focus
-          ng-model-options="{ debounce: 300 }"
-        />
-      </div>
-
-      <div class="blocklist">
-        <template-item
+    <div class="blocklist gap-y-2 !px-[20px] !pb-[20px]">
+      <template-item
           ng-repeat="template in $ctrl.templates | filter:$ctrl.state.textFilter"
           model="template"
           type-label="{{ $ctrl.typeLabel(template.Type) }}"
           on-select="($ctrl.onSelectClick)"
-        >
+      >
           <template-item-actions>
-            <div ng-if="$ctrl.isEditAllowed(template)" style="display: flex;">
-              <a ui-state="$ctrl.editPath" ui-state-params="{id: template.Id}" ng-click="$event.stopPropagation();" class="btn btn-primary btn-xs" style="margin-right: 10px;">
-                编辑
-              </a>
-              <button class="btn btn-danger btn-xs" ng-click="$ctrl.onDeleteClick(template.Id); $event.stopPropagation();">删除</button>
-            </div>
+              <div ng-if="$ctrl.isEditAllowed(template)" class="vertical-center">
+                  <a ui-state="$ctrl.editPath" ui-state-params="{id: template.Id}" ng-click="$event.stopPropagation();" class="btn btn-secondary btn-sm vertical-center">
+                      <pr-icon icon="'edit'"></pr-icon>
+                      编辑
+                  </a>
+                  <button class="btn btn-dangerlight btn-sm vertical-center" ng-click="$ctrl.onDeleteClick(template.Id); $event.stopPropagation();">
+                      <pr-icon icon="'trash-2'"></pr-icon>
+                      删除
+                  </button>
+              </div>
           </template-item-actions>
-        </template-item>
-        <div ng-if="!$ctrl.templates" class="text-center text-muted">
-          加载中...
-        </div>
-        <div ng-if="($ctrl.templates | filter: $ctrl.state.textFilter).length === 0" class="text-center text-muted">
-          没有可用的模板。
-        </div>
-      </div>
+      </template-item>
+      <div ng-if="!$ctrl.templates" class="text-muted text-center">加载中...</div>
+      <div ng-if="($ctrl.templates | filter : $ctrl.state.textFilter).length === 0" class="text-muted text-center">暂无模板。</div>
+  </div>
     </rd-widget-body>
   </rd-widget>
 </div>

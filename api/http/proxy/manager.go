@@ -4,35 +4,32 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/portainer/portainer/api/dataservices"
+	dockerclient "github.com/portainer/portainer/api/docker/client"
 	"github.com/portainer/portainer/api/http/proxy/factory/kubernetes"
 
 	cmap "github.com/orcaman/concurrent-map"
 	"github.com/portainer/portainer/api/kubernetes/cli"
 
 	portainer "github.com/portainer/portainer/api"
-	"github.com/portainer/portainer/api/docker"
 	"github.com/portainer/portainer/api/http/proxy/factory"
 )
 
-// TODO: contain code related to legacy extension management
-
 type (
-	// Manager represents a service used to manage proxies to environments(endpoints) and extensions.
+	// Manager represents a service used to manage proxies to environments (endpoints) and extensions.
 	Manager struct {
-		proxyFactory           *factory.ProxyFactory
-		endpointProxies        cmap.ConcurrentMap
-		legacyExtensionProxies cmap.ConcurrentMap
-		k8sClientFactory       *cli.ClientFactory
+		proxyFactory     *factory.ProxyFactory
+		endpointProxies  cmap.ConcurrentMap
+		k8sClientFactory *cli.ClientFactory
 	}
 )
 
 // NewManager initializes a new proxy Service
-func NewManager(dataStore portainer.DataStore, signatureService portainer.DigitalSignatureService, tunnelService portainer.ReverseTunnelService, clientFactory *docker.ClientFactory, kubernetesClientFactory *cli.ClientFactory, kubernetesTokenCacheManager *kubernetes.TokenCacheManager) *Manager {
+func NewManager(dataStore dataservices.DataStore, signatureService portainer.DigitalSignatureService, tunnelService portainer.ReverseTunnelService, clientFactory *dockerclient.ClientFactory, kubernetesClientFactory *cli.ClientFactory, kubernetesTokenCacheManager *kubernetes.TokenCacheManager, gitService portainer.GitService) *Manager {
 	return &Manager{
-		endpointProxies:        cmap.New(),
-		legacyExtensionProxies: cmap.New(),
-		k8sClientFactory:       kubernetesClientFactory,
-		proxyFactory:           factory.NewProxyFactory(dataStore, signatureService, tunnelService, clientFactory, kubernetesClientFactory, kubernetesTokenCacheManager),
+		endpointProxies:  cmap.New(),
+		k8sClientFactory: kubernetesClientFactory,
+		proxyFactory:     factory.NewProxyFactory(dataStore, signatureService, tunnelService, clientFactory, kubernetesClientFactory, kubernetesTokenCacheManager, gitService),
 	}
 }
 
@@ -66,30 +63,13 @@ func (manager *Manager) GetEndpointProxy(endpoint *portainer.Endpoint) http.Hand
 
 // DeleteEndpointProxy deletes the proxy associated to a key
 // and cleans the k8s environment(endpoint) client cache. DeleteEndpointProxy
-// is currently only called for edge connection clean up.
-func (manager *Manager) DeleteEndpointProxy(endpoint *portainer.Endpoint) {
-	manager.endpointProxies.Remove(fmt.Sprint(endpoint.ID))
-	manager.k8sClientFactory.RemoveKubeClient(endpoint)
-}
+// is currently only called for edge connection clean up and when endpoint is updated
+func (manager *Manager) DeleteEndpointProxy(endpointID portainer.EndpointID) {
+	manager.endpointProxies.Remove(fmt.Sprint(endpointID))
 
-// CreateLegacyExtensionProxy creates a new HTTP reverse proxy for a legacy extension and adds it to the registered proxies
-func (manager *Manager) CreateLegacyExtensionProxy(key, extensionAPIURL string) (http.Handler, error) {
-	proxy, err := manager.proxyFactory.NewLegacyExtensionProxy(extensionAPIURL)
-	if err != nil {
-		return nil, err
+	if manager.k8sClientFactory != nil {
+		manager.k8sClientFactory.RemoveKubeClient(endpointID)
 	}
-
-	manager.legacyExtensionProxies.Set(key, proxy)
-	return proxy, nil
-}
-
-// GetLegacyExtensionProxy returns a legacy extension proxy associated to a key
-func (manager *Manager) GetLegacyExtensionProxy(key string) http.Handler {
-	proxy, ok := manager.legacyExtensionProxies.Get(key)
-	if !ok {
-		return nil
-	}
-	return proxy.(http.Handler)
 }
 
 // CreateGitlabProxy creates a new HTTP reverse proxy that can be used to send requests to the Gitlab API

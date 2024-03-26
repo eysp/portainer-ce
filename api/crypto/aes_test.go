@@ -2,18 +2,15 @@ package crypto
 
 import (
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/docker/docker/pkg/ioutils"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_encryptAndDecrypt_withTheSamePassword(t *testing.T) {
-	tmpdir, _ := ioutils.TempDir("", "encrypt")
-	defer os.RemoveAll(tmpdir)
+	tmpdir := t.TempDir()
 
 	var (
 		originFilePath    = filepath.Join(tmpdir, "origin")
@@ -22,7 +19,7 @@ func Test_encryptAndDecrypt_withTheSamePassword(t *testing.T) {
 	)
 
 	content := []byte("content")
-	ioutil.WriteFile(originFilePath, content, 0600)
+	os.WriteFile(originFilePath, content, 0600)
 
 	originFile, _ := os.Open(originFilePath)
 	defer originFile.Close()
@@ -32,7 +29,7 @@ func Test_encryptAndDecrypt_withTheSamePassword(t *testing.T) {
 
 	err := AesEncrypt(originFile, encryptedFileWriter, []byte("passphrase"))
 	assert.Nil(t, err, "Failed to encrypt a file")
-	encryptedContent, err := ioutil.ReadFile(encryptedFilePath)
+	encryptedContent, err := os.ReadFile(encryptedFilePath)
 	assert.Nil(t, err, "Couldn't read encrypted file")
 	assert.NotEqual(t, encryptedContent, content, "Content wasn't encrypted")
 
@@ -47,13 +44,12 @@ func Test_encryptAndDecrypt_withTheSamePassword(t *testing.T) {
 
 	io.Copy(decryptedFileWriter, decryptedReader)
 
-	decryptedContent, _ := ioutil.ReadFile(decryptedFilePath)
+	decryptedContent, _ := os.ReadFile(decryptedFilePath)
 	assert.Equal(t, content, decryptedContent, "Original and decrypted content should match")
 }
 
 func Test_encryptAndDecrypt_withEmptyPassword(t *testing.T) {
-	tmpdir, _ := ioutils.TempDir("", "encrypt")
-	defer os.RemoveAll(tmpdir)
+	tmpdir := t.TempDir()
 
 	var (
 		originFilePath    = filepath.Join(tmpdir, "origin")
@@ -62,7 +58,7 @@ func Test_encryptAndDecrypt_withEmptyPassword(t *testing.T) {
 	)
 
 	content := []byte("content")
-	ioutil.WriteFile(originFilePath, content, 0600)
+	os.WriteFile(originFilePath, content, 0600)
 
 	originFile, _ := os.Open(originFilePath)
 	defer originFile.Close()
@@ -72,7 +68,7 @@ func Test_encryptAndDecrypt_withEmptyPassword(t *testing.T) {
 
 	err := AesEncrypt(originFile, encryptedFileWriter, []byte(""))
 	assert.Nil(t, err, "Failed to encrypt a file")
-	encryptedContent, err := ioutil.ReadFile(encryptedFilePath)
+	encryptedContent, err := os.ReadFile(encryptedFilePath)
 	assert.Nil(t, err, "Couldn't read encrypted file")
 	assert.NotEqual(t, encryptedContent, content, "Content wasn't encrypted")
 
@@ -87,13 +83,12 @@ func Test_encryptAndDecrypt_withEmptyPassword(t *testing.T) {
 
 	io.Copy(decryptedFileWriter, decryptedReader)
 
-	decryptedContent, _ := ioutil.ReadFile(decryptedFilePath)
+	decryptedContent, _ := os.ReadFile(decryptedFilePath)
 	assert.Equal(t, content, decryptedContent, "Original and decrypted content should match")
 }
 
 func Test_decryptWithDifferentPassphrase_shouldProduceWrongResult(t *testing.T) {
-	tmpdir, _ := ioutils.TempDir("", "encrypt")
-	defer os.RemoveAll(tmpdir)
+	tmpdir := t.TempDir()
 
 	var (
 		originFilePath    = filepath.Join(tmpdir, "origin")
@@ -102,7 +97,7 @@ func Test_decryptWithDifferentPassphrase_shouldProduceWrongResult(t *testing.T) 
 	)
 
 	content := []byte("content")
-	ioutil.WriteFile(originFilePath, content, 0600)
+	os.WriteFile(originFilePath, content, 0600)
 
 	originFile, _ := os.Open(originFilePath)
 	defer originFile.Close()
@@ -112,7 +107,7 @@ func Test_decryptWithDifferentPassphrase_shouldProduceWrongResult(t *testing.T) 
 
 	err := AesEncrypt(originFile, encryptedFileWriter, []byte("passphrase"))
 	assert.Nil(t, err, "Failed to encrypt a file")
-	encryptedContent, err := ioutil.ReadFile(encryptedFilePath)
+	encryptedContent, err := os.ReadFile(encryptedFilePath)
 	assert.Nil(t, err, "Couldn't read encrypted file")
 	assert.NotEqual(t, encryptedContent, content, "Content wasn't encrypted")
 
@@ -127,6 +122,6 @@ func Test_decryptWithDifferentPassphrase_shouldProduceWrongResult(t *testing.T) 
 
 	io.Copy(decryptedFileWriter, decryptedReader)
 
-	decryptedContent, _ := ioutil.ReadFile(decryptedFilePath)
+	decryptedContent, _ := os.ReadFile(decryptedFilePath)
 	assert.NotEqual(t, content, decryptedContent, "Original and decrypted content should NOT match")
 }

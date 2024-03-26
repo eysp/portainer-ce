@@ -1,3 +1,5 @@
+import { confirmDelete } from '@@/modals/confirm';
+
 angular.module('portainer.docker').controller('VolumesController', [
   '$q',
   '$scope',
@@ -7,20 +9,18 @@ angular.module('portainer.docker').controller('VolumesController', [
   'VolumeHelper',
   'Notifications',
   'HttpRequestHelper',
-  'EndpointProvider',
   'Authentication',
-  'ModalService',
   'endpoint',
-  function ($q, $scope, $state, VolumeService, ServiceService, VolumeHelper, Notifications, HttpRequestHelper, EndpointProvider, Authentication, ModalService, endpoint) {
+  function ($q, $scope, $state, VolumeService, ServiceService, VolumeHelper, Notifications, HttpRequestHelper, Authentication, endpoint) {
     $scope.removeAction = function (selectedItems) {
-      ModalService.confirmDeletion('您要删除选定的存储卷吗?', (confirmed) => {
+      confirmDelete('您是否要删除所选的存储卷？').then((confirmed) => {
         if (confirmed) {
           var actionCount = selectedItems.length;
           angular.forEach(selectedItems, function (volume) {
             HttpRequestHelper.setPortainerAgentTargetHeader(volume.NodeName);
             VolumeService.remove(volume)
               .then(function success() {
-                Notifications.success('成功删除存储卷', volume.Id);
+                Notifications.success('存储卷删除成功', volume.Id);
                 var index = $scope.volumes.indexOf(volume);
                 $scope.volumes.splice(index, 1);
               })
@@ -38,8 +38,6 @@ angular.module('portainer.docker').controller('VolumesController', [
       });
     };
 
-    $scope.offlineMode = false;
-
     $scope.getVolumes = getVolumes;
     function getVolumes() {
       var endpointProvider = $scope.applicationState.endpoint.mode.provider;
@@ -52,7 +50,6 @@ angular.module('portainer.docker').controller('VolumesController', [
       })
         .then(function success(data) {
           var services = data.services;
-          $scope.offlineMode = EndpointProvider.offlineMode();
           $scope.volumes = data.attached
             .map(function (volume) {
               volume.dangling = false;

@@ -3,25 +3,27 @@ package ssl
 import (
 	"context"
 	"crypto/tls"
-	"log"
 	"os"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/portainer/libcrypto"
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/dataservices"
+
+	"github.com/pkg/errors"
+	"github.com/rs/zerolog/log"
 )
 
 // Service represents a service to manage SSL certificates
 type Service struct {
 	fileService     portainer.FileService
-	dataStore       portainer.DataStore
+	dataStore       dataservices.DataStore
 	rawCert         *tls.Certificate
 	shutdownTrigger context.CancelFunc
 }
 
 // NewService returns a pointer to a new Service
-func NewService(fileService portainer.FileService, dataStore portainer.DataStore, shutdownTrigger context.CancelFunc) *Service {
+func NewService(fileService portainer.FileService, dataStore dataservices.DataStore, shutdownTrigger context.CancelFunc) *Service {
 	return &Service{
 		fileService:     fileService,
 		dataStore:       dataStore,
@@ -31,9 +33,19 @@ func NewService(fileService portainer.FileService, dataStore portainer.DataStore
 
 // Init initializes the service
 func (service *Service) Init(host, certPath, keyPath string) error {
+	certSupplied := certPath != "" && keyPath != ""
+	if certSupplied {
+		newCertPath, newKeyPath, err := service.fileService.CopySSLCertPair(certPath, keyPath)
+		if err != nil {
+			return errors.Wrap(err, "failed copying supplied certs")
+		}
+
+		return service.cacheInfo(newCertPath, newKeyPath, false)
+	}
+
 	settings, err := service.GetSSLSettings()
 	if err != nil {
-		return errors.Wrap(err, "failed fetching ssl settings")
+		return errors.Wrap(err, "failed fetching SSL settings")
 	}
 
 	// certificates already exist
@@ -49,26 +61,25 @@ func (service *Service) Init(host, certPath, keyPath string) error {
 		}
 	}
 
-	pathSupplied := certPath != "" && keyPath != ""
-	if pathSupplied {
-		newCertPath, newKeyPath, err := service.fileService.CopySSLCertPair(certPath, keyPath)
-		if err != nil {
-			return errors.Wrap(err, "failed copying supplied certs")
-		}
-
-		return service.cacheInfo(newCertPath, newKeyPath, false)
-	}
-
-	// path not supplied and certificates doesn't exist - generate self signed
+	// path not supplied and certificates doesn't exist - generate self-signed
 	certPath, keyPath = service.fileService.GetDefaultSSLCertsPath()
 
-	err = service.generateSelfSignedCertificates(host, certPath, keyPath)
+	err = generateSelfSignedCertificates(host, certPath, keyPath)
 	if err != nil {
 		return errors.Wrap(err, "failed generating self signed certs")
 	}
 
 	return service.cacheInfo(certPath, keyPath, true)
+}
 
+func generateSelfSignedCertificates(ip, certPath, keyPath string) error {
+	if ip == "" {
+		return errors.New("host can't be empty")
+	}
+
+	log.Info().Msg("no cert files found, generating self signed SSL certificates")
+
+	return libcrypto.GenerateCertsForHost("localhost", ip, certPath, keyPath, time.Now().AddDate(5, 0, 0))
 }
 
 // GetRawCertificate gets the raw certificate
@@ -97,7 +108,10 @@ func (service *Service) SetCertificates(certData, keyData []byte) error {
 		return err
 	}
 
-	service.cacheInfo(certPath, keyPath, false)
+	err = service.cacheInfo(certPath, keyPath, false)
+	if err != nil {
+		return err
+	}
 
 	service.shutdownTrigger()
 
@@ -137,7 +151,7 @@ func (service *Service) cacheCertificate(certPath, keyPath string) error {
 	return nil
 }
 
-func (service *Service) cacheInfo(certPath, keyPath string, selfSigned bool) error {
+func (service *Service) cacheInfo(certPath string, keyPath string, selfSigned bool) error {
 	err := service.cacheCertificate(certPath, keyPath)
 	if err != nil {
 		return err
@@ -152,19 +166,5 @@ func (service *Service) cacheInfo(certPath, keyPath string, selfSigned bool) err
 	settings.KeyPath = keyPath
 	settings.SelfSigned = selfSigned
 
-	err = service.dataStore.SSLSettings().UpdateSettings(settings)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (service *Service) generateSelfSignedCertificates(ip, certPath, keyPath string) error {
-	if ip == "" {
-		return errors.New("host can't be empty")
-	}
-
-	log.Printf("[INFO] [internal,ssl] [message: no cert files found, generating self signed ssl certificates]")
-	return libcrypto.GenerateCertsForHost("localhost", ip, certPath, keyPath, time.Now().AddDate(5, 0, 0))
+	return service.dataStore.SSLSettings().UpdateSettings(settings)
 }

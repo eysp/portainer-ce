@@ -1,4 +1,4 @@
-import EndpointHelper from '@/portainer/helpers/endpointHelper';
+import { isAgentEnvironment, isLocalEnvironment } from '@/react/portainer/environments/utils';
 
 export default class porImageRegistryContainerController {
   /* @ngInject */
@@ -25,7 +25,7 @@ export default class porImageRegistryContainerController {
 
   async fetchRateLimits() {
     this.pullRateLimits = null;
-    if (!EndpointHelper.isAgentEndpoint(this.endpoint) && !EndpointHelper.isLocalEndpoint(this.endpoint)) {
+    if (!isAgentEnvironment(this.endpoint.Type) && !isLocalEnvironment(this.endpoint)) {
       this.setValidity(true);
       return;
     }
@@ -35,7 +35,7 @@ export default class porImageRegistryContainerController {
       this.setValidity(!this.pullRateLimits.limit || (this.pullRateLimits.limit && this.pullRateLimits.remaining >= 0));
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.error('加载DockerHub拉取频率限制失败', e);
+      console.error('加载 DockerHub 拉取配额限制失败', e);
       this.setValidity(true);
     }
   }

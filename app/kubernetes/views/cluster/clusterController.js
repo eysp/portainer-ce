@@ -3,27 +3,17 @@ import _ from 'lodash-es';
 import filesizeParser from 'filesize-parser';
 import KubernetesResourceReservationHelper from 'Kubernetes/helpers/resourceReservationHelper';
 import { KubernetesResourceReservation } from 'Kubernetes/models/resource-reservation/models';
+import { getMetricsForAllNodes } from '@/react/kubernetes/services/service.ts';
 
 class KubernetesClusterController {
   /* @ngInject */
-  constructor(
-    $async,
-    $state,
-    Authentication,
-    Notifications,
-    LocalStorage,
-    KubernetesNodeService,
-    KubernetesMetricsService,
-    KubernetesApplicationService,
-    KubernetesEndpointService
-  ) {
+  constructor($async, $state, Notifications, LocalStorage, Authentication, KubernetesNodeService, KubernetesApplicationService, KubernetesEndpointService) {
     this.$async = $async;
     this.$state = $state;
     this.Authentication = Authentication;
     this.Notifications = Notifications;
     this.LocalStorage = LocalStorage;
     this.KubernetesNodeService = KubernetesNodeService;
-    this.KubernetesMetricsService = KubernetesMetricsService;
     this.KubernetesApplicationService = KubernetesApplicationService;
     this.KubernetesEndpointService = KubernetesEndpointService;
 
@@ -49,7 +39,7 @@ class KubernetesClusterController {
         });
       }
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to retrieve environments');
+      this.Notifications.error('Failure', err, 'Unable to retrieve environments');
     }
   }
 
@@ -63,9 +53,10 @@ class KubernetesClusterController {
       _.forEach(nodes, (node) => (node.Memory = filesizeParser(node.Memory)));
       this.nodes = nodes;
       this.CPULimit = _.reduce(this.nodes, (acc, node) => node.CPU + acc, 0);
+      this.CPULimit = Math.round(this.CPULimit * 10000) / 10000;
       this.MemoryLimit = _.reduce(this.nodes, (acc, node) => KubernetesResourceReservationHelper.megaBytesValue(node.Memory) + acc, 0);
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to retrieve nodes');
+      this.Notifications.error('Failure', err, 'Unable to retrieve nodes');
     }
   }
 
@@ -95,7 +86,7 @@ class KubernetesClusterController {
         await this.getResourceUsage(this.endpoint.Id);
       }
     } catch (err) {
-      this.Notifications.error('失败', 'Unable to retrieve applications', err);
+      this.Notifications.error('Failure', err, 'Unable to retrieve applications');
     } finally {
       this.state.applicationsLoading = false;
     }
@@ -107,7 +98,7 @@ class KubernetesClusterController {
 
   async getResourceUsage(endpointId) {
     try {
-      const nodeMetrics = await this.KubernetesMetricsService.getNodes(endpointId);
+      const nodeMetrics = await getMetricsForAllNodes(endpointId);
       const resourceUsageList = nodeMetrics.items.map((i) => i.usage);
       const clusterResourceUsage = resourceUsageList.reduce((total, u) => {
         total.CPU += KubernetesResourceReservationHelper.parseCPU(u.cpu);
@@ -116,7 +107,7 @@ class KubernetesClusterController {
       }, new KubernetesResourceReservation());
       this.resourceUsage = clusterResourceUsage;
     } catch (err) {
-      this.Notifications.error('失败', 'Unable to retrieve cluster resource usage', err);
+      this.Notifications.error('Failure', err, 'Unable to retrieve cluster resource usage');
     }
   }
 

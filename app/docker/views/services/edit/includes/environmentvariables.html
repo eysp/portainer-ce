@@ -1,9 +1,9 @@
-<ng-form ng-if="service.EnvironmentVariables" id="service-env-variables" name="serviceEnvForm">
+<ng-form ng-if="service.EnvironmentVariables" id="service-env-variables" name="serviceEnvForm" class="form-horizontal">
   <rd-widget>
-    <rd-widget-header icon="fa-tasks" title-text="环境变量">
+    <rd-widget-header icon="list" title-text="环境变量">
       <div class="nopadding" authorization="DockerServiceUpdate">
-        <a class="btn btn-default btn-sm pull-right" ng-click="isUpdating || addEnvironmentVariable(service)" ng-disabled="isUpdating">
-          <i class="fa fa-plus-circle" aria-hidden="true"></i> 环境变量
+        <a class="btn btn-secondary btn-sm pull-right" ng-click="isUpdating || addEnvironmentVariable(service)" ng-disabled="isUpdating">
+          <pr-icon icon="'plus'"></pr-icon> 添加环境变量
         </a>
       </div>
     </rd-widget-header>
@@ -11,7 +11,9 @@
       <p>此服务没有环境变量。</p>
     </rd-widget-body>
     <rd-widget-body ng-if="service.EnvironmentVariables.length > 0">
-      <environment-variables-panel is-name-disabled="true" ng-model="service.EnvironmentVariables" on-change="(onChangeEnvVars)"></environment-variables-panel>
+      <div class="form-group">
+        <environment-variables-fieldset values="service.EnvironmentVariables" on-change="(onChangeEnvVars)"></environment-variables-fieldset>
+      </div>
     </rd-widget-body>
     <rd-widget-footer authorization="DockerServiceUpdate">
       <div class="btn-toolbar" role="toolbar">
@@ -22,7 +24,7 @@
             ng-disabled="!hasChanges(service, ['EnvironmentVariables']) || serviceEnvForm.$invalid"
             ng-click="updateService(service)"
           >
-            Apply changes
+            应用更改
           </button>
           <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <span class="caret"></span>

@@ -1,8 +1,8 @@
+import _ from 'lodash-es';
 import { KubernetesApplicationDeploymentTypes, KubernetesApplicationTypes } from 'Kubernetes/models/application/models';
 import KubernetesApplicationHelper from 'Kubernetes/helpers/application';
 import KubernetesNamespaceHelper from 'Kubernetes/helpers/namespaceHelper';
-import { KubernetesConfigurationTypes } from 'Kubernetes/models/configuration/models';
-import _ from 'lodash-es';
+import { KubernetesConfigurationKinds } from 'Kubernetes/models/configuration/models';
 
 angular.module('portainer.docker').controller('KubernetesApplicationsDatatableController', [
   '$scope',
@@ -21,6 +21,8 @@ angular.module('portainer.docker').controller('KubernetesApplicationsDatatableCo
     this.state = Object.assign(this.state, {
       expandAll: false,
       expandedItems: [],
+      namespace: '',
+      namespaces: [],
     });
 
     this.filters = {
@@ -29,6 +31,13 @@ angular.module('portainer.docker').controller('KubernetesApplicationsDatatableCo
         enabled: false,
         values: [],
       },
+    };
+
+    this.applicationTypeEnumToParamMap = {
+      [KubernetesApplicationTypes.DEPLOYMENT]: 'Deployment',
+      [KubernetesApplicationTypes.DAEMONSET]: 'DaemonSet',
+      [KubernetesApplicationTypes.STATEFULSET]: 'StatefulSet',
+      [KubernetesApplicationTypes.POD]: 'Pod',
     };
 
     this.expandAll = function () {
@@ -41,7 +50,7 @@ angular.module('portainer.docker').controller('KubernetesApplicationsDatatableCo
     };
 
     this.isExpandable = function (item) {
-      return item.KubernetesApplications || this.hasConfigurationSecrets(item) || !!this.getPublishedUrl(item).length;
+      return item.KubernetesApplications || this.hasConfigurationSecrets(item) || !!this.getPublishedUrls(item).length;
     };
 
     this.expandItem = function (item, expanded) {
@@ -70,6 +79,8 @@ angular.module('portainer.docker').controller('KubernetesApplicationsDatatableCo
     };
 
     this.onSettingsShowSystemChange = function () {
+      this.updateNamespace();
+      this.setSystemResources(this.settings.showSystem);
       DatatableService.setDataTableSettings(this.tableKey, this.settings);
     };
 
@@ -89,14 +100,13 @@ angular.module('portainer.docker').controller('KubernetesApplicationsDatatableCo
       return !ctrl.isSystemNamespace(item) || ctrl.settings.showSystem;
     };
 
-    this.getPublishedUrl = function (item) {
+    this.getPublishedUrls = function (item) {
       // Map all ingress rules in published ports to their respective URLs
       const ingressUrls = item.PublishedPorts.flatMap((pp) => pp.IngressRules)
         .filter(({ Host, IP }) => Host || IP)
-        .map(({ Host, IP, Port, Path }) => {
-          let scheme = Port === 443 ? 'https' : 'http';
-          let urlPort = Port === 80 || Port === 443 ? '' : `:${Port}`;
-          return `${scheme}://${Host || IP}${urlPort}${Path}`;
+        .map(({ Host, IP, Path, TLS }) => {
+          let scheme = TLS && TLS.filter((tls) => tls.hosts && tls.hosts.includes(Host)).length > 0 ? 'https' : 'http';
+          return `${scheme}://${Host || IP}${Path}`;
         });
 
       // Map all load balancer service ports to ip address
@@ -109,11 +119,11 @@ angular.module('portainer.docker').controller('KubernetesApplicationsDatatableCo
       const publishedUrls = [...ingressUrls, ...loadBalancerURLs];
 
       // Return the first URL - priority given to ingress urls, then services (load balancers)
-      return publishedUrls.length > 0 ? publishedUrls[0] : '';
+      return publishedUrls.length > 0 ? publishedUrls : '';
     };
 
     this.hasConfigurationSecrets = function (item) {
-      return item.Configurations && item.Configurations.some((config) => config.Data && config.Type === KubernetesConfigurationTypes.SECRET);
+      return item.Configurations && item.Configurations.some((config) => config.Data && config.Kind === KubernetesConfigurationKinds.SECRET);
     };
 
     /**
@@ -134,6 +144,45 @@ angular.module('portainer.docker').controller('KubernetesApplicationsDatatableCo
     this.prepareTableFromDataset = function () {
       const availableTypeFilters = this.dataset.map((item) => ({ type: item.ApplicationType, display: true }));
       this.filters.state.values = _.uniqBy(availableTypeFilters, 'type');
+    };
+
+    this.onChangeNamespace = function () {
+      this.onChangeNamespaceDropdown(this.state.namespace);
+    };
+
+    this.updateNamespace = function () {
+      if (this.namespaces && this.settingsLoaded) {
+        const allNamespacesOption = { Name: 'All namespaces', Value: '', IsSystem: false };
+        const visibleNamespaceOptions = this.namespaces
+          .filter((ns) => {
+            if (!this.settings.showSystem && ns.IsSystem) {
+              return false;
+            }
+            return true;
+          })
+          .map((ns) => ({ Name: ns.Name, Value: ns.Name, IsSystem: ns.IsSystem }));
+        this.state.namespaces = [allNamespacesOption, ...visibleNamespaceOptions];
+
+        if (this.state.namespace && !this.state.namespaces.find((ns) => ns.Name === this.state.namespace)) {
+          if (this.state.namespaces.length > 1) {
+            let defaultNS = this.state.namespaces.find((ns) => ns.Name === 'default');
+            defaultNS = defaultNS || this.state.namespaces[1];
+            this.state.namespace = defaultNS.Value;
+          } else {
+            this.state.namespace = this.state.namespaces[0].Value;
+          }
+        }
+      }
+    };
+
+    this.$onChanges = function () {
+      if (typeof this.isSystemResources !== 'undefined') {
+        this.settings.showSystem = this.isSystemResources;
+        DatatableService.setDataTableSettings(this.settingsKey, this.settings);
+      }
+      this.state.namespace = this.namespace;
+      this.updateNamespace();
+      this.prepareTableFromDataset();
     };
 
     this.$onInit = function () {
@@ -173,7 +222,16 @@ angular.module('portainer.docker').controller('KubernetesApplicationsDatatableCo
       if (storedSettings !== null) {
         this.settings = storedSettings;
         this.settings.open = false;
+
+        this.setSystemResources && this.setSystemResources(this.settings.showSystem);
       }
+      this.settingsLoaded = true;
+      // Set the default selected namespace
+      if (!this.state.namespace) {
+        this.state.namespace = this.namespace;
+      }
+
+      this.updateNamespace();
       this.onSettingsRepeaterChange();
     };
   },

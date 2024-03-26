@@ -1,21 +1,16 @@
-<rd-header>
-  <rd-header-title title-text="环境注册表">
-    <a data-toggle="tooltip" title="刷新" ui-sref="docker.registries" ui-sref-opts="{reload: true}">
-      <i class="fa fa-sync" aria-hidden="true"></i>
-    </a>
-  </rd-header-title>
-  <rd-header-content>在此环境中管理注册表访问</rd-header-content>
-</rd-header>
+<page-header title="'环境注册表'" breadcrumbs="['注册表管理']" reload="true"> </page-header>
+
 <div class="row">
   <div class="col-sm-12">
     <registries-datatable
       title-text="注册表"
-      title-icon="fa-database"
+      title-icon="radio"
       dataset="$ctrl.registries"
       table-key="endpointRegistries"
       order-by="Name"
       endpoint-type="$ctrl.endpointType"
       can-manage-access="$ctrl.canManageAccess"
+      can-browse="$ctrl.canBrowse"
     ></registries-datatable>
   </div>
 </div>

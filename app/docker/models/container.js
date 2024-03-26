@@ -1,5 +1,5 @@
 import _ from 'lodash-es';
-import { ResourceControlViewModel } from 'Portainer/models/resourceControl/resourceControl';
+import { ResourceControlViewModel } from '@/react/portainer/access-control/models/ResourceControlViewModel';
 
 export function createStatus(statusText) {
   var status = _.toLower(statusText);
@@ -44,6 +44,8 @@ export function ContainerViewModel(data) {
     this.StackName = this.Labels['com.docker.stack.namespace'];
   }
   this.Mounts = data.Mounts;
+
+  this.IsPortainer = data.IsPortainer;
 
   this.Ports = [];
   if (data.Ports) {
@@ -100,7 +102,7 @@ export function ContainerStatsViewModel(data) {
     }
   }
   this.Networks = _.values(data.networks);
-  if (data.blkio_stats !== undefined) {
+  if (data.blkio_stats !== undefined && data.blkio_stats.io_service_bytes_recursive !== null) {
     //TODO: take care of multiple block devices
     var readData = data.blkio_stats.io_service_bytes_recursive.find((d) => d.op === 'Read');
     if (readData === undefined) {
@@ -139,4 +141,5 @@ export function ContainerDetailsViewModel(data) {
   if (data.Portainer && data.Portainer.ResourceControl) {
     this.ResourceControl = new ResourceControlViewModel(data.Portainer.ResourceControl);
   }
+  this.IsPortainer = data.IsPortainer;
 }

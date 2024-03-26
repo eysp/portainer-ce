@@ -14,7 +14,7 @@ export default class RolesController {
       this.roles = await this.RoleService.roles();
       this.roles = _.orderBy(this.roles, 'Priority', 'asc');
     } catch (err) {
-      this.Notifications.error('失败', err, '无法检索角色');
+      this.Notifications.error('Failure', err, '无法获取角色');
     }
   }
 }

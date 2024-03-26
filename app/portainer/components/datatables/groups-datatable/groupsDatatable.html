@@ -2,51 +2,63 @@
   <rd-widget>
     <rd-widget-body classes="no-padding">
       <div class="toolBar">
-        <div class="toolBarTitle"> <i class="fa" ng-class="$ctrl.titleIcon" aria-hidden="true" style="margin-right: 2px;"></i> {{ $ctrl.titleText }} </div>
-      </div>
-      <div class="actionBar">
-        <button
-          type="button"
-          class="btn btn-sm btn-danger"
-          ng-disabled="$ctrl.state.selectedItemCount === 0"
-          ng-click="$ctrl.removeAction($ctrl.state.selectedItems)"
-          data-cy="endpointGroup-removeGroupButton"
-        >
-          <i class="fa fa-trash-alt space-right" aria-hidden="true"></i>删除
-        </button>
-        <button type="button" class="btn btn-sm btn-primary" ui-sref="portainer.groups.new" data-cy="endpointGroup-addGroupButton">
-          <i class="fa fa-plus space-right" aria-hidden="true"></i>添加群组
-        </button>
-      </div>
-      <div class="searchBar">
-        <i class="fa fa-search searchIcon" aria-hidden="true"></i>
-        <input
-          type="text"
-          class="searchInput"
-          ng-model="$ctrl.state.textFilter"
-          ng-change="$ctrl.onTextFilterChange()"
-          placeholder="搜索..."
-          auto-focus
-          ng-model-options="{ debounce: 300 }"
-          data-cy="endpointGroup-searchInput"
-        />
+        <div class="toolBarTitle vertical-center">
+          <div class="widget-icon space-right">
+            <pr-icon icon="$ctrl.titleIcon"></pr-icon>
+          </div>
+          {{ $ctrl.titleText }}
+        </div>
+        <div class="searchBar vertical-center">
+          <pr-icon icon="'search'"></pr-icon>
+          <input
+            type="text"
+            class="searchInput"
+            ng-model="$ctrl.state.textFilter"
+            ng-change="$ctrl.onTextFilterChange()"
+            placeholder="搜索群组..."
+            auto-focus
+            ng-model-options="{ debounce: 300 }"
+            data-cy="endpointGroup-searchInput"
+          />
+        </div>
+        <div class="actionBar !gap-3">
+          <button
+            type="button"
+            class="btn btn-sm btn-dangerlight h-fit"
+            ng-disabled="$ctrl.state.selectedItemCount === 0"
+            ng-click="$ctrl.removeAction($ctrl.state.selectedItems)"
+            data-cy="endpointGroup-removeGroupButton"
+          >
+            <pr-icon icon="'trash-2'"></pr-icon>
+            删除
+          </button>
+          <button type="button" class="btn btn-sm btn-primary h-fit" ui-sref="portainer.groups.new" data-cy="endpointGroup-addGroupButton">
+            <pr-icon icon="'plus'"></pr-icon>添加群组
+          </button>
+        </div>
       </div>
       <div class="table-responsive">
-        <table class="table table-hover nowrap-cells" data-cy="endpointGroup-endpointGroupTable">
+        <table class="table-hover nowrap-cells table" data-cy="endpointGroup-endpointGroupTable">
           <thead>
             <tr>
               <th>
-                <span class="md-checkbox">
-                  <input id="select_all" type="checkbox" ng-model="$ctrl.state.selectAll" ng-change="$ctrl.selectAll()" data-cy="endpointGroup-selectAllCheckbox" />
-                  <label for="select_all"></label>
-                </span>
-                <a ng-click="$ctrl.changeOrderBy('Name')">
-                  名称
-                  <i class="fa fa-sort-alpha-down" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Name' && !$ctrl.state.reverseOrder"></i>
-                  <i class="fa fa-sort-alpha-up" aria-hidden="true" ng-if="$ctrl.state.orderBy === 'Name' && $ctrl.state.reverseOrder"></i>
-                </a>
+                <div class="vertical-center">
+                  <span class="md-checkbox">
+                    <input id="select_all" type="checkbox" ng-model="$ctrl.state.selectAll" ng-change="$ctrl.selectAll()" data-cy="endpointGroup-selectAllCheckbox" />
+                    <label for="select_all"></label>
+                  </span>
+                  <table-column-header
+                    col-title="'名称'"
+                    can-sort="true"
+                    is-sorted="$ctrl.state.orderBy === 'Name'"
+                    is-sorted-desc="$ctrl.state.orderBy === 'Name' && $ctrl.state.reverseOrder"
+                    ng-click="$ctrl.changeOrderBy('Name')"
+                  ></table-column-header>
+                </div>
               </th>
-              <th>操作</th>
+              <th>
+                <table-column-header col-title="'操作'" can-sort="false"></table-column-header>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -62,28 +74,31 @@
                 <a ui-sref="portainer.groups.group({id: item.Id})">{{ item.Name }}</a>
               </td>
               <td>
-                <a ui-sref="portainer.groups.group.access({id: item.Id})"> <i class="fa fa-users" aria-hidden="true"></i> 管理访问 </a>
+                <div class="vertical-center">
+                  <a ui-sref="portainer.groups.group.access({id: item.Id})">
+                    <pr-icon icon="'users'"></pr-icon>
+                    管理访问权限
+                  </a>
+                </div>
               </td>
             </tr>
             <tr ng-if="!$ctrl.dataset">
-              <td colspan="3" class="text-center text-muted">加载中...</td>
+              <td colspan="3" class="text-muted text-center">加载中...</td>
             </tr>
             <tr ng-if="$ctrl.state.filteredDataSet.length === 0">
-              <td colspan="3" class="text-center text-muted">没有可用的组。</td>
+              <td colspan="3" class="text-muted text-center">暂无可用群组。</td>
             </tr>
           </tbody>
         </table>
       </div>
       <div class="footer" ng-if="$ctrl.dataset">
-        <div class="infoBar" ng-if="$ctrl.state.selectedItemCount !== 0"> {{ $ctrl.state.selectedItemCount }} 所选项目 </div>
+        <div class="infoBar" ng-if="$ctrl.state.selectedItemCount !== 0"> {{ $ctrl.state.selectedItemCount }} 项已选择 </div>
         <div class="paginationControls">
-          <form class="form-inline">
+          <form class="form-inline vertical-center">
             <span class="limitSelector">
-              <span style="margin-right: 5px;">
-                每页项目数
-              </span>
+              <span style="margin-right: 5px"> 每页项目 </span>
               <select class="form-control" ng-model="$ctrl.state.paginatedItemLimit" ng-change="$ctrl.changePaginationLimit()" data-cy="component-paginationSelect">
-                <option value="0">All</option>
+                <option value="0">全部</option>
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50">50</option>

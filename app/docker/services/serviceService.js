@@ -1,13 +1,10 @@
+import { formatLogs } from '../helpers/logHelper';
 import { ServiceViewModel } from '../models/service';
 
 angular.module('portainer.docker').factory('ServiceService', [
   '$q',
   'Service',
-  'ServiceHelper',
-  'TaskService',
-  'ResourceControlService',
-  'LogHelper',
-  function ServiceServiceFactory($q, Service, ServiceHelper, TaskService, ResourceControlService, LogHelper) {
+  function ServiceServiceFactory($q, Service) {
     'use strict';
     var service = {};
 
@@ -22,7 +19,7 @@ angular.module('portainer.docker').factory('ServiceService', [
           deferred.resolve(services);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: '无法检索服务', err: err });
+          deferred.reject({ msg: 'Unable to retrieve services', err: err });
         });
 
       return deferred.promise;
@@ -37,7 +34,7 @@ angular.module('portainer.docker').factory('ServiceService', [
           deferred.resolve(service);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: '无法检索服务详细信息', err: err });
+          deferred.reject({ msg: 'Unable to retrieve service details', err: err });
         });
 
       return deferred.promise;
@@ -88,7 +85,7 @@ angular.module('portainer.docker').factory('ServiceService', [
 
       Service.logs(parameters)
         .$promise.then(function success(data) {
-          var logs = LogHelper.formatLogs(data.logs, true);
+          var logs = formatLogs(data.logs, { stripHeaders: true, withTimestamps: !!timestamps });
           deferred.resolve(logs);
         })
         .catch(function error(err) {

@@ -1,7 +1,7 @@
 import _ from 'lodash-es';
 import { KubernetesPortMapping, KubernetesPortMappingPort } from 'Kubernetes/models/port/models';
-import { KubernetesServiceTypes } from 'Kubernetes/models/service/models';
-import { KubernetesConfigurationTypes } from 'Kubernetes/models/configuration/models';
+import { KubernetesService, KubernetesServicePort, KubernetesServiceTypes } from 'Kubernetes/models/service/models';
+import { KubernetesConfigurationKinds } from 'Kubernetes/models/configuration/models';
 import {
   KubernetesApplicationAutoScalerFormValue,
   KubernetesApplicationConfigurationFormValue,
@@ -145,12 +145,11 @@ class KubernetesApplicationHelper {
   /* #endregion */
 
   /* #region  CONFIGURATIONS FV <> ENV & VOLUMES */
-  static generateConfigurationFormValuesFromEnvAndVolumes(env, volumes, configurations) {
+  static generateConfigurationFormValuesFromEnvAndVolumes(env, volumes, configurations, configurationKind) {
+    const filterCondition = configurationKind === KubernetesConfigurationKinds.CONFIGMAP ? 'valueFrom.configMapKeyRef.name' : 'valueFrom.secretKeyRef.name';
     const finalRes = _.flatMap(configurations, (cfg) => {
-      const filterCondition = cfg.Type === KubernetesConfigurationTypes.CONFIGMAP ? 'valueFrom.configMapKeyRef.name' : 'valueFrom.secretKeyRef.name';
-
       const cfgEnv = _.filter(env, [filterCondition, cfg.Name]);
-      const cfgVol = _.filter(volumes, { configurationName: cfg.Name });
+      const cfgVol = volumes.filter((volume) => volume.configurationName === cfg.Name && volume.configurationType === configurationKind);
       if (!cfgEnv.length && !cfgVol.length) {
         return;
       }
@@ -201,13 +200,14 @@ class KubernetesApplicationHelper {
     return _.without(finalRes, undefined);
   }
 
-  static generateEnvOrVolumesFromConfigurations(app, configurations) {
+  static generateEnvOrVolumesFromConfigurations(app, configMaps, secrets) {
+    const configurations = [...configMaps, ...secrets];
     let finalEnv = [];
     let finalVolumes = [];
     let finalMounts = [];
 
     _.forEach(configurations, (config) => {
-      const isBasic = config.SelectedConfiguration.Type === KubernetesConfigurationTypes.CONFIGMAP;
+      const isBasic = config.SelectedConfiguration.Kind === KubernetesConfigurationKinds.CONFIGMAP;
 
       if (!config.Overriden) {
         const envKeys = _.keys(config.SelectedConfiguration.Data);
@@ -275,6 +275,70 @@ class KubernetesApplicationHelper {
     return app;
   }
   /* #endregion */
+
+  /* #region  SERVICES -> SERVICES FORM VALUES */
+  static generateServicesFormValuesFromServices(app) {
+    let services = [];
+    if (app.Services) {
+      app.Services.forEach(function (service) {
+        //skip generate formValues if service = headless service ( clusterIp === "None" )
+        if (service.spec.clusterIP !== 'None') {
+          const svc = new KubernetesService();
+          svc.Namespace = service.metadata.namespace;
+          svc.Name = service.metadata.name;
+          svc.StackName = service.StackName;
+          svc.ApplicationOwner = app.ApplicationOwner;
+          svc.ApplicationName = app.ApplicationName;
+          svc.Type = service.spec.type;
+          if (service.spec.type === KubernetesServiceTypes.CLUSTER_IP) {
+            svc.Type = 1;
+          } else if (service.spec.type === KubernetesServiceTypes.NODE_PORT) {
+            svc.Type = 2;
+          } else if (service.spec.type === KubernetesServiceTypes.LOAD_BALANCER) {
+            svc.Type = 3;
+          }
+
+          let ports = [];
+          service.spec.ports.forEach(function (port) {
+            const svcport = new KubernetesServicePort();
+            svcport.name = port.name;
+            svcport.port = port.port;
+            svcport.nodePort = port.nodePort || 0;
+            svcport.protocol = port.protocol;
+            svcport.targetPort = port.targetPort;
+            svcport.serviceName = service.metadata.name;
+            svcport.ingressPaths = [];
+
+            app.Ingresses.value.forEach((ingress) => {
+              const matchingIngressPaths = ingress.Paths.filter((ingPath) => ingPath.ServiceName === service.metadata.name && ingPath.Port === port.port);
+              // only add ingress info to the port if the ingress serviceport and name matches
+              const newPaths = matchingIngressPaths.map((ingPath) => ({
+                IngressName: ingPath.IngressName,
+                Host: ingPath.Host,
+                Path: ingPath.Path,
+              }));
+              svcport.ingressPaths = [...svcport.ingressPaths, ...newPaths];
+              svc.Ingress = matchingIngressPaths.length > 0;
+            });
+
+            ports.push(svcport);
+          });
+          svc.Ports = ports;
+          svc.Selector = app.Raw.spec.selector.matchLabels;
+          services.push(svc);
+        }
+      });
+
+      return services;
+    }
+  }
+  /* #endregion */
+  static generateSelectorFromService(app) {
+    if (app.Raw.kind !== 'Pod') {
+      const selector = app.Raw.spec.selector.matchLabels;
+      return selector;
+    }
+  }
 
   /* #region  PUBLISHED PORTS FV <> PUBLISHED PORTS */
   static generatePublishedPortsFormValuesFromPublishedPorts(serviceType, publishedPorts, ingress) {

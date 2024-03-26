@@ -1,5 +1,6 @@
 import _ from 'lodash-es';
-import DockerNetworkHelper from 'Docker/helpers/networkHelper';
+import DockerNetworkHelper from '@/docker/helpers/networkHelper';
+import { confirmDelete } from '@@/modals/confirm';
 
 angular.module('portainer.docker').controller('NetworksController', [
   '$q',
@@ -8,10 +9,14 @@ angular.module('portainer.docker').controller('NetworksController', [
   'NetworkService',
   'Notifications',
   'HttpRequestHelper',
-  'EndpointProvider',
+  'endpoint',
   'AgentService',
-  function ($q, $scope, $state, NetworkService, Notifications, HttpRequestHelper, EndpointProvider, AgentService) {
-    $scope.removeAction = function (selectedItems) {
+  function ($q, $scope, $state, NetworkService, Notifications, HttpRequestHelper, endpoint, AgentService) {
+    $scope.removeAction = async function (selectedItems) {
+      const confirmed = await confirmDelete('您想删除选定的网络吗？');
+      if (!confirmed) {
+        return null;
+      }
       var actionCount = selectedItems.length;
       angular.forEach(selectedItems, function (network) {
         HttpRequestHelper.setPortainerAgentTargetHeader(network.NodeName);
@@ -22,7 +27,7 @@ angular.module('portainer.docker').controller('NetworksController', [
             $scope.networks.splice(index, 1);
           })
           .catch(function error(err) {
-            Notifications.error('失败', err, '无法删除网络');
+            Notifications.error('Failure', err, '无法删除网络');
           })
           .finally(function final() {
             --actionCount;
@@ -32,8 +37,6 @@ angular.module('portainer.docker').controller('NetworksController', [
           });
       });
     };
-
-    $scope.offlineMode = false;
 
     $scope.getNetworks = getNetworks;
 
@@ -60,12 +63,11 @@ angular.module('portainer.docker').controller('NetworksController', [
       };
 
       if ($scope.applicationState.endpoint.mode.agentProxy && $scope.applicationState.endpoint.mode.provider === 'DOCKER_SWARM_MODE') {
-        req.agents = AgentService.agents();
+        req.agents = AgentService.agents(endpoint.Id);
       }
 
       $q.all(req)
         .then((data) => {
-          $scope.offlineMode = EndpointProvider.offlineMode();
           const networks = _.forEach(data.networks, (item) => (item.Subs = []));
           if ($scope.applicationState.endpoint.mode.agentProxy && $scope.applicationState.endpoint.mode.provider === 'DOCKER_SWARM_MODE') {
             $scope.networks = groupSwarmNetworksManagerNodesFirst(data.networks, data.agents);
@@ -80,7 +82,7 @@ angular.module('portainer.docker').controller('NetworksController', [
         })
         .catch((err) => {
           $scope.networks = [];
-          Notifications.error('失败', err, '无法检索网络');
+          Notifications.error('Failure', err, '无法检索网络');
         });
     }
 

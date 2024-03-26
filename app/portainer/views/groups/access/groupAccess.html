@@ -1,14 +1,19 @@
-<rd-header>
-  <rd-header-title title-text="环境组访问"></rd-header-title>
-  <rd-header-content>
-    <a ui-sref="portainer.groups">群组</a> &gt; <a ui-sref="portainer.groups.group({id: group.Id})">{{ group.Name }}</a> &gt; 访问管理
-  </rd-header-content>
-</rd-header>
+<page-header
+  title="'环境组访问管理'"
+  breadcrumbs="[
+    { label:'组', link:'portainer.groups' },
+    {
+      label:group.Name,
+      link: 'portainer.groups.group',
+      linkParams:{id: group.Id}
+    }, '访问管理']"
+>
+</page-header>
 
 <div class="row" ng-if="group">
   <div class="col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="fa-object-group" title-text="群组"></rd-widget-header>
+      <rd-widget-header icon="dice-4" title-text="组"></rd-widget-header>
       <rd-widget-body classes="no-padding">
         <table class="table">
           <tbody>
