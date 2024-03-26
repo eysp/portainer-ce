@@ -1,1 +1,0 @@
-export { KubeconfigButton } from './KubeconfigButton';
