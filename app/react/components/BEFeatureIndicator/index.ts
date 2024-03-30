@@ -1,1 +1,0 @@
-export { BEFeatureIndicator } from './BEFeatureIndicator';

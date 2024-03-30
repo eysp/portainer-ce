@@ -1,1 +1,0 @@
-export { TeamMembersList } from './TeamMembersList';

@@ -1,1 +1,0 @@
-export { ConfigmapsAndSecretsView } from './ConfigmapsAndSecretsView';

@@ -1,1 +1,0 @@
-export { WizardAzure } from './WizardAzure';

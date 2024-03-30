@@ -1,1 +1,0 @@
-export { ConfigsDatatable } from './ConfigsDatatable';

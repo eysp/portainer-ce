@@ -1,1 +1,0 @@
-export { NavTabs } from './NavTabs';

@@ -1,1 +1,0 @@
-export { EdgeComputeSettings } from './EdgeComputeSettings';

@@ -1,1 +1,0 @@
-export { WizardKubernetes } from './WizardKubernetes';

@@ -1,1 +1,0 @@
-export { EnvironmentTypeSelectView } from './EndpointTypeView';

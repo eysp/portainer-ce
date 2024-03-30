@@ -1,1 +1,0 @@
-export { EditDetails } from './EditDetails';

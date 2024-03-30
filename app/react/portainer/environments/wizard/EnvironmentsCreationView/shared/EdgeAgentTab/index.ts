@@ -1,1 +1,0 @@
-export { EdgeAgentTab } from './EdgeAgentTab';

@@ -1,1 +1,0 @@
-export { SecretsDatatable } from './SecretsDatatable';

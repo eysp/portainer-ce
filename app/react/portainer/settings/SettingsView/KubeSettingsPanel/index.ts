@@ -1,1 +1,0 @@
-export { KubeSettingsPanel } from './KubeSettingsPanel';

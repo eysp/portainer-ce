@@ -1,1 +1,0 @@
-export { AzureSidebar } from './AzureSidebar';

@@ -1,1 +1,0 @@
-export { EnvironmentsDatatable } from './EnvironmentsDatatable';

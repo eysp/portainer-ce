@@ -1,1 +1,0 @@
-export { ApplicationDetailsWidget } from './ApplicationDetailsWidget';
