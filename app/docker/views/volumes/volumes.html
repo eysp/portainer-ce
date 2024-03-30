@@ -1,0 +1,17 @@
+<page-header title="'存储卷列表'" breadcrumbs="['存储卷']" reload="true"> </page-header>
+
+<div class="row">
+  <div class="col-sm-12">
+    <volumes-datatable
+      title-text="存储卷"
+      title-icon="database"
+      dataset="volumes"
+      table-key="volumes"
+      order-by="Id"
+      remove-action="removeAction"
+      show-host-column="applicationState.endpoint.mode.agentProxy && applicationState.endpoint.mode.provider === 'DOCKER_SWARM_MODE'"
+      show-browse-action="showBrowseAction"
+      refresh-callback="getVolumes"
+    ></volumes-datatable>
+  </div>
+</div>

@@ -1,0 +1,117 @@
+import _ from 'lodash';
+
+import { TagId } from '@/portainer/tags/types';
+import { useCreateTagMutation, useTags } from '@/portainer/tags/queries';
+
+import { Creatable, Select } from '@@/form-components/ReactSelect';
+import { FormControl } from '@@/form-components/FormControl';
+import { Link } from '@@/Link';
+
+import { TagButton } from '../TagButton';
+
+interface Props {
+  value: TagId[];
+  allowCreate?: boolean;
+  onChange(value: TagId[]): void;
+}
+
+interface Option {
+  value: TagId;
+  label: string;
+}
+
+export function TagSelector({ value, allowCreate = false, onChange }: Props) {
+  // change the struct because react-select has a bug with Creatable (https://github.com/JedWatson/react-select/issues/3417#issuecomment-461868989)
+  const tagsQuery = useTags({
+    select: (tags) => tags?.map((opt) => ({ label: opt.Name, value: opt.ID })),
+  });
+
+  const createTagMutation = useCreateTagMutation();
+
+  if (!tagsQuery.data) {
+    return null;
+  }
+
+  const { data: tags } = tagsQuery;
+
+  const selectedTags = _.compact(
+    value.map((id) => tags.find((tag) => tag.value === id))
+  );
+
+  const SelectComponent = allowCreate ? Creatable : Select;
+
+  if (!tags.length && !allowCreate) {
+    return (
+      <div className="form-group">
+        <div className="col-sm-12 small text-muted">
+          没有可用的标签。请前往
+          <Link to="portainer.tags" className="space-right space-left">
+            标签视图
+          </Link>
+          添加标签
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {value.length > 0 && (
+        <FormControl label="已选标签">
+          {selectedTags.map((tag) => (
+            <TagButton
+              key={tag.value}
+              title="删除标签"
+              value={tag.value}
+              label={tag.label}
+              onRemove={() => handleRemove(tag.value)}
+            />
+          ))}
+        </FormControl>
+      )}
+
+      <FormControl label="标签" inputId="tags-selector">
+        <SelectComponent
+          inputId="tags-selector"
+          value={[] as { label: string; value: number }[]}
+          hideSelectedOptions
+          options={tags.filter((tag) => !value.includes(tag.value))}
+          closeMenuOnSelect={false}
+          onChange={handleAdd}
+          noOptionsMessage={() => '没有可用的标签'}
+          formatCreateLabel={(inputValue) => `Create "${inputValue}"`}
+          onCreateOption={handleCreateOption}
+          aria-label="Tags"
+        />
+      </FormControl>
+    </>
+  );
+
+  function handleAdd(tag?: Option | null) {
+    if (!tag) {
+      return;
+    }
+    onChange([...value, tag.value]);
+  }
+
+  function handleRemove(tagId: TagId) {
+    onChange(value.filter((id) => id !== tagId));
+  }
+
+  function handleCreateOption(inputValue: string) {
+    if (!allowCreate) {
+      return;
+    }
+
+    // Prevent the new tag composed of space from being added
+    if (!inputValue.replace(/\s/g, '').length) {
+      return;
+    }
+
+    createTagMutation.mutate(inputValue, {
+      onSuccess(tag) {
+        handleAdd({ label: tag.Name, value: tag.ID });
+      },
+    });
+  }
+}

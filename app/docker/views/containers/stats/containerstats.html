@@ -1,0 +1,120 @@
+<page-header
+  title="'容器统计'"
+  breadcrumbs="[
+    { label:'容器', link:'docker.containers' },
+    {
+      label:(container.Name | trimcontainername),
+      link: 'docker.containers.container',
+      linkParams: { id: container.Id },
+    }, '统计数据']"
+>
+</page-header>
+
+<div class="row">
+  <div class="col-md-12">
+    <rd-widget>
+      <rd-widget-header icon="info" title-text="关于统计数据"> </rd-widget-header>
+      <rd-widget-body>
+        <form class="form-horizontal">
+          <div class="form-group">
+            <div class="col-sm-12">
+              <span class="small text-muted">
+                此视图显示关于容器<b>{{ container.Name | trimcontainername }}</b>的实时统计数据，以及此容器内运行的进程列表。
+              </span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="refreshRate" class="col-sm-3 col-md-2 col-lg-2 margin-sm-top control-label text-left"> 刷新频率 </label>
+            <div class="col-sm-3 col-md-2">
+              <select id="refreshRate" ng-model="state.refreshRate" ng-change="changeUpdateRepeater()" class="form-control">
+                <option value="1">1秒</option>
+                <option value="3">3秒</option>
+                <option value="5">5秒</option>
+                <option value="10">10秒</option>
+                <option value="30">30秒</option>
+                <option value="60">60秒</option>
+              </select>
+            </div>
+            <span>
+              <pr-icon id="refreshRateChange" icon="'check'" mode="'success'" style="display: none"></pr-icon>
+            </span>
+          </div>
+          <div class="form-group" ng-if="state.networkStatsUnavailable">
+            <div class="col-sm-12">
+              <span class="small text-muted">
+                <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
+                无法获取此容器的网络统计数据。
+              </span>
+            </div>
+          </div>
+          <div class="form-group" ng-if="state.ioStatsUnavailable">
+            <div class="col-sm-12">
+              <span class="small text-muted">
+                <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
+                无法获取此容器的I/O统计数据。
+              </span>
+            </div>
+          </div>
+        </form>
+      </rd-widget-body>
+    </rd-widget>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-6 col-md-6 col-sm-12">
+    <rd-widget>
+      <rd-widget-header icon="bar-chart" title-text="内存使用情况"></rd-widget-header>
+      <rd-widget-body>
+        <div class="chart-container" style="position: relative">
+          <canvas id="memoryChart" width="770" height="300"></canvas>
+        </div>
+      </rd-widget-body>
+    </rd-widget>
+  </div>
+
+  <div class="col-lg-6 col-md-6 col-sm-12">
+    <rd-widget>
+      <rd-widget-header icon="bar-chart" title-text="CPU使用情况"></rd-widget-header>
+      <rd-widget-body>
+        <div class="chart-container" style="position: relative">
+          <canvas id="cpuChart" width="770" height="300"></canvas>
+        </div>
+      </rd-widget-body>
+    </rd-widget>
+  </div>
+
+  <div class="col-lg-6 col-md-6 col-sm-12" ng-if="!state.networkStatsUnavailable">
+    <rd-widget>
+      <rd-widget-header icon="bar-chart" title-text="网络使用情况（汇总）"></rd-widget-header>
+      <rd-widget-body>
+        <div class="chart-container" style="position: relative">
+          <canvas id="networkChart" width="770" height="300"></canvas>
+        </div>
+      </rd-widget-body>
+    </rd-widget>
+  </div>
+
+  <div class="col-lg-6 col-md-6 col-sm-12" ng-if="!state.ioStatsUnavailable">
+    <rd-widget>
+      <rd-widget-header icon="bar-chart" title-text="I/O使用情况（汇总）"></rd-widget-header>
+      <rd-widget-body>
+        <div class="chart-container" style="position: relative">
+          <canvas id="ioChart" width="770" height="300"></canvas>
+        </div>
+      </rd-widget-body>
+    </rd-widget>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-sm-12">
+    <container-processes-datatable
+      title-text="进程"
+      title-icon="list"
+      dataset="processInfo.Processes"
+      headerset="processInfo.Titles"
+      table-key="container-processes"
+    ></container-processes-datatable>
+  </div>
+</div>

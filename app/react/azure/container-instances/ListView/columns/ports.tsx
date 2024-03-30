@@ -1,0 +1,36 @@
+import { ExternalLink } from 'lucide-react';
+import { CellContext } from '@tanstack/react-table';
+
+import { ContainerGroup } from '@/react/azure/types';
+import { getPorts } from '@/react/azure/utils';
+
+import { Icon } from '@@/Icon';
+
+import { columnHelper } from './helper';
+
+export const ports = columnHelper.accessor(getPorts, {
+  header: '已发布端口',
+  cell: PortsCell,
+  id: 'ports',
+});
+
+function PortsCell({
+  getValue,
+  row: { original: container },
+}: CellContext<ContainerGroup, ReturnType<typeof getPorts>>) {
+  const ports = getValue();
+
+  const ip = container.properties.ipAddress
+    ? container.properties.ipAddress.ip
+    : '';
+  if (ports.length === 0 || !ip) {
+    return '-';
+  }
+
+  return ports.map((port) => (
+    <a className="image-tag" href={`http://${ip}:${port.host}`} key={port.host}>
+      <Icon icon={ExternalLink} className="mr-1" />
+      {ip}:{port.host}
+    </a>
+  ));
+}

@@ -1,0 +1,72 @@
+<page-header title="'创建配置'" breadcrumbs="[{label:'配置', link:'docker.configs'}, '添加配置']"> </page-header>
+
+<div class="row">
+  <div class="col-lg-12 col-md-12 col-xs-12">
+    <rd-widget>
+      <rd-widget-body>
+        <form class="form-horizontal">
+          <!-- 名称输入 -->
+          <div class="form-group">
+            <label for="config_name" class="col-sm-1 control-label text-left">名称</label>
+            <div class="col-sm-11">
+              <input type="text" class="form-control" ng-model="ctrl.formValues.Name" id="config_name" placeholder="例如 myConfig" />
+            </div>
+          </div>
+          <!-- !名称输入 -->
+          <!-- 配置数据 -->
+          <div class="form-group">
+            <div class="col-sm-12" ng-if="ctrl.formValues.displayCodeEditor">
+              <web-editor-form
+                identifier="config-creation-editor"
+                placeholder="在此处定义或粘贴您的配置内容"
+                yml="false"
+                on-change="(ctrl.editorUpdate)"
+                value="ctrl.formValues.ConfigContent"
+              ></web-editor-form>
+            </div>
+          </div>
+          <!-- !配置数据 -->
+          <!-- 标签 -->
+          <div class="form-group">
+            <div class="col-sm-12 mt-1">
+              <label class="control-label space-right text-left">标签</label>
+              <span class="label label-default interactive vertical-center space-left" ng-click="ctrl.addLabel()"> <pr-icon icon="'plus'" mode="'alt'"></pr-icon> 添加标签 </span>
+            </div>
+            <!-- 标签输入列表 -->
+            <div class="col-sm-12 form-inline mt-2">
+              <div ng-repeat="label in ctrl.formValues.Labels" class="mt-1">
+                <div class="input-group col-sm-5 input-group-sm">
+                  <span class="input-group-addon">名称</span>
+                  <input type="text" class="form-control" ng-model="label.name" placeholder="例如 com.example.foo" />
+                </div>
+                <div class="input-group col-sm-6 input-group-sm">
+                  <span class="input-group-addon">值</span>
+                  <input type="text" class="form-control" ng-model="label.value" placeholder="例如 bar" />
+                  <span class="input-group-btn">
+                    <button class="btn btn-dangerlight" type="button" ng-click="ctrl.removeLabel($index)">
+                      <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <!-- !标签输入列表 -->
+          </div>
+          <!-- !标签 -->
+          <!-- 访问控制 -->
+          <por-access-control-form form-data="ctrl.formValues.AccessControlData"></por-access-control-form>
+          <!-- !访问控制 -->
+          <!-- 操作 -->
+          <div class="col-sm-12 form-section-title"> 操作 </div>
+          <div class="form-group">
+            <div class="col-sm-12">
+              <button type="button" class="btn btn-primary btn-sm" ng-disabled="!ctrl.formValues.Name" ng-click="ctrl.create()">创建配置</button>
+              <span class="text-danger" ng-if="ctrl.state.formValidationError" style="margin-left: 5px">{{ ctrl.state.formValidationError }}</span>
+            </div>
+          </div>
+          <!-- !操作 -->
+        </form>
+      </rd-widget-body>
+    </rd-widget>
+  </div>
+</div>

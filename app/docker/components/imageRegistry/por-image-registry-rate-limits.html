@@ -1,0 +1,31 @@
+<div class="form-group" ng-if="$ctrl.pullRateLimits">
+  <div class="col-sm-12 small">
+    <div ng-if="$ctrl.pullRateLimits.remaining > 0" class="text-muted vertical-center">
+      <pr-icon icon="'alert-circle'" mode="'primary'"></pr-icon>
+      <span ng-if="$ctrl.isAuthenticated">
+        您当前正在使用免费帐户从 DockerHub 拉取镜像，并将受到每 6 小时限制为 200 次拉取。剩余次数:
+        <span style="font-weight: bold">{{ $ctrl.pullRateLimits.remaining }}/{{ $ctrl.pullRateLimits.limit }}</span>
+      </span>
+      <span ng-if="!$ctrl.isAuthenticated">
+        <span ng-if="$ctrl.isAdmin">
+          您当前正在使用匿名帐户从 DockerHub 拉取镜像，并将受到每 6 小时限制为 100 次拉取。您可以在<a ui-sref="portainer.registries">注册表视图</a>中配置 DockerHub 认证。剩余次数:
+          <span style="font-weight: bold">{{ $ctrl.pullRateLimits.remaining }}/{{ $ctrl.pullRateLimits.limit }}</span>
+        </span>
+        <span ng-if="!$ctrl.isAdmin">
+          您当前正在使用匿名帐户从 DockerHub 拉取镜像，并将受到每 6 小时限制为 100 次拉取。请联系管理员配置 DockerHub 认证。剩余次数: <span style="font-weight: bold">{{ $ctrl.pullRateLimits.remaining }}/{{ $ctrl.pullRateLimits.limit }}</span>
+        </span>
+      </span>
+    </div>
+    <div ng-if="$ctrl.pullRateLimits.remaining <= 0" class="text-warning vertical-center">
+      <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
+      <span ng-if="$ctrl.isAuthenticated">
+        作为免费用户，您的授权拉取配额已经超过。
+        <span ng-transclude="rateLimitExceeded">您将无法从 DockerHub 注册表中拉取任何镜像。</span>
+      </span>
+      <span ng-if="!$ctrl.isAuthenticated">
+        作为匿名用户，您的授权拉取配额已经超过。
+        <span ng-transclude="rateLimitExceeded">您将无法从 DockerHub 注册表中拉取任何镜像。</span>
+      </span>
+    </div>
+  </div>
+</div>

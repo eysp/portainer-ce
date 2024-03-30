@@ -1,0 +1,67 @@
+<page-header id="'view-top'" title="'标签'" breadcrumbs="['标签管理']" reload="true"> </page-header>
+
+<div class="row">
+  <div class="col-sm-12">
+    <rd-widget>
+      <rd-widget-header icon="plus" title-text="添加新标签"> </rd-widget-header>
+      <rd-widget-body>
+        <form class="form-horizontal" name="tagCreationForm" ng-submit="createTag()">
+          <!-- name-input -->
+          <div class="form-group">
+            <label for="name" class="col-sm-2 control-label required text-left"> 名称 </label>
+            <div class="col-sm-10">
+              <input
+                type="text"
+                class="form-control"
+                name="name"
+                ng-model="formValues.Name"
+                ng-change="checkNameValidity(tagCreationForm)"
+                placeholder="例如：org/acme"
+                required
+                auto-focus
+              />
+              <div class="help-block" ng-show="tagCreationForm.name.$invalid">
+                <div class="small text-warning">
+                  <div ng-messages="tagCreationForm.name.$error">
+                    <p ng-message="required" class="vertical-center">
+                      <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
+                      此字段为必填项。
+                    </p>
+                    <p ng-message="validName" class="vertical-center">
+                      <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
+                      此标签已存在。
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- !name-input -->
+          <div class="form-group">
+            <div class="col-sm-12">
+              <button
+                type="button"
+                class="btn btn-primary btn-sm"
+                ng-disabled="state.actionInProgress || !tagCreationForm.$valid"
+                ng-click="createTag()"
+                button-spinner="state.actionInProgress"
+              >
+                <span ng-hide="state.actionInProgress" class="vertical-center">
+                  <pr-icon icon="'plus'"></pr-icon>
+                  创建标签
+                </span>
+                <span ng-show="state.actionInProgress">正在创建标签...</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </rd-widget-body>
+    </rd-widget>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-sm-12">
+    <tags-datatable title-text="标签" title-icon="tag" dataset="tags" table-key="tags" order-by="Name" remove-action="removeAction"></tags-datatable>
+  </div>
+</div>

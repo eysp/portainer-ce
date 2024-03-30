@@ -1,0 +1,18 @@
+<page-header title="'Custom Templates'" breadcrumbs="['Custom Templates']" reload="true"></page-header>
+
+<div class="row">
+  <div class="col-sm-12">
+    <custom-templates-list
+      ng-if="$ctrl.templates"
+      title-text="Templates"
+      title-icon="edit"
+      templates="$ctrl.templates"
+      table-key="customTemplates"
+      is-edit-allowed="$ctrl.isEditAllowed"
+      on-select-click="($ctrl.selectTemplate)"
+      on-delete-click="($ctrl.confirmDelete)"
+      create-path="kubernetes.templates.custom.new"
+      edit-path="kubernetes.templates.custom.edit"
+    ></custom-templates-list>
+  </div>
+</div>

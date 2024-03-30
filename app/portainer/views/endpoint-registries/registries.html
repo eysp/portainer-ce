@@ -1,0 +1,16 @@
+<page-header title="'环境注册表'" breadcrumbs="['注册表管理']" reload="true"> </page-header>
+
+<div class="row">
+  <div class="col-sm-12">
+    <registries-datatable
+      title-text="注册表"
+      title-icon="radio"
+      dataset="$ctrl.registries"
+      table-key="endpointRegistries"
+      order-by="Name"
+      endpoint-type="$ctrl.endpointType"
+      can-manage-access="$ctrl.canManageAccess"
+      can-browse="$ctrl.canBrowse"
+    ></registries-datatable>
+  </div>
+</div>

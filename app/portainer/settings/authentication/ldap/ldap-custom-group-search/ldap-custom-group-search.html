@@ -1,0 +1,74 @@
+<div class="col-sm-12 form-section-title" style="float: initial"> 组搜索配置 </div>
+
+<rd-widget ng-repeat="config in $ctrl.settings | limitTo: (1 - $ctrl.settings)" style="display: block; margin-bottom: 10px">
+  <rd-widget-body>
+    <div class="form-group" ng-if="$index > 0" style="margin-bottom: 10px">
+      <span class="col-sm-12 text-muted small"> 额外搜索配置 </span>
+    </div>
+
+    <div class="form-group">
+      <label for="ldap_group_basedn_{{ $index }}" class="col-sm-4 col-md-2 control-label text-left">
+        组基准 DN
+        <portainer-tooltip message="'LDAP 服务器将搜索组的元素的可分辨名称。'"></portainer-tooltip>
+      </label>
+      <div class="col-sm-8 col-md-4">
+        <input type="text" class="form-control" id="ldap_group_basedn_{{ $index }}" ng-model="config.GroupBaseDN" placeholder="dc=ldap,dc=domain,dc=tld" />
+      </div>
+
+      <label for="ldap_group_att_{{ $index }}" class="col-sm-4 col-md-2 control-label text-left">
+        组成员属性
+        <portainer-tooltip message="'指示组成员身份的 LDAP 属性。'"></portainer-tooltip>
+      </label>
+      <div class="col-sm-8 col-md-4">
+        <input type="text" class="form-control" id="ldap_group_att_{{ $index }}" ng-model="config.GroupAttribute" placeholder="member" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="ldap_group_filter_{{ $index }}" class="col-sm-4 col-md-2 control-label text-left">
+        组筛选
+        <portainer-tooltip message="'用于选择组元素的 LDAP 搜索过滤器，可选。'"></portainer-tooltip>
+      </label>
+      <div class="col-sm-8 col-md-10 vertical-center">
+        <input type="text" class="form-control" id="ldap_group_filter_{{ $index }}" ng-model="config.GroupFilter" placeholder="(objectClass=account)" />
+        <button class="btn btn-md btn-danger" type="button" ng-click="$ctrl.onRemoveClick($index)" ng-if="$index > 0">
+          <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
+        </button>
+      </div>
+    </div>
+    <div class="form-group">
+      <span class="col-sm-12 small" style="color: #ffa719">
+        <pr-icon icon="'briefcase'" class-name="'icon icon-xs vertical-center'"></pr-icon>
+        用户在组和团队间的移除同步功能仅在
+        <a href="https://www.portainer.io/features?from=custom-login-banner" target="_blank">企业版</a>中提供。
+        <portainer-tooltip
+          class="text-muted align-bottom"
+          message="'组允许用户自动被添加到 Portainer 团队中。但是，为了保持完全同步，自动从团队中移除用户的功能可在商业版中获取。'"
+        ></portainer-tooltip>
+      </span>
+    </div>
+  </rd-widget-body>
+</rd-widget>
+
+<div class="form-group" style="margin-top: 10px">
+  <div class="col-sm-12">
+    <button class="btn btn-sm btn-light vertical-center !ml-0" ng-click="$ctrl.onAddClick()">
+      <pr-icon icon="'plus'"></pr-icon>
+      添加组搜索配置
+    </button>
+  </div>
+  <div class="col-sm-12" style="margin-top: 10px">
+    <be-teaser-button
+      feature-id="$ctrl.limitedFeatureId"
+      heading="'显示用户/组匹配'"
+      message="'显示与 Portainer 搜索配置匹配的用户和组列表。'"
+      button-text="'显示用户/组匹配'"
+      button-class-name="'!ml-0'"
+    ></be-teaser-button>
+  </div>
+</div>
+
+<div ng-if="$ctrl.showTable">
+  <div class="form-group col-sm-12">
+    <ldap-groups-datatable dataset="$ctrl.groups" title-text="组" title-icon="users" table-key="ldapGroups"></ldap-groups-datatable>
+  </div>
+</div>

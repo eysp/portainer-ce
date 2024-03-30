@@ -1,0 +1,102 @@
+<div id="service-restart-policy">
+  <rd-widget>
+    <rd-widget-header icon="list" title-text="重启策略"> </rd-widget-header>
+    <rd-widget-body classes="no-padding">
+      <table class="table">
+        <tbody>
+          <tr>
+            <td>重启条件</td>
+            <td>
+              <div class="input-group input-group-sm">
+                <select
+                  class="selectpicker form-control !rounded"
+                  ng-model="service.RestartCondition"
+                  ng-change="updateServiceAttribute(service, 'RestartCondition')"
+                  disable-authorization="DockerServiceUpdate"
+                >
+                  <option value="none">无</option>
+                  <option value="on-failure">失败时</option>
+                  <option value="any">总是重启</option>
+                </select>
+              </div>
+            </td>
+            <td>
+              <p class="small text-muted" style="margin-top: 10px">重启的条件。</p>
+            </td>
+          </tr>
+          <tr>
+            <td>重启延迟</td>
+            <td>
+              <input
+                class="input-sm"
+                type="text"
+                ng-model="service.RestartDelay"
+                ng-change="updateServiceAttribute(service, 'RestartDelay')"
+                ng-pattern="/^([0-9]+)(h|m|s|ms|us|ns)$/i"
+                disable-authorization="DockerServiceUpdate"
+              />
+            </td>
+            <td>
+              <p class="small text-muted" style="margin-top: 10px">
+                重启尝试之间的延迟，由数字加单位（ns|us|ms|s|m|h）表示。默认值为5s，即5秒。
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td>重启最大尝试次数</td>
+            <td>
+              <input
+                class="input-sm"
+                type="number"
+                ng-model="service.RestartMaxAttempts"
+                ng-change="updateServiceAttribute(service, 'RestartMaxAttempts')"
+                disable-authorization="DockerServiceUpdate"
+              />
+            </td>
+            <td>
+              <p class="small text-muted" style="margin-top: 10px">在放弃之前尝试重启给定任务的最大次数（默认值为0，表示无限次）。</p>
+            </td>
+          </tr>
+          <tr>
+            <td>重启窗口</td>
+            <td>
+              <input
+                class="input-sm"
+                type="text"
+                ng-model="service.RestartWindow"
+                ng-change="updateServiceAttribute(service, 'RestartWindow')"
+                ng-pattern="/^([0-9]+)(h|m|s|ms|us|ns)$/i"
+                disable-authorization="DockerServiceUpdate"
+              />
+            </td>
+            <td>
+              <p class="small text-muted" style="margin-top: 10px">
+                评估重启尝试的时间窗口，由数字加单位（ns|us|ms|s|m|h）表示。默认值为0秒，表示无限制。
+              </p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </rd-widget-body>
+    <rd-widget-footer authorization="DockerServiceUpdate">
+      <div class="btn-toolbar" role="toolbar">
+        <div class="btn-group" role="group">
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            ng-disabled="!hasChanges(service, ['RestartCondition', 'RestartDelay', 'RestartMaxAttempts', 'RestartWindow'])"
+            ng-click="updateService(service)"
+            >应用更改</button
+          >
+          <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu">
+            <li><a ng-click="cancelChanges(service, ['RestartCondition', 'RestartDelay', 'RestartMaxAttempts', 'RestartWindow'])">重置更改</a></li>
+            <li><a ng-click="cancelChanges(service)">重置所有更改</a></li>
+          </ul>
+        </div>
+      </div>
+    </rd-widget-footer>
+  </rd-widget>
+</div>

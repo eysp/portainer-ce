@@ -1,0 +1,1376 @@
+<page-header
+  ng-if="!ctrl.state.isEdit && !ctrl.stack.IsComposeFormat && ctrl.state.viewReady"
+  title="'Create application'"
+  breadcrumbs="[
+    { label:'Applications', link:'kubernetes.applications' },
+     'Create an application'
+     ]"
+  reload="true"
+>
+</page-header>
+
+<page-header
+  ng-if="ctrl.state.isEdit && !ctrl.stack.IsComposeFormat && ctrl.state.viewReady"
+  title="'编辑应用'"
+  breadcrumbs="[
+    { label:'命名空间', link:'kubernetes.resourcePools' },
+    {
+      label:ctrl.application.ResourcePool,
+      link: 'kubernetes.resourcePools.resourcePool',
+      linkParams:{ id: ctrl.application.ResourcePool }
+    },
+    { label:'应用程序', link:'kubernetes.applications' },
+    {
+      label:ctrl.application.Name,
+      link: 'kubernetes.applications.application',
+      linkParams:{ name: ctrl.application.Name, namespace: ctrl.application.ResourcePool }
+    },
+     '编辑',
+     ]"
+  reload="true"
+>
+</page-header>
+
+<page-header
+  ng-if="ctrl.stack.IsComposeFormat"
+  title="'查看应用'"
+  breadcrumbs="[
+    { label:'命名空间', link:'kubernetes.resourcePools' },
+    {
+      label:ctrl.application.ResourcePool,
+      link: 'kubernetes.resourcePools.resourcePool',
+      linkParams:{ id: ctrl.application.ResourcePool }
+    },
+    { label:'应用程序', link:'kubernetes.applications' },
+    {
+      label:ctrl.application.Name,
+      link: 'kubernetes.applications.application',
+      linkParams:{ name: ctrl.application.Name, namespace: ctrl.application.ResourcePool }
+    },
+     '查看',
+     ]"
+  reload="true"
+>
+</page-header>
+
+<kubernetes-view-loading view-ready="ctrl.state.viewReady"></kubernetes-view-loading>
+<div ng-if="ctrl.state.viewReady">
+  <div class="row kubernetes-create">
+    <div class="col-xs-12">
+      <rd-widget>
+        <rd-widget-body>
+          <form class="form-horizontal mt-4" name="kubernetesApplicationCreationForm" autocomplete="off">
+            <div ng-if="!ctrl.isExternalApplication()">
+              <git-form-info-panel
+                ng-if="ctrl.state.appType == ctrl.KubernetesDeploymentTypes.GIT"
+                class-name="'text-muted'"
+                url="ctrl.stack.GitConfig.URL"
+                config-file-path="ctrl.stack.GitConfig.ConfigFilePath"
+                additional-files="ctrl.stack.AdditionalFiles"
+                type="'application'"
+              ></git-form-info-panel>
+              <!-- #region NAMESPACE -->
+              <div class="form-group" ng-if="ctrl.formValues.ResourcePool">
+                <label for="resource-pool-selector" class="col-sm-3 col-lg-2 control-label text-left">Namespace</label>
+                <div class="col-sm-8">
+                  <select
+                    class="form-control"
+                    id="resource-pool-selector"
+                    ng-model="ctrl.formValues.ResourcePool"
+                    ng-options="resourcePool.Namespace.Name for resourcePool in ctrl.resourcePools"
+                    ng-change="ctrl.onResourcePoolSelectionChange()"
+                    ng-disabled="ctrl.state.isEdit"
+                    data-cy="k8sAppCreate-nsSelect"
+                  ></select>
+                </div>
+              </div>
+              <div class="form-group" ng-if="ctrl.state.resourcePoolHasQuota && ctrl.resourceQuotaCapacityExceeded() && ctrl.formValues.ResourcePool">
+                <div class="col-sm-12 small text-danger">
+                  <pr-icon icon="'alert-triangle'"></pr-icon>
+                  此命名空间已经耗尽了资源容量，您将无法部署该应用。请联系管理员扩展命名空间的容量。
+                </div>
+              </div>
+              <div class="form-group" ng-if="!ctrl.formValues.ResourcePool">
+                <div class="col-sm-12 small text-warning">
+                  <pr-icon icon="'alert-triangle'"></pr-icon>
+                  您没有访问任何命名空间的权限。请联系管理员获取命名空间的访问权限。
+                </div>
+              </div>
+              <!-- #endregion -->
+
+              <!-- #region Git repository -->
+              <kubernetes-redeploy-app-git-form
+                ng-if="ctrl.state.appType === ctrl.KubernetesDeploymentTypes.GIT"
+                stack="ctrl.stack"
+                namespace="ctrl.formValues.ResourcePool.Namespace.Name"
+              ></kubernetes-redeploy-app-git-form>
+              <!-- #endregion -->
+
+              <!-- #region web editor -->
+              <web-editor-form
+                read-only="ctrl.stack.IsComposeFormat"
+                ng-if="ctrl.state.appType === ctrl.KubernetesDeploymentTypes.CONTENT"
+                value="ctrl.stackFileContent"
+                yml="true"
+                identifier="kubernetes-deploy-editor"
+                placeholder="在此处定义或粘贴您的清单文件内容"
+                on-change="(ctrl.onChangeFileContent)"
+              >
+                <editor-description>
+                  <div class="flex gap-1" ng-show="ctrl.stack.IsComposeFormat">
+                    <pr-icon icon="'alert-circle'" mode="'warning'" class-name="'!mt-1'"></pr-icon>
+                    <div>
+                      <p>
+                        Portainer不再支持用于Kubernetes部署的<a href="https://docs.docker.com/compose/compose-file/" target="_blank">docker-compose</a>格式清单文件，并且我们已删除了<a href="https://kompose.io/" target="_blank">Kompose</a>转换工具，该工具可以实现这一目的。这样做的原因是因为Kompose现在构成了安全风险，因为它存在许多常见的漏洞和曝光(CVEs)。
+                      </p>
+                      <p>
+                        不幸的是，虽然Kompose项目有一个维护者，并且是CNCF的一部分，但它并没有得到积极的维护。发布频率非常低，而且对于项目的新的拉取请求(包括我们提交的拉取请求)，需要几个月的时间才能合并，而这期间新的CVE正在出现。
+                      </p>
+                      <p>
+                        我们建议在沙盒环境中安装您自己的Kompose实例，将您的Docker Compose文件转换为Kubernetes清单文件，并使用这些清单文件来设置应用程序。
+                      </p>
+                    </div>
+                  </div>
+                  <span ng-show="!ctrl.stack.IsComposeFormat">
+                    <p class="vertical-center">
+                      <pr-icon icon="'info'" mode="'primary'"></pr-icon>
+                      此功能允许您在此环境中部署任何类型的Kubernetes资源（Deployment、Secret、ConfigMap等）。
+                    </p>
+                    <p>
+                      您可以在<a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/" target="_blank">官方文档</a>中了解有关Kubernetes文件格式的更多信息。
+                    </p>
+                  </span>
+                </editor-description>
+              </web-editor-form>
+              <!-- #endregion -->
+              <div ng-if="ctrl.state.appType === ctrl.KubernetesDeploymentTypes.APPLICATION_FORM">
+                <!-- #region NAME FIELD -->
+                <div class="form-group">
+                  <label for="application_name" class="col-sm-3 col-lg-2 control-label required text-left">名称</label>
+                  <div class="col-sm-8">
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="application_name"
+                      ng-model="ctrl.formValues.Name"
+                      ng-change="ctrl.onChangeName()"
+                      placeholder="我的应用"
+                      ng-pattern="/^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$/"
+                      auto-focus
+                      required
+                      ng-disabled="ctrl.state.isEdit"
+                      data-cy="k8sAppCreate-applicationName"
+                    />
+                  </div>
+                </div>
+                <div class="form-group" ng-show="kubernetesApplicationCreationForm.application_name.$invalid || ctrl.state.alreadyExists">
+                  <div class="small">
+                    <div class="col-sm-3 col-lg-2">&nbsp;</div>
+                    <div class="col-sm-8" ng-messages="kubernetesApplicationCreationForm.application_name.$error">
+                      <p class="text-warning vertical-center" ng-message="required"
+                        ><pr-icon class="vertical-center" icon="'alert-triangle'" mode="'warning'"></pr-icon> 此字段为必填项。</p
+                      >
+                      <p class="text-warning vertical-center" ng-message="pattern">
+                        <pr-icon class="vertical-center" icon="'alert-triangle'" mode="'warning'"></pr-icon>
+                        该字段必须由小写字母数字字符或'-'组成，最多包含63个字符，以字母字符开头，并以字母数字字符结尾 (例如 'my-name' 或 'abc-123')。
+                      </p>
+                    </div>
+                    <div class="col-sm-8" ng-if="ctrl.state.alreadyExists">
+                      <p class="text-warning vertical-center">
+                        <pr-icon class="vertical-center" icon="'alert-triangle'" mode="'warning'"></pr-icon>
+                        已在所选命名空间内存在相同名称的应用程序。
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <!-- #endregion -->
+
+                <!-- #region IMAGE FIELD -->
+                <div class="form-group mb-2">
+                  <div class="col-sm-12">
+                    <por-image-registry
+                      model="ctrl.formValues.ImageModel"
+                      ng-if="ctrl.formValues.ResourcePool"
+                      auto-complete="false"
+                      label-class="col-sm-3 col-lg-2"
+                      input-class="col-sm-8"
+                      namespace="ctrl.formValues.ResourcePool.Namespace.Name"
+                      endpoint="ctrl.endpoint"
+                      is-admin="ctrl.isAdmin"
+                      check-rate-limits="true"
+                      set-validity="ctrl.setPullImageValidity"
+                    ></por-image-registry>
+                  </div>
+                </div>
+                <!-- #end region IMAGE FIELD -->
+
+                <div class="col-sm-12 mb-4 !p-0">
+                  <annotations-be-teaser></annotations-be-teaser>
+                </div>
+
+                <div ng-if="ctrl.formValues.ResourcePool">
+                  <!-- #region STACK -->
+                  <div class="form-group">
+                    <div class="col-sm-12 small text-muted vertical-center">
+                      <pr-icon icon="'info'" mode="'primary'"></pr-icon>
+                      Portainer可以自动将多个应用程序捆绑在一个堆栈中。输入新堆栈的名称或在列表中选择现有堆栈。留空以使用应用程序名称。
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="stack_name" class="col-sm-3 col-lg-2 control-label text-left">堆栈</label>
+                    <div class="col-sm-8">
+                      <input
+                        type="text"
+                        class="form-control"
+                        placeholder="myStack"
+                        ng-model="ctrl.formValues.StackName"
+                        name="stack_name"
+                        uib-typeahead="stack for stack in ctrl.stacks | filter:$viewValue | limitTo:7"
+                        typeahead-min-length="0"
+                        data-cy="k8sAppCreate-stackName"
+                      />
+                    </div>
+                  </div>
+                  <!-- #endregion -->
+
+                  <!-- #region ENVIRONMENT VARIABLES -->
+                  <div class="form-group">
+                    <div class="col-sm-12 vertical-center">
+                      <label class="control-label !pt-0 text-left">环境变量</label>
+                    </div>
+
+                    <div class="col-sm-12 form-inline mt-2">
+                      <div ng-repeat="envVar in ctrl.formValues.EnvironmentVariables | orderBy: 'NameIndex'" class="mt-2">
+                        <div style="margin-top: 2px">
+                          <div class="col-sm-4 input-group input-group-sm mr-2">
+                            <div class="input-group col-sm-12 input-group-sm" ng-class="{ striked: envVar.NeedsDeletion }">
+                              <span class="input-group-addon required">名称</span>
+                              <input
+                                type="text"
+                                name="environment_variable_name_{{ $index }}"
+                                class="form-control"
+                                ng-model="envVar.Name"
+                                ng-change="ctrl.onChangeEnvironmentName()"
+                                ng-pattern="/^[-._a-zA-Z][-._a-zA-Z0-9]*$/"
+                                placeholder="foo"
+                                ng-disabled="ctrl.formValues.Containers.length > 1"
+                                data-cy="k8sAppCreate-envVarName_{{ $index }}"
+                                required
+                              />
+                            </div>
+                          </div>
+
+                          <div class="col-sm-4 input-group input-group-sm mr-2" ng-class="{ striked: envVar.NeedsDeletion }">
+                            <span class="input-group-addon">value</span>
+                            <input
+                              type="text"
+                              name="environment_variable_value_{{ $index }}"
+                              class="form-control"
+                              ng-model="envVar.Value"
+                              placeholder="bar"
+                              ng-disabled="ctrl.formValues.Containers.length > 1"
+                              data-cy="k8sAppCreate-envVarValue_{{ $index }}"
+                            />
+                          </div>
+
+                          <div class="col-sm-2 input-group input-group-sm" ng-if="ctrl.formValues.Containers.length <= 1">
+                            <button
+                              ng-if="!envVar.NeedsDeletion"
+                              class="btn btn-md btn-dangerlight btn-only-icon !ml-0"
+                              type="button"
+                              ng-click="ctrl.removeEnvironmentVariable(envVar)"
+                            >
+                              <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
+                            </button>
+                            <button
+                              ng-if="envVar.NeedsDeletion"
+                              class="btn btn-sm btn-light btn-only-icon"
+                              type="button"
+                              ng-click="ctrl.restoreEnvironmentVariable(envVar)"
+                              data-cy="k8sAppCreate-removeEnvVarButton_{{ $index }}"
+                            >
+                              <pr-icon icon="'rotate-cw'" size="'md'"></pr-icon>
+                            </button>
+                          </div>
+                        </div>
+                        <div
+                          ng-show="
+                            kubernetesApplicationCreationForm['environment_variable_name_' + $index].$invalid ||
+                            ctrl.state.duplicates.environmentVariables.refs[$index] !== undefined
+                          "
+                        >
+                        <div class="col-sm-8 input-group input-group-sm">
+                          <div
+                            class="small"
+                            style="margin-top: 5px"
+                            ng-show="
+                              kubernetesApplicationCreationForm['environment_variable_name_' + $index].$invalid ||
+                              ctrl.state.duplicates.environmentVariables.refs[$index] !== undefined
+                            "
+                          >
+                            <ng-messages for="kubernetesApplicationCreationForm['environment_variable_name_' + $index].$error">
+                              <p ng-message="required" class="text-warning vertical-center"
+                                ><pr-icon icon="'alert-triangle'" mode="'warning'" class-="vertical-center"></pr-icon> 环境变量名称是必填项。</p
+                              >
+                              <p ng-message="pattern" class="text-warning vertical-center"
+                                ><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 此字段必须由字母字符、数字、'_'、'-' 或 '.' 组成，并且不能以数字开头 (例如 'my.env-name', 或 'MY_ENV.NAME', 或 'MyEnvName1')。</p
+                              >
+                            </ng-messages>
+                            <p class="text-warning vertical-center" ng-if="ctrl.state.duplicates.environmentVariables.refs[$index] !== undefined"
+                              ><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 此环境变量已经定义。</p
+                            >
+                          </div>
+                        </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-sm-12 mt-2">
+                      <span
+                        ng-if="ctrl.formValues.Containers.length <= 1"
+                        class="btn btn-primary btn-sm btn btn-sm btn-light mb-2 !ml-0"
+                        ng-click="ctrl.addEnvironmentVariable()"
+                        data-cy="k8sAppCreate-addEnvVarButton"
+                      >
+                        <pr-icon icon="'plus'" size="'sm'"></pr-icon> 添加环境变量
+                      </span>
+                    </div>
+                  </div>
+                  <!-- #endregion -->
+
+                  <!-- #region CONFIGMAPS -->
+                  <div class="form-group">
+                    <div class="col-sm-12 vertical-center">
+                      <label class="control-label !pt-0 text-left">配置映射</label>
+                    </div>
+                    <div class="col-sm-12 small text-muted vertical-center" style="margin-top: 15px" ng-if="ctrl.formValues.ConfigMaps.length">
+                      <pr-icon icon="'info'" mode="'primary'"></pr-icon>
+                      Portainer将自动将配置映射的所有键公开为环境变量。此行为可以通过覆盖选项覆盖为每个键的文件系统挂载。
+                    </div>
+                  </div>
+
+                  <!-- config-element -->
+                  <div class="form-inline clearfix" ng-repeat="(index, config) in ctrl.formValues.ConfigMaps">
+                    <div class="col-sm-12 !p-0">
+                      <div class="input-group input-group-sm !mr-1">
+                        <span class="input-group-addon">名称</span>
+                        <select
+                          class="form-control col-sm-6"
+                          ng-model="config.SelectedConfiguration"
+                          ng-options="c as c.Name for c in ctrl.configMaps track by c.Name"
+                          ng-change="ctrl.resetConfigMap(index)"
+                          ng-disabled="ctrl.formValues.Containers.length > 1"
+                          data-cy="k8sAppCreate-addConfigSelect_{{ $index }}"
+                        ></select>
+                      </div>
+
+                      <div class="input-group btn-group btn-group-sm">
+                        <label
+                          class="btn btn-md btn-light vertical-center !ml-0"
+                          type="button"
+                          ng-click="ctrl.resetConfigMap(index)"
+                          ng-disabled="ctrl.formValues.Containers.length > 1"
+                          data-cy="k8sAppCreate-configAutoButton_{{ $index }}"
+                          uib-btn-radio="false"
+                          ng-model="config.Overriden"
+                        >
+                          <pr-icon icon="'rotate-cw'" size="'md'"></pr-icon> 自动
+                        </label>
+                        <label
+                          class="btn btn-md btn-light vertical-center !ml-0"
+                          ng-click="ctrl.overrideConfigMap(index)"
+                          ng-disabled="!config.SelectedConfiguration || ctrl.formValues.Containers.length > 1"
+                          data-cy="k8sAppCreate-configOverrideButton_{{ $index }}"
+                          uib-btn-radio="true"
+                          ng-model="config.Overriden"
+                        >
+                          <pr-icon icon="'list'" size="'md'"></pr-icon> 覆盖
+                        </label>
+                      </div>
+
+                      <button
+                        class="btn btn-md btn-dangerlight btn-only-icon vertical-center"
+                        type="button"
+                        ng-click="ctrl.removeConfigMap(index)"
+                        ng-if="ctrl.formValues.Containers.length <= 1"
+                        data-cy="k8sAppCreate-configRemoveButton"
+                      >
+                        <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
+                      </button>
+                    </div>
+                    <!-- no-override -->
+                    <div class="row clearfix" ng-if="config.SelectedConfiguration && !config.Overriden">
+                      <div class="col-sm-9 small text-muted !mt-2 !p-0">
+                        以下键将作为环境变量从<code>{{ config.SelectedConfiguration.Name }}</code> ConfigMap加载：
+                        <span ng-repeat="(key, _) in config.SelectedConfiguration.Data">
+                          <code>{{ key }}</code>{{ $last ? '' : '，' }}
+                        </span>
+                      </div>
+                    </div>
+                    <!-- !no-override -->
+
+                    <!-- has-override -->
+                    <div class="col-sm-12 !mt-2 !mb-4 !p-0" ng-if="config.Overriden" ng-repeat="(keyIndex, overridenKey) in config.OverridenKeys" style="margin-top: 2px">
+                      <div class="input-group input-group-sm !mr-1">
+                        <span class="input-group-addon">key</span>
+                        <input type="text" class="form-control" ng-value="overridenKey.Key" disabled />
+                      </div>
+
+                      <div class="input-group btn-group btn-group-sm !mr-1">
+                        <label class="btn btn-light" ng-model="overridenKey.Type" uib-btn-radio="ctrl.ApplicationConfigurationFormValueOverridenKeyTypes.ENVIRONMENT">
+                          <pr-icon icon="'list'"></pr-icon> 环境
+                        </label>
+                        <label class="btn btn-light" ng-model="overridenKey.Type" uib-btn-radio="ctrl.ApplicationConfigurationFormValueOverridenKeyTypes.FILESYSTEM">
+                          <pr-icon icon="'file-text'"></pr-icon> 文件系统
+                        </label>
+                      </div>
+
+                      <div class="form-group !ml-0 !mr-0 !align-top" ng-if="overridenKey.Type === ctrl.ApplicationConfigurationFormValueOverridenKeyTypes.FILESYSTEM">
+                        <div class="input-group input-group-sm">
+                          <span class="input-group-addon required">磁盘路径</span>
+                          <input
+                            type="text"
+                            class="form-control"
+                            ng-model="overridenKey.Path"
+                            placeholder="/etc/myapp/conf.d"
+                            name="overriden_key_configmap_path_{{ index }}_{{ keyIndex }}"
+                            ng-disabled="ctrl.formValues.Containers.length > 1"
+                            required
+                            ng-change="ctrl.onChangeConfigMapPath()"
+                            data-cy="k8sAppCreate-pathOnDiskInput"
+                          />
+                        </div>
+                        <div
+                          class="small"
+                          ng-show="
+                            kubernetesApplicationCreationForm['overriden_key_configmap_path_' + index + '_' + keyIndex].$invalid ||
+                            ctrl.state.duplicates.configMapPaths.refs[index + '_' + keyIndex] !== undefined
+                          "
+                        >
+                          <div class="text-warning" ng-if="overridenKey.Type === ctrl.ApplicationConfigurationFormValueOverridenKeyTypes.FILESYSTEM">
+                            <div
+                              ng-show="
+                                kubernetesApplicationCreationForm['overriden_key_configmap_path_' + index + '_' + keyIndex].$invalid ||
+                                ctrl.state.duplicates.configMapPaths.refs[index + '_' + keyIndex] !== undefined
+                              "
+                            >
+                              <ng-messages for="kubernetesApplicationCreationForm['overriden_key_configmap_path_' + index + '_' + keyIndex].$error">
+                                <p class="vertical-center" ng-message="required"><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> Path is required.</p>
+                              </ng-messages>
+                              <p class="vertical-center" ng-if="ctrl.state.duplicates.configMapPaths.refs[index + '_' + keyIndex] !== undefined">
+                                <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 此路径已被使用。
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- !has-override -->
+                  </div>
+                  <!-- !config-element -->
+                  <div class="col-sm-12 !p-0">
+                    <button
+                      type="button"
+                      class="btn btn-primary btn-sm btn btn-sm btn-light mb-2 !ml-0"
+                      ng-disabled="ctrl.configMaps.length === 0"
+                      ng-click="ctrl.addConfigMap()"
+                      ng-if="ctrl.formValues.Containers.length <= 1"
+                      data-cy="k8sAppCreate-addConfigButton"
+                    >
+                      <pr-icon icon="'plus'" size="'sm'"></pr-icon> 添加 ConfigMap
+                    </button>
+                  </div>
+                  <div class="my-2 w-full">
+                    <p class="vertical-center text-warning text-xs" ng-if="ctrl.configMaps.length === 0"
+                      ><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 当前命名空间中没有可用的ConfigMaps。</p
+                    >
+                  </div>
+
+                  <!-- #region SECRETS -->
+                  <div class="form-group">
+                    <div class="col-sm-12 vertical-center pt-2.5">
+                      <label class="control-label !pt-0 text-left">秘钥</label>
+                    </div>
+                    <div class="col-sm-12 small text-muted vertical-center" style="margin-top: 15px" ng-if="ctrl.formValues.Secrets.length">
+                      <pr-icon icon="'info'" mode="'primary'"></pr-icon>
+                      Portainer 将自动将秘钥的所有键暴露为环境变量。可以通过覆盖选项，将此行为覆盖为每个键的文件系统挂载。
+                    </div>
+                  </div>
+
+                  <!-- config-element -->
+                  <div class="form-inline clearfix" ng-repeat="(index, config) in ctrl.formValues.Secrets">
+                    <div class="col-sm-12 !p-0">
+                      <div class="input-group input-group-sm !mr-1">
+                        <span class="input-group-addon">名称</span>
+                        <select
+                          class="form-control col-sm-6"
+                          ng-model="config.SelectedConfiguration"
+                          ng-options="c as c.Name for c in ctrl.secrets track by c.Name"
+                          ng-change="ctrl.resetSecret(index)"
+                          ng-disabled="ctrl.formValues.Containers.length > 1"
+                          data-cy="k8sAppCreate-addSecretSelect_{{ $index }}"
+                        ></select>
+                      </div>
+
+                      <div class="input-group btn-group btn-group-sm">
+                        <label
+                          class="btn btn-md btn-light vertical-center !ml-0"
+                          type="button"
+                          ng-click="ctrl.resetSecret(index)"
+                          ng-disabled="ctrl.formValues.Containers.length > 1"
+                          data-cy="k8sAppCreate-secretAutoButton_{{ $index }}"
+                          uib-btn-radio="false"
+                          ng-model="config.Overriden"
+                        >
+                          <pr-icon icon="'rotate-cw'" size="'md'"></pr-icon> 自动
+                        </label>
+                        <label
+                          class="btn btn-md btn-light vertical-center !ml-0"
+                          ng-click="ctrl.overrideSecret(index)"
+                          ng-disabled="!config.SelectedConfiguration || ctrl.formValues.Containers.length > 1"
+                          data-cy="k8sAppCreate-secretOverrideButton_{{ $index }}"
+                          uib-btn-radio="true"
+                          ng-model="config.Overriden"
+                        >
+                          <pr-icon icon="'list'" size="'md'"></pr-icon> 覆盖
+                        </label>
+                      </div>
+
+                      <button
+                        class="btn btn-md btn-dangerlight btn-only-icon vertical-center"
+                        type="button"
+                        ng-click="ctrl.removeSecret(index)"
+                        ng-if="ctrl.formValues.Containers.length <= 1"
+                        data-cy="k8sAppCreate-secretRemoveButton"
+                      >
+                        <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
+                      </button>
+                    </div>
+                    <!-- no-override -->
+                    <div class="row clearfix" ng-if="config.SelectedConfiguration && !config.Overriden">
+                      <div class="col-sm-9 small text-muted !mt-2 !p-0">
+                        以下键将作为环境变量从<code>{{ config.SelectedConfiguration.Name }}</code> Secret加载：
+                        <span ng-repeat="(key, _) in config.SelectedConfiguration.Data">
+                          <code>{{ key }}</code
+                          >{{ $last ? '' : ', ' }}
+                        </span>
+                      </div>
+                    </div>
+                    <!-- !no-override -->
+
+                    <!-- has-override -->
+                    <div class="col-sm-12 !mt-2 !mb-4 !p-0" ng-if="config.Overriden" ng-repeat="(keyIndex, overridenKey) in config.OverridenKeys" style="margin-top: 2px">
+                      <div class="input-group input-group-sm !mr-1">
+                        <span class="input-group-addon">key</span>
+                        <input type="text" class="form-control" ng-value="overridenKey.Key" disabled />
+                      </div>
+
+                      <div class="input-group btn-group btn-group-sm !mr-1">
+                        <label class="btn btn-light" ng-model="overridenKey.Type" uib-btn-radio="ctrl.ApplicationConfigurationFormValueOverridenKeyTypes.ENVIRONMENT">
+                          <pr-icon icon="'list'"></pr-icon> 环境
+                        </label>
+                        <label class="btn btn-light" ng-model="overridenKey.Type" uib-btn-radio="ctrl.ApplicationConfigurationFormValueOverridenKeyTypes.FILESYSTEM">
+                          <pr-icon icon="'file-text'"></pr-icon> 文件系统
+                        </label>
+                      </div>
+
+                      <div class="form-group !ml-0 !mr-0 !align-top" ng-if="overridenKey.Type === ctrl.ApplicationConfigurationFormValueOverridenKeyTypes.FILESYSTEM">
+                        <div class="input-group input-group-sm">
+                          <span class="input-group-addon required">磁盘路径</span>
+                          <input
+                            type="text"
+                            class="form-control"
+                            ng-model="overridenKey.Path"
+                            placeholder="/etc/myapp/conf.d"
+                            name="overriden_key_secret_path_{{ index }}_{{ keyIndex }}"
+                            ng-disabled="ctrl.formValues.Containers.length > 1"
+                            required
+                            ng-change="ctrl.onChangeSecretPath()"
+                            data-cy="k8sAppCreate-secretPathOnDiskInput"
+                          />
+                        </div>
+                        <div
+                          class="small"
+                          ng-show="
+                            kubernetesApplicationCreationForm['overriden_key_secret_path_' + index + '_' + keyIndex].$invalid ||
+                            ctrl.state.duplicates.secretPaths.refs[index + '_' + keyIndex] !== undefined
+                          "
+                        >
+                          <div class="text-warning" ng-if="overridenKey.Type === ctrl.ApplicationConfigurationFormValueOverridenKeyTypes.FILESYSTEM">
+                            <div
+                              ng-show="
+                                kubernetesApplicationCreationForm['overriden_key_secret_path_' + index + '_' + keyIndex].$invalid ||
+                                ctrl.state.duplicates.secretPaths.refs[index + '_' + keyIndex] !== undefined
+                              "
+                            >
+                              <ng-messages for="kubernetesApplicationCreationForm['overriden_key_secret_path_' + index + '_' + keyIndex].$error">
+                                <p class="vertical-center" ng-message="required"><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 路径为必填项。</p>
+                              </ng-messages>
+                              <p class="vertical-center" ng-if="ctrl.state.duplicates.secretPaths.refs[index + '_' + keyIndex] !== undefined"
+                                ><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 该路径已被使用。</p
+                              >
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- !has-override -->
+                  </div>
+
+                  <div class="my-2 w-full">
+                    <p class="vertical-center text-muted text-xs" ng-if="ctrl.secrets.length === 0">
+                      <pr-icon icon="'info'" mode="'primary'"></pr-icon>
+                      当前命名空间中没有可用的秘钥。
+                    </p>
+                  </div>
+                  <!-- !config-element -->
+                  <div class="col-sm-12 !p-0">
+                    <button
+                      type="button"
+                      ng-disabled="ctrl.secrets.length === 0"
+                      class="btn btn-primary btn-sm btn btn-sm btn-light mb-2 !ml-0"
+                      ng-click="ctrl.addSecret()"
+                      ng-if="ctrl.formValues.Containers.length <= 1"
+                      data-cy="k8sAppCreate-addSecretButton"
+                    >
+                      <pr-icon icon="'plus'" size="'sm'"></pr-icon> 添加秘钥
+                    </button>
+                  </div>
+                  <!-- #endregion -->
+
+                  <!-- #region PERSISTED FOLDERS -->
+                  <div class="form-group">
+                    <div class="col-sm-12 vertical-center mb-2 pt-2.5" style="margin-top: 5px">
+                      <label class="control-label !pt-0 text-left">持久化文件夹</label>
+                    </div>
+                  
+                    <div class="col-sm-12 small text-muted vertical-center mt-1" ng-if="!ctrl.storageClassAvailable()">
+                      <pr-icon icon="'info'" mode="'primary'"></pr-icon>
+                      没有可用的存储选项来持久化数据，请联系管理员启用存储选项。
+                    </div>
+                  
+                    <div class="row" ng-if="ctrl.storageClassAvailable()">
+                      <div class="col-sm-12" style="margin-top: 5px" ng-if="ctrl.allQuotasExhaustedAndNoVolumesAvailable()">
+                        <span class="small text-muted vertical-center">
+                          <pr-icon icon="'alert-circle'" mode="'warning'"></pr-icon>
+                          此命名空间已耗尽其存储容量。请联系管理员扩展命名空间的容量。
+                        </span>
+                      </div>
+                  
+                      <div class="col-sm-12 form-inline" style="margin-top: 10px" ng-repeat="persistedFolder in ctrl.formValues.PersistedFolders">
+                        <div style="margin-top: 2px">
+                          <div class="input-group col-sm-3 input-group-sm" ng-class="{ striked: persistedFolder.NeedsDeletion }">
+                            <span class="input-group-addon required">容器内路径</span>
+                            <input
+                              type="text"
+                              class="form-control"
+                              name="persisted_folder_path_{{ $index }}"
+                              ng-model="persistedFolder.ContainerPath"
+                              ng-change="ctrl.onChangePersistedFolderPath()"
+                              ng-disabled="ctrl.isEditAndExistingPersistedFolder($index) || ctrl.formValues.Containers.length > 1"
+                              placeholder="/data"
+                              required
+                              data-cy="k8sAppCreate-containerPathInput_{{ $index }}"
+                            />
+                          </div>
+                  
+                          <div
+                            class="input-group col-sm-2 input-group-sm"
+                            ng-if="
+                              !ctrl.isEditAndExistingPersistedFolder($index) &&
+                              ctrl.application.ApplicationType !== ctrl.ApplicationTypes.STATEFULSET &&
+                              ctrl.formValues.Containers.length <= 1
+                            "
+                          >
+                            <span class="btn-group btn-group-sm" ng-class="{ striked: persistedFolder.NeedsDeletion }">
+                              <label
+                                class="btn btn-light"
+                                ng-model="persistedFolder.UseNewVolume"
+                                uib-btn-radio="true"
+                                ng-change="ctrl.useNewVolume($index)"
+                                ng-disabled="ctrl.isNewVolumeButtonDisabled($index)"
+                                >新存储卷</label
+                              >
+                              <label
+                                class="btn btn-light"
+                                ng-model="persistedFolder.UseNewVolume"
+                                uib-btn-radio="false"
+                                ng-change="ctrl.useExistingVolume($index)"
+                                ng-disabled="ctrl.isExistingVolumeButtonDisabled()"
+                                >现有存储卷</label
+                              >
+                            </span>
+                          </div>
+                  
+                          <div class="input-group col-sm-3 input-group-sm" ng-class="{ striked: persistedFolder.NeedsDeletion }" ng-if="persistedFolder.UseNewVolume">
+                            <span class="input-group-addon required">请求的大小</span>
+                            <input
+                              type="number"
+                              class="form-control !rounded-none"
+                              name="persisted_folder_size_{{ $index }}"
+                              ng-model="persistedFolder.Size"
+                              placeholder="20"
+                              min="0"
+                              required
+                              ng-disabled="ctrl.isEditAndExistingPersistedFolder($index) || ctrl.formValues.Containers.length > 1"
+                              ng-change="ctrl.onChangeVolumeRequestedSize()"
+                            />
+                            <span class="input-group-addon !rounded-r-[5px] !p-0">
+                              <select
+                                class="form-control !h-[28px] w-12 !rounded-r-[5px] !border-none text-xs"
+                                ng-model="persistedFolder.SizeUnit"
+                                ng-style="{ height: '100%', cursor: ctrl.isEditAndExistingPersistedFolder($index) ? 'not-allowed' : 'auto' }"
+                                ng-options="unit for unit in ctrl.state.availableSizeUnits"
+                                ng-disabled="ctrl.isEditAndExistingPersistedFolder($index) || ctrl.formValues.Containers.length > 1"
+                                ng-change="ctrl.onChangeVolumeRequestedSize()"
+                              ></select>
+                            </span>
+                          </div>
+                  
+                          <div class="input-group col-sm-2 input-group-sm" ng-class="{ striked: persistedFolder.NeedsDeletion }" ng-if="persistedFolder.UseNewVolume">
+                            <span class="input-group-addon">存储</span>
+                            <select
+                              ng-if="ctrl.hasMultipleStorageClassesAvailable()"
+                              class="form-control"
+                              ng-model="persistedFolder.StorageClass"
+                              ng-options="storageClass as storageClass.Name for storageClass in ctrl.storageClasses"
+                              ng-disabled="ctrl.state.isEdit || ctrl.formValues.Containers.length > 1"
+                              data-cy="k8sAppCreate-storageSelect_{{ $index }}"
+                            ></select>
+                            <input
+                              ng-if="!ctrl.hasMultipleStorageClassesAvailable()"
+                              type="text"
+                              class="form-control"
+                              disabled
+                              ng-model="persistedFolder.StorageClass.Name"
+                              data-cy="k8sAppCreate-storageClassNameInput_{{ $index }}"
+                            />
+                          </div>
+                  
+                          <div class="input-group col-sm-5 input-group-sm" ng-if="!persistedFolder.UseNewVolume" ng-class="{ striked: persistedFolder.NeedsDeletion }">
+                            <span class="input-group-addon">存储卷</span>
+                            <select
+                              class="form-control"
+                              name="existing_volumes_{{ $index }}"
+                              ng-model="ctrl.formValues.PersistedFolders[$index].ExistingVolume"
+                              ng-options="vol as vol.PersistentVolumeClaim.Name for vol in ctrl.availableVolumes"
+                              ng-change="ctrl.onChangeExistingVolumeSelection()"
+                              ng-disabled="ctrl.isEditAndExistingPersistedFolder($index) || ctrl.formValues.Containers.length > 1"
+                              required
+                            >
+                              <option selected disabled hidden value="">选择一个存储卷</option>
+                            </select>
+                          </div>
+                  
+                          <div class="input-group col-sm-1 input-group-sm"> </div>
+                        </div>
+                  
+                        <div
+                          class="flex flex-row gap-x-1"
+                          ng-show="
+                            kubernetesApplicationCreationForm['persisted_folder_path_' + $index].$invalid ||
+                            ctrl.state.duplicates.persistedFolders.refs[$index] !== undefined ||
+                            kubernetesApplicationCreationForm['persisted_folder_size_' + $index].$invalid ||
+                            ctrl.state.exceeded.persistedFolders.refs[$index] !== undefined ||
+                            kubernetesApplicationCreationForm['existing_volumes_' + $index].$invalid ||
+                            ctrl.state.duplicates.existingVolumes.refs[$index] !== undefined
+                          "
+                        >
+                          <div class="input-group col-sm-3 input-group-sm">
+                            <div
+                              class="small text-warning"
+                              style="margin-top: 5px"
+                              ng-show="
+                                kubernetesApplicationCreationForm['persisted_folder_path_' + $index].$invalid || ctrl.state.duplicates.persistedFolders.refs[$index] !== undefined
+                              "
+                            >
+                              <ng-messages for="kubernetesApplicationCreationForm['persisted_folder_path_' + $index].$error">
+                                <p class="vertical-center" ng-message="required"><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 路径是必需的。</p>
+                              </ng-messages>
+                              <p class="vertical-center" ng-if="ctrl.state.duplicates.persistedFolders.refs[$index] !== undefined"
+                                ><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 此路径已定义。</p
+                              >
+                            </div>
+                          </div>
+                  
+                          <div class="input-group col-sm-offset-3 col-sm-3 input-group-sm">
+                            <div
+                              class="small text-warning"
+                              style="margin-top: 5px"
+                              ng-show="
+                                kubernetesApplicationCreationForm['persisted_folder_size_' + $index].$invalid || ctrl.state.exceeded.persistedFolders.refs[$index] !== undefined
+                              "
+                            >
+                              <ng-messages for="kubernetesApplicationCreationForm['persisted_folder_size_' + $index].$error">
+                                <p class="vertical-center" ng-message="required"><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 大小是必需的。</p>
+                                <p class="vertical-center" ng-message="min"><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 此值必须大于零。</p>
+                              </ng-messages>
+                              <p class="vertical-center" ng-if="ctrl.state.exceeded.persistedFolders.refs[$index] !== undefined">
+                                <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
+                                您只能请求
+                                {{ ctrl.state.storages.availabilities[persistedFolder.StorageClass.Name] | kubernetesAppStorageRequestSizeHumanReadable }} 的容量
+                                {{ persistedFolder.StorageClass.Name }}
+                              </p>
+                            </div>
+                            <div
+                              class="small text-warning"
+                              ng-show="kubernetesApplicationCreationForm['existing_volumes_' + $index].$invalid || ctrl.state.duplicates.existingVolumes.refs[$index] !== undefined"
+                            >
+                              <ng-messages for="kubernetesApplicationCreationForm['existing_volumes_' + $index].$error">
+                                <p ng-message="required"><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 存储卷是必需的。</p>
+                              </ng-messages>
+                              <p ng-if="ctrl.state.duplicates.existingVolumes.refs[$index] !== undefined"
+                                ><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 此存储卷已被使用。</p
+                              >
+                            </div>
+                          </div>
+                  
+                          <div class="input-group col-sm-1 input-group-sm"> </div>
+                        </div>
+                      </div>
+                  
+                      <div class="col-sm-12 mt-2">
+                        <span
+                          class="btn btn-primary btn-sm btn btn-sm btn-light mb-2 !ml-0"
+                          ng-click="ctrl.addPersistedFolder()"
+                          ng-if="ctrl.isAddPersistentFolderButtonShowed()"
+                          data-cy="k8sAppCreate-addPersistentFolderButton"
+                        >
+                          <pr-icon icon="'plus'" size="'sm'"></pr-icon> 添加持久化文件夹
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- #endregion -->
+
+                  <!-- #region DATA ACCESS POLICY -->
+                  <div ng-if="ctrl.showDataAccessPolicySection()">
+                    <div class="form-group">
+                      <div class="col-sm-12">
+                        <label class="control-label text-left">数据访问策略</label>
+                      </div>
+                    </div>
+                    
+                    <div class="form-group">
+                      <div class="col-sm-12 small text-muted">指定数据在实例之间的使用方式。</div>
+                    </div>
+
+                    <kube-application-access-policy-selector
+                      value="ctrl.formValues.DataAccessPolicy"
+                      on-change="(ctrl.onDataAccessPolicyChange)"
+                      is-edit="ctrl.state.isEdit"
+                      persisted-folders-use-existing-volumes="ctrl.state.persistedFoldersUseExistingVolumes"
+                    ></kube-application-access-policy-selector>
+                  </div>
+                  <!-- #endregion -->
+
+                  <div class="col-sm-12 form-section-title">资源预留</div>
+<!-- #region RESOURCE RESERVATIONS -->
+<div class="form-group" ng-if="!ctrl.state.resourcePoolHasQuota">
+  <div class="col-sm-12 small text-muted vertical-center">
+    <pr-icon icon="'info'" mode="'primary'"></pr-icon>
+    资源预留是针对应用程序的每个实例应用的。
+  </div>
+</div>
+
+<div class="form-group" ng-if="ctrl.state.resourcePoolHasQuota && !ctrl.resourceQuotaCapacityExceeded()">
+  <div class="col-sm-12 small text-muted vertical-center">
+    <pr-icon icon="'info'" mode="'primary'"></pr-icon>
+    此命名空间设置了资源配额，您必须指定资源预留。资源预留是针对应用程序的每个实例应用的。最大值继承自命名空间配额。
+  </div>
+</div>
+
+<div class="form-group" ng-if="ctrl.state.resourcePoolHasQuota && ctrl.resourceQuotaCapacityExceeded()">
+  <div class="col-sm-12 small text-muted vertical-center">
+    <pr-icon icon="'alert-circle'" mode="'danger'"></pr-icon>
+    此命名空间已经耗尽了其资源容量，您将无法部署该应用程序。请联系管理员扩展命名空间的容量。
+  </div>
+</div>
+
+                  <!-- memory-limit-input -->
+                  <div
+                    class="form-group flex"
+                    ng-if="
+                      (!ctrl.state.resourcePoolHasQuota || (ctrl.state.resourcePoolHasQuota && !ctrl.resourceQuotaCapacityExceeded())) && ctrl.formValues.Containers.length <= 1
+                    "
+                  >
+                  <label for="memory-limit" class="space-right col-sm-3 col-lg-2 control-label flex flex-row items-center text-left">
+                    内存限制（MB）
+                    <portainer-tooltip
+                      message="'应用程序的一个实例将预留此数量的内存。如果实例的内存使用超过了预留量，可能会导致OOM（内存溢出）。'"
+                    >
+                    </portainer-tooltip>
+                  </label>
+                    <div class="col-sm-6">
+                      <slider model="ctrl.formValues.MemoryLimit" floor="ctrl.state.sliders.memory.min" ceil="ctrl.state.sliders.memory.max" step="128"></slider>
+                    </div>
+                    <div class="col-sm-2 vertical-center">
+                      <input
+                        name="memory_limit"
+                        ng-model="ctrl.formValues.MemoryLimit"
+                        type="number"
+                        min="{{ ctrl.state.sliders.memory.min }}"
+                        max="{{ ctrl.state.sliders.memory.max }}"
+                        class="form-control"
+                        id="memory-limit"
+                        required
+                        data-cy="k8sAppCreate-memoryLimit"
+                      />
+                    </div>
+                  </div>
+                  <div class="form-group" ng-show="kubernetesApplicationCreationForm.memory_limit.$invalid">
+                    <div class="col-sm-3 col-lg-2"></div>
+                    <div class="col-sm-8 small text-warning">
+                      <div ng-messages="kubernetesApplicationCreationForm.memory_limit.$error">
+                        <p class="vertical-center"
+                          ><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 值必须在{{ ctrl.state.sliders.memory.min }}和{{ ctrl.state.sliders.memory.max }}之间。
+                        </p>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- !memory-limit-input -->
+                  <!-- cpu-limit-input -->
+                  <div class="form-group flex" ng-if="(!ctrl.state.resourcePoolHasQuota || (ctrl.state.resourcePoolHasQuota && !ctrl.resourceQuotaCapacityExceeded())) && ctrl.formValues.Containers.length <= 1">
+                    <label for="cpu-limit" class="space-right col-sm-3 col-lg-2 control-label flex flex-row items-center text-left">
+                      CPU 限制
+                      <portainer-tooltip message="'应用程序的一个实例将预留此数量的 CPU。如果实例的 CPU 使用超过了预留量，可能会导致 CPU 限制。'"></portainer-tooltip>
+                    </label>
+                    <div class="col-sm-8">
+                      <slider model="ctrl.formValues.CpuLimit" floor="ctrl.state.sliders.cpu.min" ceil="ctrl.state.sliders.cpu.max" step="0.10" precision="2"></slider>
+                    </div>
+                  </div>
+                  
+                  <div class="form-group" ng-if="ctrl.nodeLimitsOverflow()">
+                    <div class="col-sm-3 col-lg-2"></div>
+                    <div class="col-sm-8 small text-muted">
+                      <pr-icon icon="'alert-circle'" mode="'danger'"></pr-icon>
+                      这些预留将超过当前集群中可用的资源。
+                    </div>
+                  </div>
+                  <!-- !cpu-limit-input -->
+                  <!-- #endregion -->
+
+                  <div class="col-sm-12 form-section-title">部署</div>
+<!-- #region DEPLOYMENT -->
+<div class="form-group">
+  <div class="col-sm-12 small text-muted">选择您希望在集群内部署应用程序的方式。</div>
+</div>
+
+                  <!-- deployment options -->
+                  <kube-application-deployment-type-selector
+                    value="ctrl.formValues.DeploymentType"
+                    on-change="(ctrl.onChangeDeploymentType)"
+                    support-global-deployment="ctrl.supportGlobalDeployment()"
+                    radio-name="'deploymentType'"
+                  ></kube-application-deployment-type-selector>
+
+                  <!-- replica count -->
+                  <div class="form-group" ng-if="ctrl.formValues.DeploymentType === ctrl.ApplicationDeploymentTypes.REPLICATED">
+                    <label for="replica_count" class="col-sm-3 col-lg-2 control-label required text-left">实例数量 </label>
+                    <div class="col-sm-2">
+                      <input
+                        type="number"
+                        name="replica_count"
+                        class="form-control"
+                        min="1"
+                        max="9999"
+                        placeholder="1"
+                        ng-model="ctrl.formValues.ReplicaCount"
+                        ng-disabled="!ctrl.supportScalableReplicaDeployment()"
+                        ng-change="ctrl.enforceReplicaCountMinimum()"
+                        required
+                        data-cy="k8sAppCreate-replicaCountInput"
+                      />
+                      <div class="help-block" ng-if="kubernetesApplicationCreationForm['replica_count'].$invalid">
+                        <div class="small text-warning whitespace-nowrap">
+                          <ng-messages for="kubernetesApplicationCreationForm['replica_count'].$error">
+                            <p class="vertical-center" ng-message="required"><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 实例数量是必填项。.</p>
+                            <p class="vertical-center" ng-message="min"><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 实例数量必须大于0</p>
+                          </ng-messages>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- !replica count -->
+
+                  <div
+                    class="form-group"
+                    ng-if="!ctrl.resourceReservationsOverflow() && ctrl.formValues.ReplicaCount > 1 && (ctrl.formValues.CpuLimit !== 0 || ctrl.formValues.MemoryLimit !== 0)"
+                  >
+                  <div class="col-sm-12 small text-muted vertical-center">
+                    <pr-icon icon="'info'" mode="'primary'"></pr-icon>
+                    <div>
+                      此应用程序将预留以下资源：
+                      <b>{{ ctrl.formValues.CpuLimit * ctrl.formValues.ReplicaCount | kubernetesApplicationCPUValue }} CPU</b> 和
+                      <b>{{ ctrl.formValues.MemoryLimit * ctrl.formValues.ReplicaCount }} MB</b> 内存。
+                    </div>
+                  </div>
+                  </div>
+
+                  <div class="form-group" ng-if="ctrl.resourceReservationsOverflow()">
+                    <div class="col-sm-12 small text-muted vertical-center">
+                      <pr-icon icon="'alert-circle'" mode="'danger'"></pr-icon>
+                      此应用程序将超过可用资源。请检查资源预留或实例数量。
+                    </div>
+                  </div>
+                  
+                  <div class="form-group" ng-if="ctrl.state.storages.quotaExceeded">
+                    <div class="col-sm-12 small text-muted vertical-center">
+                      <pr-icon icon="'alert-circle'" mode="'warning'"></pr-icon>
+                      此应用程序将超过可用存储空间。请检查持久化文件夹或实例数量。
+                    </div>
+                  </div>
+
+                  <div class="form-group" ng-if="!ctrl.supportScalableReplicaDeployment()">
+                    <div class="col-sm-12 small text-muted vertical-center">
+                      <pr-icon icon="'alert-circle'" mode="'warning'"></pr-icon>
+                      <div>
+                        以下存储选项不支持多个实例的并发访问：
+                        <code>{{ ctrl.getNonScalableStorage() }}</code>。您将无法扩展该应用程序。
+                      </div>
+                    </div>
+                  </div>
+                  <!-- #endregion -->
+
+                  <!-- #region AUTO SCALING -->
+
+                  <div class="form-group !mb-0" ng-if="ctrl.formValues.DeploymentType !== ctrl.ApplicationDeploymentTypes.GLOBAL && !ctrl.state.useServerMetrics">
+                    <div class="col-sm-12 small text-muted">
+                      <p ng-if="!ctrl.isAdmin">此功能目前已禁用，必须由管理员用户启用。</p>
+                      <p ng-if="ctrl.isAdmin">
+                        服务器指标功能必须在
+                        <a ui-sref="kubernetes.cluster.setup" class="ctrl.isAdmin">环境配置视图</a>
+                        中启用。
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <div class="col-sm-12">
+                      <div class="col-sm-3 col-lg-2 pl-0 pt-0">
+                        <label for="enable_auto_scaling" class="control-label text-left">为此应用程序启用自动扩展</label>
+                      </div>
+                      <label class="switch ml-4 mt-1">
+                        <input
+                          type="checkbox"
+                          class="form-control"
+                          name="enable_auto_scaling"
+                          ng-model="ctrl.formValues.AutoScaler.IsUsed"
+                          data-cy="k8sAppCreate-autoScaleCheckbox"
+                          ng-disabled="!(ctrl.formValues.DeploymentType !== ctrl.ApplicationDeploymentTypes.GLOBAL && ctrl.state.useServerMetrics)"
+                        />
+                        <span class="slider round"></span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="form-inline" ng-if="ctrl.formValues.DeploymentType !== ctrl.ApplicationDeploymentTypes.GLOBAL && ctrl.formValues.AutoScaler.IsUsed">
+                    <div class="row">
+                      <div class="col-sm-4 pl-0">
+                        <label class="control-label pb-2 text-left" for="auto_scaler_min">最小实例数</label>
+                        <div class="input-group input-group-sm" style="width: 100%">
+                          <input
+                            type="number"
+                            class="form-control"
+                            name="auto_scaler_min"
+                            min="0"
+                            ng-max="ctrl.formValues.AutoScaler.MaxReplicas"
+                            ng-model="ctrl.formValues.AutoScaler.MinReplicas"
+                            data-cy="k8sAppCreate-autoScaleMin"
+                            required
+                          />
+                        </div>
+                        <span ng-show="kubernetesApplicationCreationForm['auto_scaler_min'].$invalid">
+                          <div class="small text-warning" style="margin-top: 5px">
+                            <ng-messages for="kubernetesApplicationCreationForm['auto_scaler_min'].$error">
+                              <p ng-message="required" class="vertical-center"> <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 必须指定最小实例数。 </p>
+                              <p ng-message="min" class="vertical-center">
+                                <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 最小实例数必须大于 0。
+                              </p>
+                              <p ng-message="max" class="vertical-center">
+                                <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 最小实例数必须小于最大实例数。
+                              </p>
+                            </ng-messages>
+                          </div>
+                        </span>
+                      </div>
+                      <div class="col-sm-4 pl-0">
+                        <label class="control-label pb-2 text-left" for="auto_scaler_max">最大实例数</label>
+                        <div class="input-group input-group-sm" style="width: 100%">
+                          <input
+                            type="number"
+                            class="form-control"
+                            name="auto_scaler_max"
+                            ng-min="ctrl.formValues.AutoScaler.MinReplicas"
+                            ng-model="ctrl.formValues.AutoScaler.MaxReplicas"
+                          />
+                        </div>
+                        <span ng-show="kubernetesApplicationCreationForm['auto_scaler_max'].$invalid || ctrl.autoScalerOverflow()">
+                          <div class="small text-warning" style="margin-top: 5px">
+                            <ng-messages for="kubernetesApplicationCreationForm['auto_scaler_max'].$error">
+                              <p ng-message="required" class="vertical-center"> <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 必须指定最大实例数。 </p>
+                              <p ng-message="min" class="vertical-center">
+                                <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 最大实例数必须大于最小实例数。
+                              </p>
+                            </ng-messages>
+                          </div>
+                        </span>
+                      </div>
+                      <div class="col-sm-4 pl-0">
+                        <label class="control-label pb-2 text-left" for="auto_scaler_cpu">
+                          目标 CPU 使用率（<b>%</b>）
+                          <portainer-tooltip message="'自动缩放器将确保运行足够的实例以维持所有实例的平均 CPU 使用率。'">
+                          </portainer-tooltip>
+                        </label>
+                        <div class="input-group input-group-sm" style="width: 100%">
+                          <input
+                            type="number"
+                            class="form-control"
+                            name="auto_scaler_cpu"
+                            ng-model="ctrl.formValues.AutoScaler.TargetCPUUtilization"
+                            min="1"
+                            max="100"
+                            required
+                            data-cy="k8sAppCreate-targetCPUInput"
+                          />
+                        </div>
+                        <span ng-show="kubernetesApplicationCreationForm['auto_scaler_cpu'].$invalid">
+                          <div class="small text-warning" style="margin-top: 5px">
+                            <ng-messages for="kubernetesApplicationCreationForm['auto_scaler_cpu'].$error">
+                              <p ng-message="required" class="vertical-center"> <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 必须指定目标 CPU 使用率。 </p>
+                              <p ng-message="min" class="vertical-center">
+                                <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 目标 CPU 使用率必须大于 0。
+                              </p>
+                              <p ng-message="max" class="vertical-center">
+                                <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 目标 CPU 使用率必须小于 100。
+                              </p>
+                            </ng-messages>
+                          </div>
+                        </span>
+                      </div>
+                    </div>
+
+                    <div class="form-group" ng-if="ctrl.autoScalerOverflow()" style="margin-bottom: 10px">
+                      <div class="col-sm-12 small text-danger">
+                        <pr-icon icon="'alert-circle'" mode="'danger'"></pr-icon>
+                        该应用程序将超出可用资源。请检查资源预留或自动缩放策略的最大实例数。
+                      </div>
+                    </div>
+                  </div>
+                  <!-- #endregion -->
+
+                  <div class="mt-4 mb-2" ng-if="ctrl.formValues.DeploymentType === ctrl.ApplicationDeploymentTypes.REPLICATED">
+                    <div class="col-sm-12 control-label !mb-2 !p-0 text-left">放置偏好和约束</div>
+
+                    <!-- #region PLACEMENTS -->
+                    <div class="form-group">
+                      <div class="col-sm-12 small text-muted vertical-center !mb-2" ng-if="ctrl.formValues.Placements.length > 0">
+                        <pr-icon icon="'info'" mode="'primary'"></pr-icon>
+                        <div> 将此应用程序部署在符合以下所有放置规则的节点上。放置规则基于节点标签。 </div>
+                      </div>
+
+                      <div class="col-sm-12 form-inline">
+                        <div ng-repeat-start="placement in ctrl.formValues.Placements" class="!mb-2">
+                          <div class="col-sm-5 input-group mr-2 ng-class=" { striked: placement.NeedsDeletion }">
+                          <select
+                            class="form-control !rounded"
+                            ng-model="placement.Label"
+                            ng-options="label as (label.Key | kubernetesNodeLabelHumanReadbleText) for label in ctrl.nodesLabels"
+                            ng-change="ctrl.onChangePlacementLabel($index)"
+                            ng-disabled="ctrl.isEditAndNotNewPlacement($index)"
+                            data-cy="k8sAppCreate-placementLabel_{{ $index }}"
+                          >
+                          </select>
+                        </div>
+                        <div class="col-sm-5 input-group mr-2" ng-class="{ striked: placement.NeedsDeletion }">
+                          <select
+                            class="form-control !rounded"
+                            ng-model="placement.Value"
+                            ng-options="value for value in placement.Label.Values"
+                            ng-disabled="ctrl.isEditAndNotNewPlacement($index)"
+                            data-cy="k8sAppCreate-placementName_{{ $index }}"
+                          >
+                          </select>
+                        </div>
+
+                        <div class="col-sm-1 input-group">
+                          <button
+                            ng-if="!placement.NeedsDeletion"
+                            class="btn btn-md btn-dangerlight btn-only-icon !ml-0"
+                            type="button"
+                            ng-click="ctrl.removePlacement($index)"
+                            data-cy="k8sAppCreate-deletePlacementButton"
+                          >
+                            <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
+                          </button>
+                          <button
+                            ng-if="placement.NeedsDeletion"
+                            class="btn btn-sm btn-light btn-only-icon !ml-0"
+                            type="button"
+                            ng-click="ctrl.restorePlacement($index)"
+                            data-cy="k8sAppCreate-restorePlacementButton"
+                          >
+                            <pr-icon icon="'rotate-cw'" size="'md'"></pr-icon>
+                          </button>
+                        </div>
+                      </div>
+                      <div ng-repeat-end ng-show="ctrl.state.duplicates.placements.refs[$index] !== undefined">
+                        <div class="col-sm-5 input-group">
+                          <div class="small text-warning" ng-if="ctrl.state.duplicates.placements.refs[$index] !== undefined">
+                            <p class="vertical-center" ng-if="ctrl.state.duplicates.placements.refs[$index] !== undefined">
+                              <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 该标签已经定义过了。
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-sm-12">
+                      <span class="btn btn-primary btn-sm btn btn-sm btn-light mb-2 !ml-0 mt-2" ng-click="ctrl.addPlacement()">
+                        <pr-icon icon="'plus'" size="'sm'"></pr-icon> 添加规则
+                      </span>
+                    </div>
+                  </div>
+                  <div ng-if="ctrl.showPlacementPolicySection()">
+                    <div class="form-group">
+                      <div class="col-sm-12">
+                        <label class="control-label text-left">部署策略</label>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <div class="col-sm-12 small text-muted"> 指定与部署规则相关联的策略。 </div>
+                    </div>
+
+                    <box-selector
+                      ng-if="ctrl.formValues.Placements.length"
+                      options="ctrl.placementOptions"
+                      slim="true"
+                      value="ctrl.formValues.PlacementType"
+                      on-change="(ctrl.onChangePlacementType)"
+                      radio-name="'placementType'"
+                    ></box-selector>
+                  </div>
+                  <!-- #endregion -->
+                </div>
+
+                <!-- kubernetes services options -->
+                <div ng-if="ctrl.formValues.ResourcePool">
+                  <kube-services-form
+                    on-change="(ctrl.onServicesChange)"
+                    values="ctrl.formValues.Services"
+                    load-balancer-enabled="ctrl.publishViaLoadBalancerEnabled()"
+                    app-name="ctrl.formValues.Name"
+                    selector="ctrl.formValues.Selector"
+                    validation-data="{nodePortServices: ctrl.state.nodePortServices, formServices: ctrl.formValues.Services, ingressPaths: ctrl.ingressPaths, originalIngressPaths: ctrl.originalIngressPaths}"
+                    is-edit-mode="ctrl.state.isEdit"
+                    namespace="ctrl.formValues.ResourcePool.Namespace.Name"
+                  ></kube-services-form>
+                </div>
+                <!-- kubernetes services options -->
+
+                <!-- summary -->
+                <kubernetes-summary-view
+                  ng-if="!(!kubernetesApplicationCreationForm.$valid || ctrl.isDeployUpdateButtonDisabled() || !ctrl.state.pullImageValidity)"
+                  form-values="ctrl.formValues"
+                  old-form-values="ctrl.savedFormValues"
+                ></kubernetes-summary-view>
+              </div>
+            </div>
+            <div ng-if="ctrl.isExternalApplication()">
+              <div class="col-sm-12 form-section-title" ng-if="ctrl.state.appType === ctrl.KubernetesDeploymentTypes.APPLICATION_FORM"> Namespace </div>
+              <!-- #region NAMESPACE -->
+              <div class="form-group" ng-if="ctrl.formValues.ResourcePool">
+                <label for="resource-pool-selector" class="col-sm-1 control-label text-left">Namespace</label>
+                <div class="col-sm-11">
+                  <select
+                    class="form-control"
+                    id="resource-pool-selector"
+                    ng-model="ctrl.formValues.ResourcePool"
+                    ng-options="resourcePool.Namespace.Name for resourcePool in ctrl.resourcePools"
+                    ng-change="ctrl.onResourcePoolSelectionChange()"
+                    ng-disabled="ctrl.state.isEdit"
+                    data-cy="k8sAppCreate-nsSelect"
+                  ></select>
+                </div>
+              </div>
+              <div class="form-group" ng-if="ctrl.state.resourcePoolHasQuota && ctrl.resourceQuotaCapacityExceeded() && ctrl.formValues.ResourcePool">
+                <div class="col-sm-12 small text-danger">
+                  <pr-icon icon="'alert-circle'" mode="'danger'"></pr-icon>
+                  此命名空间已耗尽其资源容量，您将无法部署该应用程序。请联系管理员扩展命名空间的容量。
+                </div>
+              </div>
+              <div class="form-group" ng-if="!ctrl.formValues.ResourcePool">
+                <div class="col-sm-12 small text-muted">
+                  <pr-icon icon="'alert-circle'" mode="'warning'"></pr-icon>
+                  您没有访问任何命名空间的权限。请联系管理员获取命名空间的访问权限。
+                </div>
+              </div>
+              <!-- kubernetes services options -->
+              <div ng-if="ctrl.formValues.ResourcePool">
+                <kube-services-form
+                  on-change="(ctrl.onServicesChange)"
+                  values="ctrl.formValues.Services"
+                  app-name="ctrl.formValues.Name"
+                  selector="ctrl.formValues.Selector"
+                  validation-data="{nodePortServices: ctrl.state.nodePortServices, formServices: ctrl.formValues.Services, ingressPaths: ctrl.ingressPaths, originalIngressPaths: ctrl.originalIngressPaths}"
+                  is-edit-mode="ctrl.state.isEdit"
+                  namespace="ctrl.formValues.ResourcePool.Namespace.Name"
+                ></kube-services-form>
+              </div>
+              <!-- kubernetes services options -->
+            </div>
+
+            <!-- kubernetes summary for external application -->
+            <kubernetes-summary-view ng-if="ctrl.isExternalApplication()" form-values="ctrl.formValues" old-form-values="ctrl.savedFormValues"></kubernetes-summary-view>
+            <!-- kubernetes summary for external application -->
+            <div class="col-sm-12 form-section-title !mt-6" ng-if="ctrl.state.appType !== ctrl.KubernetesDeploymentTypes.GIT" ng-hide="ctrl.stack.IsComposeFormat"> 操作 </div>
+            <!-- #region ACTIONS -->
+            <div class="form-group" ng-hide="ctrl.stack.IsComposeFormat">
+              <div class="col-sm-12">
+                <button
+                  ng-if="ctrl.state.appType === ctrl.KubernetesDeploymentTypes.APPLICATION_FORM"
+                  type="button"
+                  class="btn btn-primary btn-sm !ml-0"
+                  ng-disabled="!kubernetesApplicationCreationForm.$valid || ctrl.isDeployUpdateButtonDisabled() || !ctrl.imageValidityIsValid() || ctrl.hasPortErrors() || !ctrl.formValues.ResourcePool"
+                  ng-click="ctrl.deployApplication()"
+                  button-spinner="ctrl.state.actionInProgress"
+                  data-cy="k8sAppCreate-deployButton"
+                >
+                <span ng-show="!ctrl.state.isEdit && !ctrl.state.actionInProgress">部署应用程序</span>
+                <span ng-show="!ctrl.state.isEdit && ctrl.state.actionInProgress">部署正在进行中...</span>
+                <span ng-show="ctrl.state.isEdit && !ctrl.state.actionInProgress">更新应用程序</span>
+                <span ng-show="ctrl.state.isEdit && ctrl.state.actionInProgress">更新正在进行中...</span>
+                </button>
+                <button
+                  ng-if="ctrl.state.isEdit && !ctrl.state.actionInProgress && ctrl.state.appType === ctrl.KubernetesDeploymentTypes.APPLICATION_FORM"
+                  type="button"
+                  class="btn btn-sm btn-default"
+                  ui-sref="kubernetes.applications.application({ name: ctrl.application.Name, namespace: ctrl.application.ResourcePool })"
+                  data-cy="k8sAppCreate-appCancelButton"
+                >
+                  取消
+                </button>
+                <!-- #Web editor buttons -->
+                <button
+                  class="btn btn-sm btn-primary"
+                  ng-click="ctrl.updateApplicationViaWebEditor()"
+                  ng-if="ctrl.state.appType === ctrl.KubernetesDeploymentTypes.CONTENT || ctrl.state.updateWebEditorInProgress"
+                  ng-disabled="!kubernetesApplicationCreationForm.$valid || !ctrl.state.isEditorDirty || ctrl.state.updateWebEditorInProgress"
+                  style="margin-top: 7px; margin-left: 0"
+                  button-spinner="ctrl.state.updateWebEditorInProgress"
+                >
+                <span ng-show="!ctrl.state.updateWebEditorInProgress">更新应用程序</span>
+                <span ng-show="ctrl.state.updateWebEditorInProgress">更新正在进行中...</span>
+                </button>
+              </div>
+            </div>
+            <!-- #endregion -->
+          </form>
+        </rd-widget-body>
+      </rd-widget>
+    </div>
+  </div>
+</div>

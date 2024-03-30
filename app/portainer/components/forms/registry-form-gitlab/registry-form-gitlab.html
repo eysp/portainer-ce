@@ -1,0 +1,163 @@
+<form class="form-horizontal" name="registryFormGitlab" ng-submit="$ctrl.retrieveRegistries()">
+  <div class="col-sm-12 form-section-title"> 重要通知 </div>
+  <div class="form-group">
+    <span class="col-sm-12 text-muted small">
+      <p>
+        有关如何生成 GitLab 个人访问令牌的信息，请参阅
+        <a href="https://gitlab.com/help/user/profile/personal_access_tokens.md" target="_blank">GitLab 指南</a>。
+    </p>
+    </span>
+  </div>
+  <div class="col-sm-12 form-section-title"> GitLab 注册表连接详情 </div>
+  <!-- credentials-user -->
+  <div class="form-group">
+    <label for="registry_username" class="col-sm-3 col-lg-2 control-label required text-left">用户名</label>
+    <div class="col-sm-9 col-lg-10">
+      <input type="text" class="form-control" id="registry_username" name="registry_username" ng-model="$ctrl.model.Username" required />
+      <div class="help-block" ng-show="registryFormGitlab.registry_username.$invalid">
+        <div class="small text-warning">
+          <div ng-messages="registryFormGitlab.registry_username.$error">
+            <p ng-message="required" class="vertical-center">
+              <pr-icon icon="'alert-triangle'"></pr-icon>
+              此字段为必填项。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- !credentials-user -->
+  <!-- credentials-pat -->
+  <div class="form-group">
+    <label for="registry_perso_acc_token" class="col-sm-3 col-lg-2 control-label required text-left">个人访问 Token </label>
+    <div class="col-sm-9 col-lg-10">
+      <input type="password" class="form-control" id="registry_perso_acc_token" name="registry_perso_acc_token" ng-model="$ctrl.model.Token" required />
+      <div class="help-block" ng-show="registryFormGitlab.registry_perso_acc_token.$invalid">
+        <div class="small text-warning">
+          <div ng-messages="registryFormGitlab.registry_perso_acc_token.$error">
+            <p ng-message="required" class="vertical-center">
+              <pr-icon icon="'alert-triangle'"></pr-icon>
+              此字段为必填项。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- !credentials-pat -->
+
+  <div class="form-group">
+    <div class="col-sm-12">
+      <button
+        type="button"
+        class="btn btn-link btn-sm !ml-0 p-0 hover:no-underline"
+        ng-if="!$ctrl.state.overrideConfiguration"
+        ng-click="$ctrl.state.overrideConfiguration = true;"
+      >
+        <pr-icon icon="'wrench'"></pr-icon>
+        覆盖默认配置
+      </button>
+      <button
+        type="button"
+        class="btn btn-link btn-sm !ml-0 p-0 hover:no-underline"
+        ng-if="$ctrl.state.overrideConfiguration"
+        ng-click="$ctrl.state.overrideConfiguration = false; $ctrl.resetDefaults()"
+      >
+        <pr-icon icon="'settings'"></pr-icon>
+        使用默认配置
+      </button>
+    </div>
+  </div>
+
+  <!-- url-input -->
+  <div class="form-group" ng-if="$ctrl.state.overrideConfiguration">
+    <label for="instance_url" class="col-sm-3 col-lg-2 control-label required text-left">
+      实例 URL
+      <portainer-tooltip message="'GitLab 实例的 URL。'"></portainer-tooltip>
+    </label>
+    <div class="col-sm-9 col-lg-10">
+      <input type="text" class="form-control" id="instance_url" name="instance_url" ng-model="$ctrl.model.Gitlab.InstanceURL" placeholder="https://gitlab.com" required />
+      <div class="help-block" ng-show="registryFormGitlab.instance_url.$invalid">
+        <div class="small text-warning">
+          <div ng-messages="registryFormGitlab.instance_url.$error">
+            <p ng-message="required" class="vertical-center">
+              <pr-icon icon="'alert-triangle'"></pr-icon>
+              此字段为必填项。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- !url-input -->
+  <!-- url-input -->
+  <div class="form-group" ng-if="$ctrl.state.overrideConfiguration">
+    <label for="registry_url" class="col-sm-3 col-lg-2 control-label required text-left">
+      注册表 URL
+      <portainer-tooltip message="'GitLab 注册表实例的 URL。'"></portainer-tooltip>
+    </label>
+    <div class="col-sm-9 col-lg-10">
+      <input type="text" class="form-control" id="registry_url" name="registry_url" ng-model="$ctrl.model.URL" placeholder="https://registry.gitlab.com" required />
+      <div class="help-block" ng-show="registryFormGitlab.registry_url.$invalid">
+        <div class="small text-warning">
+          <div ng-messages="registryFormGitlab.registry_url.$error">
+            <p ng-message="required" class="vertical-center">
+              <pr-icon icon="'alert-triangle'"></pr-icon>
+              此字段为必填项。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- !url-input -->
+
+  <div class="form-group">
+    <div class="col-sm-12">
+      <button type="submit" class="btn btn-primary btn-sm" ng-disabled="$ctrl.actionInProgress || !registryFormGitlab.$valid" button-spinner="$ctrl.actionInProgress">
+        <span ng-hide="$ctrl.actionInProgress">获取项目</span>
+        <span ng-show="$ctrl.actionInProgress">进行中...</span>
+      </button>
+    </div>
+  </div>
+</form>
+<div class="form-horizontal" ng-if="$ctrl.projects">
+  <div class="col-sm-12 form-section-title"> GitLab 项目 </div>
+  <div class="form-group">
+      <span class="col-sm-12 text-muted small"> 选择您想管理的项目的注册表。Portainer 将为每个选定的项目创建一个注册表。 </span>
+      <span class="col-sm-12 text-muted small vertical-center">
+          <pr-icon icon="'alert-triangle'" class-name="'icon-warning'"></pr-icon>
+          如果无法选择项目，请确保该项目已激活注册表功能。
+      </span>
+  </div>
+  <div class="form-group">
+      <div class="col-sm-12">
+          <gitlab-projects-datatable
+              title-text="GitLab 项目"
+              title-icon="list"
+              dataset="$ctrl.projects"
+              table-key="gitlab_projects"
+              state="$ctrl.state.gitlab"
+              order-by="Name"
+          ></gitlab-projects-datatable>
+      </div>
+  </div>
+  <div class="form-group">
+      <div class="col-sm-12">
+          <button
+              ng-click="$ctrl.createRegistries()"
+              class="btn btn-primary btn-sm"
+              ng-disabled="$ctrl.actionInProgress || !$ctrl.state.gitlab.selectedItemCount"
+              button-spinner="$ctrl.actionInProgress"
+              analytics-on
+              analytics-category="portainer"
+              analytics-event="portainer-registry-creation"
+              analytics-properties="{ metadata: { type: 'gitlab' } }"
+          >
+              <span ng-hide="$ctrl.actionInProgress">创建注册表</span>
+              <span ng-show="$ctrl.actionInProgress">进行中...</span>
+          </button>
+      </div>
+  </div>
+  <!-- !actions -->
+</div>

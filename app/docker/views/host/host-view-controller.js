@@ -1,0 +1,82 @@
+angular.module('portainer.docker').controller('HostViewController', [
+  '$q',
+  'SystemService',
+  'Notifications',
+  'StateManager',
+  'AgentService',
+  'ContainerService',
+  'Authentication',
+  function HostViewController($q, SystemService, Notifications, StateManager, AgentService, ContainerService, Authentication) {
+    var ctrl = this;
+
+    this.$onInit = initView;
+
+    ctrl.state = {
+      isAgent: false,
+      isAdmin: false,
+    };
+
+    this.engineDetails = {};
+    this.hostDetails = {};
+    this.devices = null;
+    this.disks = null;
+
+    function initView() {
+      var applicationState = StateManager.getState();
+      ctrl.state.isAgent = applicationState.endpoint.mode.agentProxy;
+      ctrl.state.isAdmin = Authentication.isAdmin();
+      var agentApiVersion = applicationState.endpoint.agentApiVersion;
+      ctrl.state.agentApiVersion = agentApiVersion;
+      ctrl.state.enableHostManagementFeatures = ctrl.endpoint.SecuritySettings.enableHostManagementFeatures;
+
+      $q.all({
+        version: SystemService.version(),
+        info: SystemService.info(),
+        jobs: ctrl.state.isAdmin ? ContainerService.containers(true, { label: ['io.portainer.job.endpoint'] }) : [],
+      })
+        .then(function success(data) {
+          ctrl.engineDetails = buildEngineDetails(data);
+          ctrl.hostDetails = buildHostDetails(data.info);
+          ctrl.jobs = data.jobs;
+
+          if (ctrl.state.isAgent && agentApiVersion > 1 && ctrl.state.enableHostManagementFeatures) {
+            return AgentService.hostInfo(ctrl.endpoint.Id).then(function onHostInfoLoad(agentHostInfo) {
+              ctrl.devices = agentHostInfo.PCIDevices;
+              ctrl.disks = agentHostInfo.PhysicalDisks;
+            });
+          }
+        })
+        .catch(function error(err) {
+          Notifications.error('Failure', err, '无法检索引擎详细信息');
+        });
+    }
+
+    function buildEngineDetails(data) {
+      var versionDetails = data.version;
+      var info = data.info;
+      return {
+        releaseVersion: versionDetails.Version,
+        apiVersion: versionDetails.ApiVersion,
+        rootDirectory: info.DockerRootDir,
+        storageDriver: info.Driver,
+        loggingDriver: info.LoggingDriver,
+        volumePlugins: info.Plugins.Volume,
+        networkPlugins: info.Plugins.Network,
+      };
+    }
+
+    function buildHostDetails(info) {
+      return {
+        os: {
+          arch: info.Architecture,
+          type: info.OSType,
+          name: info.OperatingSystem,
+        },
+        name: info.Name,
+        kernelVersion: info.KernelVersion,
+        totalCPU: info.NCPU,
+        totalMemory: info.MemTotal,
+      };
+    }
+  },
+]);

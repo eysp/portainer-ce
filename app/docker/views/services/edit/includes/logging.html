@@ -1,0 +1,75 @@
+<div id="service-logging-driver">
+  <rd-widget>
+    <rd-widget-header icon="list" title-text="日志驱动器"> </rd-widget-header>
+    <rd-widget-body classes="no-padding">
+      <div class="form-inline" style="padding: 10px" authorization="DockerServiceUpdate">
+        驱动器:
+        <select class="form-control !h-[30px] !text-[13px]" ng-model="service.LogDriverName" ng-change="updateLogDriverName(service)" ng-disabled="isUpdating">
+          <option selected value="">默认日志驱动器</option>
+          <option ng-repeat="driver in availableLoggingDrivers" ng-value="driver">{{ driver }}</option>
+          <option value="none">无</option>
+        </select>
+
+        <a class="btn btn-default btn-sm" ng-click="!service.LogDriverName || service.LogDriverName === 'none' || addLogDriverOpt(service)">
+          <pr-icon icon="'plus'"></pr-icon> 添加日志驱动器选项
+        </a>
+      </div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>选项</th>
+            <th>值</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="option in service.LogDriverOpts">
+            <td class="w-1/2">
+              <div class="input-group input-group-sm">
+                <span class="input-group-addon fit-text-size">name</span>
+                <input type="text" class="form-control" ng-model="option.key" ng-disabled="option.added || isUpdating" placeholder="例如：FOO" />
+              </div>
+            </td>
+            <td>
+              <div class="input-group input-group-sm">
+                <span class="input-group-addon fit-text-size">value</span>
+                <input
+                  type="text"
+                  class="form-control"
+                  ng-model="option.value"
+                  ng-change="updateLogDriverOpt(service, option)"
+                  placeholder="例如：bar"
+                  ng-disabled="isUpdating"
+                  disable-authorization="DockerServiceUpdate"
+                />
+                <span class="input-group-btn" authorization="DockerServiceUpdate">
+                  <button class="btn btn-dangerlight" type="button" ng-click="removeLogDriverOpt(service, $index)" ng-disabled="isUpdating">
+                    <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
+                  </button>
+                </span>
+              </div>
+            </td>
+          </tr>
+          <tr ng-if="service.LogDriverOpts.length === 0">
+            <td colspan="6" class="text-muted text-center">此日志驱动器没有关联的选项。</td>
+          </tr>
+        </tbody>
+      </table>
+    </rd-widget-body>
+    <rd-widget-footer authorization="DockerServiceUpdate">
+      <div class="btn-toolbar" role="toolbar">
+        <div class="btn-group" role="group">
+          <button type="button" class="btn btn-primary btn-sm" ng-disabled="!hasChanges(service, ['LogDriverName', 'LogDriverOpts'])" ng-click="updateService(service)"
+            >应用更改</button
+          >
+          <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu">
+            <li><a ng-click="cancelChanges(service, ['LogDriverName', 'LogDriverOpts'])">重置更改</a></li>
+            <li><a ng-click="cancelChanges(service)">重置所有更改</a></li>
+          </ul>
+        </div>
+      </div>
+    </rd-widget-footer>
+  </rd-widget>
+</div>

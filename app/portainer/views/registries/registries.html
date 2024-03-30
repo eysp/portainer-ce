@@ -1,0 +1,19 @@
+<page-header title="'注册表'" breadcrumbs="['注册表管理']" reload="true"> </page-header>
+
+<information-panel title-text="信息">
+  <span class="small text-muted">通过环境查看注册表，管理用户和/或团队的访问权限</span>
+</information-panel>
+
+<div class="row">
+  <div class="col-sm-12">
+    <registries-datatable
+      title-text="注册表"
+      title-icon="radio"
+      dataset="registries"
+      table-key="registries"
+      order-by="Name"
+      remove-action="removeAction"
+      can-browse="canBrowse"
+    ></registries-datatable>
+  </div>
+</div>

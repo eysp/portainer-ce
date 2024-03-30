@@ -1,0 +1,22 @@
+import angular from 'angular';
+import 'moment';
+import 'angular-sanitize';
+import 'ng-file-upload';
+import 'angular-messages';
+import 'angular-resource';
+import 'angular-utils-pagination';
+import 'angular-local-storage';
+import 'angular-jwt';
+import 'angular-json-tree';
+import 'angular-loading-bar';
+import 'angular-clipboard';
+import 'angular-file-saver';
+import 'angularjs-scroll-glue';
+import 'angularjs-slider';
+import 'bootstrap/dist/js/bootstrap.js';
+import 'js-yaml/dist/js-yaml.js';
+import 'angular-ui-bootstrap';
+import 'angular-moment-picker';
+import 'angulartics/dist/angulartics.min.js';
+
+window.angular = angular;

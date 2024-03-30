@@ -1,0 +1,208 @@
+<page-header title="'构建镜像'" breadcrumbs="[{label:'镜像', link:'docker.images'}, '构建镜像']"> </page-header>
+
+<div class="row">
+  <div class="col-sm-12">
+    <rd-widget>
+      <rd-widget-body>
+        <uib-tabset active="state.activeTab">
+          <uib-tab index="0">
+            <uib-tab-heading class="vertical-center"> <pr-icon icon="'wrench'" class="leading-none"></pr-icon> 构建 </uib-tab-heading>
+            <form class="form-horizontal">
+              <div class="col-sm-12 form-section-title">名称</div>
+              <!-- names -->
+              <div class="form-group">
+                <span class="col-sm-12 text-muted small">您可以为镜像指定多个名称。</span>
+              </div>
+              <div class="form-group">
+                <div class="col-sm-12">
+                  <label class="control-label text-left">名称</label>
+                  <span class="label label-default interactive" class="ml-2.5" ng-click="addImageName()"> <pr-icon icon="'plus'" mode="'alt'"></pr-icon> 添加额外的名称 </span>
+                </div>
+              </div>
+              <!-- !names -->
+              <div class="form-group" ng-if="formValues.ImageNames.length === 0">
+                <span class="col-sm-12 text-danger small">
+                  <p class="vertical-center"> <pr-icon icon="'alert-triangle'" mode="'danger'" size="'sm'"></pr-icon> 您必须为镜像指定至少一个名称。 </p>
+                </span>
+              </div>
+              <!-- name-input-list -->
+              <div ng-if="formValues.ImageNames.length > 0">
+                <div class="form-group">
+                  <span class="col-sm-12 text-muted small">名称必须按照以下格式之一指定：<code>name:tag</code>、<code>repository/name:tag</code>或<code>registryfqdn:port/repository/name:tag</code>。如果省略标签，则默认为<b>"latest"</b>。</span>
+                </div>
+                <div class="form-group">
+                  <div class="col-sm-12">
+                    <div class="col-sm-12 form-inline" class="mt-2.5">
+                      <div ng-repeat="item in formValues.ImageNames track by $index" class="mt-1">
+                        <!-- name-input -->
+                        <div class="input-group col-sm-5 input-group-sm">
+                          <span class="input-group-addon">名称</span>
+                          <input type="text" class="form-control" ng-model="item.Name" ng-change="checkName($index)" placeholder="例如my-image:my-tag" auto-focus />
+                          <span class="input-group-addon" ng-if="!item.Valid">
+                            <pr-icon icon="'x'" mode="'danger'"></pr-icon>
+                          </span>
+                          <span class="input-group-addon" ng-if="item.Valid">
+                            <pr-icon icon="'check'" mode="'success'"></pr-icon>
+                          </span>
+                        </div>
+                        <!-- !name-input -->
+                        <!-- actions -->
+                        <div class="input-group col-sm-2 input-group-sm">
+                          <button class="btn btn-dangerlight btn-only-icon" type="button" ng-click="removeImageName($index)">
+                            <pr-icon icon="'trash-2'"></pr-icon>
+                          </button>
+                        </div>
+                        <!-- !actions -->
+                        <div class="small text-warning" ng-if="!item.Valid">
+                          <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
+                          <span ng-if="!item.Unique">镜像名称必须唯一</span>
+                          <span ng-if="item.Unique">镜像名称必须由2到255个小写字母、数字、'.'、'_'或'-'组成（例如'my-name'或'abc-123'）。</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- !name-input-list -->
+              <div class="col-sm-12 form-section-title">构建方法</div>
+              <box-selector options="options" slim="true" value="state.BuildType" on-change="(onChangeBuildType)"></box-selector>
+            
+              <!-- web-editor -->
+              <!-- TODO use web-editor-form component -->
+              <div ng-show="state.BuildType === 'editor'">
+                <div class="col-sm-12 form-section-title">Web编辑器</div>
+                <div class="form-group">
+                  <span class="col-sm-12 text-muted small">
+                    您可以在<a href="https://docs.docker.com/engine/reference/builder/" target="_blank">官方文档</a>中了解有关Dockerfile格式的更多信息。
+                  </span>
+                </div>
+                <div class="form-group">
+                  <div class="col-sm-12">
+                    <code-editor identifier="image-build-editor" placeholder="在此定义或粘贴您的Dockerfile内容" docker-file="true" on-change="(editorUpdate)"></code-editor>
+                  </div>
+                </div>
+                <div class="col-sm-12 form-section-title">上传</div>
+                <div class="form-group">
+                  <div class="col-sm-12">
+                    <div class="form-group">
+                      <span class="col-sm-12 text-muted small">
+                        您可以从本地计算机上传文件以用于在Dockerfile中引用（使用ADD filename），以便将其包含在构建的镜像中。
+                      </span>
+                    </div>
+                    <button class="btn btn-sm btn-primary" ngf-select="selectAdditionalFiles($files)" ngf-multiple="true">选择文件</button>
+                    <span ng-repeat="item in formValues.AdditionalFiles track by $index" class="mx-2">
+                      {{ item.name }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <!-- !web-editor -->
+              <!-- upload -->
+              <div ng-show="state.BuildType === 'upload'">
+                <div class="col-sm-12 form-section-title">上传</div>
+                <div class="form-group">
+                  <span class="col-sm-12 text-muted small">
+                    您可以从计算机上上传包含Dockerfile的tar文件或Dockerfile文件。使用tarball时，根文件夹将用作构建上下文。
+                  </span>
+                </div>
+                <div class="form-group">
+                  <div class="col-sm-12 vertical-center">
+                    <button class="btn btn-sm btn-primary" ngf-select ngf-min-size="10" ng-model="formValues.UploadFile">选择文件</button>
+                    <span class="space-left">
+                      {{ formValues.UploadFile.name }}
+                      <span ng-if="!formValues.UploadFile"><pr-icon icon="'x'" mode="'danger'" size="'md'"></pr-icon></span>
+                    </span>
+                  </div>
+                </div>
+                <div ng-if="formValues.UploadFile.type === 'application/gzip' || formValues.UploadFile.type === 'application/x-tar'">
+                  <div class="form-group">
+                    <span class="col-sm-12 text-muted small">在tarball中指定Dockerfile的路径。</span>
+                  </div>
+                  <div class="form-group">
+                    <label for="image_path" class="col-sm-2 control-label text-left">Dockerfile路径</label>
+                    <div class="col-sm-10">
+                      <input type="text" class="form-control" ng-model="formValues.Path" id="image_path" placeholder="Dockerfile" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- !upload -->
+              <!-- url -->
+              <div ng-show="state.BuildType === 'url'">
+                <div class="col-sm-12 form-section-title">URL</div>
+                <div class="form-group">
+                  <span class="col-sm-12 small vertical-center">
+                    <pr-icon icon="'info'" mode="'primary'"></pr-icon>
+                    <span class="text-muted">
+                      指定Dockerfile、tarball或公共Git仓库的URL（以<b>.git</b>结尾）。使用Git仓库URL时，可以指定构建上下文，就像在<a href="https://docs.docker.com/engine/reference/commandline/build/#git-repositories">Docker文档</a>中所述。
+                    </span>
+                  </span>
+                </div>
+                <div class="form-group">
+                  <label for="image_url" class="col-sm-2 control-label text-left">URL</label>
+                  <div class="col-sm-10">
+                    <input
+                      type="text"
+                      class="form-control"
+                      ng-model="formValues.URL"
+                      id="image_url"
+                      placeholder="https://myhost.mydomain/myimage.tar.gz 或 https://github.com/myname/myrepo.git#mybranch"
+                    />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <span class="col-sm-12 text-muted small vertical-center">
+                    <pr-icon icon="'info'" mode="'primary'"></pr-icon>
+                    指定tarball/仓库中Dockerfile的路径（在使用Dockerfile时忽略）。
+                  </span>
+                </div>
+                <div class="form-group">
+                  <label for="image_path" class="col-sm-2 control-label text-left">Dockerfile路径</label>
+                  <div class="col-sm-10">
+                    <input type="text" class="form-control" ng-model="formValues.Path" id="image_path" placeholder="Dockerfile" />
+                  </div>
+                </div>
+              </div>
+              <!-- !url -->
+              <div ng-if="applicationState.endpoint.mode.agentProxy && applicationState.endpoint.mode.provider === 'DOCKER_SWARM_MODE'">
+                <div class="col-sm-12 form-section-title">部署</div>
+                <!-- node-selection -->
+                <node-selector model="formValues.NodeName" endpoint-id="endpoint.Id"></node-selector>
+                <!-- !node-selection -->
+              </div>
+              <!-- actions -->
+              <div class="col-sm-12 form-section-title">操作</div>
+              <div class="form-group">
+                <div class="col-sm-12">
+                  <button
+                    type="button"
+                    class="btn btn-primary btn-sm"
+                    ng-disabled="state.actionInProgress
+                                || (state.BuildType === 'editor' && formValues.DockerFileContent === '')
+                                || (state.BuildType === 'upload' && (!formValues.UploadFile || !formValues.Path))
+                                || (state.BuildType === 'url' && (!formValues.URL || !formValues.Path))
+                                || (formValues.ImageNames.length === 0 || !validImageNames())"
+                    ng-click="buildImage()"
+                    button-spinner="state.actionInProgress"
+                  >
+                    <span ng-hide="state.actionInProgress">构建镜像</span>
+                    <span ng-show="state.actionInProgress">正在构建镜像...</span>
+                  </button>
+                  <span class="text-danger" ng-if="state.formValidationError" class="space-left">{{ state.formValidationError }}</span>
+                </div>
+              </div>
+              <!-- !actions -->
+            </form>
+          </uib-tab>
+          <uib-tab index="1" disable="!buildLogs">
+            <uib-tab-heading class="vertical-center"> <pr-icon icon="'file-text'" class="leading-none"></pr-icon> 输出 </uib-tab-heading>
+            <pre class="log_viewer">
+              <div ng-repeat="line in buildLogs track by $index" class="line"><p class="inner_line" ng-click="active=!active" ng-class="{'line_selected': active}">{{ line }}</p></div>
+              <div ng-if="!buildLogs.length" class="line"><p class="inner_line">没有构建输出。</p></div>
+            </pre>
+          </uib-tab>
+        </uib-tabset>
+      </rd-widget-body>
+    </rd-widget>
+  </div>
+</div>
