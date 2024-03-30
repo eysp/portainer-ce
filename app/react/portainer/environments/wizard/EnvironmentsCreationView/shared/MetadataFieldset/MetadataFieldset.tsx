@@ -13,7 +13,7 @@ export function MetadataFieldset() {
   const { isAdmin } = useUser();
 
   return (
-    <FormSection title="Metadata">
+    <FormSection title="元数据">
       <GroupField />
 
       <TagSelector

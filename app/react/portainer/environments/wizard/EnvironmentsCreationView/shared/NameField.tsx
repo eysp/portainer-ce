@@ -27,7 +27,7 @@ export function NameField({
 
   return (
     <FormControl
-      label="Name"
+      label="名称"
       required
       errors={meta.error}
       inputId={id}

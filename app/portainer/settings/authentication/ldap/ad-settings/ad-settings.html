@@ -4,34 +4,31 @@
     <div class="limited-be-content">
       <auto-user-provision-toggle ng-model="$ctrl.settings.AutoCreateUsers">
         <field-description>
-          With automatic user provisioning enabled, Portainer will create user(s) automatically with standard user role and assign them to team(s) which matches to LDAP group
-          name(s). If disabled, users must be created in Portainer beforehand.
+          启用自动用户配置后，Portainer 将自动创建具有标准用户角色的用户，并将它们分配到与 LDAP 组名匹配的团队。如果禁用，则必须事先在 Portainer 中创建用户。
         </field-description>
       </auto-user-provision-toggle>
 
       <div>
-        <div class="col-sm-12 form-section-title"> Information </div>
+        <div class="col-sm-12 form-section-title"> 信息 </div>
         <div class="form-group col-sm-12 text-muted small">
-          When using Microsoft AD authentication, Portainer will delegate user authentication to the Domain Controller(s) configured below; if there is no connectivity, Portainer
-          will fallback to internal authentication.
+          当使用 Microsoft AD 认证时，Portainer 将用户认证委托给下面配置的域控制器；如果没有连接，Portainer 将退回到内部认证。
         </div>
       </div>
 
-      <div class="col-sm-12 form-section-title"> AD configuration </div>
+      <div class="col-sm-12 form-section-title"> AD 配置 </div>
 
       <div class="form-group">
         <div class="col-sm-12 small text-muted">
           <p class="vertical-center">
             <pr-icon icon="'info'" mode="'primary'"></pr-icon>
-            You can configure multiple AD Controllers for authentication fallback. Make sure all servers are using the same configuration (i.e. if TLS is enabled, they should all
-            use the same certificates).
+            您可以为认证备用配置多个AD控制器。确保所有服务器使用相同的配置（即，如果启用了TLS，则它们应该都使用相同的证书）。
           </p>
         </div>
       </div>
 
       <div class="form-group">
         <label for="ldap_url" class="col-sm-3 col-lg-2 control-label text-left" style="display: flex; flex-wrap: wrap">
-          AD Controller
+          AD 控制器
           <button
             type="button"
             class="label label-default interactive vertical-center"
@@ -41,7 +38,7 @@
             limited-feature-tabindex="-1"
           >
             <pr-icon icon="'plus-circle'"></pr-icon>
-            Add additional server
+            添加额外的服务器
           </button>
         </label>
         <div class="col-sm-9 col-lg-10">
@@ -71,8 +68,8 @@
 
       <div class="form-group">
         <label for="ldap_username" class="col-sm-3 control-label text-left">
-          Service Account
-          <portainer-tooltip message="'Account that will be used to search for users.'"></portainer-tooltip>
+          服务账号
+          <portainer-tooltip message="'将用于搜索用户的帐户。'"></portainer-tooltip>
         </label>
         <div class="col-sm-9">
           <input
@@ -90,8 +87,8 @@
 
       <div class="form-group">
         <label for="ldap_password" class="col-sm-3 control-label text-left">
-          Service Account Password
-          <portainer-tooltip message="'If you do not enter a password, Portainer will leave the current password unchanged.'"></portainer-tooltip>
+          服务账号密码
+          <portainer-tooltip message="'如果您不输入密码，Portainer 将保持当前密码不变。'"></portainer-tooltip>
         </label>
         <div class="col-sm-9">
           <input
@@ -116,7 +113,7 @@
       ></ldap-connectivity-check>
 
       <ldap-settings-security
-        title="AD Connectivity Security"
+        title="AD 连接安全性"
         settings="$ctrl.settings"
         tlsca-cert="$ctrl.tlscaCert"
         upload-in-progress="$ctrl.state.uploadInProgress"

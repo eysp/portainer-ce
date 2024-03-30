@@ -13,13 +13,13 @@ import { Icon } from '@@/Icon';
 const deployments = [
   {
     id: 'k8sLoadBalancer',
-    label: 'Kubernetes via load balancer',
+    label: '通过负载均衡器的Kubernetes',
     command: kubeLoadBalancerCommand,
     showAgentSecretMessage: true,
   },
   {
     id: 'k8sNodePort',
-    label: 'Kubernetes via node port',
+    label: '通过节点端口的Kubernetes',
     command: kubeNodePortCommand,
     showAgentSecretMessage: true,
   },

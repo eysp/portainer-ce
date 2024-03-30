@@ -31,7 +31,7 @@ const columns = [
     cell: ({ getValue }) => truncate(getValue(), { length: 64 }),
   }),
   columHelper.accessor((row) => row.Tags.join(','), {
-    header: 'Tags',
+    header: '标签',
     id: 'tags',
     enableSorting: false,
     cell: ({ getValue }) => truncate(getValue(), { length: 64 }),

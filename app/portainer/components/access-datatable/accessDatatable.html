@@ -15,7 +15,7 @@
             class="searchInput"
             ng-model="$ctrl.state.textFilter"
             ng-change="$ctrl.onTextFilterChange()"
-            placeholder="Search..."
+            placeholder="搜索..."
             ng-model-options="{ debounce: 300 }"
           />
         </div>
@@ -27,16 +27,16 @@
             ng-click="$ctrl.removeAction($ctrl.state.selectedItems)"
           >
             <pr-icon icon="'trash-2'"></pr-icon>
-            Remove
+            删除
           </button>
         </div>
       </div>
 
       <div class="small text-muted mx-4 mb-4">
         <div class="" ng-if="$ctrl.inheritFrom">
-          Access tagged as <code>inherited</code> are inherited from the group access. They cannot be removed or modified at the environment level but they can be overridden.
+          访问标记为 <code>inherited</code> 是从组访问中继承的。它们无法在环境级别进行删除或修改，但可以被覆盖。
         </div>
-        <div class="" ng-if="$ctrl.inheritFrom"> Access tagged as <code>override</code> are overriding the group access for the related users/teams. </div>
+        <div class="" ng-if="$ctrl.inheritFrom"> 访问标记为 <code>override</code> 是对相关用户/团队的组访问的覆盖。
       </div>
 
       <div class="table-responsive">
@@ -50,7 +50,7 @@
                     <label for="select_all"></label>
                   </span>
                   <table-column-header
-                    col-title="'Name'"
+                    col-title="'名称'"
                     can-sort="true"
                     is-sorted="$ctrl.state.orderBy === 'Name'"
                     is-sorted-desc="$ctrl.state.orderBy === 'Name' && $ctrl.state.reverseOrder"
@@ -60,7 +60,7 @@
               </th>
               <th>
                 <table-column-header
-                  col-title="'Type'"
+                  col-title="'类型'"
                   can-sort="true"
                   is-sorted="$ctrl.state.orderBy === 'Type'"
                   is-sorted-desc="$ctrl.state.orderBy === 'Type' && $ctrl.state.reverseOrder"
@@ -89,7 +89,7 @@
               <td colspan="4" class="text-muted text-center">加载中...</td>
             </tr>
             <tr ng-if="$ctrl.state.filteredDataSet.length === 0">
-              <td colspan="4" class="text-muted text-center">No authorized users or teams.</td>
+              <td colspan="4" class="text-muted text-center">没有授权的用户或团队。</td>
             </tr>
           </tbody>
         </table>

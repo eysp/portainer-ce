@@ -54,7 +54,7 @@ export function EdgeAgentForm({ onCreate, readonly, asyncMode }: Props) {
           <EdgeAgentFieldset readonly={readonly} asyncMode={asyncMode} />
 
           <MoreSettingsSection>
-            <FormSection title="Check-in Intervals">
+            <FormSection title="检查间隔">
               {asyncMode ? (
                 <EdgeAsyncIntervalsForm
                   values={values.edge}
@@ -77,7 +77,7 @@ export function EdgeAgentForm({ onCreate, readonly, asyncMode }: Props) {
                 <LoadingButton
                   className="vertical-center"
                   isLoading={createMutation.isLoading}
-                  loadingText="Creating environment..."
+                  loadingText="正在创建环境..."
                   disabled={!isValid}
                   icon={Plug2}
                 >

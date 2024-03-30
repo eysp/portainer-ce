@@ -14,7 +14,7 @@ const columHelper = createColumnHelper<Environment>();
 
 const columns = [
   columHelper.accessor('Name', {
-    header: 'Name',
+    header: '名称',
     id: 'Name',
     cell: ({ getValue }) => truncate(getValue(), { length: 64 }),
   }),

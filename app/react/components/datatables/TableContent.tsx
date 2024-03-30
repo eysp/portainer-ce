@@ -13,7 +13,7 @@ export function TableContent<
 >({
   isLoading = false,
   rows,
-  emptyContent = 'No items available',
+  emptyContent = '没有可用的项目',
   renderRow,
 }: Props<T>) {
   if (isLoading) {

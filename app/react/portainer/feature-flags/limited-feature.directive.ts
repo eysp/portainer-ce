@@ -25,17 +25,6 @@ export function limitedFeatureDirective(): IDirective {
       .filter((attr) => attr.startsWith(BASENAME) && attr !== `${BASENAME}Dir`)
       .map((attr) => [_.kebabCase(attr.replace(BASENAME, '')), attrs[attr]]);
 
-    const state = selectShow(featureId);
-
-    if (state === FeatureState.HIDDEN) {
-      elem.hide();
-      return;
-    }
-
-    if (state === FeatureState.VISIBLE) {
-      return;
-    }
-
     limitedFeatureAttrs.forEach(([attr, value = attr]) => {
       const currentValue = elem.attr(attr) || '';
       elem.attr(attr, `${currentValue} ${value}`.trim());

@@ -29,7 +29,7 @@ export async function createGroup(requestPayload: CreateGroupPayload) {
     );
     return group;
   } catch (e) {
-    throw parseAxiosError(e as Error, 'Failed to create group');
+    throw parseAxiosError(e as Error, '创建组失败');
   }
 }
 
@@ -39,7 +39,7 @@ export function useCreateGroupMutation() {
   return useMutation(
     createGroup,
     mutationOptions(
-      withError('Failed to create group'),
+      withError('创建组失败'),
       withInvalidate(queryClient, [queryKeys.base()])
     )
   );

@@ -1,14 +1,14 @@
 <div class="row">
   <div class="col-sm-12">
     <rd-widget ng-if="ctrl.availableUsersAndTeams && ctrl.accessControlledEntity">
-      <rd-widget-header icon="user-check" title-text="Create access"></rd-widget-header>
+      <rd-widget-header icon="user-check" title-text="创建访问"></rd-widget-header>
       <rd-widget-body>
         <form class="form-horizontal">
           <div ng-if="ctrl.entityType !== 'registry'" class="form-group">
             <span class="col-sm-12 small text-warning">
               <p class="vertical-center">
                 <pr-icon icon="'alert-circle'" mode="'warning'"></pr-icon>
-                Adding user access will require the affected user(s) to logout and login for the changes to be taken into account.
+                添加用户访问将要求受影响的用户退出并重新登录，以便考虑到变更。
               </p>
             </span>
           </div>
@@ -20,7 +20,7 @@
           ></por-access-management-users-selector>
 
           <div class="form-group" ng-if="ctrl.entityType !== 'registry'">
-            <label class="col-sm-3 col-lg-2 control-label text-left"> Role </label>
+            <label class="col-sm-3 col-lg-2 control-label text-left">角色</label>
             <div class="col-sm-9 col-lg-6">
               <div class="flex items-center">
                 <div>
@@ -49,9 +49,9 @@
               >
                 <span ng-hide="ctrl.state.actionInProgress" class="vertical-center">
                   <pr-icon icon="'plus'"></pr-icon>
-                  Create access
+                  创建访问
                 </span>
-                <span ng-show="ctrl.state.actionInProgress">Creating access...</span>
+                <span ng-show="ctrl.state.actionInProgress">正在创建访问...</span>
               </button>
             </div>
           </div>
@@ -65,7 +65,7 @@
   <div class="col-sm-12">
     <access-datatable
       ng-if="ctrl.authorizedUsersAndTeams"
-      title-text="Access"
+      title-text="访问"
       title-icon="user-x"
       table-key="{{ 'access_' + ctrl.entityType }}"
       order-by="Name"

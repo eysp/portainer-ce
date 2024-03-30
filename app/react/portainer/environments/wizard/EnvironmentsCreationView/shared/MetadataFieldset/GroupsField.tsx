@@ -20,7 +20,7 @@ export function GroupField({ name = 'meta.groupId' }: { name?: string }) {
   }));
 
   return (
-    <FormControl label="Group" errors={metaProps.error}>
+    <FormControl label="组" errors={metaProps.error}>
       <Select
         name={name}
         options={options}

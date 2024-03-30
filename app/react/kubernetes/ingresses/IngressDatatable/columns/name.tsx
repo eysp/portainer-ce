@@ -9,7 +9,7 @@ import { Ingress } from '../../types';
 import { columnHelper } from './helper';
 
 export const name = columnHelper.accessor('Name', {
-  header: 'Name',
+  header: '名称',
   cell: Cell,
   id: 'name',
 });

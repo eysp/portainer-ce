@@ -60,7 +60,7 @@ export function Slider({
 
 function translateMinValue(value: number) {
   if (value === 0) {
-    return 'unlimited';
+    return '无限制';
   }
   return value.toString();
 }

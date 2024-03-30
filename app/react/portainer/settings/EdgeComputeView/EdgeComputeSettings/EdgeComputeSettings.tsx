@@ -37,7 +37,7 @@ export function EdgeComputeSettings({ settings, onSubmit }: Props) {
   return (
     <div className="row">
         <Widget>
-            <WidgetTitle icon={Laptop} title="Edge Compute settings" />
+            <WidgetTitle icon={Laptop} title="边缘计算设置" />
 
             <WidgetBody>
                 <Formik

@@ -42,7 +42,7 @@ export function AuthFieldset({
       <div className="form-group">
         <div className="col-sm-12">
           <SwitchField
-            label="Authentication"
+            label="认证"
             labelClass="col-sm-3 col-lg-2"
             name="authentication"
             checked={value.RepositoryAuthentication}
@@ -71,7 +71,7 @@ export function AuthFieldset({
 
           <div className="form-group">
             <div className="col-sm-12">
-              <FormControl label="Username" errors={errors?.RepositoryUsername}>
+              <FormControl label="用户名" errors={errors?.RepositoryUsername}>
                 <Input
                   value={username}
                   name="repository_username"

@@ -37,7 +37,7 @@ export function Details({ team, memberships, isAdmin }: Props) {
     <div className="row">
       <div className="col-lg-12 col-md-12 col-xs-12">
         <Widget>
-          <Widget.Title title="Team details" icon={Users} />
+          <Widget.Title title="团队详情" icon={Users} />
 
           <Widget.Body className="no-padding">
             <table className="table">
@@ -53,17 +53,17 @@ export function Details({ team, memberships, isAdmin }: Props) {
                         onClick={handleDeleteClick}
                         icon={Trash2}
                       >
-                        Delete this team
+                        删除该团队
                       </Button>
                     )}
                   </td>
                 </tr>
                 <tr>
-                  <td>Leaders</td>
+                  <td>领导</td>
                   <td>{!teamSyncQuery.data && leaderCount}</td>
                 </tr>
                 <tr>
-                  <td>Total users in team</td>
+                  <td>团队总人数</td>
                   <td>{memberships.length}</td>
                 </tr>
               </tbody>
@@ -76,7 +76,7 @@ export function Details({ team, memberships, isAdmin }: Props) {
 
   async function handleDeleteClick() {
     const confirmed = await confirmDelete(
-      `Do you want to delete this team? Users in this team will not be deleted.`
+      `确定要删除该团队吗？该团队中的用户不会被删除。`
     );
     if (!confirmed) {
       return;
@@ -96,7 +96,7 @@ function useDeleteTeam() {
     (id: TeamId) => deleteTeam(id),
 
     mutationOptions(
-      withError('Unable to delete team'),
+      withError('无法删除团队'),
       withInvalidate(queryClient, [['teams']])
     )
   );

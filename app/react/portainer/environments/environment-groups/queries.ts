@@ -24,7 +24,7 @@ export function useGroup<T = EnvironmentGroup>(
     staleTime: 50,
     select,
     onError(error) {
-      notifyError('Failed loading group', error as Error);
+      notifyError('加载组失败', error as Error);
     },
   });
 

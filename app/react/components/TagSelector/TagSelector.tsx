@@ -70,7 +70,7 @@ export function TagSelector({ value, allowCreate = false, onChange }: Props) {
         </FormControl>
       )}
 
-      <FormControl label="Tags" inputId="tags-selector">
+      <FormControl label="标签" inputId="tags-selector">
         <SelectComponent
           inputId="tags-selector"
           value={[] as { label: string; value: number }[]}
