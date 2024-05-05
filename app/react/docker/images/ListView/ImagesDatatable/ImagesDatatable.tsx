@@ -107,7 +107,7 @@ export function ImagesDatatable({
         dataset={dataset}
         settingsManager={tableState}
         columns={columns}
-        emptyContentLabel="No images found"
+        emptyContentLabel="未找到镜像"
         renderTableSettings={() => (
           <TableSettingsMenu>
             <TableSettingsMenuAutoRefresh
@@ -151,7 +151,7 @@ function RemoveButtonMenu({
             disabled={selectedItems.length === 0}
             icon={ChevronDown}
           >
-            <span className="sr-only">Toggle Dropdown</span>
+            <span className="sr-only">切换下拉菜单</span>
           </MenuButton>
           <MenuPopover position={positionRight}>
             <div className="mt-3 bg-white th-highcontrast:bg-black th-dark:bg-black">
@@ -200,7 +200,7 @@ function ImportExportButtons({
           color="light"
           icon={Download}
           isLoading={isExportInProgress}
-          loadingText="Export in progress..."
+          loadingText="导出进行中..."
           data-cy="image-exportImageButton"
           onClick={() => onExportClick(selectedItems)}
           disabled={selectedItems.length === 0}
