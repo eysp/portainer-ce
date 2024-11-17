@@ -16,7 +16,7 @@ angular.module('portainer.app').factory('SettingsService', [
           deferred.resolve(settings);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: '无法检索应用程序设置', err: err });
+          deferred.reject({ msg: 'Unable to retrieve application settings', err: err });
         });
 
       return deferred.promise;
@@ -35,7 +35,7 @@ angular.module('portainer.app').factory('SettingsService', [
           deferred.resolve(settings);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: '无法检索应用程序设置', err: err });
+          deferred.reject({ msg: 'Unable to retrieve application settings', err: err });
         });
 
       return deferred.promise;

@@ -1,42 +1,38 @@
 <div class="row">
   <div class="col-sm-12">
     <rd-widget ng-if="ctrl.availableUsersAndTeams && ctrl.accessControlledEntity">
-      <rd-widget-header icon="fa-user-lock" title-text="Create access"></rd-widget-header>
+      <rd-widget-header icon="user-check" title-text="创建访问"></rd-widget-header>
       <rd-widget-body>
         <form class="form-horizontal">
-          <div class="form-group">
-            <label class="col-sm-3 col-lg-2 control-label text-left">
-              选择用户/或团队
-            </label>
-            <div class="col-sm-9 col-lg-4">
-              <span class="small text-muted" ng-if="ctrl.availableUsersAndTeams.length === 0">
-                没有可用的用户或团队
-              </span>
-              <span
-                isteven-multi-select
-                ng-if="ctrl.availableUsersAndTeams.length > 0"
-                input-model="ctrl.availableUsersAndTeams"
-                output-model="ctrl.formValues.multiselectOutput"
-                button-label="icon '-' Name"
-                item-label="icon '-' Name"
-                tick-property="ticked"
-                helper-elements="filter"
-                search-property="Name"
-                translation="{nothingSelected: 'Select one or more users and/or teams', search: '搜索...'}"
-              >
-              </span>
-            </div>
+          <div ng-if="ctrl.entityType !== 'registry'" class="form-group">
+            <span class="col-sm-12 small text-warning">
+              <p class="vertical-center">
+                <pr-icon icon="'alert-circle'" mode="'warning'"></pr-icon>
+                添加用户访问将要求受影响的用户退出并重新登录，以使更改生效。
+              </p>
+            </span>
           </div>
 
+          <por-access-management-users-selector
+            options="ctrl.availableUsersAndTeams"
+            value="ctrl.formValues.multiselectOutput"
+            on-change="(ctrl.onChangeUsersAndTeams)"
+          ></por-access-management-users-selector>
+
           <div class="form-group" ng-if="ctrl.entityType !== 'registry'">
-            <label class="col-sm-3 col-lg-2 control-label text-left">
-              角色
-            </label>
-            <div class="col-sm-9 col-lg-4">
-              <select ng-if="ctrl.rbacEnabled" class="form-control" ng-model="ctrl.formValues.selectedRole" ng-options="role.Name for role in ctrl.roles"> </select>
-              <span class="small text-muted" ng-if="!ctrl.rbacEnabled">
-                <a ui-sref="portainer.extensions.extension({id: 3})">基于角色的访问控制扩展Role-Based</a> 是选择特定角色所必需的。
-              </span>
+            <label class="col-sm-3 col-lg-2 control-label text-left"> 角色 </label>
+            <div class="col-sm-9 col-lg-6">
+              <div class="flex items-center">
+                <div>
+                  <select
+                    class="form-control"
+                    ng-model="ctrl.formValues.selectedRole"
+                    ng-options="role as ctrl.roleLabel(role) disable when ctrl.isRoleLimitedToBE(role) for role in ctrl.roles"
+                  >
+                  </select>
+                </div>
+                <be-feature-indicator feature="ctrl.limitedFeature" class="space-left"></be-feature-indicator>
+              </div>
             </div>
           </div>
 
@@ -45,12 +41,16 @@
             <div class="col-sm-12">
               <button
                 type="submit"
-                class="btn btn-primary btn-sm"
-                ng-disabled="(ctrl.availableUsersAndTeams | filter:{ticked:true}).length === 0 || ctrl.actionInProgress"
+                class="btn btn-primary btn-sm vertical-center"
+                ng-disabled="ctrl.availableUsersAndTeams.length === 0 || ctrl.formValues.multiselectOutput.length === 0 || ctrl.actionInProgress"
                 ng-click="ctrl.authorizeAccess()"
                 button-spinner="ctrl.actionInProgress"
+                data-cy="access-createAccess"
               >
-                <span ng-hide="ctrl.state.actionInProgress"><i class="fa fa-plus" aria-hidden="true"></i> 创建访问权限</span>
+                <span ng-hide="ctrl.state.actionInProgress" class="vertical-center">
+                  <pr-icon icon="'plus'"></pr-icon>
+                  创建访问
+                </span>
                 <span ng-show="ctrl.state.actionInProgress">正在创建访问...</span>
               </button>
             </div>
@@ -66,13 +66,15 @@
     <access-datatable
       ng-if="ctrl.authorizedUsersAndTeams"
       title-text="Access"
-      title-icon="fa-user-lock"
+      title-icon="user-x"
       table-key="{{ 'access_' + ctrl.entityType }}"
       order-by="Name"
-      rbac-enabled="ctrl.rbacEnabled && ctrl.entityType !== 'registry'"
+      show-warning="ctrl.entityType !== 'registry'"
+      is-update-enabled="ctrl.entityType !== 'registry'"
+      show-roles="ctrl.entityType !== 'registry'"
+      roles="ctrl.roles"
       inherit-from="ctrl.inheritFrom"
       dataset="ctrl.authorizedUsersAndTeams"
-      roles="ctrl.roles"
       update-action="ctrl.updateAction"
       remove-action="ctrl.unauthorizeAccess"
     >

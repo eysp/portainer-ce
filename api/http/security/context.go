@@ -2,9 +2,10 @@ package security
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
-	"github.com/portainer/portainer/api"
+	portainer "github.com/portainer/portainer/api"
 )
 
 type (
@@ -16,8 +17,8 @@ const (
 	contextRestrictedRequest
 )
 
-// storeTokenData stores a TokenData object inside the request context and returns the enhanced context.
-func storeTokenData(request *http.Request, tokenData *portainer.TokenData) context.Context {
+// StoreTokenData stores a TokenData object inside the request context and returns the enhanced context.
+func StoreTokenData(request *http.Request, tokenData *portainer.TokenData) context.Context {
 	return context.WithValue(request.Context(), contextAuthenticationKey, tokenData)
 }
 
@@ -25,16 +26,16 @@ func storeTokenData(request *http.Request, tokenData *portainer.TokenData) conte
 func RetrieveTokenData(request *http.Request) (*portainer.TokenData, error) {
 	contextData := request.Context().Value(contextAuthenticationKey)
 	if contextData == nil {
-		return nil, portainer.ErrMissingContextData
+		return nil, errors.New("Unable to find JWT data in request context")
 	}
 
 	tokenData := contextData.(*portainer.TokenData)
 	return tokenData, nil
 }
 
-// storeRestrictedRequestContext stores a RestrictedRequestContext object inside the request context
+// StoreRestrictedRequestContext stores a RestrictedRequestContext object inside the request context
 // and returns the enhanced context.
-func storeRestrictedRequestContext(request *http.Request, requestContext *RestrictedRequestContext) context.Context {
+func StoreRestrictedRequestContext(request *http.Request, requestContext *RestrictedRequestContext) context.Context {
 	return context.WithValue(request.Context(), contextRestrictedRequest, requestContext)
 }
 
@@ -42,7 +43,7 @@ func storeRestrictedRequestContext(request *http.Request, requestContext *Restri
 func RetrieveRestrictedRequestContext(request *http.Request) (*RestrictedRequestContext, error) {
 	contextData := request.Context().Value(contextRestrictedRequest)
 	if contextData == nil {
-		return nil, portainer.ErrMissingSecurityContext
+		return nil, errors.New("Unable to find security details in request context")
 	}
 
 	requestContext := contextData.(*RestrictedRequestContext)

@@ -21,18 +21,6 @@ angular.module('portainer.docker').factory('ServiceHelper', [
       tasks = otherServicesTasks;
     };
 
-    helper.serviceToConfig = function (service) {
-      return {
-        Name: service.Spec.Name,
-        Labels: service.Spec.Labels,
-        TaskTemplate: service.Spec.TaskTemplate,
-        Mode: service.Spec.Mode,
-        UpdateConfig: service.Spec.UpdateConfig,
-        Networks: service.Spec.Networks,
-        EndpointSpec: service.Spec.EndpointSpec,
-      };
-    };
-
     helper.translateKeyValueToPlacementPreferences = function (keyValuePreferences) {
       if (keyValuePreferences) {
         var preferences = [];
@@ -63,39 +51,6 @@ angular.module('portainer.docker').factory('ServiceHelper', [
           }
         });
         return constraints;
-      }
-      return [];
-    };
-
-    helper.translateEnvironmentVariables = function (env) {
-      if (env) {
-        var variables = [];
-        env.forEach(function (variable) {
-          var idx = variable.indexOf('=');
-          var keyValue = [variable.slice(0, idx), variable.slice(idx + 1)];
-          var originalValue = keyValue.length > 1 ? keyValue[1] : '';
-          variables.push({
-            key: keyValue[0],
-            value: originalValue,
-            originalKey: keyValue[0],
-            originalValue: originalValue,
-            added: true,
-          });
-        });
-        return variables;
-      }
-      return [];
-    };
-
-    helper.translateEnvironmentVariablesToEnv = function (env) {
-      if (env) {
-        var variables = [];
-        env.forEach(function (variable) {
-          if (variable.key && variable.key !== '') {
-            variables.push(variable.key + '=' + variable.value);
-          }
-        });
-        return variables;
       }
       return [];
     };

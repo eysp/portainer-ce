@@ -1,0 +1,26 @@
+<div class="col-sm-12" style="margin-bottom: 0px">
+  <div class="be-indicator-container limited-be">
+    <div class="limited-be-link vertical-center"><be-feature-indicator feature="$ctrl.limitedFeature"></be-feature-indicator></div>
+    <div class="limited-be-content">
+      <rd-widget>
+        <rd-widget-header icon="user-x">
+          <header-title> 有效访问查看器 </header-title>
+        </rd-widget-header>
+        <rd-widget-body>
+          <form class="form-horizontal">
+            <div class="col-sm-12 form-section-title"> 用户 </div>
+            <div class="form-group">
+              <div class="col-sm-12">
+                <span class="small text-muted" ng-if="$ctrl.users.length === 0"> 没有可用的用户 </span>
+
+                <por-select ng-if="$ctrl.users.length > 0" value="$ctrl.selectedUserId" options="$ctrl.users" on-change="($ctrl.onUserSelect)" placeholder="'选择一个用户'">
+                </por-select>
+              </div>
+            </div>
+            <access-viewer-datatable table-key="access_viewer" dataset="$ctrl.userRoles" order-by="EndpointName" is-admin="$ctrl.isAdmin"> </access-viewer-datatable>
+          </form>
+        </rd-widget-body>
+      </rd-widget>
+    </div>
+  </div>
+</div>

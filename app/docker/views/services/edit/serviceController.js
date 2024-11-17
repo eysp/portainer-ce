@@ -17,7 +17,16 @@ require('./includes/servicelabels.html');
 require('./includes/tasks.html');
 require('./includes/updateconfig.html');
 
+import _ from 'lodash-es';
+
+import * as envVarsUtils from '@/react/components/form-components/EnvironmentVariablesFieldset/utils';
 import { PorImageRegistryModel } from 'Docker/models/porImageRegistry';
+import { ResourceControlType } from '@/react/portainer/access-control/types';
+import { confirmServiceForceUpdate } from '@/react/docker/services/common/update-service-modal';
+import { confirm, confirmDelete } from '@@/modals/confirm';
+import { ModalType } from '@@/modals';
+import { buildConfirmButton } from '@@/modals/utils';
+import { convertServiceToConfig } from '@/react/docker/services/common/convertServiceToConfig';
 
 angular.module('portainer.docker').controller('ServiceController', [
   '$q',
@@ -33,7 +42,6 @@ angular.module('portainer.docker').controller('ServiceController', [
   'SecretService',
   'ImageService',
   'SecretHelper',
-  'Service',
   'ServiceHelper',
   'LabelHelper',
   'TaskService',
@@ -41,16 +49,16 @@ angular.module('portainer.docker').controller('ServiceController', [
   'ContainerService',
   'TaskHelper',
   'Notifications',
-  'ModalService',
   'PluginService',
   'Authentication',
-  'SettingsService',
   'VolumeService',
   'ImageHelper',
   'WebhookService',
-  'EndpointProvider',
   'clipboard',
   'WebhookHelper',
+  'NetworkService',
+  'RegistryService',
+  'endpoint',
   function (
     $q,
     $scope,
@@ -65,7 +73,6 @@ angular.module('portainer.docker').controller('ServiceController', [
     SecretService,
     ImageService,
     SecretHelper,
-    Service,
     ServiceHelper,
     LabelHelper,
     TaskService,
@@ -73,17 +80,26 @@ angular.module('portainer.docker').controller('ServiceController', [
     ContainerService,
     TaskHelper,
     Notifications,
-    ModalService,
     PluginService,
     Authentication,
-    SettingsService,
     VolumeService,
     ImageHelper,
     WebhookService,
-    EndpointProvider,
     clipboard,
-    WebhookHelper
+    WebhookHelper,
+    NetworkService,
+    RegistryService,
+    endpoint
   ) {
+    $scope.resourceType = ResourceControlType.Service;
+    $scope.WebhookExists = false;
+
+    $scope.onUpdateResourceControlSuccess = function () {
+      $state.reload();
+    };
+
+    $scope.endpoint = endpoint;
+
     $scope.state = {
       updateInProgress: false,
       deletionInProgress: false,
@@ -111,20 +127,27 @@ angular.module('portainer.docker').controller('ServiceController', [
     };
 
     $scope.addEnvironmentVariable = function addEnvironmentVariable(service) {
-      service.EnvironmentVariables.push({ key: '', value: '', originalValue: '' });
+      $scope.$evalAsync(() => {
+        service.EnvironmentVariables = service.EnvironmentVariables.concat({ name: '', value: '' });
+        updateServiceArray(service, 'EnvironmentVariables', service.EnvironmentVariables);
+      });
+    };
+
+    $scope.onChangeEnvVars = onChangeEnvVars;
+
+    function onChangeEnvVars(env) {
+      const service = $scope.service;
+
+      const orgEnv = service.EnvironmentVariables;
+      service.EnvironmentVariables = env.map((v) => {
+        const orgVar = orgEnv.find(({ name }) => v.name === name);
+        const added = orgVar && orgVar.added;
+        return { ...v, added };
+      });
+
       updateServiceArray(service, 'EnvironmentVariables', service.EnvironmentVariables);
-    };
-    $scope.removeEnvironmentVariable = function removeEnvironmentVariable(service, index) {
-      var removedElement = service.EnvironmentVariables.splice(index, 1);
-      if (removedElement !== null) {
-        updateServiceArray(service, 'EnvironmentVariables', service.EnvironmentVariables);
-      }
-    };
-    $scope.updateEnvironmentVariable = function updateEnvironmentVariable(service, variable) {
-      if (variable.value !== variable.originalValue || variable.key !== variable.originalKey) {
-        updateServiceArray(service, 'EnvironmentVariables', service.EnvironmentVariables);
-      }
-    };
+    }
+
     $scope.addConfig = function addConfig(service, config) {
       if (
         config &&
@@ -198,7 +221,7 @@ angular.module('portainer.docker').controller('ServiceController', [
       }
     };
     $scope.addMount = function addMount(service) {
-      service.ServiceMounts.push({ Type: 'volume', Source: '', Target: '', ReadOnly: false });
+      service.ServiceMounts.push({ Type: 'volume', Source: null, Target: '', ReadOnly: false });
       updateServiceArray(service, 'ServiceMounts', service.ServiceMounts);
     };
     $scope.removeMount = function removeMount(service, index) {
@@ -207,9 +230,41 @@ angular.module('portainer.docker').controller('ServiceController', [
         updateServiceArray(service, 'ServiceMounts', service.ServiceMounts);
       }
     };
+
+    $scope.onChangeMountType = function onChangeMountType(service, mount) {
+      mount.Source = null;
+      $scope.updateMount(service, mount);
+    };
+
     $scope.updateMount = function updateMount(service) {
       updateServiceArray(service, 'ServiceMounts', service.ServiceMounts);
     };
+
+    $scope.toggleMountReadOnly = function toggleMountReadOnly(isReadOnly, index) {
+      $scope.$evalAsync(function () {
+        updateServiceArray($scope.service, 'ServiceMounts', $scope.service.ServiceMounts);
+        $scope.service.ServiceMounts[index].ReadOnly = isReadOnly;
+      });
+    };
+
+    $scope.addNetwork = function addNetwork(service) {
+      if (!service.Networks) {
+        service.Networks = [];
+      }
+      service.Networks.push({ Editable: true });
+    };
+
+    $scope.removeNetwork = function removeNetwork(service, index) {
+      var removedElement = service.Networks.splice(index, 1);
+      if (removedElement && removedElement.length && removedElement[0].Id) {
+        updateServiceArray(service, 'Networks', service.Networks);
+      }
+    };
+
+    $scope.updateNetwork = function updateNetwork(service) {
+      updateServiceArray(service, 'Networks', service.Networks);
+    };
+
     $scope.addPlacementConstraint = function addPlacementConstraint(service) {
       service.ServiceConstraints.push({ key: '', operator: '==', value: '' });
       updateServiceArray(service, 'ServiceConstraints', service.ServiceConstraints);
@@ -289,6 +344,15 @@ angular.module('portainer.docker').controller('ServiceController', [
       updateServiceArray(service, 'Hosts', service.Hosts);
     };
 
+    $scope.onWebhookChange = function (enabled) {
+      enabled = enabled | '';
+      $scope.$evalAsync(() => {
+        $scope.updateWebhook($scope.service);
+        $scope.WebhookExists = enabled;
+        updateServiceAttribute($scope.service, 'Webhooks', enabled);
+      });
+    };
+
     $scope.updateWebhook = function updateWebhook(service) {
       if ($scope.WebhookExists) {
         WebhookService.deleteWebhook($scope.webhookID)
@@ -301,7 +365,7 @@ angular.module('portainer.docker').controller('ServiceController', [
             Notifications.error('Failure', err, 'Unable to delete webhook');
           });
       } else {
-        WebhookService.createServiceWebhook(service.Id, EndpointProvider.endpointID())
+        WebhookService.createServiceWebhook(service.Id, endpoint.Id, $scope.initialRegistryID)
           .then(function success(data) {
             $scope.WebhookExists = true;
             $scope.webhookID = data.Id;
@@ -313,28 +377,39 @@ angular.module('portainer.docker').controller('ServiceController', [
       }
     };
 
+    $scope.updateWebhookRegistryId = function () {
+      const newRegistryID = _.get($scope.formValues.RegistryModel, 'Registry.Id', 0);
+      const registryChanged = $scope.initialRegistryID != newRegistryID;
+
+      if ($scope.WebhookExists && registryChanged) {
+        WebhookService.updateServiceWebhook($scope.webhookID, newRegistryID).catch(function error(err) {
+          Notifications.error('Failure', err, 'Unable to update webhook');
+        });
+      }
+    };
+
     $scope.copyWebhook = function copyWebhook() {
       clipboard.copyText($scope.webhookURL);
       $('#copyNotification').show();
       $('#copyNotification').fadeOut(2000);
     };
 
-    $scope.cancelChanges = function cancelChanges(service, keys) {
+    $scope.cancelChanges = async function cancelChanges(service, keys) {
       if (keys) {
         // clean out the keys only from the list of modified keys
-        keys.forEach(function (key) {
+        for (const key of keys) {
           if (key === 'Image') {
-            $scope.formValues.RegistryModel.Image = '';
+            $scope.formValues.RegistryModel = await RegistryService.retrievePorRegistryModelFromRepository(originalService.Image, endpoint.Id);
           } else {
             var index = previousServiceValues.indexOf(key);
             if (index >= 0) {
               previousServiceValues.splice(index, 1);
             }
           }
-        });
+        }
       } else {
         // clean out all changes
-        $scope.formValues.RegistryModel.Image = '';
+        $scope.formValues.RegistryModel = await RegistryService.retrievePorRegistryModelFromRepository(originalService.Image, endpoint.Id);
         keys = Object.keys(service);
         previousServiceValues = [];
       }
@@ -348,7 +423,9 @@ angular.module('portainer.docker').controller('ServiceController', [
       var hasChanges = false;
       elements.forEach(function (key) {
         if (key === 'Image') {
-          hasChanges = hasChanges || $scope.formValues.RegistryModel.Image ? true : false;
+          const originalImage = service ? service.Model.Spec.TaskTemplate.ContainerSpec.Image : null;
+          const currentImage = ImageHelper.createImageConfigForContainer($scope.formValues.RegistryModel).fromImage;
+          hasChanges = hasChanges || originalImage !== currentImage;
         } else {
           hasChanges = hasChanges || previousServiceValues.indexOf(key) >= 0;
         }
@@ -356,22 +433,58 @@ angular.module('portainer.docker').controller('ServiceController', [
       return hasChanges;
     };
 
+    $scope.mountsAreValid = mountsAreValid;
+    function mountsAreValid() {
+      const mounts = $scope.service.ServiceMounts;
+      return mounts.every((mount) => mount.Source && mount.Target);
+    }
+
     function buildChanges(service) {
-      var config = ServiceHelper.serviceToConfig(service.Model);
+      var config = convertServiceToConfig(service.Model);
       config.Name = service.Name;
       config.Labels = LabelHelper.fromKeyValueToLabelHash(service.ServiceLabels);
-      config.TaskTemplate.ContainerSpec.Env = ServiceHelper.translateEnvironmentVariablesToEnv(service.EnvironmentVariables);
+      config.TaskTemplate.ContainerSpec.Env = envVarsUtils.convertToArrayOfStrings(service.EnvironmentVariables);
       config.TaskTemplate.ContainerSpec.Labels = LabelHelper.fromKeyValueToLabelHash(service.ServiceContainerLabels);
 
       if ($scope.hasChanges(service, ['Image'])) {
         const image = ImageHelper.createImageConfigForContainer($scope.formValues.RegistryModel);
         config.TaskTemplate.ContainerSpec.Image = image.fromImage;
+        config.registryId = $scope.formValues.RegistryModel.Registry.Id;
       } else {
         config.TaskTemplate.ContainerSpec.Image = service.Image;
       }
 
+      if ($scope.hasChanges(service, ['Networks'])) {
+        config.Networks = _.map(
+          _.filter(service.Networks, (item) => item.Id && item.Editable),
+          (item) => ({ Target: item.Id })
+        );
+        config.TaskTemplate.Networks = config.Networks;
+      }
+
       config.TaskTemplate.ContainerSpec.Secrets = service.ServiceSecrets ? service.ServiceSecrets.map(SecretHelper.secretConfig) : [];
       config.TaskTemplate.ContainerSpec.Configs = service.ServiceConfigs ? service.ServiceConfigs.map(ConfigHelper.configConfig) : [];
+
+      // support removal and (future) editing of credential specs
+      const credSpec = service.ServiceConfigs.find((config) => config.credSpec);
+      const credSpecId = credSpec ? credSpec.Id : '';
+      const oldCredSpecId =
+        (config.TaskTemplate.ContainerSpec.Privileges &&
+          config.TaskTemplate.ContainerSpec.Privileges.CredentialSpec &&
+          config.TaskTemplate.ContainerSpec.Privileges.CredentialSpec.Config) ||
+        '';
+      if (oldCredSpecId && !credSpecId) {
+        delete config.TaskTemplate.ContainerSpec.Privileges.CredentialSpec;
+      } else if (credSpec && oldCredSpecId !== credSpec) {
+        config.TaskTemplate.ContainerSpec.Privileges = {
+          ...(config.TaskTemplate.ContainerSpec.Privileges || {}),
+          CredentialSpec: {
+            ...((config.TaskTemplate.ContainerSpec.Privileges && config.TaskTemplate.ContainerSpec.Privileges.CredentialSpec) || {}),
+            Config: credSpec,
+          },
+        };
+      }
+
       config.TaskTemplate.ContainerSpec.Hosts = service.Hosts ? ServiceHelper.translateHostnameIPToHostsEntries(service.Hosts) : [];
 
       if (service.Mode === 'replicated') {
@@ -453,7 +566,7 @@ angular.module('portainer.docker').controller('ServiceController', [
       ServiceService.update(service, config, 'previous')
         .then(function (data) {
           if (data.message && data.message.match(/^rpc error:/)) {
-            Notifications.error(data.message, 'Error');
+            Notifications.error('Failure', data, 'Error');
           } else {
             Notifications.success('Success', 'Service successfully rolled back');
             $scope.cancelChanges({});
@@ -473,33 +586,33 @@ angular.module('portainer.docker').controller('ServiceController', [
     }
 
     $scope.rollbackService = function (service) {
-      ModalService.confirm({
+      confirm({
         title: 'Rollback service',
         message: 'Are you sure you want to rollback?',
-        buttons: {
-          confirm: {
-            label: 'Yes',
-            className: 'btn-danger',
-          },
-        },
-        callback: function onConfirm(confirmed) {
-          if (!confirmed) {
-            return;
-          }
-          rollbackService(service);
-        },
+        modalType: ModalType.Warn,
+        confirmButton: buildConfirmButton('Yes', 'danger'),
+      }).then((confirmed) => {
+        if (!confirmed) {
+          return;
+        }
+        rollbackService(service);
       });
     };
 
+    $scope.setPullImageValidity = setPullImageValidity;
+    function setPullImageValidity(validity) {
+      $scope.state.pullImageValidity = validity;
+    }
+
     $scope.updateService = function updateService(service) {
-      let config = {};
-      service, (config = buildChanges(service));
+      const config = buildChanges(service);
       ServiceService.update(service, config).then(
         function (data) {
           if (data.message && data.message.match(/^rpc error:/)) {
-            Notifications.error(data.message, 'Error');
+            Notifications.error('Failure', data, 'Error');
           } else {
             Notifications.success('Service successfully updated', 'Service updated');
+            $scope.updateWebhookRegistryId();
           }
           $scope.cancelChanges({});
           initView();
@@ -511,7 +624,7 @@ angular.module('portainer.docker').controller('ServiceController', [
     };
 
     $scope.removeService = function () {
-      ModalService.confirmDeletion('Do you want to remove this service? All the containers associated to this service will be removed too.', function onConfirm(confirmed) {
+      confirmDelete('Do you want to remove this service? All the containers associated to this service will be removed too.').then((confirmed) => {
         if (!confirmed) {
           return;
         }
@@ -526,7 +639,7 @@ angular.module('portainer.docker').controller('ServiceController', [
           return $q.when($scope.webhookID && WebhookService.deleteWebhook($scope.webhookID));
         })
         .then(function success() {
-          Notifications.success('Service successfully deleted');
+          Notifications.success('Success', 'Service successfully deleted');
           $state.go('docker.services', {});
         })
         .catch(function error(err) {
@@ -538,20 +651,17 @@ angular.module('portainer.docker').controller('ServiceController', [
     }
 
     $scope.forceUpdateService = function (service) {
-      ModalService.confirmServiceForceUpdate('Do you want to force an update of the service? All the tasks associated to the service will be recreated.', function (result) {
+      confirmServiceForceUpdate('Do you want to force an update of the service? All the tasks associated to the service will be recreated.').then(function (result) {
         if (!result) {
           return;
         }
-        var pullImage = false;
-        if (result[0]) {
-          pullImage = true;
-        }
-        forceUpdateService(service, pullImage);
+
+        forceUpdateService(service, result.pullLatest);
       });
     };
 
     function forceUpdateService(service, pullImage) {
-      var config = ServiceHelper.serviceToConfig(service.Model);
+      var config = convertServiceToConfig(service.Model);
       if (pullImage) {
         config.TaskTemplate.ContainerSpec.Image = ImageHelper.removeDigestFromRepository(config.TaskTemplate.ContainerSpec.Image);
       }
@@ -577,7 +687,10 @@ angular.module('portainer.docker').controller('ServiceController', [
     function translateServiceArrays(service) {
       service.ServiceSecrets = service.Secrets ? service.Secrets.map(SecretHelper.flattenSecret) : [];
       service.ServiceConfigs = service.Configs ? service.Configs.map(ConfigHelper.flattenConfig) : [];
-      service.EnvironmentVariables = ServiceHelper.translateEnvironmentVariables(service.Env);
+      service.EnvironmentVariables = envVarsUtils
+        .parseArrayOfStrings(service.Env)
+        .map((v) => ({ ...v, added: true }))
+        .sort((v1, v2) => (v1.name > v2.name ? 1 : -1));
       service.LogDriverOpts = ServiceHelper.translateLogDriverOptsToKeyValue(service.LogDriverOpts);
       service.ServiceLabels = LabelHelper.fromLabelHashToKeyValue(service.Labels);
       service.ServiceContainerLabels = LabelHelper.fromLabelHashToKeyValue(service.ContainerLabels);
@@ -623,25 +736,55 @@ angular.module('portainer.docker').controller('ServiceController', [
           return $q.all({
             volumes: VolumeService.volumes(),
             tasks: TaskService.tasks({ service: [service.Name] }),
-            containers: agentProxy ? ContainerService.containers() : [],
+            containers: agentProxy ? ContainerService.containers(endpoint.Id) : [],
             nodes: NodeService.nodes(),
             secrets: apiVersion >= 1.25 ? SecretService.secrets() : [],
-            configs: apiVersion >= 1.3 ? ConfigService.configs() : [],
+            configs: apiVersion >= 1.3 ? ConfigService.configs(endpoint.Id) : [],
             availableImages: ImageService.images(),
             availableLoggingDrivers: PluginService.loggingPlugins(apiVersion < 1.25),
-            settings: SettingsService.publicSettings(),
-            webhooks: WebhookService.webhooks(service.Id, EndpointProvider.endpointID()),
+            availableNetworks: NetworkService.networks(true, true, apiVersion >= 1.25),
+            webhooks: WebhookService.webhooks(service.Id, endpoint.Id),
           });
         })
-        .then(function success(data) {
+        .then(async function success(data) {
           $scope.nodes = data.nodes;
           $scope.configs = data.configs;
           $scope.secrets = data.secrets;
           $scope.availableImages = ImageService.getUniqueTagListFromImages(data.availableImages);
           $scope.availableLoggingDrivers = data.availableLoggingDrivers;
           $scope.availableVolumes = data.volumes;
-          $scope.allowBindMounts = data.settings.AllowBindMountsForRegularUsers;
+          $scope.allowBindMounts = endpoint.SecuritySettings.allowBindMountsForRegularUsers;
           $scope.isAdmin = Authentication.isAdmin();
+          $scope.availableNetworks = data.availableNetworks;
+          $scope.swarmNetworks = _.filter($scope.availableNetworks, (network) => network.Scope === 'swarm');
+
+          const serviceNetworks = _.uniqBy(_.concat($scope.service.Model.Spec.Networks || [], $scope.service.Model.Spec.TaskTemplate.Networks || []), 'Target');
+          const networks = _.filter(
+            _.map(serviceNetworks, ({ Target }) => _.find(data.availableNetworks, { Id: Target })),
+            Boolean
+          );
+
+          if (_.some($scope.service.Ports, (port) => port.PublishMode === 'ingress')) {
+            const ingressNetwork = _.find($scope.availableNetworks, (network) => network.Ingress);
+            if (ingressNetwork) {
+              networks.unshift(ingressNetwork);
+            }
+          }
+
+          $scope.service.Networks = await Promise.all(
+            _.map(networks, async (item) => {
+              let addr = '';
+              if (item.IPAM.Config.length) {
+                addr = item.IPAM.Config[0].Subnet;
+              } else {
+                const network = await NetworkService.network(item.Id);
+                addr = (network && network.IPAM && network.IPAM.Config && network.IPAM.Config.length && network.IPAM.Config[0].Subnet) || '';
+              }
+              return { Id: item.Id, Name: item.Name, Addr: addr, Editable: !item.Ingress };
+            })
+          );
+
+          originalService.Networks = angular.copy($scope.service.Networks);
 
           if (data.webhooks.length > 0) {
             var webhook = data.webhooks[0];
@@ -677,6 +820,12 @@ angular.module('portainer.docker').controller('ServiceController', [
             $scope.state.sliderMaxCpu = 32;
           }
 
+          const image = $scope.service.Model.Spec.TaskTemplate.ContainerSpec.Image;
+          RegistryService.retrievePorRegistryModelFromRepository(image, endpoint.Id).then((model) => {
+            $scope.formValues.RegistryModel = model;
+            $scope.initialRegistryID = _.get(model, 'Registry.Id', 0);
+          });
+
           // Default values
           $scope.state.addSecret = { override: false };
 
@@ -697,6 +846,20 @@ angular.module('portainer.docker').controller('ServiceController', [
         service.hasChanges = true;
       }
       previousServiceValues.push(name);
+    }
+
+    $scope.filterNetworks = filterNetworks;
+    function filterNetworks(networks, current) {
+      return networks.filter((network) => !network.Ingress && (network.Id === current.Id || $scope.service.Networks.every((serviceNetwork) => network.Id !== serviceNetwork.Id)));
+    }
+
+    $scope.filterConfigs = filterConfigs;
+    function filterConfigs(configs) {
+      if (!configs) {
+        return [];
+      }
+
+      return configs.filter((config) => $scope.service.ServiceConfigs.every((serviceConfig) => config.Id !== serviceConfig.Id));
     }
 
     function updateServiceArray(service, name) {

@@ -1,47 +1,82 @@
 package chisel
 
 import (
-	"strconv"
-
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/internal/edge/cache"
 )
 
-// AddSchedule register a schedule inside the tunnel details associated to an endpoint.
-func (service *Service) AddSchedule(endpointID portainer.EndpointID, schedule *portainer.EdgeSchedule) {
-	tunnel := service.GetTunnelDetails(endpointID)
+// EdgeJobs retrieves the edge jobs for the given environment
+func (service *Service) EdgeJobs(endpointID portainer.EndpointID) []portainer.EdgeJob {
+	service.mu.RLock()
+	defer service.mu.RUnlock()
 
-	existingScheduleIndex := -1
-	for idx, existingSchedule := range tunnel.Schedules {
-		if existingSchedule.ID == schedule.ID {
-			existingScheduleIndex = idx
+	return append(
+		make([]portainer.EdgeJob, 0, len(service.edgeJobs[endpointID])),
+		service.edgeJobs[endpointID]...,
+	)
+}
+
+// AddEdgeJob register an EdgeJob inside the tunnel details associated to an environment(endpoint).
+func (service *Service) AddEdgeJob(endpoint *portainer.Endpoint, edgeJob *portainer.EdgeJob) {
+	if endpoint.Edge.AsyncMode {
+		return
+	}
+
+	service.mu.Lock()
+	defer service.mu.Unlock()
+
+	existingJobIndex := -1
+	for idx, existingJob := range service.edgeJobs[endpoint.ID] {
+		if existingJob.ID == edgeJob.ID {
+			existingJobIndex = idx
+
 			break
 		}
 	}
 
-	if existingScheduleIndex == -1 {
-		tunnel.Schedules = append(tunnel.Schedules, *schedule)
+	if existingJobIndex == -1 {
+		service.edgeJobs[endpoint.ID] = append(service.edgeJobs[endpoint.ID], *edgeJob)
 	} else {
-		tunnel.Schedules[existingScheduleIndex] = *schedule
+		service.edgeJobs[endpoint.ID][existingJobIndex] = *edgeJob
 	}
 
-	key := strconv.Itoa(int(endpointID))
-	service.tunnelDetailsMap.Set(key, tunnel)
+	cache.Del(endpoint.ID)
 }
 
-// RemoveSchedule will remove the specified schedule from each tunnel it was registered with.
-func (service *Service) RemoveSchedule(scheduleID portainer.ScheduleID) {
-	for item := range service.tunnelDetailsMap.IterBuffered() {
-		tunnelDetails := item.Val.(*portainer.TunnelDetails)
+// RemoveEdgeJob will remove the specified Edge job from each tunnel it was registered with.
+func (service *Service) RemoveEdgeJob(edgeJobID portainer.EdgeJobID) {
+	service.mu.Lock()
 
-		updatedSchedules := make([]portainer.EdgeSchedule, 0)
-		for _, schedule := range tunnelDetails.Schedules {
-			if schedule.ID == scheduleID {
-				continue
+	for endpointID := range service.edgeJobs {
+		n := 0
+		for _, edgeJob := range service.edgeJobs[endpointID] {
+			if edgeJob.ID != edgeJobID {
+				service.edgeJobs[endpointID][n] = edgeJob
+				n++
 			}
-			updatedSchedules = append(updatedSchedules, schedule)
 		}
 
-		tunnelDetails.Schedules = updatedSchedules
-		service.tunnelDetailsMap.Set(item.Key, tunnelDetails)
+		service.edgeJobs[endpointID] = service.edgeJobs[endpointID][:n]
+
+		cache.Del(endpointID)
 	}
+
+	service.mu.Unlock()
+}
+
+func (service *Service) RemoveEdgeJobFromEndpoint(endpointID portainer.EndpointID, edgeJobID portainer.EdgeJobID) {
+	service.mu.Lock()
+	defer service.mu.Unlock()
+
+	n := 0
+	for _, edgeJob := range service.edgeJobs[endpointID] {
+		if edgeJob.ID != edgeJobID {
+			service.edgeJobs[endpointID][n] = edgeJob
+			n++
+		}
+	}
+
+	service.edgeJobs[endpointID] = service.edgeJobs[endpointID][:n]
+
+	cache.Del(endpointID)
 }

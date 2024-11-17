@@ -1,17 +1,26 @@
 import _ from 'lodash-es';
-
 import angular from 'angular';
+
+import { RoleTypes } from '@/portainer/rbac/models/role';
+import { isLimitedToBE } from '@/react/portainer/feature-flags/feature-flags.service';
 
 class PorAccessManagementController {
   /* @ngInject */
-  constructor(Notifications, ExtensionService, AccessService, RoleService) {
-    this.Notifications = Notifications;
-    this.ExtensionService = ExtensionService;
-    this.AccessService = AccessService;
-    this.RoleService = RoleService;
+  constructor($scope, $state, Notifications, AccessService, RoleService) {
+    Object.assign(this, { $scope, $state, Notifications, AccessService, RoleService });
+
+    this.limitedToBE = false;
+    this.$state = $state;
 
     this.unauthorizeAccess = this.unauthorizeAccess.bind(this);
     this.updateAction = this.updateAction.bind(this);
+    this.onChangeUsersAndTeams = this.onChangeUsersAndTeams.bind(this);
+  }
+
+  onChangeUsersAndTeams(value) {
+    this.$scope.$evalAsync(() => {
+      this.formValues.multiselectOutput = value;
+    });
   }
 
   updateAction() {
@@ -31,7 +40,7 @@ class PorAccessManagementController {
     const entity = this.accessControlledEntity;
     const oldUserAccessPolicies = entity.UserAccessPolicies;
     const oldTeamAccessPolicies = entity.TeamAccessPolicies;
-    const selectedRoleId = this.rbacEnabled ? this.formValues.selectedRole.Id : 0;
+    const selectedRoleId = this.formValues.selectedRole.Id;
     const selectedUserAccesses = _.filter(this.formValues.multiselectOutput, (access) => access.Type === 'user');
     const selectedTeamAccesses = _.filter(this.formValues.multiselectOutput, (access) => access.Type === 'team');
 
@@ -47,50 +56,58 @@ class PorAccessManagementController {
     const teamAccessPolicies = entity.TeamAccessPolicies;
     const selectedUserAccesses = _.filter(selectedAccesses, (access) => access.Type === 'user');
     const selectedTeamAccesses = _.filter(selectedAccesses, (access) => access.Type === 'team');
+
     _.forEach(selectedUserAccesses, (access) => delete userAccessPolicies[access.Id]);
     _.forEach(selectedTeamAccesses, (access) => delete teamAccessPolicies[access.Id]);
     this.updateAccess();
   }
 
+  isRoleLimitedToBE(role) {
+    if (!this.limitedToBE) {
+      return false;
+    }
+
+    return role.ID !== RoleTypes.STANDARD;
+  }
+
+  roleLabel(role) {
+    if (!this.limitedToBE) {
+      return role.Name;
+    }
+
+    if (this.isRoleLimitedToBE(role)) {
+      return `${role.Name} (Business Feature)`;
+    }
+
+    return `${role.Name} (Default)`;
+  }
+
   async $onInit() {
-    const entity = this.accessControlledEntity;
-    if (!entity) {
-      this.Notifications.error('Failure', 'Unable to retrieve accesses');
-      return;
-    }
-    if (!entity.UserAccessPolicies) {
-      entity.UserAccessPolicies = {};
-    }
-    if (!entity.TeamAccessPolicies) {
-      entity.TeamAccessPolicies = {};
-    }
-    const parent = this.inheritFrom;
-    if (parent && !parent.UserAccessPolicies) {
-      parent.UserAccessPolicies = {};
-    }
-    if (parent && !parent.TeamAccessPolicies) {
-      parent.TeamAccessPolicies = {};
-    }
-    this.roles = [];
-    this.rbacEnabled = false;
     try {
-      this.rbacEnabled = await this.ExtensionService.extensionEnabled(this.ExtensionService.EXTENSIONS.RBAC);
-      if (this.rbacEnabled) {
-        this.roles = await this.RoleService.roles();
-        this.formValues = {
-          selectedRole: this.roles[0],
-        };
+      if (this.limitedFeature) {
+        this.limitedToBE = isLimitedToBE(this.limitedFeature);
       }
-      const data = await this.AccessService.accesses(
-        entity.UserAccessPolicies,
-        entity.TeamAccessPolicies,
-        parent ? parent.UserAccessPolicies : {},
-        parent ? parent.TeamAccessPolicies : {},
-        this.roles
-      );
+
+      const entity = this.accessControlledEntity;
+      const parent = this.inheritFrom;
+
+      const roles = await this.RoleService.roles();
+      this.roles = _.orderBy(roles, 'Priority', 'asc');
+      this.formValues = {
+        multiselectOutput: [],
+        selectedRole: this.roles.find((role) => !this.isRoleLimitedToBE(role)),
+      };
+
+      const data = await this.AccessService.accesses(entity, parent, this.roles);
+
+      if (this.filterUsers) {
+        data.availableUsersAndTeams = this.filterUsers(data.availableUsersAndTeams);
+      }
+
       this.availableUsersAndTeams = _.orderBy(data.availableUsersAndTeams, 'Name', 'asc');
       this.authorizedUsersAndTeams = data.authorizedUsersAndTeams;
     } catch (err) {
+      this.$state.go('portainer.home');
       this.availableUsersAndTeams = [];
       this.authorizedUsersAndTeams = [];
       this.Notifications.error('Failure', err, 'Unable to retrieve accesses');

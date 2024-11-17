@@ -1,14 +1,9 @@
-<rd-header>
-  <rd-header-title title-text="存储卷细节"></rd-header-title>
-  <rd-header-content>
-    <a ui-sref="docker.volumes">存储卷</a> &gt; <a ui-sref="docker.volumes.volume({id: volume.Id})">{{ volume.Id }}</a>
-  </rd-header-content>
-</rd-header>
+<page-header title="'存储卷详情'" breadcrumbs="[{label:'存储卷', link:'docker.volumes'}, volume.Id]"> </page-header>
 
 <div class="row" ng-if="volume">
   <div class="col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="fa-cube" title-text="存储卷细节"></rd-widget-header>
+      <rd-widget-header icon="database" title-text="存储卷详情"></rd-widget-header>
       <rd-widget-body classes="no-padding">
         <table class="table">
           <tbody>
@@ -17,12 +12,12 @@
               <td>
                 {{ volume.Id }}
                 <button authorization="DockerVolumeDelete" class="btn btn-xs btn-danger" ng-click="removeVolume()"
-                  ><i class="fa fa-trash-alt space-right" aria-hidden="true"></i>删除此存储卷</button
+                  ><pr-icon icon="'trash-2'" class="leading-none"></pr-icon> 删除此卷</button
                 >
               </td>
             </tr>
             <tr>
-              <td>创建</td>
+              <td>创建时间</td>
               <td>{{ volume.CreatedAt | getisodate }}</td>
             </tr>
             <tr>
@@ -30,13 +25,13 @@
               <td>{{ volume.Mountpoint }}</td>
             </tr>
             <tr>
-              <td>驱动</td>
+              <td>驱动程序</td>
               <td>{{ volume.Driver }}</td>
             </tr>
             <tr ng-if="!(volume.Labels | emptyobject)">
               <td>标签</td>
               <td>
-                <table class="table table-bordered table-condensed">
+                <table class="table-bordered table-condensed table">
                   <tr ng-repeat="(k, v) in volume.Labels">
                     <td>{{ k }}</td>
                     <td>{{ v }}</td>
@@ -51,41 +46,22 @@
   </div>
 </div>
 
-<div class="row" ng-if="isCioDriver">
-  <div class="col-sm-12">
-    <volume-storidge-info volume="storidgeVolume"> </volume-storidge-info>
-  </div>
-</div>
-
-<div class="row" ng-if="isCioDriver">
-  <div class="col-sm-12">
-    <storidge-snapshot-creation volume-id="storidgeVolume.Vdisk" ng-if="storidgeVolume.SnapshotEnabled"> </storidge-snapshot-creation>
-  </div>
-</div>
-
-<div class="row" ng-if="isCioDriver && storidgeVolume.SnapshotEnabled">
-  <div class="col-sm-12">
-    <storidge-snapshots-datatable
-      title-text="Snapshots"
-      title-icon="fa-camera"
-      dataset="storidgeSnapshots"
-      table-key="storidgeSnapshots"
-      order-by="Id"
-      remove-action="removeSnapshot"
-    >
-    </storidge-snapshots-datatable>
-  </div>
-</div>
-
 <!-- access-control-panel -->
-<por-access-control-panel ng-if="volume && applicationState.application.authentication" resource-id="volume.Id" resource-control="volume.ResourceControl" resource-type="'volume'">
-</por-access-control-panel>
+<access-control-panel
+  ng-if="volume"
+  resource-id="volume.ResourceId"
+  resource-control="volume.ResourceControl"
+  resource-type="resourceType"
+  on-update-success="(onUpdateResourceControlSuccess)"
+  environment-id="endpoint.Id"
+>
+</access-control-panel>
 <!-- !access-control-panel -->
 
 <div class="row" ng-if="!(volume.Options | emptyobject)">
   <div class="col-lg-12 col-md-12 col-xs-12">
     <rd-widget>
-      <rd-widget-header icon="fa-cogs" title-text="存储卷选项"></rd-widget-header>
+      <rd-widget-header icon="settings" title-text="存储卷选项"></rd-widget-header>
       <rd-widget-body classes="no-padding">
         <table class="table">
           <tbody>
@@ -102,12 +78,12 @@
 <div class="row" ng-if="containersUsingVolume.length > 0">
   <div class="col-lg-12 col-md-12 col-xs-12">
     <rd-widget>
-      <rd-widget-header icon="fa-server" title-text="使用存储卷的容器"></rd-widget-header>
+      <rd-widget-header icon="box" title-text="使用该卷的容器"></rd-widget-header>
       <rd-widget-body classes="no-padding">
         <table class="table">
           <thead>
             <th>容器名称</th>
-            <th>安装在</th>
+            <th>挂载路径</th>
             <th>只读</th>
           </thead>
           <tbody>

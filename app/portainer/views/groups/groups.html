@@ -1,22 +1,7 @@
-<rd-header>
-  <rd-header-title title-text="端点组">
-    <a data-toggle="tooltip" title="刷新" ui-sref="portainer.groups" ui-sref-opts="{reload: true}">
-      <i class="fa fa-sync" aria-hidden="true"></i>
-    </a>
-  </rd-header-title>
-  <rd-header-content>端点组管理</rd-header-content>
-</rd-header>
+<page-header title="'环境组'" breadcrumbs="['环境组管理']" reload="true"> </page-header>
 
 <div class="row">
   <div class="col-sm-12">
-    <groups-datatable
-      title-text="端点组"
-      title-icon="fa-object-group"
-      dataset="groups"
-      table-key="groups"
-      order-by="Name"
-      access-management="applicationState.application.authentication"
-      remove-action="removeAction"
-    ></groups-datatable>
+    <groups-datatable title-text="环境组" title-icon="dice-4" dataset="groups" table-key="groups" order-by="Name" remove-action="removeAction"></groups-datatable>
   </div>
 </div>

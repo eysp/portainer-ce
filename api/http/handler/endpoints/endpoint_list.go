@@ -3,85 +3,101 @@ package endpoints
 import (
 	"net/http"
 	"strconv"
-	"strings"
 
-	"github.com/portainer/portainer/api"
-
-	"github.com/portainer/libhttp/request"
-
-	httperror "github.com/portainer/libhttp/error"
-	"github.com/portainer/libhttp/response"
+	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/http/security"
+	"github.com/portainer/portainer/api/internal/endpointutils"
+	httperror "github.com/portainer/portainer/pkg/libhttp/error"
+	"github.com/portainer/portainer/pkg/libhttp/request"
+	"github.com/portainer/portainer/pkg/libhttp/response"
 )
 
-// GET request on /api/endpoints?(start=<start>)&(limit=<limit>)&(search=<search>)&(groupId=<groupId)
+const (
+	EdgeDeviceIntervalMultiplier = 2
+	EdgeDeviceIntervalAdd        = 20
+)
+
+// @id EndpointList
+// @summary List environments(endpoints)
+// @description List all environments(endpoints) based on the current user authorizations. Will
+// @description return all environments(endpoints) if using an administrator or team leader account otherwise it will
+// @description only return authorized environments(endpoints).
+// @description **Access policy**: restricted
+// @tags endpoints
+// @security ApiKeyAuth
+// @security jwt
+// @produce json
+// @param start query int false "Start searching from"
+// @param limit query int false "Limit results to this value"
+// @param sort query sortKey false "Sort results by this value" Enum("Name", "Group", "Status", "LastCheckIn", "EdgeID")
+// @param order query int false "Order sorted results by desc/asc" Enum("asc", "desc")
+// @param search query string false "Search query"
+// @param groupIds query []int false "List environments(endpoints) of these groups"
+// @param status query []int false "List environments(endpoints) by this status"
+// @param types query []int false "List environments(endpoints) of this type"
+// @param tagIds query []int false "search environments(endpoints) with these tags (depends on tagsPartialMatch)"
+// @param tagsPartialMatch query bool false "If true, will return environment(endpoint) which has one of tagIds, if false (or missing) will return only environments(endpoints) that has all the tags"
+// @param endpointIds query []int false "will return only these environments(endpoints)"
+// @param provisioned query bool false "If true, will return environment(endpoint) that were provisioned"
+// @param agentVersions query []string false "will return only environments with on of these agent versions"
+// @param edgeAsync query bool false "if exists true show only edge async agents, false show only standard edge agents. if missing, will show both types (relevant only for edge agents)"
+// @param edgeDeviceUntrusted query bool false "if true, show only untrusted edge agents, if false show only trusted edge agents (relevant only for edge agents)"
+// @param edgeCheckInPassedSeconds query number false "if bigger then zero, show only edge agents that checked-in in the last provided seconds (relevant only for edge agents)"
+// @param excludeSnapshots query bool false "if true, the snapshot data won't be retrieved"
+// @param name query string false "will return only environments(endpoints) with this name"
+// @param edgeStackId query portainer.EdgeStackID false "will return the environements of the specified edge stack"
+// @param edgeStackStatus query string false "only applied when edgeStackId exists. Filter the returned environments based on their deployment status in the stack (not the environment status!)" Enum("Pending", "Ok", "Error", "Acknowledged", "Remove", "RemoteUpdateSuccess", "ImagesPulled")
+// @success 200 {array} portainer.Endpoint "Endpoints"
+// @failure 500 "Server error"
+// @router /endpoints [get]
 func (handler *Handler) endpointList(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	start, _ := request.RetrieveNumericQueryParameter(r, "start", true)
 	if start != 0 {
 		start--
 	}
 
-	search, _ := request.RetrieveQueryParameter(r, "search", true)
-	if search != "" {
-		search = strings.ToLower(search)
-	}
-
-	groupID, _ := request.RetrieveNumericQueryParameter(r, "groupId", true)
 	limit, _ := request.RetrieveNumericQueryParameter(r, "limit", true)
-	endpointType, _ := request.RetrieveNumericQueryParameter(r, "type", true)
+	sortField, _ := request.RetrieveQueryParameter(r, "sort", true)
+	sortOrder, _ := request.RetrieveQueryParameter(r, "order", true)
 
-	var tagIDs []portainer.TagID
-	request.RetrieveJSONQueryParameter(r, "tagIds", &tagIDs, true)
-
-	tagsPartialMatch, _ := request.RetrieveBooleanQueryParameter(r, "tagsPartialMatch", true)
-
-	var endpointIDs []portainer.EndpointID
-	request.RetrieveJSONQueryParameter(r, "endpointIds", &endpointIDs, true)
-
-	endpointGroups, err := handler.EndpointGroupService.EndpointGroups()
+	endpointGroups, err := handler.DataStore.EndpointGroup().ReadAll()
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve endpoint groups from the database", err}
+		return httperror.InternalServerError("Unable to retrieve environment groups from the database", err)
 	}
 
-	endpoints, err := handler.EndpointService.Endpoints()
+	edgeGroups, err := handler.DataStore.EdgeGroup().ReadAll()
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve endpoints from the database", err}
+		return httperror.InternalServerError("Unable to retrieve edge groups from the database", err)
+	}
+
+	endpoints, err := handler.DataStore.Endpoint().Endpoints()
+	if err != nil {
+		return httperror.InternalServerError("Unable to retrieve environments from the database", err)
+	}
+
+	settings, err := handler.DataStore.Settings().Settings()
+	if err != nil {
+		return httperror.InternalServerError("Unable to retrieve settings from the database", err)
 	}
 
 	securityContext, err := security.RetrieveRestrictedRequestContext(r)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve info from request context", err}
+		return httperror.InternalServerError("Unable to retrieve info from request context", err)
+	}
+
+	query, err := parseQuery(r)
+	if err != nil {
+		return httperror.BadRequest("Invalid query parameters", err)
 	}
 
 	filteredEndpoints := security.FilterEndpoints(endpoints, endpointGroups, securityContext)
 
-	if endpointIDs != nil {
-		filteredEndpoints = filteredEndpointsByIds(filteredEndpoints, endpointIDs)
+	filteredEndpoints, totalAvailableEndpoints, err := handler.filterEndpointsByQuery(filteredEndpoints, query, endpointGroups, edgeGroups, settings)
+	if err != nil {
+		return httperror.InternalServerError("Unable to filter endpoints", err)
 	}
 
-	if groupID != 0 {
-		filteredEndpoints = filterEndpointsByGroupID(filteredEndpoints, portainer.EndpointGroupID(groupID))
-	}
-
-	if search != "" {
-		tags, err := handler.TagService.Tags()
-		if err != nil {
-			return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve tags from the database", err}
-		}
-		tagsMap := make(map[portainer.TagID]string)
-		for _, tag := range tags {
-			tagsMap[tag.ID] = tag.Name
-		}
-		filteredEndpoints = filterEndpointsBySearchCriteria(filteredEndpoints, endpointGroups, tagsMap, search)
-	}
-
-	if endpointType != 0 {
-		filteredEndpoints = filterEndpointsByType(filteredEndpoints, portainer.EndpointType(endpointType))
-	}
-
-	if tagIDs != nil {
-		filteredEndpoints = filteredEndpointsByTags(filteredEndpoints, tagIDs, endpointGroups, tagsPartialMatch)
-	}
+	sortEnvironmentsByField(filteredEndpoints, endpointGroups, getSortKey(sortField), sortOrder == "desc")
 
 	filteredEndpointCount := len(filteredEndpoints)
 
@@ -89,9 +105,21 @@ func (handler *Handler) endpointList(w http.ResponseWriter, r *http.Request) *ht
 
 	for idx := range paginatedEndpoints {
 		hideFields(&paginatedEndpoints[idx])
+		paginatedEndpoints[idx].ComposeSyntaxMaxVersion = handler.ComposeStackManager.ComposeSyntaxMaxVersion()
+		if paginatedEndpoints[idx].EdgeCheckinInterval == 0 {
+			paginatedEndpoints[idx].EdgeCheckinInterval = settings.EdgeAgentCheckinInterval
+		}
+		endpointutils.UpdateEdgeEndpointHeartbeat(&paginatedEndpoints[idx], settings)
+		if !query.excludeSnapshots {
+			err = handler.SnapshotService.FillSnapshotData(&paginatedEndpoints[idx])
+			if err != nil {
+				return httperror.InternalServerError("Unable to add snapshot data", err)
+			}
+		}
 	}
 
 	w.Header().Set("X-Total-Count", strconv.Itoa(filteredEndpointCount))
+	w.Header().Set("X-Total-Available", strconv.Itoa(totalAvailableEndpoints))
 	return response.JSON(w, paginatedEndpoints)
 }
 
@@ -101,6 +129,10 @@ func paginateEndpoints(endpoints []portainer.Endpoint, start, limit int) []porta
 	}
 
 	endpointCount := len(endpoints)
+
+	if start < 0 {
+		start = 0
+	}
 
 	if start > endpointCount {
 		start = endpointCount
@@ -114,115 +146,6 @@ func paginateEndpoints(endpoints []portainer.Endpoint, start, limit int) []porta
 	return endpoints[start:end]
 }
 
-func filterEndpointsByGroupID(endpoints []portainer.Endpoint, endpointGroupID portainer.EndpointGroupID) []portainer.Endpoint {
-	filteredEndpoints := make([]portainer.Endpoint, 0)
-
-	for _, endpoint := range endpoints {
-		if endpoint.GroupID == endpointGroupID {
-			filteredEndpoints = append(filteredEndpoints, endpoint)
-		}
-	}
-
-	return filteredEndpoints
-}
-
-func filterEndpointsBySearchCriteria(endpoints []portainer.Endpoint, endpointGroups []portainer.EndpointGroup, tagsMap map[portainer.TagID]string, searchCriteria string) []portainer.Endpoint {
-	filteredEndpoints := make([]portainer.Endpoint, 0)
-
-	for _, endpoint := range endpoints {
-		endpointTags := convertTagIDsToTags(tagsMap, endpoint.TagIDs)
-		if endpointMatchSearchCriteria(&endpoint, endpointTags, searchCriteria) {
-			filteredEndpoints = append(filteredEndpoints, endpoint)
-			continue
-		}
-
-		if endpointGroupMatchSearchCriteria(&endpoint, endpointGroups, tagsMap, searchCriteria) {
-			filteredEndpoints = append(filteredEndpoints, endpoint)
-		}
-	}
-
-	return filteredEndpoints
-}
-
-func endpointMatchSearchCriteria(endpoint *portainer.Endpoint, tags []string, searchCriteria string) bool {
-	if strings.Contains(strings.ToLower(endpoint.Name), searchCriteria) {
-		return true
-	}
-
-	if strings.Contains(strings.ToLower(endpoint.URL), searchCriteria) {
-		return true
-	}
-
-	if endpoint.Status == portainer.EndpointStatusUp && searchCriteria == "up" {
-		return true
-	} else if endpoint.Status == portainer.EndpointStatusDown && searchCriteria == "down" {
-		return true
-	}
-	for _, tag := range tags {
-		if strings.Contains(strings.ToLower(tag), searchCriteria) {
-			return true
-		}
-	}
-
-	return false
-}
-
-func endpointGroupMatchSearchCriteria(endpoint *portainer.Endpoint, endpointGroups []portainer.EndpointGroup, tagsMap map[portainer.TagID]string, searchCriteria string) bool {
-	for _, group := range endpointGroups {
-		if group.ID == endpoint.GroupID {
-			if strings.Contains(strings.ToLower(group.Name), searchCriteria) {
-				return true
-			}
-			tags := convertTagIDsToTags(tagsMap, group.TagIDs)
-			for _, tag := range tags {
-				if strings.Contains(strings.ToLower(tag), searchCriteria) {
-					return true
-				}
-			}
-		}
-	}
-
-	return false
-}
-
-func filterEndpointsByType(endpoints []portainer.Endpoint, endpointType portainer.EndpointType) []portainer.Endpoint {
-	filteredEndpoints := make([]portainer.Endpoint, 0)
-
-	for _, endpoint := range endpoints {
-		if endpoint.Type == endpointType {
-			filteredEndpoints = append(filteredEndpoints, endpoint)
-		}
-	}
-	return filteredEndpoints
-}
-
-func convertTagIDsToTags(tagsMap map[portainer.TagID]string, tagIDs []portainer.TagID) []string {
-	tags := make([]string, 0)
-	for _, tagID := range tagIDs {
-		tags = append(tags, tagsMap[tagID])
-	}
-	return tags
-}
-
-func filteredEndpointsByTags(endpoints []portainer.Endpoint, tagIDs []portainer.TagID, endpointGroups []portainer.EndpointGroup, partialMatch bool) []portainer.Endpoint {
-	filteredEndpoints := make([]portainer.Endpoint, 0)
-
-	for _, endpoint := range endpoints {
-		endpointGroup := getEndpointGroup(endpoint.GroupID, endpointGroups)
-		endpointMatched := false
-		if partialMatch {
-			endpointMatched = endpointPartialMatchTags(endpoint, endpointGroup, tagIDs)
-		} else {
-			endpointMatched = endpointFullMatchTags(endpoint, endpointGroup, tagIDs)
-		}
-
-		if endpointMatched {
-			filteredEndpoints = append(filteredEndpoints, endpoint)
-		}
-	}
-	return filteredEndpoints
-}
-
 func getEndpointGroup(groupID portainer.EndpointGroupID, groups []portainer.EndpointGroup) portainer.EndpointGroup {
 	var endpointGroup portainer.EndpointGroup
 	for _, group := range groups {
@@ -232,58 +155,4 @@ func getEndpointGroup(groupID portainer.EndpointGroupID, groups []portainer.Endp
 		}
 	}
 	return endpointGroup
-}
-
-func endpointPartialMatchTags(endpoint portainer.Endpoint, endpointGroup portainer.EndpointGroup, tagIDs []portainer.TagID) bool {
-	tagSet := make(map[portainer.TagID]bool)
-	for _, tagID := range tagIDs {
-		tagSet[tagID] = true
-	}
-	for _, tagID := range endpoint.TagIDs {
-		if tagSet[tagID] {
-			return true
-		}
-	}
-	for _, tagID := range endpointGroup.TagIDs {
-		if tagSet[tagID] {
-			return true
-		}
-	}
-	return false
-}
-
-func endpointFullMatchTags(endpoint portainer.Endpoint, endpointGroup portainer.EndpointGroup, tagIDs []portainer.TagID) bool {
-	missingTags := make(map[portainer.TagID]bool)
-	for _, tagID := range tagIDs {
-		missingTags[tagID] = true
-	}
-	for _, tagID := range endpoint.TagIDs {
-		if missingTags[tagID] {
-			delete(missingTags, tagID)
-		}
-	}
-	for _, tagID := range endpointGroup.TagIDs {
-		if missingTags[tagID] {
-			delete(missingTags, tagID)
-		}
-	}
-	return len(missingTags) == 0
-}
-
-func filteredEndpointsByIds(endpoints []portainer.Endpoint, ids []portainer.EndpointID) []portainer.Endpoint {
-	filteredEndpoints := make([]portainer.Endpoint, 0)
-
-	idsSet := make(map[portainer.EndpointID]bool)
-	for _, id := range ids {
-		idsSet[id] = true
-	}
-
-	for _, endpoint := range endpoints {
-		if idsSet[endpoint.ID] {
-			filteredEndpoints = append(filteredEndpoints, endpoint)
-		}
-	}
-
-	return filteredEndpoints
-
 }

@@ -1,7 +1,4 @@
-<rd-header>
-  <rd-header-title title-text="创建端点组"></rd-header-title>
-  <rd-header-content> <a ui-sref="portainer.groups">端点组</a> &gt; 添加组 </rd-header-content>
-</rd-header>
+<page-header title="'创建环境组'" breadcrumbs="[{label:'环境分组', link:'portainer.groups'}, '添加分组']" reload="true"> </page-header>
 
 <div class="row">
   <div class="col-sm-12">
@@ -9,17 +6,12 @@
       <rd-widget-body>
         <group-form
           loaded="loaded"
-          page-type="create"
           model="model"
-          available-endpoints="availableEndpoints"
-          available-tags="availableTags"
           associated-endpoints="associatedEndpoints"
-          add-label-action="addLabel"
-          remove-label-action="removeLabel"
           form-action="create"
-          form-action-label="创建群组"
+          form-action-label="创建分组"
           action-in-progress="state.actionInProgress"
-          on-create-tag="(onCreateTag)"
+          on-change-environments="(onChangeEnvironments)"
         ></group-form>
       </rd-widget-body>
     </rd-widget>

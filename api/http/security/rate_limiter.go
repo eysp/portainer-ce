@@ -5,9 +5,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/portainer/portainer/api/http/errors"
+	httperror "github.com/portainer/portainer/pkg/libhttp/error"
+
 	"github.com/g07cha/defender"
-	httperror "github.com/portainer/libhttp/error"
-	"github.com/portainer/portainer/api"
 )
 
 // RateLimiter represents an entity that manages request rate limiting
@@ -29,8 +30,8 @@ func NewRateLimiter(maxRequests int, duration time.Duration, banDuration time.Du
 func (limiter *RateLimiter) LimitAccess(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ip := StripAddrPort(r.RemoteAddr)
-		if banned := limiter.Inc(ip); banned == true {
-			httperror.WriteError(w, http.StatusForbidden, "Access denied", portainer.ErrResourceAccessDenied)
+		if banned := limiter.Inc(ip); banned {
+			httperror.WriteError(w, http.StatusForbidden, "Access denied", errors.ErrResourceAccessDenied)
 			return
 		}
 		next.ServeHTTP(w, r)

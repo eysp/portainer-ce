@@ -1,36 +1,50 @@
+import { getEnvironments } from '@/react/portainer/environments/environment.service';
+import { restoreOptions } from '@/react/portainer/init/InitAdminView/restore-options';
+
 angular.module('portainer.app').controller('InitAdminController', [
-  '$async',
   '$scope',
   '$state',
   'Notifications',
   'Authentication',
   'StateManager',
+  'SettingsService',
   'UserService',
-  'EndpointService',
-  'ExtensionService',
-  function ($async, $scope, $state, Notifications, Authentication, StateManager, UserService, EndpointService, ExtensionService) {
+  'BackupService',
+  'StatusService',
+  function ($scope, $state, Notifications, Authentication, StateManager, SettingsService, UserService, BackupService, StatusService) {
+    $scope.restoreOptions = restoreOptions;
+
+    $scope.uploadBackup = uploadBackup;
+
     $scope.logo = StateManager.getState().application.logo;
+    $scope.RESTORE_FORM_TYPES = { S3: 's3', FILE: 'file' };
 
     $scope.formValues = {
       Username: 'admin',
       Password: '',
       ConfirmPassword: '',
+      enableTelemetry: process.env.NODE_ENV === 'production',
+      restoreFormType: $scope.RESTORE_FORM_TYPES.FILE,
     };
 
     $scope.state = {
       actionInProgress: false,
+      showInitPassword: true,
+      showRestorePortainer: false,
     };
 
-    function retrieveAndSaveEnabledExtensions() {
-      return $async(retrieveAndSaveEnabledExtensionsAsync);
-    }
+    createAdministratorFlow();
 
-    async function retrieveAndSaveEnabledExtensionsAsync() {
-      try {
-        await ExtensionService.retrieveAndSaveEnabledExtensions();
-      } catch (err) {
-        Notifications.error('失败', err, '无法检索已启用的扩展');
-      }
+    $scope.togglePanel = function () {
+      $scope.state.showInitPassword = !$scope.state.showInitPassword;
+      $scope.state.showRestorePortainer = !$scope.state.showRestorePortainer;
+    };
+
+    $scope.onChangeRestoreType = onChangeRestoreType;
+    function onChangeRestoreType(value) {
+      $scope.$evalAsync(() => {
+        $scope.formValues.restoreFormType = value;
+      });
     }
 
     $scope.createAdminUser = function () {
@@ -43,19 +57,23 @@ angular.module('portainer.app').controller('InitAdminController', [
           return Authentication.login(username, password);
         })
         .then(function success() {
-          return retrieveAndSaveEnabledExtensions();
+          return SettingsService.update({ enableTelemetry: $scope.formValues.enableTelemetry });
+        })
+        .then(() => {
+          return StateManager.initialize();
         })
         .then(function () {
-          return EndpointService.endpoints(0, 100);
+          return getEnvironments({ limit: 100 });
         })
         .then(function success(data) {
           if (data.value.length === 0) {
-            $state.go('portainer.init.endpoint');
+            $state.go('portainer.wizard');
           } else {
             $state.go('portainer.home');
           }
         })
         .catch(function error(err) {
+          handleError(err);
           Notifications.error('失败', err, '无法创建管理员用户');
         })
         .finally(function final() {
@@ -63,17 +81,89 @@ angular.module('portainer.app').controller('InitAdminController', [
         });
     };
 
+    function handleError(err) {
+      if (err.status === 303) {
+        const headers = err.headers();
+        const REDIRECT_REASON_TIMEOUT = 'AdminInitTimeout';
+        if (headers && headers['redirect-reason'] === REDIRECT_REASON_TIMEOUT) {
+          window.location.href = '/timeout.html';
+        }
+      }
+    }
+
     function createAdministratorFlow() {
+      SettingsService.publicSettings()
+        .then(function success(data) {
+          $scope.requiredPasswordLength = data.RequiredPasswordLength;
+        })
+        .catch(function error(err) {
+          Notifications.error('失败', err, '无法检索应用设置');
+        });
+
       UserService.administratorExists()
         .then(function success(exists) {
           if (exists) {
-            $state.go('portainer.home');
+            $state.go('portainer.wizard');
           }
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法验证管理员帐户是否存在');
+          Notifications.error('失败', err, '无法验证管理员账户是否存在');
         });
     }
-    createAdministratorFlow();
+
+    async function uploadBackup() {
+      $scope.state.backupInProgress = true;
+
+      const file = $scope.formValues.BackupFile;
+      const password = $scope.formValues.Password;
+
+      restoreAndRefresh(() => BackupService.uploadBackup(file, password));
+    }
+
+    async function restoreAndRefresh(restoreAsyncFn) {
+      $scope.state.backupInProgress = true;
+
+      try {
+        await restoreAsyncFn();
+      } catch (err) {
+        handleError(err);
+        Notifications.error('失败', err, '无法恢复备份');
+        $scope.state.backupInProgress = false;
+
+        return;
+      }
+
+      try {
+        await waitPortainerRestart();
+        Notifications.success('成功', '备份已成功恢复');
+        $state.go('portainer.auth');
+      } catch (err) {
+        handleError(err);
+        Notifications.error('失败', err, '无法检查状态');
+        await wait(2);
+        location.reload();
+      }
+
+      $scope.state.backupInProgress = false;
+    }
+
+    async function waitPortainerRestart() {
+      for (let i = 0; i < 10; i++) {
+        await wait(5);
+        try {
+          const status = await StatusService.status();
+          if (status && status.Version) {
+            return;
+          }
+        } catch (e) {
+          // pass
+        }
+      }
+      throw new Error('等待 Portainer 重启超时');
+    }
   },
 ]);
+
+function wait(seconds = 0) {
+  return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+}

@@ -1,20 +1,32 @@
 import _ from 'lodash-es';
-import { ResourceControlOwnership as RCO } from 'Portainer/models/resourceControl/resourceControlOwnership';
+import { ResourceControlOwnership as RCO } from '@/react/portainer/access-control/types';
 
 angular.module('portainer.app').controller('porAccessControlFormController', [
   '$q',
+  '$scope',
+  '$state',
   'UserService',
   'TeamService',
   'Notifications',
   'Authentication',
   'ResourceControlService',
-  function ($q, UserService, TeamService, Notifications, Authentication, ResourceControlService) {
+  function ($q, $scope, $state, UserService, TeamService, Notifications, Authentication, ResourceControlService) {
     var ctrl = this;
 
     ctrl.RCO = RCO;
 
+    this.onAuthorizedTeamsChange = onAuthorizedTeamsChange.bind(this);
+    this.onAuthorizedUsersChange = onAuthorizedUsersChange.bind(this);
+
     ctrl.availableTeams = [];
     ctrl.availableUsers = [];
+
+    ctrl.onChangeEnablement = onChangeEnablement;
+    ctrl.onChangeOwnership = onChangeOwnership;
+
+    function onChangeOwnership(ownership) {
+      onChange({ Ownership: ownership });
+    }
 
     function setOwnership(resourceControl, isAdmin) {
       if (isAdmin && resourceControl.Ownership === RCO.PRIVATE) {
@@ -22,60 +34,72 @@ angular.module('portainer.app').controller('porAccessControlFormController', [
       } else {
         ctrl.formData.Ownership = resourceControl.Ownership;
       }
+
+      if (ctrl.formData.Ownership === RCO.PUBLIC) {
+        ctrl.formData.AccessControlEnabled = false;
+      }
     }
 
     function setAuthorizedUsersAndTeams(authorizedUsers, authorizedTeams) {
-      angular.forEach(ctrl.availableUsers, function (user) {
-        var found = _.find(authorizedUsers, { Id: user.Id });
-        if (found) {
-          user.selected = true;
-        }
-      });
+      ctrl.formData.AuthorizedTeams = authorizedTeams;
+      ctrl.formData.AuthorizedUsers = authorizedUsers;
+    }
 
-      angular.forEach(ctrl.availableTeams, function (team) {
-        var found = _.find(authorizedTeams, { Id: team.Id });
-        if (found) {
-          team.selected = true;
-        }
+    function onAuthorizedTeamsChange(AuthorizedTeams) {
+      onChange({ AuthorizedTeams });
+    }
+
+    function onAuthorizedUsersChange(AuthorizedUsers) {
+      onChange({ AuthorizedUsers });
+    }
+
+    function onChange(formData) {
+      $scope.$evalAsync(() => {
+        ctrl.formData = {
+          ...ctrl.formData,
+          ...formData,
+        };
       });
     }
 
-    function initComponent() {
-      var isAdmin = Authentication.isAdmin();
+    this.$onInit = $onInit;
+    function $onInit() {
+      var isAdmin = Authentication.isPureAdmin();
       ctrl.isAdmin = isAdmin;
 
       if (isAdmin) {
         ctrl.formData.Ownership = ctrl.RCO.ADMINISTRATORS;
       }
 
+      const environmentId = $state.params.endpointId;
       $q.all({
-        availableTeams: TeamService.teams(),
-        availableUsers: isAdmin ? UserService.users(false) : [],
+        availableTeams: TeamService.teams(environmentId),
+        availableUsers: isAdmin ? UserService.users(false, environmentId) : [],
       })
         .then(function success(data) {
           ctrl.availableUsers = _.orderBy(data.availableUsers, 'Username', 'asc');
-
-          var availableTeams = _.orderBy(data.availableTeams, 'Name', 'asc');
-          ctrl.availableTeams = availableTeams;
-          if (!isAdmin && availableTeams.length === 1) {
-            ctrl.formData.AuthorizedTeams = availableTeams;
+          ctrl.availableTeams = _.orderBy(data.availableTeams, 'Name', 'asc');
+          if (!isAdmin && ctrl.availableTeams.length === 1) {
+            ctrl.formData.AuthorizedTeams = ctrl.availableTeams;
           }
-
           return $q.when(ctrl.resourceControl && ResourceControlService.retrieveOwnershipDetails(ctrl.resourceControl));
         })
         .then(function success(data) {
           if (data) {
-            var authorizedUsers = data.authorizedUsers;
-            var authorizedTeams = data.authorizedTeams;
+            const authorizedTeams = !isAdmin && ctrl.availableTeams.length === 1 ? ctrl.availableTeams : data.authorizedTeams;
+            const authorizedUsers = !isAdmin && authorizedTeams.length === 1 ? [] : data.authorizedUsers;
             setOwnership(ctrl.resourceControl, isAdmin);
             setAuthorizedUsersAndTeams(authorizedUsers, authorizedTeams);
           }
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve access control information');
+          Notifications.error('失败', err, '无法检索访问控制信息');
         });
     }
 
-    initComponent();
+    function onChangeEnablement(enable) {
+      const isAdmin = Authentication.isAdmin();
+      onChange({ AccessControlEnabled: enable, Ownership: isAdmin ? RCO.ADMINISTRATORS : RCO.PRIVATE });
+    }
   },
 ]);

@@ -43,7 +43,7 @@ angular.module('portainer.docker').controller('ServiceLogsController', [
           })
           .catch(function error(err) {
             stopRepeater();
-            Notifications.error('Failure', err, 'Unable to retrieve service logs');
+            Notifications.error('失败', err, '无法检索服务日志');
           });
       }, refreshRate * 1000);
     }
@@ -56,7 +56,7 @@ angular.module('portainer.docker').controller('ServiceLogsController', [
         })
         .catch(function error(err) {
           stopRepeater();
-          Notifications.error('Failure', err, 'Unable to retrieve service logs');
+          Notifications.error('失败', err, '无法检索服务日志');
         });
     }
 
@@ -67,7 +67,7 @@ angular.module('portainer.docker').controller('ServiceLogsController', [
           startLogPolling();
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve service information');
+          Notifications.error('失败', err, '无法检索服务信息');
         });
     }
 

@@ -1,0 +1,55 @@
+<ng-form name="$ctrl.webEditorForm">
+  <div class="web-editor overflow-x-hidden">
+    <div ng-if="!$ctrl.hideTitle" class="col-sm-12 form-section-title pr-0">
+      Web 编辑器
+      <div class="text-muted small vertical-center float-right mt-0">
+        <span ng-if="$ctrl.BROWSER_OS_PLATFORM !== 'mac'" class="vertical-center">Ctrl+F 查找</span>
+        <span ng-if="$ctrl.BROWSER_OS_PLATFORM === 'mac'" class="vertical-center">Cmd+F 查找</span>
+        <portainer-tooltip
+          ng-if="$ctrl.BROWSER_OS_PLATFORM !== 'mac'"
+          message="'Ctrl+F - 开始查找 <br />
+              Ctrl+G - 查找下一个 <br />
+              Ctrl+Shift+G - 查找上一个 <br />
+              Ctrl+Shift+F - 替换 <br />
+              Ctrl+Shift+R - 替换所有 <br />
+              Alt+G - 跳转到行 <br />
+              Alt+F - 持续搜索： <br />
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enter - 查找下一个 <br />
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Shift+Enter - 查找上一个 <br />'"
+          class-name="'[&>span]:!text-left'"
+          set-html-message="true"
+        >
+        </portainer-tooltip>
+        <portainer-tooltip
+          ng-if="$ctrl.BROWSER_OS_PLATFORM === 'mac'"
+          message="'Cmd+F - 开始查找 <br />
+              Cmd+G - 查找下一个 <br />
+              Cmd+Shift+G - 查找上一个 <br />
+              Cmd+Option+F - 替换 <br />
+              Cmd+Option+R - 替换所有 <br />
+              Option+G - 跳转到行 <br />
+              Option+F - 持续搜索： <br />
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enter - 查找下一个 <br />
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Shift+Enter - 查找上一个 <br />'"
+          class-name="'[&>span]:!text-left'"
+          set-html-message="true"
+        >
+        </portainer-tooltip>
+      </div>
+    </div>
+    <div class="trancluded-item form-group col-sm-9 col-lg-10 text-muted small" ng-transclude="description"></div>
+    <div class="form-group">
+      <div class="col-sm-12 col-lg-12">
+        <code-editor
+          identifier="{{ $ctrl.identifier }}"
+          placeholder="{{ $ctrl.placeholder }}"
+          read-only="$ctrl.readOnly"
+          yml="$ctrl.yml"
+          value="$ctrl.value"
+          on-change="($ctrl.onChange)"
+          height="{{ $ctrl.height }}"
+        ></code-editor>
+      </div>
+    </div>
+  </div>
+</ng-form>

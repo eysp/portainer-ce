@@ -1,30 +1,20 @@
 import { Terminal } from 'xterm';
+import { baseHref } from '@/portainer/helpers/pathHelper';
+import { commandStringToArray } from '@/docker/helpers/containers';
 
 angular.module('portainer.docker').controller('ContainerConsoleController', [
   '$scope',
+  '$state',
   '$transition$',
   'ContainerService',
   'ImageService',
-  'EndpointProvider',
   'Notifications',
-  'ContainerHelper',
   'ExecService',
   'HttpRequestHelper',
-  'LocalStorage',
   'CONSOLE_COMMANDS_LABEL_PREFIX',
-  function (
-    $scope,
-    $transition$,
-    ContainerService,
-    ImageService,
-    EndpointProvider,
-    Notifications,
-    ContainerHelper,
-    ExecService,
-    HttpRequestHelper,
-    LocalStorage,
-    CONSOLE_COMMANDS_LABEL_PREFIX
-  ) {
+  'SidebarService',
+  'endpoint',
+  function ($scope, $state, $transition$, ContainerService, ImageService, Notifications, ExecService, HttpRequestHelper, CONSOLE_COMMANDS_LABEL_PREFIX, SidebarService, endpoint) {
     var socket, term;
 
     let states = Object.freeze({
@@ -54,31 +44,31 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
 
       let attachId = $transition$.params().id;
 
-      ContainerService.container(attachId)
+      ContainerService.container(endpoint.Id, attachId)
         .then((details) => {
           if (!details.State.Running) {
-            Notifications.error('失败', details, '容器 ' + attachId + ' 没有运行');
+            Notifications.error('Failure', details, 'Container ' + attachId + ' is not running!');
             $scope.disconnect();
             return;
           }
 
           const params = {
-            token: LocalStorage.getJWT(),
-            endpointId: EndpointProvider.endpointID(),
+            endpointId: $state.params.endpointId,
             id: attachId,
           };
 
+          const base = window.location.origin.startsWith('http') ? `${window.location.origin}${baseHref()}` : baseHref();
           var url =
-            window.location.href.split('#')[0] +
+            base +
             'api/websocket/attach?' +
             Object.keys(params)
               .map((k) => k + '=' + params[k])
               .join('&');
 
-          initTerm(url, ContainerService.resizeTTY.bind(this, attachId));
+          initTerm(url, ContainerService.resizeTTY.bind(this, endpoint.Id, attachId));
         })
         .catch(function error(err) {
-          Notifications.error('Error', err, '无法检索容器详细信息');
+          Notifications.error('Error', err, 'Unable to retrieve container details');
           $scope.disconnect();
         });
     };
@@ -91,34 +81,34 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
       $scope.state = states.connecting;
       var command = $scope.formValues.isCustomCommand ? $scope.formValues.customCommand : $scope.formValues.command;
       var execConfig = {
-        id: $transition$.params().id,
         AttachStdin: true,
         AttachStdout: true,
         AttachStderr: true,
         Tty: true,
         User: $scope.formValues.user,
-        Cmd: ContainerHelper.commandStringToArray(command),
+        Cmd: commandStringToArray(command),
       };
 
-      ContainerService.createExec(execConfig)
+      ContainerService.createExec(endpoint.Id, $transition$.params().id, execConfig)
         .then(function success(data) {
           const params = {
-            token: LocalStorage.getJWT(),
-            endpointId: EndpointProvider.endpointID(),
+            endpointId: $state.params.endpointId,
             id: data.Id,
           };
 
+          const base = window.location.origin.startsWith('http') ? `${window.location.origin}${baseHref()}` : baseHref();
           var url =
-            window.location.href.split('#')[0] +
+            base +
             'api/websocket/exec?' +
             Object.keys(params)
               .map((k) => k + '=' + params[k])
               .join('&');
 
-          initTerm(url, ExecService.resizeTTY.bind(this, params.id));
+          const isLinuxCommand = execConfig.Cmd ? isLinuxTerminalCommand(execConfig.Cmd[0]) : false;
+          initTerm(url, ExecService.resizeTTY.bind(this, params.id), isLinuxCommand);
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法执行到容器');
+          Notifications.error('Failure', err, 'Unable to exec into container');
           $scope.disconnect();
         });
     };
@@ -145,6 +135,10 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
     };
 
     function resize(restcall, add) {
+      if ($scope.state != states.connected) {
+        return;
+      }
+
       add = add || 0;
 
       term.fit();
@@ -155,12 +149,18 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
       restcall(termWidth + add, termHeight + add, 1);
     }
 
-    function initTerm(url, resizeRestCall) {
+    function isLinuxTerminalCommand(command) {
+      const validShellCommands = ['ash', 'bash', 'dash', 'sh'];
+      return validShellCommands.includes(command);
+    }
+
+    function initTerm(url, resizeRestCall, isLinuxTerm = false) {
       let resizefun = resize.bind(this, resizeRestCall);
 
       if ($transition$.params().nodeName) {
         url += '&nodeName=' + $transition$.params().nodeName;
       }
+
       if (url.indexOf('https') > -1) {
         url = url.replace('https://', 'wss://');
       } else {
@@ -173,9 +173,19 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
         $scope.state = states.connected;
         term = new Terminal();
 
-        term.on('data', function (data) {
+        if (isLinuxTerm) {
+          // linux terminals support xterm
+          socket.send('export LANG=C.UTF-8\n');
+          socket.send('export LC_ALL=C.UTF-8\n');
+          socket.send('export TERM="xterm-256color"\n');
+          socket.send('alias ls="ls --color=auto"\n');
+          socket.send('echo -e "\\033[2J\\033[H"\n');
+        }
+
+        term.onData(function (data) {
           socket.send(data);
         });
+
         var terminal_container = document.getElementById('terminal-container');
         term.open(terminal_container);
         term.focus();
@@ -186,18 +196,20 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
           $scope.$apply();
         };
 
-        $scope.$watch('toggle', function () {
+        $scope.$watch(SidebarService.isSidebarOpen, function () {
           setTimeout(resizefun, 400);
         });
 
         socket.onmessage = function (e) {
           term.write(e.data);
         };
+
         socket.onerror = function (err) {
           $scope.disconnect();
+          Notifications.error('Failure', err, 'Connection error');
           $scope.$apply();
-          Notifications.error('失败', err, '连接错误');
         };
+
         socket.onclose = function () {
           $scope.disconnect();
           $scope.$apply();
@@ -210,7 +222,7 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
 
     $scope.initView = function () {
       HttpRequestHelper.setPortainerAgentTargetHeader($transition$.params().nodeName);
-      return ContainerService.container($transition$.params().id)
+      return ContainerService.container(endpoint.Id, $transition$.params().id)
         .then(function success(data) {
           var container = data;
           $scope.container = container;
@@ -234,8 +246,14 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
           $scope.loaded = true;
         })
         .catch(function error(err) {
-          Notifications.error('错误', err, '无法检索容器详细信息');
+          Notifications.error('Error', err, 'Unable to retrieve container details');
         });
+    };
+
+    $scope.handleIsCustomCommandChange = function (enabled) {
+      $scope.$evalAsync(() => {
+        $scope.formValues.isCustomCommand = enabled;
+      });
     };
   },
 ]);

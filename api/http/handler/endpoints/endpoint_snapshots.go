@@ -1,47 +1,70 @@
 package endpoints
 
 import (
-	"log"
 	"net/http"
 
-	httperror "github.com/portainer/libhttp/error"
-	"github.com/portainer/libhttp/response"
-	"github.com/portainer/portainer/api"
+	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/internal/snapshot"
+	httperror "github.com/portainer/portainer/pkg/libhttp/error"
+	"github.com/portainer/portainer/pkg/libhttp/response"
+
+	"github.com/rs/zerolog/log"
 )
 
-// POST request on /api/endpoints/snapshot
+// @id EndpointSnapshots
+// @summary Snapshot all environments(endpoints)
+// @description Snapshot all environments(endpoints)
+// @description **Access policy**: administrator
+// @tags endpoints
+// @security ApiKeyAuth
+// @security jwt
+// @success 204 "Success"
+// @failure 500 "Server Error"
+// @router /endpoints/snapshot [post]
 func (handler *Handler) endpointSnapshots(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
-	endpoints, err := handler.EndpointService.Endpoints()
+	endpoints, err := handler.DataStore.Endpoint().Endpoints()
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve endpoints from the database", err}
+		return httperror.InternalServerError("Unable to retrieve environments from the database", err)
 	}
 
 	for _, endpoint := range endpoints {
-		if endpoint.Type == portainer.AzureEnvironment {
+		if !snapshot.SupportDirectSnapshot(&endpoint) {
 			continue
 		}
 
-		snapshot, snapshotError := handler.Snapshotter.CreateSnapshot(&endpoint)
+		if endpoint.URL == "" {
+			continue
+		}
 
-		latestEndpointReference, err := handler.EndpointService.Endpoint(endpoint.ID)
+		snapshotError := handler.SnapshotService.SnapshotEndpoint(&endpoint)
+
+		latestEndpointReference, err := handler.DataStore.Endpoint().Endpoint(endpoint.ID)
 		if latestEndpointReference == nil {
-			log.Printf("background schedule error (endpoint snapshot). Endpoint not found inside the database anymore (endpoint=%s, URL=%s) (err=%s)\n", endpoint.Name, endpoint.URL, err)
+			log.Debug().
+				Str("endpoint", endpoint.Name).
+				Str("URL", endpoint.URL).
+				Err(err).
+				Msg("background schedule error (environment snapshot), environment not found inside the database anymore")
+
 			continue
 		}
 
-		latestEndpointReference.Status = portainer.EndpointStatusUp
+		endpoint.Status = portainer.EndpointStatusUp
 		if snapshotError != nil {
-			log.Printf("background schedule error (endpoint snapshot). Unable to create snapshot (endpoint=%s, URL=%s) (err=%s)\n", endpoint.Name, endpoint.URL, snapshotError)
-			latestEndpointReference.Status = portainer.EndpointStatusDown
+			log.Debug().
+				Str("endpoint", endpoint.Name).
+				Str("URL", endpoint.URL).
+				Err(snapshotError).
+				Msg("background schedule error (environment snapshot), unable to create snapshot")
+
+			endpoint.Status = portainer.EndpointStatusDown
 		}
 
-		if snapshot != nil {
-			latestEndpointReference.Snapshots = []portainer.Snapshot{*snapshot}
-		}
+		latestEndpointReference.Agent.Version = endpoint.Agent.Version
 
-		err = handler.EndpointService.UpdateEndpoint(latestEndpointReference.ID, latestEndpointReference)
+		err = handler.DataStore.Endpoint().UpdateEndpoint(latestEndpointReference.ID, latestEndpointReference)
 		if err != nil {
-			return &httperror.HandlerError{http.StatusInternalServerError, "Unable to persist endpoint changes inside the database", err}
+			return httperror.InternalServerError("Unable to persist environment changes inside the database", err)
 		}
 	}
 

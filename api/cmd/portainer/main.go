@@ -1,92 +1,215 @@
 package main
 
 import (
-	"encoding/json"
-	"log"
+	"context"
+	"crypto/sha256"
 	"os"
+	"path"
 	"strings"
-	"time"
-
-	"github.com/portainer/portainer/api/chisel"
 
 	portainer "github.com/portainer/portainer/api"
-	"github.com/portainer/portainer/api/bolt"
+	"github.com/portainer/portainer/api/apikey"
+	"github.com/portainer/portainer/api/build"
+	"github.com/portainer/portainer/api/chisel"
 	"github.com/portainer/portainer/api/cli"
-	"github.com/portainer/portainer/api/cron"
 	"github.com/portainer/portainer/api/crypto"
+	"github.com/portainer/portainer/api/database"
+	"github.com/portainer/portainer/api/database/boltdb"
+	"github.com/portainer/portainer/api/database/models"
+	"github.com/portainer/portainer/api/dataservices"
+	"github.com/portainer/portainer/api/datastore"
+	"github.com/portainer/portainer/api/datastore/migrator"
+	"github.com/portainer/portainer/api/datastore/postinit"
+	"github.com/portainer/portainer/api/demo"
 	"github.com/portainer/portainer/api/docker"
+	dockerclient "github.com/portainer/portainer/api/docker/client"
 	"github.com/portainer/portainer/api/exec"
 	"github.com/portainer/portainer/api/filesystem"
 	"github.com/portainer/portainer/api/git"
+	"github.com/portainer/portainer/api/hostmanagement/openamt"
 	"github.com/portainer/portainer/api/http"
-	"github.com/portainer/portainer/api/http/client"
+	"github.com/portainer/portainer/api/http/proxy"
+	kubeproxy "github.com/portainer/portainer/api/http/proxy/factory/kubernetes"
+	"github.com/portainer/portainer/api/internal/authorization"
+	"github.com/portainer/portainer/api/internal/edge"
+	"github.com/portainer/portainer/api/internal/edge/edgestacks"
+	"github.com/portainer/portainer/api/internal/endpointutils"
+	"github.com/portainer/portainer/api/internal/snapshot"
+	"github.com/portainer/portainer/api/internal/ssl"
+	"github.com/portainer/portainer/api/internal/upgrade"
 	"github.com/portainer/portainer/api/jwt"
+	"github.com/portainer/portainer/api/kubernetes"
+	kubecli "github.com/portainer/portainer/api/kubernetes/cli"
 	"github.com/portainer/portainer/api/ldap"
-	"github.com/portainer/portainer/api/libcompose"
+	"github.com/portainer/portainer/api/oauth"
+	"github.com/portainer/portainer/api/pendingactions"
+	"github.com/portainer/portainer/api/scheduler"
+	"github.com/portainer/portainer/api/stacks/deployments"
+	"github.com/portainer/portainer/pkg/featureflags"
+	"github.com/portainer/portainer/pkg/libhelm"
+	"github.com/portainer/portainer/pkg/libstack"
+	"github.com/portainer/portainer/pkg/libstack/compose"
+
+	"github.com/gofrs/uuid"
+	"github.com/rs/zerolog/log"
 )
 
 func initCLI() *portainer.CLIFlags {
-	var cli portainer.CLIService = &cli.Service{}
-	flags, err := cli.ParseFlags(portainer.APIVersion)
+	var cliService portainer.CLIService = &cli.Service{}
+	flags, err := cliService.ParseFlags(portainer.APIVersion)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err).Msg("failed parsing flags")
 	}
 
-	err = cli.ValidateFlags(flags)
+	err = cliService.ValidateFlags(flags)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err).Msg("failed validating flags")
 	}
+
 	return flags
 }
 
 func initFileService(dataStorePath string) portainer.FileService {
 	fileService, err := filesystem.NewService(dataStorePath, "")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err).Msg("failed creating file service")
 	}
+
 	return fileService
 }
 
-func initStore(dataStorePath string, fileService portainer.FileService) *bolt.Store {
-	store, err := bolt.NewStore(dataStorePath, fileService)
+func initDataStore(flags *portainer.CLIFlags, secretKey []byte, fileService portainer.FileService, shutdownCtx context.Context) dataservices.DataStore {
+	connection, err := database.NewDatabase("boltdb", *flags.Data, secretKey)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err).Msg("failed creating database connection")
 	}
 
-	err = store.Open()
-	if err != nil {
-		log.Fatal(err)
+	if bconn, ok := connection.(*boltdb.DbConnection); ok {
+		bconn.MaxBatchSize = *flags.MaxBatchSize
+		bconn.MaxBatchDelay = *flags.MaxBatchDelay
+		bconn.InitialMmapSize = *flags.InitialMmapSize
+	} else {
+		log.Fatal().Msg("failed creating database connection: expecting a boltdb database type but a different one was received")
 	}
 
+	store := datastore.NewStore(*flags.Data, fileService, connection)
+	isNew, err := store.Open()
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed opening store")
+	}
+
+	if *flags.Rollback {
+		err := store.Rollback(false)
+		if err != nil {
+			log.Fatal().Err(err).Msg("failed rolling back")
+		}
+
+		log.Info().Msg("exiting rollback")
+		os.Exit(0)
+	}
+
+	// Init sets some defaults - it's basically a migration
 	err = store.Init()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err).Msg("failed initializing data store")
 	}
 
-	err = store.MigrateData()
-	if err != nil {
-		log.Fatal(err)
+	if isNew {
+		instanceId, err := uuid.NewV4()
+		if err != nil {
+			log.Fatal().Err(err).Msg("failed generating instance id")
+		}
+
+		migratorInstance := migrator.NewMigrator(&migrator.MigratorParameters{})
+		migratorCount := migratorInstance.GetMigratorCountOfCurrentAPIVersion()
+
+		// from MigrateData
+		v := models.Version{
+			SchemaVersion: portainer.APIVersion,
+			Edition:       int(portainer.PortainerCE),
+			InstanceID:    instanceId.String(),
+			MigratorCount: migratorCount,
+		}
+		store.VersionService.UpdateVersion(&v)
+
+		err = updateSettingsFromFlags(store, flags)
+		if err != nil {
+			log.Fatal().Err(err).Msg("failed updating settings from flags")
+		}
+	} else {
+		err = store.MigrateData()
+		if err != nil {
+			log.Fatal().Err(err).Msg("failed migration")
+		}
 	}
+
+	err = updateSettingsFromFlags(store, flags)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed updating settings from flags")
+	}
+
+	// this is for the db restore functionality - needs more tests.
+	go func() {
+		<-shutdownCtx.Done()
+		defer connection.Close()
+	}()
+
 	return store
 }
 
-func initComposeStackManager(dataStorePath string, reverseTunnelService portainer.ReverseTunnelService) portainer.ComposeStackManager {
-	return libcompose.NewComposeStackManager(dataStorePath, reverseTunnelService)
-}
-
-func initSwarmStackManager(assetsPath string, dataStorePath string, signatureService portainer.DigitalSignatureService, fileService portainer.FileService, reverseTunnelService portainer.ReverseTunnelService) (portainer.SwarmStackManager, error) {
-	return exec.NewSwarmStackManager(assetsPath, dataStorePath, signatureService, fileService, reverseTunnelService)
-}
-
-func initJWTService(authenticationEnabled bool) portainer.JWTService {
-	if authenticationEnabled {
-		jwtService, err := jwt.NewService()
-		if err != nil {
-			log.Fatal(err)
-		}
-		return jwtService
+// checkDBSchemaServerVersionMatch checks if the server version matches the db scehma version
+func checkDBSchemaServerVersionMatch(dbStore dataservices.DataStore, serverVersion string, serverEdition int) bool {
+	v, err := dbStore.Version().Version()
+	if err != nil {
+		return false
 	}
-	return nil
+
+	return v.SchemaVersion == serverVersion && v.Edition == serverEdition
+}
+
+func initComposeStackManager(composeDeployer libstack.Deployer, proxyManager *proxy.Manager) portainer.ComposeStackManager {
+	composeWrapper, err := exec.NewComposeStackManager(composeDeployer, proxyManager)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed creating compose manager")
+	}
+
+	return composeWrapper
+}
+
+func initSwarmStackManager(
+	assetsPath string,
+	configPath string,
+	signatureService portainer.DigitalSignatureService,
+	fileService portainer.FileService,
+	reverseTunnelService portainer.ReverseTunnelService,
+	dataStore dataservices.DataStore,
+) (portainer.SwarmStackManager, error) {
+	return exec.NewSwarmStackManager(assetsPath, configPath, signatureService, fileService, reverseTunnelService, dataStore)
+}
+
+func initKubernetesDeployer(kubernetesTokenCacheManager *kubeproxy.TokenCacheManager, kubernetesClientFactory *kubecli.ClientFactory, dataStore dataservices.DataStore, reverseTunnelService portainer.ReverseTunnelService, signatureService portainer.DigitalSignatureService, proxyManager *proxy.Manager, assetsPath string) portainer.KubernetesDeployer {
+	return exec.NewKubernetesDeployer(kubernetesTokenCacheManager, kubernetesClientFactory, dataStore, reverseTunnelService, signatureService, proxyManager, assetsPath)
+}
+
+func initHelmPackageManager(assetsPath string) (libhelm.HelmPackageManager, error) {
+	return libhelm.NewHelmPackageManager(libhelm.HelmConfig{BinaryPath: assetsPath})
+}
+
+func initAPIKeyService(datastore dataservices.DataStore) apikey.APIKeyService {
+	return apikey.NewAPIKeyService(datastore.APIKeyRepository(), datastore.User())
+}
+
+func initJWTService(userSessionTimeout string, dataStore dataservices.DataStore) (portainer.JWTService, error) {
+	if userSessionTimeout == "" {
+		userSessionTimeout = portainer.DefaultUserSessionTimeout
+	}
+
+	jwtService, err := jwt.NewService(userSessionTimeout, dataStore)
+	if err != nil {
+		return nil, err
+	}
+
+	return jwtService, nil
 }
 
 func initDigitalSignatureService() portainer.DigitalSignatureService {
@@ -101,250 +224,114 @@ func initLDAPService() portainer.LDAPService {
 	return &ldap.Service{}
 }
 
-func initGitService() portainer.GitService {
-	return git.NewService()
+func initOAuthService() portainer.OAuthService {
+	return oauth.NewService()
 }
 
-func initClientFactory(signatureService portainer.DigitalSignatureService, reverseTunnelService portainer.ReverseTunnelService) *docker.ClientFactory {
-	return docker.NewClientFactory(signatureService, reverseTunnelService)
+func initGitService(ctx context.Context) portainer.GitService {
+	return git.NewService(ctx)
 }
 
-func initSnapshotter(clientFactory *docker.ClientFactory) portainer.Snapshotter {
-	return docker.NewSnapshotter(clientFactory)
-}
+func initSSLService(addr, certPath, keyPath string, fileService portainer.FileService, dataStore dataservices.DataStore, shutdownTrigger context.CancelFunc) (*ssl.Service, error) {
+	slices := strings.Split(addr, ":")
+	host := slices[0]
+	if host == "" {
+		host = "0.0.0.0"
+	}
 
-func initJobScheduler() portainer.JobScheduler {
-	return cron.NewJobScheduler()
-}
+	sslService := ssl.NewService(fileService, dataStore, shutdownTrigger)
 
-func loadSnapshotSystemSchedule(jobScheduler portainer.JobScheduler, snapshotter portainer.Snapshotter, scheduleService portainer.ScheduleService, endpointService portainer.EndpointService, settingsService portainer.SettingsService) error {
-	settings, err := settingsService.Settings()
+	err := sslService.Init(host, certPath, keyPath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	schedules, err := scheduleService.SchedulesByJobType(portainer.SnapshotJobType)
-	if err != nil {
-		return err
-	}
-
-	var snapshotSchedule *portainer.Schedule
-	if len(schedules) == 0 {
-		snapshotJob := &portainer.SnapshotJob{}
-		snapshotSchedule = &portainer.Schedule{
-			ID:             portainer.ScheduleID(scheduleService.GetNextIdentifier()),
-			Name:           "system_snapshot",
-			CronExpression: "@every " + settings.SnapshotInterval,
-			Recurring:      true,
-			JobType:        portainer.SnapshotJobType,
-			SnapshotJob:    snapshotJob,
-			Created:        time.Now().Unix(),
-		}
-	} else {
-		snapshotSchedule = &schedules[0]
-	}
-
-	snapshotJobContext := cron.NewSnapshotJobContext(endpointService, snapshotter)
-	snapshotJobRunner := cron.NewSnapshotJobRunner(snapshotSchedule, snapshotJobContext)
-
-	err = jobScheduler.ScheduleJob(snapshotJobRunner)
-	if err != nil {
-		return err
-	}
-
-	if len(schedules) == 0 {
-		return scheduleService.CreateSchedule(snapshotSchedule)
-	}
-	return nil
+	return sslService, nil
 }
 
-func loadEndpointSyncSystemSchedule(jobScheduler portainer.JobScheduler, scheduleService portainer.ScheduleService, endpointService portainer.EndpointService, flags *portainer.CLIFlags) error {
-	if *flags.ExternalEndpoints == "" {
-		return nil
-	}
-
-	log.Println("Using external endpoint definition. Endpoint management via the API will be disabled.")
-
-	schedules, err := scheduleService.SchedulesByJobType(portainer.EndpointSyncJobType)
-	if err != nil {
-		return err
-	}
-
-	if len(schedules) != 0 {
-		return nil
-	}
-
-	endpointSyncJob := &portainer.EndpointSyncJob{}
-
-	endpointSyncSchedule := &portainer.Schedule{
-		ID:              portainer.ScheduleID(scheduleService.GetNextIdentifier()),
-		Name:            "system_endpointsync",
-		CronExpression:  "@every " + *flags.SyncInterval,
-		Recurring:       true,
-		JobType:         portainer.EndpointSyncJobType,
-		EndpointSyncJob: endpointSyncJob,
-		Created:         time.Now().Unix(),
-	}
-
-	endpointSyncJobContext := cron.NewEndpointSyncJobContext(endpointService, *flags.ExternalEndpoints)
-	endpointSyncJobRunner := cron.NewEndpointSyncJobRunner(endpointSyncSchedule, endpointSyncJobContext)
-
-	err = jobScheduler.ScheduleJob(endpointSyncJobRunner)
-	if err != nil {
-		return err
-	}
-
-	return scheduleService.CreateSchedule(endpointSyncSchedule)
+func initDockerClientFactory(signatureService portainer.DigitalSignatureService, reverseTunnelService portainer.ReverseTunnelService) *dockerclient.ClientFactory {
+	return dockerclient.NewClientFactory(signatureService, reverseTunnelService)
 }
 
-func loadSchedulesFromDatabase(jobScheduler portainer.JobScheduler, jobService portainer.JobService, scheduleService portainer.ScheduleService, endpointService portainer.EndpointService, fileService portainer.FileService, reverseTunnelService portainer.ReverseTunnelService) error {
-	schedules, err := scheduleService.Schedules()
-	if err != nil {
-		return err
-	}
-
-	for _, schedule := range schedules {
-
-		if schedule.JobType == portainer.ScriptExecutionJobType {
-			jobContext := cron.NewScriptExecutionJobContext(jobService, endpointService, fileService)
-			jobRunner := cron.NewScriptExecutionJobRunner(&schedule, jobContext)
-
-			err = jobScheduler.ScheduleJob(jobRunner)
-			if err != nil {
-				return err
-			}
-		}
-
-		if schedule.EdgeSchedule != nil {
-			for _, endpointID := range schedule.EdgeSchedule.Endpoints {
-				reverseTunnelService.AddSchedule(endpointID, schedule.EdgeSchedule)
-			}
-		}
-
-	}
-
-	return nil
+func initKubernetesClientFactory(signatureService portainer.DigitalSignatureService, reverseTunnelService portainer.ReverseTunnelService, dataStore dataservices.DataStore, instanceID, addrHTTPS, userSessionTimeout string) (*kubecli.ClientFactory, error) {
+	return kubecli.NewClientFactory(signatureService, reverseTunnelService, dataStore, instanceID, addrHTTPS, userSessionTimeout)
 }
 
-func initStatus(endpointManagement, snapshot bool, flags *portainer.CLIFlags) *portainer.Status {
+func initSnapshotService(
+	snapshotIntervalFromFlag string,
+	dataStore dataservices.DataStore,
+	dockerClientFactory *dockerclient.ClientFactory,
+	kubernetesClientFactory *kubecli.ClientFactory,
+	shutdownCtx context.Context,
+	pendingActionsService *pendingactions.PendingActionsService,
+) (portainer.SnapshotService, error) {
+	dockerSnapshotter := docker.NewSnapshotter(dockerClientFactory)
+	kubernetesSnapshotter := kubernetes.NewSnapshotter(kubernetesClientFactory)
+
+	snapshotService, err := snapshot.NewService(snapshotIntervalFromFlag, dataStore, dockerSnapshotter, kubernetesSnapshotter, shutdownCtx, pendingActionsService)
+	if err != nil {
+		return nil, err
+	}
+
+	return snapshotService, nil
+}
+
+func initStatus(instanceID string) *portainer.Status {
 	return &portainer.Status{
-		Analytics:          !*flags.NoAnalytics,
-		Authentication:     !*flags.NoAuth,
-		EndpointManagement: endpointManagement,
-		Snapshot:           snapshot,
-		Version:            portainer.APIVersion,
+		Version:    portainer.APIVersion,
+		InstanceID: instanceID,
 	}
 }
 
-func initDockerHub(dockerHubService portainer.DockerHubService) error {
-	_, err := dockerHubService.DockerHub()
-	if err == portainer.ErrObjectNotFound {
-		dockerhub := &portainer.DockerHub{
-			Authentication: false,
-			Username:       "",
-			Password:       "",
-		}
-		return dockerHubService.UpdateDockerHub(dockerhub)
-	} else if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func initSettings(settingsService portainer.SettingsService, flags *portainer.CLIFlags) error {
-	_, err := settingsService.Settings()
-	if err == portainer.ErrObjectNotFound {
-		settings := &portainer.Settings{
-			LogoURL:              *flags.Logo,
-			AuthenticationMethod: portainer.AuthenticationInternal,
-			LDAPSettings: portainer.LDAPSettings{
-				AnonymousMode:   true,
-				AutoCreateUsers: true,
-				TLSConfig:       portainer.TLSConfiguration{},
-				SearchSettings: []portainer.LDAPSearchSettings{
-					portainer.LDAPSearchSettings{},
-				},
-				GroupSearchSettings: []portainer.LDAPGroupSearchSettings{
-					portainer.LDAPGroupSearchSettings{},
-				},
-			},
-			OAuthSettings:                             portainer.OAuthSettings{},
-			AllowBindMountsForRegularUsers:            true,
-			AllowPrivilegedModeForRegularUsers:        true,
-			AllowVolumeBrowserForRegularUsers:         false,
-			AllowDeviceMappingForRegularUsers:         true,
-			AllowStackManagementForRegularUsers:       true,
-			AllowContainerCapabilitiesForRegularUsers: true,
-			EnableHostManagementFeatures:              false,
-			AllowHostNamespaceForRegularUsers:         true,
-			SnapshotInterval:                          *flags.SnapshotInterval,
-			EdgeAgentCheckinInterval:                  portainer.DefaultEdgeAgentCheckinIntervalInSeconds,
-		}
-
-		if *flags.Templates != "" {
-			settings.TemplatesURL = *flags.Templates
-		}
-
-		if *flags.Labels != nil {
-			settings.BlackListedLabels = *flags.Labels
-		} else {
-			settings.BlackListedLabels = make([]portainer.Pair, 0)
-		}
-
-		return settingsService.UpdateSettings(settings)
-	} else if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func initTemplates(templateService portainer.TemplateService, fileService portainer.FileService, templateURL, templateFile string) error {
-	if templateURL != "" {
-		log.Printf("Portainer started with the --templates flag. Using external templates, template management will be disabled.")
-		return nil
-	}
-
-	existingTemplates, err := templateService.Templates()
+func updateSettingsFromFlags(dataStore dataservices.DataStore, flags *portainer.CLIFlags) error {
+	settings, err := dataStore.Settings().Settings()
 	if err != nil {
 		return err
 	}
 
-	if len(existingTemplates) != 0 {
-		log.Printf("Templates already registered inside the database. Skipping template import.")
-		return nil
+	if *flags.SnapshotInterval != "" {
+		settings.SnapshotInterval = *flags.SnapshotInterval
 	}
 
-	templatesJSON, err := fileService.GetFileContent(templateFile)
+	if *flags.Logo != "" {
+		settings.LogoURL = *flags.Logo
+	}
+
+	if *flags.EnableEdgeComputeFeatures {
+		settings.EnableEdgeComputeFeatures = *flags.EnableEdgeComputeFeatures
+	}
+
+	if *flags.Templates != "" {
+		settings.TemplatesURL = *flags.Templates
+	}
+
+	if *flags.Labels != nil {
+		settings.BlackListedLabels = *flags.Labels
+	}
+
+	if agentKey, ok := os.LookupEnv("AGENT_SECRET"); ok {
+		settings.AgentSecret = agentKey
+	} else {
+		settings.AgentSecret = ""
+	}
+
+	err = dataStore.Settings().UpdateSettings(settings)
 	if err != nil {
-		log.Println("Unable to retrieve template definitions via filesystem")
 		return err
 	}
 
-	var templates []portainer.Template
-	err = json.Unmarshal(templatesJSON, &templates)
+	sslSettings, err := dataStore.SSLSettings().Settings()
 	if err != nil {
-		log.Println("Unable to parse templates file. Please review your template definition file.")
 		return err
 	}
 
-	for _, template := range templates {
-		err := templateService.CreateTemplate(&template)
-		if err != nil {
-			return err
-		}
+	if *flags.HTTPDisabled {
+		sslSettings.HTTPEnabled = false
+	} else if *flags.HTTPEnabled {
+		sslSettings.HTTPEnabled = true
 	}
 
-	return nil
-}
-
-func retrieveFirstEndpointFromDatabase(endpointService portainer.EndpointService) *portainer.Endpoint {
-	endpoints, err := endpointService.Endpoints()
-	if err != nil {
-		log.Fatal(err)
-	}
-	return &endpoints[0]
+	return dataStore.SSLSettings().UpdateSettings(sslSettings)
 }
 
 func loadAndParseKeyPair(fileService portainer.FileService, signatureService portainer.DigitalSignatureService) error {
@@ -367,7 +354,7 @@ func generateAndStoreKeyPair(fileService portainer.FileService, signatureService
 func initKeyPair(fileService portainer.FileService, signatureService portainer.DigitalSignatureService) error {
 	existingKeyPair, err := fileService.KeyPairFilesExist()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err).Msg("failed checking for existing key pair")
 	}
 
 	if existingKeyPair {
@@ -376,331 +363,299 @@ func initKeyPair(fileService portainer.FileService, signatureService portainer.D
 	return generateAndStoreKeyPair(fileService, signatureService)
 }
 
-func createTLSSecuredEndpoint(flags *portainer.CLIFlags, endpointService portainer.EndpointService, snapshotter portainer.Snapshotter) error {
-	tlsConfiguration := portainer.TLSConfiguration{
-		TLS:           *flags.TLS,
-		TLSSkipVerify: *flags.TLSSkipVerify,
-	}
-
-	if *flags.TLS {
-		tlsConfiguration.TLSCACertPath = *flags.TLSCacert
-		tlsConfiguration.TLSCertPath = *flags.TLSCert
-		tlsConfiguration.TLSKeyPath = *flags.TLSKey
-	} else if !*flags.TLS && *flags.TLSSkipVerify {
-		tlsConfiguration.TLS = true
-	}
-
-	endpointID := endpointService.GetNextIdentifier()
-	endpoint := &portainer.Endpoint{
-		ID:                 portainer.EndpointID(endpointID),
-		Name:               "primary",
-		URL:                *flags.EndpointURL,
-		GroupID:            portainer.EndpointGroupID(1),
-		Type:               portainer.DockerEnvironment,
-		TLSConfig:          tlsConfiguration,
-		UserAccessPolicies: portainer.UserAccessPolicies{},
-		TeamAccessPolicies: portainer.TeamAccessPolicies{},
-		Extensions:         []portainer.EndpointExtension{},
-		TagIDs:             []portainer.TagID{},
-		Status:             portainer.EndpointStatusUp,
-		Snapshots:          []portainer.Snapshot{},
-	}
-
-	if strings.HasPrefix(endpoint.URL, "tcp://") {
-		tlsConfig, err := crypto.CreateTLSConfigurationFromDisk(tlsConfiguration.TLSCACertPath, tlsConfiguration.TLSCertPath, tlsConfiguration.TLSKeyPath, tlsConfiguration.TLSSkipVerify)
-		if err != nil {
-			return err
-		}
-
-		agentOnDockerEnvironment, err := client.ExecutePingOperation(endpoint.URL, tlsConfig)
-		if err != nil {
-			return err
-		}
-
-		if agentOnDockerEnvironment {
-			endpoint.Type = portainer.AgentOnDockerEnvironment
-		}
-	}
-
-	return snapshotAndPersistEndpoint(endpoint, endpointService, snapshotter)
-}
-
-func createUnsecuredEndpoint(endpointURL string, endpointService portainer.EndpointService, snapshotter portainer.Snapshotter) error {
-	if strings.HasPrefix(endpointURL, "tcp://") {
-		_, err := client.ExecutePingOperation(endpointURL, nil)
-		if err != nil {
-			return err
-		}
-	}
-
-	endpointID := endpointService.GetNextIdentifier()
-	endpoint := &portainer.Endpoint{
-		ID:                 portainer.EndpointID(endpointID),
-		Name:               "primary",
-		URL:                endpointURL,
-		GroupID:            portainer.EndpointGroupID(1),
-		Type:               portainer.DockerEnvironment,
-		TLSConfig:          portainer.TLSConfiguration{},
-		UserAccessPolicies: portainer.UserAccessPolicies{},
-		TeamAccessPolicies: portainer.TeamAccessPolicies{},
-		Extensions:         []portainer.EndpointExtension{},
-		TagIDs:             []portainer.TagID{},
-		Status:             portainer.EndpointStatusUp,
-		Snapshots:          []portainer.Snapshot{},
-	}
-
-	return snapshotAndPersistEndpoint(endpoint, endpointService, snapshotter)
-}
-
-func snapshotAndPersistEndpoint(endpoint *portainer.Endpoint, endpointService portainer.EndpointService, snapshotter portainer.Snapshotter) error {
-	snapshot, err := snapshotter.CreateSnapshot(endpoint)
-	endpoint.Status = portainer.EndpointStatusUp
+func loadEncryptionSecretKey(keyfilename string) []byte {
+	content, err := os.ReadFile(path.Join("/run/secrets", keyfilename))
 	if err != nil {
-		log.Printf("http error: endpoint snapshot error (endpoint=%s, URL=%s) (err=%s)\n", endpoint.Name, endpoint.URL, err)
-	}
+		if os.IsNotExist(err) {
+			log.Info().Str("filename", keyfilename).Msg("encryption key file not present")
+		} else {
+			log.Info().Err(err).Msg("error reading encryption key file")
+		}
 
-	if snapshot != nil {
-		endpoint.Snapshots = []portainer.Snapshot{*snapshot}
-	}
-
-	return endpointService.CreateEndpoint(endpoint)
-}
-
-func initEndpoint(flags *portainer.CLIFlags, endpointService portainer.EndpointService, snapshotter portainer.Snapshotter) error {
-	if *flags.EndpointURL == "" {
 		return nil
 	}
 
-	endpoints, err := endpointService.Endpoints()
-	if err != nil {
-		return err
-	}
-
-	if len(endpoints) > 0 {
-		log.Println("Instance already has defined endpoints. Skipping the endpoint defined via CLI.")
-		return nil
-	}
-
-	if *flags.TLS || *flags.TLSSkipVerify {
-		return createTLSSecuredEndpoint(flags, endpointService, snapshotter)
-	}
-	return createUnsecuredEndpoint(*flags.EndpointURL, endpointService, snapshotter)
+	// return a 32 byte hash of the secret (required for AES)
+	hash := sha256.Sum256(content)
+	return hash[:]
 }
 
-func initJobService(dockerClientFactory *docker.ClientFactory) portainer.JobService {
-	return docker.NewJobService(dockerClientFactory)
-}
+func buildServer(flags *portainer.CLIFlags) portainer.Server {
+	shutdownCtx, shutdownTrigger := context.WithCancel(context.Background())
 
-func initExtensionManager(fileService portainer.FileService, extensionService portainer.ExtensionService) (portainer.ExtensionManager, error) {
-	extensionManager := exec.NewExtensionManager(fileService, extensionService)
-
-	err := extensionManager.StartExtensions()
-	if err != nil {
-		return nil, err
+	if flags.FeatureFlags != nil {
+		featureflags.Parse(*flags.FeatureFlags, portainer.SupportedFeatureFlags)
 	}
-
-	return extensionManager, nil
-}
-
-func terminateIfNoAdminCreated(userService portainer.UserService) {
-	timer1 := time.NewTimer(5 * time.Minute)
-	<-timer1.C
-
-	users, err := userService.UsersByRole(portainer.AdministratorRole)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if len(users) == 0 {
-		log.Fatal("No administrator account was created after 5 min. Shutting down the Portainer instance for security reasons.")
-		return
-	}
-}
-
-func main() {
-	flags := initCLI()
 
 	fileService := initFileService(*flags.Data)
+	encryptionKey := loadEncryptionSecretKey(*flags.SecretKeyName)
+	if encryptionKey == nil {
+		log.Info().Msg("proceeding without encryption key")
+	}
 
-	store := initStore(*flags.Data, fileService)
-	defer store.Close()
+	dataStore := initDataStore(flags, encryptionKey, fileService, shutdownCtx)
 
-	jwtService := initJWTService(!*flags.NoAuth)
+	if err := dataStore.CheckCurrentEdition(); err != nil {
+		log.Fatal().Err(err).Msg("")
+	}
+
+	// check if the db schema version matches with server version
+	if !checkDBSchemaServerVersionMatch(dataStore, portainer.APIVersion, int(portainer.Edition)) {
+		log.Fatal().Msg("The database schema version does not align with the server version. Please consider reverting to the previous server version or addressing the database migration issue.")
+	}
+
+	instanceID, err := dataStore.Version().InstanceID()
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed getting instance id")
+	}
+
+	apiKeyService := initAPIKeyService(dataStore)
+
+	settings, err := dataStore.Settings().Settings()
+	if err != nil {
+		log.Fatal().Err(err).Msg("")
+	}
+
+	jwtService, err := initJWTService(settings.UserSessionTimeout, dataStore)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed initializing JWT service")
+	}
 
 	ldapService := initLDAPService()
 
-	gitService := initGitService()
+	oauthService := initOAuthService()
+
+	gitService := initGitService(shutdownCtx)
+
+	openAMTService := openamt.NewService()
 
 	cryptoService := initCryptoService()
 
 	digitalSignatureService := initDigitalSignatureService()
 
-	err := initKeyPair(fileService, digitalSignatureService)
+	edgeStacksService := edgestacks.NewService(dataStore)
+
+	sslService, err := initSSLService(*flags.AddrHTTPS, *flags.SSLCert, *flags.SSLKey, fileService, dataStore, shutdownTrigger)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err).Msg("")
 	}
 
-	extensionManager, err := initExtensionManager(fileService, store.ExtensionService)
+	sslSettings, err := sslService.GetSSLSettings()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err).Msg("failed to get SSL settings")
 	}
 
-	reverseTunnelService := chisel.NewService(store.EndpointService, store.TunnelServerService)
-
-	clientFactory := initClientFactory(digitalSignatureService, reverseTunnelService)
-
-	jobService := initJobService(clientFactory)
-
-	snapshotter := initSnapshotter(clientFactory)
-
-	endpointManagement := true
-	if *flags.ExternalEndpoints != "" {
-		endpointManagement = false
-	}
-
-	swarmStackManager, err := initSwarmStackManager(*flags.Assets, *flags.Data, digitalSignatureService, fileService, reverseTunnelService)
+	err = initKeyPair(fileService, digitalSignatureService)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err).Msg("failed initializing key pair")
 	}
 
-	composeStackManager := initComposeStackManager(*flags.Data, reverseTunnelService)
+	reverseTunnelService := chisel.NewService(dataStore, shutdownCtx, fileService)
 
-	err = initTemplates(store.TemplateService, fileService, *flags.Templates, *flags.TemplateFile)
+	dockerClientFactory := initDockerClientFactory(digitalSignatureService, reverseTunnelService)
+	kubernetesClientFactory, err := initKubernetesClientFactory(digitalSignatureService, reverseTunnelService, dataStore, instanceID, *flags.AddrHTTPS, settings.UserSessionTimeout)
+
+	authorizationService := authorization.NewService(dataStore)
+	authorizationService.K8sClientFactory = kubernetesClientFactory
+
+	kubernetesTokenCacheManager := kubeproxy.NewTokenCacheManager()
+
+	kubeClusterAccessService := kubernetes.NewKubeClusterAccessService(*flags.BaseURL, *flags.AddrHTTPS, sslSettings.CertPath)
+
+	proxyManager := proxy.NewManager(kubernetesClientFactory)
+
+	reverseTunnelService.ProxyManager = proxyManager
+
+	dockerConfigPath := fileService.GetDockerConfigPath()
+
+	composeDeployer, err := compose.NewComposeDeployer(*flags.Assets, dockerConfigPath)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err).Msg("failed initializing compose deployer")
 	}
 
-	err = initSettings(store.SettingsService, flags)
+	composeStackManager := initComposeStackManager(composeDeployer, proxyManager)
+
+	swarmStackManager, err := initSwarmStackManager(*flags.Assets, dockerConfigPath, digitalSignatureService, fileService, reverseTunnelService, dataStore)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err).Msg("failed initializing swarm stack manager")
 	}
 
-	jobScheduler := initJobScheduler()
+	kubernetesDeployer := initKubernetesDeployer(kubernetesTokenCacheManager, kubernetesClientFactory, dataStore, reverseTunnelService, digitalSignatureService, proxyManager, *flags.Assets)
 
-	err = loadSchedulesFromDatabase(jobScheduler, jobService, store.ScheduleService, store.EndpointService, fileService, reverseTunnelService)
+	pendingActionsService := pendingactions.NewService(dataStore, kubernetesClientFactory, dockerClientFactory, authorizationService, shutdownCtx, *flags.Assets, kubernetesDeployer)
+
+	snapshotService, err := initSnapshotService(*flags.SnapshotInterval, dataStore, dockerClientFactory, kubernetesClientFactory, shutdownCtx, pendingActionsService)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err).Msg("failed initializing snapshot service")
 	}
+	snapshotService.Start()
 
-	err = loadEndpointSyncSystemSchedule(jobScheduler, store.ScheduleService, store.EndpointService, flags)
+	proxyManager.NewProxyFactory(dataStore, digitalSignatureService, reverseTunnelService, dockerClientFactory, kubernetesClientFactory, kubernetesTokenCacheManager, gitService, snapshotService)
+
+	helmPackageManager, err := initHelmPackageManager(*flags.Assets)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err).Msg("failed initializing helm package manager")
 	}
 
-	if *flags.Snapshot {
-		err = loadSnapshotSystemSchedule(jobScheduler, snapshotter, store.ScheduleService, store.EndpointService, store.SettingsService)
+	err = edge.LoadEdgeJobs(dataStore, reverseTunnelService)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed loading edge jobs from database")
+	}
+
+	applicationStatus := initStatus(instanceID)
+
+	demoService := demo.NewService()
+	if *flags.DemoEnvironment {
+		err := demoService.Init(dataStore, cryptoService)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal().Err(err).Msg("failed initializing demo environment")
 		}
 	}
 
-	jobScheduler.Start()
+	// channel to control when the admin user is created
+	adminCreationDone := make(chan struct{}, 1)
 
-	err = initDockerHub(store.DockerHubService)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	applicationStatus := initStatus(endpointManagement, *flags.Snapshot, flags)
-
-	err = initEndpoint(flags, store.EndpointService, snapshotter)
-	if err != nil {
-		log.Fatal(err)
-	}
+	go endpointutils.InitEndpoint(shutdownCtx, adminCreationDone, flags, dataStore, snapshotService)
 
 	adminPasswordHash := ""
 	if *flags.AdminPasswordFile != "" {
-		content, err := fileService.GetFileContent(*flags.AdminPasswordFile)
+		content, err := fileService.GetFileContent(*flags.AdminPasswordFile, "")
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal().Err(err).Msg("failed getting admin password file")
 		}
+
 		adminPasswordHash, err = cryptoService.Hash(strings.TrimSuffix(string(content), "\n"))
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal().Err(err).Msg("failed hashing admin password")
 		}
 	} else if *flags.AdminPassword != "" {
 		adminPasswordHash = *flags.AdminPassword
 	}
 
 	if adminPasswordHash != "" {
-		users, err := store.UserService.UsersByRole(portainer.AdministratorRole)
+		users, err := dataStore.User().UsersByRole(portainer.AdministratorRole)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal().Err(err).Msg("failed getting admin user")
 		}
 
 		if len(users) == 0 {
-			log.Println("Created admin user with the given password.")
+			log.Info().Msg("created admin user with the given password.")
 			user := &portainer.User{
-				Username:                "admin",
-				Role:                    portainer.AdministratorRole,
-				Password:                adminPasswordHash,
-				PortainerAuthorizations: portainer.DefaultPortainerAuthorizations(),
+				Username: "admin",
+				Role:     portainer.AdministratorRole,
+				Password: adminPasswordHash,
 			}
-			err := store.UserService.CreateUser(user)
+
+			err := dataStore.User().Create(user)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err).Msg("failed creating admin user")
 			}
+
+			// notify the admin user is created, the endpoint initialization can start
+			adminCreationDone <- struct{}{}
 		} else {
-			log.Println("Instance already has an administrator user defined. Skipping admin password related flags.")
+			log.Info().Msg("instance already has an administrator user defined, skipping admin password related flags.")
 		}
 	}
 
-	if !*flags.NoAuth {
-		go terminateIfNoAdminCreated(store.UserService)
-	}
-
-	err = reverseTunnelService.StartTunnelServer(*flags.TunnelAddr, *flags.TunnelPort, snapshotter)
+	err = reverseTunnelService.StartTunnelServer(*flags.TunnelAddr, *flags.TunnelPort, snapshotService)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err).Msg("failed starting tunnel server")
 	}
 
-	var server portainer.Server = &http.Server{
-		ReverseTunnelService:    reverseTunnelService,
-		Status:                  applicationStatus,
-		BindAddress:             *flags.Addr,
-		AssetsPath:              *flags.Assets,
-		AuthDisabled:            *flags.NoAuth,
-		EndpointManagement:      endpointManagement,
-		RoleService:             store.RoleService,
-		UserService:             store.UserService,
-		TeamService:             store.TeamService,
-		TeamMembershipService:   store.TeamMembershipService,
-		EdgeGroupService:        store.EdgeGroupService,
-		EdgeStackService:        store.EdgeStackService,
-		EndpointService:         store.EndpointService,
-		EndpointGroupService:    store.EndpointGroupService,
-		EndpointRelationService: store.EndpointRelationService,
-		ExtensionService:        store.ExtensionService,
-		ResourceControlService:  store.ResourceControlService,
-		SettingsService:         store.SettingsService,
-		RegistryService:         store.RegistryService,
-		DockerHubService:        store.DockerHubService,
-		StackService:            store.StackService,
-		ScheduleService:         store.ScheduleService,
-		TagService:              store.TagService,
-		TemplateService:         store.TemplateService,
-		WebhookService:          store.WebhookService,
-		SwarmStackManager:       swarmStackManager,
-		ComposeStackManager:     composeStackManager,
-		ExtensionManager:        extensionManager,
-		CryptoService:           cryptoService,
-		JWTService:              jwtService,
-		FileService:             fileService,
-		LDAPService:             ldapService,
-		GitService:              gitService,
-		SignatureService:        digitalSignatureService,
-		JobScheduler:            jobScheduler,
-		Snapshotter:             snapshotter,
-		SSL:                     *flags.SSL,
-		SSLCert:                 *flags.SSLCert,
-		SSLKey:                  *flags.SSLKey,
-		DockerClientFactory:     clientFactory,
-		JobService:              jobService,
-	}
+	scheduler := scheduler.NewScheduler(shutdownCtx)
+	stackDeployer := deployments.NewStackDeployer(swarmStackManager, composeStackManager, kubernetesDeployer, dockerClientFactory, dataStore)
+	deployments.StartStackSchedules(scheduler, stackDeployer, dataStore, gitService)
 
-	log.Printf("Starting Portainer %s on %s", portainer.APIVersion, *flags.Addr)
-	err = server.Start()
+	sslDBSettings, err := dataStore.SSLSettings().Settings()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Msg("failed to fetch SSL settings from DB")
+	}
+
+	upgradeService, err := upgrade.NewService(*flags.Assets, composeDeployer, kubernetesClientFactory)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed initializing upgrade service")
+	}
+
+	// Our normal migrations run as part of the database initialization
+	// but some more complex migrations require access to a kubernetes or docker
+	// client. Therefore we run a separate migration process just before
+	// starting the server.
+	postInitMigrator := postinit.NewPostInitMigrator(
+		kubernetesClientFactory,
+		dockerClientFactory,
+		dataStore,
+		*flags.Assets,
+		kubernetesDeployer,
+	)
+	if err := postInitMigrator.PostInitMigrate(); err != nil {
+		log.Fatal().Err(err).Msg("failure during post init migrations")
+	}
+
+	return &http.Server{
+		AuthorizationService:        authorizationService,
+		ReverseTunnelService:        reverseTunnelService,
+		Status:                      applicationStatus,
+		BindAddress:                 *flags.Addr,
+		BindAddressHTTPS:            *flags.AddrHTTPS,
+		HTTPEnabled:                 sslDBSettings.HTTPEnabled,
+		AssetsPath:                  *flags.Assets,
+		DataStore:                   dataStore,
+		EdgeStacksService:           edgeStacksService,
+		SwarmStackManager:           swarmStackManager,
+		ComposeStackManager:         composeStackManager,
+		KubernetesDeployer:          kubernetesDeployer,
+		HelmPackageManager:          helmPackageManager,
+		APIKeyService:               apiKeyService,
+		CryptoService:               cryptoService,
+		JWTService:                  jwtService,
+		FileService:                 fileService,
+		LDAPService:                 ldapService,
+		OAuthService:                oauthService,
+		GitService:                  gitService,
+		OpenAMTService:              openAMTService,
+		ProxyManager:                proxyManager,
+		KubernetesTokenCacheManager: kubernetesTokenCacheManager,
+		KubeClusterAccessService:    kubeClusterAccessService,
+		SignatureService:            digitalSignatureService,
+		SnapshotService:             snapshotService,
+		SSLService:                  sslService,
+		DockerClientFactory:         dockerClientFactory,
+		KubernetesClientFactory:     kubernetesClientFactory,
+		Scheduler:                   scheduler,
+		ShutdownCtx:                 shutdownCtx,
+		ShutdownTrigger:             shutdownTrigger,
+		StackDeployer:               stackDeployer,
+		DemoService:                 demoService,
+		UpgradeService:              upgradeService,
+		AdminCreationDone:           adminCreationDone,
+		PendingActionsService:       pendingActionsService,
+	}
+}
+
+func main() {
+	configureLogger()
+	setLoggingMode("PRETTY")
+
+	flags := initCLI()
+
+	setLoggingLevel(*flags.LogLevel)
+	setLoggingMode(*flags.LogMode)
+
+	for {
+		server := buildServer(flags)
+		log.Info().
+			Str("version", portainer.APIVersion).
+			Str("build_number", build.BuildNumber).
+			Str("image_tag", build.ImageTag).
+			Str("nodejs_version", build.NodejsVersion).
+			Str("yarn_version", build.YarnVersion).
+			Str("webpack_version", build.WebpackVersion).
+			Str("go_version", build.GoVersion).
+			Msg("starting Portainer")
+
+		err := server.Start()
+
+		log.Info().Err(err).Msg("HTTP server exited")
 	}
 }

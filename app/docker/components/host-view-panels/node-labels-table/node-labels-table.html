@@ -1,33 +1,17 @@
-<div ng-if="!$ctrl.labels.length">
-  There are no labels for this node.
-</div>
+<div ng-if="!$ctrl.labels.length"> There are no labels for this node. </div>
 
-<table class="table" ng-if="$ctrl.labels.length">
-  <thead>
-    <tr>
-      <th>Label</th>
-      <th>Value</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr ng-repeat="label in $ctrl.labels">
-      <td>
-        <div class="input-group input-group-sm">
-          <span class="input-group-addon fit-text-size">名称</span>
-          <input type="text" class="form-control" ng-model="label.key" placeholder="例如 com.example.foo" ng-change="$ctrl.updateLabel(label)" />
-        </div>
-      </td>
-      <td>
-        <div class="input-group input-group-sm">
-          <span class="input-group-addon fit-text-size">Value</span>
-          <input type="text" class="form-control" ng-model="label.value" placeholder="例如 bar" ng-change="$ctrl.updateLabel(label)" />
-          <span class="input-group-btn">
-            <button class="btn btn-sm btn-danger" type="button" ng-click="$ctrl.removeLabel($index)">
-              <i class="fa fa-trash" aria-hidden="true"></i>
-            </button>
-          </span>
-        </div>
-      </td>
-    </tr>
-  </tbody>
-</table>
+<div class="col-sm-12 form-inline !p-0" ng-if="$ctrl.labels.length">
+  <div ng-repeat="label in $ctrl.labels" class="mt-1">
+    <div class="input-group col-sm-5 input-group-sm">
+      <span class="input-group-addon">name</span>
+      <input type="text" class="form-control" ng-model="label.key" placeholder="e.g. com.example.foo" ng-change="$ctrl.updateLabel(label)" />
+    </div>
+    <div class="input-group col-sm-5 input-group-sm">
+      <span class="input-group-addon">value</span>
+      <input type="text" class="form-control" ng-model="label.value" placeholder="e.g. bar" ng-change="$ctrl.updateLabel(label)" />
+    </div>
+    <button class="btn btn-light" type="button" ng-click="$ctrl.removeLabel($index)">
+      <pr-icon icon="'trash-2'" class-name="'icon-secondary icon-md'"></pr-icon>
+    </button>
+  </div>
+</div>

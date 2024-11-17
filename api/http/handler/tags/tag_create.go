@@ -1,42 +1,68 @@
 package tags
 
 import (
+	"errors"
 	"net/http"
 
+	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/dataservices"
+	httperror "github.com/portainer/portainer/pkg/libhttp/error"
+	"github.com/portainer/portainer/pkg/libhttp/request"
+
 	"github.com/asaskevich/govalidator"
-	httperror "github.com/portainer/libhttp/error"
-	"github.com/portainer/libhttp/request"
-	"github.com/portainer/libhttp/response"
-	"github.com/portainer/portainer/api"
 )
 
 type tagCreatePayload struct {
-	Name string
+	Name string `validate:"required" example:"org/acme"`
 }
 
 func (payload *tagCreatePayload) Validate(r *http.Request) error {
 	if govalidator.IsNull(payload.Name) {
-		return portainer.Error("Invalid tag name")
+		return errors.New("invalid tag name")
 	}
+
 	return nil
 }
 
-// POST request on /api/tags
+// @id TagCreate
+// @summary Create a new tag
+// @description Create a new tag.
+// @description **Access policy**: administrator
+// @tags tags
+// @security ApiKeyAuth
+// @security jwt
+// @accept json
+// @produce json
+// @param body body tagCreatePayload true "Tag details"
+// @success 200 {object} portainer.Tag "Success"
+// @failure 409 "This name is already associated to a tag"
+// @failure 500 "Server error"
+// @router /tags [post]
 func (handler *Handler) tagCreate(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	var payload tagCreatePayload
 	err := request.DecodeAndValidateJSONPayload(r, &payload)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid request payload", err}
+		return httperror.BadRequest("Invalid request payload", err)
 	}
 
-	tags, err := handler.TagService.Tags()
+	var tag *portainer.Tag
+	err = handler.DataStore.UpdateTx(func(tx dataservices.DataStoreTx) error {
+		tag, err = createTag(tx, payload)
+		return err
+	})
+
+	return txResponse(w, tag, err)
+}
+
+func createTag(tx dataservices.DataStoreTx, payload tagCreatePayload) (*portainer.Tag, error) {
+	tags, err := tx.Tag().ReadAll()
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve tags from the database", err}
+		return nil, httperror.InternalServerError("Unable to retrieve tags from the database", err)
 	}
 
 	for _, tag := range tags {
 		if tag.Name == payload.Name {
-			return &httperror.HandlerError{http.StatusConflict, "This name is already associated to a tag", portainer.ErrTagAlreadyExists}
+			return nil, httperror.Conflict("This name is already associated to a tag", errors.New("a tag already exists with this name"))
 		}
 	}
 
@@ -46,10 +72,10 @@ func (handler *Handler) tagCreate(w http.ResponseWriter, r *http.Request) *httpe
 		Endpoints:      map[portainer.EndpointID]bool{},
 	}
 
-	err = handler.TagService.CreateTag(tag)
+	err = tx.Tag().Create(tag)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to persist the tag inside the database", err}
+		return nil, httperror.InternalServerError("Unable to persist the tag inside the database", err)
 	}
 
-	return response.JSON(w, tag)
+	return tag, nil
 }

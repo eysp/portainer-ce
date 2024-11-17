@@ -1,18 +1,34 @@
-<rd-header>
-  <rd-header-title title-text="创建堆栈"></rd-header-title>
-  <rd-header-content> <a ui-sref="portainer.stacks">堆栈</a> &gt; 添加堆栈 </rd-header-content>
-</rd-header>
+<page-header title="'创建堆栈'" breadcrumbs="[{label:'堆栈', link:'docker.stacks'}, '添加堆栈']" reload="true"> </page-header>
 
 <div class="row">
   <div class="col-sm-12">
     <rd-widget>
       <rd-widget-body>
-        <form class="form-horizontal">
+        <form class="form-horizontal" name="createStackForm">
           <!-- name-input -->
           <div class="form-group">
             <label for="stack_name" class="col-sm-1 control-label text-left">名称</label>
             <div class="col-sm-11">
-              <input type="text" class="form-control" ng-model="formValues.Name" id="stack_name" placeholder="例如 mystack" auto-focus />
+              <input
+                type="text"
+                class="form-control"
+                ng-model="formValues.Name"
+                id="stack_name"
+                name="stack_name"
+                placeholder="例如 mystack"
+                auto-focus
+                ng-pattern="STACK_NAME_VALIDATION_REGEX"
+              />
+              <div class="help-block" ng-show="createStackForm.stack_name.$invalid">
+                <div class="small text-warning">
+                  <div ng-messages="createStackForm.stack_name.$error">
+                    <p ng-message="pattern">
+                      <span><pr-icon icon="'alert-triangle'" class-name="'icon-sm icon-warning'"></pr-icon></span>
+                      此字段必须由小写字母数字字符、'_' 或 '-' 组成 (例如 'my-name', 或 'abc-123').
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <!-- !name-input -->
@@ -20,221 +36,149 @@
             <span class="col-sm-12 text-muted small" ng-if="state.StackType === 1">
               该堆栈将使用等效的 <code>docker stack deploy</code> 命令进行部署。
             </span>
-            <span class="col-sm-12 text-muted small" ng-if="state.StackType === 2">
-              该堆栈将使用等效的 <code>docker-compose</code> 进行部署。 目前仅支持 Compose 文件格式版本 <b>2</b>。<br /><br />
-              <i class="fa fa-exclamation-circle orange-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-              注意：由于libcompose的限制，栈名会被标准化，去掉所有特殊字符和大写字母。
+            <div class="col-sm-12 text-muted small" ng-if="state.StackType === 2 && composeSyntaxMaxVersion == 2">
+              <div style="margin-bottom: 7px">
+                该堆栈将使用 <code>docker compose</code> 进行部署。目前只支持 Compose 文件格式版本 <b>2</b>。
+              </div>
+              <pr-icon icon="'alert-triangle'" mode="'warning'" class-name="'mr-0.5'"></pr-icon>
+              注意：由于 libcompose 的限制，堆栈名称将被标准化，移除所有特殊字符和大写字母。
+            </div>
+            <span class="col-sm-12 text-muted small" ng-if="state.StackType === 2 && composeSyntaxMaxVersion > 2">
+              该堆栈将使用 <code>docker compose</code> 进行部署。
             </span>
           </div>
           <!-- build-method -->
-          <div class="col-sm-12 form-section-title">
-            构建方法
-          </div>
-          <div class="form-group"></div>
-          <div class="form-group" style="margin-bottom: 0;">
-            <div class="boxselector_wrapper">
-              <div>
-                <input type="radio" id="method_editor" ng-model="state.Method" value="editor" />
-                <label for="method_editor">
-                  <div class="boxselector_header">
-                    <i class="fa fa-edit" aria-hidden="true" style="margin-right: 2px;"></i>
-                    Web editor
-                  </div>
-                  <p>使用我们的网页编辑器</p>
-                </label>
-              </div>
-              <div>
-                <input type="radio" id="method_upload" ng-model="state.Method" value="upload" />
-                <label for="method_upload">
-                  <div class="boxselector_header">
-                    <i class="fa fa-upload" aria-hidden="true" style="margin-right: 2px;"></i>
-                    上传
-                  </div>
-                  <p>从您的计算机上传r</p>
-                </label>
-              </div>
-              <div>
-                <input type="radio" id="method_repository" ng-model="state.Method" value="repository" />
-                <label for="method_repository">
-                  <div class="boxselector_header">
-                    <i class="fab fa-git" aria-hidden="true" style="margin-right: 2px;"></i>
-                    Repository
-                  </div>
-                  <p>使用 git 存储库</p>
-                </label>
-              </div>
-            </div>
-          </div>
+          <div class="col-sm-12 form-section-title"> 构建方法 </div>
+
+          <box-selector slim="true" radio-name="'build-method'" options="buildMethods" value="state.Method" on-change="(onBuildMethodChange)" slim="true"></box-selector>
+
           <!-- !build-method -->
-          <!-- web-editor -->
-          <div ng-show="state.Method === 'editor'">
-            <div class="col-sm-12 form-section-title">
-              Web editor
-            </div>
-            <div class="form-group">
-              <span class="col-sm-12 text-muted small">
-                您可以在<a href="https://docs.docker.com/compose/compose-file/" target="_blank">官方文档</a>中获取有关 Compose 文件格式的更多信息。
-              </span>
-            </div>
-            <div class="form-group">
-              <div class="col-sm-12">
-                <code-editor
-                  identifier="stack-creation-editor"
-                  placeholder="# 在此处定义或粘贴 docker-compose 文件的内容"
-                  yml="true"
-                  on-change="(editorUpdate)"
-                ></code-editor>
-              </div>
-            </div>
-          </div>
-          <!-- !web-editor -->
+
           <!-- upload -->
           <div ng-show="state.Method === 'upload'">
-            <div class="col-sm-12 form-section-title">
-              上传
-            </div>
+            <div class="col-sm-12 form-section-title"> 上传 </div>
             <div class="form-group">
-              <span class="col-sm-12 text-muted small">
-                您可以从计算机上传 Compose 文件。
-              </span>
+              <span class="col-sm-12 text-muted small"> 您可以从计算机上传 Compose 文件。 </span>
+              <div class="col-sm-12" ng-if="state.uploadYamlValidationError"
+                ><span class="text-danger small">{{ state.uploadYamlValidationError }}</span></div
+              >
             </div>
             <div class="form-group">
               <div class="col-sm-12">
-                <button class="btn btn-sm btn-primary" ngf-select ng-model="formValues.StackFile">选择文件</button>
-                <span style="margin-left: 5px;">
+                <button type="button" class="btn btn-sm btn-light" ngf-select="uploadFile($file)">
+                  <pr-icon icon="'upload'"></pr-icon>
+                  选择文件</button
+                >
+                <span style="margin-left: 5px">
                   {{ formValues.StackFile.name }}
-                  <i class="fa fa-times red-icon" ng-if="!formValues.StackFile" aria-hidden="true"></i>
+                  <pr-icon icon="'x'" mode="'danger'" ng-if="!formValues.StackFile"></pr-icon>
                 </span>
               </div>
             </div>
           </div>
           <!-- !upload -->
-          <!-- repository -->
-          <div ng-show="state.Method === 'repository'">
-            <div class="col-sm-12 form-section-title">
-              Git 储存库
-            </div>
-            <div class="form-group">
-              <span class="col-sm-12 text-muted small">
-                您可以使用 git 存储库的 URL。
+          <git-form
+            ng-if="state.Method === 'repository'"
+            value="formValues"
+            on-change="(onChangeFormValues)"
+            is-docker-standalone="isDockerStandalone"
+            is-additional-files-field-visible="true"
+            is-auth-explanation-visible="true"
+            is-force-pull-visible="true"
+            base-webhook-url="{{ state.baseWebhookUrl }}"
+            webhook-id="{{ state.webhookId }}"
+            webhooks-docs="/user/docker/stacks/webhooks"
+          ></git-form>
+
+          <div ng-show="state.Method === 'template'">
+            <div class="col-sm-12">
+              <custom-template-selector
+                new-template-path="docker.templates.custom.new"
+                stack-type="state.StackType"
+                on-change="(onChangeTemplateId)"
+                value="state.selectedTemplateId"
+              ></custom-template-selector>
+
+              <custom-templates-variables-field
+                ng-if="isTemplateVariablesEnabled && state.selectedTemplate"
+                definitions="state.selectedTemplate.Variables"
+                value="formValues.Variables"
+                on-change="(onChangeTemplateVariables)"
+              ></custom-templates-variables-field>
+
+              <span ng-if="state.Method === 'template' && state.selectedTemplateId && state.templateLoadFailed">
+                <p class="small vertical-center text-danger mb-5" ng-if="currentUser.isAdmin || currentUser.id === state.selectedTemplate.CreatedByUserId">
+                  <pr-icon icon="'alert-triangle'" mode="'danger'" size="'md'" feather="true"></pr-icon>无法加载自定义模板，请
+                  <a ui-sref="docker.templates.custom.edit({id: state.selectedTemplateId})">点击这里</a> 进行配置。</p
+                >
+                <p class="small vertical-center text-danger mb-5" ng-if="!(currentUser.isAdmin || currentUser.id === state.selectedTemplate.CreatedByUserId)">
+                  <pr-icon icon="'alert-triangle'" mode="'danger'" size="'md'" feather="true"></pr-icon>无法加载自定义模板，请联系您的管理员。</p
+                >
               </span>
-            </div>
-            <div class="form-group">
-              <label for="stack_repository_url" class="col-sm-2 control-label text-left">注册表 URL</label>
-              <div class="col-sm-10">
-                <input
-                  type="text"
-                  class="form-control"
-                  ng-model="formValues.RepositoryURL"
-                  id="stack_repository_url"
-                  placeholder="https://github.com/portainer/portainer-compose"
-                />
-              </div>
-            </div>
-            <div class="form-group">
-              <span class="col-sm-12 text-muted small">
-                使用以下语法指定存储库的引用：带有 <code>refs/heads/branch_name</code> 的分支或带有 <code>refs/tags/tag_name</code> 的标签。 如果
-                 未指定，将使用默认的 <code>HEAD</code> 通常引用 <code>master</code> 分支。
-              </span>
-            </div>
-            <div class="form-group">
-              <label for="stack_repository_url" class="col-sm-2 control-label text-left">存储库参考</label>
-              <div class="col-sm-10">
-                <input type="text" class="form-control" ng-model="formValues.RepositoryReferenceName" id="stack_repository_reference_name" placeholder="refs/heads/master" />
-              </div>
-            </div>
-            <div class="form-group">
-              <span class="col-sm-12 text-muted small">
-                指示从存储库根目录到 Compose 文件的路径。
-              </span>
-            </div>
-            <div class="form-group">
-              <label for="stack_repository_path" class="col-sm-2 control-label text-left">撰写路径</label>
-              <div class="col-sm-10">
-                <input type="text" class="form-control" ng-model="formValues.ComposeFilePathInRepository" id="stack_repository_path" placeholder="docker-compose.yml" />
-              </div>
-            </div>
-            <div class="form-group">
-              <div class="col-sm-12">
-                <label class="control-label text-left">
-                  验证
-                </label>
-                <label class="switch" style="margin-left: 20px;"> <input type="checkbox" ng-model="formValues.RepositoryAuthentication" /><i></i> </label>
-              </div>
-            </div>
-            <div class="form-group" ng-if="formValues.RepositoryAuthentication">
-              <span class="col-sm-12 text-muted small">
-                如果您的 git 帐户启用了 2FA，您在部署堆栈时可能会收到 <code>authentication required</code> 错误。 在这种情况下，您需要提供
-                 个人访问令牌而不是您的密码。
-              </span>
-            </div>
-            <div class="form-group" ng-if="formValues.RepositoryAuthentication">
-              <label for="repository_username" class="col-sm-1 control-label text-left">用户名</label>
-              <div class="col-sm-11 col-md-5">
-                <input type="text" class="form-control" ng-model="formValues.RepositoryUsername" name="repository_username" placeholder="myGitUser" />
-              </div>
-              <label for="repository_password" class="col-sm-1 control-label text-left">
-                密码
-              </label>
-              <div class="col-sm-11 col-md-5">
-                <input type="password" class="form-control" ng-model="formValues.RepositoryPassword" name="repository_password" placeholder="myPassword" />
-              </div>
             </div>
           </div>
+
+          <web-editor-form
+            ng-if="state.Method === 'editor' || (state.Method === 'template' && state.selectedTemplateId)"
+            identifier="stack-creation-editor"
+            value="formValues.StackFileContent"
+            on-change="(onChangeFileContent)"
+            ng-required="true"
+            yml="true"
+            placeholder="在此定义或粘贴您的 Docker Compose 文件内容"
+            read-only="state.isEditorReadOnly"
+          >
+            <editor-description>
+              <p>
+                您可以在 <a href="https://docs.docker.com/compose/compose-file/" target="_blank">官方文档</a>中获取更多有关 Compose 文件格式的信息。
+              </p>
+              <p ng-if="state.editorYamlValidationError" class="text-danger">{{ state.editorYamlValidationError }}</p>
+            </editor-description>
+          </web-editor-form>
+
+          <div ng-if="state.Method !== 'repository' && isAdmin && applicationState.endpoint.type !== 4">
+            <div class="col-sm-12 form-section-title">
+              Webhooks
+              <por-switch-field
+                name="EnableWebhook"
+                checked="formValues.EnableWebhook"
+                label-class="'col-sm-2'"
+                tooltip="'创建一个 webhook（或回调 URI）以自动更新此堆栈。向此回调 URI 发送 POST 请求（无需身份验证）将拉取关联镜像的最新版本并重新部署此堆栈。'"
+                label="'创建一个堆栈 webhook'"
+                on-change="(onEnableWebhookChange)"
+                feature-id="'stack-webhook'"
+              ></por-switch-field>
+            </div>
+          </div>
+
           <!-- environment-variables -->
-          <div>
-            <div class="col-sm-12 form-section-title">
-              环境
-            </div>
-            <div class="form-group">
-              <div class="col-sm-12" style="margin-top: 5px;">
-                <label class="control-label text-left">环境变量</label>
-                <span class="label label-default interactive" style="margin-left: 10px;" ng-click="addEnvironmentVariable()">
-                  <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加环境变量
-                </span>
-              </div>
-              <!-- environment-variable-input-list -->
-              <div class="col-sm-12 form-inline" style="margin-top: 10px;">
-                <div ng-repeat="variable in formValues.Env" style="margin-top: 2px;">
-                  <div class="input-group col-sm-5 input-group-sm">
-                    <span class="input-group-addon">名称</span>
-                    <input type="text" class="form-control" ng-model="variable.name" placeholder="例如 FOO" />
-                  </div>
-                  <div class="input-group col-sm-5 input-group-sm">
-                    <span class="input-group-addon">value</span>
-                    <input type="text" class="form-control" ng-model="variable.value" placeholder="例如 bar" />
-                  </div>
-                  <button class="btn btn-sm btn-danger" type="button" ng-click="removeEnvironmentVariable($index)">
-                    <i class="fa fa-trash" aria-hidden="true"></i>
-                  </button>
-                </div>
-              </div>
-              <!-- !environment-variable-input-list -->
-            </div>
-          </div>
+          <stack-environment-variables-panel values="formValues.Env" on-change="(handleEnvVarChange)" show-alert="true"> </stack-environment-variables-panel>
           <!-- !environment-variables -->
-          <!-- !repository -->
-          <por-access-control-form form-data="formValues.AccessControlData" ng-if="applicationState.application.authentication"></por-access-control-form>
+          <por-access-control-form form-data="formValues.AccessControlData"></por-access-control-form>
           <!-- actions -->
-          <div class="col-sm-12 form-section-title">
-            Actions
-          </div>
+          <div class="col-sm-12 form-section-title"> 操作 </div>
           <div class="form-group">
             <div class="col-sm-12">
               <button
                 type="button"
                 class="btn btn-primary btn-sm"
                 ng-disabled="state.actionInProgress
-              || (state.Method === 'upload' && !formValues.StackFile)
-              || (state.Method === 'repository' && ((!formValues.RepositoryURL || !formValues.ComposeFilePathInRepository) || (formValues.RepositoryAuthentication && (!formValues.RepositoryUsername || !formValues.RepositoryPassword))))
+              || !createStackForm.$valid
+              || ((state.Method === 'editor' || state.Method === 'template') && (!formValues.StackFileContent || state.editorYamlValidationError))
+              || (state.Method === 'upload' && (!formValues.StackFile || state.uploadYamlValidationError))
+              || (state.Method === 'repository' && ((!formValues.RepositoryURL || !formValues.ComposeFilePathInRepository) || (formValues.RepositoryAuthentication && !formValues.RepositoryPassword)))
               || !formValues.Name"
                 ng-click="deployStack()"
                 button-spinner="state.actionInProgress"
+                analytics-on
+                analytics-category="docker"
+                analytics-event="docker-stack-create"
+                analytics-properties="buildAnalyticsProperties()"
               >
                 <span ng-hide="state.actionInProgress">部署堆栈</span>
-                <span ng-show="state.actionInProgress">部署堆栈中...</span>
+                <span ng-show="state.actionInProgress">部署进行中...</span>
               </button>
-              <span class="text-danger" ng-if="state.formValidationError" style="margin-left: 5px;">{{ state.formValidationError }}</span>
+              <span class="text-danger" ng-if="state.formValidationError" style="margin-left: 5px">{{ state.formValidationError }}</span>
             </div>
           </div>
           <!-- !actions -->

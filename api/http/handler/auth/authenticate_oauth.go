@@ -1,124 +1,101 @@
 package auth
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"log"
+	"errors"
 	"net/http"
 
+	portainer "github.com/portainer/portainer/api"
+	httperrors "github.com/portainer/portainer/api/http/errors"
+	httperror "github.com/portainer/portainer/pkg/libhttp/error"
+	"github.com/portainer/portainer/pkg/libhttp/request"
+
 	"github.com/asaskevich/govalidator"
-	httperror "github.com/portainer/libhttp/error"
-	"github.com/portainer/libhttp/request"
-	"github.com/portainer/portainer/api"
+	"github.com/rs/zerolog/log"
 )
 
 type oauthPayload struct {
+	// OAuth code returned from OAuth Provided
 	Code string
 }
 
 func (payload *oauthPayload) Validate(r *http.Request) error {
 	if govalidator.IsNull(payload.Code) {
-		return portainer.Error("Invalid OAuth authorization code")
+		return errors.New("Invalid OAuth authorization code")
 	}
+
 	return nil
 }
 
-func (handler *Handler) authenticateThroughExtension(code, licenseKey string, settings *portainer.OAuthSettings) (string, error) {
-	extensionURL := handler.ProxyManager.GetExtensionURL(portainer.OAuthAuthenticationExtension)
-
-	encodedConfiguration, err := json.Marshal(settings)
-	if err != nil {
-		return "", nil
+func (handler *Handler) authenticateOAuth(code string, settings *portainer.OAuthSettings) (string, error) {
+	if code == "" {
+		return "", errors.New("Invalid OAuth authorization code")
 	}
 
-	req, err := http.NewRequest("GET", extensionURL+"/validate", nil)
-	if err != nil {
-		return "", err
+	if settings == nil {
+		return "", errors.New("Invalid OAuth configuration")
 	}
 
-	client := &http.Client{}
-	req.Header.Set("X-OAuth-Config", string(encodedConfiguration))
-	req.Header.Set("X-OAuth-Code", code)
-	req.Header.Set("X-PortainerExtension-License", licenseKey)
-
-	resp, err := client.Do(req)
+	username, err := handler.OAuthService.Authenticate(code, settings)
 	if err != nil {
 		return "", err
 	}
 
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-
-	type extensionResponse struct {
-		Username string `json:"Username,omitempty"`
-		Err      string `json:"err,omitempty"`
-		Details  string `json:"details,omitempty"`
-	}
-
-	var extResp extensionResponse
-	err = json.Unmarshal(body, &extResp)
-	if err != nil {
-		return "", err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return "", portainer.Error(extResp.Err + ":" + extResp.Details)
-	}
-
-	return extResp.Username, nil
+	return username, nil
 }
 
+// @id ValidateOAuth
+// @summary Authenticate with OAuth
+// @description **Access policy**: public
+// @tags auth
+// @accept json
+// @produce json
+// @param body body oauthPayload true "OAuth Credentials used for authentication"
+// @success 200 {object} authenticateResponse "Success"
+// @failure 400 "Invalid request"
+// @failure 422 "Invalid Credentials"
+// @failure 500 "Server error"
+// @router /auth/oauth/validate [post]
 func (handler *Handler) validateOAuth(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	var payload oauthPayload
 	err := request.DecodeAndValidateJSONPayload(r, &payload)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid request payload", err}
+		return httperror.BadRequest("Invalid request payload", err)
 	}
 
-	settings, err := handler.SettingsService.Settings()
+	settings, err := handler.DataStore.Settings().Settings()
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve settings from the database", err}
+		return httperror.InternalServerError("Unable to retrieve settings from the database", err)
 	}
 
-	if settings.AuthenticationMethod != 3 {
-		return &httperror.HandlerError{http.StatusForbidden, "OAuth authentication is not enabled", portainer.Error("OAuth authentication is not enabled")}
+	if settings.AuthenticationMethod != portainer.AuthenticationOAuth {
+		return httperror.Forbidden("OAuth authentication is not enabled", errors.New("OAuth authentication is not enabled"))
 	}
 
-	extension, err := handler.ExtensionService.Extension(portainer.OAuthAuthenticationExtension)
-	if err == portainer.ErrObjectNotFound {
-		return &httperror.HandlerError{http.StatusNotFound, "Oauth authentication extension is not enabled", err}
-	} else if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to find a extension with the specified identifier inside the database", err}
-	}
-
-	username, err := handler.authenticateThroughExtension(payload.Code, extension.License.LicenseKey, &settings.OAuthSettings)
+	username, err := handler.authenticateOAuth(payload.Code, &settings.OAuthSettings)
 	if err != nil {
-		log.Printf("[DEBUG] - OAuth authentication error: %s", err)
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to authenticate through OAuth", portainer.ErrUnauthorized}
+		log.Debug().Err(err).Msg("OAuth authentication error")
+
+		return httperror.InternalServerError("Unable to authenticate through OAuth", httperrors.ErrUnauthorized)
 	}
 
-	user, err := handler.UserService.UserByUsername(username)
-	if err != nil && err != portainer.ErrObjectNotFound {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve a user with the specified username from the database", err}
+	user, err := handler.DataStore.User().UserByUsername(username)
+	if err != nil && !handler.DataStore.IsErrObjectNotFound(err) {
+		return httperror.InternalServerError("Unable to retrieve a user with the specified username from the database", err)
 	}
 
 	if user == nil && !settings.OAuthSettings.OAuthAutoCreateUsers {
-		return &httperror.HandlerError{http.StatusForbidden, "Account not created beforehand in Portainer and automatic user provisioning not enabled", portainer.ErrUnauthorized}
+		return httperror.Forbidden("Account not created beforehand in Portainer and automatic user provisioning not enabled", httperrors.ErrUnauthorized)
 	}
 
 	if user == nil {
 		user = &portainer.User{
-			Username:                username,
-			Role:                    portainer.StandardUserRole,
-			PortainerAuthorizations: portainer.DefaultPortainerAuthorizations(),
+			Username: username,
+			Role:     portainer.StandardUserRole,
 		}
 
-		err = handler.UserService.CreateUser(user)
+		err = handler.DataStore.User().Create(user)
 		if err != nil {
-			return &httperror.HandlerError{http.StatusInternalServerError, "Unable to persist user inside the database", err}
+			return httperror.InternalServerError("Unable to persist user inside the database", err)
 		}
 
 		if settings.OAuthSettings.DefaultTeamID != 0 {
@@ -128,17 +105,13 @@ func (handler *Handler) validateOAuth(w http.ResponseWriter, r *http.Request) *h
 				Role:   portainer.TeamMember,
 			}
 
-			err = handler.TeamMembershipService.CreateTeamMembership(membership)
+			err = handler.DataStore.TeamMembership().Create(membership)
 			if err != nil {
-				return &httperror.HandlerError{http.StatusInternalServerError, "Unable to persist team membership inside the database", err}
+				return httperror.InternalServerError("Unable to persist team membership inside the database", err)
 			}
 		}
 
-		err = handler.AuthorizationService.UpdateUsersAuthorizations()
-		if err != nil {
-			return &httperror.HandlerError{http.StatusInternalServerError, "Unable to update user authorizations", err}
-		}
 	}
 
-	return handler.writeToken(w, user)
+	return handler.writeToken(w, user, false)
 }

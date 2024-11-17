@@ -1,8 +1,9 @@
 module.exports = ({ env }) => ({
-  plugins: {
+  plugins: [
     // add vendor prefixes
-    autoprefixer: { browsers: 'last 2 versions' },
+    require('autoprefixer'),
     // minify the result
-    cssnano: env === 'production' ? {} : false,
-  },
+    env !== 'development' && require('cssnano'),
+    require('tailwindcss'),
+  ],
 });

@@ -1,11 +1,11 @@
 <div id="service-update-config">
   <rd-widget>
-    <rd-widget-header icon="fa-list-alt" title-text="Update configuration"> </rd-widget-header>
+    <rd-widget-header icon="list" title-text="更新配置"> </rd-widget-header>
     <rd-widget-body classes="no-padding">
-      <table class="table">
+      <table class="mb-0 table">
         <tbody>
           <tr>
-            <td>更新限制</td>
+            <td>更新并行度</td>
             <td>
               <input
                 class="input-sm"
@@ -16,9 +16,7 @@
               />
             </td>
             <td>
-              <p class="small text-muted" style="margin-top: 10px;">
-                同时更新的最大任务数（0 表示一次更新）。
-              </p>
+              <p class="small text-muted" style="margin-top: 10px"> 同时更新的最大任务数（0表示一次性更新所有任务）。 </p>
             </td>
           </tr>
           <tr>
@@ -34,16 +32,14 @@
               />
             </td>
             <td>
-              <p class="small text-muted" style="margin-top: 10px;">
-                由数字后跟单位 (ns|us|ms|s|m|h) 表示的更新之间的时间量。 示例：1m。
-              </p>
+              <p class="small text-muted" style="margin-top: 10px"> 更新之间的时间间隔，格式为数字后跟单位（ns|us|ms|s|m|h）。例如：1m。 </p>
             </td>
           </tr>
           <tr>
             <td>更新失败操作</td>
             <td>
-              <div class="form-group">
-                <label class="radio-inline">
+              <div class="form-group !mb-0">
+                <label class="radio-inline align-baseline">
                   <input
                     type="radio"
                     name="failure_action"
@@ -54,7 +50,7 @@
                   />
                   继续
                 </label>
-                <label class="radio-inline">
+                <label class="radio-inline align-baseline">
                   <input
                     type="radio"
                     name="failure_action"
@@ -68,15 +64,13 @@
               </div>
             </td>
             <td>
-              <p class="small text-muted" style="margin-top: 10px;">
-                更新后无法启动时采取的措施。
-              </p>
+              <p class="small text-muted" style="margin-top: 10px"> Action taken on failure to start after update. </p>
             </td>
           </tr>
           <tr ng-if="applicationState.endpoint.apiVersion >= 1.29">
             <td>顺序</td>
             <td>
-              <div class="form-group">
+              <div class="form-group !mb-0">
                 <label class="radio-inline">
                   <input
                     type="radio"
@@ -86,7 +80,7 @@
                     ng-change="updateServiceAttribute(service, 'UpdateOrder')"
                     disable-authorization="DockerServiceUpdate"
                   />
-                  先开始
+                  启动优先
                 </label>
                 <label class="radio-inline">
                   <input
@@ -97,14 +91,12 @@
                     ng-change="updateServiceAttribute(service, 'UpdateOrder')"
                     disable-authorization="DockerServiceUpdate"
                   />
-                  先停止
+                  停止优先
                 </label>
               </div>
             </td>
             <td>
-              <p class="small text-muted" style="margin-top: 10px;">
-                失败时的操作命令。
-              </p>
+              <p class="small text-muted" style="margin-top: 10px"> 更新失败时的操作顺序。 </p>
             </td>
           </tr>
         </tbody>

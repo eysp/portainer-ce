@@ -1,5 +1,11 @@
 import moment from 'moment';
+import _ from 'lodash-es';
 import { PorImageRegistryModel } from 'Docker/models/porImageRegistry';
+import { confirmContainerDeletion } from '@/react/docker/containers/common/confirm-container-delete-modal';
+import { FeatureId } from '@/react/portainer/feature-flags/enums';
+import { ResourceControlType } from '@/react/portainer/access-control/types';
+import { confirmContainerRecreation } from '@/react/docker/containers/ItemView/ConfirmRecreationModal';
+import { commitContainer } from '@/react/docker/proxy/queries/useCommitContainerMutation';
 
 angular.module('portainer.docker').controller('ContainerController', [
   '$q',
@@ -8,45 +14,21 @@ angular.module('portainer.docker').controller('ContainerController', [
   '$transition$',
   '$filter',
   '$async',
-  'ExtensionService',
-  'Commit',
-  'ContainerHelper',
   'ContainerService',
   'ImageHelper',
-  'NetworkService',
   'Notifications',
-  'ModalService',
-  'ResourceControlService',
-  'RegistryService',
-  'ImageService',
   'HttpRequestHelper',
   'Authentication',
-  'StateManager',
-  function (
-    $q,
-    $scope,
-    $state,
-    $transition$,
-    $filter,
-    $async,
-    ExtensionService,
-    Commit,
-    ContainerHelper,
-    ContainerService,
-    ImageHelper,
-    NetworkService,
-    Notifications,
-    ModalService,
-    ResourceControlService,
-    RegistryService,
-    ImageService,
-    HttpRequestHelper,
-    Authentication,
-    StateManager
-  ) {
+  'endpoint',
+  function ($q, $scope, $state, $transition$, $filter, $async, ContainerService, ImageHelper, Notifications, HttpRequestHelper, Authentication, endpoint) {
+    $scope.resourceType = ResourceControlType.Container;
+    $scope.endpoint = endpoint;
+    $scope.isAdmin = Authentication.isAdmin();
     $scope.activityTime = 0;
     $scope.portBindings = [];
     $scope.displayRecreateButton = false;
+    $scope.displayCreateWebhookButton = false;
+    $scope.containerWebhookFeature = FeatureId.CONTAINER_WEBHOOK;
 
     $scope.config = {
       RegistryModel: new PorImageRegistryModel(),
@@ -55,18 +37,43 @@ angular.module('portainer.docker').controller('ContainerController', [
 
     $scope.state = {
       recreateContainerInProgress: false,
-      joinNetworkInProgress: false,
-      leaveNetworkInProgress: false,
+      pullImageValidity: false,
     };
 
+    $scope.setPullImageValidity = setPullImageValidity;
+    function setPullImageValidity(validity) {
+      $scope.state.pullImageValidity = validity;
+    }
+
     $scope.updateRestartPolicy = updateRestartPolicy;
+
+    $scope.onUpdateResourceControlSuccess = function () {
+      $state.reload();
+    };
+
+    $scope.computeDockerGPUCommand = () => {
+      const gpuOptions = _.find($scope.container.HostConfig.DeviceRequests, function (o) {
+        return o.Driver === 'nvidia' || o.Capabilities[0][0] === 'gpu';
+      });
+      if (!gpuOptions) {
+        return 'No GPU config found';
+      }
+      let gpuStr = 'all';
+      if (gpuOptions.Count !== -1) {
+        gpuStr = `"device=${_.join(gpuOptions.DeviceIDs, ',')}"`;
+      }
+      // we only support a single set of capabilities for now
+      // creation UI needs to be reworked in order to support OR combinations of AND capabilities
+      const capStr = `"capabilities=${_.join(gpuOptions.Capabilities[0], ',')}"`;
+      return `${gpuStr},${capStr}`;
+    };
 
     var update = function () {
       var nodeName = $transition$.params().nodeName;
       HttpRequestHelper.setPortainerAgentTargetHeader(nodeName);
       $scope.nodeName = nodeName;
 
-      ContainerService.container($transition$.params().id)
+      ContainerService.container(endpoint.Id, $transition$.params().id)
         .then(function success(data) {
           var container = data;
           $scope.container = container;
@@ -83,123 +90,112 @@ angular.module('portainer.docker').controller('ContainerController', [
 
           $scope.portBindings = [];
           if (container.NetworkSettings.Ports) {
-            angular.forEach(Object.keys(container.NetworkSettings.Ports), function (portMapping) {
-              if (container.NetworkSettings.Ports[portMapping]) {
-                var mapping = {};
-                mapping.container = portMapping;
-                mapping.host = container.NetworkSettings.Ports[portMapping][0].HostIp + ':' + container.NetworkSettings.Ports[portMapping][0].HostPort;
-                $scope.portBindings.push(mapping);
+            _.forEach(Object.keys(container.NetworkSettings.Ports), function (key) {
+              if (container.NetworkSettings.Ports[key]) {
+                _.forEach(container.NetworkSettings.Ports[key], (portMapping) => {
+                  const mapping = {};
+                  mapping.container = key;
+                  mapping.host = `${portMapping.HostIp}:${portMapping.HostPort}`;
+                  $scope.portBindings.push(mapping);
+                });
               }
             });
           }
 
+          $scope.container.Config.Env = _.sortBy($scope.container.Config.Env, _.toLower);
           const inSwarm = $scope.container.Config.Labels['com.docker.swarm.service.id'];
           const autoRemove = $scope.container.HostConfig.AutoRemove;
           const admin = Authentication.isAdmin();
-          const appState = StateManager.getState();
-          const { allowHostNamespaceForRegularUsers, allowDeviceMappingForRegularUsers, allowBindMountsForRegularUsers, allowPrivilegedModeForRegularUsers } = appState.application;
-          const settingRestrictsRegularUsers =
-            !allowBindMountsForRegularUsers || !allowDeviceMappingForRegularUsers || !allowHostNamespaceForRegularUsers || !allowPrivilegedModeForRegularUsers;
+          const {
+            allowContainerCapabilitiesForRegularUsers,
+            allowHostNamespaceForRegularUsers,
+            allowDeviceMappingForRegularUsers,
+            allowSysctlSettingForRegularUsers,
+            allowBindMountsForRegularUsers,
+            allowPrivilegedModeForRegularUsers,
+          } = endpoint.SecuritySettings;
 
-          ExtensionService.extensionEnabled(ExtensionService.EXTENSIONS.RBAC).then((rbacEnabled) => {
-            $scope.displayRecreateButton = !inSwarm && !autoRemove && (settingRestrictsRegularUsers || rbacEnabled ? admin : true);
-          });
+          const settingRestrictsRegularUsers =
+            !allowContainerCapabilitiesForRegularUsers ||
+            !allowBindMountsForRegularUsers ||
+            !allowDeviceMappingForRegularUsers ||
+            !allowSysctlSettingForRegularUsers ||
+            !allowHostNamespaceForRegularUsers ||
+            !allowPrivilegedModeForRegularUsers;
+
+          $scope.displayRecreateButton = !inSwarm && !autoRemove && (admin || !settingRestrictsRegularUsers);
+          $scope.displayCreateWebhookButton = $scope.displayRecreateButton;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索容器信息');
+          Notifications.error('Failure', err, 'Unable to retrieve container info');
         });
     };
 
     function executeContainerAction(id, action, successMessage, errorMessage) {
-      action(id)
+      action(endpoint.Id, id)
         .then(function success() {
           Notifications.success(successMessage, id);
           update();
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, errorMessage);
+          Notifications.error('Failure', err, errorMessage);
         });
     }
 
     $scope.start = function () {
-      var successMessage = '容器启动成功';
-      var errorMessage = '容器启动失败';
+      var successMessage = 'Container successfully started';
+      var errorMessage = 'Unable to start container';
       executeContainerAction($transition$.params().id, ContainerService.startContainer, successMessage, errorMessage);
     };
 
     $scope.stop = function () {
-      var successMessage = '容器成功停止';
-      var errorMessage = '无法停止容器';
+      var successMessage = 'Container successfully stopped';
+      var errorMessage = 'Unable to stop container';
       executeContainerAction($transition$.params().id, ContainerService.stopContainer, successMessage, errorMessage);
     };
 
     $scope.kill = function () {
-      var successMessage = '容器成功杀死';
+      var successMessage = 'Container successfully killed';
       var errorMessage = 'Unable to kill container';
       executeContainerAction($transition$.params().id, ContainerService.killContainer, successMessage, errorMessage);
     };
 
     $scope.pause = function () {
-      var successMessage = '容器成功暂停';
-      var errorMessage = '容器暂停失败';
+      var successMessage = 'Container successfully paused';
+      var errorMessage = 'Unable to pause container';
       executeContainerAction($transition$.params().id, ContainerService.pauseContainer, successMessage, errorMessage);
     };
 
     $scope.unpause = function () {
-      var successMessage = '容器成功恢复';
-      var errorMessage = '容器恢复失败';
+      var successMessage = 'Container successfully resumed';
+      var errorMessage = 'Unable to resume container';
       executeContainerAction($transition$.params().id, ContainerService.resumeContainer, successMessage, errorMessage);
     };
 
     $scope.restart = function () {
-      var successMessage = '容器成功重启';
-      var errorMessage = '容器重启失败';
+      var successMessage = 'Container successfully restarted';
+      var errorMessage = 'Unable to restart container';
       executeContainerAction($transition$.params().id, ContainerService.restartContainer, successMessage, errorMessage);
     };
 
     $scope.renameContainer = function () {
       var container = $scope.container;
-      ContainerService.renameContainer($transition$.params().id, container.newContainerName)
+      if (container.newContainerName === $filter('trimcontainername')(container.Name)) {
+        $scope.container.edit = false;
+        return;
+      }
+      ContainerService.renameContainer(endpoint.Id, $transition$.params().id, container.newContainerName)
         .then(function success() {
           container.Name = container.newContainerName;
-          Notifications.success('容器重命名成功', container.Name);
+          Notifications.success('Container successfully renamed', container.Name);
         })
         .catch(function error(err) {
-          container.newContainerName = container.Name;
-          Notifications.error('失败', err, '无法重命名容器');
+          container.newContainerName = $filter('trimcontainername')(container.Name);
+          Notifications.error('Failure', err, 'Unable to rename container');
         })
         .finally(function final() {
           $scope.container.edit = false;
-        });
-    };
-
-    $scope.containerLeaveNetwork = function containerLeaveNetwork(container, networkId) {
-      $scope.state.leaveNetworkInProgress = true;
-      NetworkService.disconnectContainer(networkId, container.Id, false)
-        .then(function success() {
-          Notifications.success('Container left network', container.Id);
-          $state.reload();
-        })
-        .catch(function error(err) {
-          Notifications.error('失败', err, '无法断开容器与网络的连接');
-        })
-        .finally(function final() {
-          $scope.state.leaveNetworkInProgress = false;
-        });
-    };
-
-    $scope.containerJoinNetwork = function containerJoinNetwork(container, networkId) {
-      $scope.state.joinNetworkInProgress = true;
-      NetworkService.connectContainer(networkId, container.Id)
-        .then(function success() {
-          Notifications.success('容器加入网络', container.Id);
-          $state.reload();
-        })
-        .catch(function error(err) {
-          Notifications.error('失败', err, '无法将容器连接到网络');
-        })
-        .finally(function final() {
-          $scope.state.joinNetworkInProgress = false;
+          $scope.$apply();
         });
     };
 
@@ -208,11 +204,11 @@ angular.module('portainer.docker').controller('ContainerController', [
       const registryModel = $scope.config.RegistryModel;
       const imageConfig = ImageHelper.createImageConfigForContainer(registryModel);
       try {
-        await Commit.commitContainer({ id: $transition$.params().id, repo: imageConfig.fromImage }).$promise;
-        Notifications.success('镜像创建', $transition$.params().id);
+        await commitContainer(endpoint.Id, { container: $transition$.params().id, repo: imageConfig.fromImage });
+        Notifications.success('Image created', $transition$.params().id);
         $state.reload();
       } catch (err) {
-        Notifications.error('失败', err, '无法创建镜像');
+        Notifications.error('Failure', err, 'Unable to create image');
         $scope.config.commitInProgress = false;
       }
     }
@@ -222,167 +218,80 @@ angular.module('portainer.docker').controller('ContainerController', [
     };
 
     $scope.confirmRemove = function () {
-      var title = '您即将删除一个容器。';
-      if ($scope.container.State.Running) {
-        title = '您即将删除正在运行的容器。';
-      }
-      ModalService.confirmContainerDeletion(title, function (result) {
+      return $async(async () => {
+        var title = 'You are about to remove a container.';
+        if ($scope.container.State.Running) {
+          title = 'You are about to remove a running container.';
+        }
+
+        const result = await confirmContainerDeletion(title);
+
         if (!result) {
           return;
         }
-        var cleanAssociatedVolumes = false;
-        if (result[0]) {
-          cleanAssociatedVolumes = true;
-        }
-        removeContainer(cleanAssociatedVolumes);
+        const { removeVolumes } = result;
+
+        removeContainer(removeVolumes);
       });
     };
 
     function removeContainer(cleanAssociatedVolumes) {
-      ContainerService.remove($scope.container, cleanAssociatedVolumes)
+      ContainerService.remove(endpoint.Id, $scope.container.Id, cleanAssociatedVolumes)
         .then(function success() {
-          Notifications.success('容器成功删除');
+          Notifications.success('Success', 'Container successfully removed');
           $state.go('docker.containers', {}, { reload: true });
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法删除容器');
+          Notifications.error('Failure', err, 'Unable to remove container');
         });
     }
 
     function recreateContainer(pullImage) {
       var container = $scope.container;
-      var config = ContainerHelper.configFromContainer(container.Model);
       $scope.state.recreateContainerInProgress = true;
-      var isRunning = container.State.Running;
 
-      return pullImageIfNeeded()
-        .then(stopContainerIfNeeded)
-        .then(renameContainer)
-        .then(setMainNetworkAndCreateContainer)
-        .then(connectContainerToOtherNetworks)
-        .then(startContainerIfNeeded)
-        .then(createResourceControl)
-        .then(deleteOldContainer)
-        .then(notifyAndChangeView)
-        .catch(notifyOnError);
-
-      function stopContainerIfNeeded() {
-        if (!isRunning) {
-          return $q.when();
-        }
-        return ContainerService.stopContainer(container.Id);
-      }
-
-      function renameContainer() {
-        return ContainerService.renameContainer(container.Id, container.Name + '-old');
-      }
-
-      function pullImageIfNeeded() {
-        if (!pullImage) {
-          return $q.when();
-        }
-        return RegistryService.retrievePorRegistryModelFromRepository(container.Config.Image).then(function pullImage(registryModel) {
-          return ImageService.pullImage(registryModel, true);
-        });
-      }
-
-      function setMainNetworkAndCreateContainer() {
-        var networks = config.NetworkingConfig.EndpointsConfig;
-        var networksNames = Object.keys(networks);
-        if (networksNames.length > 1) {
-          config.NetworkingConfig.EndpointsConfig = {};
-          config.NetworkingConfig.EndpointsConfig[networksNames[0]] = networks[0];
-        }
-        return $q.all([ContainerService.createContainer(config), networks]);
-      }
-
-      function connectContainerToOtherNetworks(createContainerData) {
-        var newContainer = createContainerData[0];
-        var networks = createContainerData[1];
-        var networksNames = Object.keys(networks);
-        var connectionPromises = networksNames.map(function connectToNetwork(name) {
-          NetworkService.connectContainer(name, newContainer.Id);
-        });
-        return $q.all(connectionPromises).then(function onConnectToNetworkSuccess() {
-          return newContainer;
-        });
-      }
-
-      function deleteOldContainer(newContainer) {
-        return ContainerService.remove(container, true).then(function onRemoveSuccess() {
-          return newContainer;
-        });
-      }
-
-      function startContainerIfNeeded(newContainer) {
-        if (!isRunning) {
-          return $q.when(newContainer);
-        }
-        return ContainerService.startContainer(newContainer.Id).then(function onStartSuccess() {
-          return newContainer;
-        });
-      }
-
-      function createResourceControl(newContainer) {
-        const userId = Authentication.getUserDetails().ID;
-        const oldResourceControl = container.ResourceControl;
-        const newResourceControl = newContainer.Portainer.ResourceControl;
-        return ResourceControlService.duplicateResourceControl(userId, oldResourceControl, newResourceControl);
-      }
+      return ContainerService.recreateContainer(endpoint.Id, container.Id, pullImage).then(notifyAndChangeView).catch(notifyOnError);
 
       function notifyAndChangeView() {
-        Notifications.success('容器重新创建成功');
+        Notifications.success('Success', 'Container successfully re-created');
         $state.go('docker.containers', {}, { reload: true });
       }
 
       function notifyOnError(err) {
-        Notifications.error('失败', err, '无法重新创建容器');
+        Notifications.error('Failure', err, 'Unable to re-create container');
         $scope.state.recreateContainerInProgress = false;
       }
     }
 
     $scope.recreate = function () {
-      ModalService.confirmContainerRecreation(function (result) {
+      const cannotPullImage = !$scope.container.Config.Image || $scope.container.Config.Image.toLowerCase().startsWith('sha256');
+      confirmContainerRecreation(cannotPullImage).then(function (result) {
         if (!result) {
           return;
         }
-        var pullImage = false;
-        if (result[0]) {
-          pullImage = true;
-        }
-        recreateContainer(pullImage);
+
+        recreateContainer(result.pullLatest);
       });
     };
 
     function updateRestartPolicy(restartPolicy, maximumRetryCount) {
       maximumRetryCount = restartPolicy === 'on-failure' ? maximumRetryCount : undefined;
 
-      return ContainerService.updateRestartPolicy($scope.container.Id, restartPolicy, maximumRetryCount).then(onUpdateSuccess).catch(notifyOnError);
+      return ContainerService.updateRestartPolicy(endpoint.Id, $scope.container.Id, restartPolicy, maximumRetryCount).then(onUpdateSuccess).catch(notifyOnError);
 
       function onUpdateSuccess() {
         $scope.container.HostConfig.RestartPolicy = {
           Name: restartPolicy,
           MaximumRetryCount: maximumRetryCount,
         };
-        Notifications.success('重启策略已更新');
+        Notifications.success('Success', 'Restart policy updated');
       }
 
       function notifyOnError(err) {
-        Notifications.error('失败', err, '无法更新重启策略');
+        Notifications.error('Failure', err, 'Unable to update restart policy');
         return $q.reject(err);
       }
     }
-
-    var provider = $scope.applicationState.endpoint.mode.provider;
-    var apiVersion = $scope.applicationState.endpoint.apiVersion;
-    NetworkService.networks(provider === 'DOCKER_STANDALONE' || provider === 'DOCKER_SWARM_MODE', false, provider === 'DOCKER_SWARM_MODE' && apiVersion >= 1.25)
-      .then(function success(data) {
-        var networks = data;
-        $scope.availableNetworks = networks;
-      })
-      .catch(function error(err) {
-        Notifications.error('失败', err, '无法检索网络');
-      });
 
     update();
   },

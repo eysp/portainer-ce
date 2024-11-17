@@ -1,94 +1,86 @@
-import angular from 'angular';
-import _ from 'lodash-es';
+import { confirmDestructive } from '@@/modals/confirm';
+import { EdgeTypes } from '@/react/portainer/environments/types';
+import { buildConfirmButton } from '@@/modals/utils';
+import { tagOptions } from '@/react/edge/edge-groups/CreateView/tag-options';
+import { groupTypeOptions } from '@/react/edge/edge-groups/CreateView/group-type-options';
 
-class EdgeGroupFormController {
+export class EdgeGroupFormController {
   /* @ngInject */
-  constructor(EndpointService, $async, $scope) {
-    this.EndpointService = EndpointService;
+  constructor($async, $scope) {
     this.$async = $async;
+    this.$scope = $scope;
 
-    this.state = {
-      available: {
-        limit: '10',
-        filter: '',
-        pageNumber: 1,
-        totalCount: 0,
-      },
-      associated: {
-        limit: '10',
-        filter: '',
-        pageNumber: 1,
-        totalCount: 0,
-      },
+    this.groupTypeOptions = groupTypeOptions;
+    this.tagOptions = tagOptions;
+
+    this.dynamicQuery = {
+      types: EdgeTypes,
+      tagIds: [],
+      tagsPartialMatch: false,
     };
 
-    this.endpoints = {
-      associated: [],
-      available: null,
-    };
-
-    this.associateEndpoint = this.associateEndpoint.bind(this);
-    this.dissociateEndpoint = this.dissociateEndpoint.bind(this);
-    this.getPaginatedEndpointsAsync = this.getPaginatedEndpointsAsync.bind(this);
-    this.getPaginatedEndpoints = this.getPaginatedEndpoints.bind(this);
+    this.onChangeEnvironments = this.onChangeEnvironments.bind(this);
+    this.onChangeTags = this.onChangeTags.bind(this);
+    this.onChangeDynamic = this.onChangeDynamic.bind(this);
+    this.onChangeModel = this.onChangeModel.bind(this);
+    this.onChangePartialMatch = this.onChangePartialMatch.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
 
     $scope.$watch(
       () => this.model,
       () => {
-        this.getPaginatedEndpoints(this.pageType, 'associated');
+        if (this.model.Dynamic) {
+          this.dynamicQuery = {
+            types: EdgeTypes,
+            tagIds: this.model.TagIds,
+            tagsPartialMatch: this.model.PartialMatch,
+          };
+        }
       },
       true
     );
   }
 
-  associateEndpoint(endpoint) {
-    if (!_.includes(this.model.Endpoints, endpoint.Id)) {
-      this.endpoints.associated.push(endpoint);
-      this.model.Endpoints.push(endpoint.Id);
-      _.remove(this.endpoints.available, { Id: endpoint.Id });
-    }
+  onChangeModel(model) {
+    return this.$scope.$evalAsync(() => {
+      this.model = {
+        ...this.model,
+        ...model,
+      };
+    });
   }
 
-  dissociateEndpoint(endpoint) {
-    _.remove(this.endpoints.associated, { Id: endpoint.Id });
-    _.remove(this.model.Endpoints, (id) => id === endpoint.Id);
-    this.endpoints.available.push(endpoint);
+  onChangePartialMatch(value) {
+    return this.onChangeModel({ PartialMatch: value });
   }
 
-  getPaginatedEndpoints(pageType, tableType) {
-    return this.$async(this.getPaginatedEndpointsAsync, pageType, tableType);
+  onChangeDynamic(value) {
+    this.onChangeModel({ Dynamic: value });
   }
 
-  async getPaginatedEndpointsAsync(pageType, tableType) {
-    const { pageNumber, limit, search } = this.state[tableType];
-    const start = (pageNumber - 1) * limit + 1;
-    const query = { search, type: 4 };
-    if (tableType === 'associated') {
-      if (this.model.Dynamic) {
-        query.tagIds = this.model.TagIds;
-        query.tagsPartialMatch = this.model.PartialMatch;
-      } else {
-        query.endpointIds = this.model.Endpoints;
+  onChangeTags(value) {
+    this.onChangeModel({ TagIds: value });
+  }
+
+  onChangeEnvironments(value, meta) {
+    return this.$async(async () => {
+      if (meta.type === 'remove' && this.pageType === 'edit') {
+        const confirmed = await confirmDestructive({
+          title: 'Confirm action',
+          message: 'Removing the environment from this group will remove its corresponding edge stacks',
+          confirmButton: buildConfirmButton('Confirm'),
+        });
+
+        if (!confirmed) {
+          return;
+        }
       }
-    }
-    const response = await this.fetchEndpoints(start, limit, query);
-    const totalCount = parseInt(response.totalCount, 10);
-    this.endpoints[tableType] = response.value;
-    this.state[tableType].totalCount = totalCount;
 
-    if (tableType === 'available') {
-      this.noEndpoints = totalCount === 0;
-      this.endpoints[tableType] = _.filter(response.value, (endpoint) => !_.includes(this.model.Endpoints, endpoint.Id));
-    }
+      this.onChangeModel({ Endpoints: value });
+    });
   }
 
-  fetchEndpoints(start, limit, query) {
-    if (query.tagIds && !query.tagIds.length) {
-      return { value: [], totalCount: 0 };
-    }
-    return this.EndpointService.endpoints(start, limit, query);
+  handleSubmit() {
+    this.formAction(this.model);
   }
 }
-
-angular.module('portainer.edge').controller('EdgeGroupFormController', EdgeGroupFormController);
-export default EdgeGroupFormController;

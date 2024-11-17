@@ -1,14 +1,14 @@
 <div>
   <rd-widget>
-    <rd-widget-header icon="fa-tasks" title-text="Published ports">
+    <rd-widget-header icon="list" title-text="已发布端口">
       <div class="nopadding" authorization="DockerServiceUpdate">
-        <a class="btn btn-default btn-sm pull-right" ng-click="isUpdating ||addPublishedPort(service)" ng-disabled="isUpdating">
-          <i class="fa fa-plus-circle" aria-hidden="true"></i> 端口映射
+        <a class="btn btn-secondary btn-sm pull-right" ng-click="isUpdating ||addPublishedPort(service)" ng-disabled="isUpdating">
+          <pr-icon icon="'plus'"></pr-icon> 端口映射
         </a>
       </div>
     </rd-widget-header>
     <rd-widget-body ng-if="!service.Ports || service.Ports.length === 0">
-      <p>此服务未发布任何端口。</p>
+      <p>此服务没有已发布的端口。</p>
     </rd-widget-body>
     <rd-widget-body ng-if="service.Ports && service.Ports.length > 0" classes="no-padding">
       <table class="table">
@@ -25,7 +25,7 @@
           <tr ng-repeat="portBinding in service.Ports">
             <td>
               <div class="input-group input-group-sm">
-                <span class="input-group-addon">主机</span>
+                <span class="input-group-addon !leading-none">主机</span>
                 <input
                   type="number"
                   class="form-control"
@@ -39,7 +39,7 @@
             </td>
             <td>
               <div class="input-group input-group-sm">
-                <span class="input-group-addon">container</span>
+                <span class="input-group-addon !leading-none">容器</span>
                 <input
                   type="number"
                   class="form-control"
@@ -54,7 +54,7 @@
             <td>
               <div class="input-group input-group-sm">
                 <select
-                  class="selectpicker form-control"
+                  class="selectpicker form-control !rounded"
                   ng-model="portBinding.Protocol"
                   ng-change="updatePublishedPort(service, mapping)"
                   ng-disabled="isUpdating"
@@ -68,7 +68,7 @@
             <td>
               <div class="input-group input-group-sm">
                 <select
-                  class="selectpicker form-control"
+                  class="selectpicker form-control !rounded"
                   ng-model="portBinding.PublishMode"
                   ng-change="updatePublishedPort(service, mapping)"
                   ng-disabled="isUpdating"
@@ -81,8 +81,8 @@
             </td>
             <td authorization="DockerServiceUpdate">
               <span class="input-group-btn">
-                <button class="btn btn-sm btn-danger" type="button" ng-click="removePortPublishedBinding(service, $index)" ng-disabled="isUpdating">
-                  <i class="fa fa-trash" aria-hidden="true"></i>
+                <button class="btn btn-sm btn-dangerlight" type="button" ng-click="removePortPublishedBinding(service, $index)" ng-disabled="isUpdating">
+                  <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
                 </button>
               </span>
             </td>

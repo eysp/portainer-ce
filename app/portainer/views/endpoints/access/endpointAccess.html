@@ -1,14 +1,20 @@
-<rd-header>
-  <rd-header-title title-text="Endpoint access"></rd-header-title>
-  <rd-header-content>
-    <a ui-sref="portainer.endpoints">Endpoints</a> &gt; <a ui-sref="portainer.endpoints.endpoint({id: ctrl.endpoint.Id})">{{ ctrl.endpoint.Name }}</a> &gt; Access management
-  </rd-header-content>
-</rd-header>
+<page-header
+  title="'环境访问'"
+  breadcrumbs="[
+    { label:'环境', link:'portainer.endpoints' },
+    {
+      label:ctrl.endpoint.Name,
+      link: 'portainer.endpoints.endpoint',
+      linkParams:{id: ctrl.endpoint.Id}
+    }, '访问管理']"
+  reload="true"
+>
+</page-header>
 
 <div class="row" ng-if="ctrl.endpoint">
   <div class="col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="fa-plug" title-text="Endpoint"></rd-widget-header>
+      <rd-widget-header icon="hard-drive" title-text="环境"></rd-widget-header>
       <rd-widget-body classes="no-padding">
         <table class="table">
           <tbody>
@@ -25,7 +31,7 @@
               </td>
             </tr>
             <tr>
-              <td>Group</td>
+              <td>分组</td>
               <td>
                 <a ui-sref="portainer.groups.group({ id: ctrl.group.Id })">{{ ctrl.group.Name }}</a>
               </td>
@@ -44,5 +50,6 @@
   entity-type="endpoint"
   inherit-from="ctrl.group"
   update-access="ctrl.updateAccess"
+  limited-feature="ctrl.limitedFeature"
 >
 </por-access-management>

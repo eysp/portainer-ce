@@ -76,15 +76,13 @@ angular.module('portainer.docker').controller('SwarmController', [
             $scope.nodes = nodes;
           })
           .catch(function error(err) {
-            Notifications.error('Failure', err, 'Unable to retrieve cluster details');
+            Notifications.error('失败', err, '无法检索集群详情');
           });
       }
     }
 
     function initView() {
-      if (StateManager.getState().application.authentication) {
-        $scope.isAdmin = Authentication.isAdmin();
-      }
+      $scope.isAdmin = Authentication.isAdmin();
 
       var provider = $scope.applicationState.endpoint.mode.provider;
       $q.all({
@@ -101,7 +99,7 @@ angular.module('portainer.docker').controller('SwarmController', [
           }
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve cluster details');
+          Notifications.error('失败', err, '无法检索集群详情');
         });
     }
 

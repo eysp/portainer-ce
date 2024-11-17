@@ -1,206 +1,372 @@
 import _ from 'lodash-es';
 import uuidv4 from 'uuid/v4';
-import { EndpointSecurityFormData } from '../../../components/endpointSecurity/porEndpointSecurityModel';
 
-angular
-  .module('portainer.app')
-  .controller('EndpointController', function EndpointController(
-    $async,
-    $q,
-    $scope,
-    $state,
-    $transition$,
-    $filter,
-    clipboard,
-    EndpointService,
-    GroupService,
-    TagService,
-    EndpointProvider,
-    Notifications,
-    Authentication
-  ) {
-    if (!$scope.applicationState.application.endpointManagement) {
-      $state.go('portainer.endpoints');
-    }
+import { PortainerEndpointTypes } from '@/portainer/models/endpoint/models';
+import EndpointHelper from '@/portainer/helpers/endpointHelper';
+import { getAMTInfo } from 'Portainer/hostmanagement/open-amt/open-amt.service';
+import { confirmDestructive } from '@@/modals/confirm';
+import { isEdgeEnvironment, isDockerAPIEnvironment } from '@/react/portainer/environments/utils';
 
-    $scope.state = {
-      uploadInProgress: false,
-      actionInProgress: false,
-      deploymentTab: 0,
-      allowCreate: Authentication.isAdmin(),
-    };
+import { commandsTabs } from '@/react/edge/components/EdgeScriptForm/scripts';
+import { confirmDisassociate } from '@/react/portainer/environments/ItemView/ConfirmDisassociateModel';
+import { buildConfirmButton } from '@@/modals/utils';
+import { getInfo } from '@/react/docker/proxy/queries/useInfo';
 
-    $scope.formValues = {
-      SecurityFormData: new EndpointSecurityFormData(),
-    };
+angular.module('portainer.app').controller('EndpointController', EndpointController);
 
-    $scope.copyEdgeAgentDeploymentCommand = function () {
-      if ($scope.state.deploymentTab === 0) {
-        clipboard.copyText(
-          'docker run -d -v /var/run/docker.sock:/var/run/docker.sock -v /var/lib/docker/volumes:/var/lib/docker/volumes -v /:/host --restart always -e EDGE=1 -e EDGE_ID=' +
-            $scope.randomEdgeID +
-            ' -e EDGE_KEY=' +
-            $scope.endpoint.EdgeKey +
-            ' -e CAP_HOST_MANAGEMENT=1 -v portainer_agent_data:/data --name portainer_edge_agent portainer/agent'
-        );
-      } else {
-        clipboard.copyText(
-          'docker network create --driver overlay portainer_agent_network; docker service create --name portainer_edge_agent --network portainer_agent_network -e AGENT_CLUSTER_ADDR=tasks.portainer_edge_agent -e EDGE=1 -e EDGE_ID=' +
-            $scope.randomEdgeID +
-            ' -e EDGE_KEY=' +
-            $scope.endpoint.EdgeKey +
-            " -e CAP_HOST_MANAGEMENT=1 --mode global --constraint 'node.platform.os == linux' --mount type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock --mount type=bind,src=//var/lib/docker/volumes,dst=/var/lib/docker/volume --mount type=bind,src=//,dst=/host --mount type=volume,src=portainer_agent_data,dst=/data portainer/agent"
-        );
-      }
-      $('#copyNotificationDeploymentCommand').show().fadeOut(2500);
-    };
+/* @ngInject */
+function EndpointController(
+  $async,
+  $scope,
+  $state,
+  $transition$,
+  $filter,
+  clipboard,
+  EndpointService,
+  GroupService,
 
-    $scope.copyEdgeAgentKey = function () {
-      clipboard.copyText($scope.endpoint.EdgeKey);
-      $('#copyNotificationEdgeKey').show().fadeOut(2500);
-    };
+  Notifications,
+  Authentication,
+  SettingsService
+) {
+  $scope.onChangeCheckInInterval = onChangeCheckInInterval;
+  $scope.setFieldValue = setFieldValue;
+  $scope.onChangeTags = onChangeTags;
+  $scope.onChangeTLSConfigFormValues = onChangeTLSConfigFormValues;
 
-    $scope.onCreateTag = function onCreateTag(tagName) {
-      return $async(onCreateTagAsync, tagName);
-    };
+  $scope.state = {
+    selectAll: false,
+    // displayTextFilter: false,
+    get selectedItemCount() {
+      return $scope.state.selectedItems.length || 0;
+    },
+    selectedItems: [],
+    uploadInProgress: false,
+    actionInProgress: false,
+    azureEndpoint: false,
+    kubernetesEndpoint: false,
+    agentEndpoint: false,
+    edgeEndpoint: false,
+    edgeAssociated: false,
+    allowCreate: Authentication.isAdmin(),
+    allowSelfSignedCerts: true,
+    showAMTInfo: false,
+    showTLSConfig: false,
+    edgeScriptCommands: {
+      linux: _.compact([commandsTabs.k8sLinux, commandsTabs.swarmLinux, commandsTabs.standaloneLinux]),
+      win: [commandsTabs.swarmWindows, commandsTabs.standaloneWindow],
+    },
+  };
 
-    async function onCreateTagAsync(tagName) {
-      try {
-        const tag = await TagService.createTag(tagName);
-        $scope.availableTags = $scope.availableTags.concat(tag);
-        $scope.endpoint.TagIds = $scope.endpoint.TagIds.concat(tag.Id);
-      } catch (err) {
-        Notifications.error('Failue', err, 'Unable to create tag');
+  $scope.selectAll = function () {
+    $scope.state.firstClickedItem = null;
+    for (var i = 0; i < $scope.state.filteredDataSet.length; i++) {
+      var item = $scope.state.filteredDataSet[i];
+      if (item.Checked !== $scope.state.selectAll) {
+        // if ($scope.allowSelection(item) && item.Checked !== $scope.state.selectAll) {
+        item.Checked = $scope.state.selectAll;
+        $scope.selectItem(item);
       }
     }
+  };
 
-    $scope.updateEndpoint = function () {
-      var endpoint = $scope.endpoint;
-      var securityData = $scope.formValues.SecurityFormData;
-      var TLS = securityData.TLS;
-      var TLSMode = securityData.TLSMode;
-      var TLSSkipVerify = TLS && (TLSMode === 'tls_client_noca' || TLSMode === 'tls_only');
-      var TLSSkipClientVerify = TLS && (TLSMode === 'tls_ca' || TLSMode === 'tls_only');
+  function isBetween(value, a, b) {
+    return (value >= a && value <= b) || (value >= b && value <= a);
+  }
 
-      var payload = {
-        Name: endpoint.Name,
-        PublicURL: endpoint.PublicURL,
-        GroupID: endpoint.GroupId,
-        TagIds: endpoint.TagIds,
-        TLS: TLS,
-        TLSSkipVerify: TLSSkipVerify,
-        TLSSkipClientVerify: TLSSkipClientVerify,
-        TLSCACert: TLSSkipVerify || securityData.TLSCACert === endpoint.TLSConfig.TLSCACert ? null : securityData.TLSCACert,
-        TLSCert: TLSSkipClientVerify || securityData.TLSCert === endpoint.TLSConfig.TLSCert ? null : securityData.TLSCert,
-        TLSKey: TLSSkipClientVerify || securityData.TLSKey === endpoint.TLSConfig.TLSKey ? null : securityData.TLSKey,
-        AzureApplicationID: endpoint.AzureCredentials.ApplicationID,
-        AzureTenantID: endpoint.AzureCredentials.TenantID,
-        AzureAuthenticationKey: endpoint.AzureCredentials.AuthenticationKey,
-      };
+  $scope.selectItem = function (item, event) {
+    // Handle range select using shift
+    if (event && event.originalEvent.shiftKey && $scope.state.firstClickedItem) {
+      const firstItemIndex = $scope.state.filteredDataSet.indexOf($scope.state.firstClickedItem);
+      const lastItemIndex = $scope.state.filteredDataSet.indexOf(item);
+      const itemsInRange = _.filter($scope.state.filteredDataSet, (item, index) => {
+        return isBetween(index, firstItemIndex, lastItemIndex);
+      });
+      const value = $scope.state.firstClickedItem.Checked;
 
-      if ($scope.endpointType !== 'local' && endpoint.Type !== 3) {
-        payload.URL = 'tcp://' + endpoint.URL;
+      _.forEach(itemsInRange, (i) => {
+        i.Checked = value;
+      });
+      $scope.state.firstClickedItem = item;
+    } else if (event) {
+      item.Checked = !item.Checked;
+      $scope.state.firstClickedItem = item;
+    }
+    $scope.state.selectedItems = _.uniq(_.concat($scope.state.selectedItems, $scope.state.filteredDataSet)).filter((i) => i.Checked);
+    if (event && $scope.state.selectAll && $scope.state.selectedItems.length !== $scope.state.filteredDataSet.length) {
+      $scope.state.selectAll = false;
+    }
+  };
+
+  $scope.formValues = {
+    tlsConfig: {
+      tls: false,
+      skipVerify: false,
+      skipClientVerify: false,
+      caCertFile: null,
+      certFile: null,
+      keyFile: null,
+    },
+  };
+
+  $scope.onDisassociateEndpoint = async function () {
+    confirmDisassociate().then((confirmed) => {
+      if (confirmed) {
+        disassociateEndpoint();
       }
+    });
+  };
 
+  async function disassociateEndpoint() {
+    var endpoint = $scope.endpoint;
+
+    try {
       $scope.state.actionInProgress = true;
-      EndpointService.updateEndpoint(endpoint.Id, payload).then(
-        function success() {
-          Notifications.success('Endpoint updated', $scope.endpoint.Name);
-          EndpointProvider.setEndpointPublicURL(endpoint.PublicURL);
-          $state.go('portainer.endpoints', {}, { reload: true });
-        },
-        function error(err) {
-          Notifications.error('Failure', err, 'Unable to update endpoint');
-          $scope.state.actionInProgress = false;
-        },
-        function update(evt) {
-          if (evt.upload) {
-            $scope.state.uploadInProgress = evt.upload;
-          }
-        }
-      );
+      await EndpointService.disassociateEndpoint(endpoint.Id);
+      Notifications.success('Environment disassociated', $scope.endpoint.Name);
+      $state.reload();
+    } catch (err) {
+      Notifications.error('Failure', err, 'Unable to disassociate environment');
+    } finally {
+      $scope.state.actionInProgress = false;
+    }
+  }
+
+  function onChangeCheckInInterval(value) {
+    setFieldValue('EdgeCheckinInterval', value);
+  }
+
+  function onChangeTags(value) {
+    setFieldValue('TagIds', value);
+  }
+
+  function onChangeTLSConfigFormValues(newValues) {
+    return this.$async(async () => {
+      $scope.formValues.tlsConfig = {
+        ...$scope.formValues.tlsConfig,
+        ...newValues,
+      };
+    });
+  }
+
+  function setFieldValue(name, value) {
+    return $scope.$evalAsync(() => {
+      $scope.endpoint = {
+        ...$scope.endpoint,
+        [name]: value,
+      };
+    });
+  }
+
+  Array.prototype.indexOf = function (val) {
+    for (var i = 0; i < this.length; i++) {
+      if (this[i] == val) return i;
+    }
+    return -1;
+  };
+  Array.prototype.remove = function (val) {
+    var index = this.indexOf(val);
+    if (index > -1) {
+      this.splice(index, 1);
+    }
+  };
+
+  $scope.updateEndpoint = async function () {
+    var endpoint = $scope.endpoint;
+
+    if (isEdgeEnvironment(endpoint.Type) && _.difference($scope.initialTagIds, endpoint.TagIds).length > 0) {
+      let confirmed = await confirmDestructive({
+        title: '确认操作',
+        message: '从此环境中移除标签将会在使用动态分组时移除相应的边缘堆栈',
+        confirmButton: buildConfirmButton(),
+      });
+
+      if (!confirmed) {
+        return;
+      }
+    }
+
+    var payload = {
+      Name: endpoint.Name,
+      PublicURL: endpoint.PublicURL,
+      Gpus: endpoint.Gpus,
+      GroupID: endpoint.GroupId,
+      TagIds: endpoint.TagIds,
+      AzureApplicationID: endpoint.AzureCredentials.ApplicationID,
+      AzureTenantID: endpoint.AzureCredentials.TenantID,
+      AzureAuthenticationKey: endpoint.AzureCredentials.AuthenticationKey,
+      EdgeCheckinInterval: endpoint.EdgeCheckinInterval,
     };
 
-    function decodeEdgeKey(key) {
-      let keyInformation = {};
+    if (
+      $scope.endpointType !== 'local' &&
+      endpoint.Type !== PortainerEndpointTypes.AzureEnvironment &&
+      endpoint.Type !== PortainerEndpointTypes.KubernetesLocalEnvironment &&
+      endpoint.Type !== PortainerEndpointTypes.AgentOnKubernetesEnvironment
+    ) {
+      payload.URL = 'tcp://' + endpoint.URL;
 
-      if (key === '') {
-        return keyInformation;
+      if (endpoint.Type === PortainerEndpointTypes.DockerEnvironment) {
+        var tlsConfig = $scope.formValues.tlsConfig;
+        payload.TLS = tlsConfig.tls;
+        payload.TLSSkipVerify = tlsConfig.skipVerify;
+        if (tlsConfig.tls && !tlsConfig.skipVerify) {
+          payload.TLSSkipClientVerify = tlsConfig.skipClientVerify;
+          payload.TLSCACert = tlsConfig.caCertFile;
+          payload.TLSCert = tlsConfig.certFile;
+          payload.TLSKey = tlsConfig.keyFile;
+        }
       }
+    }
 
-      let decodedKey = _.split(atob(key), '|');
-      keyInformation.instanceURL = decodedKey[0];
-      keyInformation.tunnelServerAddr = decodedKey[1];
+    if (endpoint.Type === PortainerEndpointTypes.AgentOnKubernetesEnvironment) {
+      payload.URL = endpoint.URL;
+    }
 
+    if (endpoint.Type === PortainerEndpointTypes.KubernetesLocalEnvironment) {
+      payload.URL = 'https://' + endpoint.URL;
+    }
+
+    $scope.state.actionInProgress = true;
+    EndpointService.updateEndpoint(endpoint.Id, payload).then(
+      function success() {
+        Notifications.success('Environment updated', $scope.endpoint.Name);
+        $state.go($state.params.redirectTo || 'portainer.endpoints', {}, { reload: true });
+      },
+      function error(err) {
+        Notifications.error('Failure', err, 'Unable to update environment');
+        $scope.state.actionInProgress = false;
+      },
+      function update(evt) {
+        if (evt.upload) {
+          $scope.state.uploadInProgress = evt.upload;
+        }
+      }
+    );
+  };
+
+  function decodeEdgeKey(key) {
+    let keyInformation = {};
+
+    if (key === '') {
       return keyInformation;
     }
 
-    function initView() {
-      $q.all({
-        endpoint: EndpointService.endpoint($transition$.params().id),
-        groups: GroupService.groups(),
-        tags: TagService.tags(),
-      })
-        .then(function success(data) {
-          var endpoint = data.endpoint;
-          if (endpoint.URL.indexOf('unix://') === 0 || endpoint.URL.indexOf('npipe://') === 0) {
-            $scope.endpointType = 'local';
-          } else {
-            $scope.endpointType = 'remote';
+    let decodedKey = _.split(atob(key), '|');
+    keyInformation.instanceURL = decodedKey[0];
+    keyInformation.tunnelServerAddr = decodedKey[1];
+
+    return keyInformation;
+  }
+
+  function configureState() {
+    if (
+      $scope.endpoint.Type === PortainerEndpointTypes.KubernetesLocalEnvironment ||
+      $scope.endpoint.Type === PortainerEndpointTypes.AgentOnKubernetesEnvironment ||
+      $scope.endpoint.Type === PortainerEndpointTypes.EdgeAgentOnKubernetesEnvironment
+    ) {
+      $scope.state.kubernetesEndpoint = true;
+    }
+    if ($scope.endpoint.Type === PortainerEndpointTypes.EdgeAgentOnDockerEnvironment || $scope.endpoint.Type === PortainerEndpointTypes.EdgeAgentOnKubernetesEnvironment) {
+      $scope.state.edgeEndpoint = true;
+    }
+    if ($scope.endpoint.Type === PortainerEndpointTypes.AzureEnvironment) {
+      $scope.state.azureEndpoint = true;
+    }
+    if (
+      $scope.endpoint.Type === PortainerEndpointTypes.AgentOnDockerEnvironment ||
+      $scope.endpoint.Type === PortainerEndpointTypes.EdgeAgentOnDockerEnvironment ||
+      $scope.endpoint.Type === PortainerEndpointTypes.AgentOnKubernetesEnvironment ||
+      $scope.endpoint.Type === PortainerEndpointTypes.EdgeAgentOnKubernetesEnvironment
+    ) {
+      $scope.state.agentEndpoint = true;
+    }
+  }
+
+  function configureTLS(endpoint) {
+    $scope.formValues = {
+      tlsConfig: {
+        tls: endpoint.TLSConfig.TLS || false,
+        skipVerify: endpoint.TLSConfig.TLSSkipVerify || false,
+        skipClientVerify: endpoint.TLSConfig.TLSSkipClientVerify || false,
+      },
+    };
+  }
+
+  async function initView() {
+    return $async(async () => {
+      try {
+        const [endpoint, groups, settings] = await Promise.all([EndpointService.endpoint($transition$.params().id), GroupService.groups(), SettingsService.settings()]);
+
+        if (isDockerAPIEnvironment(endpoint)) {
+          $scope.state.showTLSConfig = true;
+        }
+
+        // Check if the environment is docker standalone, to decide whether to show the GPU insights box
+        const isDockerEnvironment = endpoint.Type === PortainerEndpointTypes.DockerEnvironment;
+        if (isDockerEnvironment) {
+          try {
+            const dockerInfo = await getInfo(endpoint.Id);
+            const isDockerSwarmEnv = dockerInfo.Swarm && dockerInfo.Swarm.NodeID;
+            $scope.isDockerStandaloneEnv = !isDockerSwarmEnv;
+          } catch (err) {
+            // $scope.isDockerStandaloneEnv is only used to show the "GPU insights box", so fail quietly on error
           }
-          endpoint.URL = $filter('stripprotocol')(endpoint.URL);
-          if (endpoint.Type === 4) {
-            $scope.edgeKeyDetails = decodeEdgeKey(endpoint.EdgeKey);
-            $scope.randomEdgeID = uuidv4();
-            $scope.dockerCommands = {
-              standalone: buildStandaloneCommand($scope.randomEdgeID, endpoint.EdgeKey),
-              swarm: buildSwarmCommand($scope.randomEdgeID, endpoint.EdgeKey),
-            };
+        }
+
+        if (endpoint.URL.indexOf('unix://') === 0 || endpoint.URL.indexOf('npipe://') === 0) {
+          $scope.endpointType = 'local';
+        } else {
+          $scope.endpointType = 'remote';
+        }
+
+        endpoint.URL = $filter('stripprotocol')(endpoint.URL);
+
+        if (endpoint.Type === PortainerEndpointTypes.EdgeAgentOnDockerEnvironment || endpoint.Type === PortainerEndpointTypes.EdgeAgentOnKubernetesEnvironment) {
+          $scope.edgeKeyDetails = decodeEdgeKey(endpoint.EdgeKey);
+
+          $scope.state.edgeAssociated = !!endpoint.EdgeID;
+          endpoint.EdgeID = endpoint.EdgeID || uuidv4();
+        }
+
+        $scope.endpoint = endpoint;
+        $scope.initialTagIds = endpoint.TagIds.slice();
+        $scope.groups = groups;
+
+        configureState();
+
+        configureTLS(endpoint);
+
+        if (EndpointHelper.isDockerEndpoint(endpoint) && $scope.state.edgeAssociated) {
+          $scope.state.showAMTInfo = settings && settings.openAMTConfiguration && settings.openAMTConfiguration.enabled;
+        }
+      } catch (err) {
+        Notifications.error('Failure', err, 'Unable to retrieve environment details');
+      }
+
+      if ($scope.state.showAMTInfo) {
+        try {
+          $scope.endpoint.ManagementInfo = {};
+          const amtInfo = await getAMTInfo($state.params.id);
+          try {
+            $scope.endpoint.ManagementInfo = JSON.parse(amtInfo.RawOutput);
+          } catch (err) {
+            clearAMTManagementInfo(amtInfo.RawOutput);
           }
-          $scope.endpoint = endpoint;
-          $scope.groups = data.groups;
-          $scope.availableTags = data.tags;
-        })
-        .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve endpoint details');
-        });
-    }
+        } catch (err) {
+          clearAMTManagementInfo('Unable to retrieve AMT environment details');
+        }
+      }
+    });
+  }
 
-    function buildStandaloneCommand(edgeId, edgeKey) {
-      return `docker run -d -v /var/run/docker.sock:/var/run/docker.sock \\
-  -v /var/lib/docker/volumes:/var/lib/docker/volumes \\
-  -v /:/host \\
-  --restart always \\
-  -e EDGE=1 \\
-  -e EDGE_ID=${edgeId} \\
-  -e EDGE_KEY=${edgeKey} \\
-  -e CAP_HOST_MANAGEMENT=1 \\
-  -v portainer_agent_data:/data \\
-  --name portainer_edge_agent \\
-  portainer/agent`;
-    }
+  function clearAMTManagementInfo(versionValue) {
+    $scope.endpoint.ManagementInfo['AMT'] = versionValue;
+    $scope.endpoint.ManagementInfo['UUID'] = '-';
+    $scope.endpoint.ManagementInfo['Control Mode'] = '-';
+    $scope.endpoint.ManagementInfo['Build Number'] = '-';
+    $scope.endpoint.ManagementInfo['DNS Suffix'] = '-';
+  }
 
-    function buildSwarmCommand(edgeId, edgeKey) {
-      return `docker network create \\
-  --driver overlay \\
-  portainer_agent_network;
-
-docker service create \\
-  --name portainer_edge_agent \\
-  --network portainer_agent_network \\
-  -e AGENT_CLUSTER_ADDR=tasks.portainer_edge_agent \\
-  -e EDGE=1 \\
-  -e EDGE_ID=${edgeId} \\
-  -e EDGE_KEY=${edgeKey} \\
-  -e CAP_HOST_MANAGEMENT=1 \\
-  --mode global \\
-  --constraint 'node.platform.os == linux' \\
-  --mount type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock \\
-  --mount type=bind,src=//var/lib/docker/volumes,dst=/var/lib/docker/volumes \\
-  --mount type=bind,src=//,dst=/host \\
-  --mount type=volume,src=portainer_agent_data,dst=/data \\
-  portainer/agent`;
-    }
-
-    initView();
-  });
+  initView();
+}

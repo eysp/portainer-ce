@@ -1,11 +1,10 @@
 import _ from 'lodash-es';
-import splitargs from 'splitargs/src/splitargs';
 
 const portPattern = /^([1-9]|[1-5]?[0-9]{2,4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$/m;
 
 function parsePort(port) {
   if (portPattern.test(port)) {
-    return parseInt(port);
+    return parseInt(port, 10);
   } else {
     return 0;
   }
@@ -65,18 +64,6 @@ angular.module('portainer.docker').factory('ContainerHelper', [
     'use strict';
     var helper = {};
 
-    helper.commandStringToArray = function (command) {
-      return splitargs(command);
-    };
-
-    helper.commandArrayToString = function (array) {
-      return array
-        .map(function (elem) {
-          return "'" + elem + "'";
-        })
-        .join(' ');
-    };
-
     helper.configFromContainer = function (container) {
       var config = container.Config;
       // HostConfig
@@ -116,6 +103,7 @@ angular.module('portainer.docker').factory('ContainerHelper', [
           }
         }
       }
+      config.HostConfig.Mounts = null;
       config.HostConfig.Binds = binds;
       config.Volumes = volumes;
       return config;
@@ -179,7 +167,11 @@ angular.module('portainer.docker').factory('ContainerHelper', [
           }
 
           const bindKey = containerPort + '/' + portBinding.protocol;
-          bindings[bindKey] = [{ HostIp: hostIp, HostPort: hostPort }];
+          if (bindings[bindKey]) {
+            bindings[bindKey].push({ HostIp: hostIp, HostPort: hostPort });
+          } else {
+            bindings[bindKey] = [{ HostIp: hostIp, HostPort: hostPort }];
+          }
         }
       });
       return bindings;
@@ -196,26 +188,30 @@ angular.module('portainer.docker').factory('ContainerHelper', [
 
       _.forEach(portBindingKeysByProtocol, (portBindingKeys, protocol) => {
         // Group the port bindings by host IP
-        const portBindingKeysByHostIp = _.groupBy(portBindingKeys, (portKey) => {
-          const portBinding = portBindings[portKey][0];
-          return portBinding.HostIp || '';
-        });
+        const portBindingKeysByHostIp = {};
+        for (const portKey of portBindingKeys) {
+          for (const portBinding of portBindings[portKey]) {
+            portBindingKeysByHostIp[portBinding.HostIp] = portBindingKeysByHostIp[portBinding.HostIp] || [];
+            portBindingKeysByHostIp[portBinding.HostIp].push(portKey);
+          }
+        }
 
-        _.forEach(portBindingKeysByHostIp, (portBindingKeys) => {
-          // Sort by 主机端口
+        _.forEach(portBindingKeysByHostIp, (portBindingKeys, ip) => {
+          // Sort by host port
           const sortedPortBindingKeys = _.orderBy(portBindingKeys, (portKey) => {
-            return parseInt(_.split(portKey, '/')[0]);
+            return parseInt(_.split(portKey, '/')[0], 10);
           });
 
           let previousHostPort = -1;
           let previousContainerPort = -1;
           _.forEach(sortedPortBindingKeys, (portKey) => {
             const portKeySplit = _.split(portKey, '/');
-            const containerPort = parseInt(portKeySplit[0]);
+            const containerPort = parseInt(portKeySplit[0], 10);
             const portBinding = portBindings[portKey][0];
+            portBindings[portKey].shift();
             const hostPort = parsePort(portBinding.HostPort);
 
-            // We only combine single ports, and skip the 主机端口 ranges on one 容器端口
+            // We only combine single ports, and skip the host port ranges on one container port
             if (hostPort > 0) {
               // If we detect consecutive ports, we create a range of them
               if (bindings.length > 0 && previousHostPort === hostPort - 1 && previousContainerPort === containerPort - 1) {
@@ -234,8 +230,8 @@ angular.module('portainer.docker').factory('ContainerHelper', [
             }
 
             let bindingHostPort = portBinding.HostPort.toString();
-            if (portBinding.HostIp) {
-              bindingHostPort = portBinding.HostIp + ':' + bindingHostPort;
+            if (ip) {
+              bindingHostPort = `${ip}:${bindingHostPort}`;
             }
 
             const binding = {
@@ -249,6 +245,10 @@ angular.module('portainer.docker').factory('ContainerHelper', [
       });
 
       return bindings;
+    };
+
+    helper.getContainerNames = function (containers) {
+      return _.map(_.flatten(_.map(containers, 'Names')), (name) => _.trimStart(name, '/'));
     };
 
     return helper;

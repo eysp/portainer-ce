@@ -1,37 +1,72 @@
-# 前言
+<p align="center">
+  <img title="portainer" src='https://github.com/portainer/portainer/blob/develop/app/assets/images/portainer-github-banner.png?raw=true' />
+</p>
 
-Docker好评率比较高的Portainer面板，完整汉化版，
+**Portainer Community Edition** is a lightweight service delivery platform for containerized applications that can be used to manage Docker, Swarm, Kubernetes and ACI environments. It is designed to be as simple to deploy as it is to use. The application allows you to manage all your orchestrator resources (containers, images, volumes, networks and more) through a ‘smart’ GUI and/or an extensive API.
 
-汉化过程中原来没汉化词条非常多，版本是在1.24.2请熟知。
+Portainer consists of a single container that can run on any cluster. It can be deployed as a Linux container or a Windows native container.
 
-其实还有很一部分基本上用不到的没汉化，你能看到的也没基本都汉化了
+**Portainer Business Edition** builds on the open-source base and includes a range of advanced features and functions (like RBAC and Support) that are specific to the needs of business users.
 
-经测试群晖和openwrt均可用，arm架构欢迎各位测试，有问题欢迎加Q群[758648462](https://jq.qq.com/?_wv=1027&k=5U91thC)反馈交流
+- [Compare Portainer CE and Compare Portainer BE](https://portainer.io/products)
+- [Take3 – get 3 free nodes of Portainer Business for as long as you want them](https://www.portainer.io/take-3)
+- [Portainer BE install guide](https://install.portainer.io)
 
-**另外看清楚我的代码把端口改为9999了，所以访问IP:9999**
+## Latest Version
 
-**具体自己体会吧，懒得打字，另外本人小学毕业，大多是谷歌百度翻译+我自己的理解，翻译不准确欢迎指教，不喜勿喷**
+Portainer CE is updated regularly. We aim to do an update release every couple of months.
 
-x86架构CPU一键安装
-```
-docker run -d --restart=always --name=portainer -p 9999:9000 -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data 6053537/portainer
-```
+[![latest version](https://img.shields.io/github/v/release/portainer/portainer?color=%2344cc11&label=Latest%20release&style=for-the-badge)](https://github.com/portainer/portainer/releases/latest)
 
-arm-64架构CPU一键安装
-```
-docker run -d --restart=always --name=portainer -p 9999:9000 -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data 6053537/portainer:linux-arm64
-```
+## Getting started
 
-**附上编译教程**
-```
-apk add nodejs npm go git yarn autoconf automake libtool pkgconf build-base
-git clone https://github.com/yspcn/portainer
-cd portainer
-yarn
-npm install -g grunt-cli
-grunt build
-```
-**docker构建**
-```
-docker build -t 6053537/portainer ./
-```
+- [Deploy Portainer](https://docs.portainer.io/start/install)
+- [Documentation](https://docs.portainer.io)
+- [Contribute to the project](https://docs.portainer.io/contribute/contribute)
+
+## Features & Functions
+
+View [this](https://www.portainer.io/products) table to see all of the Portainer CE functionality and compare to Portainer Business.
+
+- [Portainer CE for Docker / Docker Swarm](https://www.portainer.io/solutions/docker)
+- [Portainer CE for Kubernetes](https://www.portainer.io/solutions/kubernetes-ui)
+
+## Getting help
+
+Portainer CE is an open source project and is supported by the community. You can buy a supported version of Portainer at portainer.io
+
+Learn more about Portainer's community support channels [here.](https://www.portainer.io/get-support-for-portainer)
+
+- Issues: https://github.com/portainer/portainer/issues
+- Slack (chat): [https://portainer.io/slack](https://portainer.io/slack)
+
+You can join the Portainer Community by visiting [https://www.portainer.io/join-our-community](https://www.portainer.io/join-our-community). This will give you advance notice of events, content and other related Portainer content.
+
+## Reporting bugs and contributing
+
+- Want to report a bug or request a feature? Please open [an issue](https://github.com/portainer/portainer/issues/new).
+- Want to help us build **_portainer_**? Follow our [contribution guidelines](https://docs.portainer.io/contribute/contribute) to build it locally and make a pull request.
+
+## Security
+
+- Here at Portainer, we believe in [responsible disclosure](https://en.wikipedia.org/wiki/Responsible_disclosure) of security issues. If you have found a security issue, please report it to <security@portainer.io>.
+
+## Work for us
+
+If you are a developer, and our code in this repo makes sense to you, we would love to hear from you. We are always on the hunt for awesome devs, either freelance or employed. Drop us a line to info@portainer.io with your details and/or visit our [careers page](https://portainer.io/careers).
+
+## Privacy
+
+**To make sure we focus our development effort in the right places we need to know which features get used most often. To give us this information we use [Matomo Analytics](https://matomo.org/), which is hosted in Germany and is fully GDPR compliant.**
+
+When Portainer first starts, you are given the option to DISABLE analytics. If you **don't** choose to disable it, we collect anonymous usage as per [our privacy policy](https://www.portainer.io/privacy-policy). **Please note**, there is no personally identifiable information sent or stored at any time and we only use the data to help us improve Portainer.
+
+## Limitations
+
+Portainer supports "Current - 2 docker versions only. Prior versions may operate, however these are not supported.
+
+## Licensing
+
+Portainer is licensed under the zlib license. See [LICENSE](./LICENSE) for reference.
+
+Portainer also contains code from open source projects. See [ATTRIBUTIONS.md](./ATTRIBUTIONS.md) for a list.

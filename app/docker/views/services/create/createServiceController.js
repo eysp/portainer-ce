@@ -1,4 +1,6 @@
 import _ from 'lodash-es';
+
+import * as envVarsUtils from '@/react/components/form-components/EnvironmentVariablesFieldset/utils';
 import { PorImageRegistryModel } from 'Docker/models/porImageRegistry';
 import { AccessControlFormData } from '../../../../portainer/components/accessControlForm/porAccessControlFormModel';
 
@@ -12,7 +14,7 @@ angular.module('portainer.docker').controller('CreateServiceController', [
   '$scope',
   '$state',
   '$timeout',
-  'Service',
+  'ServiceService',
   'ServiceHelper',
   'ConfigService',
   'ConfigHelper',
@@ -27,19 +29,15 @@ angular.module('portainer.docker').controller('CreateServiceController', [
   'Notifications',
   'FormValidator',
   'PluginService',
-  'RegistryService',
-  'HttpRequestHelper',
   'NodeService',
-  'SettingsService',
   'WebhookService',
-  'EndpointProvider',
-  'ExtensionService',
+  'endpoint',
   function (
     $q,
     $scope,
     $state,
     $timeout,
-    Service,
+    ServiceService,
     ServiceHelper,
     ConfigService,
     ConfigHelper,
@@ -54,14 +52,12 @@ angular.module('portainer.docker').controller('CreateServiceController', [
     Notifications,
     FormValidator,
     PluginService,
-    RegistryService,
-    HttpRequestHelper,
     NodeService,
-    SettingsService,
     WebhookService,
-    EndpointProvider,
-    ExtensionService
+    endpoint
   ) {
+    $scope.endpoint = endpoint;
+
     $scope.formValues = {
       Name: '',
       RegistryModel: new PorImageRegistryModel(),
@@ -106,15 +102,34 @@ angular.module('portainer.docker').controller('CreateServiceController', [
     $scope.state = {
       formValidationError: '',
       actionInProgress: false,
+      pullImageValidity: false,
     };
 
     $scope.allowBindMounts = false;
+
+    $scope.handleWebHookChange = handleWebHookChange;
+
+    function handleWebHookChange(checked) {
+      return $scope.$evalAsync(() => {
+        $scope.formValues.Webhook = checked;
+      });
+    }
+
+    $scope.handleEnvVarChange = handleEnvVarChange;
+    function handleEnvVarChange(value) {
+      $scope.formValues.Env = value;
+    }
 
     $scope.refreshSlider = function () {
       $timeout(function () {
         $scope.$broadcast('rzSliderForceRender');
       });
     };
+
+    $scope.setPullImageValidity = setPullImageValidity;
+    function setPullImageValidity(validity) {
+      $scope.state.pullImageValidity = validity;
+    }
 
     $scope.addPortBinding = function () {
       $scope.formValues.Ports.push({ PublishedPort: '', TargetPort: '', Protocol: 'tcp', PublishMode: 'ingress' });
@@ -141,7 +156,7 @@ angular.module('portainer.docker').controller('CreateServiceController', [
     };
 
     $scope.addVolume = function () {
-      $scope.formValues.Volumes.push({ Source: '', Target: '', ReadOnly: false, Type: 'volume' });
+      $scope.formValues.Volumes.push({ Source: null, Target: '', ReadOnly: false, Type: 'volume' });
     };
 
     $scope.removeVolume = function (index) {
@@ -154,6 +169,7 @@ angular.module('portainer.docker').controller('CreateServiceController', [
 
     $scope.removeConfig = function (index) {
       $scope.formValues.Configs.splice(index, 1);
+      $scope.checkIfConfigDuplicated();
     };
 
     $scope.addSecret = function () {
@@ -162,14 +178,7 @@ angular.module('portainer.docker').controller('CreateServiceController', [
 
     $scope.removeSecret = function (index) {
       $scope.formValues.Secrets.splice(index, 1);
-    };
-
-    $scope.addEnvironmentVariable = function () {
-      $scope.formValues.Env.push({ name: '', value: '' });
-    };
-
-    $scope.removeEnvironmentVariable = function (index) {
-      $scope.formValues.Env.splice(index, 1);
+      $scope.checkIfSecretDuplicated();
     };
 
     $scope.addPlacementConstraint = function () {
@@ -210,6 +219,36 @@ angular.module('portainer.docker').controller('CreateServiceController', [
 
     $scope.removeLogDriverOpt = function (index) {
       $scope.formValues.LogDriverOpts.splice(index, 1);
+    };
+
+    $scope.checkIfSecretDuplicated = function () {
+      $scope.formValues.Secrets.$invalid = false;
+      [...$scope.formValues.Secrets]
+        .sort((a, b) => a.model.Id.localeCompare(b.model.Id))
+        .sort((a, b) => {
+          if (a.model.Id === b.model.Id) {
+            $scope.formValues.Secrets.$invalid = true;
+            $scope.formValues.Secrets.$error = 'Secret ' + a.model.Name + ' cannot be assigned multiple times.';
+          }
+        });
+      if (!$scope.formValues.Secrets.$invalid) {
+        $scope.formValues.Secrets.$error = '';
+      }
+    };
+
+    $scope.checkIfConfigDuplicated = function () {
+      $scope.formValues.Configs.$invalid = false;
+      [...$scope.formValues.Configs]
+        .sort((a, b) => a.model.Id.localeCompare(b.model.Id))
+        .sort((a, b) => {
+          if (a.model.Id === b.model.Id) {
+            $scope.formValues.Configs.$invalid = true;
+            $scope.formValues.Configs.$error = 'Config ' + a.model.Name + ' cannot be assigned multiple times.';
+          }
+        });
+      if (!$scope.formValues.Configs.$invalid) {
+        $scope.formValues.Configs.$error = '';
+      }
     };
 
     function prepareImageConfig(config, input) {
@@ -273,13 +312,7 @@ angular.module('portainer.docker').controller('CreateServiceController', [
     }
 
     function prepareEnvConfig(config, input) {
-      var env = [];
-      input.Env.forEach(function (v) {
-        if (v.name) {
-          env.push(v.name + '=' + v.value);
-        }
-      });
-      config.TaskTemplate.ContainerSpec.Env = env;
+      config.TaskTemplate.ContainerSpec.Env = envVarsUtils.convertToArrayOfStrings(input.Env);
     }
 
     function prepareLabelsConfig(config, input) {
@@ -486,20 +519,19 @@ angular.module('portainer.docker').controller('CreateServiceController', [
 
     function createNewService(config, accessControlData) {
       const registryModel = $scope.formValues.RegistryModel;
-      var authenticationDetails = registryModel.Registry.Authentication ? RegistryService.encodedCredentials(registryModel.Registry) : '';
-      HttpRequestHelper.setRegistryAuthenticationHeader(authenticationDetails);
 
-      Service.create(config)
-        .$promise.then(function success(data) {
+      ServiceService.create(config, registryModel.Registry.Authentication ? registryModel.Registry.Id : 0)
+        .then(function success(data) {
           const serviceId = data.ID;
           const resourceControl = data.Portainer.ResourceControl;
           const userId = Authentication.getUserDetails().ID;
           const rcPromise = ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl);
-          const webhookPromise = $q.when($scope.formValues.Webhook && WebhookService.createServiceWebhook(serviceId, EndpointProvider.endpointID()));
+          const registryID = $scope.formValues.RegistryModel.Registry.Id;
+          const webhookPromise = $q.when(endpoint.Type !== 4 && $scope.formValues.Webhook && WebhookService.createServiceWebhook(serviceId, endpoint.Id, registryID));
           return $q.all([rcPromise, webhookPromise]);
         })
         .then(function success() {
-          Notifications.success('Service successfully created');
+          Notifications.success('Success', 'Service successfully created');
           $state.go('docker.services', {}, { reload: true });
         })
         .catch(function error(err) {
@@ -513,13 +545,19 @@ angular.module('portainer.docker').controller('CreateServiceController', [
     function validateForm(accessControlData, isAdmin) {
       $scope.state.formValidationError = '';
       var error = '';
-      error = FormValidator.validateAccessControl(accessControlData, isAdmin);
+      error = FormValidator.validateAccessControl(accessControlData, isAdmin) || $scope.formValues.Secrets.$error || $scope.formValues.Configs.$error;
 
       if (error) {
         $scope.state.formValidationError = error;
         return false;
       }
       return true;
+    }
+
+    $scope.volumesAreValid = volumesAreValid;
+    function volumesAreValid() {
+      const volumes = $scope.formValues.Volumes;
+      return volumes.every((volume) => volume.Target && volume.Source);
     }
 
     $scope.create = function createService() {
@@ -564,7 +602,7 @@ angular.module('portainer.docker').controller('CreateServiceController', [
         volumes: VolumeService.volumes(),
         networks: NetworkService.networks(true, true, false),
         secrets: apiVersion >= 1.25 ? SecretService.secrets() : [],
-        configs: apiVersion >= 1.3 ? ConfigService.configs() : [],
+        configs: apiVersion >= 1.3 ? ConfigService.configs(endpoint.Id) : [],
         nodes: NodeService.nodes(),
         availableLoggingDrivers: PluginService.loggingPlugins(apiVersion < 1.25),
         allowBindMounts: checkIfAllowedBindMounts(),
@@ -589,18 +627,9 @@ angular.module('portainer.docker').controller('CreateServiceController', [
     async function checkIfAllowedBindMounts() {
       const isAdmin = Authentication.isAdmin();
 
-      const settings = await SettingsService.publicSettings();
-      const { AllowBindMountsForRegularUsers } = settings;
+      const { allowBindMountsForRegularUsers } = endpoint.SecuritySettings;
 
-      if (isAdmin || AllowBindMountsForRegularUsers) {
-        return true;
-      }
-      const rbacEnabled = await ExtensionService.extensionEnabled(ExtensionService.EXTENSIONS.RBAC);
-      if (rbacEnabled) {
-        return Authentication.hasAuthorizations(['EndpointResourcesAccess']);
-      }
-
-      return false;
+      return isAdmin || allowBindMountsForRegularUsers;
     }
   },
 ]);

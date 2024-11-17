@@ -1,45 +1,51 @@
-<form class="form-horizontal" name="registryFormCustom" ng-submit="$ctrl.formAction()">
-  <div class="col-sm-12 form-section-title">
-    重要通知
-  </div>
+<form class="form-horizontal" name="$ctrl.registryFormCustom" ng-submit="$ctrl.formAction()">
+  <div class="col-sm-12 form-section-title"> 重要通知 </div>
   <div class="form-group">
     <span class="col-sm-12 text-muted small">
-      Docker 要求您连接到<a href="https://docs.docker.com/registry/deploying/#running-a-domain-registry" target="_blank">安全注册表</a>。 你可以找到更多
-       有关如何连接到不安全注册表的信息<a href="https://docs.docker.com/registry/insecure/" target="_blank">在 Docker 文档中</a>。
+      Docker 要求您连接到 <a href="https://docs.docker.com/registry/deploying/#running-a-domain-registry" target="_blank">安全注册表</a>。您可以在
+      <a href="https://docs.docker.com/registry/insecure/" target="_blank">Docker 文档</a>中找到有关如何连接到不安全注册表的更多信息。
     </span>
   </div>
-  <div class="col-sm-12 form-section-title">
-    自定义注册表详细信息
-  </div>
+  <div class="col-sm-12 form-section-title"> 自定义注册表详情 </div>
   <!-- name-input -->
   <div class="form-group">
-    <label for="registry_name" class="col-sm-3 col-lg-2 control-label text-left">名称</label>
+    <label for="registry_name" class="col-sm-3 col-lg-2 control-label required text-left">名称</label>
     <div class="col-sm-9 col-lg-10">
       <input type="text" class="form-control" id="registry_name" name="registry_name" ng-model="$ctrl.model.Name" placeholder="my-custom-registry" required auto-focus />
-    </div>
-  </div>
-  <div class="form-group" ng-show="registryFormCustom.registry_name.$invalid">
-    <div class="col-sm-12 small text-warning">
-      <div ng-messages="registryFormCustom.registry_name.$error">
-        <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此字段是必需的。</p>
+      <div class="help-block" ng-show="$ctrl.registryFormCustom.registry_name.$invalid">
+        <div class="small text-warning">
+          <div ng-messages="$ctrl.registryFormCustom.registry_name.$error">
+            <p ng-message="required" class="vertical-center">
+              <pr-icon icon="'alert-triangle'"></pr-icon>
+              此字段为必填项。
+            </p>
+            <p ng-message="used" class="vertical-center">
+              <pr-icon icon="'alert-triangle'"></pr-icon>
+              已存在同名的注册表。
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
   <!-- !name-input -->
   <!-- url-input -->
   <div class="form-group">
-    <label for="registry_url" class="col-sm-3 col-lg-2 control-label text-left">
+    <label for="registry_url" class="col-sm-3 col-lg-2 control-label required text-left">
       注册表 URL
-      <portainer-tooltip position="bottom" message="Docker 注册表的 URL 或 IP 地址。 任何协议都将被剥离。"></portainer-tooltip>
+      <portainer-tooltip message="'Docker 注册表的 URL 或 IP 地址。如果存在任何协议和尾部斜杠，将被去除。'"></portainer-tooltip>
     </label>
     <div class="col-sm-9 col-lg-10">
-      <input type="text" class="form-control" id="registry_url" name="registry_url" ng-model="$ctrl.model.URL" placeholder="10.0.0.10:5000 or myregistry.domain.tld" required />
-    </div>
-  </div>
-  <div class="form-group" ng-show="registryFormCustom.registry_url.$invalid">
-    <div class="col-sm-12 small text-warning">
-      <div ng-messages="registryFormCustom.registry_url.$error">
-        <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此字段是必需的。</p>
+      <input type="text" class="form-control" id="registry_url" name="registry_url" ng-model="$ctrl.model.URL" placeholder="10.0.0.10:5000 或 myregistry.domain.tld" required />
+      <div class="help-block" ng-show="$ctrl.registryFormCustom.registry_url.$invalid">
+        <div class="small text-warning">
+          <div ng-messages="$ctrl.registryFormCustom.registry_url.$error">
+            <p ng-message="required" class="vertical-center">
+              <pr-icon icon="'alert-triangle'"></pr-icon>
+              此字段为必填项。
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -47,53 +53,70 @@
   <!-- authentication-checkbox -->
   <div class="form-group">
     <div class="col-sm-12">
-      <label for="registry_auth" class="control-label text-left">
-        验证
-        <portainer-tooltip position="bottom" message="如果您需要指定凭据以连接到此注册表，请启用此选项。"></portainer-tooltip>
-      </label>
-      <label class="switch" style="margin-left: 20px;"> <input type="checkbox" ng-model="$ctrl.model.Authentication" /><i></i> </label>
+      <por-switch-field
+        label="'身份验证'"
+        label-class="'col-sm-3 col-lg-2'"
+        tooltip="'如果需要提供凭据以连接到此注册表，请启用此选项。'"
+        name="'administrator'"
+        checked="$ctrl.model.Authentication"
+        on-change="($ctrl.toggleAuthentication)"
+        label-class="'col-sm-2'"
+      ></por-switch-field>
     </div>
   </div>
   <!-- !authentication-checkbox -->
   <div ng-if="$ctrl.model.Authentication">
     <!-- credentials-user -->
     <div class="form-group">
-      <label for="registry_username" class="col-sm-3 col-lg-2 control-label text-left">用户名</label>
+      <label for="registry_username" class="col-sm-3 col-lg-2 control-label required text-left">用户名</label>
       <div class="col-sm-9 col-lg-10">
         <input type="text" class="form-control" id="registry_username" name="registry_username" ng-model="$ctrl.model.Username" required />
-      </div>
-    </div>
-    <div class="form-group" ng-show="registryFormCustom.registry_username.$invalid">
-      <div class="col-sm-12 small text-warning">
-        <div ng-messages="registryFormCustom.registry_username.$error">
-          <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此字段是必需的。</p>
+        <div class="help-block" ng-show="$ctrl.registryFormCustom.registry_username.$invalid">
+          <div class="small text-warning">
+            <div ng-messages="$ctrl.registryFormCustom.registry_username.$error">
+              <p ng-message="required" class="vertical-center">
+                <pr-icon icon="'alert-triangle'"></pr-icon>
+                此字段为必填项。
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
     <!-- !credentials-user -->
     <!-- credentials-password -->
     <div class="form-group">
-      <label for="registry_password" class="col-sm-3 col-lg-2 control-label text-left">密码</label>
+      <label for="registry_password" class="col-sm-3 col-lg-2 control-label required text-left">密码</label>
       <div class="col-sm-9 col-lg-10">
         <input type="password" class="form-control" id="registry_password" name="registry_password" ng-model="$ctrl.model.Password" required />
-      </div>
-    </div>
-    <div class="form-group" ng-show="registryFormCustom.registry_password.$invalid">
-      <div class="col-sm-12 small text-warning">
-        <div ng-messages="registryFormCustom.registry_password.$error">
-          <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此字段是必需的。</p>
+        <div class="help-block" ng-show="$ctrl.registryFormCustom.registry_password.$invalid">
+          <div class="small text-warning">
+            <div ng-messages="$ctrl.registryFormCustom.registry_password.$error">
+              <p ng-message="required" class="vertical-center">
+                <pr-icon icon="'alert-triangle'"></pr-icon>
+                此字段为必填项。
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
     <!-- !credentials-password -->
   </div>
   <!-- actions -->
-  <div class="col-sm-12 form-section-title">
-    操作
-  </div>
+  <div class="col-sm-12 form-section-title"> 操作 </div>
   <div class="form-group">
     <div class="col-sm-12">
-      <button type="submit" class="btn btn-primary btn-sm" ng-disabled="$ctrl.actionInProgress || !registryFormCustom.$valid" button-spinner="$ctrl.actionInProgress">
+      <button
+        type="submit"
+        class="btn btn-primary btn-sm"
+        ng-disabled="$ctrl.actionInProgress || !$ctrl.registryFormCustom.$valid"
+        button-spinner="$ctrl.actionInProgress"
+        analytics-on
+        analytics-category="portainer"
+        analytics-event="portainer-registry-creation"
+        analytics-properties="{ metadata: { type: 'custom' }}"
+      >
         <span ng-hide="$ctrl.actionInProgress">{{ $ctrl.formActionLabel }}</span>
         <span ng-show="$ctrl.actionInProgress">进行中...</span>
       </button>

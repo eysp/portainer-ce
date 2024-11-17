@@ -4,9 +4,8 @@ angular.module('portainer.docker').controller('NodeDetailsViewController', [
   'NodeService',
   'StateManager',
   'AgentService',
-  'ContainerService',
   'Authentication',
-  function NodeDetailsViewController($q, $stateParams, NodeService, StateManager, AgentService, ContainerService, Authentication) {
+  function NodeDetailsViewController($q, $stateParams, NodeService, StateManager, AgentService, Authentication) {
     var ctrl = this;
 
     ctrl.$onInit = initView;
@@ -20,29 +19,25 @@ angular.module('portainer.docker').controller('NodeDetailsViewController', [
       var applicationState = StateManager.getState();
       ctrl.state.isAgent = applicationState.endpoint.mode.agentProxy;
       ctrl.state.isAdmin = Authentication.isAdmin();
-      ctrl.state.enableHostManagementFeatures = applicationState.application.enableHostManagementFeatures;
-
-      var fetchJobs = ctrl.state.isAdmin && ctrl.state.isAgent;
+      ctrl.state.enableHostManagementFeatures = ctrl.endpoint.SecuritySettings.enableHostManagementFeatures;
 
       var nodeId = $stateParams.id;
       $q.all({
         node: NodeService.node(nodeId),
-        jobs: fetchJobs ? ContainerService.containers(true, { label: ['io.portainer.job.endpoint'] }) : [],
       }).then(function (data) {
         var node = data.node;
         ctrl.originalNode = node;
         ctrl.hostDetails = buildHostDetails(node);
         ctrl.engineDetails = buildEngineDetails(node);
         ctrl.nodeDetails = buildNodeDetails(node);
-        ctrl.jobs = data.jobs;
         if (ctrl.state.isAgent) {
           var agentApiVersion = applicationState.endpoint.agentApiVersion;
           ctrl.state.agentApiVersion = agentApiVersion;
-          if (agentApiVersion < 2) {
+          if (agentApiVersion < 2 || !ctrl.state.enableHostManagementFeatures) {
             return;
           }
 
-          AgentService.hostInfo(node.Hostname).then(function onHostInfoLoad(agentHostInfo) {
+          AgentService.hostInfo(ctrl.endpoint.Id, node.Hostname).then(function onHostInfoLoad(agentHostInfo) {
             ctrl.devices = agentHostInfo.PCIDevices;
             ctrl.disks = agentHostInfo.PhysicalDisks;
           });

@@ -7,9 +7,8 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/hex"
-	"math/big"
 
-	"github.com/portainer/libcrypto"
+	"github.com/portainer/portainer/pkg/libcrypto"
 )
 
 const (
@@ -22,7 +21,7 @@ const (
 )
 
 // ECDSAService is a service used to create digital signatures when communicating with
-// an agent based environment. It will automatically generates a key pair using ECDSA or
+// an agent based environment(endpoint). It will automatically generates a key pair using ECDSA or
 // can also reuse an existing ECDSA key pair.
 type ECDSAService struct {
 	privateKey    *ecdsa.PrivateKey
@@ -114,9 +113,6 @@ func (service *ECDSAService) CreateSignature(message string) (string, error) {
 	}
 
 	hash := libcrypto.HashFromBytes([]byte(message))
-
-	r := big.NewInt(0)
-	s := big.NewInt(0)
 
 	r, s, err := ecdsa.Sign(rand.Reader, service.privateKey, hash)
 	if err != nil {

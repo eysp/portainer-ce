@@ -1,62 +1,197 @@
 package git
 
 import (
-	"crypto/tls"
-	"net/http"
-	"net/url"
+	"context"
+	"os"
+	"path/filepath"
 	"strings"
-	"time"
 
-	"gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/plumbing"
-	"gopkg.in/src-d/go-git.v4/plumbing/transport/client"
-	githttp "gopkg.in/src-d/go-git.v4/plumbing/transport/http"
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/config"
+	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/filemode"
+	"github.com/go-git/go-git/v5/plumbing/object"
+	githttp "github.com/go-git/go-git/v5/plumbing/transport/http"
+	"github.com/go-git/go-git/v5/storage/memory"
+	"github.com/pkg/errors"
+	gittypes "github.com/portainer/portainer/api/git/types"
 )
 
-// Service represents a service for managing Git.
-type Service struct {
-	httpsCli *http.Client
+type gitClient struct {
+	preserveGitDirectory bool
 }
 
-// NewService initializes a new service.
-func NewService() *Service {
-	httpsCli := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		},
-		Timeout: 300 * time.Second,
-	}
-
-	client.InstallProtocol("https", githttp.NewClient(httpsCli))
-
-	return &Service{
-		httpsCli: httpsCli,
+func NewGitClient(preserveGitDir bool) *gitClient {
+	return &gitClient{
+		preserveGitDirectory: preserveGitDir,
 	}
 }
 
-// ClonePublicRepository clones a public git repository using the specified URL in the specified
-// destination folder.
-func (service *Service) ClonePublicRepository(repositoryURL, referenceName string, destination string) error {
-	return cloneRepository(repositoryURL, referenceName, destination)
-}
-
-// ClonePrivateRepositoryWithBasicAuth clones a private git repository using the specified URL in the specified
-// destination folder. It will use the specified username and password for basic HTTP authentication.
-func (service *Service) ClonePrivateRepositoryWithBasicAuth(repositoryURL, referenceName string, destination, username, password string) error {
-	credentials := username + ":" + url.PathEscape(password)
-	repositoryURL = strings.Replace(repositoryURL, "://", "://"+credentials+"@", 1)
-	return cloneRepository(repositoryURL, referenceName, destination)
-}
-
-func cloneRepository(repositoryURL, referenceName, destination string) error {
-	options := &git.CloneOptions{
-		URL: repositoryURL,
+func (c *gitClient) download(ctx context.Context, dst string, opt cloneOption) error {
+	gitOptions := git.CloneOptions{
+		URL:             opt.repositoryUrl,
+		Depth:           opt.depth,
+		InsecureSkipTLS: opt.tlsSkipVerify,
+		Auth:            getAuth(opt.username, opt.password),
 	}
 
-	if referenceName != "" {
-		options.ReferenceName = plumbing.ReferenceName(referenceName)
+	if opt.referenceName != "" {
+		gitOptions.ReferenceName = plumbing.ReferenceName(opt.referenceName)
 	}
 
-	_, err := git.PlainClone(destination, false, options)
+	_, err := git.PlainCloneContext(ctx, dst, false, &gitOptions)
+
+	if err != nil {
+		if err.Error() == "authentication required" {
+			return gittypes.ErrAuthenticationFailure
+		}
+		return errors.Wrap(err, "failed to clone git repository")
+	}
+
+	if !c.preserveGitDirectory {
+		os.RemoveAll(filepath.Join(dst, ".git"))
+	}
+
+	return nil
+}
+
+func (c *gitClient) latestCommitID(ctx context.Context, opt fetchOption) (string, error) {
+	remote := git.NewRemote(memory.NewStorage(), &config.RemoteConfig{
+		Name: "origin",
+		URLs: []string{opt.repositoryUrl},
+	})
+
+	listOptions := &git.ListOptions{
+		Auth:            getAuth(opt.username, opt.password),
+		InsecureSkipTLS: opt.tlsSkipVerify,
+	}
+
+	refs, err := remote.List(listOptions)
+	if err != nil {
+		if err.Error() == "authentication required" {
+			return "", gittypes.ErrAuthenticationFailure
+		}
+		return "", errors.Wrap(err, "failed to list repository refs")
+	}
+
+	referenceName := opt.referenceName
+	if referenceName == "" {
+		for _, ref := range refs {
+			if strings.EqualFold(ref.Name().String(), "HEAD") {
+				referenceName = ref.Target().String()
+			}
+		}
+	}
+
+	for _, ref := range refs {
+		if strings.EqualFold(ref.Name().String(), referenceName) {
+			return ref.Hash().String(), nil
+		}
+	}
+
+	return "", errors.Errorf("could not find ref %q in the repository", opt.referenceName)
+}
+
+func getAuth(username, password string) *githttp.BasicAuth {
+	if password != "" {
+		if username == "" {
+			username = "token"
+		}
+
+		return &githttp.BasicAuth{
+			Username: username,
+			Password: password,
+		}
+	}
+	return nil
+}
+
+func (c *gitClient) listRefs(ctx context.Context, opt baseOption) ([]string, error) {
+	rem := git.NewRemote(memory.NewStorage(), &config.RemoteConfig{
+		Name: "origin",
+		URLs: []string{opt.repositoryUrl},
+	})
+
+	listOptions := &git.ListOptions{
+		Auth:            getAuth(opt.username, opt.password),
+		InsecureSkipTLS: opt.tlsSkipVerify,
+	}
+
+	refs, err := rem.List(listOptions)
+	if err != nil {
+		return nil, checkGitError(err)
+	}
+
+	var ret []string
+	for _, ref := range refs {
+		if ref.Name().String() == "HEAD" {
+			continue
+		}
+		ret = append(ret, ref.Name().String())
+	}
+
+	return ret, nil
+}
+
+// listFiles list all filenames under the specific repository
+func (c *gitClient) listFiles(ctx context.Context, opt fetchOption) ([]string, error) {
+	cloneOption := &git.CloneOptions{
+		URL:             opt.repositoryUrl,
+		NoCheckout:      true,
+		Depth:           1,
+		SingleBranch:    true,
+		ReferenceName:   plumbing.ReferenceName(opt.referenceName),
+		Auth:            getAuth(opt.username, opt.password),
+		InsecureSkipTLS: opt.tlsSkipVerify,
+		Tags:            git.NoTags,
+	}
+
+	repo, err := git.Clone(memory.NewStorage(), nil, cloneOption)
+	if err != nil {
+		return nil, checkGitError(err)
+	}
+
+	head, err := repo.Head()
+	if err != nil {
+		return nil, err
+	}
+
+	commit, err := repo.CommitObject(head.Hash())
+	if err != nil {
+		return nil, err
+	}
+
+	tree, err := commit.Tree()
+	if err != nil {
+		return nil, err
+	}
+
+	var allPaths []string
+
+	w := object.NewTreeWalker(tree, true, nil)
+	defer w.Close()
+
+	for {
+		name, entry, err := w.Next()
+		if err != nil {
+			break
+		}
+
+		isDir := entry.Mode == filemode.Dir
+		if opt.dirOnly == isDir {
+			allPaths = append(allPaths, name)
+		}
+	}
+
+	return allPaths, nil
+}
+
+func checkGitError(err error) error {
+	errMsg := err.Error()
+	if errMsg == "repository not found" {
+		return gittypes.ErrIncorrectRepositoryURL
+	} else if errMsg == "authentication required" {
+		return gittypes.ErrAuthenticationFailure
+	}
 	return err
 }

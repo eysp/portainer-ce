@@ -1,19 +1,19 @@
 import angular from 'angular';
 import uuidv4 from 'uuid/v4';
+import { getEnvironments } from '@/react/portainer/environments/environment.service';
+import { dispatchCacheRefreshEvent } from '@/portainer/services/http-request.helper';
 
 class AuthenticationController {
   /* @ngInject */
   constructor(
     $async,
+    $analytics,
     $scope,
     $state,
     $stateParams,
-    $sanitize,
     $window,
     Authentication,
     UserService,
-    EndpointService,
-    ExtensionService,
     StateManager,
     Notifications,
     SettingsService,
@@ -22,15 +22,13 @@ class AuthenticationController {
     StatusService
   ) {
     this.$async = $async;
+    this.$analytics = $analytics;
     this.$scope = $scope;
     this.$state = $state;
     this.$stateParams = $stateParams;
     this.$window = $window;
-    this.$sanitize = $sanitize;
     this.Authentication = Authentication;
     this.UserService = UserService;
-    this.EndpointService = EndpointService;
-    this.ExtensionService = ExtensionService;
     this.StateManager = StateManager;
     this.Notifications = Notifications;
     this.SettingsService = SettingsService;
@@ -44,18 +42,18 @@ class AuthenticationController {
       Password: '',
     };
     this.state = {
+      passwordInputType: 'password',
+      showOAuthLogin: false,
+      showStandardLogin: false,
       AuthenticationError: '',
       loginInProgress: true,
       OAuthProvider: '',
     };
 
-    this.retrieveAndSaveEnabledExtensionsAsync = this.retrieveAndSaveEnabledExtensionsAsync.bind(this);
     this.checkForEndpointsAsync = this.checkForEndpointsAsync.bind(this);
-    this.checkForLatestVersionAsync = this.checkForLatestVersionAsync.bind(this);
     this.postLoginSteps = this.postLoginSteps.bind(this);
 
     this.oAuthLoginAsync = this.oAuthLoginAsync.bind(this);
-    this.retryLoginSanitizeAsync = this.retryLoginSanitizeAsync.bind(this);
     this.internalLoginAsync = this.internalLoginAsync.bind(this);
 
     this.authenticateUserAsync = this.authenticateUserAsync.bind(this);
@@ -68,6 +66,16 @@ class AuthenticationController {
   /**
    * UTILS FUNCTIONS SECTION
    */
+
+  toggleShowPassword() {
+    this.state.passwordInputType = this.state.passwordInputType === 'text' ? 'password' : 'text';
+  }
+
+  // set the password input type to password, so that browser autofills don't treat the input as text
+  setPasswordInputType(inputType) {
+    this.state.passwordInputType = inputType;
+    document.getElementById('password').setAttribute('type', inputType);
+  }
 
   logout(error) {
     this.Authentication.logout();
@@ -120,50 +128,32 @@ class AuthenticationController {
    * POST LOGIN STEPS SECTION
    */
 
-  async retrieveAndSaveEnabledExtensionsAsync() {
+  async checkForEndpointsAsync() {
     try {
-      await this.ExtensionService.retrieveAndSaveEnabledExtensions();
-    } catch (err) {
-      this.error(err, '无法检索已启用的扩展');
-    }
-  }
+      const isAdmin = this.Authentication.isAdmin();
+      const endpoints = await getEnvironments({ limit: 1, query: { excludeSnapshots: true } });
 
-  async checkForEndpointsAsync(noAuth) {
-    try {
-      const endpoints = await this.EndpointService.endpoints(0, 1);
-      const isAdmin = noAuth || this.Authentication.isAdmin();
+      if (this.Authentication.getUserDetails().forceChangePassword) {
+        return this.$state.go('portainer.account');
+      }
 
       if (endpoints.value.length === 0 && isAdmin) {
-        return this.$state.go('portainer.init.endpoint');
+        return this.$state.go('portainer.wizard');
       } else {
         return this.$state.go('portainer.home');
       }
     } catch (err) {
-      this.error(err, '无法检索端点');
-    }
-  }
-
-  async checkForLatestVersionAsync() {
-    let versionInfo = {
-      UpdateAvailable: false,
-      LatestVersion: '',
-    };
-
-    try {
-      const versionStatus = await this.StatusService.version();
-      if (versionStatus.UpdateAvailable) {
-        versionInfo.UpdateAvailable = true;
-        versionInfo.LatestVersion = versionStatus.LatestVersion;
-      }
-    } finally {
-      this.StateManager.setVersionInfo(versionInfo);
+      this.error(err, '无法获取环境');
     }
   }
 
   async postLoginSteps() {
-    await this.retrieveAndSaveEnabledExtensionsAsync();
-    await this.checkForEndpointsAsync(false);
-    await this.checkForLatestVersionAsync();
+    await this.StateManager.initialize();
+
+    const isAdmin = this.Authentication.isAdmin();
+    this.$analytics.setUserRole(isAdmin ? 'admin' : 'standard-user');
+
+    await this.checkForEndpointsAsync();
   }
   /**
    * END POST LOGIN STEPS SECTION
@@ -178,16 +168,7 @@ class AuthenticationController {
       await this.Authentication.OAuthLogin(code);
       this.URLHelper.cleanParameters();
     } catch (err) {
-      this.error(err, '无法通过 OAuth 登录');
-    }
-  }
-
-  async retryLoginSanitizeAsync(username, password) {
-    try {
-      await this.internalLoginAsync(this.$sanitize(username), this.$sanitize(password));
-      this.$state.go('portainer.updatePassword');
-    } catch (err) {
-      this.error(err, 'Invalid credentials');
+      this.error(err, 'Unable to login via OAuth');
     }
   }
 
@@ -211,17 +192,12 @@ class AuthenticationController {
       this.state.loginInProgress = true;
       await this.internalLoginAsync(username, password);
     } catch (err) {
-      if (this.state.permissionsError) {
-        return;
-      }
-      // This login retry is necessary to avoid conflicts with databases
-      // containing users created before Portainer 1.19.2
-      // See https://github.com/portainer/portainer/issues/2199 for more info
-      await this.retryLoginSanitizeAsync(username, password);
+      this.error(err, '无法登录');
     }
   }
 
   authenticateUser() {
+    this.setPasswordInputType('password');
     return this.$async(this.authenticateUserAsync);
   }
 
@@ -236,7 +212,7 @@ class AuthenticationController {
     if (this.hasValidState(state)) {
       await this.oAuthLoginAsync(code);
     } else {
-      this.error(null, 'OAuth 状态无效，请重试。');
+      this.error(null, '无效的 OAuth 状态，请重试。');
     }
   }
 
@@ -247,16 +223,21 @@ class AuthenticationController {
         this.$state.go('portainer.init.admin');
       }
     } catch (err) {
-      this.error(err, '无法验证管理员帐户是否存在');
+      this.error(err, '无法验证管理员账户是否存在');
     }
+  }
+
+  toggleStandardLogin() {
+    this.state.showStandardLogin = !this.state.showStandardLogin;
   }
 
   async onInit() {
     try {
       const settings = await this.SettingsService.publicSettings();
-      this.AuthenticationMethod = settings.AuthenticationMethod;
-      this.state.OAuthProvider = this.determineOauthProvider(settings.OAuthLoginURI);
+      this.state.showOAuthLogin = settings.AuthenticationMethod === 3;
+      this.state.showStandardLogin = !this.state.showOAuthLogin;
       this.state.OAuthLoginURI = settings.OAuthLoginURI;
+      this.state.OAuthProvider = this.determineOauthProvider(settings.OAuthLoginURI);
 
       const code = this.URLHelper.getParameter('code');
       const state = this.URLHelper.getParameter('state');
@@ -264,6 +245,10 @@ class AuthenticationController {
         await this.manageOauthCodeReturn(code, state);
         this.generateOAuthLoginURI();
         return;
+      }
+      if (!this.logo) {
+        await this.StateManager.initialize();
+        this.logo = this.StateManager.getState().application.logo;
       }
       this.generateOAuthLoginURI();
 
@@ -277,19 +262,17 @@ class AuthenticationController {
         this.LocalStorage.cleanLogoutReason();
       }
 
+      // always clear the kubernetes cache on login
+      dispatchCacheRefreshEvent();
+
       if (this.Authentication.isAuthenticated()) {
         await this.postLoginSteps();
       }
       this.state.loginInProgress = false;
 
-      const authenticationEnabled = this.$scope.applicationState.application.authentication;
-      if (!authenticationEnabled) {
-        await this.checkForEndpointsAsync(true);
-      } else {
-        await this.authEnabledFlowAsync();
-      }
+      await this.authEnabledFlowAsync();
     } catch (err) {
-      this.Notifications.error('失败', err, '无法检索公共设置');
+      this.Notifications.error('失败', err, '无法获取公共设置');
     }
   }
 

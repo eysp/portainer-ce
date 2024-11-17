@@ -3,54 +3,33 @@ package templates
 import (
 	"net/http"
 
-	"github.com/gorilla/mux"
-	httperror "github.com/portainer/libhttp/error"
-	"github.com/portainer/portainer/api"
+	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/http/security"
-)
+	httperror "github.com/portainer/portainer/pkg/libhttp/error"
 
-const (
-	errTemplateManagementDisabled = portainer.Error("Template management is disabled")
+	"github.com/gorilla/mux"
 )
 
 // Handler represents an HTTP API handler for managing templates.
 type Handler struct {
 	*mux.Router
-	TemplateService portainer.TemplateService
-	SettingsService portainer.SettingsService
+	DataStore   dataservices.DataStore
+	GitService  portainer.GitService
+	FileService portainer.FileService
 }
 
 // NewHandler returns a new instance of Handler.
-func NewHandler(bouncer *security.RequestBouncer) *Handler {
+func NewHandler(bouncer security.BouncerService) *Handler {
 	h := &Handler{
 		Router: mux.NewRouter(),
 	}
 
 	h.Handle("/templates",
-		bouncer.RestrictedAccess(httperror.LoggerHandler(h.templateList))).Methods(http.MethodGet)
-	h.Handle("/templates",
-		bouncer.AdminAccess(h.templateManagementCheck(httperror.LoggerHandler(h.templateCreate)))).Methods(http.MethodPost)
-	h.Handle("/templates/{id}",
-		bouncer.RestrictedAccess(h.templateManagementCheck(httperror.LoggerHandler(h.templateInspect)))).Methods(http.MethodGet)
-	h.Handle("/templates/{id}",
-		bouncer.AdminAccess(h.templateManagementCheck(httperror.LoggerHandler(h.templateUpdate)))).Methods(http.MethodPut)
-	h.Handle("/templates/{id}",
-		bouncer.AdminAccess(h.templateManagementCheck(httperror.LoggerHandler(h.templateDelete)))).Methods(http.MethodDelete)
+		bouncer.AuthenticatedAccess(httperror.LoggerHandler(h.templateList))).Methods(http.MethodGet)
+	h.Handle("/templates/{id}/file",
+		bouncer.AuthenticatedAccess(httperror.LoggerHandler(h.templateFile))).Methods(http.MethodPost)
+	h.Handle("/templates/file",
+		bouncer.AuthenticatedAccess(httperror.LoggerHandler(h.templateFileOld))).Methods(http.MethodPost)
 	return h
-}
-
-func (handler *Handler) templateManagementCheck(next http.Handler) http.Handler {
-	return httperror.LoggerHandler(func(rw http.ResponseWriter, r *http.Request) *httperror.HandlerError {
-		settings, err := handler.SettingsService.Settings()
-		if err != nil {
-			return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve settings from the database", err}
-		}
-
-		if settings.TemplatesURL != "" {
-			return &httperror.HandlerError{http.StatusServiceUnavailable, "Portainer is configured to use external templates, template management is disabled", errTemplateManagementDisabled}
-		}
-
-		next.ServeHTTP(rw, r)
-		return nil
-	})
 }

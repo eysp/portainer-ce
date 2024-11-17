@@ -1,20 +1,20 @@
 <div>
   <rd-widget>
-    <rd-widget-header icon="fa-tasks" title-text="Hosts file entries">
+    <rd-widget-header icon="list" title-text="Hosts file entries">
       <div class="nopadding" authorization="DockerServiceUpdate">
-        <a class="btn btn-default btn-sm pull-right" ng-click="isUpdating ||addHostsEntry(service)" ng-disabled="isUpdating">
-          <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加主机条目
+        <a class="btn btn-secondary btn-sm pull-right" ng-click="isUpdating ||addHostsEntry(service)" ng-disabled="isUpdating">
+          <pr-icon icon="'plus'"></pr-icon> add host entry
         </a>
       </div>
     </rd-widget-header>
     <rd-widget-body ng-if="!service.Hosts || service.Hosts.length === 0">
-      <p>Hosts文件没有额外的条目。</p>
+      <p>The Hosts file has no extra entries.</p>
     </rd-widget-body>
     <rd-widget-body ng-if="service.Hosts.length > 0" classes="no-padding">
       <table class="table">
         <thead>
           <tr>
-            <th>主机名称</th>
+            <th>Hostname</th>
             <th>IP</th>
           </tr>
         </thead>
@@ -26,7 +26,7 @@
                   type="text"
                   class="form-control"
                   ng-model="entry.hostname"
-                  placeholder="例如 example.com"
+                  placeholder="e.g. example.com"
                   ng-change="updateHostsEntry(service, entry)"
                   ng-disabled="isUpdating"
                   disable-authorization="DockerServiceUpdate"
@@ -39,14 +39,14 @@
                   type="text"
                   class="form-control"
                   ng-model="entry.ip"
-                  placeholder="例如 10.0.1.1"
+                  placeholder="e.g. 10.0.1.1"
                   ng-change="updateHostsEntry(service, entry)"
                   ng-disabled="isUpdating"
                   disable-authorization="DockerServiceUpdate"
                 />
                 <span class="input-group-btn" authorization="DockerServiceUpdate">
-                  <button class="btn btn-sm btn-danger" type="button" ng-click="removeHostsEntry(service, $index)" ng-disabled="isUpdating">
-                    <i class="fa fa-trash" aria-hidden="true"></i>
+                  <button class="btn btn-dangerlight" type="button" ng-click="removeHostsEntry(service, $index)" ng-disabled="isUpdating">
+                    <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
                   </button>
                 </span>
               </div>
@@ -58,13 +58,13 @@
     <rd-widget-footer authorization="DockerServiceUpdate">
       <div class="btn-toolbar" role="toolbar">
         <div class="btn-group" role="group">
-          <button type="button" class="btn btn-primary btn-sm" ng-disabled="!hasChanges(service, ['Hosts'])" ng-click="updateService(service)">应用更改</button>
+          <button type="button" class="btn btn-primary btn-sm" ng-disabled="!hasChanges(service, ['Hosts'])" ng-click="updateService(service)">Apply changes</button>
           <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu">
-            <li><a ng-click="cancelChanges(service, ['Hosts'])">重置更改</a></li>
-            <li><a ng-click="cancelChanges(service)">重置所有更改</a></li>
+            <li><a ng-click="cancelChanges(service, ['Hosts'])">Reset changes</a></li>
+            <li><a ng-click="cancelChanges(service)">Reset all changes</a></li>
           </ul>
         </div>
       </div>

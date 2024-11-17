@@ -3,22 +3,23 @@ package docker
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
+	"strings"
+
+	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/http/proxy/factory/utils"
+	"github.com/portainer/portainer/api/http/security"
+	"github.com/portainer/portainer/api/internal/authorization"
 
 	"github.com/docker/docker/client"
-	portainer "github.com/portainer/portainer/api"
-	"github.com/portainer/portainer/api/http/proxy/factory/responseutils"
-	"github.com/portainer/portainer/api/http/security"
+	"github.com/segmentio/encoding/json"
 )
 
-const (
-	containerObjectIdentifier = "Id"
-)
+const containerObjectIdentifier = "Id"
 
-func getInheritedResourceControlFromContainerLabels(dockerClient *client.Client, containerID string, resourceControls []portainer.ResourceControl) (*portainer.ResourceControl, error) {
+func getInheritedResourceControlFromContainerLabels(dockerClient *client.Client, endpointID portainer.EndpointID, containerID string, resourceControls []portainer.ResourceControl) (*portainer.ResourceControl, error) {
 	container, err := dockerClient.ContainerInspect(context.Background(), containerID)
 	if err != nil {
 		return nil, err
@@ -26,20 +27,15 @@ func getInheritedResourceControlFromContainerLabels(dockerClient *client.Client,
 
 	serviceName := container.Config.Labels[resourceLabelForDockerServiceID]
 	if serviceName != "" {
-		serviceResourceControl := portainer.GetResourceControlByResourceIDAndType(serviceName, portainer.ServiceResourceControl, resourceControls)
+		serviceResourceControl := authorization.GetResourceControlByResourceIDAndType(serviceName, portainer.ServiceResourceControl, resourceControls)
 		if serviceResourceControl != nil {
 			return serviceResourceControl, nil
 		}
 	}
 
-	swarmStackName := container.Config.Labels[resourceLabelForDockerSwarmStackName]
-	if swarmStackName != "" {
-		return portainer.GetResourceControlByResourceIDAndType(swarmStackName, portainer.StackResourceControl, resourceControls), nil
-	}
-
-	composeStackName := container.Config.Labels[resourceLabelForDockerComposeStackName]
-	if composeStackName != "" {
-		return portainer.GetResourceControlByResourceIDAndType(composeStackName, portainer.StackResourceControl, resourceControls), nil
+	stackResourceID := getStackResourceIDFromLabels(container.Config.Labels, endpointID)
+	if stackResourceID != "" {
+		return authorization.GetResourceControlByResourceIDAndType(stackResourceID, portainer.StackResourceControl, resourceControls), nil
 	}
 
 	return nil, nil
@@ -50,7 +46,7 @@ func getInheritedResourceControlFromContainerLabels(dockerClient *client.Client,
 func (transport *Transport) containerListOperation(response *http.Response, executor *operationExecutor) error {
 	// ContainerList response is a JSON array
 	// https://docs.docker.com/engine/api/v1.28/#operation/ContainerList
-	responseArray, err := responseutils.GetResponseAsJSONArray(response)
+	responseArray, err := utils.GetResponseAsJSONArray(response)
 	if err != nil {
 		return err
 	}
@@ -73,7 +69,12 @@ func (transport *Transport) containerListOperation(response *http.Response, exec
 		}
 	}
 
-	return responseutils.RewriteResponse(response, responseArray, http.StatusOK)
+	responseArray, err = transport.applyPortainerContainers(responseArray)
+	if err != nil {
+		return err
+	}
+
+	return utils.RewriteResponse(response, responseArray, http.StatusOK)
 }
 
 // containerInspectOperation extracts the response as a JSON object, verify that the user
@@ -81,7 +82,7 @@ func (transport *Transport) containerListOperation(response *http.Response, exec
 func (transport *Transport) containerInspectOperation(response *http.Response, executor *operationExecutor) error {
 	//ContainerInspect response is a JSON object
 	// https://docs.docker.com/engine/api/v1.28/#operation/ContainerInspect
-	responseObject, err := responseutils.GetResponseAsJSONOBject(response)
+	responseObject, err := utils.GetResponseAsJSONObject(response)
 	if err != nil {
 		return err
 	}
@@ -92,6 +93,8 @@ func (transport *Transport) containerInspectOperation(response *http.Response, e
 		labelsObjectSelector:        selectorContainerLabelsFromContainerInspectOperation,
 	}
 
+	responseObject, _ = transport.applyPortainerContainer(responseObject)
+
 	return transport.applyAccessControlOnResource(resourceOperationParameters, responseObject, response, executor)
 }
 
@@ -100,9 +103,9 @@ func (transport *Transport) containerInspectOperation(response *http.Response, e
 // Labels are available under the "Config.Labels" property.
 // API schema reference: https://docs.docker.com/engine/api/v1.28/#operation/ContainerInspect
 func selectorContainerLabelsFromContainerInspectOperation(responseObject map[string]interface{}) map[string]interface{} {
-	containerConfigObject := responseutils.GetJSONObject(responseObject, "Config")
+	containerConfigObject := utils.GetJSONObject(responseObject, "Config")
 	if containerConfigObject != nil {
-		containerLabelsObject := responseutils.GetJSONObject(containerConfigObject, "Labels")
+		containerLabelsObject := utils.GetJSONObject(containerConfigObject, "Labels")
 		return containerLabelsObject
 	}
 	return nil
@@ -113,7 +116,7 @@ func selectorContainerLabelsFromContainerInspectOperation(responseObject map[str
 // Labels are available under the "Labels" property.
 // API schema reference: https://docs.docker.com/engine/api/v1.28/#operation/ContainerList
 func selectorContainerLabelsFromContainerListOperation(responseObject map[string]interface{}) map[string]interface{} {
-	containerLabelsObject := responseutils.GetJSONObject(responseObject, "Labels")
+	containerLabelsObject := utils.GetJSONObject(responseObject, "Labels")
 	return containerLabelsObject
 }
 
@@ -156,12 +159,13 @@ func containerHasBlackListedLabel(containerLabels map[string]interface{}, labelB
 func (transport *Transport) decorateContainerCreationOperation(request *http.Request, resourceIdentifierAttribute string, resourceType portainer.ResourceControlType) (*http.Response, error) {
 	type PartialContainer struct {
 		HostConfig struct {
-			Privileged bool          `json:"Privileged"`
-			PidMode    string        `json:"PidMode"`
-			Devices    []interface{} `json:"Devices"`
-			CapAdd     []string      `json:"CapAdd"`
-			CapDrop    []string      `json:"CapDrop"`
-			Binds      []string      `json:"Binds"`
+			Privileged bool                   `json:"Privileged"`
+			PidMode    string                 `json:"PidMode"`
+			Devices    []interface{}          `json:"Devices"`
+			Sysctls    map[string]interface{} `json:"Sysctls"`
+			CapAdd     []string               `json:"CapAdd"`
+			CapDrop    []string               `json:"CapDrop"`
+			Binds      []string               `json:"Binds"`
 		} `json:"HostConfig"`
 	}
 
@@ -180,50 +184,51 @@ func (transport *Transport) decorateContainerCreationOperation(request *http.Req
 	}
 
 	if !isAdminOrEndpointAdmin {
-		settings, err := transport.settingsService.Settings()
+		securitySettings, err := transport.fetchEndpointSecuritySettings()
 		if err != nil {
 			return nil, err
 		}
 
-		if !settings.AllowPrivilegedModeForRegularUsers ||
-			!settings.AllowHostNamespaceForRegularUsers ||
-			!settings.AllowDeviceMappingForRegularUsers ||
-			!settings.AllowContainerCapabilitiesForRegularUsers ||
-			!settings.AllowBindMountsForRegularUsers {
-
-			body, err := ioutil.ReadAll(request.Body)
-			if err != nil {
-				return nil, err
-			}
-
-			partialContainer := &PartialContainer{}
-			err = json.Unmarshal(body, partialContainer)
-			if err != nil {
-				return nil, err
-			}
-
-			if !settings.AllowPrivilegedModeForRegularUsers && partialContainer.HostConfig.Privileged {
-				return forbiddenResponse, errors.New("forbidden to use privileged mode")
-			}
-
-			if !settings.AllowHostNamespaceForRegularUsers && partialContainer.HostConfig.PidMode == "host" {
-				return forbiddenResponse, errors.New("forbidden to use pid host namespace")
-			}
-
-			if !settings.AllowDeviceMappingForRegularUsers && len(partialContainer.HostConfig.Devices) > 0 {
-				return nil, errors.New("forbidden to use device mapping")
-			}
-
-			if !settings.AllowContainerCapabilitiesForRegularUsers && (len(partialContainer.HostConfig.CapAdd) > 0 || len(partialContainer.HostConfig.CapDrop) > 0) {
-				return nil, errors.New("forbidden to use container capabilities")
-			}
-
-			if !settings.AllowBindMountsForRegularUsers && (len(partialContainer.HostConfig.Binds) > 0) {
-				return forbiddenResponse, errors.New("forbidden to use bind mounts")
-			}
-
-			request.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+		body, err := io.ReadAll(request.Body)
+		if err != nil {
+			return nil, err
 		}
+
+		partialContainer := &PartialContainer{}
+		err = json.Unmarshal(body, partialContainer)
+		if err != nil {
+			return nil, err
+		}
+
+		if !securitySettings.AllowPrivilegedModeForRegularUsers && partialContainer.HostConfig.Privileged {
+			return forbiddenResponse, errors.New("forbidden to use privileged mode")
+		}
+
+		if !securitySettings.AllowHostNamespaceForRegularUsers && partialContainer.HostConfig.PidMode == "host" {
+			return forbiddenResponse, errors.New("forbidden to use pid host namespace")
+		}
+
+		if !securitySettings.AllowDeviceMappingForRegularUsers && len(partialContainer.HostConfig.Devices) > 0 {
+			return forbiddenResponse, errors.New("forbidden to use device mapping")
+		}
+
+		if !securitySettings.AllowSysctlSettingForRegularUsers && len(partialContainer.HostConfig.Sysctls) > 0 {
+			return forbiddenResponse, errors.New("forbidden to use sysctl settings")
+		}
+
+		if !securitySettings.AllowContainerCapabilitiesForRegularUsers && (len(partialContainer.HostConfig.CapAdd) > 0 || len(partialContainer.HostConfig.CapDrop) > 0) {
+			return nil, errors.New("forbidden to use container capabilities")
+		}
+
+		if !securitySettings.AllowBindMountsForRegularUsers && (len(partialContainer.HostConfig.Binds) > 0) {
+			for _, bind := range partialContainer.HostConfig.Binds {
+				if strings.HasPrefix(bind, "/") {
+					return forbiddenResponse, errors.New("forbidden to use bind mounts")
+				}
+			}
+		}
+
+		request.Body = io.NopCloser(bytes.NewBuffer(body))
 	}
 
 	response, err := transport.executeDockerRequest(request)

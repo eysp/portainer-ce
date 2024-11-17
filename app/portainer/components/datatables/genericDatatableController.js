@@ -1,11 +1,13 @@
 import _ from 'lodash-es';
 import './datatable.css';
-import { ResourceControlOwnership as RCO } from 'Portainer/models/resourceControl/resourceControlOwnership';
+import { ResourceControlOwnership as RCO } from '@/react/portainer/access-control/types';
+import { isBE } from '@/react/portainer/feature-flags/feature-flags.service';
 
 function isBetween(value, a, b) {
   return (value >= a && value <= b) || (value >= b && value <= a);
 }
 
+// TODO: review - refactor to use a class that can be extended
 angular.module('portainer.app').controller('GenericDatatableController', [
   '$interval',
   'PaginationService',
@@ -13,6 +15,7 @@ angular.module('portainer.app').controller('GenericDatatableController', [
   'PAGINATION_MAX_ITEMS',
   function ($interval, PaginationService, DatatableService, PAGINATION_MAX_ITEMS) {
     this.RCO = RCO;
+    this.isBE = isBE;
 
     this.state = {
       selectAll: false,
@@ -32,15 +35,22 @@ angular.module('portainer.app').controller('GenericDatatableController', [
         refreshRate: '30',
       },
     };
+
     this.resetSelectionState = function () {
       this.state.selectAll = false;
       this.state.selectedItems = [];
       _.map(this.state.filteredDataSet, (item) => (item.Checked = false));
     };
 
-    this.onTextFilterChange = function () {
-      DatatableService.setDataTableTextFilters(this.tableKey, this.state.textFilter);
+    this.onTextFilterChangeGeneric = onTextFilterChangeGeneric;
+
+    this.onTextFilterChange = function onTextFilterChange() {
+      return this.onTextFilterChangeGeneric();
     };
+
+    function onTextFilterChangeGeneric() {
+      DatatableService.setDataTableTextFilters(this.tableKey, this.state.textFilter);
+    }
 
     this.changeOrderBy = function changeOrderBy(orderField) {
       this.state.reverseOrder = this.state.orderBy === orderField ? !this.state.reverseOrder : false;
@@ -56,7 +66,7 @@ angular.module('portainer.app').controller('GenericDatatableController', [
         const itemsInRange = _.filter(this.state.filteredDataSet, (item, index) => {
           return isBetween(index, firstItemIndex, lastItemIndex);
         });
-        const value = item.Checked;
+        const value = this.state.firstClickedItem.Checked;
 
         _.forEach(itemsInRange, (i) => {
           if (!this.allowSelection(i)) {
@@ -66,9 +76,10 @@ angular.module('portainer.app').controller('GenericDatatableController', [
         });
         this.state.firstClickedItem = item;
       } else if (event) {
+        item.Checked = !item.Checked;
         this.state.firstClickedItem = item;
       }
-      this.state.selectedItems = this.state.filteredDataSet.filter((i) => i.Checked);
+      this.state.selectedItems = this.uniq().filter((i) => i.Checked);
       if (event && this.state.selectAll && this.state.selectedItems.length !== this.state.filteredDataSet.length) {
         this.state.selectAll = false;
       }
@@ -85,6 +96,13 @@ angular.module('portainer.app').controller('GenericDatatableController', [
         }
       }
       this.onSelectionChanged();
+    };
+
+    /**
+     * Override this method to change the uniqness filter when selecting items
+     */
+    this.uniq = function () {
+      return _.uniq(_.concat(this.state.filteredDataSet, this.state.selectedItems));
     };
 
     /**
@@ -125,7 +143,11 @@ angular.module('portainer.app').controller('GenericDatatableController', [
      * https://github.com/portainer/portainer/pull/2877#issuecomment-503333425
      * https://github.com/portainer/portainer/pull/2877#issuecomment-503537249
      */
-    this.$onInit = function () {
+    this.$onInit = function $onInit() {
+      this.$onInitGeneric();
+    };
+
+    this.$onInitGeneric = function $onInitGeneric() {
       this.setDefaults();
       this.prepareTableFromDataset();
 
@@ -156,6 +178,11 @@ angular.module('portainer.app').controller('GenericDatatableController', [
         this.settings.open = false;
       }
       this.onSettingsRepeaterChange();
+
+      var storedColumnVisibility = DatatableService.getColumnVisibilitySettings(this.tableKey);
+      if (storedColumnVisibility !== null) {
+        this.columnVisibility = storedColumnVisibility;
+      }
     };
 
     /**
@@ -175,8 +202,9 @@ angular.module('portainer.app').controller('GenericDatatableController', [
     };
 
     this.startRepeater = function () {
-      this.repeater = $interval(() => {
-        this.refreshCallback();
+      this.repeater = $interval(async () => {
+        await this.refreshCallback();
+        this.onDataRefresh();
       }, this.settings.repeater.refreshRate * 1000);
     };
 
@@ -189,6 +217,14 @@ angular.module('portainer.app').controller('GenericDatatableController', [
       }
       DatatableService.setDataTableSettings(this.tableKey, this.settings);
     };
+
+    /**
+     * Override this method to execute code after calling the refresh callback
+     */
+    this.onDataRefresh = function () {
+      return;
+    };
+
     /**
      * !REPEATER SECTION
      */

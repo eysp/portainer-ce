@@ -1,4 +1,6 @@
 import _ from 'lodash-es';
+import { confirmDelete } from '@@/modals/confirm';
+import { processItemsInBatches } from '@/react/common/processItemsInBatches';
 
 angular.module('portainer.app').controller('UsersController', [
   '$q',
@@ -7,11 +9,10 @@ angular.module('portainer.app').controller('UsersController', [
   'UserService',
   'TeamService',
   'TeamMembershipService',
-  'ModalService',
   'Notifications',
   'Authentication',
   'SettingsService',
-  function ($q, $scope, $state, UserService, TeamService, TeamMembershipService, ModalService, Notifications, Authentication, SettingsService) {
+  function ($q, $scope, $state, UserService, TeamService, TeamMembershipService, Notifications, Authentication, SettingsService) {
     $scope.state = {
       userCreationError: '',
       validUsername: false,
@@ -23,19 +24,31 @@ angular.module('portainer.app').controller('UsersController', [
       Password: '',
       ConfirmPassword: '',
       Administrator: false,
-      Teams: [],
+      TeamIds: [],
+    };
+
+    $scope.handleAdministratorChange = function (checked) {
+      return $scope.$evalAsync(() => {
+        $scope.formValues.Administrator = checked;
+      });
+    };
+
+    $scope.onChangeTeamIds = function (teamIds) {
+      return $scope.$evalAsync(() => {
+        $scope.formValues.TeamIds = teamIds;
+      });
     };
 
     $scope.checkUsernameValidity = function () {
       var valid = true;
       for (var i = 0; i < $scope.users.length; i++) {
-        if ($scope.formValues.Username === $scope.users[i].Username) {
+        if ($scope.formValues.Username.toLocaleLowerCase() === $scope.users[i].Username.toLocaleLowerCase()) {
           valid = false;
           break;
         }
       }
       $scope.state.validUsername = valid;
-      $scope.state.userCreationError = valid ? '' : '用户名已存在';
+      $scope.state.userCreationError = valid ? '' : '用户名已被占用';
     };
 
     $scope.addUser = function () {
@@ -44,11 +57,7 @@ angular.module('portainer.app').controller('UsersController', [
       var username = $scope.formValues.Username;
       var password = $scope.formValues.Password;
       var role = $scope.formValues.Administrator ? 1 : 2;
-      var teamIds = [];
-      angular.forEach($scope.formValues.Teams, function (team) {
-        teamIds.push(team.Id);
-      });
-      UserService.createUser(username, password, role, teamIds)
+      UserService.createUser(username, password, role, $scope.formValues.TeamIds)
         .then(function success() {
           Notifications.success('用户创建成功', username);
           $state.reload();
@@ -61,29 +70,24 @@ angular.module('portainer.app').controller('UsersController', [
         });
     };
 
-    function deleteSelectedUsers(selectedItems) {
-      var actionCount = selectedItems.length;
-      angular.forEach(selectedItems, function (user) {
-        UserService.deleteUser(user.Id)
+    async function deleteSelectedUsers(selectedItems) {
+      async function doRemove(user) {
+        return UserService.deleteUser(user.Id)
           .then(function success() {
-            Notifications.success('已成功删除用户', user.Username);
+            Notifications.success('用户成功删除', user.Username);
             var index = $scope.users.indexOf(user);
             $scope.users.splice(index, 1);
           })
           .catch(function error(err) {
             Notifications.error('失败', err, '无法删除用户');
-          })
-          .finally(function final() {
-            --actionCount;
-            if (actionCount === 0) {
-              $state.reload();
-            }
           });
-      });
+      }
+      await processItemsInBatches(selectedItems, doRemove);
+      $state.reload();
     }
 
     $scope.removeAction = function (selectedItems) {
-      ModalService.confirmDeletion('您要删除选定的用户吗？ 他们将无法再登录 Portainer。', function onConfirm(confirmed) {
+      confirmDelete('您确定要删除选中的用户吗？删除后这些用户将无法再登录Portainer。').then((confirmed) => {
         if (!confirmed) {
           return;
         }
@@ -99,7 +103,7 @@ angular.module('portainer.app').controller('UsersController', [
           var membership = memberships[j];
           if (user.Id === membership.UserId && membership.Role === 1) {
             user.isTeamLeader = true;
-            user.RoleName = 'team leader';
+            user.RoleName = '团队领导';
             break;
           }
         }
@@ -122,9 +126,11 @@ angular.module('portainer.app').controller('UsersController', [
           $scope.users = users;
           $scope.teams = _.orderBy(data.teams, 'Name', 'asc');
           $scope.AuthenticationMethod = data.settings.AuthenticationMethod;
+          $scope.requiredPasswordLength = data.settings.RequiredPasswordLength;
+          $scope.teamSync = data.settings.TeamSync;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索用户和团队');
+          Notifications.error('失败', err, '无法获取用户和团队');
           $scope.users = [];
           $scope.teams = [];
         });

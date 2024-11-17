@@ -1,165 +1,256 @@
-angular.module('portainer.app').controller('SettingsAuthenticationController', [
-  '$q',
-  '$scope',
-  '$state',
-  'Notifications',
-  'SettingsService',
-  'FileUploadService',
-  'TeamService',
-  'ExtensionService',
-  function ($q, $scope, $state, Notifications, SettingsService, FileUploadService, TeamService, ExtensionService) {
-    $scope.state = {
-      successfulConnectivityCheck: false,
-      failedConnectivityCheck: false,
-      uploadInProgress: false,
-      connectivityCheckInProgress: false,
-      actionInProgress: false,
-    };
+import angular from 'angular';
+import _ from 'lodash-es';
 
-    $scope.formValues = {
-      TLSCACert: '',
-      LDAPSettings: {
-        AnonymousMode: true,
-        ReaderDN: '',
-        URL: '',
-        TLSConfig: {
-          TLS: false,
-          TLSSkipVerify: false,
-        },
-        StartTLS: false,
-        SearchSettings: [
-          {
-            BaseDN: '',
-            Filter: '',
-            UserNameAttribute: '',
-          },
-        ],
-        GroupSearchSettings: [
-          {
-            GroupBaseDN: '',
-            GroupFilter: '',
-            GroupAttribute: '',
-          },
-        ],
-        AutoCreateUsers: true,
+import { buildLdapSettingsModel, buildAdSettingsModel } from '@/portainer/settings/authentication/ldap/ldap-settings.model';
+import { options } from '@/react/portainer/settings/AuthenticationView/InternalAuth/options';
+
+angular.module('portainer.app').controller('SettingsAuthenticationController', SettingsAuthenticationController);
+
+function SettingsAuthenticationController($q, $scope, $state, Notifications, SettingsService, FileUploadService, TeamService, LDAPService) {
+  $scope.authMethod = 1;
+
+  $scope.state = {
+    uploadInProgress: false,
+    actionInProgress: false,
+    availableUserSessionTimeoutOptions: [
+      {
+        key: '1小时',
+        value: '1h',
       },
-    };
+      {
+        key: '4小时',
+        value: '4h',
+      },
+      {
+        key: '8小时',
+        value: '8h',
+      },
+      {
+        key: '24小时',
+        value: '24h',
+      },
+      { key: '1周', value: `${24 * 7}h` },
+      { key: '1个月', value: `${24 * 30}h` },
+      { key: '6个月', value: `${24 * 30 * 6}h` },
+      { key: '1年', value: `${24 * 30 * 12}h` },
+    ],
+ };
 
-    $scope.goToOAuthExtensionView = function () {
-      $state.go('portainer.extensions.extension', { id: 2 });
-    };
+  $scope.formValues = {
+    UserSessionTimeout: $scope.state.availableUserSessionTimeoutOptions[0],
+    TLSCACert: '',
+    ldap: {
+      serverType: 0,
+      adSettings: buildAdSettingsModel(),
+      ldapSettings: buildLdapSettingsModel(),
+    },
+  };
 
-    $scope.isOauthEnabled = function isOauthEnabled() {
-      return $scope.settings && $scope.settings.AuthenticationMethod === 3;
-    };
+  $scope.authOptions = options;
 
-    $scope.addSearchConfiguration = function () {
-      $scope.formValues.LDAPSettings.SearchSettings.push({ BaseDN: '', UserNameAttribute: '', Filter: '' });
-    };
+  $scope.onChangeAuthMethod = function onChangeAuthMethod(value) {
+    $scope.authMethod = value;
 
-    $scope.removeSearchConfiguration = function (index) {
-      $scope.formValues.LDAPSettings.SearchSettings.splice(index, 1);
-    };
-
-    $scope.addGroupSearchConfiguration = function () {
-      $scope.formValues.LDAPSettings.GroupSearchSettings.push({ GroupBaseDN: '', GroupAttribute: '', GroupFilter: '' });
-    };
-
-    $scope.removeGroupSearchConfiguration = function (index) {
-      $scope.formValues.LDAPSettings.GroupSearchSettings.splice(index, 1);
-    };
-
-    $scope.LDAPConnectivityCheck = function () {
-      var settings = angular.copy($scope.settings);
-      var TLSCAFile = $scope.formValues.TLSCACert !== settings.LDAPSettings.TLSConfig.TLSCACert ? $scope.formValues.TLSCACert : null;
-
-      if ($scope.formValues.LDAPSettings.AnonymousMode) {
-        settings.LDAPSettings['ReaderDN'] = '';
-        settings.LDAPSettings['Password'] = '';
-      }
-
-      var uploadRequired = ($scope.formValues.LDAPSettings.TLSConfig.TLS || $scope.formValues.LDAPSettings.StartTLS) && !$scope.formValues.LDAPSettings.TLSConfig.TLSSkipVerify;
-      $scope.state.uploadInProgress = uploadRequired;
-
-      $scope.state.connectivityCheckInProgress = true;
-      $q.when(!uploadRequired || FileUploadService.uploadLDAPTLSFiles(TLSCAFile, null, null))
-        .then(function success() {
-          addLDAPDefaultPort(settings, $scope.formValues.LDAPSettings.TLSConfig.TLS);
-          return SettingsService.checkLDAPConnectivity(settings);
-        })
-        .then(function success() {
-          $scope.state.failedConnectivityCheck = false;
-          $scope.state.successfulConnectivityCheck = true;
-          Notifications.success('Connection to LDAP successful');
-        })
-        .catch(function error(err) {
-          $scope.state.failedConnectivityCheck = true;
-          $scope.state.successfulConnectivityCheck = false;
-          Notifications.error('Failure', err, 'Connection to LDAP failed');
-        })
-        .finally(function final() {
-          $scope.state.uploadInProgress = false;
-          $scope.state.connectivityCheckInProgress = false;
-        });
-    };
-
-    $scope.saveSettings = function () {
-      var settings = angular.copy($scope.settings);
-      var TLSCAFile = $scope.formValues.TLSCACert !== settings.LDAPSettings.TLSConfig.TLSCACert ? $scope.formValues.TLSCACert : null;
-
-      if ($scope.formValues.LDAPSettings.AnonymousMode) {
-        settings.LDAPSettings['ReaderDN'] = '';
-        settings.LDAPSettings['Password'] = '';
-      }
-
-      var uploadRequired = ($scope.formValues.LDAPSettings.TLSConfig.TLS || $scope.formValues.LDAPSettings.StartTLS) && !$scope.formValues.LDAPSettings.TLSConfig.TLSSkipVerify;
-      $scope.state.uploadInProgress = uploadRequired;
-
-      $scope.state.actionInProgress = true;
-      $q.when(!uploadRequired || FileUploadService.uploadLDAPTLSFiles(TLSCAFile, null, null))
-        .then(function success() {
-          addLDAPDefaultPort(settings, $scope.formValues.LDAPSettings.TLSConfig.TLS);
-          return SettingsService.update(settings);
-        })
-        .then(function success() {
-          Notifications.success('Authentication settings updated');
-        })
-        .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to update authentication settings');
-        })
-        .finally(function final() {
-          $scope.state.uploadInProgress = false;
-          $scope.state.actionInProgress = false;
-        });
-    };
-
-    // Add default port if :port is not defined in URL
-    function addLDAPDefaultPort(settings, tlsEnabled) {
-      if (settings.LDAPSettings.URL.indexOf(':') === -1) {
-        settings.LDAPSettings.URL += tlsEnabled ? ':636' : ':389';
-      }
+    if (value === 4) {
+      $scope.settings.AuthenticationMethod = 2;
+      $scope.formValues.ldap.serverType = 2;
+      return;
     }
 
-    function initView() {
-      $q.all({
-        settings: SettingsService.settings(),
-        teams: TeamService.teams(),
-        oauthAuthentication: ExtensionService.extensionEnabled(ExtensionService.EXTENSIONS.OAUTH_AUTHENTICATION),
+    if (value === 2) {
+      $scope.settings.AuthenticationMethod = 2;
+      $scope.formValues.ldap.serverType = $scope.formValues.ldap.ldapSettings.ServerType;
+      return;
+    }
+
+    $scope.settings.AuthenticationMethod = value;
+  };
+
+  $scope.onChangePasswordLength = function onChangePasswordLength(value) {
+    $scope.$evalAsync(() => {
+      $scope.settings.InternalAuthSettings = { RequiredPasswordLength: value };
+    });
+  };
+
+  $scope.authenticationMethodSelected = function authenticationMethodSelected(value) {
+    if (!$scope.settings) {
+      return false;
+    }
+
+    if (value === 4) {
+      return $scope.settings.AuthenticationMethod === 2 && $scope.formValues.ldap.serverType === 2;
+    }
+
+    if (value === 2) {
+      return $scope.settings.AuthenticationMethod === 2 && $scope.formValues.ldap.serverType !== 2;
+    }
+
+    return $scope.settings.AuthenticationMethod === value;
+  };
+
+  $scope.isOauthEnabled = function isOauthEnabled() {
+    return $scope.settings && $scope.settings.AuthenticationMethod === 3;
+  };
+
+  $scope.LDAPConnectivityCheck = LDAPConnectivityCheck;
+  function LDAPConnectivityCheck() {
+    const settings = angular.copy($scope.settings);
+
+    const { settings: ldapSettings, uploadRequired, tlscaFile } = prepareLDAPSettings();
+    settings.LDAPSettings = ldapSettings;
+    $scope.state.uploadInProgress = uploadRequired;
+
+    $scope.state.connectivityCheckInProgress = true;
+
+    $q.when(!uploadRequired || FileUploadService.uploadLDAPTLSFiles(tlscaFile, null, null))
+      .then(function success() {
+        return LDAPService.check(settings.LDAPSettings);
       })
-        .then(function success(data) {
-          var settings = data.settings;
-          $scope.teams = data.teams;
-          $scope.settings = settings;
-          $scope.formValues.LDAPSettings = settings.LDAPSettings;
-          $scope.OAuthSettings = settings.OAuthSettings;
-          $scope.formValues.TLSCACert = settings.LDAPSettings.TLSConfig.TLSCACert;
-          $scope.oauthAuthenticationAvailable = data.oauthAuthentication;
-        })
-        .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve application settings');
-        });
+      .then(function success() {
+        $scope.state.failedConnectivityCheck = false;
+        $scope.state.successfulConnectivityCheck = true;
+        Notifications.success('Success', 'Connection to LDAP successful');
+      })
+      .catch(function error(err) {
+        $scope.state.failedConnectivityCheck = true;
+        $scope.state.successfulConnectivityCheck = false;
+        Notifications.error('Failure', err, 'Connection to LDAP failed');
+      })
+      .finally(function final() {
+        $scope.state.uploadInProgress = false;
+        $scope.state.connectivityCheckInProgress = false;
+      });
+  }
+
+  $scope.saveSettings = function () {
+    const settings = angular.copy($scope.settings);
+
+    const { settings: ldapSettings, uploadRequired, tlscaFile } = prepareLDAPSettings();
+    settings.LDAPSettings = ldapSettings;
+    $scope.state.uploadInProgress = uploadRequired;
+
+    $scope.state.actionInProgress = true;
+
+    $q.when(!uploadRequired || FileUploadService.uploadLDAPTLSFiles(tlscaFile, null, null))
+      .then(function success() {
+        return SettingsService.update(settings);
+      })
+      .then(function success() {
+        Notifications.success('成功', '身份验证设置已更新');
+      })
+      .catch(function error(err) {
+        Notifications.error('失败', err, '无法更新身份验证设置');
+      })
+      .finally(function final() {
+        $scope.state.uploadInProgress = false;
+        $scope.state.actionInProgress = false;
+      });
+  };
+
+  function prepareLDAPSettings() {
+    const tlscaCert = $scope.formValues.TLSCACert;
+
+    const tlscaFile = tlscaCert !== $scope.settings.LDAPSettings.TLSConfig.TLSCACert ? tlscaCert : null;
+
+    const isADServer = $scope.formValues.ldap.serverType === 2;
+
+    const settings = isADServer ? $scope.formValues.ldap.adSettings : $scope.formValues.ldap.ldapSettings;
+
+    if (settings.AnonymousMode && !isADServer) {
+      settings.ReaderDN = '';
+      settings.Password = '';
     }
 
-    initView();
-  },
-]);
+    if (isADServer) {
+      settings.AnonymousMode = false;
+    }
+
+    settings.URLs = settings.URLs.map((url) => {
+      if (url === undefined || url === '') {
+        return;
+      }
+
+      if (url.includes(':')) {
+        return url;
+      }
+      return url + (settings.TLSConfig.TLS ? ':636' : ':389');
+    });
+
+    const uploadRequired = (settings.TLSConfig.TLS || settings.StartTLS) && !settings.TLSConfig.TLSSkipVerify;
+
+    settings.URL = settings.URLs[0];
+
+    return { settings, uploadRequired, tlscaFile };
+  }
+
+  $scope.isLDAPFormValid = isLDAPFormValid;
+  function isLDAPFormValid() {
+    const ldapSettings = $scope.formValues.ldap.serverType === 2 ? $scope.formValues.ldap.adSettings : $scope.formValues.ldap.ldapSettings;
+    const isTLSMode = ldapSettings.TLSConfig.TLS || ldapSettings.StartTLS;
+
+    return (
+      _.compact(ldapSettings.URLs).length &&
+      (ldapSettings.AnonymousMode || (ldapSettings.ReaderDN && ldapSettings.Password)) &&
+      (!isTLSMode || (isTLSMode && $scope.formValues.TLSCACert) || ldapSettings.TLSConfig.TLSSkipVerify) &&
+      (!$scope.settings.LDAPSettings.AdminAutoPopulate || ($scope.settings.LDAPSettings.AdminAutoPopulate && $scope.formValues.selectedAdminGroups.length > 0))
+    );
+  }
+
+  $scope.isOAuthTeamMembershipFormValid = isOAuthTeamMembershipFormValid;
+  function isOAuthTeamMembershipFormValid() {
+    if ($scope.settings && $scope.settings.OAuthSettings.OAuthAutoMapTeamMemberships && $scope.settings.OAuthSettings.TeamMemberships) {
+      if (!$scope.settings.OAuthSettings.TeamMemberships.OAuthClaimName) {
+        return false;
+      }
+
+      const hasInvalidMapping = $scope.settings.OAuthSettings.TeamMemberships.OAuthClaimMappings.some((m) => !(m.ClaimValRegex && m.Team));
+      if (hasInvalidMapping) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function initView() {
+    $q.all({
+      settings: SettingsService.settings(),
+      teams: TeamService.teams(),
+    })
+      .then(function success(data) {
+        var settings = data.settings;
+        $scope.teams = data.teams;
+        $scope.settings = settings;
+
+        $scope.OAuthSettings = settings.OAuthSettings;
+        $scope.authMethod = settings.AuthenticationMethod;
+        if (settings.AuthenticationMethod === 2 && settings.LDAPSettings.ServerType === 2) {
+          $scope.authMethod = 4;
+        }
+
+        if (settings.LDAPSettings.URL) {
+          settings.LDAPSettings.URLs = [settings.LDAPSettings.URL];
+        }
+        if (!settings.LDAPSettings.URLs) {
+          settings.LDAPSettings.URLs = [];
+        }
+        if (!settings.LDAPSettings.URLs.length) {
+          settings.LDAPSettings.URLs.push('');
+        }
+        if (!settings.LDAPSettings.ServerType) {
+          settings.LDAPSettings.ServerType = 0;
+        }
+
+        $scope.formValues.ldap.serverType = settings.LDAPSettings.ServerType;
+        if (settings.LDAPSettings.ServerType === 2) {
+          $scope.formValues.ldap.adSettings = settings.LDAPSettings;
+        } else {
+          $scope.formValues.ldap.ldapSettings = Object.assign($scope.formValues.ldap.ldapSettings, settings.LDAPSettings);
+        }
+      })
+      .catch(function error(err) {
+        Notifications.error('失败', err, '无法检索应用设置');
+      });
+  }
+
+  initView();
+}

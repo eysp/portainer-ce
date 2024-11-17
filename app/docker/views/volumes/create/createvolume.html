@@ -1,7 +1,4 @@
-<rd-header>
-  <rd-header-title title-text="创建存储卷"></rd-header-title>
-  <rd-header-content> <a ui-sref="docker.volumes">存储卷</a> &gt; 添加存储卷 </rd-header-content>
-</rd-header>
+<page-header title="'创建存储卷'" breadcrumbs="[{label:'存储卷', link:'docker.volumes'}, '添加存储卷']"> </page-header>
 
 <div class="row">
   <div class="col-sm-12">
@@ -16,15 +13,13 @@
             </div>
           </div>
           <!-- !name-input -->
-          <div class="col-sm-12 form-section-title">
-            驱动配置
-          </div>
+          <div class="col-sm-12 form-section-title"> 驱动程序配置 </div>
           <!-- driver-input -->
           <div class="form-group">
-            <label for="volume_driver" class="col-sm-2 col-md-1 control-label text-left">驱动</label>
+            <label for="volume_driver" class="col-sm-2 col-md-1 control-label text-left">驱动程序</label>
             <div class="col-sm-10 col-md-11">
               <select class="form-control" ng-options="driver for driver in availableVolumeDrivers" ng-model="formValues.Driver" ng-if="availableVolumeDrivers.length > 0">
-                <option disabled hidden value="">选择驱动</option>
+                <option disabled hidden value="">选择驱动程序</option>
               </select>
               <input type="text" class="form-control" ng-model="formValues.Driver" id="volume_driver" placeholder="例如 driverName" ng-if="availableVolumeDrivers.length === 0" />
             </div>
@@ -32,21 +27,18 @@
           <!-- !driver-input -->
           <!-- driver-options -->
           <div class="form-group" ng-hide="formValues.CIFSData.useCIFS || formValues.NFSData.useNFS">
-            <div class="col-sm-12" style="margin-top: 5px;">
+            <div class="col-sm-12" style="margin-top: 5px">
               <label class="control-label text-left">
-                驱动选项
-                <portainer-tooltip
-                  position="bottom"
-                  message="驱动程序选项特定于所选驱动程序。 请参阅所选驱动程序文档。"
-                ></portainer-tooltip>
+                驱动程序选项
+                <portainer-tooltip message="'驱动程序选项是特定于选定驱动程序的。请参考所选驱动程序文档。'"></portainer-tooltip>
               </label>
-              <span class="label label-default interactive" style="margin-left: 10px;" ng-click="addDriverOption()">
-                <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加驱动选项
+              <span class="label label-default interactive" style="margin-left: 10px" ng-click="addDriverOption()">
+                <pr-icon icon="'plus'" mode="'alt'"></pr-icon> 添加驱动程序选项
               </span>
             </div>
             <!-- driver-options-input-list -->
-            <div class="col-sm-12 form-inline" style="margin-top: 10px;">
-              <div ng-repeat="option in formValues.DriverOptions" style="margin-top: 2px;">
+            <div class="col-sm-12 form-inline" style="margin-top: 10px">
+              <div ng-repeat="option in formValues.DriverOptions" style="margin-top: 2px">
                 <div class="input-group col-sm-5 input-group-sm">
                   <span class="input-group-addon">名称</span>
                   <input type="text" class="form-control" ng-model="option.name" placeholder="例如 mountpoint" />
@@ -55,8 +47,8 @@
                   <span class="input-group-addon">value</span>
                   <input type="text" class="form-control" ng-model="option.value" placeholder="例如 /path/on/host" />
                 </div>
-                <button class="btn btn-sm btn-danger" type="button" ng-click="removeDriverOption($index)">
-                  <i class="fa fa-trash" aria-hidden="true"></i>
+                <button class="btn btn-sm btn-light" type="button" ng-click="removeDriverOption($index)">
+                  <pr-icon icon="'trash-2'" class-name="'icon-secondary icon-md'"></pr-icon>
                 </button>
               </div>
             </div>
@@ -65,57 +57,29 @@
           <!-- !driver-options -->
           <!-- nfs-management -->
           <div class="form-group col-md-12">
-            <label for="useNFS" class="control-label text-left">
-              使用 NFS 存储卷
-            </label>
-            <label class="switch" style="margin-left: 20px;">
-              <input type="checkbox" name="useNFS" ng-model="formValues.NFSData.useNFS" ng-click="formValues.CIFSData.useCIFS = false" />
-              <i></i>
-            </label>
-            <div ng-if="formValues.NFSData.useNFS" class="small text-muted" style="margin-top: 10px;">
-              确保 <code>nfs-utils</code> 已安装在您的主机上。
-            </div>
+            <por-switch-field checked="formValues.NFSData.useNFS" label="'使用 NFS 卷'" on-change="(onUseNFSChange)"></por-switch-field>
+            <div ng-if="formValues.NFSData.useNFS" class="small text-muted" style="margin-top: 10px"> 确保 <code>nfs-utils</code> 已安装在您的主机上。 </div>
           </div>
           <volumes-nfs-form data="formValues.NFSData" ng-show="formValues.Driver === 'local'"></volumes-nfs-form>
           <!-- !nfs-management -->
           <!-- cifs-management -->
           <div class="form-group col-md-12">
-            <label for="useCIFS" class="control-label text-left">
-              使用 CIFS 存储卷
-            </label>
-            <label class="switch" style="margin-left: 20px;">
-              <input type="checkbox" name="useCIFS" ng-model="formValues.CIFSData.useCIFS" ng-click="formValues.NFSData.useNFS = false" />
-              <i></i>
-            </label>
-            <div ng-if="formValues.CIFSData.useCIFS" class="small text-muted" style="margin-top: 10px;">
-              确保 <code>cifs-utils</code> 已安装在您的主机上。
-            </div>
+            <por-switch-field checked="formValues.CIFSData.useCIFS" label="'使用 CIFS 卷'" on-change="(onUseCIFSChange)"></por-switch-field>
+            <div ng-if="formValues.CIFSData.useCIFS" class="small text-muted" style="margin-top: 10px"> 确保 <code>cifs-utils</code> 已安装在您的主机上。 </div>
           </div>
           <volumes-cifs-form data="formValues.CIFSData" ng-show="formValues.Driver === 'local'"></volumes-cifs-form>
           <!-- !cifs-management -->
-          <!-- storidge -->
-          <div ng-if="formValues.Driver === 'cio:latest'">
-            <div class="col-sm-12 form-section-title">
-              Storidge
-            </div>
-            <storidge-profile-selector storidge-profile="formValues.StoridgeProfile"></storidge-profile-selector>
-          </div>
-          <!-- storidge -->
           <div ng-if="applicationState.endpoint.mode.agentProxy && applicationState.endpoint.mode.provider === 'DOCKER_SWARM_MODE' && formValues.Driver === 'local'">
-            <div class="col-sm-12 form-section-title">
-              部署
-            </div>
+            <div class="col-sm-12 form-section-title"> 部署 </div>
             <!-- node-selection -->
-            <node-selector model="formValues.NodeName"> </node-selector>
+            <node-selector model="formValues.NodeName" endpoint-id="endpoint.Id"> </node-selector>
             <!-- !node-selection -->
           </div>
           <!-- access-control -->
-          <por-access-control-form form-data="formValues.AccessControlData" ng-if="applicationState.application.authentication"></por-access-control-form>
+          <por-access-control-form form-data="formValues.AccessControlData"></por-access-control-form>
           <!-- !access-control -->
           <!-- actions -->
-          <div class="col-sm-12 form-section-title">
-            操作
-          </div>
+          <div class="col-sm-12 form-section-title"> 操作 </div>
           <div class="form-group">
             <div class="col-sm-12">
               <button
@@ -126,9 +90,9 @@
                 button-spinner="state.actionInProgress"
               >
                 <span ng-hide="state.actionInProgress">创建存储卷</span>
-                <span ng-show="state.actionInProgress">存储卷创建中...</span>
+                <span ng-show="state.actionInProgress">正在创建存储卷...</span>
               </button>
-              <span class="text-danger" ng-if="state.formValidationError" style="margin-left: 5px;">{{ state.formValidationError }}</span>
+              <span class="text-danger" ng-if="state.formValidationError" style="margin-left: 5px">{{ state.formValidationError }}</span>
             </div>
           </div>
           <!-- !actions -->

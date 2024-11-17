@@ -1,37 +1,51 @@
 package endpoints
 
 import (
+	"errors"
 	"net/http"
 
-	httperror "github.com/portainer/libhttp/error"
-	"github.com/portainer/libhttp/request"
-	"github.com/portainer/libhttp/response"
-	"github.com/portainer/portainer/api"
+	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/internal/snapshot"
+	httperror "github.com/portainer/portainer/pkg/libhttp/error"
+	"github.com/portainer/portainer/pkg/libhttp/request"
+	"github.com/portainer/portainer/pkg/libhttp/response"
 )
 
-// POST request on /api/endpoints/:id/snapshot
+// @id EndpointSnapshot
+// @summary Snapshots an environment(endpoint)
+// @description Snapshots an environment(endpoint)
+// @description **Access policy**: administrator
+// @tags endpoints
+// @security ApiKeyAuth
+// @security jwt
+// @param id path int true "Environment(Endpoint) identifier"
+// @success 204 "Success"
+// @failure 400 "Invalid request"
+// @failure 404 "Environment(Endpoint) not found"
+// @failure 500 "Server error"
+// @router /endpoints/{id}/snapshot [post]
 func (handler *Handler) endpointSnapshot(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	endpointID, err := request.RetrieveNumericRouteVariableValue(r, "id")
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid endpoint identifier route variable", err}
+		return httperror.BadRequest("Invalid environment identifier route variable", err)
 	}
 
-	endpoint, err := handler.EndpointService.Endpoint(portainer.EndpointID(endpointID))
-	if err == portainer.ErrObjectNotFound {
-		return &httperror.HandlerError{http.StatusNotFound, "Unable to find an endpoint with the specified identifier inside the database", err}
+	endpoint, err := handler.DataStore.Endpoint().Endpoint(portainer.EndpointID(endpointID))
+	if handler.DataStore.IsErrObjectNotFound(err) {
+		return httperror.NotFound("Unable to find an environment with the specified identifier inside the database", err)
 	} else if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to find an endpoint with the specified identifier inside the database", err}
+		return httperror.InternalServerError("Unable to find an environment with the specified identifier inside the database", err)
 	}
 
-	if endpoint.Type == portainer.AzureEnvironment {
-		return &httperror.HandlerError{http.StatusBadRequest, "Snapshots not supported for Azure endpoints", err}
+	if !snapshot.SupportDirectSnapshot(endpoint) {
+		return httperror.BadRequest("Snapshots not supported for this environment", errors.New("Snapshots not supported for this environment"))
 	}
 
-	snapshot, snapshotError := handler.Snapshotter.CreateSnapshot(endpoint)
+	snapshotError := handler.SnapshotService.SnapshotEndpoint(endpoint)
 
-	latestEndpointReference, err := handler.EndpointService.Endpoint(endpoint.ID)
+	latestEndpointReference, err := handler.DataStore.Endpoint().Endpoint(endpoint.ID)
 	if latestEndpointReference == nil {
-		return &httperror.HandlerError{http.StatusNotFound, "Unable to find an endpoint with the specified identifier inside the database", err}
+		return httperror.NotFound("Unable to find an environment with the specified identifier inside the database", err)
 	}
 
 	latestEndpointReference.Status = portainer.EndpointStatusUp
@@ -39,13 +53,11 @@ func (handler *Handler) endpointSnapshot(w http.ResponseWriter, r *http.Request)
 		latestEndpointReference.Status = portainer.EndpointStatusDown
 	}
 
-	if snapshot != nil {
-		latestEndpointReference.Snapshots = []portainer.Snapshot{*snapshot}
-	}
+	latestEndpointReference.Agent.Version = endpoint.Agent.Version
 
-	err = handler.EndpointService.UpdateEndpoint(latestEndpointReference.ID, latestEndpointReference)
+	err = handler.DataStore.Endpoint().UpdateEndpoint(latestEndpointReference.ID, latestEndpointReference)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to persist endpoint changes inside the database", err}
+		return httperror.InternalServerError("Unable to persist environment changes inside the database", err)
 	}
 
 	return response.Empty(w)

@@ -3,34 +3,37 @@ package settings
 import (
 	"net/http"
 
-	"github.com/gorilla/mux"
-	httperror "github.com/portainer/libhttp/error"
-	"github.com/portainer/portainer/api"
+	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/dataservices"
+	"github.com/portainer/portainer/api/demo"
 	"github.com/portainer/portainer/api/http/security"
+	httperror "github.com/portainer/portainer/pkg/libhttp/error"
+
+	"github.com/gorilla/mux"
 )
 
 func hideFields(settings *portainer.Settings) {
 	settings.LDAPSettings.Password = ""
 	settings.OAuthSettings.ClientSecret = ""
+	settings.OAuthSettings.KubeSecretKey = nil
 }
 
 // Handler is the HTTP handler used to handle settings operations.
 type Handler struct {
 	*mux.Router
-	SettingsService      portainer.SettingsService
-	LDAPService          portainer.LDAPService
-	FileService          portainer.FileService
-	JobScheduler         portainer.JobScheduler
-	ScheduleService      portainer.ScheduleService
-	RoleService          portainer.RoleService
-	ExtensionService     portainer.ExtensionService
-	AuthorizationService *portainer.AuthorizationService
+	DataStore       dataservices.DataStore
+	FileService     portainer.FileService
+	JWTService      portainer.JWTService
+	LDAPService     portainer.LDAPService
+	SnapshotService portainer.SnapshotService
+	demoService     *demo.Service
 }
 
 // NewHandler creates a handler to manage settings operations.
-func NewHandler(bouncer *security.RequestBouncer) *Handler {
+func NewHandler(bouncer security.BouncerService, demoService *demo.Service) *Handler {
 	h := &Handler{
-		Router: mux.NewRouter(),
+		Router:      mux.NewRouter(),
+		demoService: demoService,
 	}
 	h.Handle("/settings",
 		bouncer.AdminAccess(httperror.LoggerHandler(h.settingsInspect))).Methods(http.MethodGet)
@@ -38,8 +41,6 @@ func NewHandler(bouncer *security.RequestBouncer) *Handler {
 		bouncer.AdminAccess(httperror.LoggerHandler(h.settingsUpdate))).Methods(http.MethodPut)
 	h.Handle("/settings/public",
 		bouncer.PublicAccess(httperror.LoggerHandler(h.settingsPublic))).Methods(http.MethodGet)
-	h.Handle("/settings/authentication/checkLDAP",
-		bouncer.AdminAccess(httperror.LoggerHandler(h.settingsLDAPCheck))).Methods(http.MethodPut)
 
 	return h
 }

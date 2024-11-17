@@ -1,7 +1,4 @@
-<rd-header>
-  <rd-header-title title-text="构建镜像"></rd-header-title>
-  <rd-header-content> <a ui-sref="docker.images">镜像</a> &gt; 构建镜像 </rd-header-content>
-</rd-header>
+<page-header title="'Build image'" breadcrumbs="[{label:'Images', link:'docker.images'}, 'Build image']"> </page-header>
 
 <div class="row">
   <div class="col-sm-12">
@@ -9,153 +6,129 @@
       <rd-widget-body>
         <uib-tabset active="state.activeTab">
           <uib-tab index="0">
-            <uib-tab-heading> <i class="fa fa-wrench space-right" aria-hidden="true"></i> 构建 </uib-tab-heading>
+            <uib-tab-heading class="vertical-center"> <pr-icon icon="'wrench'" class="leading-none"></pr-icon> Builder </uib-tab-heading>
             <form class="form-horizontal">
-              <div class="col-sm-12 form-section-title">
-                命名
-              </div>
+              <div class="col-sm-12 form-section-title"> Naming </div>
               <!-- names -->
               <div class="form-group">
-                <span class="col-sm-12 text-muted small">
-                  您可以为镜像指定多个名称。
-                </span>
+                <span class="col-sm-12 text-muted small"> You can specify multiple names to your image. </span>
               </div>
               <div class="form-group">
                 <div class="col-sm-12">
-                  <label class="control-label text-left">名称</label>
-                  <span class="label label-default interactive" style="margin-left: 10px;" ng-click="addImageName()">
-                    <i class="fa fa-plus-circle" aria-hidden="true"></i> 添加其他名称
-                  </span>
+                  <label class="control-label text-left">Names</label>
+                  <span class="label label-default interactive" class="ml-2.5" ng-click="addImageName()"> <pr-icon icon="'plus'" mode="'alt'"></pr-icon> add additional name </span>
                 </div>
               </div>
               <!-- !names -->
               <div class="form-group" ng-if="formValues.ImageNames.length === 0">
                 <span class="col-sm-12 text-danger small">
-                  <i class="fa fa-exclamation-triangle space-right" aria-hidden="true"></i>您必须至少为镜像指定一个名称。
+                  <p class="vertical-center"> <pr-icon icon="'alert-triangle'" mode="'danger'" size="'sm'"></pr-icon> You must specify at least one name for the image. </p>
                 </span>
               </div>
               <!-- name-input-list -->
               <div ng-if="formValues.ImageNames.length > 0">
                 <div class="form-group">
                   <span class="col-sm-12 text-muted small">
-                    名称必须以下列格式之一指定： <code>name:tag</code>, <code>repository/name:tag</code> 或
-                    <code>registryfqdn:port/repository/name:tag</code> 格式。 如果省略标记，则使用默认 <b>latest</b> 值。
+                    A name must be specified in one of the following formats: <code>name:tag</code>, <code>repository/name:tag</code> or
+                    <code>registryfqdn:port/repository/name:tag</code> format. If you omit the tag the default <b>latest</b> value is assumed.
                   </span>
                 </div>
                 <div class="form-group">
                   <div class="col-sm-12">
-                    <div class="col-sm-12 form-inline" style="margin-top: 10px;">
-                      <div ng-repeat="item in formValues.ImageNames track by $index" style="margin-top: 2px;">
+                    <div class="col-sm-12 form-inline" class="mt-2.5">
+                      <div ng-repeat="item in formValues.ImageNames track by $index" class="mt-1">
                         <!-- name-input -->
                         <div class="input-group col-sm-5 input-group-sm">
-                          <span class="input-group-addon">名称</span>
-                          <input type="text" class="form-control" ng-model="item.Name" placeholder="例如 myImage:myTag" auto-focus />
-                          <span class="input-group-addon"
-                            ><i ng-class="{ true: 'fa fa-check green-icon', false: 'fa fa-times red-icon' }[item.Name !== '']" aria-hidden="true"></i
-                          ></span>
+                          <span class="input-group-addon">name</span>
+                          <input type="text" class="form-control" ng-model="item.Name" ng-change="checkName($index)" placeholder="e.g. my-image:my-tag" auto-focus />
+                          <span class="input-group-addon" ng-if="!item.Valid">
+                            <pr-icon icon="'x'" mode="'danger'"></pr-icon>
+                          </span>
+                          <span class="input-group-addon" ng-if="item.Valid">
+                            <pr-icon icon="'check'" mode="'success'"></pr-icon>
+                          </span>
                         </div>
                         <!-- !name-input -->
                         <!-- actions -->
                         <div class="input-group col-sm-2 input-group-sm">
-                          <button class="btn btn-sm btn-danger" type="button" ng-click="removeImageName($index)">
-                            <i class="fa fa-trash" aria-hidden="true"></i>
+                          <button class="btn btn-dangerlight btn-only-icon" type="button" ng-click="removeImageName($index)">
+                            <pr-icon icon="'trash-2'"></pr-icon>
                           </button>
                         </div>
                         <!-- !actions -->
+                        <div class="small text-warning" ng-if="!item.Valid">
+                          <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
+                          <span ng-if="!item.Unique">The image name must be unique</span>
+                          <span ng-if="item.Unique"
+                            >The image name must consist of between 2 and 255 lowercase alphanumeric characters, '.', '_', or '-' (e.g. 'my-name', or 'abc-123').</span
+                          >
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
               <!-- !name-input-list -->
-              <!-- build-method -->
-              <div class="col-sm-12 form-section-title">
-                构建方法
-              </div>
-              <div class="form-group"></div>
-              <div class="form-group" style="margin-bottom: 0;">
-                <div class="boxselector_wrapper">
-                  <div>
-                    <input type="radio" id="method_editor" ng-model="state.BuildType" value="editor" ng-click="toggleEditor()" />
-                    <label for="method_editor">
-                      <div class="boxselector_header">
-                        <i class="fa fa-edit" aria-hidden="true" style="margin-right: 2px;"></i>
-                        Web editor
-                      </div>
-                      <p>使用我们的网页编辑器</p>
-                    </label>
-                  </div>
-                  <div>
-                    <input type="radio" id="method_upload" ng-model="state.BuildType" value="upload" ng-click="saveEditorContent()" />
-                    <label for="method_upload">
-                      <div class="boxselector_header">
-                        <i class="fa fa-upload" aria-hidden="true" style="margin-right: 2px;"></i>
-                        上传
-                      </div>
-                      <p>从您的计算机上传 tarball 或 Dockerfile</p>
-                    </label>
-                  </div>
-                  <div>
-                    <input type="radio" id="method_url" ng-model="state.BuildType" value="url" ng-click="saveEditorContent()" />
-                    <label for="method_url">
-                      <div class="boxselector_header">
-                        <i class="fa fa-globe" aria-hidden="true" style="margin-right: 2px;"></i>
-                        URL
-                      </div>
-                      <p>指定文件的 URL</p>
-                    </label>
-                  </div>
-                </div>
-              </div>
-              <!-- !build-method -->
+              <div class="col-sm-12 form-section-title"> Build method </div>
+              <box-selector options="options" slim="true" value="state.BuildType" on-change="(onChangeBuildType)"></box-selector>
+
               <!-- web-editor -->
+              <!-- TODO use web-editor-form component -->
               <div ng-show="state.BuildType === 'editor'">
-                <div class="col-sm-12 form-section-title">
-                  Web editor
-                </div>
+                <div class="col-sm-12 form-section-title"> Web editor </div>
                 <div class="form-group">
                   <span class="col-sm-12 text-muted small">
-                    您可以在 Dockerfile 格式中获得更多信息
-                    <a href="https://docs.docker.com/engine/reference/builder/" target="_blank">官方文档</a>。
+                    You can get more information about Dockerfile format in the
+                    <a href="https://docs.docker.com/engine/reference/builder/" target="_blank">official documentation</a>.
                   </span>
                 </div>
                 <div class="form-group">
                   <div class="col-sm-12">
                     <code-editor
                       identifier="image-build-editor"
-                      placeholder="在此处定义或粘贴 Dockerfile 的内容"
-                      yml="false"
+                      placeholder="Define or paste the content of your Dockerfile here"
+                      docker-file="true"
                       on-change="(editorUpdate)"
                     ></code-editor>
+                  </div>
+                </div>
+                <div class="col-sm-12 form-section-title"> Upload </div>
+                <div class="form-group">
+                  <div class="col-sm-12">
+                    <div class="form-group">
+                      <span class="col-sm-12 text-muted small">
+                        You can upload files from your local computer for referencing in your Dockerfile (using ADD filename) so they are included in your built image.
+                      </span>
+                    </div>
+                    <button class="btn btn-sm btn-primary" ngf-select="selectAdditionalFiles($files)" ngf-multiple="true">Select files</button>
+                    <span ng-repeat="item in formValues.AdditionalFiles track by $index" class="mx-2">
+                      {{ item.name }}
+                    </span>
                   </div>
                 </div>
               </div>
               <!-- !web-editor -->
               <!-- upload -->
               <div ng-show="state.BuildType === 'upload'">
-                <div class="col-sm-12 form-section-title">
-                  上传
-                </div>
+                <div class="col-sm-12 form-section-title"> Upload </div>
                 <div class="form-group">
-                  <span class="text-muted small">
-                    您可以从计算机上传 Dockerfile 或包含 Dockerfile 的 tar 存档。 使用 tarball 时，根文件夹将用作构建
-                     语境。
+                  <span class="col-sm-12 text-muted small">
+                    You can upload a Dockerfile or a tar archive containing a Dockerfile from your computer. When using a tarball, the root folder will be used as the build
+                    context.
                   </span>
                 </div>
                 <div class="form-group">
-                  <div class="col-sm-12">
-                    <button class="btn btn-sm btn-primary" ngf-select ngf-min-size="10" ng-model="formValues.UploadFile">选择文件</button>
-                    <span style="margin-left: 5px;">
+                  <div class="col-sm-12 vertical-center">
+                    <button class="btn btn-sm btn-primary" ngf-select ngf-min-size="10" ng-model="formValues.UploadFile">Select file</button>
+                    <span class="space-left">
                       {{ formValues.UploadFile.name }}
-                      <i class="fa fa-times red-icon" ng-if="!formValues.UploadFile" aria-hidden="true"></i>
+                      <span ng-if="!formValues.UploadFile"><pr-icon icon="'x'" mode="'danger'" size="'md'"></pr-icon></span>
                     </span>
                   </div>
                 </div>
                 <div ng-if="formValues.UploadFile.type === 'application/gzip' || formValues.UploadFile.type === 'application/x-tar'">
                   <div class="form-group">
-                    <span class="col-sm-12 text-muted small">
-                      指明 tarball 中 Dockerfile 的路径。
-                    </span>
+                    <span class="col-sm-12 text-muted small"> Indicate the path to the Dockerfile within the tarball. </span>
                   </div>
                   <div class="form-group">
                     <label for="image_path" class="col-sm-2 control-label text-left">Dockerfile path</label>
@@ -168,24 +141,32 @@
               <!-- !upload -->
               <!-- url -->
               <div ng-show="state.BuildType === 'url'">
-                <div class="col-sm-12 form-section-title">
-                  URL
-                </div>
+                <div class="col-sm-12 form-section-title"> URL </div>
                 <div class="form-group">
-                  <span class="col-sm-12 text-muted small">
-                    指定 Dockerfile、tarball 或公共 Git 存储库（以 <b>.git</b>为后缀）的 URL。 使用 tarball 或 Git 存储库 URL 时，根文件夹
-                     将用作构建上下文。
+                  <span class="col-sm-12 small vertical-center">
+                    <pr-icon icon="'info'" mode="'primary'"></pr-icon>
+                    <span class="text-muted"
+                      >Specify the URL to a Dockerfile, a tarball or a public Git repository (suffixed by <b>.git</b>). When using a Git repository URL, build contexts can be
+                      specified as in the <a href="https://docs.docker.com/engine/reference/commandline/build/#git-repositories">Docker documentation.</a></span
+                    >
                   </span>
                 </div>
                 <div class="form-group">
                   <label for="image_url" class="col-sm-2 control-label text-left">URL</label>
                   <div class="col-sm-10">
-                    <input type="text" class="form-control" ng-model="formValues.URL" id="image_url" placeholder="https://myhost.mydomain/myimage.tar.gz" />
+                    <input
+                      type="text"
+                      class="form-control"
+                      ng-model="formValues.URL"
+                      id="image_url"
+                      placeholder="https://myhost.mydomain/myimage.tar.gz or https://github.com/myname/myrepo.git#mybranch"
+                    />
                   </div>
                 </div>
                 <div class="form-group">
-                  <span class="col-sm-12 text-muted small">
-                    指明 tarball/repository 中 Dockerfile 的路径（使用 Dockerfile 时忽略）。
+                  <span class="col-sm-12 text-muted small vertical-center">
+                    <pr-icon icon="'info'" mode="'primary'"></pr-icon>
+                    Indicate the path to the Dockerfile within the tarball/repository (ignored when using a Dockerfile).
                   </span>
                 </div>
                 <div class="form-group">
@@ -197,43 +178,40 @@
               </div>
               <!-- !url -->
               <div ng-if="applicationState.endpoint.mode.agentProxy && applicationState.endpoint.mode.provider === 'DOCKER_SWARM_MODE'">
-                <div class="col-sm-12 form-section-title">
-                  部署
-                </div>
+                <div class="col-sm-12 form-section-title"> Deployment </div>
                 <!-- node-selection -->
-                <node-selector model="formValues.NodeName"> </node-selector>
+                <node-selector model="formValues.NodeName" endpoint-id="endpoint.Id"> </node-selector>
                 <!-- !node-selection -->
               </div>
               <!-- actions -->
-              <div class="col-sm-12 form-section-title">
-                操作
-              </div>
+              <div class="col-sm-12 form-section-title"> Actions </div>
               <div class="form-group">
                 <div class="col-sm-12">
                   <button
                     type="button"
                     class="btn btn-primary btn-sm"
                     ng-disabled="state.actionInProgress
+                    || (state.BuildType === 'editor' && formValues.DockerFileContent === '')
                     || (state.BuildType === 'upload' && (!formValues.UploadFile || !formValues.Path))
                     || (state.BuildType === 'url' && (!formValues.URL || !formValues.Path))
                     || (formValues.ImageNames.length === 0 || !validImageNames())"
                     ng-click="buildImage()"
                     button-spinner="state.actionInProgress"
                   >
-                    <span ng-hide="state.actionInProgress">构建镜像</span>
-                    <span ng-show="state.actionInProgress">正在构建镜像...</span>
+                    <span ng-hide="state.actionInProgress">Build the image</span>
+                    <span ng-show="state.actionInProgress">Image building in progress...</span>
                   </button>
-                  <span class="text-danger" ng-if="state.formValidationError" style="margin-left: 5px;">{{ state.formValidationError }}</span>
+                  <span class="text-danger" ng-if="state.formValidationError" class="space-left">{{ state.formValidationError }}</span>
                 </div>
               </div>
               <!-- !actions -->
             </form>
           </uib-tab>
           <uib-tab index="1" disable="!buildLogs">
-            <uib-tab-heading> <i class="fa fa-file-alt space-right" aria-hidden="true"></i> Output </uib-tab-heading>
-            <pre class="log_viewer">
+            <uib-tab-heading class="vertical-center"> <pr-icon icon="'file-text'" class="leading-none"></pr-icon> Output </uib-tab-heading>
+            <pre class="log_viewer" data-cy="logViewer">
               <div ng-repeat="line in buildLogs track by $index" class="line"><p class="inner_line" ng-click="active=!active" ng-class="{'line_selected': active}">{{ line }}</p></div>
-              <div ng-if="!buildLogs.length" class="line"><p class="inner_line">没有可用的构建输出。</p></div>
+              <div ng-if="!buildLogs.length" class="line"><p class="inner_line">No build output available.</p></div>
             </pre>
           </uib-tab>
         </uib-tabset>

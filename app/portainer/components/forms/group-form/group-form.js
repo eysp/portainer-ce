@@ -6,16 +6,12 @@ angular.module('portainer.app').component('groupForm', {
   controller: GroupFormController,
   bindings: {
     loaded: '<',
-    pageType: '@',
     model: '=',
-    availableEndpoints: '=',
-    availableTags: '<',
     associatedEndpoints: '=',
-    addLabelAction: '<',
-    removeLabelAction: '<',
     formAction: '<',
     formActionLabel: '@',
     actionInProgress: '<',
-    onCreateTag: '<',
+
+    onChangeEnvironments: '<',
   },
 });

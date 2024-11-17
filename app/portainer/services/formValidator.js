@@ -1,4 +1,4 @@
-import { ResourceControlOwnership as RCO } from 'Portainer/models/resourceControl/resourceControlOwnership';
+import { ResourceControlOwnership as RCO } from '@/react/portainer/access-control/types';
 
 angular.module('portainer.app').factory('FormValidator', [
   function FormValidatorFactory() {
@@ -12,9 +12,9 @@ angular.module('portainer.app').factory('FormValidator', [
       }
 
       if (isAdmin && accessControlData.Ownership === RCO.RESTRICTED && accessControlData.AuthorizedUsers.length === 0 && accessControlData.AuthorizedTeams.length === 0) {
-        return 'Äú±ØĞëÖÁÉÙÖ¸¶¨Ò»¸öÍÅ¶Ó»òÓÃ»§¡£';
+        return 'æ‚¨å¿…é¡»æŒ‡å®šè‡³å°‘ä¸€ä¸ªå›¢é˜Ÿæˆ–ç”¨æˆ·ã€‚';
       } else if (!isAdmin && accessControlData.Ownership === RCO.RESTRICTED && accessControlData.AuthorizedTeams.length === 0) {
-        return 'Äú±ØĞëÖÁÉÙÖ¸¶¨Ò»¸öÍÅ¶Ó¡£';
+        return 'æ‚¨å¿…é¡»æŒ‡å®šè‡³å°‘ä¸€ä¸ªå›¢é˜Ÿã€‚';
       }
       return '';
     };

@@ -2,22 +2,23 @@ package client
 
 import (
 	"crypto/tls"
-	"encoding/json"
+	"errors"
 	"fmt"
-	"io/ioutil"
-	"log"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
 
-	"github.com/portainer/portainer/api"
+	portainer "github.com/portainer/portainer/api"
+
+	"github.com/rs/zerolog/log"
+	"github.com/segmentio/encoding/json"
 )
 
-const (
-	errInvalidResponseStatus = portainer.Error("Invalid response status (expecting 200)")
-	defaultHTTPTimeout       = 5
-)
+var errInvalidResponseStatus = errors.New("invalid response status (expecting 200)")
+
+const defaultHTTPTimeout = 5
 
 // HTTPClient represents a client to send HTTP requests.
 type HTTPClient struct {
@@ -50,17 +51,18 @@ func (client *HTTPClient) ExecuteAzureAuthenticationRequest(credentials *portain
 		"resource":      {"https://management.azure.com/"},
 	}
 
-	response, err := client.PostForm(loginURL, params)
+	resp, err := client.PostForm(loginURL, params)
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
-	if response.StatusCode != http.StatusOK {
-		return nil, portainer.ErrAzureInvalidCredentials
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New("invalid Azure credentials")
 	}
 
 	var token AzureAuthenticationResponse
-	err = json.NewDecoder(response.Body).Decode(&token)
+	err = json.NewDecoder(resp.Body).Decode(&token)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +74,6 @@ func (client *HTTPClient) ExecuteAzureAuthenticationRequest(credentials *portain
 // the content of the response body. Timeout can be specified via the timeout parameter,
 // will default to defaultHTTPTimeout if set to 0.
 func Get(url string, timeout int) ([]byte, error) {
-
 	if timeout == 0 {
 		timeout = defaultHTTPTimeout
 	}
@@ -88,11 +89,12 @@ func Get(url string, timeout int) ([]byte, error) {
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		log.Printf("[ERROR] [http,client] [message: unexpected status code] [status_code: %d]", response.StatusCode)
+		log.Error().Int("status_code", response.StatusCode).Msg("unexpected status code")
+
 		return nil, errInvalidResponseStatus
 	}
 
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +102,7 @@ func Get(url string, timeout int) ([]byte, error) {
 	return body, nil
 }
 
-// ExecutePingOperation will send a SystemPing operation HTTP request to a Docker environment
+// ExecutePingOperation will send a SystemPing operation HTTP request to a Docker environment(endpoint)
 // using the specified host and optional TLS configuration.
 // It uses a new Http.Client for each operation.
 func ExecutePingOperation(host string, tlsConfig *tls.Config) (bool, error) {
@@ -124,13 +126,16 @@ func ExecutePingOperation(host string, tlsConfig *tls.Config) (bool, error) {
 func pingOperation(client *http.Client, target string) (bool, error) {
 	pingOperationURL := target + "/_ping"
 
-	response, err := client.Get(pingOperationURL)
+	resp, err := client.Get(pingOperationURL)
 	if err != nil {
 		return false, err
 	}
 
+	io.Copy(io.Discard, resp.Body)
+	resp.Body.Close()
+
 	agentOnDockerEnvironment := false
-	if response.Header.Get(portainer.PortainerAgentHeader) != "" {
+	if resp.Header.Get(portainer.PortainerAgentHeader) != "" {
 		agentOnDockerEnvironment = true
 	}
 

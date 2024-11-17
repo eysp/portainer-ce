@@ -1,27 +1,51 @@
 import _ from 'lodash-es';
 import { PorImageRegistryModel } from 'Docker/models/porImageRegistry';
+import { confirmImageExport } from '@/react/docker/images/common/ConfirmExportModal';
+import { confirmDelete } from '@@/modals/confirm';
 
 angular.module('portainer.docker').controller('ImageController', [
+  '$async',
   '$q',
   '$scope',
   '$transition$',
   '$state',
-  '$timeout',
+  'Authentication',
   'ImageService',
   'ImageHelper',
   'RegistryService',
   'Notifications',
   'HttpRequestHelper',
-  'ModalService',
   'FileSaver',
   'Blob',
-  function ($q, $scope, $transition$, $state, $timeout, ImageService, ImageHelper, RegistryService, Notifications, HttpRequestHelper, ModalService, FileSaver, Blob) {
+  'endpoint',
+  'RegistryModalService',
+  function (
+    $async,
+    $q,
+    $scope,
+    $transition$,
+    $state,
+    Authentication,
+    ImageService,
+    ImageHelper,
+    RegistryService,
+    Notifications,
+    HttpRequestHelper,
+    FileSaver,
+    Blob,
+    endpoint,
+    RegistryModalService
+  ) {
+    $scope.endpoint = endpoint;
+    $scope.isAdmin = Authentication.isAdmin();
+
     $scope.formValues = {
       RegistryModel: new PorImageRegistryModel(),
     };
 
     $scope.state = {
       exportInProgress: false,
+      pullImageValidity: false,
     };
 
     $scope.sortType = 'Order';
@@ -38,6 +62,11 @@ angular.module('portainer.docker').controller('ImageController', [
       $('#layer-command-' + layerId + '-full').toggle();
     };
 
+    $scope.setPullImageValidity = setPullImageValidity;
+    function setPullImageValidity(validity) {
+      $scope.state.pullImageValidity = validity;
+    }
+
     $scope.tagImage = function () {
       const registryModel = $scope.formValues.RegistryModel;
 
@@ -45,7 +74,7 @@ angular.module('portainer.docker').controller('ImageController', [
 
       ImageService.tagImage($transition$.params().id, image.fromImage)
         .then(function success() {
-          Notifications.success('Image successfully tagged');
+          Notifications.success('Success', 'Image successfully tagged');
           $state.go('docker.images.image', { id: $transition$.params().id }, { reload: true });
         })
         .catch(function error(err) {
@@ -53,75 +82,91 @@ angular.module('portainer.docker').controller('ImageController', [
         });
     };
 
-    $scope.pushTag = function (repository) {
-      $('#uploadResourceHint').show();
-      RegistryService.retrievePorRegistryModelFromRepository(repository)
-        .then(function success(registryModel) {
-          return ImageService.pushImage(registryModel);
-        })
-        .then(function success() {
-          Notifications.success('Image successfully pushed', repository);
-        })
-        .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to push image to repository');
-        })
-        .finally(function final() {
-          $('#uploadResourceHint').hide();
-        });
-    };
+    $scope.pushTag = pushTag;
 
-    $scope.pullTag = function (repository) {
-      $('#downloadResourceHint').show();
-      RegistryService.retrievePorRegistryModelFromRepository(repository)
-        .then(function success(registryModel) {
-          return ImageService.pullImage(registryModel, false);
-        })
-        .then(function success() {
-          Notifications.success('Image successfully pulled', repository);
-        })
-        .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to pull image');
-        })
-        .finally(function final() {
+    async function pushTag(repository) {
+      return $async(async () => {
+        try {
+          const registryModel = await RegistryModalService.registryModal(repository, $scope.registries);
+
+          if (registryModel) {
+            $('#uploadResourceHint').show();
+            await ImageService.pushImage(registryModel);
+            Notifications.success('Image successfully pushed', repository);
+          }
+        } catch (err) {
+          Notifications.error('Failure', err, 'Unable to push image to repository');
+        } finally {
+          $('#uploadResourceHint').hide();
+        }
+      });
+    }
+
+    $scope.pullTag = pullTag;
+    async function pullTag(repository) {
+      return $async(async () => {
+        try {
+          const registryModel = await RegistryModalService.registryModal(repository, $scope.registries);
+          if (registryModel) {
+            $('#downloadResourceHint').show();
+            await ImageService.pullImage(registryModel);
+            Notifications.success('Image successfully pulled', repository);
+          }
+        } catch (err) {
+          Notifications.error('Failure', err, 'Unable to pull image from repository');
+        } finally {
           $('#downloadResourceHint').hide();
-        });
-    };
+        }
+      });
+    }
 
     $scope.removeTag = function (repository) {
-      ImageService.deleteImage(repository, false)
-        .then(function success() {
-          if ($scope.image.RepoTags.length === 1) {
-            Notifications.success('Image successfully deleted', repository);
-            $state.go('docker.images', {}, { reload: true });
-          } else {
-            Notifications.success('Tag successfully deleted', repository);
-            $state.go('docker.images.image', { id: $transition$.params().id }, { reload: true });
-          }
-        })
-        .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to remove image');
-        });
+      return $async(async () => {
+        if (!(await confirmDelete('Are you sure you want to delete this tag?'))) {
+          return;
+        }
+
+        ImageService.deleteImage(repository, false)
+          .then(function success() {
+            if ($scope.image.RepoTags.length === 1) {
+              Notifications.success('Image successfully deleted', repository);
+              $state.go('docker.images', {}, { reload: true });
+            } else {
+              Notifications.success('Tag successfully deleted', repository);
+              $state.go('docker.images.image', { id: $transition$.params().id }, { reload: true });
+            }
+          })
+          .catch(function error(err) {
+            Notifications.error('Failure', err, 'Unable to remove image');
+          });
+      });
     };
 
     $scope.removeImage = function (id) {
-      ImageService.deleteImage(id, false)
-        .then(function success() {
-          Notifications.success('Image successfully deleted', id);
-          $state.go('docker.images', {}, { reload: true });
-        })
-        .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to remove image');
-        });
+      return $async(async () => {
+        if (!(await confirmDelete('Deleting this image will also delete all associated tags. Are you sure you want to delete this image?'))) {
+          return;
+        }
+
+        ImageService.deleteImage(id, false)
+          .then(function success() {
+            Notifications.success('Image successfully deleted', id);
+            $state.go('docker.images', {}, { reload: true });
+          })
+          .catch(function error(err) {
+            Notifications.error('Failure', err, 'Unable to remove image');
+          });
+      });
     };
 
     function exportImage(image) {
       HttpRequestHelper.setPortainerAgentTargetHeader(image.NodeName);
       $scope.state.exportInProgress = true;
-      ImageService.downloadImages([image])
+      ImageService.downloadImages([{ tags: image.RepoTags, id: image.Id }])
         .then(function success(data) {
           var downloadData = new Blob([data.file], { type: 'application/x-tar' });
           FileSaver.saveAs(downloadData, 'images.tar');
-          Notifications.success('Image successfully downloaded');
+          Notifications.success('Success', 'Image successfully downloaded');
         })
         .catch(function error(err) {
           Notifications.error('Failure', err, 'Unable to download image');
@@ -137,7 +182,7 @@ angular.module('portainer.docker').controller('ImageController', [
         return;
       }
 
-      ModalService.confirmImageExport(function (confirmed) {
+      confirmImageExport(function (confirmed) {
         if (!confirmed) {
           return;
         }
@@ -145,16 +190,23 @@ angular.module('portainer.docker').controller('ImageController', [
       });
     };
 
-    function initView() {
+    async function initView() {
       HttpRequestHelper.setPortainerAgentTargetHeader($transition$.params().nodeName);
-      var endpointProvider = $scope.applicationState.endpoint.mode.provider;
+
+      try {
+        $scope.registries = await RegistryService.loadRegistriesForDropdown(endpoint.Id);
+      } catch (err) {
+        this.Notifications.error('Failure', err, 'Unable to load registries');
+      }
+
       $q.all({
         image: ImageService.image($transition$.params().id),
-        history: endpointProvider !== 'VMWARE_VIC' ? ImageService.history($transition$.params().id) : [],
+        history: ImageService.history($transition$.params().id),
       })
         .then(function success(data) {
           $scope.image = data.image;
           $scope.history = data.history;
+          $scope.image.Env = _.sortBy($scope.image.Env, _.toLower);
         })
         .catch(function error(err) {
           Notifications.error('Failure', err, 'Unable to retrieve image details');

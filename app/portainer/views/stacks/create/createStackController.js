@@ -1,159 +1,373 @@
-import { AccessControlFormData } from '../../../components/accessControlForm/porAccessControlFormModel';
+import angular from 'angular';
 
-angular.module('portainer.app').controller('CreateStackController', [
-  '$scope',
-  '$state',
-  'StackService',
-  'Authentication',
-  'Notifications',
-  'FormValidator',
-  'ResourceControlService',
-  'FormHelper',
-  'EndpointProvider',
-  function ($scope, $state, StackService, Authentication, Notifications, FormValidator, ResourceControlService, FormHelper, EndpointProvider) {
-    $scope.formValues = {
-      Name: '',
-      StackFileContent: '',
-      StackFile: null,
-      RepositoryURL: '',
-      RepositoryReferenceName: '',
-      RepositoryAuthentication: false,
-      RepositoryUsername: '',
-      RepositoryPassword: '',
-      Env: [],
-      ComposeFilePathInRepository: 'docker-compose.yml',
-      AccessControlData: new AccessControlFormData(),
-    };
+import { AccessControlFormData } from '@/portainer/components/accessControlForm/porAccessControlFormModel';
+import { STACK_NAME_VALIDATION_REGEX } from '@/react/constants';
+import { RepositoryMechanismTypes } from '@/kubernetes/models/deploy';
+import { FeatureId } from '@/react/portainer/feature-flags/enums';
+import { isTemplateVariablesEnabled, renderTemplate } from '@/react/portainer/custom-templates/components/utils';
+import { editor, upload, git, customTemplate } from '@@/BoxSelector/common-options/build-methods';
+import { confirmWebEditorDiscard } from '@@/modals/confirm';
+import { parseAutoUpdateResponse, transformAutoUpdateViewModel } from '@/react/portainer/gitops/AutoUpdateFieldset/utils';
+import { baseStackWebhookUrl, createWebhookId } from '@/portainer/helpers/webhookHelper';
+import { getVariablesFieldDefaultValues } from '@/react/portainer/custom-templates/components/CustomTemplatesVariablesField';
 
-    $scope.state = {
-      Method: 'editor',
-      formValidationError: '',
-      actionInProgress: false,
-      StackType: null,
-    };
+angular
+  .module('portainer.app')
+  .controller(
+    'CreateStackController',
+    function (
+      $scope,
+      $state,
+      $async,
+      $window,
+      StackService,
+      Authentication,
+      Notifications,
+      FormValidator,
+      ResourceControlService,
+      FormHelper,
+      StackHelper,
+      ContainerHelper,
+      ContainerService,
+      endpoint
+    ) {
+      $scope.onChangeTemplateId = onChangeTemplateId;
+      $scope.onChangeTemplateVariables = onChangeTemplateVariables;
+      $scope.isTemplateVariablesEnabled = isTemplateVariablesEnabled;
+      $scope.buildAnalyticsProperties = buildAnalyticsProperties;
+      $scope.stackWebhookFeature = FeatureId.STACK_WEBHOOK;
+      $scope.buildMethods = [editor, upload, git, customTemplate];
+      $scope.STACK_NAME_VALIDATION_REGEX = STACK_NAME_VALIDATION_REGEX;
 
-    $scope.addEnvironmentVariable = function () {
-      $scope.formValues.Env.push({ name: '', value: '' });
-    };
+      $scope.formValues = {
+        Name: '',
+        StackFileContent: '',
+        StackFile: null,
+        RepositoryURL: '',
+        RepositoryReferenceName: '',
+        RepositoryAuthentication: false,
+        RepositoryUsername: '',
+        RepositoryPassword: '',
+        Env: [],
+        AdditionalFiles: [],
+        ComposeFilePathInRepository: 'docker-compose.yml',
+        AccessControlData: new AccessControlFormData(),
+        EnableWebhook: false,
+        Variables: [],
+        AutoUpdate: parseAutoUpdateResponse(),
+        TLSSkipVerify: false,
+      };
 
-    $scope.removeEnvironmentVariable = function (index) {
-      $scope.formValues.Env.splice(index, 1);
-    };
+      $scope.state = {
+        Method: 'editor',
+        formValidationError: '',
+        actionInProgress: false,
+        StackType: null,
+        editorYamlValidationError: '',
+        uploadYamlValidationError: '',
+        isEditorDirty: false,
+        selectedTemplate: null,
+        selectedTemplateId: null,
+        baseWebhookUrl: baseStackWebhookUrl(),
+        webhookId: createWebhookId(),
+        templateLoadFailed: false,
+        isEditorReadOnly: false,
+      };
 
-    function validateForm(accessControlData, isAdmin) {
-      $scope.state.formValidationError = '';
-      var error = '';
-      error = FormValidator.validateAccessControl(accessControlData, isAdmin);
+      $scope.currentUser = {
+        isAdmin: false,
+        id: null,
+      };
 
-      if (error) {
-        $scope.state.formValidationError = error;
-        return false;
-      }
-      return true;
-    }
+      $window.onbeforeunload = () => {
+        if ($scope.state.Method === 'editor' && $scope.formValues.StackFileContent && $scope.state.isEditorDirty) {
+          return '';
+        }
+      };
 
-    function createSwarmStack(name, method) {
-      var env = FormHelper.removeInvalidEnvVars($scope.formValues.Env);
-      var endpointId = EndpointProvider.endpointID();
+      $scope.$on('$destroy', function () {
+        $scope.state.isEditorDirty = false;
+      });
 
-      if (method === 'editor') {
-        var stackFileContent = $scope.formValues.StackFileContent;
-        return StackService.createSwarmStackFromFileContent(name, stackFileContent, env, endpointId);
-      } else if (method === 'upload') {
-        var stackFile = $scope.formValues.StackFile;
-        return StackService.createSwarmStackFromFileUpload(name, stackFile, env, endpointId);
-      } else if (method === 'repository') {
-        var repositoryOptions = {
-          RepositoryURL: $scope.formValues.RepositoryURL,
-          RepositoryReferenceName: $scope.formValues.RepositoryReferenceName,
-          ComposeFilePathInRepository: $scope.formValues.ComposeFilePathInRepository,
-          RepositoryAuthentication: $scope.formValues.RepositoryAuthentication,
-          RepositoryUsername: $scope.formValues.RepositoryUsername,
-          RepositoryPassword: $scope.formValues.RepositoryPassword,
-        };
-        return StackService.createSwarmStackFromGitRepository(name, repositoryOptions, env, endpointId);
-      }
-    }
+      $scope.onChangeFormValues = onChangeFormValues;
+      $scope.onBuildMethodChange = onBuildMethodChange;
 
-    function createComposeStack(name, method) {
-      var env = FormHelper.removeInvalidEnvVars($scope.formValues.Env);
-      var endpointId = EndpointProvider.endpointID();
-
-      if (method === 'editor') {
-        var stackFileContent = $scope.formValues.StackFileContent;
-        return StackService.createComposeStackFromFileContent(name, stackFileContent, env, endpointId);
-      } else if (method === 'upload') {
-        var stackFile = $scope.formValues.StackFile;
-        return StackService.createComposeStackFromFileUpload(name, stackFile, env, endpointId);
-      } else if (method === 'repository') {
-        var repositoryOptions = {
-          RepositoryURL: $scope.formValues.RepositoryURL,
-          RepositoryReferenceName: $scope.formValues.RepositoryReferenceName,
-          ComposeFilePathInRepository: $scope.formValues.ComposeFilePathInRepository,
-          RepositoryAuthentication: $scope.formValues.RepositoryAuthentication,
-          RepositoryUsername: $scope.formValues.RepositoryUsername,
-          RepositoryPassword: $scope.formValues.RepositoryPassword,
-        };
-        return StackService.createComposeStackFromGitRepository(name, repositoryOptions, env, endpointId);
-      }
-    }
-
-    $scope.deployStack = function () {
-      var name = $scope.formValues.Name;
-      var method = $scope.state.Method;
-
-      var accessControlData = $scope.formValues.AccessControlData;
-      var userDetails = Authentication.getUserDetails();
-      var isAdmin = Authentication.isAdmin();
-
-      if (method === 'editor' && $scope.formValues.StackFileContent === '') {
-        $scope.state.formValidationError = 'Stack file content must not be empty';
-        return;
-      }
-
-      if (!validateForm(accessControlData, isAdmin)) {
-        return;
-      }
-
-      var type = $scope.state.StackType;
-      var action = createSwarmStack;
-      if (type === 2) {
-        action = createComposeStack;
-      }
-      $scope.state.actionInProgress = true;
-      action(name, method)
-        .then(function success(data) {
-          if (data.data) {
-            data = data.data;
-          }
-          const userId = userDetails.ID;
-          const resourceControl = data.ResourceControl;
-          return ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl);
-        })
-        .then(function success() {
-          Notifications.success('Stack successfully deployed');
-          $state.go('portainer.stacks');
-        })
-        .catch(function error(err) {
-          Notifications.error('Deployment error', err, 'Unable to deploy stack');
-        })
-        .finally(function final() {
-          $scope.state.actionInProgress = false;
+      function onBuildMethodChange(value) {
+        $scope.$evalAsync(() => {
+          $scope.state.Method = value;
         });
-    };
+      }
 
-    $scope.editorUpdate = function (cm) {
-      $scope.formValues.StackFileContent = cm.getValue();
-    };
+      $scope.onEnableWebhookChange = function (enable) {
+        $scope.$evalAsync(() => {
+          $scope.formValues.EnableWebhook = enable;
+        });
+      };
 
-    function initView() {
-      var endpointMode = $scope.applicationState.endpoint.mode;
-      $scope.state.StackType = 2;
-      if (endpointMode.provider === 'DOCKER_SWARM_MODE' && endpointMode.role === 'MANAGER') {
-        $scope.state.StackType = 1;
+      function buildAnalyticsProperties() {
+        const metadata = { type: methodLabel($scope.state.Method) };
+
+        if ($scope.state.Method === 'repository') {
+          metadata.automaticUpdates = 'off';
+          if ($scope.formValues.RepositoryAutomaticUpdates) {
+            metadata.automaticUpdates = autoSyncLabel($scope.formValues.RepositoryMechanism);
+          }
+          metadata.auth = $scope.formValues.RepositoryAuthentication;
+        }
+
+        if ($scope.state.Method === 'template') {
+          metadata.templateName = $scope.state.selectedTemplate.Title;
+        }
+
+        return { metadata };
+
+        function methodLabel(method) {
+          switch (method) {
+            case 'editor':
+              return 'web-editor';
+            case 'repository':
+              return 'git';
+            case 'upload':
+              return 'file-upload';
+            case 'template':
+              return 'custom-template';
+          }
+        }
+
+        function autoSyncLabel(type) {
+          switch (type) {
+            case RepositoryMechanismTypes.INTERVAL:
+              return 'polling';
+            case RepositoryMechanismTypes.WEBHOOK:
+              return 'webhook';
+          }
+          return 'off';
+        }
+      }
+
+      function validateForm(accessControlData, isAdmin) {
+        $scope.state.formValidationError = '';
+        var error = '';
+        error = FormValidator.validateAccessControl(accessControlData, isAdmin);
+
+        if (error) {
+          $scope.state.formValidationError = error;
+          return false;
+        }
+        return true;
+      }
+
+      function createSwarmStack(name, method) {
+        var env = FormHelper.removeInvalidEnvVars($scope.formValues.Env);
+        const endpointId = +$state.params.endpointId;
+
+        if (method === 'template' || method === 'editor') {
+          var stackFileContent = $scope.formValues.StackFileContent;
+          return StackService.createSwarmStackFromFileContent(name, stackFileContent, env, endpointId);
+        }
+
+        if (method === 'upload') {
+          var stackFile = $scope.formValues.StackFile;
+          return StackService.createSwarmStackFromFileUpload(name, stackFile, env, endpointId);
+        }
+
+        if (method === 'repository') {
+          var repositoryOptions = {
+            AdditionalFiles: $scope.formValues.AdditionalFiles,
+            RepositoryURL: $scope.formValues.RepositoryURL,
+            RepositoryReferenceName: $scope.formValues.RepositoryReferenceName,
+            ComposeFilePathInRepository: $scope.formValues.ComposeFilePathInRepository,
+            RepositoryAuthentication: $scope.formValues.RepositoryAuthentication,
+            RepositoryUsername: $scope.formValues.RepositoryUsername,
+            RepositoryPassword: $scope.formValues.RepositoryPassword,
+            AutoUpdate: transformAutoUpdateViewModel($scope.formValues.AutoUpdate, $scope.state.webhookId),
+            TLSSkipVerify: $scope.formValues.TLSSkipVerify,
+          };
+
+          return StackService.createSwarmStackFromGitRepository(name, repositoryOptions, env, endpointId);
+        }
+      }
+
+      function createComposeStack(name, method) {
+        var env = FormHelper.removeInvalidEnvVars($scope.formValues.Env);
+        const endpointId = +$state.params.endpointId;
+
+        if (method === 'editor' || method === 'template') {
+          var stackFileContent = $scope.formValues.StackFileContent;
+          return StackService.createComposeStackFromFileContent(name, stackFileContent, env, endpointId);
+        } else if (method === 'upload') {
+          var stackFile = $scope.formValues.StackFile;
+          return StackService.createComposeStackFromFileUpload(name, stackFile, env, endpointId);
+        } else if (method === 'repository') {
+          var repositoryOptions = {
+            AdditionalFiles: $scope.formValues.AdditionalFiles,
+            RepositoryURL: $scope.formValues.RepositoryURL,
+            RepositoryReferenceName: $scope.formValues.RepositoryReferenceName,
+            ComposeFilePathInRepository: $scope.formValues.ComposeFilePathInRepository,
+            RepositoryAuthentication: $scope.formValues.RepositoryAuthentication,
+            RepositoryUsername: $scope.formValues.RepositoryUsername,
+            RepositoryPassword: $scope.formValues.RepositoryPassword,
+            AutoUpdate: transformAutoUpdateViewModel($scope.formValues.AutoUpdate, $scope.state.webhookId),
+            TLSSkipVerify: $scope.formValues.TLSSkipVerify,
+          };
+
+          return StackService.createComposeStackFromGitRepository(name, repositoryOptions, env, endpointId);
+        }
+      }
+
+      $scope.handleEnvVarChange = handleEnvVarChange;
+      function handleEnvVarChange(value) {
+        $scope.formValues.Env = value;
+      }
+
+      $scope.deployStack = function () {
+        var name = $scope.formValues.Name;
+        var method = $scope.state.Method;
+
+        var accessControlData = $scope.formValues.AccessControlData;
+        var userDetails = Authentication.getUserDetails();
+        var isAdmin = Authentication.isAdmin();
+
+        if (method === 'editor' && $scope.formValues.StackFileContent === '') {
+          $scope.state.formValidationError = '堆栈文件内容不能为空';
+          return;
+        }
+
+        if (!validateForm(accessControlData, isAdmin)) {
+          return;
+        }
+
+        var type = $scope.state.StackType;
+        var action = createSwarmStack;
+        if (type === 2) {
+          action = createComposeStack;
+        }
+        $scope.state.actionInProgress = true;
+        action(name, method)
+          .then(function success(data) {
+            if (data.data) {
+              data = data.data;
+            }
+            const userId = userDetails.ID;
+            const resourceControl = data.ResourceControl;
+            return ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl);
+          })
+          .then(function success() {
+            Notifications.success('成功', '堆栈成功部署');
+            $scope.state.isEditorDirty = false;
+            $state.go('docker.stacks');
+          })
+          .catch(function error(err) {
+            Notifications.error('部署错误', err, '无法部署堆栈');
+          })
+          .finally(function final() {
+            $scope.state.actionInProgress = false;
+          });
+      };
+
+      $scope.onChangeFileContent = onChangeFileContent;
+      function onChangeFileContent(value) {
+        $scope.formValues.StackFileContent = value;
+        $scope.state.editorYamlValidationError = StackHelper.validateYAML($scope.formValues.StackFileContent, $scope.containerNames);
+        $scope.state.isEditorDirty = true;
+      }
+
+      async function onFileLoadAsync(event) {
+        $scope.state.uploadYamlValidationError = StackHelper.validateYAML(event.target.result, $scope.containerNames);
+      }
+
+      function onFileLoad(event) {
+        return $async(onFileLoadAsync, event);
+      }
+
+      $scope.uploadFile = function (file) {
+        $scope.formValues.StackFile = file;
+
+        if (file) {
+          const temporaryFileReader = new FileReader();
+          temporaryFileReader.fileName = file.name;
+          temporaryFileReader.onload = onFileLoad;
+          temporaryFileReader.readAsText(file);
+        }
+      };
+
+      function onChangeTemplateId(templateId, template) {
+        return $async(async () => {
+          if (!template || ($scope.state.selectedTemplateId === templateId && $scope.state.selectedTemplate === template)) {
+            return;
+          }
+
+          try {
+            $scope.state.selectedTemplateId = templateId;
+            $scope.state.selectedTemplate = template;
+
+            try {
+              const isGit = template.GitConfig !== null;
+              $scope.state.templateContent = await this.CustomTemplateService.customTemplateFile(templateId, isGit);
+              onChangeFileContent($scope.state.templateContent);
+
+              $scope.state.isEditorReadOnly = isGit;
+            } catch (err) {
+              $scope.state.templateLoadFailed = true;
+              throw err;
+            }
+
+            if (template.Variables && template.Variables.length > 0) {
+              const variables = getVariablesFieldDefaultValues(template.Variables);
+              onChangeTemplateVariables(variables);
+            }
+          } catch (err) {
+            Notifications.error('失败', err, '无法检索自定义模板文件');
+          }
+        });
+      }
+
+      function onChangeTemplateVariables(value) {
+        onChangeFormValues({ Variables: value });
+
+        if (!$scope.isTemplateVariablesEnabled) {
+          return;
+        }
+        const rendered = renderTemplate($scope.state.templateContent, $scope.formValues.Variables, $scope.state.selectedTemplate.Variables);
+        $scope.state.editorYamlValidationError = StackHelper.validateYAML(rendered, $scope.containerNames);
+        onChangeFormValues({ StackFileContent: rendered });
+      }
+
+      async function initView() {
+        $scope.currentUser.isAdmin = Authentication.isAdmin();
+        $scope.currentUser.id = Authentication.getUserDetails().ID;
+
+        var endpointMode = $scope.applicationState.endpoint.mode;
+        $scope.state.StackType = 2;
+        $scope.isDockerStandalone = endpointMode.provider === 'DOCKER_STANDALONE';
+        if (endpointMode.provider === 'DOCKER_SWARM_MODE' && endpointMode.role === 'MANAGER') {
+          $scope.state.StackType = 1;
+        }
+
+        $scope.composeSyntaxMaxVersion = endpoint.ComposeSyntaxMaxVersion;
+        try {
+          const containers = await ContainerService.containers(endpoint.Id, true);
+          $scope.containerNames = ContainerHelper.getContainerNames(containers);
+        } catch (err) {
+          Notifications.error('失败', err, '无法检索容器');
+        }
+      }
+
+      this.uiCanExit = async function () {
+        if ($scope.state.Method === 'editor' && $scope.formValues.StackFileContent && $scope.state.isEditorDirty) {
+          return confirmWebEditorDiscard();
+        }
+      };
+
+      initView();
+
+      function onChangeFormValues(newValues) {
+        return $async(async () => {
+          $scope.formValues = {
+            ...$scope.formValues,
+            ...newValues,
+          };
+        });
       }
     }
-
-    initView();
-  },
-]);
+  );

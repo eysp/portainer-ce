@@ -1,193 +1,314 @@
 package stacks
 
 import (
+	"fmt"
 	"net/http"
-	"path"
-	"regexp"
-	"strconv"
-	"strings"
 
-	"github.com/asaskevich/govalidator"
-	httperror "github.com/portainer/libhttp/error"
-	"github.com/portainer/libhttp/request"
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/filesystem"
+	"github.com/portainer/portainer/api/git/update"
 	"github.com/portainer/portainer/api/http/security"
+	"github.com/portainer/portainer/api/stacks/deployments"
+	"github.com/portainer/portainer/api/stacks/stackbuilders"
+	"github.com/portainer/portainer/api/stacks/stackutils"
+	httperror "github.com/portainer/portainer/pkg/libhttp/error"
+	"github.com/portainer/portainer/pkg/libhttp/request"
+
+	"github.com/asaskevich/govalidator"
+	"github.com/pkg/errors"
+	"github.com/rs/zerolog/log"
 )
 
-// this is coming from libcompose
-// https://github.com/portainer/libcompose/blob/master/project/context.go#L117-L120
-func normalizeStackName(name string) string {
-	r := regexp.MustCompile("[^a-z0-9]+")
-	return r.ReplaceAllString(strings.ToLower(name), "")
-}
-
 type composeStackFromFileContentPayload struct {
-	Name             string
-	StackFileContent string
-	Env              []portainer.Pair
+	// Name of the stack
+	Name string `example:"myStack" validate:"required"`
+	// Content of the Stack file
+	StackFileContent string `example:"version: 3\n services:\n web:\n image:nginx" validate:"required"`
+	// A list of environment variables used during stack deployment
+	Env []portainer.Pair
+	// Whether the stack is from a app template
+	FromAppTemplate bool `example:"false"`
 }
 
 func (payload *composeStackFromFileContentPayload) Validate(r *http.Request) error {
 	if govalidator.IsNull(payload.Name) {
-		return portainer.Error("Invalid stack name")
+		return errors.New("Invalid stack name")
 	}
-	payload.Name = normalizeStackName(payload.Name)
+
 	if govalidator.IsNull(payload.StackFileContent) {
-		return portainer.Error("Invalid stack file content")
+		return errors.New("Invalid stack file content")
 	}
 	return nil
 }
 
+func createStackPayloadFromComposeFileContentPayload(name string, fileContent string, env []portainer.Pair, fromAppTemplate bool) stackbuilders.StackPayload {
+	return stackbuilders.StackPayload{
+		Name:             name,
+		StackFileContent: fileContent,
+		Env:              env,
+		FromAppTemplate:  fromAppTemplate,
+	}
+}
+
+func (handler *Handler) checkAndCleanStackDupFromSwarm(w http.ResponseWriter, r *http.Request, endpoint *portainer.Endpoint, userID portainer.UserID, stack *portainer.Stack) error {
+	resourceControl, err := handler.DataStore.ResourceControl().ResourceControlByResourceIDAndType(stackutils.ResourceControlID(stack.EndpointID, stack.Name), portainer.StackResourceControl)
+	if err != nil {
+		return err
+	}
+
+	// stop scheduler updates of the stack before removal
+	if stack.AutoUpdate != nil {
+		deployments.StopAutoupdate(stack.ID, stack.AutoUpdate.JobID, handler.Scheduler)
+	}
+
+	err = handler.DataStore.Stack().Delete(stack.ID)
+	if err != nil {
+		return err
+	}
+
+	if resourceControl != nil {
+		err = handler.DataStore.ResourceControl().Delete(resourceControl.ID)
+		if err != nil {
+			log.Error().
+				Str("stack", fmt.Sprintf("%+v", stack)).
+				Msg("unable to remove the associated resource control from the database for stack")
+		}
+	}
+
+	if exists, _ := handler.FileService.FileExists(stack.ProjectPath); exists {
+		err = handler.FileService.RemoveDirectory(stack.ProjectPath)
+		if err != nil {
+			log.Warn().
+				Str("stack", fmt.Sprintf("%+v", stack)).
+				Msg("unable to remove stack files from disk for stack")
+		}
+	}
+
+	return nil
+}
+
+// @id StackCreateDockerStandaloneString
+// @summary Deploy a new compose stack from a text
+// @description Deploy a new stack into a Docker environment specified via the environment identifier.
+// @description **Access policy**: authenticated
+// @tags stacks
+// @security ApiKeyAuth
+// @security jwt
+// @accept json
+// @produce json
+// @param body body composeStackFromFileContentPayload true "stack config"
+// @param endpointId query int true "Identifier of the environment that will be used to deploy the stack"
+// @success 200 {object} portainer.Stack
+// @failure 400 "Invalid request"
+// @failure 500 "Server error"
+// @router /stacks/create/standalone/string [post]
 func (handler *Handler) createComposeStackFromFileContent(w http.ResponseWriter, r *http.Request, endpoint *portainer.Endpoint, userID portainer.UserID) *httperror.HandlerError {
 	var payload composeStackFromFileContentPayload
 	err := request.DecodeAndValidateJSONPayload(r, &payload)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid request payload", err}
+		return httperror.BadRequest("Invalid request payload", err)
 	}
 
-	stacks, err := handler.StackService.Stacks()
+	payload.Name = handler.ComposeStackManager.NormalizeStackName(payload.Name)
+
+	isUnique, err := handler.checkUniqueStackNameInDocker(endpoint, payload.Name, 0, false)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve stacks from the database", err}
+		return httperror.InternalServerError("Unable to check for name collision", err)
 	}
 
-	for _, stack := range stacks {
-		if strings.EqualFold(stack.Name, payload.Name) {
-			return &httperror.HandlerError{http.StatusConflict, "A stack with this name already exists", portainer.ErrStackAlreadyExists}
+	if !isUnique {
+		stacks, err := handler.DataStore.Stack().StacksByName(payload.Name)
+		if err != nil {
+			return stackExistsError(payload.Name)
+		}
+		for _, stack := range stacks {
+			if stack.Type != portainer.DockerComposeStack && stack.EndpointID == endpoint.ID {
+				err := handler.checkAndCleanStackDupFromSwarm(w, r, endpoint, userID, &stack)
+				if err != nil {
+					return httperror.BadRequest("Invalid request payload", err)
+				}
+			} else {
+				return stackExistsError(payload.Name)
+			}
 		}
 	}
 
-	stackID := handler.StackService.GetNextIdentifier()
-	stack := &portainer.Stack{
-		ID:         portainer.StackID(stackID),
-		Name:       payload.Name,
-		Type:       portainer.DockerComposeStack,
-		EndpointID: endpoint.ID,
-		EntryPoint: filesystem.ComposeFileDefaultName,
-		Env:        payload.Env,
-	}
-
-	stackFolder := strconv.Itoa(int(stack.ID))
-	projectPath, err := handler.FileService.StoreStackFileFromBytes(stackFolder, stack.EntryPoint, []byte(payload.StackFileContent))
+	securityContext, err := security.RetrieveRestrictedRequestContext(r)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to persist Compose file on disk", err}
-	}
-	stack.ProjectPath = projectPath
-
-	doCleanUp := true
-	defer handler.cleanUp(stack, &doCleanUp)
-
-	config, configErr := handler.createComposeDeployConfig(r, stack, endpoint)
-	if configErr != nil {
-		return configErr
+		return httperror.InternalServerError("Unable to retrieve info from request context", err)
 	}
 
-	err = handler.deployComposeStack(config)
-	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, err.Error(), err}
+	stackPayload := createStackPayloadFromComposeFileContentPayload(payload.Name, payload.StackFileContent, payload.Env, payload.FromAppTemplate)
+
+	composeStackBuilder := stackbuilders.CreateComposeStackFileContentBuilder(securityContext,
+		handler.DataStore,
+		handler.FileService,
+		handler.StackDeployer)
+
+	stackBuilderDirector := stackbuilders.NewStackBuilderDirector(composeStackBuilder)
+	stack, httpErr := stackBuilderDirector.Build(&stackPayload, endpoint)
+	if httpErr != nil {
+		return httpErr
 	}
 
-	err = handler.StackService.CreateStack(stack)
-	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to persist the stack inside the database", err}
-	}
-
-	doCleanUp = false
 	return handler.decorateStackResponse(w, stack, userID)
 }
 
 type composeStackFromGitRepositoryPayload struct {
-	Name                        string
-	RepositoryURL               string
-	RepositoryReferenceName     string
-	RepositoryAuthentication    bool
-	RepositoryUsername          string
-	RepositoryPassword          string
-	ComposeFilePathInRepository string
-	Env                         []portainer.Pair
+	// Name of the stack
+	Name string `example:"myStack" validate:"required"`
+	// URL of a Git repository hosting the Stack file
+	RepositoryURL string `example:"https://github.com/openfaas/faas" validate:"required"`
+	// Reference name of a Git repository hosting the Stack file
+	RepositoryReferenceName string `example:"refs/heads/master"`
+	// Use basic authentication to clone the Git repository
+	RepositoryAuthentication bool `example:"true"`
+	// Username used in basic authentication. Required when RepositoryAuthentication is true.
+	RepositoryUsername string `example:"myGitUsername"`
+	// Password used in basic authentication. Required when RepositoryAuthentication is true.
+	RepositoryPassword string `example:"myGitPassword"`
+	// Path to the Stack file inside the Git repository
+	ComposeFile string `example:"docker-compose.yml" default:"docker-compose.yml"`
+	// Applicable when deploying with multiple stack files
+	AdditionalFiles []string `example:"[nz.compose.yml, uat.compose.yml]"`
+	// Optional GitOps update configuration
+	AutoUpdate *portainer.AutoUpdateSettings
+	// A list of environment variables used during stack deployment
+	Env []portainer.Pair
+	// Whether the stack is from a app template
+	FromAppTemplate bool `example:"false"`
+	// TLSSkipVerify skips SSL verification when cloning the Git repository
+	TLSSkipVerify bool `example:"false"`
+}
+
+func createStackPayloadFromComposeGitPayload(name, repoUrl, repoReference, repoUsername, repoPassword string, repoAuthentication bool, composeFile string, additionalFiles []string, autoUpdate *portainer.AutoUpdateSettings, env []portainer.Pair, fromAppTemplate bool, repoSkipSSLVerify bool) stackbuilders.StackPayload {
+	return stackbuilders.StackPayload{
+		Name: name,
+		RepositoryConfigPayload: stackbuilders.RepositoryConfigPayload{
+			URL:            repoUrl,
+			ReferenceName:  repoReference,
+			Authentication: repoAuthentication,
+			Username:       repoUsername,
+			Password:       repoPassword,
+			TLSSkipVerify:  repoSkipSSLVerify,
+		},
+		ComposeFile:     composeFile,
+		AdditionalFiles: additionalFiles,
+		AutoUpdate:      autoUpdate,
+		Env:             env,
+		FromAppTemplate: fromAppTemplate,
+	}
 }
 
 func (payload *composeStackFromGitRepositoryPayload) Validate(r *http.Request) error {
 	if govalidator.IsNull(payload.Name) {
-		return portainer.Error("Invalid stack name")
+		return errors.New("Invalid stack name")
 	}
-	payload.Name = normalizeStackName(payload.Name)
 	if govalidator.IsNull(payload.RepositoryURL) || !govalidator.IsURL(payload.RepositoryURL) {
-		return portainer.Error("Invalid repository URL. Must correspond to a valid URL format")
+		return errors.New("Invalid repository URL. Must correspond to a valid URL format")
 	}
-	if payload.RepositoryAuthentication && (govalidator.IsNull(payload.RepositoryUsername) || govalidator.IsNull(payload.RepositoryPassword)) {
-		return portainer.Error("Invalid repository credentials. Username and password must be specified when authentication is enabled")
+	if payload.RepositoryAuthentication && govalidator.IsNull(payload.RepositoryPassword) {
+		return errors.New("Invalid repository credentials. Password must be specified when authentication is enabled")
 	}
-	if govalidator.IsNull(payload.ComposeFilePathInRepository) {
-		payload.ComposeFilePathInRepository = filesystem.ComposeFileDefaultName
+	if err := update.ValidateAutoUpdateSettings(payload.AutoUpdate); err != nil {
+		return err
 	}
 	return nil
 }
 
+// @id StackCreateDockerStandaloneRepository
+// @summary Deploy a new compose stack from repository
+// @description Deploy a new stack into a Docker environment specified via the environment identifier.
+// @description **Access policy**: authenticated
+// @tags stacks
+// @security ApiKeyAuth
+// @security jwt
+// @produce json
+// @accept json
+// @param endpointId query int true "Identifier of the environment that will be used to deploy the stack"
+// @param body body composeStackFromGitRepositoryPayload true "stack config"
+// @success 200 {object} portainer.Stack
+// @failure 400 "Invalid request"
+// @failure 409 "Stack name or webhook ID already exists"
+// @failure 500 "Server error"
+// @router /stacks/create/standalone/repository [post]
 func (handler *Handler) createComposeStackFromGitRepository(w http.ResponseWriter, r *http.Request, endpoint *portainer.Endpoint, userID portainer.UserID) *httperror.HandlerError {
 	var payload composeStackFromGitRepositoryPayload
 	err := request.DecodeAndValidateJSONPayload(r, &payload)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid request payload", err}
+		return httperror.BadRequest("Invalid request payload", err)
 	}
 
-	stacks, err := handler.StackService.Stacks()
+	payload.Name = handler.ComposeStackManager.NormalizeStackName(payload.Name)
+	if payload.ComposeFile == "" {
+		payload.ComposeFile = filesystem.ComposeFileDefaultName
+	}
+
+	isUnique, err := handler.checkUniqueStackNameInDocker(endpoint, payload.Name, 0, false)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve stacks from the database", err}
+		return httperror.InternalServerError("Unable to check for name collision", err)
 	}
 
-	for _, stack := range stacks {
-		if strings.EqualFold(stack.Name, payload.Name) {
-			return &httperror.HandlerError{http.StatusConflict, "A stack with this name already exists", portainer.ErrStackAlreadyExists}
+	if !isUnique {
+		stacks, err := handler.DataStore.Stack().StacksByName(payload.Name)
+		if err != nil {
+			return stackExistsError(payload.Name)
+		}
+		for _, stack := range stacks {
+			if stack.Type != portainer.DockerComposeStack && stack.EndpointID == endpoint.ID {
+				err := handler.checkAndCleanStackDupFromSwarm(w, r, endpoint, userID, &stack)
+				if err != nil {
+					return httperror.BadRequest("Invalid request payload", err)
+				}
+			} else {
+				return stackExistsError(payload.Name)
+			}
 		}
 	}
 
-	stackID := handler.StackService.GetNextIdentifier()
-	stack := &portainer.Stack{
-		ID:         portainer.StackID(stackID),
-		Name:       payload.Name,
-		Type:       portainer.DockerComposeStack,
-		EndpointID: endpoint.ID,
-		EntryPoint: payload.ComposeFilePathInRepository,
-		Env:        payload.Env,
+	//make sure the webhook ID is unique
+	if payload.AutoUpdate != nil && payload.AutoUpdate.Webhook != "" {
+		isUnique, err := handler.checkUniqueWebhookID(payload.AutoUpdate.Webhook)
+		if err != nil {
+			return httperror.InternalServerError("Unable to check for webhook ID collision", err)
+		}
+		if !isUnique {
+			return httperror.Conflict(fmt.Sprintf("Webhook ID: %s already exists", payload.AutoUpdate.Webhook), stackutils.ErrWebhookIDAlreadyExists)
+		}
 	}
 
-	projectPath := handler.FileService.GetStackProjectPath(strconv.Itoa(int(stack.ID)))
-	stack.ProjectPath = projectPath
-
-	gitCloneParams := &cloneRepositoryParameters{
-		url:            payload.RepositoryURL,
-		referenceName:  payload.RepositoryReferenceName,
-		path:           projectPath,
-		authentication: payload.RepositoryAuthentication,
-		username:       payload.RepositoryUsername,
-		password:       payload.RepositoryPassword,
-	}
-
-	doCleanUp := true
-	defer handler.cleanUp(stack, &doCleanUp)
-
-	err = handler.cloneGitRepository(gitCloneParams)
+	securityContext, err := security.RetrieveRestrictedRequestContext(r)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to clone git repository", err}
+		return httperror.InternalServerError("Unable to retrieve info from request context", err)
 	}
 
-	config, configErr := handler.createComposeDeployConfig(r, stack, endpoint)
-	if configErr != nil {
-		return configErr
+	stackPayload := createStackPayloadFromComposeGitPayload(payload.Name,
+		payload.RepositoryURL,
+		payload.RepositoryReferenceName,
+		payload.RepositoryUsername,
+		payload.RepositoryPassword,
+		payload.RepositoryAuthentication,
+		payload.ComposeFile,
+		payload.AdditionalFiles,
+		payload.AutoUpdate,
+		payload.Env,
+		payload.FromAppTemplate,
+		payload.TLSSkipVerify,
+	)
+
+	composeStackBuilder := stackbuilders.CreateComposeStackGitBuilder(securityContext,
+		handler.DataStore,
+		handler.FileService,
+		handler.GitService,
+		handler.Scheduler,
+		handler.StackDeployer)
+
+	stackBuilderDirector := stackbuilders.NewStackBuilderDirector(composeStackBuilder)
+	stack, httpErr := stackBuilderDirector.Build(&stackPayload, endpoint)
+	if httpErr != nil {
+		return httpErr
 	}
 
-	err = handler.deployComposeStack(config)
-	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, err.Error(), err}
-	}
-
-	err = handler.StackService.CreateStack(stack)
-	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to persist the stack inside the database", err}
-	}
-
-	doCleanUp = false
 	return handler.decorateStackResponse(w, stack, userID)
 }
 
@@ -197,177 +318,101 @@ type composeStackFromFileUploadPayload struct {
 	Env              []portainer.Pair
 }
 
-func (payload *composeStackFromFileUploadPayload) Validate(r *http.Request) error {
+func createStackPayloadFromComposeFileUploadPayload(name string, fileContentBytes []byte, env []portainer.Pair) stackbuilders.StackPayload {
+	return stackbuilders.StackPayload{
+		Name:                  name,
+		StackFileContentBytes: fileContentBytes,
+		Env:                   env,
+	}
+}
+
+func decodeRequestForm(r *http.Request) (*composeStackFromFileUploadPayload, error) {
+	payload := &composeStackFromFileUploadPayload{}
 	name, err := request.RetrieveMultiPartFormValue(r, "Name", false)
 	if err != nil {
-		return portainer.Error("Invalid stack name")
+		return nil, errors.New("Invalid stack name")
 	}
-	payload.Name = normalizeStackName(name)
+	payload.Name = name
 
 	composeFileContent, _, err := request.RetrieveMultiPartFormFile(r, "file")
 	if err != nil {
-		return portainer.Error("Invalid Compose file. Ensure that the Compose file is uploaded correctly")
+		return nil, errors.New("Invalid Compose file. Ensure that the Compose file is uploaded correctly")
 	}
 	payload.StackFileContent = composeFileContent
 
 	var env []portainer.Pair
 	err = request.RetrieveMultiPartFormJSONValue(r, "Env", &env, true)
 	if err != nil {
-		return portainer.Error("Invalid Env parameter")
+		return nil, errors.New("Invalid Env parameter")
 	}
 	payload.Env = env
-	return nil
+	return payload, nil
 }
 
+// @id StackCreateDockerStandaloneFile
+// @summary Deploy a new compose stack from a file
+// @description Deploy a new stack into a Docker environment specified via the environment identifier.
+// @description **Access policy**: authenticated
+// @tags stacks
+// @security ApiKeyAuth
+// @security jwt
+// @accept multipart/form-data
+// @produce json
+// @param Name formData string true "Name of the stack"
+// @param Env formData string false "Environment variables passed during deployment, represented as a JSON array [{'name': 'name', 'value': 'value'}]."
+// @param file formData file false "Stack file"
+// @param endpointId query int true "Identifier of the environment that will be used to deploy the stack"
+// @success 200 {object} portainer.Stack
+// @failure 400 "Invalid request"
+// @failure 500 "Server error"
+// @router /stacks/create/standalone/file [post]
 func (handler *Handler) createComposeStackFromFileUpload(w http.ResponseWriter, r *http.Request, endpoint *portainer.Endpoint, userID portainer.UserID) *httperror.HandlerError {
-	payload := &composeStackFromFileUploadPayload{}
-	err := payload.Validate(r)
+	payload, err := decodeRequestForm(r)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid request payload", err}
+		return httperror.BadRequest("Invalid request payload", err)
 	}
 
-	stacks, err := handler.StackService.Stacks()
+	payload.Name = handler.ComposeStackManager.NormalizeStackName(payload.Name)
+
+	isUnique, err := handler.checkUniqueStackNameInDocker(endpoint, payload.Name, 0, false)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve stacks from the database", err}
+		return httperror.InternalServerError("Unable to check for name collision", err)
 	}
 
-	for _, stack := range stacks {
-		if strings.EqualFold(stack.Name, payload.Name) {
-			return &httperror.HandlerError{http.StatusConflict, "A stack with this name already exists", portainer.ErrStackAlreadyExists}
+	if !isUnique {
+		stacks, err := handler.DataStore.Stack().StacksByName(payload.Name)
+		if err != nil {
+			return stackExistsError(payload.Name)
+		}
+		for _, stack := range stacks {
+			if stack.Type != portainer.DockerComposeStack && stack.EndpointID == endpoint.ID {
+				err := handler.checkAndCleanStackDupFromSwarm(w, r, endpoint, userID, &stack)
+				if err != nil {
+					return httperror.BadRequest("Invalid request payload", err)
+				}
+			} else {
+				return stackExistsError(payload.Name)
+			}
 		}
 	}
 
-	stackID := handler.StackService.GetNextIdentifier()
-	stack := &portainer.Stack{
-		ID:         portainer.StackID(stackID),
-		Name:       payload.Name,
-		Type:       portainer.DockerComposeStack,
-		EndpointID: endpoint.ID,
-		EntryPoint: filesystem.ComposeFileDefaultName,
-		Env:        payload.Env,
-	}
-
-	stackFolder := strconv.Itoa(int(stack.ID))
-	projectPath, err := handler.FileService.StoreStackFileFromBytes(stackFolder, stack.EntryPoint, payload.StackFileContent)
-	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to persist Compose file on disk", err}
-	}
-	stack.ProjectPath = projectPath
-
-	doCleanUp := true
-	defer handler.cleanUp(stack, &doCleanUp)
-
-	config, configErr := handler.createComposeDeployConfig(r, stack, endpoint)
-	if configErr != nil {
-		return configErr
-	}
-
-	err = handler.deployComposeStack(config)
-	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, err.Error(), err}
-	}
-
-	err = handler.StackService.CreateStack(stack)
-	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to persist the stack inside the database", err}
-	}
-
-	doCleanUp = false
-	return handler.decorateStackResponse(w, stack, userID)
-}
-
-type composeStackDeploymentConfig struct {
-	stack      *portainer.Stack
-	endpoint   *portainer.Endpoint
-	dockerhub  *portainer.DockerHub
-	registries []portainer.Registry
-	isAdmin    bool
-	user       *portainer.User
-}
-
-func (handler *Handler) createComposeDeployConfig(r *http.Request, stack *portainer.Stack, endpoint *portainer.Endpoint) (*composeStackDeploymentConfig, *httperror.HandlerError) {
 	securityContext, err := security.RetrieveRestrictedRequestContext(r)
 	if err != nil {
-		return nil, &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve info from request context", err}
+		return httperror.InternalServerError("Unable to retrieve info from request context", err)
 	}
 
-	dockerhub, err := handler.DockerHubService.DockerHub()
-	if err != nil {
-		return nil, &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve DockerHub details from the database", err}
+	stackPayload := createStackPayloadFromComposeFileUploadPayload(payload.Name, payload.StackFileContent, payload.Env)
+
+	composeStackBuilder := stackbuilders.CreateComposeStackFileUploadBuilder(securityContext,
+		handler.DataStore,
+		handler.FileService,
+		handler.StackDeployer)
+
+	stackBuilderDirector := stackbuilders.NewStackBuilderDirector(composeStackBuilder)
+	stack, httpErr := stackBuilderDirector.Build(&stackPayload, endpoint)
+	if httpErr != nil {
+		return httpErr
 	}
 
-	registries, err := handler.RegistryService.Registries()
-	if err != nil {
-		return nil, &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve registries from the database", err}
-	}
-	filteredRegistries := security.FilterRegistries(registries, securityContext)
-
-	var user *portainer.User
-	if !handler.authDisabled {
-		user, err = handler.UserService.User(securityContext.UserID)
-		if err != nil {
-			return nil, &httperror.HandlerError{http.StatusInternalServerError, "Unable to load user information from the database", err}
-		}
-	}
-
-	config := &composeStackDeploymentConfig{
-		stack:      stack,
-		endpoint:   endpoint,
-		dockerhub:  dockerhub,
-		registries: filteredRegistries,
-		isAdmin:    securityContext.IsAdmin,
-		user:       user,
-	}
-
-	return config, nil
-}
-
-// TODO: libcompose uses credentials store into a config.json file to pull images from
-// private registries. Right now the only solution is to re-use the embedded Docker binary
-// to login/logout, which will generate the required data in the config.json file and then
-// clean it. Hence the use of the mutex.
-// We should contribute to libcompose to support authentication without using the config.json file.
-func (handler *Handler) deployComposeStack(config *composeStackDeploymentConfig) error {
-	settings, err := handler.SettingsService.Settings()
-	if err != nil {
-		return err
-	}
-
-	if !handler.authDisabled {
-		isAdminOrEndpointAdmin, err := handler.userIsAdminOrEndpointAdmin(config.user, config.endpoint.ID)
-		if err != nil {
-			return err
-		}
-
-		if (!settings.AllowBindMountsForRegularUsers ||
-			!settings.AllowPrivilegedModeForRegularUsers ||
-			!settings.AllowHostNamespaceForRegularUsers ||
-			!settings.AllowDeviceMappingForRegularUsers ||
-			!settings.AllowContainerCapabilitiesForRegularUsers) && !isAdminOrEndpointAdmin {
-
-			composeFilePath := path.Join(config.stack.ProjectPath, config.stack.EntryPoint)
-
-			stackContent, err := handler.FileService.GetFileContent(composeFilePath)
-			if err != nil {
-				return err
-			}
-
-			err = handler.isValidStackFile(stackContent, settings)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	handler.stackCreationMutex.Lock()
-	defer handler.stackCreationMutex.Unlock()
-
-	handler.SwarmStackManager.Login(config.dockerhub, config.registries, config.endpoint)
-
-	err = handler.ComposeStackManager.Up(config.stack, config.endpoint)
-	if err != nil {
-		return err
-	}
-
-	return handler.SwarmStackManager.Logout(config.endpoint)
+	return handler.decorateStackResponse(w, stack, userID)
 }

@@ -1,11 +1,12 @@
 import _ from 'lodash-es';
+import { TemplateType } from '@/react/portainer/templates/app-templates/types';
+import { TEMPLATE_NAME_VALIDATION_REGEX } from '@/react/portainer/custom-templates/components/CommonFields';
 import { AccessControlFormData } from '../../components/accessControlForm/porAccessControlFormModel';
 
 angular.module('portainer.app').controller('TemplatesController', [
   '$scope',
   '$q',
   '$state',
-  '$transition$',
   '$anchorScroll',
   'ContainerService',
   'ImageService',
@@ -17,15 +18,13 @@ angular.module('portainer.app').controller('TemplatesController', [
   'ResourceControlService',
   'Authentication',
   'FormValidator',
-  'SettingsService',
   'StackService',
-  'EndpointProvider',
-  'ModalService',
+  'endpoint',
+  '$async',
   function (
     $scope,
     $q,
     $state,
-    $transition$,
     $anchorScroll,
     ContainerService,
     ImageService,
@@ -37,18 +36,22 @@ angular.module('portainer.app').controller('TemplatesController', [
     ResourceControlService,
     Authentication,
     FormValidator,
-    SettingsService,
     StackService,
-    EndpointProvider,
-    ModalService
+    endpoint,
+    $async
   ) {
+    const DOCKER_STANDALONE = 'DOCKER_STANDALONE';
+    const DOCKER_SWARM_MODE = 'DOCKER_SWARM_MODE';
+
     $scope.state = {
       selectedTemplate: null,
       showAdvancedOptions: false,
       formValidationError: '',
       actionInProgress: false,
-      templateManagement: true,
+      templateNameRegex: TEMPLATE_NAME_VALIDATION_REGEX,
     };
+
+    $scope.enabledTypes = [TemplateType.Container, TemplateType.ComposeStack];
 
     $scope.formValues = {
       network: '',
@@ -111,17 +114,17 @@ angular.module('portainer.app').controller('TemplatesController', [
             generatedVolumeIds.push(volumeId);
           });
           TemplateService.updateContainerConfigurationWithVolumes(templateConfiguration, template, data);
-          return ImageService.pullImage(template.RegistryModel, true);
+          return ImageService.pullImage(template.RegistryModel);
         })
         .then(function success() {
-          return ContainerService.createAndStartContainer(templateConfiguration);
+          return ContainerService.createAndStartContainer(endpoint, templateConfiguration, accessControlData);
         })
         .then(function success(data) {
           const resourceControl = data.Portainer.ResourceControl;
           return ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl, generatedVolumeIds);
         })
         .then(function success() {
-          Notifications.success('Container successfully created');
+          Notifications.success('成功', '容器创建成功');
           $state.go('docker.containers', {}, { reload: true });
         })
         .catch(function error(err) {
@@ -145,20 +148,21 @@ angular.module('portainer.app').controller('TemplatesController', [
       var repositoryOptions = {
         RepositoryURL: template.Repository.url,
         ComposeFilePathInRepository: template.Repository.stackfile,
+        FromAppTemplate: true,
       };
 
-      var endpointId = EndpointProvider.endpointID();
+      const endpointId = +$state.params.endpointId;
       StackService.createComposeStackFromGitRepository(stackName, repositoryOptions, template.Env, endpointId)
         .then(function success(data) {
           const resourceControl = data.ResourceControl;
           return ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl);
         })
         .then(function success() {
-          Notifications.success('Stack successfully deployed');
-          $state.go('portainer.stacks');
+          Notifications.success('成功', '堆栈部署成功');
+          $state.go('docker.stacks');
         })
         .catch(function error(err) {
-          Notifications.warning('Deployment error', err.data.err);
+          Notifications.error('部署错误', err);
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -182,20 +186,22 @@ angular.module('portainer.app').controller('TemplatesController', [
       var repositoryOptions = {
         RepositoryURL: template.Repository.url,
         ComposeFilePathInRepository: template.Repository.stackfile,
+        FromAppTemplate: true,
       };
 
-      var endpointId = EndpointProvider.endpointID();
+      const endpointId = +$state.params.endpointId;
+
       StackService.createSwarmStackFromGitRepository(stackName, repositoryOptions, env, endpointId)
         .then(function success(data) {
           const resourceControl = data.ResourceControl;
           return ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl);
         })
         .then(function success() {
-          Notifications.success('Stack successfully deployed');
-          $state.go('portainer.stacks');
+          Notifications.success('成功', '堆栈部署成功');
+          $state.go('docker.stacks');
         })
         .catch(function error(err) {
-          Notifications.warning('Deployment error', err.data.err);
+          Notifications.error('部署错误', err);
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -223,31 +229,50 @@ angular.module('portainer.app').controller('TemplatesController', [
       }
     };
 
-    $scope.unselectTemplate = function (template) {
-      template.Selected = false;
-      $scope.state.selectedTemplate = null;
+    $scope.unselectTemplate = function () {
+      return $async(async () => {
+        $scope.state.selectedTemplate = null;
+      });
     };
 
     $scope.selectTemplate = function (template) {
-      if ($scope.state.selectedTemplate) {
-        $scope.unselectTemplate($scope.state.selectedTemplate);
-      }
+      return $async(async () => {
+        if ($scope.state.selectedTemplate) {
+          await $scope.unselectTemplate($scope.state.selectedTemplate);
+        }
 
-      template.Selected = true;
-      if (template.Network) {
-        $scope.formValues.network = _.find($scope.availableNetworks, function (o) {
-          return o.Name === template.Network;
-        });
-      } else {
-        $scope.formValues.network = _.find($scope.availableNetworks, function (o) {
-          return o.Name === 'bridge';
-        });
-      }
+        if (template.Network) {
+          $scope.formValues.network = _.find($scope.availableNetworks, function (o) {
+            return o.Name === template.Network;
+          });
+        } else {
+          $scope.formValues.network = _.find($scope.availableNetworks, function (o) {
+            return o.Name === 'bridge';
+          });
+        }
 
-      $scope.formValues.name = template.Name ? template.Name : '';
-      $scope.state.selectedTemplate = template;
-      $anchorScroll('view-top');
+        $scope.formValues.name = template.Name ? template.Name : '';
+        $scope.state.selectedTemplate = template;
+        $scope.state.deployable = isDeployable($scope.applicationState.endpoint, template.Type);
+        $anchorScroll('view-top');
+      });
     };
+
+    function isDeployable(endpoint, templateType) {
+      let deployable = false;
+      switch (templateType) {
+        case 1:
+          deployable = endpoint.mode.provider === DOCKER_SWARM_MODE || endpoint.mode.provider === DOCKER_STANDALONE;
+          break;
+        case 2:
+          deployable = endpoint.mode.provider === DOCKER_SWARM_MODE;
+          break;
+        case 3:
+          deployable = endpoint.mode.provider === DOCKER_SWARM_MODE || endpoint.mode.provider === DOCKER_STANDALONE;
+          break;
+      }
+      return deployable;
+    }
 
     function createTemplateConfiguration(template) {
       var network = $scope.formValues.network;
@@ -255,42 +280,25 @@ angular.module('portainer.app').controller('TemplatesController', [
       return TemplateService.createTemplateConfiguration(template, name, network);
     }
 
-    $scope.deleteTemplate = function (template) {
-      ModalService.confirmDeletion('Do you want to delete this template?', function onConfirm(confirmed) {
-        if (!confirmed) {
-          return;
-        }
-        deleteTemplate(template);
-      });
-    };
-
-    function deleteTemplate(template) {
-      TemplateService.delete(template.Id)
-        .then(function success() {
-          Notifications.success('Template successfully deleted');
-          var idx = $scope.templates.indexOf(template);
-          $scope.templates.splice(idx, 1);
-        })
-        .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to remove template');
-        });
-    }
-
     function initView() {
       $scope.isAdmin = Authentication.isAdmin();
 
       var endpointMode = $scope.applicationState.endpoint.mode;
       var apiVersion = $scope.applicationState.endpoint.apiVersion;
+      const endpointId = +$state.params.endpointId;
+
+      const showSwarmStacks = endpointMode.provider === 'DOCKER_SWARM_MODE' && endpointMode.role === 'MANAGER' && apiVersion >= 1.25;
+
+      $scope.disabledTypes = !showSwarmStacks ? [TemplateType.SwarmStack] : [];
 
       $q.all({
-        templates: TemplateService.templates(),
+        templates: TemplateService.templates(endpointId),
         volumes: VolumeService.getVolumes(),
         networks: NetworkService.networks(
           endpointMode.provider === 'DOCKER_STANDALONE' || endpointMode.provider === 'DOCKER_SWARM_MODE',
           false,
           endpointMode.provider === 'DOCKER_SWARM_MODE' && apiVersion >= 1.25
         ),
-        settings: SettingsService.publicSettings(),
       })
         .then(function success(data) {
           var templates = data.templates;
@@ -298,13 +306,11 @@ angular.module('portainer.app').controller('TemplatesController', [
           $scope.availableVolumes = _.orderBy(data.volumes.Volumes, [(volume) => volume.Name.toLowerCase()], ['asc']);
           var networks = data.networks;
           $scope.availableNetworks = networks;
-          var settings = data.settings;
-          $scope.allowBindMounts = settings.AllowBindMountsForRegularUsers;
-          $scope.state.templateManagement = !settings.ExternalTemplates;
+          $scope.allowBindMounts = endpoint.SecuritySettings.allowBindMountsForRegularUsers;
         })
         .catch(function error(err) {
           $scope.templates = [];
-          Notifications.error('Failure', err, 'An error occured during apps initialization.');
+          Notifications.error('失败', err, '应用初始化时发生错误。');
         });
     }
 

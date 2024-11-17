@@ -1,18 +1,29 @@
+import { getOptions } from '@/react/docker/networks/CreateView/macvlanOptions';
+
 angular.module('portainer.docker').controller('NetworkMacvlanFormController', [
   '$q',
   'NodeService',
   'NetworkService',
   'Notifications',
-  'StateManager',
+  '$scope',
   'Authentication',
-  function ($q, NodeService, NetworkService, Notifications, StateManager, Authentication) {
+  function ($q, NodeService, NetworkService, Notifications, $scope, Authentication) {
     var ctrl = this;
+
+    this.options = [];
+
+    ctrl.onChangeSelectedNodes = onChangeSelectedNodes.bind(ctrl);
+    function onChangeSelectedNodes(nodes) {
+      return $scope.$evalAsync(() => {
+        ctrl.data.DatatableState.selectedItems = nodes;
+      });
+    }
 
     ctrl.requiredNodeSelection = function () {
       if (ctrl.data.Scope !== 'local' || ctrl.data.DatatableState === undefined) {
         return false;
       }
-      return ctrl.data.DatatableState.selectedItemCount === 0;
+      return ctrl.data.DatatableState.selectedItems.length;
     };
 
     ctrl.requiredConfigSelection = function () {
@@ -22,11 +33,18 @@ angular.module('portainer.docker').controller('NetworkMacvlanFormController', [
       return !ctrl.data.SelectedNetworkConfig;
     };
 
-    function initComponent() {
-      if (StateManager.getState().application.authentication) {
-        var isAdmin = Authentication.isAdmin();
-        ctrl.isAdmin = isAdmin;
-      }
+    this.onChangeScope = onChangeScope.bind(this);
+    function onChangeScope(value) {
+      return $scope.$evalAsync(() => {
+        this.data.Scope = value;
+      });
+    }
+
+    this.$onInit = $onInit;
+    function $onInit() {
+      var isAdmin = Authentication.isAdmin();
+      ctrl.isAdmin = isAdmin;
+
       var provider = ctrl.applicationState.endpoint.mode.provider;
       var apiVersion = ctrl.applicationState.endpoint.apiVersion;
       $q.all({
@@ -40,12 +58,12 @@ angular.module('portainer.docker').controller('NetworkMacvlanFormController', [
           ctrl.availableNetworks = data.networks.filter(function (item) {
             return item.ConfigOnly === true;
           });
+
+          ctrl.options = getOptions(ctrl.availableNetworks.length > 0);
         })
         .catch(function error(err) {
           Notifications.error('Failure', err, 'Unable to retrieve informations for macvlan');
         });
     }
-
-    initComponent();
   },
 ]);

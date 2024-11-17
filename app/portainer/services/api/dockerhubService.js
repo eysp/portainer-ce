@@ -1,31 +1,27 @@
-import { DockerHubViewModel } from '../../models/dockerhub';
+import { PortainerEndpointTypes } from '@/portainer/models/endpoint/models';
+import { isLocalEnvironment } from '@/react/portainer/environments/utils';
 
-angular.module('portainer.app').factory('DockerHubService', [
-  '$q',
-  'DockerHub',
-  function DockerHubServiceFactory($q, DockerHub) {
-    'use strict';
-    var service = {};
+angular.module('portainer.app').factory('DockerHubService', DockerHubService);
 
-    service.dockerhub = function () {
-      var deferred = $q.defer();
+/* @ngInject */
+function DockerHubService(Endpoints, AgentDockerhub) {
+  return {
+    checkRateLimits,
+  };
 
-      DockerHub.get()
-        .$promise.then(function success(data) {
-          var dockerhub = new DockerHubViewModel(data);
-          deferred.resolve(dockerhub);
-        })
-        .catch(function error(err) {
-          deferred.reject({ msg: '无法检索 DockerHub 详细信息', err: err });
-        });
+  function checkRateLimits(endpoint, registryId) {
+    if (isLocalEnvironment(endpoint)) {
+      return Endpoints.dockerhubLimits({ id: endpoint.Id, registryId }).$promise;
+    }
 
-      return deferred.promise;
-    };
+    switch (endpoint.Type) {
+      case PortainerEndpointTypes.AgentOnDockerEnvironment:
+      case PortainerEndpointTypes.EdgeAgentOnDockerEnvironment:
+        return AgentDockerhub.limits({ endpointId: endpoint.Id, endpointType: 'docker', registryId }).$promise;
 
-    service.update = function (dockerhub) {
-      return DockerHub.update({}, dockerhub).$promise;
-    };
-
-    return service;
-  },
-]);
+      case PortainerEndpointTypes.AgentOnKubernetesEnvironment:
+      case PortainerEndpointTypes.EdgeAgentOnKubernetesEnvironment:
+        return AgentDockerhub.limits({ endpointId: endpoint.Id, endpointType: 'kubernetes', registryId }).$promise;
+    }
+  }
+}

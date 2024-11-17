@@ -1,3 +1,4 @@
+//go:build windows
 // +build windows
 
 package factory
@@ -13,24 +14,16 @@ import (
 
 func (factory ProxyFactory) newOSBasedLocalProxy(path string, endpoint *portainer.Endpoint) (http.Handler, error) {
 	transportParameters := &docker.TransportParameters{
-		Endpoint:               endpoint,
-		ResourceControlService: factory.resourceControlService,
-		UserService:            factory.userService,
-		TeamService:            factory.teamService,
-		TeamMembershipService:  factory.teamMembershipService,
-		RegistryService:        factory.registryService,
-		DockerHubService:       factory.dockerHubService,
-		SettingsService:        factory.settingsService,
-		ReverseTunnelService:   factory.reverseTunnelService,
-		ExtensionService:       factory.extensionService,
-		SignatureService:       factory.signatureService,
-		DockerClientFactory:    factory.dockerClientFactory,
-		AuthDisabled:           factory.authDisabled,
+		Endpoint:             endpoint,
+		DataStore:            factory.dataStore,
+		ReverseTunnelService: factory.reverseTunnelService,
+		SignatureService:     factory.signatureService,
+		DockerClientFactory:  factory.dockerClientFactory,
 	}
 
 	proxy := &dockerLocalProxy{}
 
-	dockerTransport, err := docker.NewTransport(transportParameters, newNamedPipeTransport(path))
+	dockerTransport, err := docker.NewTransport(transportParameters, newNamedPipeTransport(path), factory.gitService, factory.snapshotService)
 	if err != nil {
 		return nil, err
 	}

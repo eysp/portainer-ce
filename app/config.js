@@ -1,75 +1,50 @@
-import toastr from 'toastr';
 import { Terminal } from 'xterm';
 import * as fit from 'xterm/lib/addons/fit/fit';
+import { csrfInterceptor, csrfTokenReaderInterceptorAngular } from './portainer/services/csrf';
+import { agentInterceptor } from './portainer/services/axios';
+import { dispatchCacheRefreshEventIfNeeded } from './portainer/services/http-request.helper';
 
-angular.module('portainer').config([
-  '$urlRouterProvider',
-  '$httpProvider',
-  'localStorageServiceProvider',
-  'jwtOptionsProvider',
-  'AnalyticsProvider',
-  '$uibTooltipProvider',
-  '$compileProvider',
-  'cfpLoadingBarProvider',
-  function ($urlRouterProvider, $httpProvider, localStorageServiceProvider, jwtOptionsProvider, AnalyticsProvider, $uibTooltipProvider, $compileProvider, cfpLoadingBarProvider) {
-    'use strict';
+/* @ngInject */
+export function configApp($urlRouterProvider, $httpProvider, localStorageServiceProvider, $uibTooltipProvider, $compileProvider, cfpLoadingBarProvider) {
+  if (process.env.NODE_ENV === 'testing') {
+    $compileProvider.debugInfoEnabled(false);
+  }
 
-    var environment = '@@ENVIRONMENT';
-    if (environment === 'production') {
-      $compileProvider.debugInfoEnabled(false);
-    }
+  // ask to clear cache on mutation
+  $httpProvider.interceptors.push(() => ({
+    request: (reqConfig) => {
+      dispatchCacheRefreshEventIfNeeded(reqConfig);
+      return reqConfig;
+    },
+  }));
 
-    localStorageServiceProvider.setPrefix('portainer');
+  localStorageServiceProvider.setPrefix('portainer');
 
-    jwtOptionsProvider.config({
-      tokenGetter: [
-        'LocalStorage',
-        function (LocalStorage) {
-          return LocalStorage.getJWT();
-        },
-      ],
-    });
-    $httpProvider.interceptors.push('jwtInterceptor');
-    $httpProvider.interceptors.push('EndpointStatusInterceptor');
-    $httpProvider.defaults.headers.post['Content-Type'] = 'application/json';
-    $httpProvider.defaults.headers.put['Content-Type'] = 'application/json';
-    $httpProvider.defaults.headers.patch['Content-Type'] = 'application/json';
+  $httpProvider.defaults.headers.post['Content-Type'] = 'application/json';
+  $httpProvider.defaults.headers.put['Content-Type'] = 'application/json';
+  $httpProvider.defaults.headers.patch['Content-Type'] = 'application/json';
 
-    $httpProvider.interceptors.push([
-      'HttpRequestHelper',
-      function (HttpRequestHelper) {
-        return {
-          request: function (config) {
-            if (config.url.indexOf('/docker/') > -1) {
-              config.headers['X-PortainerAgent-Target'] = HttpRequestHelper.portainerAgentTargetHeader();
-              if (HttpRequestHelper.portainerAgentManagerOperation()) {
-                config.headers['X-PortainerAgent-ManagerOperation'] = '1';
-              }
-            }
-            return config;
-          },
-        };
-      },
-    ]);
+  $httpProvider.interceptors.push(() => ({
+    request: agentInterceptor,
+  }));
 
-    AnalyticsProvider.setAccount({ tracker: __CONFIG_GA_ID, set: { anonymizeIp: true } });
-    AnalyticsProvider.startOffline(true);
+  $httpProvider.interceptors.push(() => ({
+    response: csrfTokenReaderInterceptorAngular,
+    request: csrfInterceptor,
+  }));
 
-    toastr.options.timeOut = 3000;
+  Terminal.applyAddon(fit);
 
-    Terminal.applyAddon(fit);
+  $uibTooltipProvider.setTriggers({
+    mouseenter: 'mouseleave',
+    click: 'click',
+    focus: 'blur',
+    outsideClick: 'outsideClick',
+  });
 
-    $uibTooltipProvider.setTriggers({
-      mouseenter: 'mouseleave',
-      click: 'click',
-      focus: 'blur',
-      outsideClick: 'outsideClick',
-    });
+  cfpLoadingBarProvider.includeSpinner = false;
+  cfpLoadingBarProvider.parentSelector = '#loadingbar-placeholder';
+  cfpLoadingBarProvider.latencyThreshold = 600;
 
-    cfpLoadingBarProvider.includeSpinner = false;
-    cfpLoadingBarProvider.parentSelector = '#loadingbar-placeholder';
-    cfpLoadingBarProvider.latencyThreshold = 600;
-
-    $urlRouterProvider.otherwise('/auth');
-  },
-]);
+  $urlRouterProvider.otherwise('/auth');
+}

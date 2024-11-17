@@ -1,14 +1,18 @@
 package endpointgroups
 
-import portainer "github.com/portainer/portainer/api"
+import (
+	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/dataservices"
+	"github.com/portainer/portainer/api/internal/edge"
+)
 
-func (handler *Handler) updateEndpointRelations(endpoint *portainer.Endpoint, endpointGroup *portainer.EndpointGroup) error {
-	if endpoint.Type != portainer.EdgeAgentEnvironment {
+func (handler *Handler) updateEndpointRelations(tx dataservices.DataStoreTx, endpoint *portainer.Endpoint, endpointGroup *portainer.EndpointGroup) error {
+	if endpoint.Type != portainer.EdgeAgentOnKubernetesEnvironment && endpoint.Type != portainer.EdgeAgentOnDockerEnvironment {
 		return nil
 	}
 
 	if endpointGroup == nil {
-		unassignedGroup, err := handler.EndpointGroupService.EndpointGroup(portainer.EndpointGroupID(1))
+		unassignedGroup, err := tx.EndpointGroup().Read(portainer.EndpointGroupID(1))
 		if err != nil {
 			return err
 		}
@@ -16,27 +20,27 @@ func (handler *Handler) updateEndpointRelations(endpoint *portainer.Endpoint, en
 		endpointGroup = unassignedGroup
 	}
 
-	endpointRelation, err := handler.EndpointRelationService.EndpointRelation(endpoint.ID)
+	endpointRelation, err := tx.EndpointRelation().EndpointRelation(endpoint.ID)
 	if err != nil {
 		return err
 	}
 
-	edgeGroups, err := handler.EdgeGroupService.EdgeGroups()
+	edgeGroups, err := tx.EdgeGroup().ReadAll()
 	if err != nil {
 		return err
 	}
 
-	edgeStacks, err := handler.EdgeStackService.EdgeStacks()
+	edgeStacks, err := tx.EdgeStack().EdgeStacks()
 	if err != nil {
 		return err
 	}
 
-	endpointStacks := portainer.EndpointRelatedEdgeStacks(endpoint, endpointGroup, edgeGroups, edgeStacks)
+	endpointStacks := edge.EndpointRelatedEdgeStacks(endpoint, endpointGroup, edgeGroups, edgeStacks)
 	stacksSet := map[portainer.EdgeStackID]bool{}
 	for _, edgeStackID := range endpointStacks {
 		stacksSet[edgeStackID] = true
 	}
 	endpointRelation.EdgeStacks = stacksSet
 
-	return handler.EndpointRelationService.UpdateEndpointRelation(endpoint.ID, endpointRelation)
+	return tx.EndpointRelation().UpdateEndpointRelation(endpoint.ID, endpointRelation)
 }

@@ -1,47 +1,28 @@
 package templates
 
 import (
-	"encoding/json"
 	"net/http"
 
-	httperror "github.com/portainer/libhttp/error"
-	"github.com/portainer/libhttp/response"
-	"github.com/portainer/portainer/api"
-	"github.com/portainer/portainer/api/http/client"
-	"github.com/portainer/portainer/api/http/security"
+	httperror "github.com/portainer/portainer/pkg/libhttp/error"
+	"github.com/portainer/portainer/pkg/libhttp/response"
 )
 
-// GET request on /api/templates
+// @id TemplateList
+// @summary List available templates
+// @description List available templates.
+// @description **Access policy**: authenticated
+// @tags templates
+// @security ApiKeyAuth
+// @security jwt
+// @produce json
+// @success 200 {object} listResponse "Success"
+// @failure 500 "Server error"
+// @router /templates [get]
 func (handler *Handler) templateList(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
-	settings, err := handler.SettingsService.Settings()
-	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve settings from the database", err}
+	templates, httpErr := handler.fetchTemplates()
+	if httpErr != nil {
+		return httpErr
 	}
 
-	var templates []portainer.Template
-	if settings.TemplatesURL == "" {
-		templates, err = handler.TemplateService.Templates()
-		if err != nil {
-			return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve templates from the database", err}
-		}
-	} else {
-		var templateData []byte
-		templateData, err = client.Get(settings.TemplatesURL, 0)
-		if err != nil {
-			return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve external templates", err}
-		}
-
-		err = json.Unmarshal(templateData, &templates)
-		if err != nil {
-			return &httperror.HandlerError{http.StatusInternalServerError, "Unable to parse external templates", err}
-		}
-	}
-
-	securityContext, err := security.RetrieveRestrictedRequestContext(r)
-	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve info from request context", err}
-	}
-
-	filteredTemplates := security.FilterTemplates(templates, securityContext)
-	return response.JSON(w, filteredTemplates)
+	return response.JSON(w, templates)
 }

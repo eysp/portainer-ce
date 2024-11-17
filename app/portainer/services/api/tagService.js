@@ -2,8 +2,9 @@ import { TagViewModel } from '../../models/tag';
 
 angular.module('portainer.app').factory('TagService', [
   '$q',
+  '$async',
   'Tags',
-  function TagServiceFactory($q, Tags) {
+  function TagServiceFactory($q, $async, Tags) {
     'use strict';
     var service = {};
 
@@ -17,7 +18,7 @@ angular.module('portainer.app').factory('TagService', [
           deferred.resolve(tags);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: '无法检索标签', err: err });
+          deferred.reject({ msg: 'Unable to retrieve tags', err: err });
         });
       return deferred.promise;
     };
@@ -32,12 +33,12 @@ angular.module('portainer.app').factory('TagService', [
           deferred.resolve(tags);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: '无法检索标签', err: err });
+          deferred.reject({ msg: 'Unable to retrieve tags', err: err });
         });
       return deferred.promise;
     };
 
-    service.createTag = async function (name) {
+    async function createTagAsync(name) {
       var payload = {
         Name: name,
       };
@@ -45,9 +46,14 @@ angular.module('portainer.app').factory('TagService', [
         const tag = await Tags.create({}, payload).$promise;
         return new TagViewModel(tag);
       } catch (err) {
-        throw { msg: '无法创建标签', err };
+        throw { msg: 'Unable to create tag', err };
       }
-    };
+    }
+
+    function createTag(name) {
+      return $async(createTagAsync, name);
+    }
+    service.createTag = createTag;
 
     service.deleteTag = function (id) {
       return Tags.remove({ id: id }).$promise;
