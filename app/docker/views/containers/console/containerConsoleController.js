@@ -246,7 +246,7 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
           $scope.loaded = true;
         })
         .catch(function error(err) {
-          Notifications.error('Error', err, 'Unable to retrieve container details');
+          Notifications.error('错误', err, '无法获取容器详情');
         });
     };
 

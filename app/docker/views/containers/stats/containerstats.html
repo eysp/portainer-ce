@@ -1,39 +1,38 @@
 <page-header
-  title="'Container statistics'"
+  title="'容器统计信息'"
   breadcrumbs="[
-    { label:'Containers', link:'docker.containers' },
+    { label:'容器', link:'docker.containers' },
     {
       label:(container.Name | trimcontainername),
       link: 'docker.containers.container',
       linkParams: { id: container.Id },
-    }, 'Stats']"
+    }, '统计']"
 >
 </page-header>
 
 <div class="row">
   <div class="col-md-12">
     <rd-widget>
-      <rd-widget-header icon="info" title-text="About statistics"> </rd-widget-header>
+      <rd-widget-header icon="info" title-text="关于统计"> </rd-widget-header>
       <rd-widget-body>
         <form class="form-horizontal">
           <div class="form-group">
             <div class="col-sm-12">
               <span class="small text-muted">
-                This view displays real-time statistics about the container <b>{{ container.Name | trimcontainername }}</b> as well as a list of the running processes inside this
-                container.
+                此视图显示容器 <b>{{ container.Name | trimcontainername }}</b> 的实时统计信息以及该容器内部运行进程的列表。
               </span>
             </div>
           </div>
           <div class="form-group">
-            <label for="refreshRate" class="col-sm-3 col-md-2 col-lg-2 margin-sm-top control-label text-left"> Refresh rate </label>
+            <label for="refreshRate" class="col-sm-3 col-md-2 col-lg-2 margin-sm-top control-label text-left"> 刷新频率 </label>
             <div class="col-sm-3 col-md-2">
               <select id="refreshRate" ng-model="state.refreshRate" ng-change="changeUpdateRepeater()" class="form-control">
-                <option value="1">1s</option>
-                <option value="3">3s</option>
-                <option value="5">5s</option>
-                <option value="10">10s</option>
-                <option value="30">30s</option>
-                <option value="60">60s</option>
+                <option value="1">1秒</option>
+                <option value="3">3秒</option>
+                <option value="5">5秒</option>
+                <option value="10">10秒</option>
+                <option value="30">30秒</option>
+                <option value="60">60秒</option>
               </select>
             </div>
             <span>
@@ -44,7 +43,7 @@
             <div class="col-sm-12">
               <span class="small text-muted">
                 <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
-                Network stats are unavailable for this container.
+                此容器的网络统计数据不可用。
               </span>
             </div>
           </div>
@@ -52,7 +51,7 @@
             <div class="col-sm-12">
               <span class="small text-muted">
                 <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
-                I/O stats are unavailable for this container.
+                此容器的I/O统计数据不可用。
               </span>
             </div>
           </div>
@@ -65,7 +64,7 @@
 <div class="row">
   <div class="col-lg-6 col-md-6 col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="bar-chart" title-text="Memory usage"></rd-widget-header>
+      <rd-widget-header icon="bar-chart" title-text="内存使用情况"></rd-widget-header>
       <rd-widget-body>
         <div class="chart-container" style="position: relative">
           <canvas id="memoryChart" width="770" height="300"></canvas>
@@ -76,7 +75,7 @@
 
   <div class="col-lg-6 col-md-6 col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="bar-chart" title-text="CPU usage"></rd-widget-header>
+      <rd-widget-header icon="bar-chart" title-text="CPU使用情况"></rd-widget-header>
       <rd-widget-body>
         <div class="chart-container" style="position: relative">
           <canvas id="cpuChart" width="770" height="300"></canvas>
@@ -87,7 +86,7 @@
 
   <div class="col-lg-6 col-md-6 col-sm-12" ng-if="!state.networkStatsUnavailable">
     <rd-widget>
-      <rd-widget-header icon="bar-chart" title-text="Network usage (aggregate)"></rd-widget-header>
+      <rd-widget-header icon="bar-chart" title-text="网络使用情况（总计）"></rd-widget-header>
       <rd-widget-body>
         <div class="chart-container" style="position: relative">
           <canvas id="networkChart" width="770" height="300"></canvas>
@@ -98,7 +97,7 @@
 
   <div class="col-lg-6 col-md-6 col-sm-12" ng-if="!state.ioStatsUnavailable">
     <rd-widget>
-      <rd-widget-header icon="bar-chart" title-text="I/O usage (aggregate)"></rd-widget-header>
+      <rd-widget-header icon="bar-chart" title-text="I/O使用情况（总计）"></rd-widget-header>
       <rd-widget-body>
         <div class="chart-container" style="position: relative">
           <canvas id="ioChart" width="770" height="300"></canvas>

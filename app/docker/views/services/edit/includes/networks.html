@@ -1,21 +1,21 @@
 <div id="service-network-specs">
   <rd-widget>
-    <rd-widget-header icon="list" title-text="Networks">
+    <rd-widget-header icon="list" title-text="网络">
       <div class="nopadding" authorization="DockerServiceUpdate">
-        <a class="btn btn-secondary btn-sm pull-right" ng-click="isUpdating || addNetwork(service)" ng-disabled="isUpdating"> <pr-icon icon="'plus'"></pr-icon> network </a>
+        <a class="btn btn-secondary btn-sm pull-right" ng-click="isUpdating || addNetwork(service)" ng-disabled="isUpdating"> <pr-icon icon="'plus'"></pr-icon> 网络 </a>
       </div>
     </rd-widget-header>
     <rd-widget-body ng-if="!service.Networks || service.Networks.length === 0">
-      <p>This service is not connected to any networks.</p>
+      <p>此服务没有连接到任何网络。</p>
     </rd-widget-body>
     <rd-widget-body ng-if="service.Networks && service.Networks.length > 0" classes="no-padding">
       <table class="table">
         <thead>
           <tr>
-            <th>Name</th>
+            <th>名称</th>
             <th>ID</th>
-            <th>IP address</th>
-            <th>Actions</th>
+            <th>IP 地址</th>
+            <th>操作</th>
           </tr>
         </thead>
         <tbody>
@@ -30,7 +30,7 @@
                 disable-authorization="DockerServiceUpdate"
                 style="width: initial; min-width: 50%"
               >
-                <option disabled value="" selected>Select a network</option>
+                <option disabled value="" selected>选择一个网络</option>
               </select>
               <span ng-if="!network.Editable">{{ network.Name }}</span>
             </td>
@@ -56,14 +56,14 @@
       <div class="btn-toolbar" role="toolbar">
         <div class="btn-group" role="group">
           <button type="button" class="btn btn-primary btn-sm" ng-disabled="isUpdating || !hasChanges(service, ['Networks'])" ng-click="updateService(service)">
-            Apply changes
+            应用更改
           </button>
           <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu">
-            <li><a ng-click="cancelChanges(service, ['Networks'])">Reset changes</a></li>
-            <li><a ng-click="cancelChanges(service)">Reset all changes</a></li>
+            <li><a ng-click="cancelChanges(service, ['Networks'])">重置更改</a></li>
+            <li><a ng-click="cancelChanges(service)">重置所有更改</a></li>
           </ul>
         </div>
       </div>

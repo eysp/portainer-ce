@@ -14,7 +14,7 @@ angular.module('portainer.docker').controller('EventsController', [
           $scope.events = data;
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to load events');
+          Notifications.error('失败', err, '无法加载事件');
         });
     }
 

@@ -127,7 +127,7 @@ angular.module('portainer.docker').controller('ContainerController', [
           $scope.displayCreateWebhookButton = $scope.displayRecreateButton;
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve container info');
+          Notifications.error('失败', err, '无法获取容器信息');
         });
     };
 
@@ -138,43 +138,43 @@ angular.module('portainer.docker').controller('ContainerController', [
           update();
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, errorMessage);
+          Notifications.error('失败', err, errorMessage);
         });
     }
 
     $scope.start = function () {
-      var successMessage = 'Container successfully started';
-      var errorMessage = 'Unable to start container';
+      var successMessage = '容器已成功启动';
+      var errorMessage = '无法启动容器';
       executeContainerAction($transition$.params().id, ContainerService.startContainer, successMessage, errorMessage);
     };
 
     $scope.stop = function () {
-      var successMessage = 'Container successfully stopped';
-      var errorMessage = 'Unable to stop container';
+      var successMessage = '容器已成功停止';
+      var errorMessage = '无法停止容器';
       executeContainerAction($transition$.params().id, ContainerService.stopContainer, successMessage, errorMessage);
     };
 
     $scope.kill = function () {
-      var successMessage = 'Container successfully killed';
-      var errorMessage = 'Unable to kill container';
+      var successMessage = '容器已成功终止';
+      var errorMessage = '无法终止容器';
       executeContainerAction($transition$.params().id, ContainerService.killContainer, successMessage, errorMessage);
     };
 
     $scope.pause = function () {
-      var successMessage = 'Container successfully paused';
-      var errorMessage = 'Unable to pause container';
+      var successMessage = '容器已成功暂停';
+      var errorMessage = '无法暂停容器';
       executeContainerAction($transition$.params().id, ContainerService.pauseContainer, successMessage, errorMessage);
     };
 
     $scope.unpause = function () {
-      var successMessage = 'Container successfully resumed';
-      var errorMessage = 'Unable to resume container';
+      var successMessage = '容器已成功恢复';
+      var errorMessage = '无法恢复容器';
       executeContainerAction($transition$.params().id, ContainerService.resumeContainer, successMessage, errorMessage);
     };
 
     $scope.restart = function () {
-      var successMessage = 'Container successfully restarted';
-      var errorMessage = 'Unable to restart container';
+      var successMessage = '容器已成功重启';
+      var errorMessage = '无法重启容器';
       executeContainerAction($transition$.params().id, ContainerService.restartContainer, successMessage, errorMessage);
     };
 
@@ -187,11 +187,11 @@ angular.module('portainer.docker').controller('ContainerController', [
       ContainerService.renameContainer(endpoint.Id, $transition$.params().id, container.newContainerName)
         .then(function success() {
           container.Name = container.newContainerName;
-          Notifications.success('Container successfully renamed', container.Name);
+          Notifications.success('容器已成功重命名', container.Name);
         })
         .catch(function error(err) {
           container.newContainerName = $filter('trimcontainername')(container.Name);
-          Notifications.error('Failure', err, 'Unable to rename container');
+          Notifications.error('失败', err, '无法重命名容器');
         })
         .finally(function final() {
           $scope.container.edit = false;
@@ -205,10 +205,10 @@ angular.module('portainer.docker').controller('ContainerController', [
       const imageConfig = ImageHelper.createImageConfigForContainer(registryModel);
       try {
         await commitContainer(endpoint.Id, { container: $transition$.params().id, repo: imageConfig.fromImage });
-        Notifications.success('Image created', $transition$.params().id);
+        Notifications.success('镜像创建成功', $transition$.params().id);
         $state.reload();
       } catch (err) {
-        Notifications.error('Failure', err, 'Unable to create image');
+        Notifications.error('失败', err, '无法创建镜像');
         $scope.config.commitInProgress = false;
       }
     }
@@ -219,9 +219,9 @@ angular.module('portainer.docker').controller('ContainerController', [
 
     $scope.confirmRemove = function () {
       return $async(async () => {
-        var title = 'You are about to remove a container.';
+        var title = '您即将删除一个容器。';
         if ($scope.container.State.Running) {
-          title = 'You are about to remove a running container.';
+          title = '您即将删除一个正在运行的容器。';
         }
 
         const result = await confirmContainerDeletion(title);
@@ -238,11 +238,11 @@ angular.module('portainer.docker').controller('ContainerController', [
     function removeContainer(cleanAssociatedVolumes) {
       ContainerService.remove(endpoint.Id, $scope.container.Id, cleanAssociatedVolumes)
         .then(function success() {
-          Notifications.success('Success', 'Container successfully removed');
+          Notifications.success('成功', '容器已成功删除');
           $state.go('docker.containers', {}, { reload: true });
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to remove container');
+          Notifications.error('失败', err, '无法删除容器');
         });
     }
 
@@ -253,12 +253,12 @@ angular.module('portainer.docker').controller('ContainerController', [
       return ContainerService.recreateContainer(endpoint.Id, container.Id, pullImage).then(notifyAndChangeView).catch(notifyOnError);
 
       function notifyAndChangeView() {
-        Notifications.success('Success', 'Container successfully re-created');
+        Notifications.success('成功', '容器已成功重新创');
         $state.go('docker.containers', {}, { reload: true });
       }
 
       function notifyOnError(err) {
-        Notifications.error('Failure', err, 'Unable to re-create container');
+        Notifications.error('失败', err, '无法重新创建容器');
         $scope.state.recreateContainerInProgress = false;
       }
     }
@@ -284,11 +284,11 @@ angular.module('portainer.docker').controller('ContainerController', [
           Name: restartPolicy,
           MaximumRetryCount: maximumRetryCount,
         };
-        Notifications.success('Success', 'Restart policy updated');
+        Notifications.success('成功', '重启策略已更新');
       }
 
       function notifyOnError(err) {
-        Notifications.error('Failure', err, 'Unable to update restart policy');
+        Notifications.error('失败', err, '无法更新重启策略');
         return $q.reject(err);
       }
     }

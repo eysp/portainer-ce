@@ -24,7 +24,7 @@ class ConfigsController {
     try {
       this.configs = await this.ConfigService.configs(this.endpoint.Id);
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve configs');
+      this.Notifications.error('失败', err, '无法获取配置');
     }
   }
 
@@ -34,7 +34,7 @@ class ConfigsController {
   }
 
   async removeAction(selectedItems) {
-    const confirmed = await confirmDelete('Do you want to remove the selected config(s)?');
+    const confirmed = await confirmDelete('您是否要删除选中的配置？');
     if (!confirmed) {
       return null;
     }
@@ -46,11 +46,11 @@ class ConfigsController {
     for (const config of selectedItems) {
       try {
         await this.ConfigService.remove(this.endpoint.Id, config.Id);
-        this.Notifications.success('Config successfully removed', config.Name);
+        this.Notifications.success('配置成功删除', config.Name);
         const index = this.configs.indexOf(config);
         this.configs.splice(index, 1);
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to remove config');
+        this.Notifications.error('失败', err, '无法删除配置');
       } finally {
         --actionCount;
         if (actionCount === 0) {

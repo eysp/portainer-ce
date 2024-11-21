@@ -1,6 +1,6 @@
 <div>
   <rd-widget>
-    <rd-widget-header icon="list" title-text="Container spec"></rd-widget-header>
+    <rd-widget-header icon="list" title-text="容器规范"></rd-widget-header>
     <rd-widget-body classes="no-padding">
       <table class="!mb-0 table">
         <tbody>
@@ -10,37 +10,37 @@
               ><code ng-if="service.Command">{{ service.Command | command }}</code></td
             >
             <td>
-              <p class="small text-muted" style="margin-top: 10px"> Command to execute. </p>
+              <p class="small text-muted" style="margin-top: 10px"> 执行的命令。 </p>
             </td>
           </tr>
           <tr>
-            <td>Args</td>
+            <td>参数</td>
             <td
               ><code ng-if="service.Arguments">{{ service.Arguments }}</code></td
             >
             <td>
-              <p class="small text-muted" style="margin-top: 10px"> Arguments passed to command in container. </p>
+              <p class="small text-muted" style="margin-top: 10px"> 传递给容器中命令的参数。 </p>
             </td>
           </tr>
           <tr>
             <td>User</td>
             <td>{{ service.User }}</td>
             <td>
-              <p class="small text-muted" style="margin-top: 10px"> Username or UID. </p>
+              <p class="small text-muted" style="margin-top: 10px"> 用户名或用户ID（UID）。 </p>
             </td>
           </tr>
           <tr>
             <td>Working directory</td>
             <td>{{ service.Dir }}</td>
             <td>
-              <p class="small text-muted" style="margin-top: 10px"> Working directory inside the container. </p>
+              <p class="small text-muted" style="margin-top: 10px"> 容器内的工作目录。 </p>
             </td>
           </tr>
           <tr>
-            <td>Stop grace period</td>
+            <td>停止宽限期</td>
             <td>{{ service.StopGracePeriod }}</td>
             <td>
-              <p class="small text-muted" style="margin-top: 10px"> Time to wait before force killing a container (default none). </p>
+              <p class="small text-muted" style="margin-top: 10px"> 在强制终止容器之前等待的时间（默认无）。 </p>
             </td>
           </tr>
         </tbody>

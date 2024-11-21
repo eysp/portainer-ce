@@ -1,22 +1,22 @@
 <div ng-if="service.ServiceMounts" id="service-mounts">
   <rd-widget>
-    <rd-widget-header icon="list" title-text="Mounts">
+    <rd-widget-header icon="list" title-text="挂载">
       <div class="nopadding" authorization="DockerServiceUpdate">
-        <a class="btn btn-secondary btn-sm pull-right" ng-click="isUpdating ||addMount(service)" ng-disabled="isUpdating"> <pr-icon icon="'plus'"></pr-icon> mount </a>
+        <a class="btn btn-secondary btn-sm pull-right" ng-click="isUpdating ||addMount(service)" ng-disabled="isUpdating"> <pr-icon icon="'plus'"></pr-icon> 挂载 </a>
       </div>
     </rd-widget-header>
     <rd-widget-body ng-if="service.ServiceMounts.length === 0">
-      <p>There are no mounts for this service.</p>
+      <p>此服务没有任何挂载。</p>
     </rd-widget-body>
     <rd-widget-body ng-if="service.ServiceMounts.length > 0" classes="no-padding">
       <table class="mb-0 table">
         <thead>
           <tr>
-            <th ng-if="isAdmin || allowBindMounts">Type</th>
-            <th>Source</th>
-            <th>Target</th>
-            <th authorization="DockerServiceUpdate">Read only</th>
-            <th authorization="DockerServiceUpdate">Actions</th>
+            <th ng-if="isAdmin || allowBindMounts">类型</th>
+            <th>源</th>
+            <th>目标</th>
+            <th authorization="DockerServiceUpdate">只读</th>
+            <th authorization="DockerServiceUpdate">操作</th>
           </tr>
         </thead>
         <tbody>
@@ -30,8 +30,8 @@
                 ng-disabled="isUpdating"
                 disable-authorization="DockerServiceUpdate"
               >
-                <option value="volume">Volume</option>
-                <option value="bind">Bind</option>
+                <option value="volume">存储卷</option>
+                <option value="bind">绑定</option>
               </select>
             </td>
             <td class="!pb-0 !pt-6 !align-top">
@@ -44,7 +44,7 @@
                   ng-if="mount.Type === 'volume'"
                   disable-authorization="DockerServiceUpdate"
                 >
-                  <option selected disabled hidden value="">Select a volume</option>
+                  <option selected disabled hidden value="">选择存储卷</option>
                 </select>
                 <input
                   type="text"
@@ -58,7 +58,7 @@
                 />
               </div>
               <div class="small text-warning !-mt-6" ng-show="!mount.Source">
-                <div class="vertical-center"><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> Source is required. </div></div
+                <div class="vertical-center"><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 必须提供源路径。 </div></div
               >
             </td>
             <td class="!pb-0 !pt-6 !align-top">
@@ -72,7 +72,7 @@
                 disable-authorization="DockerServiceUpdate"
               />
               <div class="small text-warning !-mt-6" ng-show="!mount.Target">
-                <div class="vertical-center"><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> Target is required. </div></div
+                <div class="vertical-center"><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 必须提供目标路径。 </div></div
               >
             </td>
             <td authorization="DockerServiceUpdate">
@@ -93,14 +93,14 @@
       <div class="btn-toolbar" role="toolbar">
         <div class="btn-group" role="group">
           <button type="button" class="btn btn-primary btn-sm" ng-disabled="!mountsAreValid() || !hasChanges(service, ['ServiceMounts'])" ng-click="updateService(service)">
-            Apply changes
+            应用更改
           </button>
           <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu">
-            <li><a ng-click="cancelChanges(service, ['ServiceMounts'])">Reset changes</a></li>
-            <li><a ng-click="cancelChanges(service)">Reset all changes</a></li>
+            <li><a ng-click="cancelChanges(service, ['ServiceMounts'])">重置更改</a></li>
+            <li><a ng-click="cancelChanges(service)">重置所有更改</a></li>
           </ul>
         </div>
       </div>

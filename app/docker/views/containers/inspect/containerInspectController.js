@@ -18,7 +18,7 @@ angular.module('portainer.docker').controller('ContainerInspectController', [
           $scope.containerInfo = d;
         })
         .catch(function error(e) {
-          Notifications.error('Failure', e, 'Unable to inspect container');
+          Notifications.error('失败', e, '无法检查容器');
         });
     }
 

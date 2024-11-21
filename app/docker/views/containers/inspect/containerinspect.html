@@ -1,22 +1,22 @@
 <page-header
-  title="'Container inspect'"
+  title="'容器检查'"
   breadcrumbs="[
-    { label:'Containers', link:'docker.containers' },
+    { label:'容器', link:'docker.containers' },
     {
       label:(containerInfo.Name | trimcontainername),
       link: 'docker.containers.container',
       linkParams: { id: containerInfo.Id },
-    }, 'Inspect']"
+    }, '检查']"
 >
 </page-header>
 
 <div class="row">
   <div class="col-lg-12 col-md-12 col-xs-12">
     <rd-widget>
-      <rd-widget-header icon="circle" title-text="Inspect">
+      <rd-widget-header icon="circle" title-text="检查">
         <span class="btn-group btn-group-sm">
-          <label class="btn btn-light" ng-model="state.DisplayTextView" uib-btn-radio="false"><pr-icon icon="'code'"></pr-icon>Tree</label>
-          <label class="btn btn-light" ng-model="state.DisplayTextView" uib-btn-radio="true"><pr-icon icon="'file'"></pr-icon>Text</label>
+          <label class="btn btn-light" ng-model="state.DisplayTextView" uib-btn-radio="false"><pr-icon icon="'code'"></pr-icon>树状视图</label>
+          <label class="btn btn-light" ng-model="state.DisplayTextView" uib-btn-radio="true"><pr-icon icon="'file'"></pr-icon>文本视图</label>
         </span>
       </rd-widget-header>
       <rd-widget-body>

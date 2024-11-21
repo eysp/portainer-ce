@@ -1,4 +1,4 @@
-<page-header title="'Dashboard'" breadcrumbs="['Environment summary']"> </page-header>
+<page-header title="'仪表板'" breadcrumbs="['环境概览']"> </page-header>
 
 <div class="row" ng-if="applicationState.endpoint.mode.agentProxy && applicationState.endpoint.mode.provider === 'DOCKER_SWARM_MODE'">
   <div class="col-sm-12">
@@ -17,12 +17,12 @@
   <span class="small">
     <p class="text-muted" ng-if="applicationState.endpoint.mode.role === 'MANAGER'">
       <pr-icon icon="'alert-circle'" mode="'primary'"></pr-icon>
-      Portainer is connected to a node that is part of a Swarm cluster. Some resources located on other nodes in the cluster might not be available for management, have a look at
-      <help-link doc-link="'/admin/environments/add/swarm/agent'" target="'_blank'" children="'our agent setup'"></help-link> for more details.
+      Portainer 已连接到一个属于 Swarm 集群的节点。某些位于集群中其他节点上的资源可能无法进行管理，详细信息请参阅
+      <help-link doc-link="'/admin/environments/add/swarm/agent'" target="'_blank'" children="'我们的代理设置'"></help-link> 。
     </p>
     <p class="text-muted" ng-if="applicationState.endpoint.mode.role === 'WORKER'">
       <pr-icon icon="'alert-circle'" mode="'primary'"></pr-icon>
-      Portainer is connected to a worker node. Swarm management features will not be available.
+      Portainer 已连接到一个工作节点。Swarm 管理功能将不可用。
     </p>
   </span>
 </information-panel>
@@ -31,12 +31,12 @@
   <div class="row" ng-if="(!applicationState.endpoint.mode.agentProxy || applicationState.endpoint.mode.provider !== 'DOCKER_SWARM_MODE') && info && endpoint">
     <div class="col-sm-12">
       <rd-widget>
-        <rd-widget-header icon="gauge" title-text="Environment info"></rd-widget-header>
+        <rd-widget-header icon="gauge" title-text="环境信息"></rd-widget-header>
         <rd-widget-body classes="!px-5 !py-0">
           <table class="table">
             <tbody>
               <tr>
-                <td>Environment</td>
+                <td>环境</td>
                 <td>
                   {{ endpoint.Name }}
                   <span class="small text-muted space-left">
@@ -47,7 +47,7 @@
                     - {{ info.Swarm && info.Swarm.NodeID !== '' ? 'Swarm' : 'Standalone' }} {{ info.ServerVersion }}
                     <span ng-if="endpoint.Type === 2">
                       <pr-icon icon="'zap'"></pr-icon>
-                      Agent</span
+                      代理</span
                     ></span
                   >
                 </td>
@@ -61,13 +61,13 @@
                 <td>{{ gpuInfoStr }}</td>
               </tr>
               <tr>
-                <td>Tags</td>
+                <td>标签</td>
                 <td>{{ endpointTags }}</td>
               </tr>
               <tr ng-if="applicationState.endpoint.mode.provider === 'DOCKER_SWARM_MODE' && applicationState.endpoint.mode.role === 'MANAGER'">
                 <td colspan="2">
                   <div class="btn-group" role="group" aria-label="...">
-                    <a ui-sref="docker.swarm.visualizer" class="vertical-center"><pr-icon icon="'trello'" class-name="'icon'"></pr-icon>Go to cluster visualizer</a>
+                    <a ui-sref="docker.swarm.visualizer" class="vertical-center"><pr-icon icon="'trello'" class-name="'icon'"></pr-icon>前往集群可视化工具</a>
                   </div>
                 </td>
               </tr>

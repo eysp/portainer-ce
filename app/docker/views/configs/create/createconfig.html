@@ -1,4 +1,4 @@
-<page-header title="'Create config'" breadcrumbs="[{label:'Configs', link:'docker.configs'}, 'Add config']"> </page-header>
+<page-header title="'创建配置g'" breadcrumbs="[{label:'配置', link:'docker.configs'}, '添加配置']"> </page-header>
 
 <div class="row">
   <div class="col-lg-12 col-md-12 col-xs-12">
@@ -7,9 +7,9 @@
         <form class="form-horizontal">
           <!-- name-input -->
           <div class="form-group">
-            <label for="config_name" class="col-sm-1 control-label text-left">Name</label>
+            <label for="config_name" class="col-sm-1 control-label text-left">名称</label>
             <div class="col-sm-11">
-              <input type="text" class="form-control" ng-model="ctrl.formValues.Name" id="config_name" placeholder="e.g. myConfig" />
+              <input type="text" class="form-control" ng-model="ctrl.formValues.Name" id="config_name" placeholder="例如 myConfig" />
             </div>
           </div>
           <!-- !name-input -->
@@ -18,7 +18,7 @@
             <div class="col-sm-12" ng-if="ctrl.formValues.displayCodeEditor">
               <web-editor-form
                 identifier="config-creation-editor"
-                placeholder="Define or paste the content of your config here"
+                placeholder="在此定义或粘贴配置内容"
                 yml="false"
                 on-change="(ctrl.editorUpdate)"
                 value="ctrl.formValues.ConfigContent"
@@ -29,19 +29,19 @@
           <!-- labels -->
           <div class="form-group">
             <div class="col-sm-12 mt-1">
-              <label class="control-label space-right text-left">Labels</label>
-              <span class="label label-default interactive vertical-center space-left" ng-click="ctrl.addLabel()"> <pr-icon icon="'plus'" mode="'alt'"></pr-icon> add label </span>
+              <label class="control-label space-right text-left">标签</label>
+              <span class="label label-default interactive vertical-center space-left" ng-click="ctrl.addLabel()"> <pr-icon icon="'plus'" mode="'alt'"></pr-icon> 添加标签 </span>
             </div>
             <!-- labels-input-list -->
             <div class="col-sm-12 form-inline mt-2">
               <div ng-repeat="label in ctrl.formValues.Labels" class="mt-1">
                 <div class="input-group col-sm-5 input-group-sm">
-                  <span class="input-group-addon">name</span>
-                  <input type="text" class="form-control" ng-model="label.name" placeholder="e.g. com.example.foo" />
+                  <span class="input-group-addon">名称</span>
+                  <input type="text" class="form-control" ng-model="label.name" placeholder="例如 com.example.foo" />
                 </div>
                 <div class="input-group col-sm-6 input-group-sm">
-                  <span class="input-group-addon">value</span>
-                  <input type="text" class="form-control" ng-model="label.value" placeholder="e.g. bar" />
+                  <span class="input-group-addon">值</span>
+                  <input type="text" class="form-control" ng-model="label.value" placeholder="例如 bar" />
                   <span class="input-group-btn">
                     <button class="btn btn-dangerlight" type="button" ng-click="ctrl.removeLabel($index)">
                       <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
@@ -57,10 +57,10 @@
           <por-access-control-form form-data="ctrl.formValues.AccessControlData"></por-access-control-form>
           <!-- !access-control -->
           <!-- actions -->
-          <div class="col-sm-12 form-section-title"> Actions </div>
+          <div class="col-sm-12 form-section-title"> 操作 </div>
           <div class="form-group">
             <div class="col-sm-12">
-              <button type="button" class="btn btn-primary btn-sm" ng-disabled="!ctrl.formValues.Name" ng-click="ctrl.create()">Create config</button>
+              <button type="button" class="btn btn-primary btn-sm" ng-disabled="!ctrl.formValues.Name" ng-click="ctrl.create()">创建配置</button>
               <span class="text-danger" ng-if="ctrl.state.formValidationError" style="margin-left: 5px">{{ ctrl.state.formValidationError }}</span>
             </div>
           </div>

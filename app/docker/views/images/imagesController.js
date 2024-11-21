@@ -39,11 +39,11 @@ angular.module('portainer.docker').controller('ImagesController', [
       $scope.state.actionInProgress = true;
       ImageService.pullImage(registryModel, nodeName)
         .then(function success() {
-          Notifications.success('Image successfully pulled', registryModel.Image);
+          Notifications.success('镜像拉取成功', registryModel.Image);
           $state.reload();
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to pull image');
+          Notifications.error('失败', err, '无法拉取镜像');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -52,18 +52,18 @@ angular.module('portainer.docker').controller('ImagesController', [
 
     function confirmImageForceRemoval() {
       return confirmDestructive({
-        title: 'Are you sure?',
+        title: '您确定吗？',
         message:
-          "Forcing removal of an image will remove it even if it's used by stopped containers, and delete all associated tags. Are you sure you want to remove the selected image(s)?",
-        confirmButton: buildConfirmButton('Remove the image', 'danger'),
+          "强制删除镜像将会移除它，即使它被停止的容器使用，并删除所有相关的标签。您确定要删除选中的镜像吗？",
+        confirmButton: buildConfirmButton('删除镜像', 'danger'),
       });
     }
 
     function confirmRegularRemove() {
       return confirmDestructive({
-        title: 'Are you sure?',
-        message: 'Removing an image will also delete all associated tags. Are you sure you want to remove the selected image(s)?',
-        confirmButton: buildConfirmButton('Remove the image', 'danger'),
+        title: '您确定吗？',
+        message: '删除镜像将同时删除所有相关的标签。您确定要删除选中的镜像吗？',
+        confirmButton: buildConfirmButton('删除镜像', 'danger'),
       });
     }
 
@@ -95,13 +95,13 @@ angular.module('portainer.docker').controller('ImagesController', [
         });
 
         if (untagged) {
-          Notifications.warning('', 'Cannot download a untagged image');
+          Notifications.warning('', '法下载未标记的镜像');
           return false;
         }
       }
 
       if (_.uniqBy(selectedItems, 'NodeName').length > 1) {
-        Notifications.warning('', 'Cannot download images from different nodes at the same time');
+        Notifications.warning('', '无法同时从不同节点下载镜像');
         return false;
       }
 
@@ -119,10 +119,10 @@ angular.module('portainer.docker').controller('ImagesController', [
         .then(function success(data) {
           var downloadData = new Blob([data], { type: 'application/x-tar' });
           FileSaver.saveAs(downloadData, 'images.tar');
-          Notifications.success('Success', 'Image(s) successfully downloaded');
+          Notifications.success('成功', '镜像已成功下载');
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to download image(s)');
+          Notifications.error('失败', err, '无法下载镜像');
         })
         .finally(function final() {
           $scope.state.exportInProgress = false;
@@ -158,10 +158,10 @@ angular.module('portainer.docker').controller('ImagesController', [
         HttpRequestHelper.setPortainerAgentTargetHeader(image.nodeName);
         return ImageService.deleteImage(image.id, force)
           .then(function success() {
-            Notifications.success('Image successfully removed', image.id);
+            Notifications.success('镜像已成功删除', image.id);
           })
           .catch(function error(err) {
-            Notifications.error('Failure', err, 'Unable to remove image');
+            Notifications.error('失败', err, '无法删除镜像');
           });
       }
 

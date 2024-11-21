@@ -1,9 +1,9 @@
-<page-header title="'Image list'" breadcrumbs="['Images']" reload="true"> </page-header>
+<page-header title="'镜像列表'" breadcrumbs="['镜像']" reload="true"> </page-header>
 
 <div class="row" authorization="DockerImageCreate">
   <div class="col-lg-12 col-md-12 col-xs-12">
     <rd-widget>
-      <rd-widget-header icon="download" title-text="Pull image "> </rd-widget-header>
+      <rd-widget-header icon="download" title-text="拉取镜像 "> </rd-widget-header>
       <rd-widget-body>
         <form class="form-horizontal">
           <!-- image-and-registry -->
@@ -18,7 +18,7 @@
             check-rate-limits="true"
           >
             <div ng-if="applicationState.endpoint.mode.agentProxy && applicationState.endpoint.mode.provider === 'DOCKER_SWARM_MODE'">
-              <div class="col-sm-12 form-section-title"> Deployment </div>
+              <div class="col-sm-12 form-section-title"> 部署 </div>
               <!-- node-selection -->
               <node-selector model="formValues.NodeName" endpoint-id="endpoint.Id"> </node-selector>
               <!-- !node-selection -->
@@ -32,8 +32,8 @@
                   ng-click="pullImage()"
                   button-spinner="state.actionInProgress"
                 >
-                  <span ng-hide="state.actionInProgress">Pull the image</span>
-                  <span ng-show="state.actionInProgress">Download in progress...</span>
+                  <span ng-hide="state.actionInProgress">拉取镜像</span>
+                  <span ng-show="state.actionInProgress">下载进行中...</span>
                 </button>
               </div>
             </div>
