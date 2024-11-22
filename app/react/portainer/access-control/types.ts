@@ -6,10 +6,10 @@ export type ResourceControlId = number;
 export type ResourceId = number | string;
 
 export enum ResourceControlOwnership {
-  PUBLIC = 'public',
-  PRIVATE = 'private',
-  RESTRICTED = 'restricted',
-  ADMINISTRATORS = 'administrators',
+  PUBLIC = '公开',
+  PRIVATE = '私有',
+  RESTRICTED = '受限',
+  ADMINISTRATORS = '管理员', 
 }
 
 /**

@@ -21,7 +21,7 @@ export const columns = _.compact([
   columnHelper.accessor(
     (item) => item.aggregatedStatus[StatusType.Acknowledged] || 0,
     {
-      header: 'Acknowledged',
+      header: '已确认',
       enableSorting: false,
       enableHiding: false,
       cell: ({ getValue, row }) => (
@@ -40,7 +40,7 @@ export const columns = _.compact([
     columnHelper.accessor(
       (item) => item.aggregatedStatus[StatusType.ImagesPulled] || 0,
       {
-        header: 'Images pre-pulled',
+        header: '预拉取的镜像',
         cell: ({ getValue, row: { original: item } }) => {
           if (!item.PrePullImage) {
             return <div className="text-center">-</div>;
@@ -64,7 +64,7 @@ export const columns = _.compact([
   columnHelper.accessor(
     (item) => item.aggregatedStatus[StatusType.DeploymentReceived] || 0,
     {
-      header: 'Deployments received',
+      header: '已接收的部署',
       cell: ({ getValue, row }) => (
         <DeploymentCounter
           count={getValue()}
@@ -82,7 +82,7 @@ export const columns = _.compact([
   columnHelper.accessor(
     (item) => item.aggregatedStatus[StatusType.Error] || 0,
     {
-      header: 'Deployments failed',
+      header: '部署失败',
       cell: ({ getValue, row }) => {
         const count = getValue();
 

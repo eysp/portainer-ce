@@ -59,17 +59,17 @@ function StatusCell({
       case ContainerStatus.Paused:
       case ContainerStatus.Starting:
       case ContainerStatus.Unhealthy:
-        return '警告';
+        return 'warning';
       case ContainerStatus.Created:
-        return '信息';
+        return 'info';
       case ContainerStatus.Stopped:
       case ContainerStatus.Dead:
       case ContainerStatus.Exited:
-        return '危险';
+        return 'danger';
       case ContainerStatus.Healthy:
       case ContainerStatus.Running:
       default:
-        return '成功';
+        return 'success';
     }
   }
 

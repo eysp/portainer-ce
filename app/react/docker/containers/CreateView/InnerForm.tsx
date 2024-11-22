@@ -80,7 +80,7 @@ export function InnerForm({
                     options={[
                       {
                         id: 'commands',
-                        label: '命令与日志g',
+                        label: '命令与日志',
                         children: (
                           <CommandsTab
                             apiVersion={apiVersion}
