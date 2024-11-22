@@ -24,20 +24,20 @@ function Template({ text, color, title }: Args) {
 export const Success: Story<Args> = Template.bind({});
 Success.args = {
   color: 'success',
-  title: '成功',
-  text: '这是一个成功的提醒。非常长的文本，非常长的文本，非常长的文本，非常长的文本，非常长的文本，非常长的文本',
+  title: 'Success',
+  text: 'This is a success alert. Very long text, Very long text,Very long text ,Very long text ,Very long text, Very long text',
 };
 
 export const Error: Story<Args> = Template.bind({});
 Error.args = {
   color: 'error',
-  title: '错误',
-  text: '这是一个错误的提醒',
+  title: 'Error',
+  text: 'This is an error alert',
 };
 
 export const Info: Story<Args> = Template.bind({});
 Info.args = {
   color: 'info',
-  title: '信息',
-  text: '这是一个信息提醒',
+  title: 'Info',
+  text: 'This is an info alert',
 };
