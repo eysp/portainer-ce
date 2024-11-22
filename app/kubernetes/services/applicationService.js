@@ -417,7 +417,7 @@ class KubernetesApplicationService {
   // true = KubernetesApplication
   // false = KubernetesApplicationFormValues
   //
-  // e.g. signatures are
+  // 例如 signatures are
   //
   // patch(oldValues: KubernetesApplication, newValues: KubernetesApplication, partial: (undefined | false)): Promise<unknown>
   // patch(oldValues: KubernetesApplicationFormValues, newValues: KubernetesApplicationFormValues, partial: true): Promise<unknown>

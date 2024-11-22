@@ -63,7 +63,7 @@ export function NamespaceInnerForm({
           as={Input}
           id="namespace"
           name="name"
-          placeholder="e.g. my-namespace"
+          placeholder="例如 my-namespace"
           data-cy="k8sNamespaceCreate-namespaceNameInput"
         />
       </FormControl>

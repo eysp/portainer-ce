@@ -42,7 +42,7 @@ export function nameValidation(
   if (isComposeStack) {
     schema = schema.matches(
       new RegExp(STACK_NAME_VALIDATION_REGEX),
-      "This field must consist of lower case alphanumeric characters, '_' or '-' (e.g. 'my-name', or 'abc-123')."
+      "This field must consist of lower case alphanumeric characters, '_' or '-' (例如 'my-name', or 'abc-123')."
     );
   }
 

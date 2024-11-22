@@ -205,7 +205,7 @@ type BuildImageQueryParams = {
   cpushares?: number;
 
   /**
-   * CPUs in which to allow execution (e.g., 0-3, 0,1).
+   * CPUs in which to allow execution (例如, 0-3, 0,1).
    */
   cpusetcpus?: string;
 

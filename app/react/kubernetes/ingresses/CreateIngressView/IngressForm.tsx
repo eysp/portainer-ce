@@ -33,9 +33,9 @@ const PathTypes: Record<string, string[]> = {
   other: ['Prefix', 'Exact'],
 };
 const PlaceholderAnnotations: Record<string, string[]> = {
-  nginx: ['e.g. nginx.ingress.kubernetes.io/rewrite-target', '/$1'],
-  traefik: ['e.g. traefik.ingress.kubernetes.io/router.tls', 'true'],
-  other: ['e.g. app.kubernetes.io/name', 'examplename'],
+  nginx: ['例如 nginx.ingress.kubernetes.io/rewrite-target', '/$1'],
+  traefik: ['例如 traefik.ingress.kubernetes.io/router.tls', 'true'],
+  other: ['例如 app.kubernetes.io/name', 'examplename'],
 };
 
 interface Props {
@@ -342,7 +342,7 @@ export function IngressForm({
                     </span>
                   </TooltipWithChildren>
 
-                  <TooltipWithChildren message="Enable use of regular expressions in ingress paths (set in the ingress details of an application). Use this along with rewrite-target to specify the regex capturing group to be replaced, e.g. path regex of ^/foo/(,*) and rewrite-target of /bar/$1 rewrites example.com/foo/account to example.com/bar/account.">
+                  <TooltipWithChildren message="Enable use of regular expressions in ingress paths (set in the ingress details of an application). Use this along with rewrite-target to specify the regex capturing group to be replaced, 例如 path regex of ^/foo/(,*) and rewrite-target of /bar/$1 rewrites example.com/foo/account to example.com/bar/account.">
                     <span>
                       <Button
                         className="btn btn-sm btn-light mb-2 ml-2"
@@ -411,7 +411,7 @@ export function IngressForm({
                           id={`ingress_host_${hostIndex}`}
                           type="text"
                           className="form-control form-control-sm"
-                          placeholder="e.g. example.com"
+                          placeholder="例如 example.com"
                           defaultValue={host.Host}
                           onChange={(e: ChangeEvent<HTMLInputElement>) =>
                             handleHostChange(hostIndex, e.target.value)

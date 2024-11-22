@@ -10,7 +10,7 @@ export function kubeEnvVarValidationSchema(): SchemaOf<EnvVar[]> {
         .required('Environment variable name is required')
         .matches(
           /^[a-zA-Z][a-zA-Z0-9_.-]*$/,
-          `This field must consist of alphabetic characters, digits, '_', '-', or '.', and must not start with a digit (e.g. 'my.env-name', or 'MY_ENV.NAME', or 'MyEnvName1'`
+          `This field must consist of alphabetic characters, digits, '_', '-', or '.', and must not start with a digit (例如 'my.env-name', or 'MY_ENV.NAME', or 'MyEnvName1'`
         ),
       value: string().default(''),
       needsDeletion: bool().default(false),

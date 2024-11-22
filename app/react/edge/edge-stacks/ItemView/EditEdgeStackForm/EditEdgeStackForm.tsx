@@ -122,7 +122,7 @@ function InnerForm({
       {hasKubeEndpoint && hasDockerEndpoint && (
         <TextTip>
           There are no available deployment types when there is more than one
-          type of environment in your edge group selection (e.g. Kubernetes and
+          type of environment in your edge group selection (例如 Kubernetes and
           Docker environments). Please select edge groups that have environments
           of the same type.
         </TextTip>

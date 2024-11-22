@@ -21,7 +21,7 @@ export function ContainerNetworksDatatable({
   container,
   nodeName,
 }: {
-  dataset: NetworkSettings['Networks'];
+  dataset: NetworkSettings['网络'];
   container: ContainerListViewModel;
   nodeName?: string;
 }) {

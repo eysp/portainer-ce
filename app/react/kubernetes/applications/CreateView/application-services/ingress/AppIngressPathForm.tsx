@@ -63,7 +63,7 @@ export function AppIngressPathForm({
     isEditMode,
   ]);
 
-  // when the hostname options change (e.g. after a namespace change) and the host and ingress is no longer available, update the selected ingress to the first available one
+  // when the hostname options change (例如 after a namespace change) and the host and ingress is no longer available, update the selected ingress to the first available one
   useEffect(() => {
     if (ingressHostOptionsWithCurrentValue) {
       // some rerenders might not be from a namespace or hostname change so keep the current values if they're still valid

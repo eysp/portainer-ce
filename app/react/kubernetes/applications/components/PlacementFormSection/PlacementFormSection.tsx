@@ -122,7 +122,7 @@ function useNodeLabels(): NodeLabels {
       }))
     ) || [];
 
-  // create a NodeLabels object with each label key's possible values, without duplicate keys or values. e.g. { 'beta.kubernetes.io/arch': ['amd64', 'arm64'] }
+  // create a NodeLabels object with each label key's possible values, without duplicate keys or values. 例如 { 'beta.kubernetes.io/arch': ['amd64', 'arm64'] }
   // in multinode clusters, there can be multiple nodes with the same label key
   const allNodesLabels = nodeLabelPairs.map((pair) => pair.key);
   const uniqueNodesLabels = new Set(allNodesLabels);

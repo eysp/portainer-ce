@@ -27,7 +27,7 @@ const complicatedStatefulSet: ApplicationFormValues = {
     Registry: {
       Id: 0,
       Type: 0,
-      Name: 'Docker Hub (anonymous)',
+      Name: 'Docker Hub (匿名)',
       URL: 'docker.io',
     },
     Image: 'caddy',
@@ -166,7 +166,7 @@ const complicatedStatefulSetNoServices: ApplicationFormValues = {
     Registry: {
       Id: 0,
       Type: 0,
-      Name: 'Docker Hub (anonymous)',
+      Name: 'Docker Hub (匿名)',
       URL: 'docker.io',
     },
     Image: 'caddy:latest',
@@ -313,7 +313,7 @@ const simpleDaemonset: ApplicationFormValues = {
     Registry: {
       Id: 0,
       Type: 0,
-      Name: 'Docker Hub (anonymous)',
+      Name: 'Docker Hub (匿名)',
       URL: 'docker.io',
     },
     Image: 'caddy',
@@ -381,7 +381,7 @@ const simpleDeployment: ApplicationFormValues = {
     Registry: {
       Id: 0,
       Type: 0,
-      Name: 'Docker Hub (anonymous)',
+      Name: 'Docker Hub (匿名)',
       URL: 'docker.io',
     },
     Image: 'caddy',

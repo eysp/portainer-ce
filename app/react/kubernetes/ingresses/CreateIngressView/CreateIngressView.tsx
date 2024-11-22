@@ -377,7 +377,7 @@ export function CreateIngressView() {
           errors.ingressName = 'Ingress name is required';
         } else if (!nameRegex.test(rule.IngressName)) {
           errors.ingressName =
-            "This field must consist of lower case alphanumeric characters or '-', contain at most 63 characters, start with an alphabetic character, and end with an alphanumeric character (e.g. 'my-name', or 'abc-123').";
+            "This field must consist of lower case alphanumeric characters or '-', contain at most 63 characters, start with an alphabetic character, and end with an alphanumeric character (例如 'my-name', or 'abc-123').";
         } else if (ingressNames.includes(rule.IngressName)) {
           errors.ingressName = 'Ingress name already exists';
         }

@@ -41,7 +41,7 @@ type NetworkConfigBase = {
 /**
  * This type definition of NetworkConfig doesnt enforce the usage of only one type of the union
  * and not a mix of fields of the unionised types.
- * e.g. the following is valid for TS while it is not for the Docker API
+ * 例如 the following is valid for TS while it is not for the Docker API
  *
  * const config: NetworkConfig = {
  *   Name: 'my-network', // shared

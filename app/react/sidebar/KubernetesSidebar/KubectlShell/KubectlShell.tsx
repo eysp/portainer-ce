@@ -56,7 +56,7 @@ export function KubeCtlShell({ environmentId, onClose }: Props) {
     terminal.focus();
     fit(terminal);
     terminal.writeln('#Run kubectl commands inside here');
-    terminal.writeln('#e.g. kubectl get all');
+    terminal.writeln('#例如 kubectl get all');
     terminal.writeln('');
   }, [terminal]);
 

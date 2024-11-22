@@ -122,7 +122,7 @@ function parseCpu(cpu: string) {
   return res;
 }
 
-// bytesToReadableFormat converts bytes to a human readable string (e.g. '1.5 GB'), assuming base 10
+// bytesToReadableFormat converts bytes to a human readable string (例如 '1.5 GB'), assuming base 10
 // there's some discussion about whether base 2 or base 10 should be used for memory units
 // https://www.quora.com/Is-1-GB-equal-to-1024-MB-or-1000-MB
 export function bytesToReadableFormat(memoryBytes: number) {

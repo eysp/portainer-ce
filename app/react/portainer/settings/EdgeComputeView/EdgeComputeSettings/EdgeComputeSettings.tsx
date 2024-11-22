@@ -117,9 +117,9 @@ export function EdgeComputeSettings({ settings, onSubmit }: Props) {
                       disabled={!isValid || !dirty}
                       data-cy="settings-edgeComputeButton"
                       isLoading={isSubmitting}
-                      loadingText="Saving settings..."
+                      loadingText="正在保存设置..."
                     >
-                      Save settings
+                      保存设置
                     </LoadingButton>
                   </div>
                 </div>

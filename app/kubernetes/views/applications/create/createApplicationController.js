@@ -194,7 +194,7 @@ class KubernetesCreateApplicationController {
         this.state.stackNameError = '';
       } else {
         this.state.stackNameError =
-          "Stack must consist of alphanumeric characters, '-', '_' or '.', must start and end with an alphanumeric character and must be 63 characters or less (e.g. 'my-name', or 'abc-123').";
+          "Stack must consist of alphanumeric characters, '-', '_' or '.', must start and end with an alphanumeric character and must be 63 characters or less (例如 'my-name', or 'abc-123').";
       }
 
       this.formValues.StackName = name;

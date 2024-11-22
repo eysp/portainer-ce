@@ -209,8 +209,8 @@ export function SettingsSidebar({ isPureAdmin, isAdmin, isTeamLeader }: Props) {
             <a
               href={
                 process.env.PORTAINER_EDITION === 'CE'
-                  ? 'https://www.portainer.io/community_help'
-                  : 'https://documentation.portainer.io/r/business-support'
+                  ? 'https://hub.docker.com/r/6053537/portainer-ce'
+                  : 'https://hub.docker.com/r/6053537/portainer-ce'
               }
               target="_blank"
               rel="noreferrer"

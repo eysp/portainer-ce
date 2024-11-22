@@ -21,7 +21,7 @@ export function FileUploadField({
   onChange,
   value,
   accept,
-  title = 'Select a file',
+  title = '选择文件',
   required = false,
   inputId,
   color = 'primary',

@@ -8,7 +8,7 @@ type CommitParams = {
   repo?: string; //  Repository name for the created image
   tag?: string; //  Tag name for the create image
   comment?: string; //  Commit message
-  author?: string; //  Author of the image (e.g., John Hannibal Smith <hannibal@a-team.com>)
+  author?: string; //  Author of the image (例如, John Hannibal Smith <hannibal@a-team.com>)
   pause?: boolean; //  Default: true  Whether to pause the container before committing
   changes?: string; //  Dockerfile instructions to apply while committing
 };

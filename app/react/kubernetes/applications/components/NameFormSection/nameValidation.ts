@@ -32,7 +32,7 @@ export function appNameValidation(
     )
     .test(
       'is-valid',
-      "This field must consist of lower case alphanumeric characters or '-', contain at most 63 characters, start with an alphabetic character, and end with an alphanumeric character (e.g. 'my-name', or 'abc-123').",
+      "This field must consist of lower case alphanumeric characters or '-', contain at most 63 characters, start with an alphabetic character, and end with an alphanumeric character (例如 'my-name', or 'abc-123').",
       (appName) => {
         if (!appName) {
           return true;

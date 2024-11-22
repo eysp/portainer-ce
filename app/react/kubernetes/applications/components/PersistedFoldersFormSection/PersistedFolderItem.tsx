@@ -53,7 +53,7 @@ export function PersistedFolderItem({
           <InputGroup.Addon required>Path in container</InputGroup.Addon>
           <Input
             type="text"
-            placeholder="e.g. /data"
+            placeholder="例如 /data"
             disabled={
               (isEdit && isExistingPersistedFolder()) ||
               applicationValues.Containers.length > 1
@@ -109,7 +109,7 @@ export function PersistedFolderItem({
               <Input
                 className="!rounded-none -mr-[1px] !w-20"
                 type="number"
-                placeholder="e.g. 20"
+                placeholder="例如 20"
                 min="0"
                 disabled={
                   (isEdit && isExistingPersistedFolder()) ||

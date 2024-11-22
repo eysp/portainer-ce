@@ -81,7 +81,7 @@ export function ConfigurationData({
             <InputGroup.Input
               type="text"
               value={value.path}
-              placeholder="e.g. /etc/myapp/conf.d"
+              placeholder="例如 /etc/myapp/conf.d"
               onChange={(e) => onChange({ ...value, path: e.target.value })}
               data-cy={`k8sAppCreate-${dataCyType}PathOnDiskInput_${configurationIndex}_${keyIndex}`}
             />
