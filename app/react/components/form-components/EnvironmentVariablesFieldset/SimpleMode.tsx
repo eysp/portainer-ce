@@ -35,15 +35,15 @@ export function SimpleMode({
         className="!ml-0 p-0 hover:no-underline"
         onClick={onAdvancedModeClick}
       >
-        Advanced mode
+        高级模式
       </Button>
 
       <TextTip color="blue" inline={false}>
-        Switch to advanced mode to copy & paste multiple variables
+        切换到高级模式以复制和粘贴多个变量
       </TextTip>
 
       <InputList
-        aria-label="environment variables list"
+        aria-label="环境变量列表"
         onChange={onChange}
         value={value}
         isAddButtonHidden
@@ -61,7 +61,7 @@ export function SimpleMode({
           color="default"
           icon={Plus}
         >
-          Add an environment variable
+          添加环境变量
         </Button>
 
         <FileEnv onChooseFile={(add) => onChange([...value, ...add])} />
@@ -80,7 +80,7 @@ function FileEnv({ onChooseFile }: { onChooseFile: (file: Values) => void }) {
       <FileUploadField
         inputId="env-file-upload"
         onChange={handleChange}
-        title="Load variables from .env file"
+        title="从 .env 文件加载变量"
         accept=".env"
         value={file}
         color="default"
@@ -88,7 +88,7 @@ function FileEnv({ onChooseFile }: { onChooseFile: (file: Values) => void }) {
 
       {fileTooBig && (
         <TextTip color="orange" inline>
-          File too large! Try uploading a file smaller than 1MB
+          文件太大！尝试上传小于 1MB 的文件
         </TextTip>
       )}
     </>

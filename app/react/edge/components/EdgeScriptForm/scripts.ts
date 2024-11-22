@@ -32,7 +32,7 @@ export const commandsTabs: Record<string, CommandTab> = {
   },
   standaloneLinux: {
     id: 'standalone',
-    label: 'Docker Standalone',
+    label: 'Docker 单机模式',
     command: buildLinuxStandaloneCommand,
   },
   swarmWindows: {
@@ -42,7 +42,7 @@ export const commandsTabs: Record<string, CommandTab> = {
   },
   standaloneWindow: {
     id: 'standalone',
-    label: 'Docker Standalone',
+    label: 'Docker 单机模式',
     command: buildWindowsStandaloneCommand,
   },
 } as const;

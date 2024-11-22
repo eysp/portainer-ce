@@ -23,6 +23,6 @@ async function getNodesCount() {
 
 export function useNodesCount() {
   return useQuery(queryKey, getNodesCount, {
-    ...withError('Unable to retrieve nodes count'),
+    ...withError('无法检索节点数'),
   });
 }

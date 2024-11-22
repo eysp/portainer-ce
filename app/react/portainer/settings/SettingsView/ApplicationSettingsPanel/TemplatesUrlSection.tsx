@@ -15,7 +15,7 @@ export function TemplatesUrlSection() {
   const buildTemplateDocUrl = useDocsUrl('/advanced/app-templates/build');
 
   return (
-    <FormSection title="App Templates">
+    <FormSection title="应用模板">
       <div className="form-group">
         <div className="col-sm-12 text-muted small">
           <p>

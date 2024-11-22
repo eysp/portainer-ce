@@ -27,7 +27,7 @@ export async function getSystemStatus() {
   try {
     const { data } = await axios.get<StatusResponse>(buildUrl('status'));
 
-    data.Edition = isBE ? 'Business Edition' : 'Community Edition';
+    data.Edition = isBE ? '商业版' : '社区版';
 
     return data;
   } catch (error) {

@@ -23,15 +23,15 @@ export function KubeNoteMinimumCharacters() {
       <div className="form-group">
         <div className="col-sm-12">
           <SwitchField
-            label="Require a note on applications"
+            label="要求应用程序备注"
             checked={isEnabled}
             name="toggle_requireNoteOnApplications"
             onChange={(value) => setIsEnabled(value)}
             featureId={FeatureId.K8S_REQUIRE_NOTE_ON_APPLICATIONS}
             labelClass="col-sm-3 col-lg-2"
             tooltip={`${
-              isBE ? '' : 'BE allows entry of notes in Add/Edit application. '
-            }Using this will enforce entry of a note in Add/Edit application (and prevent complete clearing of it in Application details).`}
+              isBE ? '' : 'BE 允许在添加/编辑应用程序时输入备注。 '
+            }启用此选项将强制在添加/编辑应用程序时输入备注（并防止在应用程序详情中完全清除备注）。`}
           />
         </div>
       </div>
@@ -39,7 +39,7 @@ export function KubeNoteMinimumCharacters() {
         <FormControl
           label={
             <span className="pl-4">
-              Minimum number of characters note must have
+              备注必须包含的最小字符数
             </span>
           }
           errors={error}

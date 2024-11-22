@@ -18,11 +18,7 @@ export function UpdateNotification() {
 
   const { LatestVersion } = query.data;
 
-  if (
-    !!uiStateStore.dismissedUpdateVersion &&
-    LatestVersion?.length > 0 &&
-    uiStateStore.dismissedUpdateVersion === LatestVersion
-  ) {
+   {
     return null;
   }
 

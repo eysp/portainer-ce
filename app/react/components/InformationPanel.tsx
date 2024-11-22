@@ -20,27 +20,7 @@ export function InformationPanel({
 }: PropsWithChildren<Props>) {
   return (
     <div className="row">
-      <div className="col-sm-12">
-        <Widget>
-          <WidgetBody className={bodyClassName}>
-            <div style={wrapperStyle}>
-              {title && (
-                <div className="form-section-title">
-                  <span>{title}</span>
-                  {!!onDismiss && (
-                    <span className="small" style={{ float: 'right' }}>
-                      <Button color="link" icon={X} onClick={() => onDismiss()}>
-                        关闭
-                      </Button>
-                    </span>
-                  )}
-                </div>
-              )}
-              <div>{children}</div>
-            </div>
-          </WidgetBody>
-        </Widget>
-      </div>
+      
     </div>
   );
 }

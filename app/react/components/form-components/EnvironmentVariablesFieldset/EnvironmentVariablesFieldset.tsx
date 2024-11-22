@@ -45,15 +45,15 @@ export function EnvironmentVariablesFieldset({
 export function envVarValidation(): SchemaOf<Values> {
   return array(
     object({
-      name: string().required('Environment variable name is required'),
+      name: string().required('环境变量名称是必需的'),
       value: string().default(''),
       needsDeletion: boolean().default(false),
     })
   ).test(
     'unique',
-    'This environment variable is already defined',
+    '此环境变量已定义',
     buildUniquenessTest(
-      () => 'This environment variable is already defined',
+      () => '此环境变量已定义',
       'name'
     )
   );

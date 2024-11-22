@@ -26,7 +26,7 @@ export function EnvironmentActions({ environment }: Props) {
           params={{ environmentId: environment.Id, edgeStackId }}
           className="hover:!no-underline"
         >
-          <Button color="none" title="Browse Snapshot">
+          <Button color="none" title="浏览快照">
             <Icon icon={Search} className="searchIcon" />
           </Button>
         </Link>

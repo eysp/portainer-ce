@@ -9,18 +9,18 @@ export function HelmSection() {
   const [{ name }, { error }] = useField<string>('helmRepositoryUrl');
 
   return (
-    <FormSection title="Helm repository">
+    <FormSection title="Helm 仓库">
       <div className="mb-2">
         <TextTip color="blue">
-          You can specify the URL to your own Helm repository here. See the{' '}
+          您可以在此处指定您自己的 Helm 仓库的 URL。有关更多详细信息，请参阅{' '}
           <a
             href="https://helm.sh/docs/topics/chart_repository/"
             target="_blank"
             rel="noreferrer"
           >
-            official documentation
+            官方文档
           </a>{' '}
-          for more details.
+          。
         </TextTip>
       </div>
 

@@ -7,16 +7,15 @@ export function StackNameLabelInsight() {
   const { isPureAdmin } = useCurrentUser();
   const insightsBoxContent = (
     <>
-      The stack field below was previously labelled &apos;Name&apos; but, in
-      fact, it&apos;s always been the stack name (hence the relabelling).
+      下方的堆栈字段之前被标记为&apos;名称&apos;，但实际上，它一直是堆栈名称（因此进行了重新标记）。
       {isPureAdmin && (
         <>
           <br />
-          Kubernetes Stacks functionality can be turned off entirely via{' '}
+          Kubernetes 堆栈功能可以通过{' '}
           <Link to="portainer.settings" target="_blank">
-            Kubernetes Settings
+            Kubernetes 设置
           </Link>
-          .
+          完全关闭。
         </>
       )}
     </>
@@ -25,7 +24,7 @@ export function StackNameLabelInsight() {
   return (
     <InsightsBox
       type="slim"
-      header="Stack"
+      header="堆栈"
       content={insightsBoxContent}
       insightCloseId="k8s-stacks-name"
     />

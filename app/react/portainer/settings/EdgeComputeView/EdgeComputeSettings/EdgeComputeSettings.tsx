@@ -37,7 +37,7 @@ export function EdgeComputeSettings({ settings, onSubmit }: Props) {
   return (
     <div className="row">
       <Widget>
-        <WidgetTitle icon={Laptop} title="Edge Compute settings" />
+        <WidgetTitle icon={Laptop} title="Edge 计算设置" />
 
         <WidgetBody>
           <Formik
@@ -63,7 +63,7 @@ export function EdgeComputeSettings({ settings, onSubmit }: Props) {
               >
                 <FormControl
                   inputId="edge_enable"
-                  label="Enable Edge Compute features"
+                  label="启用 Edge 计算功能"
                   size="small"
                   errors={errors.EnableEdgeComputeFeatures}
                 >
@@ -79,15 +79,14 @@ export function EdgeComputeSettings({ settings, onSubmit }: Props) {
                 </FormControl>
 
                 <TextTip color="blue" className="mb-2">
-                  Enable this setting to use Portainer Edge Compute
-                  capabilities.
+                  启用此设置以使用 Portainer Edge 计算功能。
                 </TextTip>
 
                 {isBE && values.EnableEdgeComputeFeatures && (
                   <>
                     <PortainerUrlField
                       fieldName="EdgePortainerUrl"
-                      tooltip="URL of this Portainer instance that will be used by Edge agents to initiate the communications."
+                      tooltip="Edge 代理将用于启动通信的此 Portainer 实例的 URL。"
                     />
 
                     <PortainerTunnelAddrField fieldName="Edge.TunnelServerAddress" />

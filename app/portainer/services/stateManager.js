@@ -133,7 +133,7 @@ function StateManagerFactory(
         deferred.resolve(state);
       })
       .catch(function error(err) {
-        deferred.reject({ msg: 'Unable to retrieve server settings and status', err: err });
+        deferred.reject({ msg: '无法检索服务器设置和状态', err: err });
       });
 
     return deferred.promise;
@@ -220,7 +220,7 @@ function StateManagerFactory(
         deferred.resolve();
       })
       .catch(function error(err) {
-        deferred.reject({ msg: 'Unable to connect to the Docker environment', err: err });
+        deferred.reject({ msg: '无法连接到 Docker 环境', err: err });
       })
       .finally(function final() {
         state.loading = false;

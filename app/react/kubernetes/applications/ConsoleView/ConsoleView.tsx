@@ -106,7 +106,7 @@ export function ConsoleView() {
   return (
     <>
       <PageHeader
-        title="Application console"
+        title="应用程序控制台"
         breadcrumbs={breadcrumbs}
         reload
       />
@@ -115,14 +115,14 @@ export function ConsoleView() {
           <Widget>
             <WidgetBody>
               <div className="row">
-                <div className="col-sm-12 form-section-title">Console</div>
+                <div className="col-sm-12 form-section-title">控制台e</div>
               </div>
               <div className="form-row flex">
                 <label
                   htmlFor="consoleCommand"
                   className="col-sm-3 col-lg-2 control-label m-0 p-0 text-left"
                 >
-                  Command
+                  命令
                   <TerminalTooltip />
                 </label>
                 <div className="col-sm-8 input-group p-0">
@@ -154,11 +154,11 @@ export function ConsoleView() {
                   }
                   disabled={connectionStatus === 'connecting'}
                 >
-                  {connectionStatus === 'open' && 'Disconnect'}
-                  {connectionStatus === 'connecting' && 'Connecting'}
+                  {connectionStatus === 'open' && '断开连接'}
+                  {connectionStatus === 'connecting' && '连接中'}
                   {connectionStatus !== 'connecting' &&
                     connectionStatus !== 'open' &&
-                    'Connect'}
+                    '连接'}
                 </Button>
               </div>
             </WidgetBody>

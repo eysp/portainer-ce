@@ -27,19 +27,19 @@ export function AdvancedMode({
         className="!ml-0 p-0 hover:no-underline"
         onClick={onSimpleModeClick}
       >
-        Simple mode
+        简易模式
       </Button>
 
       <TextTip color="blue" inline={false}>
-        Switch to simple mode to define variables line by line, or load from
-        .env file
+        切换到简易模式逐行定义变量，或从
+        .env 文件加载
       </TextTip>
 
       <CodeEditor
         id="environment-variables-editor"
         value={editorValue}
         onChange={handleEditorChange}
-        placeholder="e.g. key=value"
+        placeholder="例如 key=value"
       />
     </>
   );

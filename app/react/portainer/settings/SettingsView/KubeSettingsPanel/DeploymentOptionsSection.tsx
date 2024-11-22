@@ -17,17 +17,17 @@ export function DeploymentOptionsSection() {
 
   const limitedFeature = isLimitedToBE(FeatureId.ENFORCE_DEPLOYMENT_OPTIONS);
   return (
-    <FormSection title="Deployment options">
+    <FormSection title="部署选项">
       <div className="form-group">
         <div className="col-sm-12">
           <SwitchField
-            label="Enforce code-based deployment"
+            label="强制基于代码的部署"
             checked={values.hideAddWithForm}
             name="toggle_hideAddWithForm"
             featureId={FeatureId.ENFORCE_DEPLOYMENT_OPTIONS}
             onChange={(value) => handleToggleAddWithForm(value)}
             labelClass="col-sm-3 col-lg-2"
-            tooltip="Hides the 'Add with form' buttons and prevents adding/editing of resources via forms"
+            tooltip="隐藏'使用表单添加'按钮，并禁止通过表单添加/编辑资源"
           />
         </div>
       </div>
@@ -35,7 +35,7 @@ export function DeploymentOptionsSection() {
         <div className="form-group flex flex-col gap-y-1">
           <div className="col-sm-12">
             <SwitchField
-              label="Allow web editor and custom template use"
+              label="允许使用网页编辑器和自定义模板"
               checked={!values.hideWebEditor}
               name="toggle_hideWebEditor"
               onChange={(value) =>
@@ -46,7 +46,7 @@ export function DeploymentOptionsSection() {
           </div>
           <div className="col-sm-12">
             <SwitchField
-              label="Allow specifying of a manifest via a URL"
+              label="允许通过 URL 指定清单"
               checked={!values.hideFileUpload}
               name="toggle_hideFileUpload"
               onChange={(value) =>
@@ -61,14 +61,14 @@ export function DeploymentOptionsSection() {
         <div className="form-group">
           <div className="col-sm-12">
             <SwitchField
-              label="Allow per environment override"
+              label="允许每个环境覆盖"
               checked={values.perEnvOverride}
               onChange={(value) =>
                 setFieldValue('globalDeploymentOptions.perEnvOverride', value)
               }
               name="toggle_perEnvOverride"
               labelClass="col-sm-3 col-lg-2"
-              tooltip="Allows overriding of deployment options in the Cluster setup screen of each environment"
+              tooltip="允许在每个环境的集群设置屏幕中覆盖部署选项"
             />
           </div>
         </div>
@@ -79,7 +79,7 @@ export function DeploymentOptionsSection() {
       <div className="form-group">
         <div className="col-sm-12">
           <SwitchField
-            label="Allow stacks functionality with Kubernetes environments"
+            label="允许 Kubernetes 环境使用堆栈功能"
             checked={!values.hideStacksFunctionality}
             onChange={(value) =>
               setFieldValue(
@@ -89,7 +89,7 @@ export function DeploymentOptionsSection() {
             }
             name="toggle_stacksFunctionality"
             labelClass="col-sm-3 col-lg-2"
-            tooltip="This allows you to group your applications/workloads into a single ‘stack’, and then view or delete an entire stack. If disabled, stacks functionality will not show in the UI."
+            tooltip="这允许您将应用程序/工作负载分组为一个‘堆栈’，然后查看或删除整个堆栈。如果禁用，堆栈功能将不会显示在 UI 中。."
           />
         </div>
       </div>

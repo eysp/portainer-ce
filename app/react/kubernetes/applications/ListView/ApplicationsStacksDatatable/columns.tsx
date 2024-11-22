@@ -15,7 +15,7 @@ export const columns = [
   buildExpandColumn<KubernetesStack>(),
   columnHelper.accessor('Name', {
     id: 'name',
-    header: 'Stack',
+    header: '堆栈',
   }),
   columnHelper.accessor('ResourcePool', {
     id: 'namespace',
@@ -32,7 +32,7 @@ export const columns = [
           </Link>
           {KubernetesNamespaceHelper.isSystemNamespace(value) && (
             <span className="label label-info image-tag label-margins">
-              system
+              系统
             </span>
           )}
         </>
@@ -42,12 +42,12 @@ export const columns = [
 
   columnHelper.accessor((row) => row.Applications.length, {
     id: 'applications',
-    header: 'Applications',
+    header: '应用',
   }),
 
   columnHelper.display({
     id: 'actions',
-    header: 'Actions',
+    header: '操作',
     cell: ({ row: { original: item } }) => (
       <Link
         to="kubernetes.stacks.stack.logs"
@@ -55,7 +55,7 @@ export const columns = [
         className="flex items-center gap-1"
       >
         <Icon icon={FileText} />
-        Logs
+        日志
       </Link>
     ),
   }),

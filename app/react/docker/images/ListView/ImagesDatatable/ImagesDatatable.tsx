@@ -69,7 +69,7 @@ export function ImagesDatatable({
 
   return (
     <Datatable
-      title="镜像s"
+      title="镜像"
       titleIcon={List}
       renderTableActions={(selectedItems) => (
         <div className="flex items-center gap-2">

@@ -9,7 +9,7 @@ import { queryKeys } from './query-keys';
 export const queryKey = [...queryKeys.base(), 'info'] as const;
 
 export type ContainerPlatform =
-  | 'Docker Standalone'
+  | 'Docker 单机模式'
   | 'Docker Swarm'
   | 'Kubernetes'
   | 'Podman';
@@ -31,6 +31,6 @@ async function getSystemInfo() {
 
 export function useSystemInfo() {
   return useQuery(queryKey, getSystemInfo, {
-    ...withError('Unable to retrieve system info'),
+    ...withError('无法检索系统信息'),
   });
 }

@@ -2,22 +2,22 @@
   <table class="table-bordered table-condensed table">
     <tr>
       <td class="col-md-3">
-        <span>Name</span>
+        <span>名称</span>
       </td>
       <td>
         <select class="form-control" ng-model="$ctrl.state.editModel.name" disable-authorization="DockerContainerUpdate">
-          <option value="no">None</option>
-          <option value="on-failure">On Failure</option>
-          <option value="always">Always</option>
-          <option value="unless-stopped">Unless Stopped</option>
+          <option value="no">无</option>
+          <option value="on-failure">失败时重启</option>
+          <option value="always">总是重启</option>
+          <option value="unless-stopped">除非停止</option>
         </select>
       </td>
       <td class="col-md-2" authorization="DockerContainerUpdate">
-        <button class="btn btn-sm btn-primary" ng-click="$ctrl.save()">Update</button>
+        <button class="btn btn-sm btn-primary" ng-click="$ctrl.save()">更新</button>
       </td>
     </tr>
     <tr ng-if="$ctrl.state.editModel.name === 'on-failure'">
-      <td class="col-md-3">Maximum Retry Count</td>
+      <td class="col-md-3">最大重试次数</td>
       <td colspan="2">
         <input type="number" class="form-control" ng-model="$ctrl.state.editModel.maximumRetryCount" />
       </td>

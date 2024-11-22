@@ -103,7 +103,7 @@ export function AccessControlPanelForm({
           <div className="form-group">
             <div className="col-sm-12">
               <Button size="small" color="default" onClick={onCancelClick}>
-                Cancel
+                取消
               </Button>
               <LoadingButton
                 size="small"
@@ -111,9 +111,9 @@ export function AccessControlPanelForm({
                 type="submit"
                 isLoading={isSubmitting}
                 disabled={!isValid}
-                loadingText="Updating Ownership"
+                loadingText="更新所有权"
               >
-                Update Ownership
+                更新所有权
               </LoadingButton>
             </div>
           </div>
@@ -134,7 +134,7 @@ export function AccessControlPanelForm({
 
     updateAccess.mutate(accessControl, {
       onSuccess() {
-        notifySuccess('Success', 'Access control successfully updated');
+        notifySuccess('成功', '访问控制已成功更新');
       },
     });
   }
@@ -143,9 +143,9 @@ export function AccessControlPanelForm({
 function confirmAccessControlUpdate() {
   return confirm({
     modalType: ModalType.Warn,
-    title: 'Are you sure?',
+    title: '你确定吗？',
     message:
-      'Changing the ownership of this resource will potentially restrict its management to some users.',
-    confirmButton: buildConfirmButton('Change ownership'),
+      '更改此资源的所有权可能会限制某些用户的管理。',
+    confirmButton: buildConfirmButton('更改所有权'),
   });
 }

@@ -83,7 +83,7 @@ function DeployCode({ code }: DeployCodeProps) {
         <Code>{code}</Code>
       </div>
       <div className="mt-2">
-        <CopyButton copyText={code}>Copy command</CopyButton>
+        <CopyButton copyText={code}>复制命令</CopyButton>
       </div>
     </>
   );
