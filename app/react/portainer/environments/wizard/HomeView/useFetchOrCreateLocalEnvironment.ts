@@ -12,7 +12,7 @@ import {
 } from '@/react/portainer/environments/environment.service/create';
 
 export function useConnectLocalEnvironment(): {
-  status: '错误' | '加载中' | '成功';
+  status: 'error' | 'loading' | 'success';
   type?: EnvironmentType;
 } {
   const [localEnvironment, setLocalEnvironment] = useState<Environment>();
@@ -48,17 +48,17 @@ export function useConnectLocalEnvironment(): {
 
 function getStatus(
   isLoading: boolean,
-  mutationStatus: '加载中' | '错误' | '成功' | '空闲'
-): '加载中' | '错误' | '成功' {
-  if (isLoading || mutationStatus === '加载中') {
-    return '加载中';
+  mutationStatus: 'loading' | 'error' | 'success' | 'idle'
+): 'loading' | 'error' | 'success' {
+  if (isLoading || mutationStatus === 'loading') {
+    return 'loading';
   }
 
-  if (mutationStatus === '错误') {
-    return '错误';
+  if (mutationStatus === 'error') {
+    return 'error';
   }
 
-  return '成功';
+  return 'success';
 }
 
 async function createLocalEnvironment() {

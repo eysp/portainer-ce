@@ -11,9 +11,9 @@ const StatusMode: Record<
   Health['Status'],
   ComponentProps<typeof Icon>['mode']
 > = {
-  healthy: '成功',
-  unhealthy: '危险',
-  starting: '警告',
+  healthy: 'success',
+  unhealthy: 'danger',
+  starting: 'warning',
 };
 
 interface Props {
