@@ -61,14 +61,14 @@ export function SecretsDatatable({
 
   return (
     <Datatable
-      title="Secrets"
+      title="密钥"
       titleIcon={Lock}
       columns={columns}
       dataset={dataset || []}
       isLoading={!dataset}
       disableSelect={!hasWriteAccessQuery.authorized}
       settingsManager={tableState}
-      emptyContentLabel="No secret available."
+      emptyContentLabel="没有可用的密钥。"
       renderTableActions={(selectedItems) =>
         hasWriteAccessQuery.authorized && (
           <TableActions selectedItems={selectedItems} onRemove={onRemove} />
@@ -104,7 +104,7 @@ function TableActions({
           className="!m-0"
           data-cy="secret-removeSecretButton"
         >
-          Remove
+          删除
         </Button>
       </Authorized>
 
@@ -116,7 +116,7 @@ function TableActions({
           className="!m-0"
           data-cy="secret-addSecretButton"
         >
-          Add secret
+          添加密钥
         </Button>
       </Authorized>
     </div>

@@ -117,7 +117,7 @@ export const columns = _.compact([
     }
   ),
   columnHelper.accessor('Status', {
-    header: 'Status',
+    header: '状态',
     cell: ({ row }) => (
       <div className="w-full text-center">
         <EdgeStackStatus edgeStack={row.original} />
@@ -130,7 +130,7 @@ export const columns = _.compact([
     },
   }),
   columnHelper.accessor('CreationDate', {
-    header: 'Creation Date',
+    header: '创建日期',
     cell: ({ getValue }) => isoDateFromTimestamp(getValue()),
     enableHiding: false,
   }),
@@ -139,7 +139,7 @@ export const columns = _.compact([
       (item) =>
         item.GitConfig ? item.GitConfig.ConfigHash : item.StackFileVersion,
       {
-        header: 'Target Version',
+        header: '目标版本',
         enableSorting: false,
         cell: ({ row: { original: item } }) => {
           if (item.GitConfig) {

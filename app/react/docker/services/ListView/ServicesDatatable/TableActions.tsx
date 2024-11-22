@@ -41,7 +41,7 @@ export function TableActions({
               icon={RefreshCw}
               data-cy="service-updateServiceButton"
             >
-              Update
+              更新
             </Button>
           </Authorized>
         )}
@@ -53,7 +53,7 @@ export function TableActions({
             icon={Trash2}
             data-cy="service-removeServiceButton"
           >
-            Remove
+            删除
           </Button>
         </Authorized>
       </ButtonGroup>
@@ -66,7 +66,7 @@ export function TableActions({
             icon={Plus}
             className="!ml-0"
           >
-            Add service
+            添加服务
           </Button>
         </Authorized>
       )}
@@ -75,7 +75,7 @@ export function TableActions({
 
   async function handleUpdate(selectedItems: Array<ServiceViewModel>) {
     const confirmed = await confirmServiceForceUpdate(
-      'Do you want to force an update of the selected service(s)? All the tasks associated to the selected service(s) will be recreated.'
+      '您是否确定强制更新所选服务？所有与所选服务相关的任务将被重新创建。'
     );
 
     if (!confirmed) {
@@ -89,7 +89,7 @@ export function TableActions({
       },
       {
         onSuccess() {
-          notifySuccess('Success', 'Service(s) successfully updated');
+          notifySuccess('成功', '服务已成功更新');
           router.stateService.reload();
         },
       }
@@ -98,7 +98,7 @@ export function TableActions({
 
   async function handleRemove(selectedItems: Array<ServiceViewModel>) {
     const confirmed = await confirmDelete(
-      'Do you want to remove the selected service(s)? All the containers associated to the selected service(s) will be removed too.'
+      '您是否确定删除所选服务？所有与所选服务相关的容器也将被删除。'
     );
 
     if (!confirmed) {
@@ -109,7 +109,7 @@ export function TableActions({
       selectedItems.map((service) => service.Id),
       {
         onSuccess() {
-          notifySuccess('Success', 'Service(s) successfully removed');
+          notifySuccess('成功', '服务已成功删除');
           router.stateService.reload();
         },
       }

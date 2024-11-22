@@ -64,13 +64,13 @@ export function HelmRepositoryDatatable() {
       description={<HelmDatatableDescription isAdmin={isAdminUser} />}
       settingsManager={tableState}
       columns={columns}
-      title="Helm repositories"
+      title="Helm 仓库"
       titleIcon={helm}
       titleId="helm-repositories"
       renderTableActions={(selectedRows) => (
         <HelmRepositoryDatatableActions selectedItems={selectedRows} />
       )}
-      emptyContentLabel="No Helm repository found"
+      emptyContentLabel="未找到 Helm 仓库"
       isLoading={helmReposQuery.isLoading}
       isRowSelectable={(row) => !row.original.Global}
     />
@@ -80,17 +80,15 @@ export function HelmRepositoryDatatable() {
 function HelmDatatableDescription({ isAdmin }: { isAdmin: boolean }) {
   return (
     <TextTip color="blue" className="mb-3">
-      Adding a Helm repo here only makes it available in your own user
-      account&apos;s Portainer UI. Helm charts are pulled down from these repos
-      (plus the{' '}
+      在这里添加一个 Helm 仓库只会使其在您自己的用户账户的 Portainer UI 中可用。Helm charts 将从这些仓库 (以及{' '}
       {isAdmin ? (
         <Link to="portainer.settings" params={{ '#': 'kubernetes-settings' }}>
-          <span>globally-set Helm repo</span>
+          <span>全局设置的 Helm 仓库</span>
         </Link>
       ) : (
-        <span>globally-set Helm repo</span>
+        <span>全局设置的 Helm 仓库</span>
       )}
-      ) and shown in the Create from Manifest screen&apos;s Helm charts list.
+      ) 拉取，并显示在“从清单创建”页面的 Helm charts 列表中。
     </TextTip>
   );
 }

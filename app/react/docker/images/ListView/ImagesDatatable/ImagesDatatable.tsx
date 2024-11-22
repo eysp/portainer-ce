@@ -130,7 +130,7 @@ function RemoveButtonMenu({
             onRemove(selectedItems, false);
           }}
         >
-          Remove
+          删除
         </Button>
         <Menu>
           <MenuButton
@@ -149,7 +149,7 @@ function RemoveButtonMenu({
                   onRemove(selectedItems, true);
                 }}
               >
-                Force Remove
+                强制删除
               </MenuItem>
             </div>
           </MenuPopover>
@@ -180,7 +180,7 @@ function ImportExportButtons({
           disabled={isExportInProgress}
           props={{ to: 'docker.images.import' }}
         >
-          Import
+          导入
         </Button>
       </Authorized>
       <Authorized authorizations="DockerImageGet">
@@ -194,7 +194,7 @@ function ImportExportButtons({
           onClick={() => onExportClick(selectedItems)}
           disabled={selectedItems.length === 0}
         >
-          Export
+          导出
         </LoadingButton>
       </Authorized>
     </ButtonGroup>

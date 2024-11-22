@@ -3,15 +3,15 @@ import { ResourceControlViewModel } from '@/react/portainer/access-control/model
 import { DockerContainerResponse } from './types/response';
 
 export enum ContainerStatus {
-  Paused = '暂停',
-  Stopped = '停止',
-  Created = '已创建',
-  Healthy = '状态良好',
-  Unhealthy = '状态异常',
-  Starting = '启动中',
-  Running = '运行中',
-  Dead = '已死亡',
-  Exited = '已退出',
+  Paused = 'paused',
+  Stopped = 'stopped',
+  Created = 'created',
+  Healthy = 'healthy',
+  Unhealthy = 'unhealthy',
+  Starting = 'starting',
+  Running = 'running',
+  Dead = 'dead',
+  Exited = 'exited',
 }
 
 export type QuickAction = '附加' | '执行' | '检查' | '日志' | '统计';

@@ -26,7 +26,7 @@ export function TableActions({
         icon={Trash2}
         className="!m-0"
       >
-        Remove
+        删除
       </Button>
 
       <Button
@@ -36,16 +36,16 @@ export function TableActions({
         className="!m-0"
         data-cy="edgeStack-addStackButton"
       >
-        Add stack
+        添加堆栈
       </Button>
     </div>
   );
 
   async function handleRemove(selectedItems: Array<DecoratedEdgeStack>) {
     const confirmed = await confirmDestructive({
-      title: 'Are you sure?',
-      message: 'Are you sure you want to remove the selected Edge stack(s)?',
-      confirmButton: buildConfirmButton('Remove', 'danger'),
+      title: '您确定吗？',
+      message: '您确定要删除除选定的 Edge 堆栈吗？',
+      confirmButton: buildConfirmButton('删除', 'danger'),
     });
 
     if (!confirmed) {
@@ -55,7 +55,7 @@ export function TableActions({
     const ids = selectedItems.map((item) => item.Id);
     removeMutation.mutate(ids, {
       onSuccess: () => {
-        notifySuccess('Success', 'Edge stack(s) removed');
+        notifySuccess('成功', 'Edge 堆栈已移除');
       },
     });
   }

@@ -36,7 +36,7 @@ export function BEFeatureIndicator({
     >
       {children}
       {showIcon && <Icon icon={Briefcase} className="be-indicator-icon mr-1" />}
-      <span className="be-indicator-label break-words">Business Feature</span>
+      <span className="be-indicator-label break-words">企业版功能</span>
     </a>
   );
 }

@@ -203,7 +203,7 @@ export function InnerForm({
                       },
                       {
                         id: 'capabilities',
-                        label: 'Capabilities',
+                        label: '容器功能',
                         hidden: hideCapabilities,
                         children: (
                           <CapabilitiesTab

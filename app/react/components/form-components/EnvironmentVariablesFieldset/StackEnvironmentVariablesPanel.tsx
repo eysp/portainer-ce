@@ -52,13 +52,13 @@ export function StackEnvironmentVariablesPanel({
                 <strong>stack.env 文件操作</strong>
               </p>
               <div>
-                通过 <strong>代码仓库</strong>部署时，stack.env
+                通过 <strong>代码仓库</strong> 部署时，stack.env
                 文件必须已驻留在 Git 存储库中。
               </div>
               <div>
                 通过 <strong>网页编辑器</strong>,{' '}
                 <strong>上传</strong> 或{' '}
-                <strong>自定义模板</strong>部署时，stack.env 文件
+                <strong>自定义模板</strong> 部署时，stack.env 文件
                 会根据您在下面设置的内容自动创建。
               </div>
             </div>

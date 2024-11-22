@@ -60,7 +60,7 @@ export function AccessControlPanel({
 
   return (
     <TableContainer>
-      <TableTitle label="Access control" icon={Eye} />
+      <TableTitle label="访问控制" icon={Eye} />
       <AccessControlPanelDetails
         resourceType={resourceType}
         resourceControl={resourceControl}

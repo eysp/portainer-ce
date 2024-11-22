@@ -58,7 +58,7 @@ function getStatus(
 } {
   if (!numDeployments || hasOldVersion) {
     return {
-      label: 'Unavailable',
+      label: '不可用',
       icon: MinusCircle,
       mode: 'secondary',
       tooltip: getUnavailableTooltip(),
@@ -67,7 +67,7 @@ function getStatus(
 
   if (envStatus.length < numDeployments) {
     return {
-      label: 'Deploying',
+      label: '部署中',
       icon: Loader2,
       spin: true,
       mode: 'primary',
@@ -78,7 +78,7 @@ function getStatus(
 
   if (allFailed) {
     return {
-      label: 'Failed',
+      label: '失败',
       icon: XCircle,
       mode: 'danger',
     };
@@ -88,7 +88,7 @@ function getStatus(
 
   if (allCompleted) {
     return {
-      label: 'Completed',
+      label: '已完成',
       icon: CheckCircle,
       mode: 'success',
     };
@@ -102,7 +102,7 @@ function getStatus(
 
   if (allRunning) {
     return {
-      label: 'Running',
+      label: '运行中',
       icon: CheckCircle,
       mode: 'success',
     };
@@ -114,14 +114,14 @@ function getStatus(
 
   if (hasRunning && hasFailed && !hasDeploying) {
     return {
-      label: 'Partially Running',
+      label: '部分运行中',
       icon: AlertTriangle,
       mode: 'warning',
     };
   }
 
   return {
-    label: 'Deploying',
+    label: '部署中',
     icon: Loader2,
     spin: true,
     mode: 'primary',
@@ -129,11 +129,11 @@ function getStatus(
 
   function getUnavailableTooltip() {
     if (!numDeployments) {
-      return 'Your edge stack is currently unavailable due to the absence of an available environment in your edge group';
+      return '由于您的边缘组中没有可用环境，您的边缘堆栈当前不可用';
     }
 
     if (hasOldVersion) {
-      return 'Please note that the new status feature for the Edge stack is only available for Edge Agent versions 2.19.0 and above. To access the status of your edge stack, it is essential to upgrade your Edge Agent to a corresponding version that is compatible with your Portainer server.';
+      return '请注意，边缘堆栈的新状态功能仅适用于 Edge Agent 版本 2.19.0 及以上版本。要访问边缘堆栈的状态，必须将 Edge Agent 升级到与您的 Portainer 服务器兼容的相应版本。';
     }
 
     return '';

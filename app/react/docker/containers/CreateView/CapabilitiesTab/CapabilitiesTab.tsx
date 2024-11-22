@@ -13,7 +13,7 @@ export function CapabilitiesTab({
   onChange: (values: Values) => void;
 }) {
   return (
-    <FormSection title="Container capabilities">
+    <FormSection title="容器功能">
       <div className="form-group flex flex-wrap gap-y-2 px-5">
         {capabilities.map((cap) => (
           <div key={cap.key} className="w-1/3 text-center">
