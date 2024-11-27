@@ -1,17 +1,17 @@
 <form class="form-horizontal" name="$ctrl.registryFormEcr" ng-submit="$ctrl.formAction()">
-  <div class="col-sm-12 form-section-title"> Important notice </div>
+  <div class="col-sm-12 form-section-title"> 重要通知 </div>
   <div class="form-group">
     <span class="col-sm-12 text-muted small">
-      For information on how to generate an Access Key, follow the
-      <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html#id_users_create_console" target="_blank">AWS guide</a>.
+      有关如何生成访问密钥的信息，请参考
+      <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html#id_users_create_console" target="_blank">AWS指南</a>。
     </span>
   </div>
 
-  <div class="col-sm-12 form-section-title"> ECR connection details </div>
+  <div class="col-sm-12 form-section-title"> ECR连接详情 </div>
 
   <!-- name-input -->
   <div class="form-group">
-    <label for="registry_name" class="col-sm-3 col-lg-2 control-label required text-left">Name</label>
+    <label for="registry_name" class="col-sm-3 col-lg-2 control-label required text-left">名称</label>
     <div class="col-sm-9 col-lg-10">
       <input type="text" class="form-control" id="registry_name" name="registry_name" ng-model="$ctrl.model.Name" placeholder="my-ecr-registry" required auto-focus />
       <div class="help-block" ng-show="$ctrl.registryFormEcr.registry_name.$invalid">
@@ -23,7 +23,7 @@
             </p>
             <p ng-message="used" class="vertical-center">
               <pr-icon icon="'alert-triangle'"></pr-icon>
-              A registry with the same name already exists.
+              已存在具有相同名称的注册表。
             </p>
           </div>
         </div>
@@ -35,8 +35,8 @@
   <!-- url-input -->
   <div class="form-group">
     <label for="registry_url" class="col-sm-3 col-lg-2 control-label text-left">
-      <span class="required">Registry URL</span>
-      <portainer-tooltip message="'URL of an Amazon Elastic Container Registry, which contains an account id and region.'"></portainer-tooltip>
+      <span class="required">注册表 URL</span>
+      <portainer-tooltip message="'亚马逊弹性容器注册表的URL，其中包含账户ID和区域。'"></portainer-tooltip>
     </label>
     <div class="col-sm-9 col-lg-10">
       <input
@@ -66,9 +66,9 @@
   <div class="form-group">
     <div class="col-sm-12">
       <por-switch-field
-        label="'Authentication'"
+        label="'认证'"
         label-class="'col-sm-3 col-lg-2'"
-        tooltip="'Enable this option if you need to specify credentials to connect to a private registry.'"
+        tooltip="'如果需要指定凭据以连接到私有注册表，请启用此选项。'"
         name="'administrator'"
         checked="$ctrl.model.Authentication"
         on-change="($ctrl.toggleAuthentication)"
@@ -81,7 +81,7 @@
   <div ng-if="$ctrl.model.Authentication">
     <!-- aws-access-key -->
     <div class="form-group">
-      <label for="registry_access_key" class="col-sm-3 col-lg-2 control-label required text-left">AWS Access Key</label>
+      <label for="registry_access_key" class="col-sm-3 col-lg-2 control-label required text-left">AWS 访问密钥</label>
       <div class="col-sm-9 col-lg-10">
         <input type="text" class="form-control" id="registry_access_key" name="registry_access_key" ng-model="$ctrl.model.Username" required />
         <div class="help-block" ng-show="$ctrl.registryFormEcr.registry_access_key.$invalid">
@@ -100,7 +100,7 @@
 
     <!-- aws-secret-access-key -->
     <div class="form-group">
-      <label for="registry_secret_access_key" class="col-sm-3 col-lg-2 control-label required text-left">AWS Secret Access Key</label>
+      <label for="registry_secret_access_key" class="col-sm-3 col-lg-2 control-label required text-left">AWS秘密访问密钥</label>
       <div class="col-sm-9 col-lg-10">
         <input type="password" class="form-control" id="registry_secret_access_key" name="registry_secret_access_key" ng-model="$ctrl.model.Password" required />
         <div class="help-block" ng-show="$ctrl.registryFormEcr.registry_secret_access_key.$invalid">
@@ -119,7 +119,7 @@
 
     <!-- region -->
     <div class="form-group">
-      <label for="registry_region" class="col-sm-3 col-lg-2 control-label required text-left">Region</label>
+      <label for="registry_region" class="col-sm-3 col-lg-2 control-label required text-left">区域</label>
       <div class="col-sm-9 col-lg-10">
         <input type="text" class="form-control" id="registry_region" name="registry_region" placeholder="us-west-1" ng-model="$ctrl.model.Ecr.Region" required />
         <div class="help-block" ng-show="$ctrl.registryFormEcr.registry_region.$invalid">
@@ -131,7 +131,7 @@
               </p>
               <p ng-message="used" class="vertical-center">
                 <pr-icon icon="'alert-triangle'"></pr-icon>
-                A registry with the same name already exists.
+                已存在具有相同名称的注册表。
               </p>
             </div>
           </div>
@@ -142,7 +142,7 @@
   </div>
 
   <!-- actions -->
-  <div class="col-sm-12 form-section-title"> Actions </div>
+  <div class="col-sm-12 form-section-title"> 操作 </div>
   <div class="form-group">
     <div class="col-sm-12">
       <button
@@ -156,7 +156,7 @@
         analytics-properties="{ metadata: { type: 'ecr' } }"
       >
         <span ng-hide="$ctrl.actionInProgress">{{ $ctrl.formActionLabel }}</span>
-        <span ng-show="$ctrl.actionInProgress">In progress...</span>
+        <span ng-show="$ctrl.actionInProgress">进行中...</span>
       </button>
     </div>
   </div>

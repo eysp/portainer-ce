@@ -25,7 +25,7 @@
             <tr>
               <th>
                 <table-column-header
-                  col-title="'User Name'"
+                  col-title="'用户名'"
                   can-sort="true"
                   is-sorted="$ctrl.state.orderBy === 'Name'"
                   is-sorted-desc="$ctrl.state.orderBy === 'Name' && $ctrl.state.reverseOrder"
@@ -33,7 +33,7 @@
                 ></table-column-header>
               </th>
               <th>
-                <table-column-header col-title="'Groups'" can-sort="false"></table-column-header>
+                <table-column-header col-title="'分组'" can-sort="false"></table-column-header>
               </th>
             </tr>
           </thead>
@@ -50,10 +50,10 @@
               </td>
             </tr>
             <tr ng-if="!$ctrl.dataset">
-              <td colspan="3" class="text-muted text-center">Loading...</td>
+              <td colspan="3" class="text-muted text-center">加载中...</td>
             </tr>
             <tr ng-if="$ctrl.state.filteredDataSet.length === 0">
-              <td colspan="5" class="text-muted text-center">No groups found.</td>
+              <td colspan="5" class="text-muted text-center">未找到任何分组。</td>
             </tr>
           </tbody>
         </table>

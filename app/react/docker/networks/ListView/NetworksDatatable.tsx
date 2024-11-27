@@ -55,7 +55,7 @@ export function NetworksDatatable({ dataset, onRemove, onRefresh }: Props) {
   return (
     <ExpandableDatatable<DecoratedNetwork>
       settingsManager={settings}
-      title="Networks"
+      title="网络"
       titleIcon={Network}
       dataset={dataset}
       columns={columns}
@@ -74,7 +74,7 @@ export function NetworksDatatable({ dataset, onRemove, onRefresh }: Props) {
           )}
         </>
       )}
-      emptyContentLabel="No networks available."
+      emptyContentLabel="没有可用的网络。"
       renderTableActions={(selectedRows) => (
         <div className="flex gap-3">
           <Authorized

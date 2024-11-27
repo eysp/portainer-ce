@@ -109,7 +109,7 @@ function Cell({
       )}
       {item.dangling && (
         <span className="label label-warning image-tag ml-2" role="status">
-          未使
+          未使用
         </span>
       )}
     </>

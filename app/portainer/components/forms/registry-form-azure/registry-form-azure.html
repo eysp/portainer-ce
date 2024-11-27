@@ -1,8 +1,8 @@
 <form class="form-horizontal" name="$ctrl.registryFormAzure" ng-submit="$ctrl.formAction()">
-  <div class="col-sm-12 form-section-title"> Azure registry details </div>
+  <div class="col-sm-12 form-section-title"> Azure 注册表详情 </div>
   <!-- name-input -->
   <div class="form-group">
-    <label for="registry_name" class="col-sm-3 col-lg-2 control-label required text-left">Name</label>
+    <label for="registry_name" class="col-sm-3 col-lg-2 control-label required text-left">名称</label>
     <div class="col-sm-9 col-lg-10">
       <input type="text" class="form-control" id="registry_name" name="registry_name" ng-model="$ctrl.model.Name" placeholder="my-azure-registry" required auto-focus />
       <div class="help-block" ng-show="$ctrl.registryFormAzure.registry_name.$invalid">
@@ -14,7 +14,7 @@
             </p>
             <p ng-message="used" class="vertical-center">
               <pr-icon icon="'alert-triangle'"></pr-icon>
-              A registry with the same name already exists.
+              已存在具有相同名称的注册表。
             </p>
           </div>
         </div>
@@ -25,7 +25,7 @@
   <!-- url-input -->
   <div class="form-group">
     <label for="registry_url" class="col-sm-3 col-lg-2 control-label text-left">
-      <span class="required">Registry URL</span>
+      <span class="required">注册表 URL</span>
       <portainer-tooltip message="'URL of an Azure Container Registry. Any protocol will be stripped.'"></portainer-tooltip>
     </label>
     <div class="col-sm-9 col-lg-10">
@@ -45,7 +45,7 @@
   <!-- url-input -->
   <!-- credentials-user -->
   <div class="form-group">
-    <label for="registry_username" class="col-sm-3 col-lg-2 control-label required text-left">Username</label>
+    <label for="registry_username" class="col-sm-3 col-lg-2 control-label required text-left">用户名</label>
     <div class="col-sm-9 col-lg-10">
       <input type="text" class="form-control" id="registry_username" name="registry_username" ng-model="$ctrl.model.Username" required />
       <div class="help-block" ng-show="$ctrl.registryFormAzure.registry_username.$invalid">
@@ -63,7 +63,7 @@
   <!-- !credentials-user -->
   <!-- credentials-password -->
   <div class="form-group">
-    <label for="registry_password" class="col-sm-3 col-lg-2 control-label required text-left">Password</label>
+    <label for="registry_password" class="col-sm-3 col-lg-2 control-label required text-left">密码</label>
     <div class="col-sm-9 col-lg-10">
       <input type="password" class="form-control" id="registry_password" name="registry_password" ng-model="$ctrl.model.Password" required />
       <div class="help-block" ng-show="$ctrl.registryFormAzure.registry_password.$invalid">
@@ -80,7 +80,7 @@
   </div>
   <!-- !credentials-password -->
   <!-- actions -->
-  <div class="col-sm-12 form-section-title"> Actions </div>
+  <div class="col-sm-12 form-section-title"> 操作 </div>
   <div class="form-group">
     <div class="col-sm-12">
       <button
@@ -94,7 +94,7 @@
         analytics-properties="{ metadata: { type: 'azure' } }"
       >
         <span ng-hide="$ctrl.actionInProgress">{{ $ctrl.formActionLabel }}</span>
-        <span ng-show="$ctrl.actionInProgress">In progress...</span>
+        <span ng-show="$ctrl.actionInProgress">进行中...</span>
       </button>
     </div>
   </div>
