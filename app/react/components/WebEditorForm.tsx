@@ -116,7 +116,7 @@ export function WebEditorForm({
 function DefaultTitle({ id }: { id: string }) {
   return (
     <FormSectionTitle htmlFor={id}>
-      Web editor
+      网页编辑器
       <div className="text-muted small vertical-center ml-auto">
         {editorConfig[BROWSER_OS_PLATFORM].searchCmdLabel}
 

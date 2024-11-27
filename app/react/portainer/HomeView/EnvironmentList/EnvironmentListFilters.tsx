@@ -12,8 +12,8 @@ import { ConnectionType } from './types';
 import styles from './EnvironmentList.module.css';
 
 const status = [
-  { value: EnvironmentStatus.Up, label: '在线' },
-  { value: EnvironmentStatus.Down, label: '离线' },
+  { value: EnvironmentStatus.Up, label: 'Up' },
+  { value: EnvironmentStatus.Down, label: 'Down' },
 ];
 
 export function EnvironmentListFilters({

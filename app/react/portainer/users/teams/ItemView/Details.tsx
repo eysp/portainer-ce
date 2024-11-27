@@ -37,7 +37,7 @@ export function Details({ team, memberships, isAdmin }: Props) {
     <div className="row">
       <div className="col-lg-12 col-md-12 col-xs-12">
         <Widget>
-          <Widget.Title title="Team details" icon={Users} />
+          <Widget.Title title="团队详情" icon={Users} />
 
           <Widget.Body className="no-padding">
             <table className="table">

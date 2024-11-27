@@ -140,7 +140,7 @@ export function CreateTeamForm({ users, teams }: Props) {
     addTeamMutation.mutate(values, {
       onSuccess() {
         incFormKey();
-        notifySuccess('Team successfully added', '');
+        notifySuccess('团队已成功添加', '');
       },
     });
   }
@@ -154,8 +154,8 @@ export function useAddTeamMutation() {
     {
       meta: {
         error: {
-          title: 'Failure',
-          message: 'Failed to create team',
+          title: '失败',
+          message: '创建团队失败',
         },
       },
       onSuccess() {

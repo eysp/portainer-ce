@@ -39,7 +39,7 @@ export function UsersList({ users, disabled, teamId }: Props) {
         dataset={users}
         columns={columns}
         titleIcon={Users}
-        title="Users"
+        title="用户"
         renderTableActions={() =>
           isPureAdmin && (
             <Button

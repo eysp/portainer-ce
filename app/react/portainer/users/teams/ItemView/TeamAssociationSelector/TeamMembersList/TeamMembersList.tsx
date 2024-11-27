@@ -55,7 +55,7 @@ export function TeamMembersList({ users, roles, disabled, teamId }: Props) {
         dataset={users}
         columns={columns}
         titleIcon={Users}
-        title="Team members"
+        title="团队成员"
         renderTableActions={() =>
           isPureAdmin && (
             <Button
