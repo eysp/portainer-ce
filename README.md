@@ -75,4 +75,4 @@ Portainer supports "Current - 2 docker versions only. Prior versions may operate
 
 Portainer is licensed under the zlib license. See [LICENSE](./LICENSE) for reference.
 
-# Apache License(./LICENSE) 2.0
+# Apache [License](./LICENSE) 2.0
