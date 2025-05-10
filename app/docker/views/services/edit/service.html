@@ -165,13 +165,13 @@
         <div class="btn-toolbar" role="toolbar">
           <div class="btn-group" role="group">
             <button type="button" class="btn btn-primary" ng-disabled="!hasChanges(service, ['Mode', 'Replicas', 'Name', 'Webhooks'])" ng-click="updateService(service)"
-              >Apply changes</button
+              >应用更改</button
             >
             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               <pr-icon icon="'chevron-down'"></pr-icon>
             </button>
             <ul class="dropdown-menu">
-              <li><a ng-click="cancelChanges(service, ['Mode', 'Replicas', 'Name'])">Reset changes</a></li>
+              <li><a ng-click="cancelChanges(service, ['Mode', 'Replicas', 'Name'])">重置更改</a></li>
               <li><a ng-click="cancelChanges(service)">Reset all changes</a></li>
             </ul>
           </div>

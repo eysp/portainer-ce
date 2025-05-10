@@ -72,13 +72,13 @@
       <div class="btn-toolbar" role="toolbar">
         <div class="btn-group" role="group">
           <button type="button" class="btn btn-primary btn-sm" ng-disabled="!hasChanges(service, ['LogDriverName', 'LogDriverOpts'])" ng-click="updateService(service)"
-            >Apply changes</button
+            >应用更改</button
           >
           <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <pr-icon icon="'chevron-down'"></pr-icon>
           </button>
           <ul class="dropdown-menu">
-            <li><a ng-click="cancelChanges(service, ['LogDriverName', 'LogDriverOpts'])">Reset changes</a></li>
+            <li><a ng-click="cancelChanges(service, ['LogDriverName', 'LogDriverOpts'])">重置更改</a></li>
             <li><a ng-click="cancelChanges(service)">Reset all changes</a></li>
           </ul>
         </div>

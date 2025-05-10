@@ -59,7 +59,7 @@ export function ServiceWidget({
               disabled={!hasChanges || !isValid}
               data-cy="service-apply-changes-button"
             >
-              Apply changes
+              应用更改
             </Button>
 
             <Menu>
@@ -74,7 +74,7 @@ export function ServiceWidget({
               </MenuButton>
               <MenuPopover position={positionRight}>
                 <div className="mt-3 bg-white th-highcontrast:bg-black th-dark:bg-black">
-                  <MenuItem onSelect={() => onReset()}>Reset changes</MenuItem>
+                  <MenuItem onSelect={() => onReset()}>重置更改</MenuItem>
                   <MenuItem onSelect={() => onReset(true)}>
                     Reset all changes
                   </MenuItem>

@@ -55,7 +55,7 @@ export function YAMLInspector({
           featureId={FeatureId.K8S_EDIT_YAML}
           heading="Apply YAML changes"
           message="Applies any changes that you make in the YAML editor by calling the Kubernetes API to patch the relevant resources. Any resource removals or unexpected resource additions that you make in the YAML will be ignored. Note that editing is disabled for resources in namespaces marked as system."
-          buttonText="Apply changes"
+          buttonText="应用更改"
           data-cy="yaml-inspector-apply-changes-teaser-button"
         />
       </div>

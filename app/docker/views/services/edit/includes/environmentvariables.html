@@ -22,13 +22,13 @@
             ng-disabled="!hasChanges(service, ['EnvironmentVariables']) || serviceEnvForm.$invalid"
             ng-click="updateService(service)"
           >
-            Apply changes
+            应用更改
           </button>
           <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <pr-icon icon="'chevron-down'"></pr-icon>
           </button>
           <ul class="dropdown-menu">
-            <li><a ng-click="cancelChanges(service, ['EnvironmentVariables'])">Reset changes</a></li>
+            <li><a ng-click="cancelChanges(service, ['EnvironmentVariables'])">重置更改</a></li>
             <li><a ng-click="cancelChanges(service)">Reset all changes</a></li>
           </ul>
         </div>
