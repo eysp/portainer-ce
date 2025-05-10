@@ -1,7 +1,7 @@
 <!-- use registry -->
 <div class="row">
   <div class="form-group" ng-if="$ctrl.model.UseRegistry">
-    <label for="image_registry" class="control-label col-sm-3 col-lg-2 text-left" ng-class="$ctrl.labelClass"> Registry </label>
+    <label for="image_registry" class="control-label col-sm-3 col-lg-2 text-left" ng-class="$ctrl.labelClass"> 注册表 </label>
     <div ng-class="$ctrl.inputClass" class="col-sm-8">
       <select
         data-cy="component-registrySelect"
@@ -14,7 +14,7 @@
     </div>
   </div>
   <div class="form-group" ng-if="$ctrl.model.UseRegistry">
-    <label for="image_name" ng-class="$ctrl.labelClass" class="control-label col-sm-3 col-lg-2 required text-left">Image</label>
+    <label for="image_name" ng-class="$ctrl.labelClass" class="control-label col-sm-3 col-lg-2 required text-left">镜像</label>
     <div ng-class="$ctrl.inputClass" class="col-sm-8">
       <div class="input-group">
         <span class="input-group-addon" id="registry-name">{{ $ctrl.displayedRegistryURL() }}</span>
@@ -26,7 +26,7 @@
           uib-typeahead="image for image in $ctrl.availableImages | filter:$viewValue | limitTo:5"
           ng-model="$ctrl.model.Image"
           name="image_name"
-          placeholder="e.g. my-image:my-tag"
+          placeholder="例如 my-image:my-tag"
           ng-change="$ctrl.onImageChange()"
           required
         />
@@ -34,10 +34,10 @@
           <a
             href="https://hub.docker.com/search?type=image&q={{ $ctrl.model.Image | trimshasum | trimversiontag }}"
             class="btn btn-default vertical-center"
-            title="Search image on Docker Hub"
+            title="在 Docker Hub 上搜索镜像"
             target="_blank"
           >
-            <pr-icon icon="'svg-docker'" size="'md'"></pr-icon> Search
+            <pr-icon icon="'svg-docker'" size="'md'"></pr-icon> 搜索
           </a>
         </span>
       </div>
@@ -48,16 +48,16 @@
   <div ng-if="!$ctrl.model.UseRegistry">
     <div class="form-group">
       <span class="small">
-        <p class="text-muted ml-4"> When using advanced mode, image and repository <b>must be</b> publicly available. </p>
+        <p class="text-muted ml-4"> 使用高级模式时，镜像和仓库<b>必须</b>是公开可访问的。 </p>
       </span>
-      <label for="image_name" ng-class="$ctrl.labelClass" class="control-label col-sm-3 col-lg-2 required text-left">Image </label>
+      <label for="image_name" ng-class="$ctrl.labelClass" class="control-label col-sm-3 col-lg-2 required text-left">镜像 </label>
       <div ng-class="$ctrl.inputClass" class="col-sm-8">
         <input
           type="text"
           class="form-control"
           ng-model="$ctrl.model.Image"
           name="image_name"
-          placeholder="e.g. registry:port/my-image:my-tag"
+          placeholder="例如 registry:port/my-image:my-tag"
           required
           data-cy="component-imageInput"
         />
@@ -71,8 +71,8 @@
       <div class="col-sm-3 col-lg-2"></div>
       <div class="col-sm-8" ng-messages="$ctrl.form.image_name.$error">
         <p class="text-warning vertical-center" ng-message="required">
-          <pr-icon icon="'alert-triangle'" mode="'warning'" class="vertical-center"></pr-icon> Image name is required.
-          <span ng-if="$ctrl.canPull">Tag must be specified otherwise Portainer will pull all tags associated to the image.</span>
+          <pr-icon icon="'alert-triangle'" mode="'warning'" class="vertical-center"></pr-icon> 镜像名称为必填项。
+          <span ng-if="$ctrl.canPull">必须指定标签，否则 Portainer 将拉取与镜像关联的所有标签。</span>
         </p>
       </div>
     </div>
@@ -81,10 +81,10 @@
   <div class="form-group">
     <div class="col-sm-12">
       <button type="button" class="btn btn-link btn-sm vertical-center !ml-0 p-0 hover:no-underline" ng-if="!$ctrl.model.UseRegistry" ng-click="$ctrl.model.UseRegistry = true;">
-        <pr-icon icon="'database'"> </pr-icon> Simple mode
+        <pr-icon icon="'database'"> </pr-icon> 简单模式
       </button>
       <button type="button" class="btn btn-link btn-sm vertical-center !ml-0 p-0 hover:no-underline" ng-if="$ctrl.model.UseRegistry" ng-click="$ctrl.model.UseRegistry = false;">
-        <pr-icon icon="'globe'"> </pr-icon> Advanced mode
+        <pr-icon icon="'globe'"> </pr-icon> 高级模式
       </button>
     </div>
   </div>

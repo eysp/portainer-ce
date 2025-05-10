@@ -62,7 +62,7 @@ angular.module('portainer.docker').controller('NetworkMacvlanFormController', [
           ctrl.options = getOptions(ctrl.availableNetworks.length > 0);
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve informations for macvlan');
+          Notifications.error('失败', err, '无法检索 macvlan 信息');
         });
     }
   },
