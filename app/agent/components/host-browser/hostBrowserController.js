@@ -57,7 +57,7 @@ export class HostBrowserController {
       this.state.path = path;
       this.files = files;
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to browse');
+      this.Notifications.error('失败', err, '无法浏览');
     }
   }
 
@@ -69,11 +69,11 @@ export class HostBrowserController {
     const newFilePath = this.buildPath(this.state.path, newName);
     try {
       await this.HostBrowserService.rename(this.endpointId, filePath, newFilePath);
-      this.Notifications.success('File successfully renamed', this.getRelativePath(newFilePath));
+      this.Notifications.success('文件重命名成功', this.getRelativePath(newFilePath));
       const files = await this.HostBrowserService.ls(this.endpointId, this.state.path);
       this.files = files;
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to rename file');
+      this.Notifications.error('失败', err, '无法重命名文件');
     }
   }
 
@@ -89,14 +89,14 @@ export class HostBrowserController {
       });
       this.FileSaver.saveAs(downloadData, fileName);
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to download file');
+      this.Notifications.error('失败', err, '无法下载文件');
     }
   }
 
   confirmDeleteFile(name) {
     const filePath = this.buildPath(this.state.path, name);
 
-    confirmDelete(`Are you sure that you want to delete ${this.getRelativePath(filePath)}?`).then((confirmed) => {
+    confirmDelete(`你确定要删除 ${this.getRelativePath(filePath)} 吗？`).then((confirmed) => {
       if (!confirmed) {
         return;
       }
@@ -110,11 +110,11 @@ export class HostBrowserController {
   async deleteFileAsync(path) {
     try {
       await this.HostBrowserService.delete(this.endpointId, path);
-      this.Notifications.success('File successfully deleted', this.getRelativePath(path));
+      this.Notifications.success('文件删除成功', this.getRelativePath(path));
       const files = await this.HostBrowserService.ls(this.endpointId, this.state.path);
       this.files = files;
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to delete file');
+      this.Notifications.error('失败', err, '无法删除文件');
     }
   }
 
@@ -143,13 +143,13 @@ export class HostBrowserController {
   }
   async onFileSelectedForUploadAsync(file) {
     if (!this.endpointId) {
-      throw new Error('missing endpoint id');
+      throw new Error('缺少终端 ID');
     }
     try {
       await this.HostBrowserService.upload(this.endpointId, this.state.path, file);
       this.onFileUploaded();
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to upload file');
+      this.Notifications.error('失败', err, '无法上传文件');
     }
   }
 

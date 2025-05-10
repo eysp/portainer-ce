@@ -12,7 +12,7 @@ export class NodeSelectorController {
         this.model = agents[0].NodeName;
       }
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to load agents');
+      this.Notifications.error('失败', err, '无法加载代理');
     }
   }
 }
