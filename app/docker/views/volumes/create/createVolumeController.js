@@ -3,7 +3,6 @@ import { VolumesNFSFormData } from '../../../components/volumesNFSForm/volumesNF
 import { VolumesCIFSFormData } from '../../../components/volumesCIFSForm/volumesCifsFormModel';
 
 angular.module('portainer.docker').controller('CreateVolumeController', [
-  '$q',
   '$scope',
   '$state',
   'VolumeService',
@@ -12,8 +11,10 @@ angular.module('portainer.docker').controller('CreateVolumeController', [
   'Authentication',
   'Notifications',
   'FormValidator',
-  'HttpRequestHelper',
-  function ($q, $scope, $state, VolumeService, PluginService, ResourceControlService, Authentication, Notifications, FormValidator, HttpRequestHelper) {
+  'endpoint',
+  function ($scope, $state, VolumeService, PluginService, ResourceControlService, Authentication, Notifications, FormValidator, endpoint) {
+    $scope.endpoint = endpoint;
+
     $scope.formValues = {
       Driver: 'local',
       DriverOptions: [],
@@ -37,6 +38,24 @@ angular.module('portainer.docker').controller('CreateVolumeController', [
     $scope.removeDriverOption = function (index) {
       $scope.formValues.DriverOptions.splice(index, 1);
     };
+
+    $scope.onUseNFSChange = onUseNFSChange;
+
+    function onUseNFSChange(checked) {
+      return $scope.$evalAsync(() => {
+        $scope.formValues.NFSData.useNFS = checked;
+        $scope.formValues.CIFSData.useCIFS = false;
+      });
+    }
+
+    $scope.onUseCIFSChange = onUseCIFSChange;
+
+    function onUseCIFSChange(checked) {
+      return $scope.$evalAsync(() => {
+        $scope.formValues.CIFSData.useCIFS = checked;
+        $scope.formValues.NFSData.useNFS = false;
+      });
+    }
 
     function validateForm(accessControlData, isAdmin) {
       $scope.state.formValidationError = '';
@@ -63,7 +82,7 @@ angular.module('portainer.docker').controller('CreateVolumeController', [
       driverOptions.push({ name: 'device', value: device });
 
       const versionNumber = data.versionsNumber[data.versions.indexOf(data.version)];
-      const options = 'username=' + data.username + ',password=' + data.password + ',vers=' + versionNumber;
+      const options = 'addr=' + data.serverAddress + ',username=' + data.username + ',password=' + data.password + ',vers=' + versionNumber;
       driverOptions.push({ name: 'o', value: options });
     }
 
@@ -78,7 +97,7 @@ angular.module('portainer.docker').controller('CreateVolumeController', [
       }
       driverOptions.push({ name: 'o', value: options });
 
-      var mountPoint = data.mountPoint[0] === ':' ? data.mountPoint : ':' + data.mountPoint;
+      var mountPoint = data.mountPoint.indexOf(':') === -1 ? ':' + data.mountPoint : data.mountPoint;
       driverOptions.push({ name: 'device', value: mountPoint });
     }
 
@@ -86,11 +105,6 @@ angular.module('portainer.docker').controller('CreateVolumeController', [
       var name = $scope.formValues.Name;
       var driver = $scope.formValues.Driver;
       var driverOptions = $scope.formValues.DriverOptions;
-      var storidgeProfile = $scope.formValues.StoridgeProfile;
-
-      if (driver === 'cio:latest' && storidgeProfile) {
-        driverOptions.push({ name: 'profile', value: storidgeProfile.Name });
-      }
 
       if ($scope.formValues.NFSData.useNFS) {
         prepareNFSConfiguration(driverOptions);
@@ -110,21 +124,20 @@ angular.module('portainer.docker').controller('CreateVolumeController', [
       }
 
       var nodeName = $scope.formValues.NodeName;
-      HttpRequestHelper.setPortainerAgentTargetHeader(nodeName);
 
       $scope.state.actionInProgress = true;
-      VolumeService.createVolume(volumeConfiguration)
+      VolumeService.createVolume(volumeConfiguration, nodeName)
         .then(function success(data) {
           const userId = userDetails.ID;
           const resourceControl = data.ResourceControl;
           return ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl);
         })
         .then(function success() {
-          Notifications.success('存储卷成功创建');
+          Notifications.success('Success', 'Volume successfully created');
           $state.go('docker.volumes', {}, { reload: true });
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '创建存储卷时出错');
+          Notifications.error('Failure', err, 'An error occurred during volume creation');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -139,7 +152,7 @@ angular.module('portainer.docker').controller('CreateVolumeController', [
           $scope.availableVolumeDrivers = data;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索存储卷驱动程序');
+          Notifications.error('Failure', err, 'Unable to retrieve volume drivers');
         });
     }
 

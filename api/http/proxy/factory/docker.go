@@ -1,17 +1,17 @@
 package factory
 
 import (
-	"fmt"
 	"io"
-	"log"
 	"net/http"
-	"net/url"
 	"strings"
 
-	httperror "github.com/portainer/libhttp/error"
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/crypto"
 	"github.com/portainer/portainer/api/http/proxy/factory/docker"
+	"github.com/portainer/portainer/api/url"
+	httperror "github.com/portainer/portainer/pkg/libhttp/error"
+
+	"github.com/rs/zerolog/log"
 )
 
 func (factory *ProxyFactory) newDockerProxy(endpoint *portainer.Endpoint) (http.Handler, error) {
@@ -23,7 +23,7 @@ func (factory *ProxyFactory) newDockerProxy(endpoint *portainer.Endpoint) (http.
 }
 
 func (factory *ProxyFactory) newDockerLocalProxy(endpoint *portainer.Endpoint) (http.Handler, error) {
-	endpointURL, err := url.Parse(endpoint.URL)
+	endpointURL, err := url.ParseURL(endpoint.URL)
 	if err != nil {
 		return nil, err
 	}
@@ -32,12 +32,16 @@ func (factory *ProxyFactory) newDockerLocalProxy(endpoint *portainer.Endpoint) (
 }
 
 func (factory *ProxyFactory) newDockerHTTPProxy(endpoint *portainer.Endpoint) (http.Handler, error) {
+	rawURL := endpoint.URL
 	if endpoint.Type == portainer.EdgeAgentOnDockerEnvironment {
-		tunnel := factory.reverseTunnelService.GetTunnelDetails(endpoint.ID)
-		endpoint.URL = fmt.Sprintf("http://127.0.0.1:%d", tunnel.Port)
+		tunnelAddr, err := factory.reverseTunnelService.TunnelAddr(endpoint)
+		if err != nil {
+			return nil, err
+		}
+		rawURL = "http://" + tunnelAddr
 	}
 
-	endpointURL, err := url.Parse(endpoint.URL)
+	endpointURL, err := url.ParseURL(rawURL)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +67,7 @@ func (factory *ProxyFactory) newDockerHTTPProxy(endpoint *portainer.Endpoint) (h
 		DockerClientFactory:  factory.dockerClientFactory,
 	}
 
-	dockerTransport, err := docker.NewTransport(transportParameters, httpTransport)
+	dockerTransport, err := docker.NewTransport(transportParameters, httpTransport, factory.gitService, factory.snapshotService)
 	if err != nil {
 		return nil, err
 	}
@@ -106,6 +110,6 @@ func (proxy *dockerLocalProxy) ServeHTTP(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(res.StatusCode)
 
 	if _, err := io.Copy(w, res.Body); err != nil {
-		log.Printf("proxy error: %s\n", err)
+		log.Debug().Err(err).Msg("proxy error")
 	}
 }

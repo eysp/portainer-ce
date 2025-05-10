@@ -1,9 +1,10 @@
 package exec
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 	"path"
+	"path/filepath"
 	"testing"
 
 	portainer "github.com/portainer/portainer/api"
@@ -23,6 +24,7 @@ func Test_createEnvFile(t *testing.T) {
 			name: "should not add env file option if stack doesn't have env variables",
 			stack: &portainer.Stack{
 				ProjectPath: dir,
+				Env:         nil,
 			},
 			expected: "",
 		},
@@ -52,10 +54,10 @@ func Test_createEnvFile(t *testing.T) {
 			result, _ := createEnvFile(tt.stack)
 
 			if tt.expected != "" {
-				assert.Equal(t, "stack.env", result)
+				assert.Equal(t, filepath.Join(tt.stack.ProjectPath, "stack.env"), result)
 
 				f, _ := os.Open(path.Join(dir, "stack.env"))
-				content, _ := ioutil.ReadAll(f)
+				content, _ := io.ReadAll(f)
 
 				assert.Equal(t, tt.expected, string(content))
 			} else {
@@ -65,20 +67,22 @@ func Test_createEnvFile(t *testing.T) {
 	}
 }
 
-func Test_getStackFiles(t *testing.T) {
+func Test_createEnvFile_mergesDefultAndInplaceEnvVars(t *testing.T) {
+	dir := t.TempDir()
+	os.WriteFile(path.Join(dir, ".env"), []byte("VAR1=VAL1\nVAR2=VAL2\n"), 0600)
 	stack := &portainer.Stack{
-		EntryPoint: "./file", // picks entry point
-		AdditionalFiles: []string{
-			``,                  // ignores empty string
-			`.`,                 // ignores .
-			`..`,                // ignores ..
-			`./dir/`,            // ignrores paths that end with trailing /
-			`/with-root-prefix`, // replaces "root" based paths with relative
-			`./relative`,        // keeps relative paths
-			`../escape`,         // prevents dir escape
+		ProjectPath: dir,
+		Env: []portainer.Pair{
+			{Name: "VAR1", Value: "NEW_VAL1"},
+			{Name: "VAR3", Value: "VAL3"},
 		},
 	}
+	result, err := createEnvFile(stack)
+	assert.Equal(t, filepath.Join(stack.ProjectPath, "stack.env"), result)
+	assert.NoError(t, err)
+	assert.FileExists(t, path.Join(dir, "stack.env"))
+	f, _ := os.Open(path.Join(dir, "stack.env"))
+	content, _ := io.ReadAll(f)
 
-	filePaths := getStackFiles(stack)
-	assert.ElementsMatch(t, filePaths, []string{`./file`, `./with-root-prefix`, `./relative`})
+	assert.Equal(t, []byte("VAR1=VAL1\nVAR2=VAL2\n\nVAR1=NEW_VAL1\nVAR3=VAL3\n"), content)
 }

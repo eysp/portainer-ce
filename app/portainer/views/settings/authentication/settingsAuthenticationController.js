@@ -1,36 +1,44 @@
 import angular from 'angular';
 import _ from 'lodash-es';
 
-import { HIDE_INTERNAL_AUTH } from '@/portainer/feature-flags/feature-ids';
 import { buildLdapSettingsModel, buildAdSettingsModel } from '@/portainer/settings/authentication/ldap/ldap-settings.model';
+import { options } from '@/react/portainer/settings/AuthenticationView/InternalAuth/options';
+import { SERVER_TYPES } from '@/react/portainer/settings/AuthenticationView/ldap-options';
+import { AuthenticationMethod } from '@/react/portainer/settings/types';
 
 angular.module('portainer.app').controller('SettingsAuthenticationController', SettingsAuthenticationController);
 
 function SettingsAuthenticationController($q, $scope, $state, Notifications, SettingsService, FileUploadService, TeamService, LDAPService) {
+  $scope.authMethod = 1;
+
   $scope.state = {
     uploadInProgress: false,
     actionInProgress: false,
     availableUserSessionTimeoutOptions: [
       {
-        key: '1 小时',
+        key: '30 minutes',
+        value: '30m',
+      },
+      {
+        key: '1 hour',
         value: '1h',
       },
       {
-        key: '4 小时',
+        key: '4 hours',
         value: '4h',
       },
       {
-        key: '8 小时',
+        key: '8 hours',
         value: '8h',
       },
       {
-        key: '24 小时',
+        key: '24 hours',
         value: '24h',
       },
-      { key: '1 周', value: `${24 * 7}h` },
-      { key: '1 月', value: `${24 * 30}h` },
-      { key: '6 月', value: `${24 * 30 * 6}h` },
-      { key: '1 年', value: `${24 * 30 * 12}h` },
+      { key: '1 week', value: `${24 * 7}h` },
+      { key: '1 month', value: `${24 * 30}h` },
+      { key: '6 months', value: `${24 * 30 * 6}h` },
+      { key: '1 year', value: `${24 * 30 * 12}h` },
     ],
   };
 
@@ -44,22 +52,19 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
     },
   };
 
-  $scope.authOptions = [
-    { id: 'auth_internal', icon: 'fa fa-users', label: 'Internal', description: '内部认证机制', value: 1 },
-    { id: 'auth_ldap', icon: 'fa fa-users', label: 'LDAP', description: 'LDAP 认证', value: 2 },
-    { id: 'auth_ad', icon: 'fab fa-microsoft', label: 'Microsoft Active Directory', description: 'AD 认证', value: 4, feature: HIDE_INTERNAL_AUTH },
-    { id: 'auth_oauth', icon: 'fa fa-users', label: 'OAuth', description: 'OAuth 认证', value: 3 },
-  ];
+  $scope.authOptions = options;
 
   $scope.onChangeAuthMethod = function onChangeAuthMethod(value) {
+    $scope.authMethod = value;
+
     if (value === 4) {
-      $scope.settings.AuthenticationMethod = 2;
-      $scope.formValues.ldap.serverType = 2;
+      $scope.settings.AuthenticationMethod = AuthenticationMethod.LDAP;
+      $scope.formValues.ldap.serverType = SERVER_TYPES.AD;
       return;
     }
 
     if (value === 2) {
-      $scope.settings.AuthenticationMethod = 2;
+      $scope.settings.AuthenticationMethod = AuthenticationMethod.LDAP;
       $scope.formValues.ldap.serverType = $scope.formValues.ldap.ldapSettings.ServerType;
       return;
     }
@@ -67,24 +72,30 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
     $scope.settings.AuthenticationMethod = value;
   };
 
+  $scope.onChangePasswordLength = function onChangePasswordLength(value) {
+    $scope.$evalAsync(() => {
+      $scope.settings.InternalAuthSettings = { RequiredPasswordLength: value };
+    });
+  };
+
   $scope.authenticationMethodSelected = function authenticationMethodSelected(value) {
     if (!$scope.settings) {
       return false;
     }
 
-    if (value === 4) {
-      return $scope.settings.AuthenticationMethod === 2 && $scope.formValues.ldap.serverType === 2;
+    if (value === AuthenticationMethod.AD) {
+      return $scope.settings.AuthenticationMethod === AuthenticationMethod.LDAP && $scope.formValues.ldap.serverType === SERVER_TYPES.AD;
     }
 
-    if (value === 2) {
-      return $scope.settings.AuthenticationMethod === 2 && $scope.formValues.ldap.serverType !== 2;
+    if (value === AuthenticationMethod.LDAP) {
+      return $scope.settings.AuthenticationMethod === AuthenticationMethod.LDAP && $scope.formValues.ldap.serverType !== SERVER_TYPES.AD;
     }
 
     return $scope.settings.AuthenticationMethod === value;
   };
 
   $scope.isOauthEnabled = function isOauthEnabled() {
-    return $scope.settings && $scope.settings.AuthenticationMethod === 3;
+    return $scope.settings && $scope.settings.AuthenticationMethod === AuthenticationMethod.OAuth;
   };
 
   $scope.LDAPConnectivityCheck = LDAPConnectivityCheck;
@@ -104,12 +115,12 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
       .then(function success() {
         $scope.state.failedConnectivityCheck = false;
         $scope.state.successfulConnectivityCheck = true;
-        Notifications.success('连接到 LDAP 成功');
+        Notifications.success('Success', 'Connection to LDAP successful');
       })
       .catch(function error(err) {
         $scope.state.failedConnectivityCheck = true;
         $scope.state.successfulConnectivityCheck = false;
-        Notifications.error('失败', err, '连接到 LDAP 失败');
+        Notifications.error('Failure', err, 'Connection to LDAP failed');
       })
       .finally(function final() {
         $scope.state.uploadInProgress = false;
@@ -131,10 +142,10 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
         return SettingsService.update(settings);
       })
       .then(function success() {
-        Notifications.success('身份验证设置已更新');
+        Notifications.success('Success', 'Authentication settings updated');
       })
       .catch(function error(err) {
-        Notifications.error('失败', err, '无法更新身份验证设置');
+        Notifications.error('Failure', err, 'Unable to update authentication settings');
       })
       .finally(function final() {
         $scope.state.uploadInProgress = false;
@@ -147,7 +158,7 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
 
     const tlscaFile = tlscaCert !== $scope.settings.LDAPSettings.TLSConfig.TLSCACert ? tlscaCert : null;
 
-    const isADServer = $scope.formValues.ldap.serverType === 2;
+    const isADServer = $scope.formValues.ldap.serverType === SERVER_TYPES.AD;
 
     const settings = isADServer ? $scope.formValues.ldap.adSettings : $scope.formValues.ldap.ldapSettings;
 
@@ -161,6 +172,10 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
     }
 
     settings.URLs = settings.URLs.map((url) => {
+      if (url === undefined || url === '') {
+        return;
+      }
+
       if (url.includes(':')) {
         return url;
       }
@@ -176,14 +191,25 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
 
   $scope.isLDAPFormValid = isLDAPFormValid;
   function isLDAPFormValid() {
-    const ldapSettings = $scope.formValues.ldap.serverType === 2 ? $scope.formValues.ldap.adSettings : $scope.formValues.ldap.ldapSettings;
+    const ldapSettings = $scope.formValues.ldap.serverType === SERVER_TYPES.AD ? $scope.formValues.ldap.adSettings : $scope.formValues.ldap.ldapSettings;
     const isTLSMode = ldapSettings.TLSConfig.TLS || ldapSettings.StartTLS;
 
     return (
       _.compact(ldapSettings.URLs).length &&
-      (ldapSettings.AnonymousMode || (ldapSettings.ReaderDN && ldapSettings.Password)) &&
-      (!isTLSMode || $scope.formValues.TLSCACert || ldapSettings.TLSConfig.TLSSkipVerify)
+      (ldapSettings.AnonymousMode || (ldapSettings.ReaderDN && isLDAPPasswordValid(ldapSettings.Password))) &&
+      (!isTLSMode || (isTLSMode && $scope.formValues.TLSCACert) || ldapSettings.TLSConfig.TLSSkipVerify) &&
+      (!$scope.settings.LDAPSettings.AdminAutoPopulate || ($scope.settings.LDAPSettings.AdminAutoPopulate && $scope.formValues.selectedAdminGroups.length > 0))
     );
+  }
+
+  // isLDAPPasswordValid is used to validate the password field in the LDAP settings form, and avoids the password field to be required when the form is in edit mode
+  function isLDAPPasswordValid(password) {
+    // if isEdit and it doesn't switch between AD and LDAP, then an empty password is valid
+    if ($scope.state.isEditLDAP && $scope.state.initialServerType === $scope.formValues.ldap.serverType) {
+      return true;
+    }
+    // otherwise the password is required
+    return !!password;
   }
 
   $scope.isOAuthTeamMembershipFormValid = isOAuthTeamMembershipFormValid;
@@ -213,15 +239,8 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
 
         $scope.OAuthSettings = settings.OAuthSettings;
         $scope.authMethod = settings.AuthenticationMethod;
-        if (settings.AuthenticationMethod === 2 && settings.LDAPSettings.ServerType === 2) {
-          $scope.authMethod = 4;
-        }
-
-        $scope.formValues.ldap.serverType = settings.LDAPSettings.ServerType;
-        if (settings.LDAPSettings.ServerType === 2) {
-          $scope.formValues.ldap.adSettings = settings.LDAPSettings;
-        } else {
-          $scope.formValues.ldap.ldapSettings = settings.LDAPSettings;
+        if (settings.AuthenticationMethod === AuthenticationMethod.LDAP && settings.LDAPSettings.ServerType === SERVER_TYPES.AD) {
+          $scope.authMethod = AuthenticationMethod.AD;
         }
 
         if (settings.LDAPSettings.URL) {
@@ -234,11 +253,20 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
           settings.LDAPSettings.URLs.push('');
         }
         if (!settings.LDAPSettings.ServerType) {
-          settings.LDAPSettings.ServerType = 0;
+          settings.LDAPSettings.ServerType = SERVER_TYPES.CUSTOM;
         }
+
+        $scope.formValues.ldap.serverType = settings.LDAPSettings.ServerType;
+        if (settings.LDAPSettings.ServerType === SERVER_TYPES.AD) {
+          $scope.formValues.ldap.adSettings = settings.LDAPSettings;
+        } else {
+          $scope.formValues.ldap.ldapSettings = Object.assign($scope.formValues.ldap.ldapSettings, settings.LDAPSettings);
+        }
+        $scope.state.isEditLDAP = settings.LDAPSettings.ServerType === SERVER_TYPES.AD || settings.LDAPSettings.ServerType === SERVER_TYPES.LDAP;
+        $scope.state.initialServerType = settings.LDAPSettings.ServerType;
       })
       .catch(function error(err) {
-        Notifications.error('失败', err, '无法检索应用程序设置');
+        Notifications.error('Failure', err, 'Unable to retrieve application settings');
       });
   }
 

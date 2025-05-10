@@ -1,19 +1,15 @@
-<div class="col-sm-12 form-section-title">
-  {{ $ctrl.title || 'LDAP security' }}
-</div>
+<div class="col-sm-12 form-section-title"> {{ $ctrl.title || 'LDAP security' }} </div>
 
 <!-- starttls -->
 <div class="form-group" ng-if="!$ctrl.settings.TLSConfig.TLS">
-  <label for="tls" class="control-label col-sm-3 text-left" style="padding-top: 0;">
-    使用 StartTLS
-    <portainer-tooltip
-      position="bottom"
-      message="如果要使用 StartTLS 来保护与服务器的连接，请启用此选项。 如果选择使用 TLS，则忽略。"
-    ></portainer-tooltip>
+  <label for="tls" class="control-label col-sm-3 col-lg-2 text-left" style="padding-top: 0">
+    Use StartTLS
+    <portainer-tooltip message="'Enable this option if want to use StartTLS to secure the connection to the server. Ignored if Use TLS is selected.'"></portainer-tooltip>
   </label>
-  <div class="col-sm-9">
+  <div class="col-sm-9 col-lg-10">
     <label class="switch">
-      <input type="checkbox" ng-model="$ctrl.settings.StartTLS" limited-feature-dir="{{::$ctrl.limitedFeatureId}}" limited-feature-tabindex="-1" /><i></i>
+      <input type="checkbox" ng-model="$ctrl.settings.StartTLS" limited-feature-dir="{{::$ctrl.limitedFeatureId}}" limited-feature-tabindex="-1" data-cy="starttls-toggle" />
+      <span class="slider round"></span>
     </label>
   </div>
 </div>
@@ -21,13 +17,14 @@
 
 <!-- tls-checkbox -->
 <div class="form-group" ng-if="!$ctrl.settings.StartTLS">
-  <label for="tls" class="control-label col-sm-3 text-left" style="padding-top: 0;">
-    使用 TLS
-    <portainer-tooltip position="bottom" message="如果您需要指定 TLS 证书以连接到 LDAP 服务器，请启用此选项。"></portainer-tooltip>
+  <label for="tls" class="control-label col-sm-3 col-lg-2 text-left" style="padding-top: 0">
+    Use TLS
+    <portainer-tooltip message="'Enable this option if you need to specify TLS certificates to connect to the LDAP server.'"></portainer-tooltip>
   </label>
-  <div class="col-sm-9">
+  <div class="col-sm-9 col-lg-10">
     <label class="switch">
-      <input type="checkbox" ng-model="$ctrl.settings.TLSConfig.TLS" limited-feature-dir="{{::$ctrl.limitedFeatureId}}" limited-feature-tabindex="-1" /><i></i>
+      <input type="checkbox" ng-model="$ctrl.settings.TLSConfig.TLS" limited-feature-dir="{{::$ctrl.limitedFeatureId}}" limited-feature-tabindex="-1" data-cy="tls-toggle" />
+      <span class="slider round"></span>
     </label>
   </div>
 </div>
@@ -35,13 +32,20 @@
 
 <!-- tls-skip-verify -->
 <div class="form-group">
-  <label for="tls" class="control-label col-sm-3 text-left" style="padding-top: 0;">
-    跳过服务器证书的验证
-    <portainer-tooltip position="bottom" message="跳过服务器 TLS 证书的验证。 不建议在不安全的网络上使用。"></portainer-tooltip>
+  <label for="tls" class="control-label col-sm-3 col-lg-2 text-left" style="padding-top: 0">
+    Skip verification of server certificate
+    <portainer-tooltip message="'Skip the verification of the server TLS certificate. Not recommended on unsecured networks.'"></portainer-tooltip>
   </label>
-  <div class="col-sm-9">
+  <div class="col-sm-9 col-lg-10">
     <label class="switch">
-      <input type="checkbox" ng-model="$ctrl.settings.TLSConfig.TLSSkipVerify" limited-feature-dir="{{::$ctrl.limitedFeatureId}}" limited-feature-tabindex="-1" /><i></i>
+      <input
+        type="checkbox"
+        ng-model="$ctrl.settings.TLSConfig.TLSSkipVerify"
+        limited-feature-dir="{{::$ctrl.limitedFeatureId}}"
+        limited-feature-tabindex="-1"
+        data-cy="tls-skip-verify-toggle"
+      />
+      <span class="slider round"></span>
     </label>
   </div>
 </div>
@@ -49,8 +53,8 @@
 
 <!-- ca-input -->
 <div class="form-group" ng-if="$ctrl.settings.TLSConfig.TLS || ($ctrl.settings.StartTLS && !$ctrl.settings.TLSConfig.TLSSkipVerify)">
-  <label class="col-sm-3 control-label text-left">TLS CA 证书</label>
-  <div class="col-sm-9">
+  <label class="col-sm-3 col-lg-2 control-label text-left">TLS CA certificate</label>
+  <div class="col-sm-9 col-lg-10 vertical-center">
     <button
       type="button"
       class="btn btn-sm btn-primary"
@@ -59,13 +63,13 @@
       limited-feature-dir="{{::$ctrl.limitedFeatureId}}"
       limited-feature-tabindex="-1"
     >
-      选择文件
+      Select file
     </button>
-    <span style="margin-left: 5px;">
+    <span class="vertical-center">
       {{ $ctrl.tlscaCert.name }}
-      <i class="fa fa-check green-icon" ng-if="$ctrl.tlscaCert && $ctrl.tlscaCert === $ctrl.settings.TLSConfig.TLSCACert" aria-hidden="true"></i>
-      <i class="fa fa-times red-icon" ng-if="!$ctrl.tlscaCert" aria-hidden="true"></i>
-      <i class="fa fa-circle-notch fa-spin" ng-if="$ctrl.uploadInProgress"></i>
+      <pr-icon icon="'check'" class="icon-success" ng-if="$ctrl.tlscaCert && $ctrl.tlscaCert === $ctrl.settings.TLSConfig.TLSCACert"></pr-icon>
+      <pr-icon icon="'x'" class="icon-danger" ng-if="!$ctrl.tlscaCert"></pr-icon>
+      <pr-icon icon="'loader-2'" class-name="'animate-spin-slow ml-0.5'" ng-if="$ctrl.uploadInProgress"></pr-icon>
     </span>
   </div>
 </div>

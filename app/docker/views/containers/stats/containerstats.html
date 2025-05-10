@@ -1,50 +1,59 @@
-<rd-header>
-  <rd-header-title title-text="容器统计"></rd-header-title>
-  <rd-header-content>
-    <a ui-sref="docker.containers">容器</a> &gt; <a ui-sref="docker.containers.container({id: container.Id})">{{ container.Name | trimcontainername }}</a> &gt; 状态
-  </rd-header-content>
-</rd-header>
+<page-header
+  title="'Container statistics'"
+  breadcrumbs="[
+    { label:'Containers', link:'docker.containers' },
+    {
+      label:(container.Name | trimcontainername),
+      link: 'docker.containers.container',
+      linkParams: { id: container.Id },
+    }, 'Stats']"
+>
+</page-header>
 
 <div class="row">
   <div class="col-md-12">
     <rd-widget>
-      <rd-widget-header icon="fa-info-circle" title-text="关于统计"> </rd-widget-header>
+      <rd-widget-header icon="info" title-text="About statistics"> </rd-widget-header>
       <rd-widget-body>
         <form class="form-horizontal">
           <div class="form-group">
             <div class="col-sm-12">
               <span class="small text-muted">
-                此视图显示有关容器 <b>{{ container.Name | trimcontainername }}</b> 以及其中正在运行的进程列表
-                 容器。
+                This view displays real-time statistics about the container <b>{{ container.Name | trimcontainername }}</b> as well as a list of the running processes inside this
+                container.
               </span>
             </div>
           </div>
           <div class="form-group">
-            <label for="refreshRate" class="col-sm-3 col-md-2 col-lg-2 margin-sm-top control-label text-left">
-              刷新频率
-            </label>
+            <label for="refreshRate" class="col-sm-3 col-md-2 col-lg-2 margin-sm-top control-label text-left"> Refresh rate </label>
             <div class="col-sm-3 col-md-2">
-              <select id="refreshRate" ng-model="state.refreshRate" ng-change="changeUpdateRepeater()" class="form-control">
-                <option value="1">1秒</option>
-                <option value="3">3秒</option>
-                <option value="5">5秒</option>
-                <option value="10">10秒</option>
-                <option value="30">30秒</option>
-                <option value="60">60秒</option>
+              <select id="refreshRate" ng-model="state.refreshRate" ng-change="changeUpdateRepeater()" class="form-control" data-cy="docker-containers-stats-refresh-rate">
+                <option value="1">1s</option>
+                <option value="3">3s</option>
+                <option value="5">5s</option>
+                <option value="10">10s</option>
+                <option value="30">30s</option>
+                <option value="60">60s</option>
               </select>
             </div>
             <span>
-              <i id="refreshRateChange" class="fa fa-check green-icon" aria-hidden="true" style="margin-top: 7px; display: none;"></i>
+              <pr-icon id="refreshRateChange" icon="'check'" mode="'success'" style="display: none"></pr-icon>
             </span>
           </div>
           <div class="form-group" ng-if="state.networkStatsUnavailable">
             <div class="col-sm-12">
-              <span class="small text-muted"> <i class="fa fa-exclamation-triangle orange-icon" aria-hidden="true"></i> 此容器的网络统计信息不可用。 </span>
+              <span class="small text-muted">
+                <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
+                Network stats are unavailable for this container.
+              </span>
             </div>
           </div>
           <div class="form-group" ng-if="state.ioStatsUnavailable">
             <div class="col-sm-12">
-              <span class="small text-muted"> <i class="fa fa-exclamation-triangle orange-icon" aria-hidden="true"></i> 此容器的 I/O 统计信息不可用。 </span>
+              <span class="small text-muted">
+                <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
+                I/O stats are unavailable for this container.
+              </span>
             </div>
           </div>
         </form>
@@ -56,9 +65,9 @@
 <div class="row">
   <div class="col-lg-6 col-md-6 col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="fa-chart-area" title-text="内存使用情况"></rd-widget-header>
+      <rd-widget-header icon="bar-chart" title-text="Memory usage"></rd-widget-header>
       <rd-widget-body>
-        <div class="chart-container" style="position: relative;">
+        <div class="chart-container" style="position: relative">
           <canvas id="memoryChart" width="770" height="300"></canvas>
         </div>
       </rd-widget-body>
@@ -67,9 +76,9 @@
 
   <div class="col-lg-6 col-md-6 col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="fa-chart-area" title-text="CPU使用率"></rd-widget-header>
+      <rd-widget-header icon="bar-chart" title-text="CPU usage"></rd-widget-header>
       <rd-widget-body>
-        <div class="chart-container" style="position: relative;">
+        <div class="chart-container" style="position: relative">
           <canvas id="cpuChart" width="770" height="300"></canvas>
         </div>
       </rd-widget-body>
@@ -78,9 +87,9 @@
 
   <div class="col-lg-6 col-md-6 col-sm-12" ng-if="!state.networkStatsUnavailable">
     <rd-widget>
-      <rd-widget-header icon="fa-chart-area" title-text="网络使用量（合计）"></rd-widget-header>
+      <rd-widget-header icon="bar-chart" title-text="Network usage (aggregate)"></rd-widget-header>
       <rd-widget-body>
-        <div class="chart-container" style="position: relative;">
+        <div class="chart-container" style="position: relative">
           <canvas id="networkChart" width="770" height="300"></canvas>
         </div>
       </rd-widget-body>
@@ -89,9 +98,9 @@
 
   <div class="col-lg-6 col-md-6 col-sm-12" ng-if="!state.ioStatsUnavailable">
     <rd-widget>
-      <rd-widget-header icon="fa-chart-area" title-text="I/O 使用率（合计）"></rd-widget-header>
+      <rd-widget-header icon="bar-chart" title-text="I/O usage (aggregate)"></rd-widget-header>
       <rd-widget-body>
-        <div class="chart-container" style="position: relative;">
+        <div class="chart-container" style="position: relative">
           <canvas id="ioChart" width="770" height="300"></canvas>
         </div>
       </rd-widget-body>
@@ -99,14 +108,4 @@
   </div>
 </div>
 
-<div class="row">
-  <div class="col-sm-12">
-    <container-processes-datatable
-      title-text="容器进程"
-      title-icon="fa-tasks"
-      dataset="processInfo.Processes"
-      headerset="processInfo.Titles"
-      table-key="container-processes"
-    ></container-processes-datatable>
-  </div>
-</div>
+<docker-container-processes-datatable></docker-container-processes-datatable>

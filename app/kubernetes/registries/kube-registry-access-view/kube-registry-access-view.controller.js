@@ -2,12 +2,13 @@ import KubernetesNamespaceHelper from 'Kubernetes/helpers/namespaceHelper';
 
 export default class KubernetesRegistryAccessController {
   /* @ngInject */
-  constructor($async, $state, ModalService, EndpointService, Notifications, KubernetesResourcePoolService) {
+  constructor($async, $scope, $state, EndpointService, Notifications, RegistryService, KubernetesResourcePoolService) {
     this.$async = $async;
+    this.$scope = $scope;
     this.$state = $state;
-    this.ModalService = ModalService;
     this.Notifications = Notifications;
     this.KubernetesResourcePoolService = KubernetesResourcePoolService;
+    this.RegistryService = RegistryService;
     this.EndpointService = EndpointService;
 
     this.state = {
@@ -19,23 +20,18 @@ export default class KubernetesRegistryAccessController {
     this.savedResourcePools = [];
 
     this.handleRemove = this.handleRemove.bind(this);
+    this.onChangeResourcePools = this.onChangeResourcePools.bind(this);
   }
 
   async submit() {
-    return this.updateNamespaces([...this.savedResourcePools.map(({ value }) => value), ...this.selectedResourcePools.map((pool) => pool.name)]);
+    return this.updateNamespaces([...this.savedResourcePools.map(({ value }) => value), ...this.selectedResourcePools]);
   }
 
   handleRemove(namespaces) {
     const removeNamespaces = namespaces.map(({ value }) => value);
     const nsToUpdate = this.savedResourcePools.map(({ value }) => value).filter((value) => !removeNamespaces.includes(value));
 
-    const displayedMessage =
-      'This registry might be used by one or more applications inside this environment. Removing the registry access could lead to a service interruption for these applications.<br/><br/>Do you wish to continue?';
-    this.ModalService.confirmDeletion(displayedMessage, (confirmed) => {
-      if (confirmed) {
-        return this.updateNamespaces(nsToUpdate);
-      }
-    });
+    return this.updateNamespaces(nsToUpdate);
   }
 
   updateNamespaces(namespaces) {
@@ -45,9 +41,16 @@ export default class KubernetesRegistryAccessController {
           namespaces,
         });
         this.$state.reload(this.$state.current);
+        this.Notifications.success('Success', 'Registry access updated');
       } catch (err) {
-        this.Notifications.error('失败', err, 'Failed saving registry access');
+        this.Notifications.error('Failure', err, 'Failed saving registry access');
       }
+    });
+  }
+
+  onChangeResourcePools(resourcePools) {
+    return this.$scope.$evalAsync(() => {
+      this.selectedResourcePools = resourcePools;
     });
   }
 
@@ -57,12 +60,12 @@ export default class KubernetesRegistryAccessController {
         this.state = {
           registryId: this.$state.params.id,
         };
-        this.registry = await this.EndpointService.registry(this.endpoint.Id, this.state.registryId);
+        this.registry = await this.RegistryService.registry(this.state.registryId, this.endpoint.Id);
         if (this.registry.RegistryAccesses && this.registry.RegistryAccesses[this.endpoint.Id]) {
           this.savedResourcePools = this.registry.RegistryAccesses[this.endpoint.Id].Namespaces.map((value) => ({ value }));
         }
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to retrieve registry details');
+        this.Notifications.error('Failure', err, 'Unable to retrieve registry details');
       }
 
       try {
@@ -72,7 +75,7 @@ export default class KubernetesRegistryAccessController {
           .filter((pool) => !KubernetesNamespaceHelper.isSystemNamespace(pool.Namespace.Name) && !this.savedResourcePools.find(({ value }) => value === pool.Namespace.Name))
           .map((pool) => ({ name: pool.Namespace.Name, id: pool.Namespace.Id }));
       } catch (err) {
-        this.Notifications.error('失败', err, 'Unable to retrieve namespaces');
+        this.Notifications.error('Failure', err, 'Unable to retrieve namespaces');
       }
     });
   }

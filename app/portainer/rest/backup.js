@@ -9,18 +9,25 @@ angular.module('portainer.app').factory('Backup', [
       {
         download: {
           method: 'POST',
-          responseType: 'blob',
+          responseType: 'arraybuffer',
           ignoreLoadingBar: true,
-          transformResponse: (data, headersGetter) => ({
-            file: data,
-            name: headersGetter('Content-Disposition').replace('attachment; filename=', ''),
-          }),
+          transformResponse: (data, headersGetter, status) => {
+            if (status !== 200) {
+              const decoder = new TextDecoder('utf-8');
+              const str = decoder.decode(data);
+              return JSON.parse(str);
+            }
+
+            return {
+              file: data,
+              name: headersGetter('Content-Disposition').replace('attachment; filename=', ''),
+            };
+          },
         },
         getS3Settings: { method: 'GET', params: { subResource: 's3', action: 'settings' } },
         saveS3Settings: { method: 'POST', params: { subResource: 's3', action: 'settings' } },
         exportS3Backup: { method: 'POST', params: { subResource: 's3', action: 'execute' } },
         restoreS3Backup: { method: 'POST', params: { subResource: 's3', action: 'restore' } },
-        getBackupStatus: { method: 'GET', params: { subResource: 's3', action: 'status' } },
       }
     );
   },

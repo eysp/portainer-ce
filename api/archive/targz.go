@@ -3,6 +3,7 @@ package archive
 import (
 	"archive/tar"
 	"compress/gzip"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -14,7 +15,7 @@ import (
 // abosolutePath should be an absolute path to a directory.
 // Archive name will be <directoryName>.tar.gz and will be placed next to the directory.
 func TarGzDir(absolutePath string) (string, error) {
-	targzPath := filepath.Join(absolutePath, fmt.Sprintf("%s.tar.gz", filepath.Base(absolutePath)))
+	targzPath := filepath.Join(absolutePath, filepath.Base(absolutePath)+".tar.gz")
 	outFile, err := os.Create(targzPath)
 	if err != nil {
 		return "", err
@@ -47,18 +48,6 @@ func TarGzDir(absolutePath string) (string, error) {
 }
 
 func addToArchive(tarWriter *tar.Writer, pathInArchive string, path string, info os.FileInfo) error {
-	header, err := tar.FileInfoHeader(info, info.Name())
-	if err != nil {
-		return err
-	}
-
-	header.Name = pathInArchive // use relative paths in archive
-
-	err = tarWriter.WriteHeader(header)
-	if err != nil {
-		return err
-	}
-
 	if info.IsDir() {
 		return nil
 	}
@@ -67,6 +56,26 @@ func addToArchive(tarWriter *tar.Writer, pathInArchive string, path string, info
 	if err != nil {
 		return err
 	}
+
+	stat, err := file.Stat()
+	if err != nil {
+		return err
+	}
+
+	header, err := tar.FileInfoHeader(stat, stat.Name())
+	if err != nil {
+		return err
+	}
+	header.Name = pathInArchive // use relative paths in archive
+
+	err = tarWriter.WriteHeader(header)
+	if err != nil {
+		return err
+	}
+	if stat.IsDir() {
+		return nil
+	}
+
 	_, err = io.Copy(tarWriter, file)
 	return err
 }
@@ -84,7 +93,7 @@ func ExtractTarGz(r io.Reader, outputDirPath string) error {
 	for {
 		header, err := tarReader.Next()
 
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 
@@ -97,7 +106,7 @@ func ExtractTarGz(r io.Reader, outputDirPath string) error {
 			// skip, dir will be created with a file
 		case tar.TypeReg:
 			p := filepath.Clean(filepath.Join(outputDirPath, header.Name))
-			if err := os.MkdirAll(filepath.Dir(p), 0744); err != nil {
+			if err := os.MkdirAll(filepath.Dir(p), 0o744); err != nil {
 				return fmt.Errorf("Failed to extract dir %s", filepath.Dir(p))
 			}
 			outFile, err := os.Create(p)
@@ -109,7 +118,7 @@ func ExtractTarGz(r io.Reader, outputDirPath string) error {
 			}
 			outFile.Close()
 		default:
-			return fmt.Errorf("Tar: uknown type: %v in %s",
+			return fmt.Errorf("tar: unknown type: %v in %s",
 				header.Typeflag,
 				header.Name)
 		}

@@ -1,8 +1,9 @@
 import angular from 'angular';
+import { dispatchCacheRefreshEvent } from '@/portainer/services/http-request.helper';
 
 class LogoutController {
   /* @ngInject */
-  constructor($async, $state, $transition$, $window, Authentication, StateManager, Notifications, LocalStorage, SettingsService, ThemeManager) {
+  constructor($async, $state, $transition$, $window, Authentication, StateManager, Notifications, LocalStorage, SettingsService) {
     this.$async = $async;
     this.$state = $state;
     this.$transition$ = $transition$;
@@ -13,7 +14,6 @@ class LogoutController {
     this.Notifications = Notifications;
     this.LocalStorage = LocalStorage;
     this.SettingsService = SettingsService;
-    this.ThemeManager = ThemeManager;
 
     this.logo = this.StateManager.getState().application.logo;
     this.logoutAsync = this.logoutAsync.bind(this);
@@ -26,14 +26,14 @@ class LogoutController {
    */
   async logoutAsync() {
     const error = this.$transition$.params().error;
-    const performApiLogout = this.$transition$.params().performApiLogout;
     const settings = await this.SettingsService.publicSettings();
 
-    this.ThemeManager.defaultTheme();
-
     try {
-      await this.Authentication.logout(performApiLogout);
+      await this.Authentication.logout();
     } finally {
+      // always clear the kubernetes cache
+      dispatchCacheRefreshEvent();
+
       this.LocalStorage.storeLogoutReason(error);
       if (settings.OAuthLogoutURI && this.Authentication.getUserDetails().ID !== 1) {
         this.$window.location.href = settings.OAuthLogoutURI;
@@ -55,7 +55,7 @@ class LogoutController {
     try {
       await this.logout();
     } catch (err) {
-      this.Notifications.error('失败', err, '注销时发生错误');
+      this.Notifications.error('Failure', err, 'An error occurred during logout');
     }
   }
 

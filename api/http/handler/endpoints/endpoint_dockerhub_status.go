@@ -1,48 +1,66 @@
 package endpoints
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
 
-	httperror "github.com/portainer/libhttp/error"
-	"github.com/portainer/libhttp/request"
-	"github.com/portainer/libhttp/response"
 	portainer "github.com/portainer/portainer/api"
-	bolterrors "github.com/portainer/portainer/api/bolt/errors"
 	"github.com/portainer/portainer/api/http/client"
 	"github.com/portainer/portainer/api/internal/endpointutils"
+	httperror "github.com/portainer/portainer/pkg/libhttp/error"
+	"github.com/portainer/portainer/pkg/libhttp/request"
+	"github.com/portainer/portainer/pkg/libhttp/response"
+
+	"github.com/segmentio/encoding/json"
 )
 
 type dockerhubStatusResponse struct {
+	// Remaiming images to pull
 	Remaining int `json:"remaining"`
-	Limit     int `json:"limit"`
+	// Daily limit
+	Limit int `json:"limit"`
 }
 
-// GET request on /api/endpoints/{id}/dockerhub/{registryId}
+// @id endpointDockerhubStatus
+// @summary fetch docker pull limits
+// @description get docker pull limits for a docker hub registry in the environment
+// @description **Access policy**:
+// @tags endpoints
+// @security ApiKeyAuth
+// @security jwt
+// @produce json
+// @param id path int true "endpoint ID"
+// @param registryId path int true "registry ID"
+// @success 200 {object} dockerhubStatusResponse "Success"
+// @failure 400 "Invalid request"
+// @failure 403 "Permission denied"
+// @failure 404 "registry or endpoint not found"
+// @failure 500 "Server error"
+// @router /endpoints/{id}/dockerhub/{registryId} [get]
 func (handler *Handler) endpointDockerhubStatus(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	endpointID, err := request.RetrieveNumericRouteVariableValue(r, "id")
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid environment identifier route variable", err}
+		return httperror.BadRequest("Invalid environment identifier route variable", err)
 	}
 
 	endpoint, err := handler.DataStore.Endpoint().Endpoint(portainer.EndpointID(endpointID))
-	if err == bolterrors.ErrObjectNotFound {
-		return &httperror.HandlerError{http.StatusNotFound, "Unable to find an environment with the specified identifier inside the database", err}
+	if handler.DataStore.IsErrObjectNotFound(err) {
+		return httperror.NotFound("Unable to find an environment with the specified identifier inside the database", err)
 	} else if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to find an environment with the specified identifier inside the database", err}
+		return httperror.InternalServerError("Unable to find an environment with the specified identifier inside the database", err)
 	}
 
 	if !endpointutils.IsLocalEndpoint(endpoint) {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid environment type", errors.New("Invalid environment type")}
+		return httperror.BadRequest("Invalid environment type", errors.New("Invalid environment type"))
 	}
 
 	registryID, err := request.RetrieveNumericRouteVariableValue(r, "registryId")
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid registry identifier route variable", err}
+		return httperror.BadRequest("Invalid registry identifier route variable", err)
 	}
 
 	var registry *portainer.Registry
@@ -50,27 +68,34 @@ func (handler *Handler) endpointDockerhubStatus(w http.ResponseWriter, r *http.R
 	if registryID == 0 {
 		registry = &portainer.Registry{}
 	} else {
-		registry, err = handler.DataStore.Registry().Registry(portainer.RegistryID(registryID))
-		if err == bolterrors.ErrObjectNotFound {
-			return &httperror.HandlerError{http.StatusNotFound, "Unable to find a registry with the specified identifier inside the database", err}
+		registry, err = handler.DataStore.Registry().Read(portainer.RegistryID(registryID))
+		if handler.DataStore.IsErrObjectNotFound(err) {
+			return httperror.NotFound("Unable to find a registry with the specified identifier inside the database", err)
 		} else if err != nil {
-			return &httperror.HandlerError{http.StatusInternalServerError, "Unable to find a registry with the specified identifier inside the database", err}
+			return httperror.InternalServerError("Unable to find a registry with the specified identifier inside the database", err)
 		}
 
 		if registry.Type != portainer.DockerHubRegistry {
-			return &httperror.HandlerError{http.StatusBadRequest, "Invalid registry type", errors.New("Invalid registry type")}
+			return httperror.BadRequest("Invalid registry type", errors.New("Invalid registry type"))
 		}
+	}
+
+	if handler.PullLimitCheckDisabled {
+		return response.JSON(w, &dockerhubStatusResponse{
+			Limit:     10,
+			Remaining: 10,
+		})
 	}
 
 	httpClient := client.NewHTTPClient()
 	token, err := getDockerHubToken(httpClient, registry)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve DockerHub token from DockerHub", err}
+		return httperror.InternalServerError("Unable to retrieve DockerHub token from DockerHub", err)
 	}
 
 	resp, err := getDockerHubLimits(httpClient, token)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve DockerHub rate limits from DockerHub", err}
+		return httperror.InternalServerError("Unable to retrieve DockerHub rate limits from DockerHub", err)
 	}
 
 	return response.JSON(w, resp)
@@ -112,7 +137,6 @@ func getDockerHubToken(httpClient *client.HTTPClient, registry *portainer.Regist
 }
 
 func getDockerHubLimits(httpClient *client.HTTPClient, token string) (*dockerhubStatusResponse, error) {
-
 	requestURL := "https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest"
 
 	req, err := http.NewRequest(http.MethodHead, requestURL, nil)
@@ -120,13 +144,15 @@ func getDockerHubLimits(httpClient *client.HTTPClient, token string) (*dockerhub
 		return nil, err
 	}
 
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+	req.Header.Add("Authorization", "Bearer "+token)
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+
+	io.Copy(io.Discard, resp.Body)
+	resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.New("failed fetching dockerhub limits")

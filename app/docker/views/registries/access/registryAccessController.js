@@ -2,12 +2,13 @@ import { TeamAccessViewModel, UserAccessViewModel } from 'Portainer/models/acces
 
 class DockerRegistryAccessController {
   /* @ngInject */
-  constructor($async, $state, Notifications, EndpointService, GroupService) {
+  constructor($async, $state, Notifications, EndpointService, GroupService, RegistryService) {
     this.$async = $async;
     this.$state = $state;
     this.Notifications = Notifications;
     this.EndpointService = EndpointService;
     this.GroupService = GroupService;
+    this.RegistryService = RegistryService;
 
     this.updateAccess = this.updateAccess.bind(this);
     this.filterUsers = this.filterUsers.bind(this);
@@ -18,11 +19,11 @@ class DockerRegistryAccessController {
       this.state.actionInProgress = true;
       try {
         await this.EndpointService.updateRegistryAccess(this.state.endpointId, this.state.registryId, this.registryEndpointAccesses);
-        this.Notifications.success('已成功更新访问权限');
+        this.Notifications.success('Success', 'Access successfully updated');
         this.$state.reload();
       } catch (err) {
         this.state.actionInProgress = false;
-        this.Notifications.error('失败', err, '无法更新访问');
+        this.Notifications.error('Failure', err, 'Unable to update accesses');
       }
     });
   }
@@ -35,15 +36,17 @@ class DockerRegistryAccessController {
     const endpointGroupTeams = this.endpointGroup.TeamAccessPolicies;
 
     return users.filter((userOrTeam) => {
-      const userRole = userOrTeam instanceof UserAccessViewModel && (endpointUsers[userOrTeam.Id] || endpointGroupUsers[userOrTeam.Id]);
-      const teamRole = userOrTeam instanceof TeamAccessViewModel && (endpointTeams[userOrTeam.Id] || endpointGroupTeams[userOrTeam.Id]);
+      const userAccess = userOrTeam instanceof UserAccessViewModel && (endpointUsers[userOrTeam.Id] || endpointGroupUsers[userOrTeam.Id]);
+      const teamAccess = userOrTeam instanceof TeamAccessViewModel && (endpointTeams[userOrTeam.Id] || endpointGroupTeams[userOrTeam.Id]);
 
-      return userRole || teamRole;
+      return userAccess || teamAccess;
     });
   }
 
   $onInit() {
     return this.$async(async () => {
+      this.registryTo = window.location.hash.match(/#!\/\d+\/docker\/swarm\/registries/) ? 'docker.swarm.registries' : 'docker.host.registries';
+
       try {
         this.state = {
           viewReady: false,
@@ -51,11 +54,11 @@ class DockerRegistryAccessController {
           endpointId: this.$state.params.endpointId,
           registryId: this.$state.params.id,
         };
-        this.registry = await this.EndpointService.registry(this.state.endpointId, this.state.registryId);
+        this.registry = await this.RegistryService.registry(this.state.registryId, this.state.endpointId);
         this.registryEndpointAccesses = this.registry.RegistryAccesses[this.state.endpointId] || {};
         this.endpointGroup = await this.GroupService.group(this.endpoint.GroupId);
       } catch (err) {
-        this.Notifications.error('失败', err, '无法检索注册表详细信息');
+        this.Notifications.error('Failure', err, 'Unable to retrieve registry details');
       } finally {
         this.state.viewReady = true;
       }

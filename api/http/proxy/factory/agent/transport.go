@@ -6,14 +6,11 @@ import (
 	portainer "github.com/portainer/portainer/api"
 )
 
-type (
-	// Transport is an http.Transport wrapper that adds custom http headers to communicate to an Agent
-	Transport struct {
-		httpTransport      *http.Transport
-		signatureService   portainer.DigitalSignatureService
-		endpointIdentifier portainer.EndpointID
-	}
-)
+// Transport is an http.Transport wrapper that adds custom http headers to communicate to an Agent
+type Transport struct {
+	httpTransport    *http.Transport
+	signatureService portainer.DigitalSignatureService
+}
 
 // NewTransport returns a new transport that can be used to send signed requests to a Portainer agent
 func NewTransport(signatureService portainer.DigitalSignatureService, httpTransport *http.Transport) *Transport {
@@ -25,7 +22,7 @@ func NewTransport(signatureService portainer.DigitalSignatureService, httpTransp
 	return transport
 }
 
-// RoundTrip is the implementation of the the http.RoundTripper interface
+// RoundTrip is the implementation of the http.RoundTripper interface
 func (transport *Transport) RoundTrip(request *http.Request) (*http.Response, error) {
 	signature, err := transport.signatureService.CreateSignature(portainer.PortainerAgentSignatureMessage)
 	if err != nil {

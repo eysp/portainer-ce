@@ -1,10 +1,12 @@
 import angular from 'angular';
 import _ from 'lodash-es';
+import filesizeParser from 'filesize-parser';
 import KubernetesVolumeHelper from 'Kubernetes/helpers/volumeHelper';
 import KubernetesEventHelper from 'Kubernetes/helpers/eventHelper';
 import { KubernetesStorageClassAccessPolicies } from 'Kubernetes/models/storage-class/models';
-import filesizeParser from 'filesize-parser';
 import KubernetesNamespaceHelper from 'Kubernetes/helpers/namespaceHelper';
+import { confirmRedeploy } from '@/react/kubernetes/volumes/ItemView/ConfirmRedeployModal';
+import { isVolumeUsed } from '@/react/kubernetes/volumes/utils';
 
 class KubernetesVolumeController {
   /* @ngInject */
@@ -17,7 +19,6 @@ class KubernetesVolumeController {
     KubernetesEventService,
     KubernetesApplicationService,
     KubernetesPersistentVolumeClaimService,
-    ModalService,
     KubernetesPodService
   ) {
     this.$async = $async;
@@ -29,7 +30,6 @@ class KubernetesVolumeController {
     this.KubernetesEventService = KubernetesEventService;
     this.KubernetesApplicationService = KubernetesApplicationService;
     this.KubernetesPersistentVolumeClaimService = KubernetesPersistentVolumeClaimService;
-    this.ModalService = ModalService;
     this.KubernetesPodService = KubernetesPodService;
 
     this.onInit = this.onInit.bind(this);
@@ -50,7 +50,7 @@ class KubernetesVolumeController {
   }
 
   isExternalVolume() {
-    return KubernetesVolumeHelper.isExternalVolume(this.volume);
+    return !this.volume.PersistentVolumeClaim.ApplicationOwner;
   }
 
   isSystemNamespace() {
@@ -58,7 +58,7 @@ class KubernetesVolumeController {
   }
 
   isUsed() {
-    return KubernetesVolumeHelper.isUsed(this.volume);
+    return isVolumeUsed(this.volume);
   }
 
   onChangeSize() {
@@ -84,7 +84,7 @@ class KubernetesVolumeController {
     try {
       this.volume.PersistentVolumeClaim.Storage = this.state.volumeSize + this.state.volumeSizeUnit.charAt(0);
       await this.KubernetesPersistentVolumeClaimService.patch(this.oldVolume.PersistentVolumeClaim, this.volume.PersistentVolumeClaim);
-      this.Notifications.success('Volume successfully updated');
+      this.Notifications.success('Success', 'Volume successfully updated');
 
       if (redeploy) {
         const promises = _.flatten(
@@ -93,32 +93,30 @@ class KubernetesVolumeController {
           })
         );
         await Promise.all(promises);
-        this.Notifications.success('Applications successfully redeployed');
+        this.Notifications.success('Success', 'Applications successfully redeployed');
       }
 
       this.$state.reload(this.$state.current);
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to update volume.');
+      this.Notifications.error('Failure', err, 'Unable to update volume.');
     }
   }
 
   updateVolume() {
-    if (KubernetesVolumeHelper.isUsed(this.volume)) {
-      this.ModalService.confirmRedeploy(
-        'One or multiple applications are currently using this volume.</br> For the change to be taken into account these applications will need to be redeployed. Do you want us to reschedule it now?',
-        (redeploy) => {
-          return this.$async(this.updateVolumeAsync, redeploy);
-        }
-      );
+    if (isVolumeUsed(this.volume)) {
+      confirmRedeploy().then((redeploy) => {
+        return this.$async(this.updateVolumeAsync, redeploy);
+      });
     } else {
       return this.$async(this.updateVolumeAsync, false);
     }
   }
 
   async getVolumeAsync() {
+    const storageClasses = this.endpoint.Kubernetes.Configuration.StorageClasses;
     try {
       const [volume, applications] = await Promise.all([
-        this.KubernetesVolumeService.get(this.state.namespace, this.state.name),
+        this.KubernetesVolumeService.get(this.state.namespace, storageClasses, this.state.name),
         this.KubernetesApplicationService.get(this.state.namespace),
       ]);
       volume.Applications = KubernetesVolumeHelper.getUsingApplications(volume, applications);
@@ -128,7 +126,7 @@ class KubernetesVolumeController {
       this.state.volumeSizeUnit = volume.PersistentVolumeClaim.Storage.slice(-2);
       this.state.oldVolumeSize = filesizeParser(volume.PersistentVolumeClaim.Storage, { base: 10 });
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to retrieve volume');
+      this.Notifications.error('Failure', err, 'Unable to retrieve volume');
     }
   }
 
@@ -150,7 +148,7 @@ class KubernetesVolumeController {
       this.events = _.filter(events, (event) => event.Involved.uid === this.volume.PersistentVolumeClaim.Id);
       this.state.eventWarningCount = KubernetesEventHelper.warningCount(this.events);
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to retrieve application related events');
+      this.Notifications.error('Failure', err, 'Unable to retrieve application related events');
     } finally {
       this.state.eventsLoading = false;
     }
@@ -177,8 +175,8 @@ class KubernetesVolumeController {
       increaseSize: false,
       volumeSize: 0,
       volumeSizeUnit: 'GB',
-      volumeSharedAccessPolicy: '',
-      volumeSharedAccessPolicyTooltip: '',
+      volumeSharedAccessPolicies: [],
+      volumeSharedAccessPolicyTooltips: '',
       errors: {
         volumeSize: false,
       },
@@ -189,18 +187,16 @@ class KubernetesVolumeController {
     try {
       await this.getVolume();
       await this.getEvents();
-      if (this.volume.PersistentVolumeClaim.StorageClass !== undefined) {
-        this.state.volumeSharedAccessPolicy = this.volume.PersistentVolumeClaim.StorageClass.AccessModes[this.volume.PersistentVolumeClaim.StorageClass.AccessModes.length - 1];
+      if (this.volume.PersistentVolumeClaim.storageClass !== undefined) {
+        this.state.volumeSharedAccessPolicies = this.volume.PersistentVolumeClaim.AccessModes;
         let policies = KubernetesStorageClassAccessPolicies();
-
-        policies.forEach((policy) => {
-          if (policy.Name == this.state.volumeSharedAccessPolicy) {
-            this.state.volumeSharedAccessPolicyTooltip = policy.Description;
-          }
+        this.state.volumeSharedAccessPolicyTooltips = this.state.volumeSharedAccessPolicies.map((policy) => {
+          const matchingPolicy = policies.find((p) => p.Name === policy);
+          return matchingPolicy ? matchingPolicy.Description : undefined;
         });
       }
     } catch (err) {
-      this.Notifications.error('失败', err, 'Unable to load view data');
+      this.Notifications.error('Failure', err, 'Unable to load view data');
     } finally {
       this.state.viewReady = true;
     }

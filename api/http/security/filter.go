@@ -7,59 +7,67 @@ import (
 // FilterUserTeams filters teams based on user role.
 // non-administrator users only have access to team they are member of.
 func FilterUserTeams(teams []portainer.Team, context *RestrictedRequestContext) []portainer.Team {
-	filteredTeams := teams
+	if context.IsAdmin {
+		return teams
+	}
 
-	if !context.IsAdmin {
-		filteredTeams = make([]portainer.Team, 0)
-		for _, membership := range context.UserMemberships {
-			for _, team := range teams {
-				if team.ID == membership.TeamID {
-					filteredTeams = append(filteredTeams, team)
-					break
-				}
+	n := 0
+	for _, membership := range context.UserMemberships {
+		for _, team := range teams {
+			if team.ID == membership.TeamID {
+				teams[n] = team
+				n++
+
+				break
 			}
 		}
 	}
 
-	return filteredTeams
+	return teams[:n]
 }
 
 // FilterLeaderTeams filters teams based on user role.
 // Team leaders only have access to team they lead.
 func FilterLeaderTeams(teams []portainer.Team, context *RestrictedRequestContext) []portainer.Team {
-	filteredTeams := teams
+	n := 0
 
-	if context.IsTeamLeader {
-		filteredTeams = make([]portainer.Team, 0)
-		for _, membership := range context.UserMemberships {
-			for _, team := range teams {
-				if team.ID == membership.TeamID && membership.Role == portainer.TeamLeader {
-					filteredTeams = append(filteredTeams, team)
-					break
-				}
-			}
+	if !context.IsTeamLeader {
+		return teams[:n]
+	}
+
+	leaderSet := map[portainer.TeamID]bool{}
+	for _, membership := range context.UserMemberships {
+		if membership.Role == portainer.TeamLeader && membership.UserID == context.UserID {
+			leaderSet[membership.TeamID] = true
 		}
 	}
 
-	return filteredTeams
+	for _, team := range teams {
+		if leaderSet[team.ID] {
+			teams[n] = team
+			n++
+		}
+	}
+
+	return teams[:n]
 }
 
 // FilterUsers filters users based on user role.
 // Non-administrator users only have access to non-administrator users.
 func FilterUsers(users []portainer.User, context *RestrictedRequestContext) []portainer.User {
-	filteredUsers := users
+	if context.IsAdmin {
+		return users
+	}
 
-	if !context.IsAdmin {
-		filteredUsers = make([]portainer.User, 0)
-
-		for _, user := range users {
-			if user.Role != portainer.AdministratorRole {
-				filteredUsers = append(filteredUsers, user)
-			}
+	n := 0
+	for _, user := range users {
+		if user.Role != portainer.AdministratorRole {
+			users[n] = user
+			n++
 		}
 	}
 
-	return filteredUsers
+	return users[:n]
 }
 
 // FilterRegistries filters registries based on user role and team memberships.
@@ -69,53 +77,54 @@ func FilterRegistries(registries []portainer.Registry, user *portainer.User, tea
 		return registries
 	}
 
-	filteredRegistries := []portainer.Registry{}
-
+	n := 0
 	for _, registry := range registries {
 		if AuthorizedRegistryAccess(&registry, user, teamMemberships, endpointID) {
-			filteredRegistries = append(filteredRegistries, registry)
+			registries[n] = registry
+			n++
 		}
 	}
 
-	return filteredRegistries
+	return registries[:n]
 }
 
 // FilterEndpoints filters environments(endpoints) based on user role and team memberships.
-// Non administrator users only have access to authorized environments(endpoints) (can be inherited via endoint groups).
+// Non administrator only have access to authorized environments(endpoints) (can be inherited via endpoint groups).
 func FilterEndpoints(endpoints []portainer.Endpoint, groups []portainer.EndpointGroup, context *RestrictedRequestContext) []portainer.Endpoint {
-	filteredEndpoints := endpoints
+	if context.IsAdmin {
+		return endpoints
+	}
 
-	if !context.IsAdmin {
-		filteredEndpoints = make([]portainer.Endpoint, 0)
+	n := 0
+	for _, endpoint := range endpoints {
+		endpointGroup := getAssociatedGroup(&endpoint, groups)
 
-		for _, endpoint := range endpoints {
-			endpointGroup := getAssociatedGroup(&endpoint, groups)
-
-			if authorizedEndpointAccess(&endpoint, endpointGroup, context.UserID, context.UserMemberships) {
-				filteredEndpoints = append(filteredEndpoints, endpoint)
-			}
+		if AuthorizedEndpointAccess(&endpoint, endpointGroup, context.UserID, context.UserMemberships) {
+			endpoint.UserAccessPolicies = nil
+			endpoints[n] = endpoint
+			n++
 		}
 	}
 
-	return filteredEndpoints
+	return endpoints[:n]
 }
 
 // FilterEndpointGroups filters environment(endpoint) groups based on user role and team memberships.
 // Non administrator users only have access to authorized environment(endpoint) groups.
 func FilterEndpointGroups(endpointGroups []portainer.EndpointGroup, context *RestrictedRequestContext) []portainer.EndpointGroup {
-	filteredEndpointGroups := endpointGroups
+	if context.IsAdmin {
+		return endpointGroups
+	}
 
-	if !context.IsAdmin {
-		filteredEndpointGroups = make([]portainer.EndpointGroup, 0)
-
-		for _, group := range endpointGroups {
-			if authorizedEndpointGroupAccess(&group, context.UserID, context.UserMemberships) {
-				filteredEndpointGroups = append(filteredEndpointGroups, group)
-			}
+	n := 0
+	for _, group := range endpointGroups {
+		if authorizedEndpointGroupAccess(&group, context.UserID, context.UserMemberships) {
+			endpointGroups[n] = group
+			n++
 		}
 	}
 
-	return filteredEndpointGroups
+	return endpointGroups[:n]
 }
 
 func getAssociatedGroup(endpoint *portainer.Endpoint, groups []portainer.EndpointGroup) *portainer.EndpointGroup {
@@ -124,5 +133,6 @@ func getAssociatedGroup(endpoint *portainer.Endpoint, groups []portainer.Endpoin
 			return &group
 		}
 	}
+
 	return nil
 }

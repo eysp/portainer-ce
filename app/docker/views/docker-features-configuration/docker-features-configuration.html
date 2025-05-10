@@ -1,141 +1,215 @@
-<rd-header>
-  <rd-header-title title-text="Docker 功能配置"></rd-header-title>
-  <rd-header-content>Docker 配置</rd-header-content>
-</rd-header>
+<page-header title="'Docker features configuration'" breadcrumbs="['Docker configuration']"> </page-header>
 
 <div class="row">
   <div class="col-sm-12">
     <rd-widget>
       <rd-widget-body>
         <form class="form-horizontal" name="$ctrl.form">
-          <div class="col-sm-12 form-section-title">
-            主机和文件系统
-          </div>
-          <div ng-if="!$ctrl.isAgent" class="form-group">
-            <span class="col-sm-12 text-muted small">
-              <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-              这些功能仅适用于启用了代理的环境。
+          <div class="col-sm-12 form-section-title"> Host and filesystem </div>
+          <div class="form-group">
+            <span class="col-sm-12 text-muted small vertical-center">
+              <pr-icon icon="'info'" mode="'primary'" class-name="'space-right'"></pr-icon>
+              <span class="text-muted"
+                >The environment must be <a href="https://docs.portainer.io/start/agent">running the Portainer Agent</a> to use this functionality, and the root of the host must be
+                bind-mounted to <b>/host</b> in the agent deployment. Check
+                <a href="https://docs.portainer.io/user/docker/host/setup#enable-host-management-features">our documentation</a> for more information.</span
+              >
             </span>
           </div>
           <div class="form-group">
             <div class="col-sm-12">
               <por-switch-field
-                ng-model="$ctrl.formValues.enableHostManagementFeatures"
-                name="enableHostManagementFeatures"
-                label="启用主机管理功能"
-                tooltip="启用主机管理功能：主机系统浏览和高级主机详细信息。"
+                checked="$ctrl.formValues.enableHostManagementFeatures"
+                name="'enableHostManagementFeatures'"
+                label="'Enable host management features'"
+                tooltip="'Enable host management features: host system browsing and advanced host details.'"
+                label-class="'col-sm-7 col-lg-4'"
                 disabled="!$ctrl.isAgent"
-                label-class="col-sm-7 col-lg-4"
+                on-change="($ctrl.onChangeEnableHostManagementFeatures)"
               ></por-switch-field>
             </div>
           </div>
           <div class="form-group">
             <div class="col-sm-12">
               <por-switch-field
-                ng-model="$ctrl.formValues.allowVolumeBrowserForRegularUsers"
-                name="allowVolumeBrowserForRegularUsers"
-                label="为非管理员启用存储卷管理"
-                tooltip="启用后，普通用户将能够使用 Portainer 存储卷管理功能。"
+                checked="$ctrl.formValues.allowVolumeBrowserForRegularUsers"
+                name="'allowVolumeBrowserForRegularUsers'"
+                label="'Enable volume management for non-administrators'"
+                tooltip="'When enabled, regular users will be able to use Portainer volume management features.'"
+                label-class="'col-sm-7 col-lg-4'"
+                on-change="($ctrl.onChangeAllowVolumeBrowserForRegularUsers)"
                 disabled="!$ctrl.isAgent"
-                label-class="col-sm-7 col-lg-4"
               ></por-switch-field>
             </div>
           </div>
+          <!-- auto update window -->
+          <div class="col-sm-12 form-section-title"> Change window setting </div>
+
+          <div class="form-group">
+            <div class="col-sm-12">
+              <por-switch-field
+                checked="$ctrl.state.autoUpdateSettings.Enabled"
+                name="'disableSysctlSettingForRegularUsers'"
+                label="'Enable Change Window'"
+                label-class="'col-sm-7 col-lg-4'"
+                feature-id="$ctrl.limitedFeatureAutoUpdate"
+                tooltip="'Specify a time-frame during which GitOps updates can occur in this environment.'"
+                on-change="($ctrl.onToggleAutoUpdate)"
+              >
+              </por-switch-field>
+            </div>
+          </div>
+
           <!-- security -->
-          <div class="col-sm-12 form-section-title">
-            Docker 安全设定
-          </div>
+          <div class="col-sm-12 form-section-title"> Docker security settings </div>
           <div class="form-group">
             <div class="col-sm-12">
               <por-switch-field
-                ng-model="$ctrl.formValues.disableBindMountsForRegularUsers"
-                name="disableBindMountsForRegularUsers"
-                label="为非管理员禁用绑定挂载"
-                tooltip="启用后，普通用户在创建容器时将无法使用绑定安装。"
-                label-class="col-sm-7 col-lg-4"
+                checked="$ctrl.formValues.disableBindMountsForRegularUsers"
+                name="'disableBindMountsForRegularUsers'"
+                label="'Disable bind mounts for non-administrators'"
+                tooltip="'When enabled, regular users will not be able to use bind mounts when creating containers.'"
+                label-class="'col-sm-7 col-lg-4'"
+                on-change="($ctrl.onChangeDisableBindMountsForRegularUsers)"
               ></por-switch-field>
             </div>
           </div>
           <div class="form-group">
             <div class="col-sm-12">
               <por-switch-field
-                ng-model="$ctrl.formValues.disablePrivilegedModeForRegularUsers"
-                name="disablePrivilegedModeForRegularUsers"
-                label="为非管理员禁用特权模式"
-                tooltip="启用后，普通用户在创建容器时将无法使用特权模式。."
-                label-class="col-sm-7 col-lg-4"
+                checked="$ctrl.formValues.disablePrivilegedModeForRegularUsers"
+                name="'disablePrivilegedModeForRegularUsers'"
+                label="'Disable privileged mode for non-administrators'"
+                tooltip="'When enabled, regular users will not be able to use privileged mode when creating containers.'"
+                label-class="'col-sm-7 col-lg-4'"
+                on-change="($ctrl.onChangeDisablePrivilegedModeForRegularUsers)"
               ></por-switch-field>
             </div>
           </div>
           <div class="form-group">
             <div class="col-sm-12">
               <por-switch-field
-                ng-model="$ctrl.formValues.disableHostNamespaceForRegularUsers"
-                name="disableHostNamespaceForRegularUsers"
-                label="禁止非管理员使用主机 PID 1"
-                tooltip="防止用户通过主机 PID 命名空间访问主机文件系统。"
-                label-class="col-sm-7 col-lg-4"
+                checked="$ctrl.formValues.disableHostNamespaceForRegularUsers"
+                name="'disableHostNamespaceForRegularUsers'"
+                label="'Disable the use of host PID 1 for non-administrators'"
+                tooltip="'Prevent users from accessing the host filesystem through the host PID namespace.'"
+                label-class="'col-sm-7 col-lg-4'"
+                on-change="($ctrl.onChangeDisableHostNamespaceForRegularUsers)"
               ></por-switch-field>
             </div>
           </div>
           <div class="form-group">
             <div class="col-sm-12">
               <por-switch-field
-                ng-model="$ctrl.formValues.disableStackManagementForRegularUsers"
-                name="disableStackManagementForRegularUsers"
-                label="禁止非管理员使用堆栈"
-                label-class="col-sm-7 col-lg-4"
+                checked="$ctrl.formValues.disableStackManagementForRegularUsers"
+                name="'disableStackManagementForRegularUsers'"
+                label="'Disable the use of Stacks for non-administrators'"
+                label-class="'col-sm-7 col-lg-4'"
+                on-change="($ctrl.onChangeDisableStackManagementForRegularUsers)"
               ></por-switch-field>
             </div>
           </div>
           <div class="form-group">
             <div class="col-sm-12">
               <por-switch-field
-                ng-model="$ctrl.formValues.disableDeviceMappingForRegularUsers"
-                name="disableDeviceMappingForRegularUsers"
-                label="为非管理员禁用设备映射"
-                label-class="col-sm-7 col-lg-4"
+                checked="$ctrl.formValues.disableDeviceMappingForRegularUsers"
+                name="'disableDeviceMappingForRegularUsers'"
+                label="'Disable device mappings for non-administrators'"
+                label-class="'col-sm-7 col-lg-4'"
+                on-change="($ctrl.onChangeDisableDeviceMappingForRegularUsers)"
               ></por-switch-field>
             </div>
           </div>
           <div class="form-group">
             <div class="col-sm-12">
               <por-switch-field
-                ng-model="$ctrl.formValues.disableContainerCapabilitiesForRegularUsers"
-                name="disableContainerCapabilitiesForRegularUsers"
-                label="为非管理员禁用容器功能"
-                label-class="col-sm-7 col-lg-4"
+                checked="$ctrl.formValues.disableContainerCapabilitiesForRegularUsers"
+                name="'disableContainerCapabilitiesForRegularUsers'"
+                label="'Disable container capabilities for non-administrators'"
+                label-class="'col-sm-7 col-lg-4'"
+                on-change="($ctrl.onChangeDisableContainerCapabilitiesForRegularUsers)"
               ></por-switch-field>
             </div>
           </div>
           <div class="form-group">
             <div class="col-sm-12">
               <por-switch-field
-                ng-model="$ctrl.formValues.disableSysctlSettingForRegularUsers"
-                name="disableSysctlSettingForRegularUsers"
-                label="禁用非管理员的 sysctl 设置"
-                label-class="col-sm-7 col-lg-4"
+                checked="$ctrl.formValues.disableSysctlSettingForRegularUsers"
+                name="'disableSysctlSettingForRegularUsers'"
+                label="'Disable sysctl settings for non-administrators'"
+                label-class="'col-sm-7 col-lg-4'"
+                on-change="($ctrl.onChangeDisableSysctlSettingForRegularUsers)"
               ></por-switch-field>
             </div>
           </div>
 
           <div class="form-group" ng-if="$ctrl.isContainerEditDisabled()">
             <span class="col-sm-12 text-muted small">
-              <i class="fa fa-info-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
-              注意：重建/复制/编辑功能当前被一项或多项安全设置禁用（对于非管理员用户）。
+              <pr-icon icon="'info'" mode="'primary'" class-name="'mr-0.5'"></pr-icon>
+              Note: The recreate/duplicate/edit feature is currently disabled (for non-admin users) by one or more security settings.
             </span>
           </div>
           <!-- !security -->
 
-          <!-- actions -->
-          <div class="col-sm-12 form-section-title">
-            操作
+          <!-- other -->
+          <div class="col-sm-12 form-section-title"> Other </div>
+          <div class="form-group">
+            <div class="col-sm-12" ng-if="!$ctrl.isDockerStandaloneEnv">
+              <text-tip children="'Showing GPU in the UI is currently only available with Docker Standalone and is limited to NVIDIA graphics cards.'" color="'blue'" />
+            </div>
           </div>
+
           <div class="form-group">
             <div class="col-sm-12">
-              <button type="button" class="btn btn-primary btn-sm" ng-click="$ctrl.save()" ng-disabled="$ctrl.state.actionInProgress" button-spinner="$ctrl.state.actionInProgress">
-                <span ng-hide="$ctrl.state.actionInProgress">保存配置</span>
-                <span ng-show="$ctrl.state.actionInProgress">保存中...</span>
+              <por-switch-field
+                label="'Show GPU in the UI'"
+                tooltip="'This allows managing of GPUs for container/stack hardware acceleration via the Portainer UI.'"
+                checked="$ctrl.state.enableGPUManagement"
+                name="'enableGPUManagement'"
+                on-change="($ctrl.onToggleGPUManagement)"
+                label-class="'col-sm-7 col-lg-4'"
+                disabled="!$ctrl.isDockerStandaloneEnv"
+              ></por-switch-field>
+            </div>
+
+            <div ng-if="$ctrl.state.enableGPUManagement">
+              <div class="col-sm-12">
+                <text-tip children="'GPU support is currently limited to NVIDIA graphics cards only.'" color="'blue'" />
+              </div>
+              <div class="col-sm-12">
+                <div class="pl-4">
+                  <gpus-list ng-if="$ctrl.state.enableGPUManagement" value="$ctrl.endpoint.Gpus" on-change="($ctrl.onGpusChange)"></gpus-list>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="col-sm-12">
+              <por-switch-field
+                label="'Show image up to date indicators for Stacks, Services and Containers'"
+                checked="false"
+                name="'outOfDateImageToggle'"
+                label-class="'col-sm-7 col-lg-4'"
+                feature-id="$ctrl.limitedFeatureUpToDateImage"
+              ></por-switch-field>
+            </div>
+          </div>
+          <!-- !other -->
+
+          <!-- actions -->
+          <div class="col-sm-12 form-section-title"> Actions </div>
+          <div class="form-group">
+            <div class="col-sm-12">
+              <button
+                type="button"
+                class="btn btn-primary btn-sm !ml-0"
+                ng-click="$ctrl.save()"
+                ng-disabled="$ctrl.state.actionInProgress"
+                button-spinner="$ctrl.state.actionInProgress"
+              >
+                <span ng-hide="$ctrl.state.actionInProgress">Save configuration</span>
+                <span ng-show="$ctrl.state.actionInProgress">Saving...</span>
               </button>
             </div>
           </div>

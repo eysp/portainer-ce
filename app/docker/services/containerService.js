@@ -1,217 +1,118 @@
-import { ContainerDetailsViewModel, ContainerStatsViewModel, ContainerViewModel } from '../models/container';
+import angular from 'angular';
+import {
+  killContainer,
+  pauseContainer,
+  removeContainer,
+  renameContainer,
+  restartContainer,
+  resumeContainer,
+  startContainer,
+  stopContainer,
+  recreateContainer,
+  getContainerLogs,
+} from '@/react/docker/containers/containers.service';
+import { getContainers } from '@/react/docker/containers/queries/useContainers';
+import { getContainer } from '@/react/docker/containers/queries/useContainer';
+import { resizeTTY } from '@/react/docker/containers/queries/useContainerResizeTTYMutation';
+import { updateContainer } from '@/react/docker/containers/queries/useUpdateContainer';
+import { createExec } from '@/react/docker/containers/queries/useCreateExecMutation';
+import { containerStats } from '@/react/docker/containers/queries/useContainerStats';
+import { getContainerTop } from '@/react/docker/containers/queries/useContainerTop';
 
-angular.module('portainer.docker').factory('ContainerService', [
-  '$q',
-  'Container',
-  'ResourceControlService',
-  'LogHelper',
-  '$timeout',
-  function ContainerServiceFactory($q, Container, ResourceControlService, LogHelper, $timeout) {
-    'use strict';
-    var service = {};
+import { ContainerDetailsViewModel } from '../models/containerDetails';
+import { ContainerStatsViewModel } from '../models/containerStats';
+import { formatLogs } from '../helpers/logHelper';
 
-    service.container = function (id) {
-      var deferred = $q.defer();
+angular.module('portainer.docker').factory('ContainerService', ContainerServiceFactory);
 
-      Container.get({ id: id })
-        .$promise.then(function success(data) {
-          var container = new ContainerDetailsViewModel(data);
-          deferred.resolve(container);
-        })
-        .catch(function error(err) {
-          deferred.reject({ msg: '无法检索容器信息rmation', err: err });
-        });
+/* @ngInject */
+function ContainerServiceFactory(AngularToReact) {
+  const { useAxios } = AngularToReact;
 
-      return deferred.promise;
-    };
+  return {
+    killContainer: useAxios(killContainer), // container edit
+    pauseContainer: useAxios(pauseContainer), // container edit
+    renameContainer: useAxios(renameContainer), // container edit
+    restartContainer: useAxios(restartContainer), // container edit
+    resumeContainer: useAxios(resumeContainer), // container edit
+    startContainer: useAxios(startContainer), // container edit
+    stopContainer: useAxios(stopContainer), // container edit
+    recreateContainer: useAxios(recreateContainer), // container edit
+    remove: useAxios(removeContainer), // container edit
+    container: useAxios(getContainerAngularJS), // container console  + container edit + container stats
+    containers: useAxios(getContainers), // dashboard + services list + service edit + voluem edit + stackservice + stack create + stack edit
+    resizeTTY: useAxios(resizeTTYAngularJS), // container console
+    updateRestartPolicy: useAxios(updateRestartPolicyAngularJS), // container edit
+    createExec: useAxios(createExec), // container console
+    containerStats: useAxios(containerStatsAngularJS), // container stats
+    containerTop: useAxios(getContainerTop), // container stats
+    inspect: useAxios(getContainer), // container inspect
+    logs: useAxios(containerLogsAngularJS), // container logs
+  };
 
-    service.containers = function (all, filters) {
-      var deferred = $q.defer();
-      Container.query({ all: all, filters: filters })
-        .$promise.then(function success(data) {
-          var containers = data.map(function (item) {
-            return new ContainerViewModel(item);
-          });
-          deferred.resolve(containers);
-        })
-        .catch(function error(err) {
-          deferred.reject({ msg: '无法检索容器', err: err });
-        });
+  /**
+   * @param {EnvironmentId} environmentId
+   * @param {ContainerId} id
+   * @param {*} param2
+   */
+  async function getContainerAngularJS(environmentId, id, { nodeName } = {}) {
+    const data = await getContainer(environmentId, id, { nodeName });
+    return new ContainerDetailsViewModel(data);
+  }
 
-      return deferred.promise;
-    };
+  /**
+   * @param {EnvironmentId} environmentId
+   * @param {string} containerId
+   * @param {number} width
+   * @param {number} height
+   * @param timeout DEPRECATED: Previously used in pure AJS implementation
+   */
+  async function resizeTTYAngularJS(environmentId, containerId, width, height) {
+    return resizeTTY(environmentId, containerId, { width, height });
+  }
 
-    service.resizeTTY = function (id, width, height, timeout) {
-      var deferred = $q.defer();
+  /**
+   * @param {EnvironmentId} environmentId
+   * @param {ContainerId} id
+   * @param {RestartPolicy['Name']} restartPolicy
+   * @param {RestartPolicy['MaximumRetryCount']} maximumRetryCounts
+   */
+  async function updateRestartPolicyAngularJS(environmentId, id, restartPolicy, maximumRetryCounts) {
+    return updateContainer(environmentId, id, {
+      RestartPolicy: {
+        Name: restartPolicy,
+        MaximumRetryCount: maximumRetryCounts,
+      },
+    });
+  }
 
-      $timeout(function () {
-        Container.resize({}, { id: id, height: height, width: width })
-          .$promise.then(function success(data) {
-            if (data.message) {
-              deferred.reject({ msg: '无法调整容器的tty大小 ' + id, err: data.message });
-            } else {
-              deferred.resolve(data);
-            }
-          })
-          .catch(function error(err) {
-            deferred.reject({ msg: '无法调整容器的tty大小 ' + id, err: err });
-          });
-      }, timeout);
+  /**
+   * @param {EnvironmentId} environmentId
+   * @param {ContainerId} id
+   */
+  async function containerStatsAngularJS(environmentId, id) {
+    const data = await containerStats(environmentId, id);
+    return new ContainerStatsViewModel(data);
+  }
 
-      return deferred.promise;
-    };
-
-    service.startContainer = function (id) {
-      return Container.start({ id: id }, {}).$promise;
-    };
-
-    service.stopContainer = function (id) {
-      return Container.stop({ id: id }, {}).$promise;
-    };
-
-    service.restartContainer = function (id) {
-      return Container.restart({ id: id }, {}).$promise;
-    };
-
-    service.killContainer = function (id) {
-      return Container.kill({ id: id }, {}).$promise;
-    };
-
-    service.pauseContainer = function (id) {
-      return Container.pause({ id: id }, {}).$promise;
-    };
-
-    service.resumeContainer = function (id) {
-      return Container.unpause({ id: id }, {}).$promise;
-    };
-
-    service.renameContainer = function (id, newContainerName) {
-      return Container.rename({ id: id, name: newContainerName }, {}).$promise;
-    };
-
-    service.updateRestartPolicy = updateRestartPolicy;
-
-    function updateRestartPolicy(id, restartPolicy, maximumRetryCounts) {
-      return Container.update({ id: id }, { RestartPolicy: { Name: restartPolicy, MaximumRetryCount: maximumRetryCounts } }).$promise;
-    }
-
-    service.createContainer = function (configuration) {
-      var deferred = $q.defer();
-      Container.create(configuration)
-        .$promise.then(function success(data) {
-          deferred.resolve(data);
-        })
-        .catch(function error(err) {
-          deferred.reject({ msg: '无法创建容器r', err: err });
-        });
-      return deferred.promise;
-    };
-
-    service.createAndStartContainer = function (configuration) {
-      var deferred = $q.defer();
-      var container;
-      service
-        .createContainer(configuration)
-        .then(function success(data) {
-          container = data;
-          return service.startContainer(container.Id);
-        })
-        .then(function success() {
-          deferred.resolve(container);
-        })
-        .catch(function error(err) {
-          deferred.reject(err);
-        });
-      return deferred.promise;
-    };
-
-    service.remove = function (container, removeVolumes) {
-      var deferred = $q.defer();
-
-      Container.remove({ id: container.Id, v: removeVolumes ? 1 : 0, force: true })
-        .$promise.then(function success(data) {
-          if (data.message) {
-            deferred.reject({ msg: data.message, err: data.message });
-          } else {
-            deferred.resolve();
-          }
-        })
-        .catch(function error(err) {
-          deferred.reject({ msg: '无法删除容器', err: err });
-        });
-
-      return deferred.promise;
-    };
-
-    service.createExec = function (execConfig) {
-      var deferred = $q.defer();
-
-      Container.exec({}, execConfig)
-        .$promise.then(function success(data) {
-          if (data.message) {
-            deferred.reject({ msg: data.message, err: data.message });
-          } else {
-            deferred.resolve(data);
-          }
-        })
-        .catch(function error(err) {
-          deferred.reject(err);
-        });
-
-      return deferred.promise;
-    };
-
-    service.logs = function (id, stdout, stderr, timestamps, since, tail, stripHeaders) {
-      var deferred = $q.defer();
-
-      var parameters = {
-        id: id,
-        stdout: stdout || 0,
-        stderr: stderr || 0,
-        timestamps: timestamps || 0,
-        since: since || 0,
-        tail: tail || 'all',
-      };
-
-      Container.logs(parameters)
-        .$promise.then(function success(data) {
-          var logs = LogHelper.formatLogs(data.logs, stripHeaders);
-          deferred.resolve(logs);
-        })
-        .catch(function error(err) {
-          deferred.reject(err);
-        });
-
-      return deferred.promise;
-    };
-
-    service.containerStats = function (id) {
-      var deferred = $q.defer();
-
-      Container.stats({ id: id })
-        .$promise.then(function success(data) {
-          var containerStats = new ContainerStatsViewModel(data);
-          deferred.resolve(containerStats);
-        })
-        .catch(function error(err) {
-          deferred.reject(err);
-        });
-
-      return deferred.promise;
-    };
-
-    service.containerTop = function (id) {
-      return Container.top({ id: id }).$promise;
-    };
-
-    service.inspect = function (id) {
-      return Container.inspect({ id: id }).$promise;
-    };
-
-    service.prune = function (filters) {
-      return Container.prune({ filters: filters }).$promise;
-    };
-
-    return service;
-  },
-]);
+  /**
+   * @param {EnvironmentId} environmentId
+   * @param {Containerid} id
+   * @param {boolean?} stdout
+   * @param {boolean?} stderr
+   * @param {boolean?} timestamps
+   * @param {number?} since
+   * @param {number?} tail
+   * @param {boolean?} stripHeaders
+   */
+  async function containerLogsAngularJS(environmentId, id, stdout = false, stderr = false, timestamps = false, since = 0, tail = 'all', stripHeaders) {
+    const data = await getContainerLogs(environmentId, id, {
+      since,
+      stderr,
+      stdout,
+      tail,
+      timestamps,
+    });
+    return formatLogs(data, { stripHeaders, withTimestamps: !!timestamps });
+  }
+}

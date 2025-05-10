@@ -2,37 +2,36 @@ package utils
 
 import (
 	"compress/gzip"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime"
 
+	"github.com/segmentio/encoding/json"
 	"gopkg.in/yaml.v3"
 )
 
 // GetJSONObject will extract an object from a specific property of another JSON object.
 // Returns nil if nothing is associated to the specified key.
-func GetJSONObject(jsonObject map[string]interface{}, property string) map[string]interface{} {
+func GetJSONObject(jsonObject map[string]any, property string) map[string]any {
 	object := jsonObject[property]
 	if object != nil {
-		return object.(map[string]interface{})
+		return object.(map[string]any)
 	}
 	return nil
 }
 
 // GetArrayObject will extract an array from a specific property of another JSON object.
 // Returns nil if nothing is associated to the specified key.
-func GetArrayObject(jsonObject map[string]interface{}, property string) []interface{} {
+func GetArrayObject(jsonObject map[string]any, property string) []any {
 	object := jsonObject[property]
 	if object != nil {
-		return object.([]interface{})
+		return object.([]any)
 	}
 	return nil
 }
 
-func getBody(body io.ReadCloser, contentType string, isGzip bool) (interface{}, error) {
+func getBody(body io.ReadCloser, contentType string, isGzip bool) (any, error) {
 	if body == nil {
 		return nil, errors.New("unable to parse response: empty response body")
 	}
@@ -50,18 +49,8 @@ func getBody(body io.ReadCloser, contentType string, isGzip bool) (interface{}, 
 
 	defer reader.Close()
 
-	bodyBytes, err := ioutil.ReadAll(reader)
-	if err != nil {
-		return nil, err
-	}
-
-	err = body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	var data interface{}
-	err = unmarshal(contentType, bodyBytes, &data)
+	var data any
+	err := unmarshal(contentType, reader, &data)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +58,7 @@ func getBody(body io.ReadCloser, contentType string, isGzip bool) (interface{}, 
 	return data, nil
 }
 
-func marshal(contentType string, data interface{}) ([]byte, error) {
+func marshal(contentType string, data any) ([]byte, error) {
 	// Note: contentType can look like: "application/json" or "application/json; charset=utf-8"
 	mediaType, _, err := mime.ParseMediaType(contentType)
 	if err != nil {
@@ -86,8 +75,8 @@ func marshal(contentType string, data interface{}) ([]byte, error) {
 	return nil, fmt.Errorf("content type is not supported for marshaling: %s", contentType)
 }
 
-func unmarshal(contentType string, body []byte, returnBody interface{}) error {
-	// Note: contentType can look look like: "application/json" or "application/json; charset=utf-8"
+func unmarshal(contentType string, body io.Reader, returnBody any) error {
+	// Note: contentType can look like: "application/json" or "application/json; charset=utf-8"
 	mediaType, _, err := mime.ParseMediaType(contentType)
 	if err != nil {
 		return err
@@ -95,9 +84,9 @@ func unmarshal(contentType string, body []byte, returnBody interface{}) error {
 
 	switch mediaType {
 	case "application/yaml":
-		return yaml.Unmarshal(body, returnBody)
+		return yaml.NewDecoder(body).Decode(returnBody)
 	case "application/json", "":
-		return json.Unmarshal(body, returnBody)
+		return json.NewDecoder(body).Decode(returnBody)
 	}
 
 	return fmt.Errorf("content type is not supported for unmarshaling: %s", contentType)

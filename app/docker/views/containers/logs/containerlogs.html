@@ -1,13 +1,20 @@
-<rd-header>
-  <rd-header-title title-text="容器日志"></rd-header-title>
-  <rd-header-content>
-    <a ui-sref="docker.containers">容器</a> &gt; <a ui-sref="docker.containers.container({id: container.Id})">{{ container.Name | trimcontainername }}</a> &gt; 日志
-  </rd-header-content>
-</rd-header>
+<page-header
+  title="'Container logs'"
+  breadcrumbs="[
+    { label:'Containers', link:'docker.containers' },
+    { 
+      label:(container.Name | trimcontainername),
+      link: 'docker.containers.container', 
+      linkParams: { id: container.Id }
+    }, 'Logs']"
+>
+</page-header>
+
+<container-log-view ng-if="!logsEnabled"></container-log-view>
 
 <log-viewer
   data="logs"
-  ng-if="logs"
+  ng-if="logs && logsEnabled"
   log-collection-change="changeLogCollection"
   display-timestamps="state.displayTimestamps"
   line-count="state.lineCount"

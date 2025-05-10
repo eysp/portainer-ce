@@ -1,3 +1,4 @@
+//go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
 package factory
@@ -21,7 +22,7 @@ func (factory ProxyFactory) newOSBasedLocalProxy(path string, endpoint *portaine
 
 	proxy := &dockerLocalProxy{}
 
-	dockerTransport, err := docker.NewTransport(transportParameters, newSocketTransport(path))
+	dockerTransport, err := docker.NewTransport(transportParameters, newSocketTransport(path), factory.gitService, factory.snapshotService)
 	if err != nil {
 		return nil, err
 	}

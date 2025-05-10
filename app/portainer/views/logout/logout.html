@@ -1,15 +1,15 @@
 <div class="page-wrapper">
   <!-- login box -->
-  <div class="container simple-box">
+  <div class="simple-box container">
     <div class="col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3">
       <!-- login box logo -->
       <div class="row">
         <img ng-if="!ctrl.logo" src="~@/assets/images/logo_alt.svg" class="simple-box-logo" alt="Portainer" />
         <img ng-if="ctrl.logo" ng-src="{{ ctrl.logo }}" class="simple-box-logo" />
       </div>
-      <div class="row" style="text-align: center;">
-        正在注销...
-        <i class="fa fa-cog fa-spin" style="margin-left: 5px;"></i>
+      <div class="row text-center">
+        Logout in progress...
+        <pr-icon icon="'settings'" class-name="'animate-spin-slow space-left'"></pr-icon>
       </div>
     </div>
   </div>

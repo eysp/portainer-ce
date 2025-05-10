@@ -6,6 +6,8 @@ import (
 
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/http/proxy/factory/utils"
+	"github.com/portainer/portainer/api/http/security"
+	httperror "github.com/portainer/portainer/pkg/libhttp/error"
 )
 
 // proxy for /subscriptions/*/resourceGroups/*/providers/Microsoft.ContainerInstance/containerGroups/*
@@ -23,33 +25,43 @@ func (transport *Transport) proxyContainerGroupRequest(request *http.Request) (*
 }
 
 func (transport *Transport) proxyContainerGroupPutRequest(request *http.Request) (*http.Response, error) {
-	//add a lock before processing existense check
+	tokenData, err := security.RetrieveTokenData(request)
+	if err != nil {
+		return nil, httperror.Forbidden("Permission denied to access environment", err)
+	}
+
+	// Add a lock before processing existence check
 	transport.mutex.Lock()
 	defer transport.mutex.Unlock()
 
-	//generate a temp http GET request based on the current PUT request
+	// Generate a temp http GET request based on the current PUT request
 	validationRequest := &http.Request{
 		Method: http.MethodGet,
 		URL:    request.URL,
 		Header: http.Header{
-			"Authorization": []string{request.Header.Get("Authorization")},
+			"Authorization": []string{"Bearer " + tokenData.Token},
 		},
 	}
 
-	//fire the request to Azure API to validate if there is an existing container instance with the same name
-	//positive - reject the request
-	//negative - continue the process
+	// Fire the request to Azure API to validate if there is an existing container instance with the same name
+	// positive - reject the request
+	// negative - continue the process
 	validationResponse, err := http.DefaultTransport.RoundTrip(validationRequest)
 	if err != nil {
 		return validationResponse, err
 	}
 
 	if validationResponse.StatusCode >= 200 && validationResponse.StatusCode < 300 {
-		resp := &http.Response{}
+		resp := &http.Response{
+			Header: http.Header{
+				http.CanonicalHeaderKey("content-type"): []string{"application/json"},
+			},
+		}
 		errObj := map[string]string{
 			"message": "A container instance with the same name already exists inside the selected resource group",
 		}
 		err = utils.RewriteResponse(resp, errObj, http.StatusConflict)
+
 		return resp, err
 	}
 
@@ -81,11 +93,8 @@ func (transport *Transport) proxyContainerGroupPutRequest(request *http.Request)
 	responseObject = decorateObject(responseObject, resourceControl)
 
 	err = utils.RewriteResponse(response, responseObject, http.StatusOK)
-	if err != nil {
-		return response, err
-	}
 
-	return response, nil
+	return response, err
 }
 
 func (transport *Transport) proxyContainerGroupGetRequest(request *http.Request) (*http.Response, error) {

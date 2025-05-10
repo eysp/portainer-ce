@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
-	httperror "github.com/portainer/libhttp/error"
-	"github.com/portainer/libhttp/response"
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/pkg/featureflags"
+	httperror "github.com/portainer/portainer/pkg/libhttp/error"
+	"github.com/portainer/portainer/pkg/libhttp/response"
 )
 
 type publicSettingsResponse struct {
@@ -14,8 +15,14 @@ type publicSettingsResponse struct {
 	LogoURL string `json:"LogoURL" example:"https://mycompany.mydomain.tld/logo.png"`
 	// Active authentication method for the Portainer instance. Valid values are: 1 for internal, 2 for LDAP, or 3 for oauth
 	AuthenticationMethod portainer.AuthenticationMethod `json:"AuthenticationMethod" example:"1"`
+	// The minimum required length for a password of any user when using internal auth mode
+	RequiredPasswordLength int `json:"RequiredPasswordLength" example:"1"`
+	// Deployment options for encouraging deployment as code
+	GlobalDeploymentOptions portainer.GlobalDeploymentOptions `json:"GlobalDeploymentOptions"`
 	// Whether edge compute features are enabled
 	EnableEdgeComputeFeatures bool `json:"EnableEdgeComputeFeatures" example:"true"`
+	// Supported feature flags
+	Features map[featureflags.Feature]bool `json:"Features"`
 	// The URL used for oauth login
 	OAuthLoginURI string `json:"OAuthLoginURI" example:"https://gitlab.com/oauth"`
 	// The URL used for oauth logout
@@ -24,6 +31,24 @@ type publicSettingsResponse struct {
 	EnableTelemetry bool `json:"EnableTelemetry" example:"true"`
 	// The expiry of a Kubeconfig
 	KubeconfigExpiry string `example:"24h" default:"0"`
+	// Whether team sync is enabled
+	TeamSync bool `json:"TeamSync" example:"true"`
+
+	// Whether AMT is enabled
+	IsAMTEnabled bool
+
+	Edge struct {
+		// The ping interval for edge agent - used in edge async mode [seconds]
+		PingInterval int `json:"PingInterval" example:"60"`
+		// The snapshot interval for edge agent - used in edge async mode [seconds]
+		SnapshotInterval int `json:"SnapshotInterval" example:"60"`
+		// The command list interval for edge agent - used in edge async mode [seconds]
+		CommandInterval int `json:"CommandInterval" example:"60"`
+		// The check in interval for edge agent (in seconds) - used in non async mode [seconds]
+		CheckinInterval int `example:"60"`
+	}
+
+	IsDockerDesktopExtension bool `json:"IsDockerDesktopExtension" example:"false"`
 }
 
 // @id SettingsPublic
@@ -38,10 +63,11 @@ type publicSettingsResponse struct {
 func (handler *Handler) settingsPublic(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	settings, err := handler.DataStore.Settings().Settings()
 	if err != nil {
-		return &httperror.HandlerError{StatusCode: http.StatusInternalServerError, Message: "Unable to retrieve the settings from the database", Err: err}
+		return httperror.InternalServerError("Unable to retrieve the settings from the database", err)
 	}
 
 	publicSettings := generatePublicSettings(settings)
+
 	return response.JSON(w, publicSettings)
 }
 
@@ -49,11 +75,23 @@ func generatePublicSettings(appSettings *portainer.Settings) *publicSettingsResp
 	publicSettings := &publicSettingsResponse{
 		LogoURL:                   appSettings.LogoURL,
 		AuthenticationMethod:      appSettings.AuthenticationMethod,
+		RequiredPasswordLength:    appSettings.InternalAuthSettings.RequiredPasswordLength,
 		EnableEdgeComputeFeatures: appSettings.EnableEdgeComputeFeatures,
+		GlobalDeploymentOptions:   appSettings.GlobalDeploymentOptions,
 		EnableTelemetry:           appSettings.EnableTelemetry,
 		KubeconfigExpiry:          appSettings.KubeconfigExpiry,
+		Features:                  featureflags.FeatureFlags(),
+		IsAMTEnabled:              appSettings.EnableEdgeComputeFeatures && appSettings.OpenAMTConfiguration.Enabled,
 	}
-	//if OAuth authentication is on, compose the related fields from application settings
+
+	publicSettings.Edge.PingInterval = appSettings.Edge.PingInterval
+	publicSettings.Edge.SnapshotInterval = appSettings.Edge.SnapshotInterval
+	publicSettings.Edge.CommandInterval = appSettings.Edge.CommandInterval
+	publicSettings.Edge.CheckinInterval = appSettings.EdgeAgentCheckinInterval
+
+	publicSettings.IsDockerDesktopExtension = appSettings.IsDockerDesktopExtension
+
+	// If OAuth authentication is on, compose the related fields from application settings
 	if publicSettings.AuthenticationMethod == portainer.AuthenticationOAuth {
 		publicSettings.OAuthLogoutURI = appSettings.OAuthSettings.LogoutURI
 		publicSettings.OAuthLoginURI = fmt.Sprintf("%s?response_type=code&client_id=%s&redirect_uri=%s&scope=%s",
@@ -61,10 +99,18 @@ func generatePublicSettings(appSettings *portainer.Settings) *publicSettingsResp
 			appSettings.OAuthSettings.ClientID,
 			appSettings.OAuthSettings.RedirectURI,
 			appSettings.OAuthSettings.Scopes)
-		//control prompt=login param according to the SSO setting
+
+		// Control prompt=login param according to the SSO setting
 		if !appSettings.OAuthSettings.SSO {
 			publicSettings.OAuthLoginURI += "&prompt=login"
 		}
 	}
+	// If LDAP authentication is on, compose the related fields from application settings
+	if publicSettings.AuthenticationMethod == portainer.AuthenticationLDAP && appSettings.LDAPSettings.GroupSearchSettings != nil {
+		if len(appSettings.LDAPSettings.GroupSearchSettings) > 0 {
+			publicSettings.TeamSync = len(appSettings.LDAPSettings.GroupSearchSettings[0].GroupBaseDN) > 0
+		}
+	}
+
 	return publicSettings
 }

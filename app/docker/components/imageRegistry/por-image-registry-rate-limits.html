@@ -1,31 +1,33 @@
 <div class="form-group" ng-if="$ctrl.pullRateLimits">
   <div class="col-sm-12 small">
-    <div ng-if="$ctrl.pullRateLimits.remaining > 0" class="text-muted">
-      <i class="fa fa-exclamation-circle blue-icon" aria-hidden="true" style="margin-right: 2px;"></i>
+    <div ng-if="$ctrl.pullRateLimits.remaining > 0" class="text-muted vertical-center">
+      <pr-icon icon="'alert-circle'" mode="'primary'"></pr-icon>
       <span ng-if="$ctrl.isAuthenticated">
-        您目前正在使用一个免费帐户从DockerHub中拉取镜像，并且每6小时将被限制为200次拉取。剩余次数：
-        <span style="font-weight: bold;">{{ $ctrl.pullRateLimits.remaining }}/{{ $ctrl.pullRateLimits.limit }}</span>
+        You are currently using a free account to pull images from DockerHub and will be limited to 200 pulls every 6 hours. Remaining pulls:
+        <span style="font-weight: bold">{{ $ctrl.pullRateLimits.remaining }}/{{ $ctrl.pullRateLimits.limit }}</span>
       </span>
       <span ng-if="!$ctrl.isAuthenticated">
         <span ng-if="$ctrl.isAdmin">
-          您当前正在使用匿名帐户从DockerHub拉取镜像，并且每6小时只能拉取100次。您可以在
-          <a ui-sref="portainer.registries">注册表视图</a>中配置DockerHub身份验证：
-          <span style="font-weight: bold;">{{ $ctrl.pullRateLimits.remaining }}/{{ $ctrl.pullRateLimits.limit }}</span>
+          You are currently using an anonymous account to pull images from DockerHub and will be limited to 100 pulls every 6 hours. You can configure DockerHub authentication in
+          the
+          <a ui-sref="portainer.registries">Registries View</a>. Remaining pulls:
+          <span style="font-weight: bold">{{ $ctrl.pullRateLimits.remaining }}/{{ $ctrl.pullRateLimits.limit }}</span>
         </span>
         <span ng-if="!$ctrl.isAdmin">
-          您当前正在使用匿名帐户从DockerHub拉取镜像，并且每6小时只能拉取100次。请与管理员联系以配置DockerHub身份验证。剩余次数： <span style="font-weight: bold;">{{ $ctrl.pullRateLimits.remaining }}/{{ $ctrl.pullRateLimits.limit }}</span>
+          You are currently using an anonymous account to pull images from DockerHub and will be limited to 100 pulls every 6 hours. Contact your administrator to configure
+          DockerHub authentication. Remaining pulls: <span style="font-weight: bold">{{ $ctrl.pullRateLimits.remaining }}/{{ $ctrl.pullRateLimits.limit }}</span>
         </span>
       </span>
     </div>
-    <div ng-if="$ctrl.pullRateLimits.remaining <= 0" class="text-warning">
-      <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+    <div ng-if="$ctrl.pullRateLimits.remaining <= 0" class="text-warning vertical-center">
+      <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
       <span ng-if="$ctrl.isAuthenticated">
-        现在已超过您作为免费用户的授权拉取计数配额。
-        <span ng-transclude="rateLimitExceeded">您将无法从DockerHub注册表中拉取任何镜像。</span>
+        Your authorized pull count quota as a free user is now exceeded.
+        <span ng-transclude="rateLimitExceeded">You will not be able to pull any image from the DockerHub registry.</span>
       </span>
       <span ng-if="!$ctrl.isAuthenticated">
-        现在已超过您作为匿名用户的授权拉取计数配额。
-        <span ng-transclude="rateLimitExceeded">您将无法从DockerHub注册表中拉取任何镜像。</span>
+        Your authorized pull count quota as an anonymous user is now exceeded.
+        <span ng-transclude="rateLimitExceeded">You will not be able to pull any image from the DockerHub registry.</span>
       </span>
     </div>
   </div>

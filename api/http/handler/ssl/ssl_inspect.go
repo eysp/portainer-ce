@@ -3,8 +3,8 @@ package ssl
 import (
 	"net/http"
 
-	httperror "github.com/portainer/libhttp/error"
-	"github.com/portainer/libhttp/response"
+	httperror "github.com/portainer/portainer/pkg/libhttp/error"
+	"github.com/portainer/portainer/pkg/libhttp/response"
 )
 
 // @id SSLInspect
@@ -12,6 +12,7 @@ import (
 // @description Retrieve the ssl settings.
 // @description **Access policy**: administrator
 // @tags ssl
+// @security ApiKeyAuth
 // @security jwt
 // @produce json
 // @success 200 {object} portainer.SSLSettings "Success"
@@ -22,7 +23,7 @@ import (
 func (handler *Handler) sslInspect(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	settings, err := handler.SSLService.GetSSLSettings()
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Failed to fetch certificate info", err}
+		return httperror.InternalServerError("Failed to fetch certificate info", err)
 	}
 
 	return response.JSON(w, settings)

@@ -3,12 +3,12 @@ package teams
 import (
 	"net/http"
 
-	"github.com/pkg/errors"
-	httperror "github.com/portainer/libhttp/error"
-	"github.com/portainer/libhttp/request"
-	"github.com/portainer/libhttp/response"
 	portainer "github.com/portainer/portainer/api"
-	bolterrors "github.com/portainer/portainer/api/bolt/errors"
+	httperror "github.com/portainer/portainer/pkg/libhttp/error"
+	"github.com/portainer/portainer/pkg/libhttp/request"
+	"github.com/portainer/portainer/pkg/libhttp/response"
+
+	"github.com/pkg/errors"
 )
 
 // @id TeamDelete
@@ -16,8 +16,9 @@ import (
 // @description Remove a team.
 // @description **Access policy**: administrator
 // @tags teams
+// @security ApiKeyAuth
 // @security jwt
-// @param id path string true "Team Id"
+// @param id path int true "Team Id"
 // @success 204 "Success"
 // @failure 400 "Invalid request"
 // @failure 403 "Permission denied"
@@ -27,30 +28,30 @@ import (
 func (handler *Handler) teamDelete(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	teamID, err := request.RetrieveNumericRouteVariableValue(r, "id")
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid team identifier route variable", err}
+		return httperror.BadRequest("Invalid team identifier route variable", err)
 	}
 
-	_, err = handler.DataStore.Team().Team(portainer.TeamID(teamID))
-	if err == bolterrors.ErrObjectNotFound {
-		return &httperror.HandlerError{http.StatusNotFound, "Unable to find a team with the specified identifier inside the database", err}
+	_, err = handler.DataStore.Team().Read(portainer.TeamID(teamID))
+	if handler.DataStore.IsErrObjectNotFound(err) {
+		return httperror.NotFound("Unable to find a team with the specified identifier inside the database", err)
 	} else if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to find a team with the specified identifier inside the database", err}
+		return httperror.InternalServerError("Unable to find a team with the specified identifier inside the database", err)
 	}
 
-	err = handler.DataStore.Team().DeleteTeam(portainer.TeamID(teamID))
+	err = handler.DataStore.Team().Delete(portainer.TeamID(teamID))
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to delete the team from the database", err}
+		return httperror.InternalServerError("Unable to delete the team from the database", err)
 	}
 
 	err = handler.DataStore.TeamMembership().DeleteTeamMembershipByTeamID(portainer.TeamID(teamID))
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to delete associated team memberships from the database", err}
+		return httperror.InternalServerError("Unable to delete associated team memberships from the database", err)
 	}
 
 	// update default team if deleted team was default
 	err = handler.updateDefaultTeamIfDeleted(portainer.TeamID(teamID))
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to reset default team", err}
+		return httperror.InternalServerError("Unable to reset default team", err)
 	}
 
 	return response.Empty(w)

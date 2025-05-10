@@ -3,12 +3,12 @@ package users
 import (
 	"errors"
 	"net/http"
+	"strings"
 
-	"github.com/asaskevich/govalidator"
-	httperror "github.com/portainer/libhttp/error"
-	"github.com/portainer/libhttp/request"
-	"github.com/portainer/libhttp/response"
 	portainer "github.com/portainer/portainer/api"
+	httperror "github.com/portainer/portainer/pkg/libhttp/error"
+	"github.com/portainer/portainer/pkg/libhttp/request"
+	"github.com/portainer/portainer/pkg/libhttp/response"
 )
 
 type adminInitPayload struct {
@@ -19,10 +19,10 @@ type adminInitPayload struct {
 }
 
 func (payload *adminInitPayload) Validate(r *http.Request) error {
-	if govalidator.IsNull(payload.Username) || govalidator.Contains(payload.Username, " ") {
+	if len(payload.Username) == 0 || strings.Contains(payload.Username, " ") {
 		return errors.New("Invalid username. Must not contain any whitespace")
 	}
-	if govalidator.IsNull(payload.Password) {
+	if len(payload.Password) == 0 {
 		return errors.New("Invalid password")
 	}
 	return nil
@@ -32,7 +32,7 @@ func (payload *adminInitPayload) Validate(r *http.Request) error {
 // @summary Initialize administrator account
 // @description Initialize the 'admin' user account.
 // @description **Access policy**: public
-// @tags
+// @tags users
 // @accept json
 // @produce json
 // @param body body adminInitPayload true "User details"
@@ -45,16 +45,20 @@ func (handler *Handler) adminInit(w http.ResponseWriter, r *http.Request) *httpe
 	var payload adminInitPayload
 	err := request.DecodeAndValidateJSONPayload(r, &payload)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid request payload", err}
+		return httperror.BadRequest("Invalid request payload", err)
 	}
 
 	users, err := handler.DataStore.User().UsersByRole(portainer.AdministratorRole)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve users from the database", err}
+		return httperror.InternalServerError("Unable to retrieve users from the database", err)
 	}
 
 	if len(users) != 0 {
-		return &httperror.HandlerError{http.StatusConflict, "Unable to create administrator user", errAdminAlreadyInitialized}
+		return httperror.Conflict("Unable to create administrator user", errAdminAlreadyInitialized)
+	}
+
+	if !handler.passwordStrengthChecker.Check(payload.Password) {
+		return httperror.BadRequest("Password does not meet the requirements", nil)
 	}
 
 	user := &portainer.User{
@@ -64,13 +68,16 @@ func (handler *Handler) adminInit(w http.ResponseWriter, r *http.Request) *httpe
 
 	user.Password, err = handler.CryptoService.Hash(payload.Password)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to hash user password", errCryptoHashFailure}
+		return httperror.InternalServerError("Unable to hash user password", errCryptoHashFailure)
 	}
 
-	err = handler.DataStore.User().CreateUser(user)
+	err = handler.DataStore.User().Create(user)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to persist user inside the database", err}
+		return httperror.InternalServerError("Unable to persist user inside the database", err)
 	}
+
+	// After the admin user is created, we can notify the endpoint initialization process
+	handler.AdminCreationDone <- struct{}{}
 
 	return response.JSON(w, user)
 }

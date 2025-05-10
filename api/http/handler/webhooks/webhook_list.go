@@ -3,10 +3,11 @@ package webhooks
 import (
 	"net/http"
 
-	httperror "github.com/portainer/libhttp/error"
-	"github.com/portainer/libhttp/request"
-	"github.com/portainer/libhttp/response"
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/http/security"
+	httperror "github.com/portainer/portainer/pkg/libhttp/error"
+	"github.com/portainer/portainer/pkg/libhttp/request"
+	"github.com/portainer/portainer/pkg/libhttp/response"
 )
 
 type webhookListOperationFilters struct {
@@ -15,13 +16,13 @@ type webhookListOperationFilters struct {
 }
 
 // @summary List webhooks
-// @description
+// @description **Access policy**: authenticated
+// @security ApiKeyAuth
 // @security jwt
 // @tags webhooks
 // @accept json
 // @produce json
-// @param body body webhookCreatePayload true "Webhook data"
-// @param filters query webhookListOperationFilters false "Filters"
+// @param filters query string false "Filters (json-string)" example({"EndpointID":1,"ResourceID":"abc12345-abcd-2345-ab12-58005b4a0260"})
 // @success 200 {array} portainer.Webhook
 // @failure 400
 // @failure 500
@@ -30,14 +31,23 @@ func (handler *Handler) webhookList(w http.ResponseWriter, r *http.Request) *htt
 	var filters webhookListOperationFilters
 	err := request.RetrieveJSONQueryParameter(r, "filters", &filters, true)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid query parameter: filters", err}
+		return httperror.BadRequest("Invalid query parameter: filters", err)
 	}
 
-	webhooks, err := handler.DataStore.Webhook().Webhooks()
-	webhooks = filterWebhooks(webhooks, &filters)
+	securityContext, err := security.RetrieveRestrictedRequestContext(r)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve webhooks from the database", err}
+		return httperror.InternalServerError("Unable to retrieve user info from request context", err)
 	}
+	if !securityContext.IsAdmin {
+		return response.JSON(w, []portainer.Webhook{})
+	}
+
+	webhooks, err := handler.DataStore.Webhook().ReadAll()
+	if err != nil {
+		return httperror.InternalServerError("Unable to retrieve webhooks from the database", err)
+	}
+
+	webhooks = filterWebhooks(webhooks, &filters)
 
 	return response.JSON(w, webhooks)
 }
@@ -49,7 +59,7 @@ func filterWebhooks(webhooks []portainer.Webhook, filters *webhookListOperationF
 
 	filteredWebhooks := make([]portainer.Webhook, 0, len(webhooks))
 	for _, webhook := range webhooks {
-		if webhook.EndpointID == portainer.EndpointID(filters.EndpointID) && webhook.ResourceID == string(filters.ResourceID) {
+		if webhook.EndpointID == portainer.EndpointID(filters.EndpointID) && webhook.ResourceID == filters.ResourceID {
 			filteredWebhooks = append(filteredWebhooks, webhook)
 		}
 	}

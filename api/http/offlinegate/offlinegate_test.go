@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_canLockAndUnlock(t *testing.T) {
@@ -58,77 +59,6 @@ func Test_hasToBeUnlockedToLockAgain(t *testing.T) {
 
 }
 
-func Test_waitChannelWillBeEmpty_ifGateIsUnlocked(t *testing.T) {
-	o := NewOfflineGate()
-
-	signalingCh := o.Watch()
-	if signalingCh != nil {
-		t.Error("Signaling channel should be empty")
-	}
-}
-
-func Test_startWaitingForSignal_beforeGateGetsUnlocked(t *testing.T) {
-	// scenario:
-	// 1. main routing locks the gate and waits for a consumer to start up
-	// 2. consumer starts up, notifies main and begins waiting for the gate to be unlocked
-	// 3. main unlocks the gate
-	// 4. consumer be able to continue
-
-	o := NewOfflineGate()
-	unlock := o.Lock()
-
-	signalingCh := o.Watch()
-
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-	readerIsReady := sync.WaitGroup{}
-	readerIsReady.Add(1)
-
-	go func(t *testing.T) {
-		readerIsReady.Done()
-
-		// either wait for a signal or timeout
-		select {
-		case <-signalingCh:
-		case <-time.After(10 * time.Second):
-			t.Error("Failed to wait for a signal, exit by timeout")
-		}
-		wg.Done()
-	}(t)
-
-	readerIsReady.Wait()
-	unlock()
-
-	wg.Wait()
-}
-
-func Test_startWaitingForSignal_afterGateGetsUnlocked(t *testing.T) {
-	// scenario:
-	// 1. main routing locks, gets waiting channel and unlocks
-	// 2. consumer starts up and begins waiting for the gate to be unlocked
-	// 3. consumer gets signal immediately and continues
-
-	o := NewOfflineGate()
-	unlock := o.Lock()
-	signalingCh := o.Watch()
-	unlock()
-
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-
-	go func(t *testing.T) {
-		// either wait for a signal or timeout
-		select {
-		case <-signalingCh:
-		case <-time.After(10 * time.Second):
-			t.Error("Failed to wait for a signal, exit by timeout")
-		}
-		wg.Done()
-	}(t)
-
-	wg.Wait()
-}
-
 func Test_waitingMiddleware_executesImmediately_whenNotLocked(t *testing.T) {
 	// scenario:
 	// 1. create an gate
@@ -142,6 +72,7 @@ func Test_waitingMiddleware_executesImmediately_whenNotLocked(t *testing.T) {
 
 	timeout := 2 * time.Second
 	start := time.Now()
+
 	o.WaitingMiddleware(timeout, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		elapsed := time.Since(start)
 		if elapsed >= timeout {
@@ -152,7 +83,7 @@ func Test_waitingMiddleware_executesImmediately_whenNotLocked(t *testing.T) {
 
 	body, _ := io.ReadAll(response.Body)
 	if string(body) != "success" {
-		t.Error("Didn't receive expected result from the hanlder")
+		t.Error("Didn't receive expected result from the handler")
 	}
 }
 
@@ -176,6 +107,7 @@ func Test_waitingMiddleware_waitsForTheLockToBeReleased(t *testing.T) {
 
 	timeout := 10 * time.Second
 	start := time.Now()
+
 	o.WaitingMiddleware(timeout, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		elapsed := time.Since(start)
 		if elapsed >= timeout {
@@ -186,7 +118,7 @@ func Test_waitingMiddleware_waitsForTheLockToBeReleased(t *testing.T) {
 
 	body, _ := io.ReadAll(response.Body)
 	if string(body) != "success" {
-		t.Error("Didn't receive expected result from the hanlder")
+		t.Error("Didn't receive expected result from the handler")
 	}
 }
 
@@ -214,4 +146,31 @@ func Test_waitingMiddleware_mayTimeout_whenLockedForTooLong(t *testing.T) {
 	})).ServeHTTP(response, request)
 
 	assert.Equal(t, http.StatusRequestTimeout, response.Result().StatusCode, "Request support to timeout waiting for the gate")
+}
+
+func Test_waitingMiddleware_handlerPanics(t *testing.T) {
+	o := NewOfflineGate()
+
+	request := httptest.NewRequest(http.MethodPost, "/", nil)
+	response := httptest.NewRecorder()
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+
+	go func() {
+		defer func() {
+			recover()
+
+			wg.Done()
+		}()
+
+		o.WaitingMiddleware(time.Second, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			panic("panic")
+		})).ServeHTTP(response, request)
+	}()
+
+	wg.Wait()
+
+	require.True(t, o.lock.TryLock())
+	o.lock.Unlock()
 }

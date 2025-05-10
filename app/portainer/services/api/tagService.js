@@ -18,7 +18,7 @@ angular.module('portainer.app').factory('TagService', [
           deferred.resolve(tags);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: '无法检索标签', err: err });
+          deferred.reject({ msg: 'Unable to retrieve tags', err: err });
         });
       return deferred.promise;
     };
@@ -33,7 +33,7 @@ angular.module('portainer.app').factory('TagService', [
           deferred.resolve(tags);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: '无法检索标签', err: err });
+          deferred.reject({ msg: 'Unable to retrieve tags', err: err });
         });
       return deferred.promise;
     };
@@ -46,7 +46,7 @@ angular.module('portainer.app').factory('TagService', [
         const tag = await Tags.create({}, payload).$promise;
         return new TagViewModel(tag);
       } catch (err) {
-        throw { msg: '无法创建标签', err };
+        throw { msg: 'Unable to create tag', err };
       }
     }
 

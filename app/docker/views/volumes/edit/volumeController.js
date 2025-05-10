@@ -1,65 +1,35 @@
+import { ResourceControlType } from '@/react/portainer/access-control/types';
+import { confirmDelete } from '@@/modals/confirm';
+
 angular.module('portainer.docker').controller('VolumeController', [
   '$scope',
   '$state',
   '$transition$',
-  '$q',
-  'ModalService',
   'VolumeService',
   'ContainerService',
   'Notifications',
   'HttpRequestHelper',
-  'StoridgeVolumeService',
-  'StoridgeSnapshotService',
-  function ($scope, $state, $transition$, $q, ModalService, VolumeService, ContainerService, Notifications, HttpRequestHelper, StoridgeVolumeService, StoridgeSnapshotService) {
-    $scope.storidgeSnapshots = [];
-    $scope.storidgeVolume = {};
+  'Authentication',
+  'endpoint',
+  function ($scope, $state, $transition$, VolumeService, ContainerService, Notifications, HttpRequestHelper, Authentication, endpoint) {
+    $scope.resourceType = ResourceControlType.Volume;
+    $scope.endpoint = endpoint;
+    $scope.showBrowseAction = false;
 
-    $scope.removeSnapshot = function (selectedItems) {
-      ModalService.confirm({
-        title: '你确定吗？',
-        message: '是否确实要删除此快照？?',
-        buttons: {
-          confirm: {
-            label: '删除',
-            className: 'btn-danger',
-          },
-        },
-        callback: function onConfirm(confirmed) {
-          if (!confirmed) {
-            return;
-          }
-          var actionCount = selectedItems.length;
-          angular.forEach(selectedItems, function (item) {
-            StoridgeSnapshotService.remove(item.Id)
-              .then(function success() {
-                Notifications.success('快照已成功删除', item.Id);
-                var index = $scope.storidgeSnapshots.indexOf(item);
-                $scope.storidgeSnapshots.splice(index, 1);
-              })
-              .catch(function error(err) {
-                Notifications.error('失败', err, '无法删除快照');
-              })
-              .finally(function final() {
-                --actionCount;
-                if (actionCount === 0) {
-                  $state.reload();
-                }
-              });
-          });
-        },
-      });
+    $scope.onUpdateResourceControlSuccess = function () {
+      $state.reload();
     };
 
     $scope.removeVolume = function removeVolume() {
-      ModalService.confirmDeletion('是否要删除此卷？', (confirmed) => {
+      confirmDelete('Do you want to remove this volume?').then((confirmed) => {
         if (confirmed) {
-          VolumeService.remove($scope.volume)
+          VolumeService.remove($scope.volume.Id)
             .then(function success() {
-              Notifications.success('已成功删除存储卷', $transition$.params().id);
+              Notifications.success('Volume successfully removed', $transition$.params().id);
               $state.go('docker.volumes', {});
             })
             .catch(function error(err) {
-              Notifications.error('失败', err, '无法删除存储卷');
+              Notifications.error('Failure', err, 'Unable to remove volume');
             });
         }
       });
@@ -73,6 +43,7 @@ angular.module('portainer.docker').controller('VolumeController', [
 
     function initView() {
       HttpRequestHelper.setPortainerAgentTargetHeader($transition$.params().nodeName);
+      $scope.showBrowseAction = $scope.applicationState.endpoint.mode.agentProxy && (Authentication.isAdmin() || endpoint.SecuritySettings.allowVolumeBrowserForRegularUsers);
 
       VolumeService.volume($transition$.params().id)
         .then(function success(data) {
@@ -80,37 +51,21 @@ angular.module('portainer.docker').controller('VolumeController', [
           $scope.volume = volume;
           var containerFilter = { volume: [volume.Id] };
 
-          $scope.isCioDriver = volume.Driver.includes('cio');
-          if ($scope.isCioDriver) {
-            return $q.all({
-              containers: ContainerService.containers(1, containerFilter),
-              storidgeVolume: StoridgeVolumeService.volume($transition$.params().id),
-            });
-          } else {
-            return ContainerService.containers(1, containerFilter);
-          }
+          return ContainerService.containers(endpoint.Id, 1, containerFilter);
         })
         .then(function success(data) {
           var dataContainers = $scope.isCioDriver ? data.containers : data;
 
           var containers = dataContainers.map(function (container) {
             container.volumeData = getVolumeDataFromContainer(container, $scope.volume.Id);
+
+            $scope.volume.NodeName = container.NodeName || '';
             return container;
           });
           $scope.containersUsingVolume = containers;
-
-          if ($scope.isCioDriver) {
-            $scope.storidgeVolume = data.storidgeVolume;
-            if ($scope.storidgeVolume.SnapshotEnabled) {
-              return StoridgeSnapshotService.snapshots(data.storidgeVolume.Vdisk);
-            }
-          }
-        })
-        .then(function success(data) {
-          $scope.storidgeSnapshots = data;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索存储卷详细信息');
+          Notifications.error('Failure', err, 'Unable to retrieve volume details');
         });
     }
 

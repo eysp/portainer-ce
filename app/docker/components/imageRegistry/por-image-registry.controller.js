@@ -15,19 +15,24 @@ class porImageRegistryController {
     this.Notifications = Notifications;
 
     this.onRegistryChange = this.onRegistryChange.bind(this);
+    this.onImageChange = this.onImageChange.bind(this);
 
     this.registries = [];
     this.images = [];
     this.defaultRegistry = new DockerHubViewModel();
 
     this.$scope.$watch(() => this.model.Registry, this.onRegistryChange);
+    this.$scope.$watch(() => this.model.Image, this.onImageChange);
   }
 
   isKnownRegistry(registry) {
-    return !(registry instanceof DockerHubViewModel) && registry.URL;
+    return registry && !(registry instanceof DockerHubViewModel) && registry.URL;
   }
 
   getRegistryURL(registry) {
+    if (!registry) {
+      return;
+    }
     let url = registry.URL;
     if (registry.Type === RegistryTypes.GITLAB) {
       url = registry.URL + '/' + registry.Gitlab.ProjectPath;
@@ -52,33 +57,49 @@ class porImageRegistryController {
   }
 
   isDockerHubRegistry() {
-    return this.model.UseRegistry && (this.model.Registry.Type === RegistryTypes.DOCKERHUB || this.model.Registry.Type === RegistryTypes.ANONYMOUS);
+    return this.model.UseRegistry && this.model.Registry && (this.model.Registry.Type === RegistryTypes.DOCKERHUB || this.model.Registry.Type === RegistryTypes.ANONYMOUS);
   }
 
   async onRegistryChange() {
     this.prepareAutocomplete();
-    if (this.model.Registry.Type === RegistryTypes.GITLAB && this.model.Image) {
+    if (this.model.Registry && this.model.Registry.Type === RegistryTypes.GITLAB && this.model.Image) {
       this.model.Image = _.replace(this.model.Image, this.model.Registry.Gitlab.ProjectPath, '');
     }
   }
 
+  async onImageChange() {
+    if (!this.isDockerHubRegistry()) {
+      this.setValidity(true);
+    }
+  }
+
   displayedRegistryURL() {
-    return this.getRegistryURL(this.model.Registry) || 'docker.io';
+    return (this.model.Registry && this.getRegistryURL(this.model.Registry)) || 'docker.io';
   }
 
   async reloadRegistries() {
     return this.$async(async () => {
       try {
-        const registries = await this.EndpointService.registries(this.endpoint.Id, this.namespace);
-        this.registries = _.concat(this.defaultRegistry, registries);
+        let showDefaultRegistry = false;
+        this.registries = await this.EndpointService.registries(this.endpoint.Id, this.namespace);
 
-        const id = this.model.Registry.Id;
+        // Sort the registries by Name
+        this.registries.sort((a, b) => a.Name.localeCompare(b.Name));
+
+        // hide default(anonymous) dockerhub registry if user has an authenticated one
+        if (!this.registries.some((registry) => registry.Type === RegistryTypes.DOCKERHUB)) {
+          showDefaultRegistry = true;
+          // Add dockerhub on top
+          this.registries.splice(0, 0, this.defaultRegistry);
+        }
+
+        const id = this.model.Registry && this.model.Registry.Id;
         const registry = _.find(this.registries, { Id: id });
         if (!registry) {
-          this.model.Registry = this.defaultRegistry;
+          this.model.Registry = showDefaultRegistry ? this.defaultRegistry : this.registries[0];
         }
       } catch (err) {
-        this.Notifications.error('失败', err, '无法检索注册表');
+        this.Notifications.error('Failure', err, 'Unable to retrieve registries');
       }
     });
   }
@@ -94,7 +115,7 @@ class porImageRegistryController {
         const images = await this.ImageService.images();
         this.images = this.ImageService.getUniqueTagListFromImages(images);
       } catch (err) {
-        this.Notifications.error('失败', err, '无法检索镜像');
+        this.Notifications.error('Failure', err, 'Unable to retrieve images');
       }
     });
   }

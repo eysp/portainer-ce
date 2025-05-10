@@ -1,15 +1,20 @@
 package endpointgroups
 
 import (
+	"errors"
 	"net/http"
 	"reflect"
 
-	httperror "github.com/portainer/libhttp/error"
-	"github.com/portainer/libhttp/request"
-	"github.com/portainer/libhttp/response"
 	portainer "github.com/portainer/portainer/api"
-	"github.com/portainer/portainer/api/bolt/errors"
-	"github.com/portainer/portainer/api/internal/tag"
+	"github.com/portainer/portainer/api/dataservices"
+	"github.com/portainer/portainer/api/internal/endpointutils"
+	"github.com/portainer/portainer/api/pendingactions/handlers"
+	"github.com/portainer/portainer/api/tag"
+	httperror "github.com/portainer/portainer/pkg/libhttp/error"
+	"github.com/portainer/portainer/pkg/libhttp/request"
+	"github.com/portainer/portainer/pkg/libhttp/response"
+
+	"github.com/rs/zerolog/log"
 )
 
 type endpointGroupUpdatePayload struct {
@@ -32,6 +37,7 @@ func (payload *endpointGroupUpdatePayload) Validate(r *http.Request) error {
 // @description Update an environment(endpoint) group.
 // @description **Access policy**: administrator
 // @tags endpoint_groups
+// @security ApiKeyAuth
 // @security jwt
 // @accept json
 // @produce json
@@ -45,20 +51,38 @@ func (payload *endpointGroupUpdatePayload) Validate(r *http.Request) error {
 func (handler *Handler) endpointGroupUpdate(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	endpointGroupID, err := request.RetrieveNumericRouteVariableValue(r, "id")
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid environment group identifier route variable", err}
+		return httperror.BadRequest("Invalid environment group identifier route variable", err)
 	}
 
 	var payload endpointGroupUpdatePayload
-	err = request.DecodeAndValidateJSONPayload(r, &payload)
-	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid request payload", err}
+	if err := request.DecodeAndValidateJSONPayload(r, &payload); err != nil {
+		return httperror.BadRequest("Invalid request payload", err)
 	}
 
-	endpointGroup, err := handler.DataStore.EndpointGroup().EndpointGroup(portainer.EndpointGroupID(endpointGroupID))
-	if err == errors.ErrObjectNotFound {
-		return &httperror.HandlerError{http.StatusNotFound, "Unable to find an environment group with the specified identifier inside the database", err}
+	var endpointGroup *portainer.EndpointGroup
+
+	if err := handler.DataStore.UpdateTx(func(tx dataservices.DataStoreTx) error {
+		endpointGroup, err = handler.updateEndpointGroup(tx, portainer.EndpointGroupID(endpointGroupID), payload)
+
+		return err
+	}); err != nil {
+		var httpErr *httperror.HandlerError
+		if errors.As(err, &httpErr) {
+			return httpErr
+		}
+
+		return httperror.InternalServerError("Unexpected error", err)
+	}
+
+	return response.JSON(w, endpointGroup)
+}
+
+func (handler *Handler) updateEndpointGroup(tx dataservices.DataStoreTx, endpointGroupID portainer.EndpointGroupID, payload endpointGroupUpdatePayload) (*portainer.EndpointGroup, error) {
+	endpointGroup, err := tx.EndpointGroup().Read(endpointGroupID)
+	if tx.IsErrObjectNotFound(err) {
+		return nil, httperror.NotFound("Unable to find an environment group with the specified identifier inside the database", err)
 	} else if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to find an environment group with the specified identifier inside the database", err}
+		return nil, httperror.InternalServerError("Unable to find an environment group with the specified identifier inside the database", err)
 	}
 
 	if payload.Name != "" {
@@ -74,36 +98,38 @@ func (handler *Handler) endpointGroupUpdate(w http.ResponseWriter, r *http.Reque
 		payloadTagSet := tag.Set(payload.TagIDs)
 		endpointGroupTagSet := tag.Set((endpointGroup.TagIDs))
 		union := tag.Union(payloadTagSet, endpointGroupTagSet)
-		intersection := tag.Intersection(payloadTagSet, endpointGroupTagSet)
-		tagsChanged = len(union) > len(intersection)
+		intersection := tag.IntersectionCount(payloadTagSet, endpointGroupTagSet)
+		tagsChanged = len(union) > intersection
 
 		if tagsChanged {
 			removeTags := tag.Difference(endpointGroupTagSet, payloadTagSet)
 
 			for tagID := range removeTags {
-				tag, err := handler.DataStore.Tag().Tag(tagID)
+				tag, err := tx.Tag().Read(tagID)
 				if err != nil {
-					return &httperror.HandlerError{http.StatusInternalServerError, "Unable to find a tag inside the database", err}
+					return nil, httperror.InternalServerError("Unable to find a tag inside the database", err)
 				}
+
 				delete(tag.EndpointGroups, endpointGroup.ID)
-				err = handler.DataStore.Tag().UpdateTag(tag.ID, tag)
+
+				err = tx.Tag().Update(tagID, tag)
 				if err != nil {
-					return &httperror.HandlerError{http.StatusInternalServerError, "Unable to persist tag changes inside the database", err}
+					return nil, httperror.InternalServerError("Unable to persist tag changes inside the database", err)
 				}
 			}
 
 			endpointGroup.TagIDs = payload.TagIDs
 			for _, tagID := range payload.TagIDs {
-				tag, err := handler.DataStore.Tag().Tag(tagID)
+				tag, err := tx.Tag().Read(tagID)
 				if err != nil {
-					return &httperror.HandlerError{http.StatusInternalServerError, "Unable to find a tag inside the database", err}
+					return nil, httperror.InternalServerError("Unable to find a tag inside the database", err)
 				}
 
 				tag.EndpointGroups[endpointGroup.ID] = true
 
-				err = handler.DataStore.Tag().UpdateTag(tag.ID, tag)
+				err = tx.Tag().Update(tagID, tag)
 				if err != nil {
-					return &httperror.HandlerError{http.StatusInternalServerError, "Unable to persist tag changes inside the database", err}
+					return nil, httperror.InternalServerError("Unable to persist tag changes inside the database", err)
 				}
 			}
 		}
@@ -121,44 +147,43 @@ func (handler *Handler) endpointGroupUpdate(w http.ResponseWriter, r *http.Reque
 	}
 
 	if updateAuthorizations {
-		endpoints, err := handler.DataStore.Endpoint().Endpoints()
+		endpoints, err := tx.Endpoint().Endpoints()
 		if err != nil {
-			return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve environments from the database", err}
+			return nil, httperror.InternalServerError("Unable to retrieve environments from the database", err)
 		}
 
 		for _, endpoint := range endpoints {
-			if endpoint.GroupID == endpointGroup.ID {
-				if endpoint.Type == portainer.KubernetesLocalEnvironment || endpoint.Type == portainer.AgentOnKubernetesEnvironment || endpoint.Type == portainer.EdgeAgentOnKubernetesEnvironment {
-					err = handler.AuthorizationService.CleanNAPWithOverridePolicies(&endpoint, endpointGroup)
-					if err != nil {
-						return &httperror.HandlerError{http.StatusInternalServerError, "Unable to update user authorizations", err}
-					}
+			if endpoint.GroupID == endpointGroup.ID && endpointutils.IsKubernetesEndpoint(&endpoint) {
+				if err := handler.AuthorizationService.CleanNAPWithOverridePolicies(tx, &endpoint, endpointGroup); err != nil {
+					// Update flag with endpoint and continue
+					go func(endpointID portainer.EndpointID, endpointGroupID portainer.EndpointGroupID) {
+						if err := handler.PendingActionsService.Create(handlers.NewCleanNAPWithOverridePolicies(endpointID, &endpointGroupID)); err != nil {
+							log.Error().Err(err).Msgf("Unable to create pending action to clean NAP with override policies for endpoint (%d) and endpoint group (%d).", endpointID, endpointGroupID)
+						}
+					}(endpoint.ID, endpointGroup.ID)
 				}
 			}
 		}
 	}
 
-	err = handler.DataStore.EndpointGroup().UpdateEndpointGroup(endpointGroup.ID, endpointGroup)
-	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to persist environment group changes inside the database", err}
+	if err := tx.EndpointGroup().Update(endpointGroup.ID, endpointGroup); err != nil {
+		return nil, httperror.InternalServerError("Unable to persist environment group changes inside the database", err)
 	}
 
 	if tagsChanged {
-		endpoints, err := handler.DataStore.Endpoint().Endpoints()
+		endpoints, err := tx.Endpoint().Endpoints()
 		if err != nil {
-			return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve environments from the database", err}
-
+			return nil, httperror.InternalServerError("Unable to retrieve environments from the database", err)
 		}
 
 		for _, endpoint := range endpoints {
 			if endpoint.GroupID == endpointGroup.ID {
-				err = handler.updateEndpointRelations(&endpoint, endpointGroup)
-				if err != nil {
-					return &httperror.HandlerError{http.StatusInternalServerError, "Unable to persist environment relations changes inside the database", err}
+				if err := handler.updateEndpointRelations(tx, &endpoint, endpointGroup); err != nil {
+					return nil, httperror.InternalServerError("Unable to persist environment relations changes inside the database", err)
 				}
 			}
 		}
 	}
 
-	return response.JSON(w, endpointGroup)
+	return endpointGroup, nil
 }

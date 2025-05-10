@@ -1,6 +1,6 @@
 <div class="page-wrapper">
   <!-- simple box -->
-  <div class="container simple-box">
+  <div class="simple-box container">
     <div class="col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1">
       <!-- simple box logo -->
       <div class="row">
@@ -12,66 +12,64 @@
       <div class="panel panel-default">
         <div class="panel-body">
           <!-- toggle -->
-          <div style="padding-bottom: 12px;">
-            <a ng-click="togglePanel()">
-              <i ng-class="{ true: 'glyphicon glyphicon-chevron-down', false: 'glyphicon glyphicon-chevron-right' }[state.showInitPassword]" aria-hidden="true"></i
-              ><span style="padding-left: 10px;">新Portainer安装</span>
+          <div>
+            <a ng-click="togglePanel()" class="vertical-center">
+              <span>
+                <pr-icon icon="'chevron-down'" ng-if="state.showInitPassword" size="'lg'" class-name="'icon-primary'"></pr-icon>
+                <pr-icon icon="'chevron-right'" ng-if="!state.showInitPassword" size="'lg'" class-name="'icon-primary'"></pr-icon>
+              </span>
+              <span class="form-section-title">New Portainer installation</span>
             </a>
           </div>
           <!-- !toggle -->
 
           <!-- init password form -->
-          <form class="simple-box-form form-horizontal" style="padding-left: 30px;" ng-if="state.showInitPassword">
+          <form name="form" class="simple-box-form form-horizontal padding-top" ng-if="state.showInitPassword">
             <!-- note -->
             <div class="form-group">
               <div class="col-sm-12">
-                <span class="small text-muted">
-                  请创建初始管理员用户。
-                </span>
+                <span class="small text-muted"> Please create the initial administrator user. </span>
               </div>
             </div>
             <!-- !note -->
             <!-- username-input -->
             <div class="form-group">
-              <label for="username" class="col-sm-4 control-label text-left">
-                用户名
-              </label>
+              <label for="username" class="col-sm-4 control-label text-left"> Username </label>
               <div class="col-sm-8">
-                <input type="text" class="form-control" id="username" ng-model="formValues.Username" placeholder="例如 admin" />
+                <input type="text" class="form-control" id="username" ng-model="formValues.Username" placeholder="e.g. admin" data-cy="init-username" />
               </div>
             </div>
             <!-- !username-input -->
             <!-- new-password-input -->
             <div class="form-group">
-              <label for="password" class="col-sm-4 control-label text-left">密码</label>
+              <label for="password" class="col-sm-4 control-label text-left">Password</label>
               <div class="col-sm-8">
-                <input type="password" class="form-control" ng-model="formValues.Password" id="password" auto-focus />
+                <input type="password" class="form-control" ng-model="formValues.Password" id="password" name="password" ng-minlength="requiredPasswordLength" auto-focus />
               </div>
             </div>
             <!-- !new-password-input -->
             <!-- confirm-password-input -->
             <div class="form-group">
-              <label for="confirm_password" class="col-sm-4 control-label text-left">确认密码</label>
+              <label for="confirm_password" class="col-sm-4 control-label text-left">Confirm password</label>
               <div class="col-sm-8">
                 <div class="input-group">
                   <input type="password" class="form-control" ng-model="formValues.ConfirmPassword" id="confirm_password" />
-                  <span class="input-group-addon"
-                    ><i
-                      ng-class="{ true: 'fa fa-check green-icon', false: 'fa fa-times red-icon' }[formValues.Password !== '' && formValues.Password === formValues.ConfirmPassword]"
-                      aria-hidden="true"
-                    ></i
-                  ></span>
+                  <span class="input-group-addon !rounded-r-[5px]">
+                    <pr-icon ng-if="form.password.$viewValue !== '' && form.password.$viewValue === formValues.ConfirmPassword" icon="'check'" mode="'success'"></pr-icon>
+                    <pr-icon ng-if="form.password.$viewValue === '' || form.password.$viewValue !== formValues.ConfirmPassword" icon="'x'" mode="'danger'"></pr-icon>
+                  </span>
                 </div>
               </div>
             </div>
             <!-- !confirm-password-input -->
             <!-- note -->
             <div class="form-group">
-              <div class="col-sm-12">
-                <span class="small text-muted">
-                  <i ng-class="{ true: 'fa fa-check green-icon', false: 'fa fa-times red-icon' }[formValues.Password.length >= 8]" aria-hidden="true"></i>
-                  密码长度必须至少为 8 个字符
-                </span>
+              <div class="col-sm-12 text-warning">
+                <p class="vertical-center">
+                  <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
+                  <span>The password must be at least {{ requiredPasswordLength }} characters long.</span>
+                  <pr-icon mode="'success'" icon="'check'" ng-if="form.password.$valid && formValues.Password"></pr-icon>
+                </p>
               </div>
             </div>
             <!-- !note -->
@@ -81,23 +79,23 @@
                 <button
                   type="submit"
                   class="btn btn-primary btn-sm"
-                  ng-disabled="state.actionInProgress || formValues.Password.length < 8 || formValues.Password !== formValues.ConfirmPassword"
+                  ng-disabled="state.actionInProgress || form.$invalid || !formValues.Password || !formValues.ConfirmPassword ||  form.password.$viewValue !== formValues.ConfirmPassword"
                   ng-click="createAdminUser()"
                   button-spinner="state.actionInProgress"
                 >
-                  <span ng-hide="state.actionInProgress"><i class="fa fa-user-plus" aria-hidden="true"></i> 创建用户</span>
-                  <span ng-show="state.actionInProgress">正在创建用户...</span>
+                  <span ng-hide="state.actionInProgress">Create user</span>
+                  <span ng-show="state.actionInProgress">Creating user...</span>
                 </button>
               </div>
             </div>
             <!-- !actions -->
             <!-- enableTelemetry-->
             <div class="form-group">
-              <div class="col-sm-12">
-                <input type="checkbox" name="toggle_enableTelemetry" ng-model="formValues.enableTelemetry" />
-                <span class="text-muted small" style="margin-left: 2px;"
-                  >允许收集匿名统计信息。 您可以在我们的
-                  <a href="https://www.portainer.io/documentation/in-app-analytics-and-privacy-policy/" target="_blank">隐私政策</a>中找到更多相关信息。</span
+              <div class="col-sm-12 vertical-center">
+                <input type="checkbox" name="toggle_enableTelemetry" ng-model="formValues.enableTelemetry" data-cy="init-enableTelemetry" />
+                <span class="text-muted small"
+                  >Allow collection of anonymous statistics. You can find more information about this in our
+                  <a class="hyperlink" href="https://www.portainer.io/documentation/in-app-analytics-and-privacy-policy/" target="_blank">privacy policy</a>.</span
                 >
               </div>
             </div>
@@ -112,94 +110,178 @@
       <div class="panel panel-default">
         <div class="panel-body">
           <!-- toggle -->
-          <div style="padding-bottom: 12px;">
-            <a ng-click="togglePanel()">
-              <i ng-class="{ true: 'glyphicon glyphicon-chevron-down', false: 'glyphicon glyphicon-chevron-right' }[state.showRestorePortainer]" aria-hidden="true"></i
-              ><span style="padding-left: 10px;">从备份中恢复 Portainer</span>
+          <div>
+            <a ng-click="togglePanel()" data-cy="init-installPortainerFromBackup" class="vertical-center">
+              <span
+                ><pr-icon icon="'chevron-down'" ng-if="state.showRestorePortainer" size="'lg'" class-name="'icon-primary'"></pr-icon>
+                <pr-icon icon="'chevron-right'" ng-if="!state.showRestorePortainer" size="'lg'" class-name="'icon-primary'"></pr-icon
+              ></span>
+              <span class="form-section-title">Restore Portainer from backup</span>
             </a>
           </div>
           <!-- !toggle -->
 
           <!-- restore form -->
-          <form class="simple-box-form form-horizontal" style="padding-left: 30px;" ng-if="state.showRestorePortainer">
+          <form class="simple-box-form form-horizontal padding-top" ng-if="state.showRestorePortainer">
             <!-- note -->
             <div class="form-group">
               <div class="col-sm-9">
                 <span class="small text-muted">
-                  这将恢复 Portainer 元数据，其中包含有关环境、堆栈和应用程序以及已配置用户的信息。
+                  This will restore the Portainer metadata which contains information about the environments, stacks and applications, as well as the configured users.
                 </span>
               </div>
             </div>
             <!-- !note -->
-            <div class="form-group">
-              <div class="boxselector_wrapper">
-                <div>
-                  <input type="radio" id="restore_file" checked="checked" />
-                  <label for="restore_file" style="padding-bottom: 20px;">
-                    <div class="boxselector_header">
-                      <i class="fa fa-upload" aria-hidden="true" style="margin-right: 2px;"></i>
-                      上传备份文件
-                    </div>
-                    <p></p>
-                  </label>
-                </div>
-                <div>
-                  <input type="radio" id="restore_s3" disabled />
-                  <label for="restore_s3" class="boxselector_disabled" style="background-color: #ffffff;">
-                    <div class="boxselector_header">
-                      <i class="fa fa-download" aria-hidden="true" style="margin-right: 2px;"></i>
-                      从 S3 检索
-                    </div>
-                    <p>此功能在 <a href="https://www.portainer.io/business-upsell?from=restore-s3-form" target="_blank">Portainer 商业版</a>中可用</p>
-                  </label>
+
+            <box-selector slim="true" options="restoreOptions" value="formValues.restoreFormType" on-change="(onChangeRestoreType)" radio-name="'restore-type'"></box-selector>
+
+            <div ng-if="formValues.restoreFormType === RESTORE_FORM_TYPES.FILE">
+              <!-- note -->
+              <div class="form-group">
+                <div class="col-sm-12">
+                  <span class="small text-muted"> You can upload a backup file from your computer. </span>
                 </div>
               </div>
-            </div>
-            <!-- note -->
-            <div class="form-group">
-              <div class="col-sm-12">
-                <span class="small text-muted">
-                  您可以从计算机上传备份文件。
-                </span>
+              <!-- !note -->
+              <!-- select-file-input -->
+              <div class="form-group">
+                <div class="col-sm-12 vertical-center">
+                  <button
+                    class="btn btn-sm btn-primary"
+                    ngf-select
+                    accept=".gz,.encrypted"
+                    ngf-accept="'application/x-tar,application/x-gzip'"
+                    ng-model="formValues.BackupFile"
+                    auto-focus
+                    data-cy="init-selectBackupFileButton"
+                    >Select file</button
+                  >
+                  <span class="space-left vertical-center">
+                    {{ formValues.BackupFile.name }}
+                    <pr-icon icon="'x-circle'" class-name="'icon-danger'" ng-if="!formValues.BackupFile"></pr-icon>
+                  </span>
+                </div>
               </div>
-            </div>
-            <!-- !note -->
-            <!-- select-file-input -->
-            <div class="form-group">
-              <div class="col-sm-12">
-                <button class="btn btn-sm btn-primary" ngf-select accept=".tar.gz,.encrypted" ng-model="formValues.BackupFile" auto-focus>选择文件</button>
-                <span style="margin-left: 5px;">
-                  {{ formValues.BackupFile.name }}
-                  <i class="fa fa-times red-icon" ng-if="!formValues.BackupFile" aria-hidden="true"></i>
-                </span>
+              <!-- password-input -->
+              <div class="form-group">
+                <label for="password" class="col-sm-3 control-label text-left">
+                  Password
+                  <portainer-tooltip
+                    message="'If the backup is password protected, provide the password in order to extract the backup file, otherwise this field can be left empty.'"
+                  ></portainer-tooltip>
+                </label>
+                <div class="col-sm-4">
+                  <input type="password" class="form-control" ng-model="formValues.Password" id="password" data-cy="init-backupPasswordInput" />
+                </div>
               </div>
+              <!-- !password-input -->
             </div>
             <!-- !select-file-input -->
-            <!-- password-input -->
-            <div class="form-group">
-              <label for="password" class="col-sm-3 control-label text-left">
-                密码
-                <portainer-tooltip
-                  position="bottom"
-                  message="如果备份受密码保护，请提供密码以提取备份文件，否则此字段可以留空。"
-                ></portainer-tooltip>
-              </label>
-              <div class="col-sm-4">
-                <input type="password" class="form-control" ng-model="formValues.Password" id="password" />
+            <div class="limited-be-content" ng-if="formValues.restoreFormType === RESTORE_FORM_TYPES.S3">
+              <!-- Access key id  -->
+              <div class="form-group">
+                <label for="access_key_id" class="col-sm-3 control-label text-left">Access key ID</label>
+                <div class="col-sm-9">
+                  <input type="text" class="form-control" id="access_key_id" name="access_key_id" ng-model="formValues.AccessKeyId" required data-cy="init-accessKeyIdInput" />
+                </div>
               </div>
+              <!-- !Access key id  -->
+              <!-- Secret access key -->
+              <div class="form-group">
+                <label for="secret_access_key" class="col-sm-3 control-label text-left">Secret access key</label>
+                <div class="col-sm-9">
+                  <input
+                    type="password"
+                    data-cy="init-secretAccessKeyInput"
+                    class="form-control"
+                    id="secret_access_key"
+                    name="secret_access_key"
+                    ng-model="formValues.SecretAccessKey"
+                    required
+                  />
+                </div>
+              </div>
+              <!-- !Secret access key -->
+              <!-- Region -->
+              <div class="form-group">
+                <label for="backup-s3-region" class="col-sm-3 control-label text-left">Region</label>
+                <div class="col-sm-9">
+                  <input
+                    type="text"
+                    data-cy="init-s3RegionInput"
+                    class="form-control"
+                    placeholder="default region is us-east-1 if left empty"
+                    id="backup-s3-region"
+                    name="backup-s3-region"
+                    ng-model="formValues.Region"
+                  />
+                </div>
+              </div>
+              <!-- !Region -->
+              <!-- Bucket name -->
+              <div class="form-group">
+                <label for="bucket_name" class="col-sm-3 control-label text-left">Bucket name</label>
+                <div class="col-sm-9">
+                  <input type="text" class="form-control" id="bucket_name" name="bucket_name" ng-model="formValues.BucketName" required data-cy="init-bucketNameInput" />
+                </div>
+              </div>
+              <!-- !Bucket name -->
+              <!-- S3 Compatible Host -->
+              <div class="form-group">
+                <label for="s3-compatible-host" class="col-sm-3 control-label text-left">
+                  S3 Compatible Host
+                  <portainer-tooltip message="'Hostname of a S3 service'"></portainer-tooltip>
+                </label>
+                <div class="col-sm-9">
+                  <input
+                    type="text"
+                    data-cy="init-s3CompatibleHostInput"
+                    class="form-control"
+                    id="s3-compatible-host"
+                    name="s3-compatible-host"
+                    ng-model="formValues.S3CompatibleHost"
+                    placeholder="leave empty for AWS S3"
+                  />
+                </div>
+              </div>
+              <!-- !S3 Compatible Host -->
+              <!-- Filename -->
+              <div class="form-group">
+                <label for="backup-s3-filename" class="col-sm-3 control-label text-left">Filename</label>
+                <div class="col-sm-9">
+                  <input
+                    type="text"
+                    data-cy="init-backupFilenameInput"
+                    class="form-control"
+                    id="backup-s3-filename"
+                    name="backup-s3-filename"
+                    ng-model="formValues.Filename"
+                    required
+                  />
+                </div>
+              </div>
+              <!-- !Filename -->
+              <!-- password-input -->
+              <div class="form-group">
+                <label for="password" class="col-sm-3 control-label text-left">
+                  Password
+                  <portainer-tooltip
+                    message="'If the backup is password protected, provide the password in order to extract the backup file, otherwise this field can be left empty.'"
+                  ></portainer-tooltip>
+                </label>
+                <div class="col-sm-4">
+                  <input type="password" class="form-control" ng-model="formValues.Password" id="password" data-cy="init-backupPasswordInput" />
+                </div>
+              </div>
+              <!-- !password-input -->
             </div>
-            <!-- !password-input -->
             <!-- note -->
             <div class="form-group">
               <div class="col-sm-12">
-                <span class="small text-muted">
-                  您即将从此备份恢复 Portainer。
-                </span>
+                <span class="small text-muted"> You are about to restore Portainer from this backup. </span>
               </div>
               <div class="col-sm-12">
-                <span class="small text-muted">
-                 恢复完成后，请以被恢复的 Portainer 已知的用户身份登录。
-                </span>
+                <span class="small text-muted"> After restoring has completed, please log in as a user that was known by the Portainer that was restored. </span>
               </div>
             </div>
             <!-- !note -->
@@ -212,9 +294,10 @@
                   ng-disabled="!formValues.BackupFile || state.backupInProgress"
                   ng-click="uploadBackup()"
                   button-spinner="state.backupInProgress"
+                  data-cy="init-restorePortainerButton"
                 >
-                  <span ng-hide="state.backupInProgress">恢复Portainer</span>
-                  <span ng-show="state.backupInProgress">恢复Portainer中...</span>
+                  <span ng-hide="state.backupInProgress">Restore Portainer</span>
+                  <span ng-show="state.backupInProgress">Restoring Portainer...</span>
                 </button>
               </div>
             </div>

@@ -10,7 +10,8 @@ angular.module('portainer.docker').controller('ContainerStatsController', [
   'ChartService',
   'Notifications',
   'HttpRequestHelper',
-  function ($q, $scope, $transition$, $document, $interval, ContainerService, ChartService, Notifications, HttpRequestHelper) {
+  'endpoint',
+  function ($q, $scope, $transition$, $document, $interval, ContainerService, ChartService, Notifications, HttpRequestHelper, endpoint) {
     $scope.state = {
       refreshRate: '5',
       networkStatsUnavailable: false,
@@ -95,12 +96,10 @@ angular.module('portainer.docker').controller('ContainerStatsController', [
 
     function startChartUpdate(networkChart, cpuChart, memoryChart, ioChart) {
       $q.all({
-        stats: ContainerService.containerStats($transition$.params().id),
-        top: ContainerService.containerTop($transition$.params().id),
+        stats: ContainerService.containerStats(endpoint.Id, $transition$.params().id),
       })
         .then(function success(data) {
           var stats = data.stats;
-          $scope.processInfo = data.top;
           if (stats.Networks.length === 0) {
             $scope.state.networkStatsUnavailable = true;
           }
@@ -115,7 +114,7 @@ angular.module('portainer.docker').controller('ContainerStatsController', [
         })
         .catch(function error(err) {
           stopRepeater();
-          Notifications.error('失败', err, '无法检索容器统计信息');
+          Notifications.error('Failure', err, 'Unable to retrieve container statistics');
         });
     }
 
@@ -123,12 +122,10 @@ angular.module('portainer.docker').controller('ContainerStatsController', [
       var refreshRate = $scope.state.refreshRate;
       $scope.repeater = $interval(function () {
         $q.all({
-          stats: ContainerService.containerStats($transition$.params().id),
-          top: ContainerService.containerTop($transition$.params().id),
+          stats: ContainerService.containerStats(endpoint.Id, $transition$.params().id),
         })
           .then(function success(data) {
             var stats = data.stats;
-            $scope.processInfo = data.top;
             updateNetworkChart(stats, networkChart);
             updateMemoryChart(stats, memoryChart);
             updateCPUChart(stats, cpuChart);
@@ -136,7 +133,7 @@ angular.module('portainer.docker').controller('ContainerStatsController', [
           })
           .catch(function error(err) {
             stopRepeater();
-            Notifications.error('失败', err, '无法检索容器统计信息');
+            Notifications.error('Failure', err, 'Unable to retrieve container statistics');
           });
       }, refreshRate * 1000);
     }
@@ -163,12 +160,12 @@ angular.module('portainer.docker').controller('ContainerStatsController', [
 
     function initView() {
       HttpRequestHelper.setPortainerAgentTargetHeader($transition$.params().nodeName);
-      ContainerService.container($transition$.params().id)
+      ContainerService.container(endpoint.Id, $transition$.params().id)
         .then(function success(data) {
           $scope.container = data;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索容器信息');
+          Notifications.error('Failure', err, 'Unable to retrieve container information');
         });
 
       $document.ready(function () {

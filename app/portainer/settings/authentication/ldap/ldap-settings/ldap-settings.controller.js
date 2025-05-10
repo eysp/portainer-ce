@@ -1,11 +1,11 @@
+import { buildLdapSettingsModel, buildOpenLDAPSettingsModel } from '@/portainer/settings/authentication/ldap/ldap-settings.model';
+import { options } from '@/react/portainer/settings/AuthenticationView/ldap-options';
+
 const SERVER_TYPES = {
   CUSTOM: 0,
   OPEN_LDAP: 1,
   AD: 2,
 };
-
-import { buildOpenLDAPSettingsModel } from '@/portainer/settings/authentication/ldap/ldap-settings.model';
-import { EXTERNAL_AUTH_LDAP } from '@/portainer/feature-flags/feature-ids';
 
 const DEFAULT_GROUP_FILTER = '(objectClass=groupOfNames)';
 const DEFAULT_USER_FILTER = '(objectClass=inetOrgPerson)';
@@ -16,11 +16,9 @@ export default class LdapSettingsController {
     Object.assign(this, { LDAPService, SERVER_TYPES });
 
     this.tlscaCert = null;
+    this.settingsDrafts = {};
 
-    this.boxSelectorOptions = [
-      { id: 'ldap_custom', value: SERVER_TYPES.CUSTOM, label: 'Custom', icon: 'fa fa-server' },
-      { id: 'ldap_openldap', value: SERVER_TYPES.OPEN_LDAP, label: 'OpenLDAP', icon: 'fa fa-server', feature: EXTERNAL_AUTH_LDAP },
-    ];
+    this.boxSelectorOptions = options;
 
     this.onTlscaCertChange = this.onTlscaCertChange.bind(this);
     this.searchUsers = this.searchUsers.bind(this);
@@ -33,20 +31,25 @@ export default class LdapSettingsController {
   }
 
   $onInit() {
-    this.tlscaCert = this.settings.TLSCACert;
+    this.tlscaCert = this.settings.TLSConfig.TLSCACert;
   }
 
   onChangeServerType(serverType) {
+    this.settingsDrafts[this.settings.ServerType] = this.settings;
+
+    if (this.settingsDrafts[serverType]) {
+      this.settings = this.settingsDrafts[serverType];
+      return;
+    }
+
     switch (serverType) {
       case SERVER_TYPES.OPEN_LDAP:
-        return this.onChangeToOpenLDAP();
-      default:
+        this.settings = buildOpenLDAPSettingsModel();
+        break;
+      case SERVER_TYPES.CUSTOM:
+        this.settings = buildLdapSettingsModel();
         break;
     }
-  }
-
-  onChangeToOpenLDAP() {
-    this.settings = buildOpenLDAPSettingsModel();
   }
 
   searchUsers() {

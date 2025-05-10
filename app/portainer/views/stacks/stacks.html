@@ -1,24 +1,9 @@
-<rd-header>
-  <rd-header-title title-text="堆栈列表">
-    <a data-toggle="tooltip" title="刷新" ui-sref="docker.stacks" ui-sref-opts="{reload: true}">
-      <i class="fa fa-sync" aria-hidden="true"></i>
-    </a>
-  </rd-header-title>
-  <rd-header-content>堆栈</rd-header-content>
-</rd-header>
-<information-panel-offline ng-if="offlineMode"></information-panel-offline>
-<div class="row">
-  <div class="col-sm-12">
-    <stacks-datatable
-      title-text="堆栈"
-      title-icon="fa-th-list"
-      dataset="stacks"
-      table-key="stacks"
-      order-by="Name"
-      remove-action="removeAction"
-      offline-mode="offlineMode"
-      refresh-callback="getStacks"
-      create-enabled="createEnabled"
-    ></stacks-datatable>
-  </div>
-</div>
+<page-header title="'Stacks list'" breadcrumbs="['Stacks']" reload="true"> </page-header>
+
+<docker-stacks-datatable
+  ng-if="stacks"
+  dataset="stacks"
+  is-image-notification-enabled="enableImageNotification"
+  on-remove="(removeAction)"
+  on-refresh="(getStacks)"
+></docker-stacks-datatable>

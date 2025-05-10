@@ -2,8 +2,6 @@ package exec
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -11,6 +9,10 @@ import (
 	"testing"
 
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/pkg/libstack/compose"
+	"github.com/portainer/portainer/pkg/testhelpers"
+
+	"github.com/rs/zerolog/log"
 )
 
 const composeFile = `version: "3.9"
@@ -40,18 +42,17 @@ func setup(t *testing.T) (*portainer.Stack, *portainer.Endpoint) {
 }
 
 func Test_UpAndDown(t *testing.T) {
+	testhelpers.IntegrationTest(t)
 
 	stack, endpoint := setup(t)
 
-	w, err := NewComposeStackManager("", "", nil)
-	if err != nil {
-		t.Fatalf("Failed creating manager: %s", err)
-	}
+	deployer := compose.NewComposeDeployer()
+
+	w := NewComposeStackManager(deployer, nil, nil)
 
 	ctx := context.TODO()
 
-	err = w.Up(ctx, stack, endpoint)
-	if err != nil {
+	if err := w.Up(ctx, stack, endpoint, portainer.ComposeUpOptions{}); err != nil {
 		t.Fatalf("Error calling docker-compose up: %s", err)
 	}
 
@@ -59,8 +60,7 @@ func Test_UpAndDown(t *testing.T) {
 		t.Fatal("container should exist")
 	}
 
-	err = w.Down(ctx, stack, endpoint)
-	if err != nil {
+	if err := w.Down(ctx, stack, endpoint); err != nil {
 		t.Fatalf("Error calling docker-compose down: %s", err)
 	}
 
@@ -70,11 +70,11 @@ func Test_UpAndDown(t *testing.T) {
 }
 
 func containerExists(containerName string) bool {
-	cmd := exec.Command("docker", "ps", "-a", "-f", fmt.Sprintf("name=%s", containerName))
+	cmd := exec.Command("docker", "ps", "-a", "-f", "name="+containerName)
 
 	out, err := cmd.Output()
 	if err != nil {
-		log.Fatalf("failed to list containers: %s", err)
+		log.Fatal().Err(err).Msg("failed to list containers")
 	}
 
 	return strings.Contains(string(out), containerName)

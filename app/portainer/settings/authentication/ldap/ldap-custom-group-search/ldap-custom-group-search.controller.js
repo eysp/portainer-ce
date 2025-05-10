@@ -27,7 +27,7 @@ export default class LdapCustomGroupSearchController {
         this.groups = await this.onSearchClick();
       } catch (error) {
         this.showTable = false;
-        this.Notifications.error('失败', error, 'Failed to search users');
+        this.Notifications.error('Failure', error, 'Failed to search users');
       }
     });
   }

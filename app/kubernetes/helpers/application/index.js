@@ -1,12 +1,11 @@
 import _ from 'lodash-es';
 import { KubernetesPortMapping, KubernetesPortMappingPort } from 'Kubernetes/models/port/models';
-import { KubernetesServiceTypes } from 'Kubernetes/models/service/models';
-import { KubernetesConfigurationTypes } from 'Kubernetes/models/configuration/models';
+import { KubernetesService, KubernetesServicePort, KubernetesServiceTypes } from 'Kubernetes/models/service/models';
+import { KubernetesConfigurationKinds } from 'Kubernetes/models/configuration/models';
 import {
   KubernetesApplicationAutoScalerFormValue,
   KubernetesApplicationConfigurationFormValue,
   KubernetesApplicationConfigurationFormValueOverridenKey,
-  KubernetesApplicationConfigurationFormValueOverridenKeyTypes,
   KubernetesApplicationEnvironmentVariableFormValue,
   KubernetesApplicationPersistedFolderFormValue,
   KubernetesApplicationPlacementFormValue,
@@ -22,8 +21,9 @@ import {
   KubernetesApplicationVolumePersistentPayload,
   KubernetesApplicationVolumeSecretPayload,
 } from 'Kubernetes/models/application/payloads';
-import KubernetesVolumeHelper from 'Kubernetes/helpers/volumeHelper';
-import { KubernetesApplicationDeploymentTypes, KubernetesApplicationPlacementTypes, KubernetesApplicationTypes, HelmApplication } from 'Kubernetes/models/application/models';
+import { generatedApplicationConfigVolumeName } from '@/react/kubernetes/volumes/utils';
+import { HelmApplication } from 'Kubernetes/models/application/models';
+import { KubernetesApplicationDeploymentTypes, KubernetesApplicationTypes } from 'Kubernetes/models/application/models/appConstants';
 import { KubernetesPodAffinity, KubernetesPodNodeAffinityNodeSelectorRequirementOperators } from 'Kubernetes/pod/models';
 import {
   KubernetesNodeSelectorRequirementPayload,
@@ -31,9 +31,7 @@ import {
   KubernetesPodNodeAffinityPayload,
   KubernetesPreferredSchedulingTermPayload,
 } from 'Kubernetes/pod/payloads/affinities';
-
-export const PodKubernetesInstanceLabel = 'app.kubernetes.io/instance';
-export const PodManagedByLabel = 'app.kubernetes.io/managed-by';
+import { PodKubernetesInstanceLabel, PodManagedByLabel } from '@/react/kubernetes/applications/constants';
 
 class KubernetesApplicationHelper {
   /* #region  UTILITY FUNCTIONS */
@@ -76,12 +74,6 @@ class KubernetesApplicationHelper {
     return containers;
   }
 
-  static associateAllContainersAndApplication(app) {
-    const containers = _.flatMap(_.map(app.Pods, 'Containers'));
-    KubernetesApplicationHelper.associateContainerPersistedFoldersAndConfigurations(app, containers);
-    return containers;
-  }
-
   static portMappingsFromApplications(applications) {
     const res = _.reduce(
       applications,
@@ -114,14 +106,14 @@ class KubernetesApplicationHelper {
 
   /* #region  ENV VARIABLES FV <> ENV */
   static generateEnvFromEnvVariables(envVariables) {
-    _.remove(envVariables, (item) => item.NeedsDeletion);
+    _.remove(envVariables, (item) => item.needsDeletion);
     const env = _.map(envVariables, (item) => {
       const res = new KubernetesApplicationEnvPayload();
-      res.name = item.Name;
-      if (item.Value === undefined) {
+      res.name = item.name;
+      if (item.value === undefined) {
         delete res.value;
       } else {
-        res.value = item.Value;
+        res.value = item.value;
       }
       return res;
     });
@@ -134,10 +126,10 @@ class KubernetesApplicationHelper {
         return;
       }
       const res = new KubernetesApplicationEnvironmentVariableFormValue();
-      res.Name = item.name;
-      res.Value = item.value;
-      res.IsNew = false;
-      res.NameIndex = item.name;
+      res.name = item.name;
+      res.value = item.value;
+      res.isNew = false;
+      res.nameIndex = item.name;
       return res;
     });
     return _.without(envVariables, undefined);
@@ -145,12 +137,11 @@ class KubernetesApplicationHelper {
   /* #endregion */
 
   /* #region  CONFIGURATIONS FV <> ENV & VOLUMES */
-  static generateConfigurationFormValuesFromEnvAndVolumes(env, volumes, configurations) {
+  static generateConfigurationFormValuesFromEnvAndVolumes(env, volumes, configurations, configurationKind) {
+    const filterCondition = configurationKind === KubernetesConfigurationKinds.CONFIGMAP ? 'valueFrom.configMapKeyRef.name' : 'valueFrom.secretKeyRef.name';
     const finalRes = _.flatMap(configurations, (cfg) => {
-      const filterCondition = cfg.Type === KubernetesConfigurationTypes.CONFIGMAP ? 'valueFrom.configMapKeyRef.name' : 'valueFrom.secretKeyRef.name';
-
       const cfgEnv = _.filter(env, [filterCondition, cfg.Name]);
-      const cfgVol = _.filter(volumes, { configurationName: cfg.Name });
+      const cfgVol = volumes.filter((volume) => volume.configurationName === cfg.Name && volume.configurationType === configurationKind);
       if (!cfgEnv.length && !cfgVol.length) {
         return;
       }
@@ -176,21 +167,25 @@ class KubernetesApplicationHelper {
       const overrideThreshold = max - _.max(_.map(keys, 'VolCount'));
       const res = _.map(new Array(max), () => new KubernetesApplicationConfigurationFormValue());
       _.forEach(res, (item, index) => {
-        item.SelectedConfiguration = cfg;
+        item.selectedConfiguration = cfg;
+        // workaround to load configurations in the app in the select inputs
+        // this should be removed when the edit parent view is migrated to react
+        item.selectedConfiguration.metadata = {};
+        item.selectedConfiguration.metadata.name = cfg.Name;
         const overriden = index >= overrideThreshold;
         if (overriden) {
-          item.Overriden = true;
-          item.OverridenKeys = _.map(keys, (k) => {
+          item.overriden = true;
+          item.overridenKeys = _.map(keys, (k) => {
             const fvKey = new KubernetesApplicationConfigurationFormValueOverridenKey();
-            fvKey.Key = k.Key;
+            fvKey.key = k.Key;
             if (!k.Count) {
-              // !k.Count indicates k.Key is new added to the configuration and has not been loaded to the application yet
-              fvKey.Type = KubernetesApplicationConfigurationFormValueOverridenKeyTypes.NONE;
+              // !k.Count indicates k.key is new added to the configuration and has not been loaded to the application yet
+              fvKey.type = 'NONE';
             } else if (index < k.EnvCount) {
-              fvKey.Type = KubernetesApplicationConfigurationFormValueOverridenKeyTypes.ENVIRONMENT;
+              fvKey.type = 'ENVIRONMENT';
             } else {
-              fvKey.Type = KubernetesApplicationConfigurationFormValueOverridenKeyTypes.FILESYSTEM;
-              fvKey.Path = k.Sum[index].rootMountPath;
+              fvKey.type = 'FILESYSTEM';
+              fvKey.path = k.Sum[index].rootMountPath;
             }
             return fvKey;
           });
@@ -201,52 +196,53 @@ class KubernetesApplicationHelper {
     return _.without(finalRes, undefined);
   }
 
-  static generateEnvOrVolumesFromConfigurations(app, configurations) {
+  static generateEnvOrVolumesFromConfigurations(app, configMaps, secrets) {
+    const configurations = [...configMaps, ...secrets];
     let finalEnv = [];
     let finalVolumes = [];
     let finalMounts = [];
 
     _.forEach(configurations, (config) => {
-      const isBasic = config.SelectedConfiguration.Type === KubernetesConfigurationTypes.CONFIGMAP;
+      const isBasic = config.selectedConfiguration.kind === 'ConfigMap';
 
-      if (!config.Overriden) {
-        const envKeys = _.keys(config.SelectedConfiguration.Data);
+      if (!config.overriden) {
+        const envKeys = _.keys(config.selectedConfiguration.data);
         _.forEach(envKeys, (item) => {
           const res = isBasic ? new KubernetesApplicationEnvConfigMapPayload() : new KubernetesApplicationEnvSecretPayload();
           res.name = item;
           if (isBasic) {
-            res.valueFrom.configMapKeyRef.name = config.SelectedConfiguration.Name;
+            res.valueFrom.configMapKeyRef.name = config.selectedConfiguration.metadata.name;
             res.valueFrom.configMapKeyRef.key = item;
           } else {
-            res.valueFrom.secretKeyRef.name = config.SelectedConfiguration.Name;
+            res.valueFrom.secretKeyRef.name = config.selectedConfiguration.metadata.name;
             res.valueFrom.secretKeyRef.key = item;
           }
           finalEnv.push(res);
         });
       } else {
-        const envKeys = _.filter(config.OverridenKeys, (item) => item.Type === KubernetesApplicationConfigurationFormValueOverridenKeyTypes.ENVIRONMENT);
+        const envKeys = _.filter(config.overridenKeys, (item) => item.type === 'ENVIRONMENT');
         _.forEach(envKeys, (item) => {
           const res = isBasic ? new KubernetesApplicationEnvConfigMapPayload() : new KubernetesApplicationEnvSecretPayload();
-          res.name = item.Key;
+          res.name = item.key;
           if (isBasic) {
-            res.valueFrom.configMapKeyRef.name = config.SelectedConfiguration.Name;
-            res.valueFrom.configMapKeyRef.key = item.Key;
+            res.valueFrom.configMapKeyRef.name = config.selectedConfiguration.metadata.name;
+            res.valueFrom.configMapKeyRef.key = item.key;
           } else {
-            res.valueFrom.secretKeyRef.name = config.SelectedConfiguration.Name;
-            res.valueFrom.secretKeyRef.key = item.Key;
+            res.valueFrom.secretKeyRef.name = config.selectedConfiguration.metadata.name;
+            res.valueFrom.secretKeyRef.key = item.key;
           }
           finalEnv.push(res);
         });
 
-        const volKeys = _.filter(config.OverridenKeys, (item) => item.Type === KubernetesApplicationConfigurationFormValueOverridenKeyTypes.FILESYSTEM);
-        const groupedVolKeys = _.groupBy(volKeys, 'Path');
+        const volKeys = _.filter(config.overridenKeys, (item) => item.type === 'FILESYSTEM');
+        const groupedVolKeys = _.groupBy(volKeys, 'path');
         _.forEach(groupedVolKeys, (items, path) => {
-          const volumeName = KubernetesVolumeHelper.generatedApplicationConfigVolumeName(app.Name);
-          const configurationName = config.SelectedConfiguration.Name;
+          const volumeName = generatedApplicationConfigVolumeName(app.Name);
+          const configurationName = config.selectedConfiguration.metadata.name;
           const itemsMap = _.map(items, (item) => {
             const entry = new KubernetesApplicationVolumeEntryPayload();
-            entry.key = item.Key;
-            entry.path = item.Key;
+            entry.key = item.key;
+            entry.path = item.key;
             return entry;
           });
 
@@ -275,6 +271,68 @@ class KubernetesApplicationHelper {
     return app;
   }
   /* #endregion */
+
+  /* #region  SERVICES -> SERVICES FORM VALUES */
+  static generateServicesFormValuesFromServices(app, ingresses) {
+    let services = [];
+    if (app.Services) {
+      app.Services.forEach(function (service) {
+        //skip generate formValues if service = headless service ( clusterIp === "None" )
+        if (service.spec.clusterIP !== 'None') {
+          const svc = new KubernetesService();
+          svc.Namespace = service.metadata.namespace;
+          svc.Name = service.metadata.name;
+          svc.StackName = service.StackName;
+          svc.ApplicationOwner = app.ApplicationOwner;
+          svc.ApplicationName = app.ApplicationName;
+          svc.Type = service.spec.type;
+
+          let ports = [];
+          service.spec.ports.forEach(function (port) {
+            const svcport = new KubernetesServicePort();
+            svcport.name = port.name;
+            svcport.port = port.port;
+            svcport.nodePort = port.nodePort || 0;
+            svcport.protocol = port.protocol;
+            svcport.targetPort = port.targetPort;
+            svcport.serviceName = service.metadata.name;
+            svcport.ingressPaths = [];
+
+            ingresses.forEach((ingress) => {
+              const matchingIngressPaths = ingress.Paths.filter((ingPath) => ingPath.ServiceName === service.metadata.name && ingPath.Port === port.port);
+              // only add ingress info to the port if the ingress serviceport and name matches
+              const newPaths = matchingIngressPaths.map((ingPath) => ({
+                IngressName: ingPath.IngressName,
+                Host: ingPath.Host,
+                Path: ingPath.Path,
+              }));
+              svcport.ingressPaths = [...svcport.ingressPaths, ...newPaths];
+              svc.Ingress = matchingIngressPaths.length > 0;
+            });
+
+            ports.push(svcport);
+          });
+          svc.Ports = ports;
+          // if the app is a pod (doesn't have a selector), then get the pod labels
+          if (app.Raw.spec.selector) {
+            svc.Selector = app.Raw.spec.selector.matchLabels;
+          } else {
+            svc.Selector = app.Raw.metadata.labels || { app: app.Name };
+          }
+          services.push(svc);
+        }
+      });
+
+      return services;
+    }
+  }
+  /* #endregion */
+  static generateSelectorFromService(app) {
+    if (app.Raw.kind !== 'Pod') {
+      const selector = app.Raw.spec.selector.matchLabels;
+      return selector;
+    }
+  }
 
   /* #region  PUBLISHED PORTS FV <> PUBLISHED PORTS */
   static generatePublishedPortsFormValuesFromPublishedPorts(serviceType, publishedPorts, ingress) {
@@ -312,15 +370,15 @@ class KubernetesApplicationHelper {
   static generateAutoScalerFormValueFromHorizontalPodAutoScaler(autoScaler, replicasCount) {
     const res = new KubernetesApplicationAutoScalerFormValue();
     if (autoScaler) {
-      res.IsUsed = true;
-      res.MinReplicas = autoScaler.MinReplicas;
-      res.MaxReplicas = autoScaler.MaxReplicas;
-      res.TargetCPUUtilization = autoScaler.TargetCPUUtilization;
-      res.ApiVersion = autoScaler.ApiVersion;
+      res.isUsed = true;
+      res.minReplicas = autoScaler.MinReplicas;
+      res.maxReplicas = autoScaler.MaxReplicas;
+      res.targetCpuUtilizationPercentage = autoScaler.TargetCPUUtilization;
+      res.apiVersion = autoScaler.ApiVersion;
     } else {
-      res.ApiVersion = 'apps/v1';
-      res.MinReplicas = replicasCount;
-      res.MaxReplicas = replicasCount;
+      res.apiVersion = 'apps/v1';
+      res.minReplicas = replicasCount;
+      res.maxReplicas = replicasCount;
     }
     return res;
   }
@@ -330,12 +388,12 @@ class KubernetesApplicationHelper {
   /* #region  PERSISTED FOLDERS FV <> VOLUMES */
   static generatePersistedFoldersFormValuesFromPersistedFolders(persistedFolders, persistentVolumeClaims) {
     const finalRes = _.map(persistedFolders, (folder) => {
-      const pvc = _.find(persistentVolumeClaims, (item) => _.startsWith(item.Name, folder.PersistentVolumeClaimName));
-      const res = new KubernetesApplicationPersistedFolderFormValue(pvc.StorageClass);
-      res.PersistentVolumeClaimName = folder.PersistentVolumeClaimName;
-      res.Size = parseInt(pvc.Storage, 10);
-      res.SizeUnit = pvc.Storage.slice(-2);
-      res.ContainerPath = folder.MountPath;
+      const pvc = _.find(persistentVolumeClaims, (item) => _.startsWith(item.Name, folder.persistentVolumeClaimName));
+      const res = new KubernetesApplicationPersistedFolderFormValue(pvc.storageClass);
+      res.persistentVolumeClaimName = folder.persistentVolumeClaimName;
+      res.size = pvc.Storage.slice(0, -2); // remove trailing units
+      res.sizeUnit = pvc.Storage.slice(-2);
+      res.containerPath = folder.MountPath;
       return res;
     });
     return finalRes;
@@ -359,40 +417,38 @@ class KubernetesApplicationHelper {
   }
 
   static hasRWOOnly(formValues) {
-    return _.find(formValues.PersistedFolders, (item) => item.StorageClass && _.isEqual(item.StorageClass.AccessModes, ['RWO']));
+    return _.find(formValues.PersistedFolders, (item) => item.storageClass && _.isEqual(item.storageClass.AccessModes, ['RWO']));
   }
 
   static hasRWX(claims) {
-    return _.find(claims, (item) => item.StorageClass && _.includes(item.StorageClass.AccessModes, 'RWX')) !== undefined;
+    return _.find(claims, (item) => item.storageClass && _.includes(item.storageClass.AccessModes, 'RWX')) !== undefined;
   }
   /* #endregion */
 
   /* #region  PLACEMENTS FV <> AFFINITY */
-  static generatePlacementsFormValuesFromAffinity(formValues, podAffinity, nodesLabels) {
+  static generatePlacementsFormValuesFromAffinity(formValues, podAffinity) {
     let placements = formValues.Placements;
     let type = formValues.PlacementType;
     const affinity = podAffinity.nodeAffinity;
     if (affinity && affinity.requiredDuringSchedulingIgnoredDuringExecution) {
-      type = KubernetesApplicationPlacementTypes.MANDATORY;
+      type = 'mandatory';
       _.forEach(affinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms, (term) => {
         _.forEach(term.matchExpressions, (exp) => {
           const placement = new KubernetesApplicationPlacementFormValue();
-          const label = _.find(nodesLabels, { Key: exp.key });
-          placement.Label = label;
-          placement.Value = exp.values[0];
-          placement.IsNew = false;
+          placement.label = exp.key;
+          placement.value = exp.values[0];
+          placement.isNew = false;
           placements.push(placement);
         });
       });
     } else if (affinity && affinity.preferredDuringSchedulingIgnoredDuringExecution) {
-      type = KubernetesApplicationPlacementTypes.PREFERRED;
+      type = 'preferred';
       _.forEach(affinity.preferredDuringSchedulingIgnoredDuringExecution, (term) => {
         _.forEach(term.preference.matchExpressions, (exp) => {
           const placement = new KubernetesApplicationPlacementFormValue();
-          const label = _.find(nodesLabels, { Key: exp.key });
-          placement.Label = label;
-          placement.Value = exp.values[0];
-          placement.IsNew = false;
+          placement.label = exp.key;
+          placement.value = exp.values[0];
+          placement.isNew = false;
           placements.push(placement);
         });
       });
@@ -402,16 +458,16 @@ class KubernetesApplicationHelper {
   }
 
   static generateAffinityFromPlacements(app, formValues) {
-    if (formValues.DeploymentType === KubernetesApplicationDeploymentTypes.REPLICATED) {
+    if (formValues.DeploymentType === KubernetesApplicationDeploymentTypes.Replicated) {
       const placements = formValues.Placements;
       const res = new KubernetesPodNodeAffinityPayload();
       let expressions = _.map(placements, (p) => {
-        if (!p.NeedsDeletion) {
+        if (!p.needsDeletion) {
           const exp = new KubernetesNodeSelectorRequirementPayload();
-          exp.key = p.Label.Key;
-          if (p.Value) {
+          exp.key = p.label;
+          if (p.value) {
             exp.operator = KubernetesPodNodeAffinityNodeSelectorRequirementOperators.IN;
-            exp.values = [p.Value];
+            exp.values = [p.value];
           } else {
             exp.operator = KubernetesPodNodeAffinityNodeSelectorRequirementOperators.EXISTS;
             delete exp.values;
@@ -421,12 +477,12 @@ class KubernetesApplicationHelper {
       });
       expressions = _.without(expressions, undefined);
       if (expressions.length) {
-        if (formValues.PlacementType === KubernetesApplicationPlacementTypes.MANDATORY) {
+        if (formValues.PlacementType === 'mandatory') {
           const term = new KubernetesNodeSelectorTermPayload();
           term.matchExpressions = expressions;
           res.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms.push(term);
           delete res.preferredDuringSchedulingIgnoredDuringExecution;
-        } else if (formValues.PlacementType === KubernetesApplicationPlacementTypes.PREFERRED) {
+        } else if (formValues.PlacementType === 'preferred') {
           const term = new KubernetesPreferredSchedulingTermPayload();
           term.preference = new KubernetesNodeSelectorTermPayload();
           term.preference.matchExpressions = expressions;
@@ -486,7 +542,7 @@ class KubernetesApplicationHelper {
     const helmAppsList = helmAppsEntriesList.map(([helmInstance, applications]) => {
       const helmApp = new HelmApplication();
       helmApp.Name = helmInstance;
-      helmApp.ApplicationType = KubernetesApplicationTypes.HELM;
+      helmApp.ApplicationType = KubernetesApplicationTypes.Helm;
       helmApp.ApplicationOwner = applications[0].ApplicationOwner;
       helmApp.KubernetesApplications = applications;
 

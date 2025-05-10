@@ -60,12 +60,12 @@ angular.module('portainer.docker').controller('SwarmNodeDetailsPanelController',
       NodeService.updateNode(config).then(onUpdateSuccess).catch(notifyOnError);
 
       function onUpdateSuccess() {
-        Notifications.success('节点已成功更新', '节点更新');
+        Notifications.success('Node successfully updated', 'Node updated');
         $state.go('docker.nodes.node', { id: originalNode.Id }, { reload: true });
       }
 
       function notifyOnError(error) {
-        Notifications.error('失败', error, '无法更新节点');
+        Notifications.error('Failure', error, 'Failed to update node');
       }
     }
 

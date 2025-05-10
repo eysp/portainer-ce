@@ -1,3 +1,6 @@
+import { getEnvironments } from '@/react/portainer/environments/environment.service';
+import { restoreOptions } from '@/react/portainer/init/InitAdminView/restore-options';
+
 angular.module('portainer.app').controller('InitAdminController', [
   '$scope',
   '$state',
@@ -6,19 +9,22 @@ angular.module('portainer.app').controller('InitAdminController', [
   'StateManager',
   'SettingsService',
   'UserService',
-  'EndpointService',
   'BackupService',
   'StatusService',
-  function ($scope, $state, Notifications, Authentication, StateManager, SettingsService, UserService, EndpointService, BackupService, StatusService) {
+  function ($scope, $state, Notifications, Authentication, StateManager, SettingsService, UserService, BackupService, StatusService) {
+    $scope.restoreOptions = restoreOptions;
+
     $scope.uploadBackup = uploadBackup;
 
     $scope.logo = StateManager.getState().application.logo;
+    $scope.RESTORE_FORM_TYPES = { S3: 's3', FILE: 'file' };
 
     $scope.formValues = {
       Username: 'admin',
       Password: '',
       ConfirmPassword: '',
       enableTelemetry: process.env.NODE_ENV === 'production',
+      restoreFormType: $scope.RESTORE_FORM_TYPES.FILE,
     };
 
     $scope.state = {
@@ -33,6 +39,13 @@ angular.module('portainer.app').controller('InitAdminController', [
       $scope.state.showInitPassword = !$scope.state.showInitPassword;
       $scope.state.showRestorePortainer = !$scope.state.showRestorePortainer;
     };
+
+    $scope.onChangeRestoreType = onChangeRestoreType;
+    function onChangeRestoreType(value) {
+      $scope.$evalAsync(() => {
+        $scope.formValues.restoreFormType = value;
+      });
+    }
 
     $scope.createAdminUser = function () {
       var username = $scope.formValues.Username;
@@ -50,7 +63,7 @@ angular.module('portainer.app').controller('InitAdminController', [
           return StateManager.initialize();
         })
         .then(function () {
-          return EndpointService.endpoints(0, 100);
+          return getEnvironments({ limit: 100 });
         })
         .then(function success(data) {
           if (data.value.length === 0) {
@@ -60,14 +73,33 @@ angular.module('portainer.app').controller('InitAdminController', [
           }
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法创建管理员用户');
+          handleError(err);
+          Notifications.error('Failure', err, 'Unable to create administrator user');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
         });
     };
 
+    function handleError(err) {
+      if (err.status === 303) {
+        const headers = err.headers();
+        const REDIRECT_REASON_TIMEOUT = 'AdminInitTimeout';
+        if (headers && headers['redirect-reason'] === REDIRECT_REASON_TIMEOUT) {
+          window.location.href = '/timeout.html';
+        }
+      }
+    }
+
     function createAdministratorFlow() {
+      SettingsService.publicSettings()
+        .then(function success(data) {
+          $scope.requiredPasswordLength = data.RequiredPasswordLength;
+        })
+        .catch(function error(err) {
+          Notifications.error('Failure', err, 'Unable to retrieve application settings');
+        });
+
       UserService.administratorExists()
         .then(function success(exists) {
           if (exists) {
@@ -75,7 +107,7 @@ angular.module('portainer.app').controller('InitAdminController', [
           }
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法验证管理员帐户是否存在');
+          Notifications.error('Failure', err, 'Unable to verify administrator account existence');
         });
     }
 
@@ -94,7 +126,8 @@ angular.module('portainer.app').controller('InitAdminController', [
       try {
         await restoreAsyncFn();
       } catch (err) {
-        Notifications.error('失败', err, '无法恢复备份');
+        handleError(err);
+        Notifications.error('Failure', err, 'Unable to restore the backup');
         $scope.state.backupInProgress = false;
 
         return;
@@ -102,10 +135,11 @@ angular.module('portainer.app').controller('InitAdminController', [
 
       try {
         await waitPortainerRestart();
-        Notifications.success('备份已成功恢复');
+        Notifications.success('Success', 'The backup has successfully been restored');
         $state.go('portainer.auth');
       } catch (err) {
-        Notifications.error('失败', err, '无法检查状态');
+        handleError(err);
+        Notifications.error('Failure', err, 'Unable to check for status');
         await wait(2);
         location.reload();
       }
@@ -125,7 +159,7 @@ angular.module('portainer.app').controller('InitAdminController', [
           // pass
         }
       }
-      throw new Error('等待Portainer重新启动超时');
+      throw new Error('Timeout to wait for Portainer restarting');
     }
   },
 ]);

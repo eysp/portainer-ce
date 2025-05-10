@@ -1,5 +1,6 @@
 import moment from 'moment';
-import { ACTIVITY_AUDIT } from '@/portainer/feature-flags/feature-ids';
+
+import { FeatureId } from '@/react/portainer/feature-flags/enums';
 
 export default class AuthLogsViewController {
   /* @ngInject */
@@ -7,9 +8,9 @@ export default class AuthLogsViewController {
     this.$async = $async;
     this.Notifications = Notifications;
 
-    this.limitedFeature = ACTIVITY_AUDIT;
+    this.limitedFeature = FeatureId.ACTIVITY_AUDIT;
     this.state = {
-      keyword: 'f',
+      keyword: '',
       date: {
         from: 0,
         to: 0,
@@ -67,9 +68,11 @@ export default class AuthLogsViewController {
   }
 
   onChangeKeyword(keyword) {
-    this.state.page = 1;
-    this.state.keyword = keyword;
-    this.loadLogs();
+    return this.$scope.$evalAsync(() => {
+      this.state.page = 1;
+      this.state.keyword = keyword;
+      this.loadLogs();
+    });
   }
 
   onChangeDate({ startDate, endDate }) {
@@ -82,11 +85,11 @@ export default class AuthLogsViewController {
     return this.$async(async () => {
       this.state.logs = null;
       try {
-        const { logs, totalCount } = { logs: [{}, {}, {}, {}, {}], totalCount: 5 };
+        const { logs, totalCount } = { logs: [], totalCount: 0 };
         this.state.logs = decorateLogs(logs);
         this.state.totalItems = totalCount;
       } catch (err) {
-        this.Notifications.error('失败', err, '加载身份验证活动日志失败');
+        this.Notifications.error('Failure', err, 'Failed loading auth activity logs');
       }
     });
   }

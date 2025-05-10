@@ -3,15 +3,14 @@ package users
 import (
 	"errors"
 	"net/http"
+	"time"
 
-	"github.com/asaskevich/govalidator"
-	httperror "github.com/portainer/libhttp/error"
-	"github.com/portainer/libhttp/request"
-	"github.com/portainer/libhttp/response"
 	portainer "github.com/portainer/portainer/api"
-	bolterrors "github.com/portainer/portainer/api/bolt/errors"
 	httperrors "github.com/portainer/portainer/api/http/errors"
 	"github.com/portainer/portainer/api/http/security"
+	httperror "github.com/portainer/portainer/pkg/libhttp/error"
+	"github.com/portainer/portainer/pkg/libhttp/request"
+	"github.com/portainer/portainer/pkg/libhttp/response"
 )
 
 type userUpdatePasswordPayload struct {
@@ -22,10 +21,10 @@ type userUpdatePasswordPayload struct {
 }
 
 func (payload *userUpdatePasswordPayload) Validate(r *http.Request) error {
-	if govalidator.IsNull(payload.Password) {
+	if len(payload.Password) == 0 {
 		return errors.New("Invalid current password")
 	}
-	if govalidator.IsNull(payload.NewPassword) {
+	if len(payload.NewPassword) == 0 {
 		return errors.New("Invalid new password")
 	}
 	return nil
@@ -36,6 +35,7 @@ func (payload *userUpdatePasswordPayload) Validate(r *http.Request) error {
 // @description Update password for the specified user.
 // @description **Access policy**: authenticated
 // @tags users
+// @security ApiKeyAuth
 // @security jwt
 // @accept json
 // @produce json
@@ -50,44 +50,50 @@ func (payload *userUpdatePasswordPayload) Validate(r *http.Request) error {
 func (handler *Handler) userUpdatePassword(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	userID, err := request.RetrieveNumericRouteVariableValue(r, "id")
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid user identifier route variable", err}
+		return httperror.BadRequest("Invalid user identifier route variable", err)
 	}
 
 	tokenData, err := security.RetrieveTokenData(r)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve user authentication token", err}
+		return httperror.InternalServerError("Unable to retrieve user authentication token", err)
 	}
 
 	if tokenData.Role != portainer.AdministratorRole && tokenData.ID != portainer.UserID(userID) {
-		return &httperror.HandlerError{http.StatusForbidden, "Permission denied to update user", httperrors.ErrUnauthorized}
+		return httperror.Forbidden("Permission denied to update user", httperrors.ErrUnauthorized)
 	}
 
 	var payload userUpdatePasswordPayload
 	err = request.DecodeAndValidateJSONPayload(r, &payload)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid request payload", err}
+		return httperror.BadRequest("Invalid request payload", err)
 	}
 
-	user, err := handler.DataStore.User().User(portainer.UserID(userID))
-	if err == bolterrors.ErrObjectNotFound {
-		return &httperror.HandlerError{http.StatusNotFound, "Unable to find a user with the specified identifier inside the database", err}
+	user, err := handler.DataStore.User().Read(portainer.UserID(userID))
+	if handler.DataStore.IsErrObjectNotFound(err) {
+		return httperror.NotFound("Unable to find a user with the specified identifier inside the database", err)
 	} else if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to find a user with the specified identifier inside the database", err}
+		return httperror.InternalServerError("Unable to find a user with the specified identifier inside the database", err)
 	}
 
 	err = handler.CryptoService.CompareHashAndData(user.Password, payload.Password)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusForbidden, "Specified password do not match actual password", httperrors.ErrUnauthorized}
+		return httperror.Forbidden("Current password doesn't match", errors.New("Current password does not match the password provided. Please try again"))
+	}
+
+	if !handler.passwordStrengthChecker.Check(payload.NewPassword) {
+		return httperror.BadRequest("Password does not meet the minimum strength requirements", nil)
 	}
 
 	user.Password, err = handler.CryptoService.Hash(payload.NewPassword)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to hash user password", errCryptoHashFailure}
+		return httperror.InternalServerError("Unable to hash user password", errCryptoHashFailure)
 	}
 
-	err = handler.DataStore.User().UpdateUser(user.ID, user)
+	user.TokenIssueAt = time.Now().Unix()
+
+	err = handler.DataStore.User().Update(user.ID, user)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to persist user changes inside the database", err}
+		return httperror.InternalServerError("Unable to persist user changes inside the database", err)
 	}
 
 	return response.Empty(w)

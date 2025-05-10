@@ -3,24 +3,26 @@ package exec
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"os/exec"
 	"path"
 	"runtime"
 	"strings"
 
-	"github.com/pkg/errors"
+	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/http/proxy"
 	"github.com/portainer/portainer/api/http/proxy/factory"
 	"github.com/portainer/portainer/api/http/proxy/factory/kubernetes"
 	"github.com/portainer/portainer/api/kubernetes/cli"
 
-	portainer "github.com/portainer/portainer/api"
+	"github.com/pkg/errors"
 )
 
 // KubernetesDeployer represents a service to deploy resources inside a Kubernetes environment(endpoint).
 type KubernetesDeployer struct {
 	binaryPath                  string
-	dataStore                   portainer.DataStore
+	dataStore                   dataservices.DataStore
 	reverseTunnelService        portainer.ReverseTunnelService
 	signatureService            portainer.DigitalSignatureService
 	kubernetesClientFactory     *cli.ClientFactory
@@ -29,7 +31,7 @@ type KubernetesDeployer struct {
 }
 
 // NewKubernetesDeployer initializes a new KubernetesDeployer service.
-func NewKubernetesDeployer(kubernetesTokenCacheManager *kubernetes.TokenCacheManager, kubernetesClientFactory *cli.ClientFactory, datastore portainer.DataStore, reverseTunnelService portainer.ReverseTunnelService, signatureService portainer.DigitalSignatureService, proxyManager *proxy.Manager, binaryPath string) *KubernetesDeployer {
+func NewKubernetesDeployer(kubernetesTokenCacheManager *kubernetes.TokenCacheManager, kubernetesClientFactory *cli.ClientFactory, datastore dataservices.DataStore, reverseTunnelService portainer.ReverseTunnelService, signatureService portainer.DigitalSignatureService, proxyManager *proxy.Manager, binaryPath string) *KubernetesDeployer {
 	return &KubernetesDeployer{
 		binaryPath:                  binaryPath,
 		dataStore:                   datastore,
@@ -42,19 +44,19 @@ func NewKubernetesDeployer(kubernetesTokenCacheManager *kubernetes.TokenCacheMan
 }
 
 func (deployer *KubernetesDeployer) getToken(userID portainer.UserID, endpoint *portainer.Endpoint, setLocalAdminToken bool) (string, error) {
-	kubeCLI, err := deployer.kubernetesClientFactory.GetKubeClient(endpoint)
+	kubeCLI, err := deployer.kubernetesClientFactory.GetPrivilegedKubeClient(endpoint)
 	if err != nil {
 		return "", err
 	}
 
-	tokenCache := deployer.kubernetesTokenCacheManager.GetOrCreateTokenCache(int(endpoint.ID))
+	tokenCache := deployer.kubernetesTokenCacheManager.GetOrCreateTokenCache(endpoint.ID)
 
 	tokenManager, err := kubernetes.NewTokenManager(kubeCLI, deployer.dataStore, tokenCache, setLocalAdminToken)
 	if err != nil {
 		return "", err
 	}
 
-	user, err := deployer.dataStore.User().User(userID)
+	user, err := deployer.dataStore.User().Read(userID)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to fetch the user")
 	}
@@ -69,8 +71,9 @@ func (deployer *KubernetesDeployer) getToken(userID portainer.UserID, endpoint *
 	}
 
 	if token == "" {
-		return "", fmt.Errorf("can not get a valid user service account token")
+		return "", errors.New("can not get a valid user service account token")
 	}
+
 	return token, nil
 }
 
@@ -122,6 +125,8 @@ func (deployer *KubernetesDeployer) command(operation string, userID portainer.U
 
 	var stderr bytes.Buffer
 	cmd := exec.Command(command, args...)
+	cmd.Env = os.Environ()
+	cmd.Env = append(cmd.Env, "POD_NAMESPACE=default")
 	cmd.Stderr = &stderr
 
 	output, err := cmd.Output()
@@ -130,29 +135,6 @@ func (deployer *KubernetesDeployer) command(operation string, userID portainer.U
 	}
 
 	return string(output), nil
-}
-
-// ConvertCompose leverages the kompose binary to deploy a compose compliant manifest.
-func (deployer *KubernetesDeployer) ConvertCompose(data []byte) ([]byte, error) {
-	command := path.Join(deployer.binaryPath, "kompose")
-	if runtime.GOOS == "windows" {
-		command = path.Join(deployer.binaryPath, "kompose.exe")
-	}
-
-	args := make([]string, 0)
-	args = append(args, "convert", "-f", "-", "--stdout")
-
-	var stderr bytes.Buffer
-	cmd := exec.Command(command, args...)
-	cmd.Stderr = &stderr
-	cmd.Stdin = bytes.NewReader(data)
-
-	output, err := cmd.Output()
-	if err != nil {
-		return nil, errors.New(stderr.String())
-	}
-
-	return output, nil
 }
 
 func (deployer *KubernetesDeployer) getAgentURL(endpoint *portainer.Endpoint) (string, *factory.ProxyServer, error) {

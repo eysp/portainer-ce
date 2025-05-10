@@ -1,14 +1,17 @@
 package endpoints
 
 import (
-	httperror "github.com/portainer/libhttp/error"
+	"net/http"
+
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/dataservices"
+	dockerclient "github.com/portainer/portainer/api/docker/client"
 	"github.com/portainer/portainer/api/http/proxy"
 	"github.com/portainer/portainer/api/http/security"
 	"github.com/portainer/portainer/api/internal/authorization"
 	"github.com/portainer/portainer/api/kubernetes/cli"
-
-	"net/http"
+	"github.com/portainer/portainer/api/pendingactions"
+	httperror "github.com/portainer/portainer/pkg/libhttp/error"
 
 	"github.com/gorilla/mux"
 )
@@ -23,21 +26,24 @@ func hideFields(endpoint *portainer.Endpoint) {
 // Handler is the HTTP handler used to handle environment(endpoint) operations.
 type Handler struct {
 	*mux.Router
-	requestBouncer       *security.RequestBouncer
-	DataStore            portainer.DataStore
-	FileService          portainer.FileService
-	ProxyManager         *proxy.Manager
-	ReverseTunnelService portainer.ReverseTunnelService
-	SnapshotService      portainer.SnapshotService
-	K8sClientFactory     *cli.ClientFactory
-	ComposeStackManager  portainer.ComposeStackManager
-	AuthorizationService *authorization.Service
-	BindAddress          string
-	BindAddressHTTPS     string
+	requestBouncer         security.BouncerService
+	DataStore              dataservices.DataStore
+	FileService            portainer.FileService
+	ProxyManager           *proxy.Manager
+	ReverseTunnelService   portainer.ReverseTunnelService
+	SnapshotService        portainer.SnapshotService
+	K8sClientFactory       *cli.ClientFactory
+	ComposeStackManager    portainer.ComposeStackManager
+	AuthorizationService   *authorization.Service
+	DockerClientFactory    *dockerclient.ClientFactory
+	BindAddress            string
+	BindAddressHTTPS       string
+	PendingActionsService  *pendingactions.PendingActionsService
+	PullLimitCheckDisabled bool
 }
 
 // NewHandler creates a handler to manage environment(endpoint) operations.
-func NewHandler(bouncer *security.RequestBouncer) *Handler {
+func NewHandler(bouncer security.BouncerService) *Handler {
 	h := &Handler{
 		Router:         mux.NewRouter(),
 		requestBouncer: bouncer,
@@ -53,27 +59,34 @@ func NewHandler(bouncer *security.RequestBouncer) *Handler {
 		bouncer.AdminAccess(httperror.LoggerHandler(h.endpointSnapshots))).Methods(http.MethodPost)
 	h.Handle("/endpoints",
 		bouncer.RestrictedAccess(httperror.LoggerHandler(h.endpointList))).Methods(http.MethodGet)
+	h.Handle("/endpoints/agent_versions",
+		bouncer.RestrictedAccess(httperror.LoggerHandler(h.agentVersions))).Methods(http.MethodGet)
+	h.Handle("/endpoints/relations", bouncer.RestrictedAccess(httperror.LoggerHandler(h.updateRelations))).Methods(http.MethodPut)
+
 	h.Handle("/endpoints/{id}",
 		bouncer.RestrictedAccess(httperror.LoggerHandler(h.endpointInspect))).Methods(http.MethodGet)
 	h.Handle("/endpoints/{id}",
 		bouncer.AdminAccess(httperror.LoggerHandler(h.endpointUpdate))).Methods(http.MethodPut)
 	h.Handle("/endpoints/{id}",
 		bouncer.AdminAccess(httperror.LoggerHandler(h.endpointDelete))).Methods(http.MethodDelete)
+	h.Handle("/endpoints/delete",
+		bouncer.AdminAccess(httperror.LoggerHandler(h.endpointDeleteBatch))).Methods(http.MethodPost)
 	h.Handle("/endpoints/{id}/dockerhub/{registryId}",
-		bouncer.RestrictedAccess(httperror.LoggerHandler(h.endpointDockerhubStatus))).Methods(http.MethodGet)
-	h.Handle("/endpoints/{id}/extensions",
-		bouncer.RestrictedAccess(httperror.LoggerHandler(h.endpointExtensionAdd))).Methods(http.MethodPost)
-	h.Handle("/endpoints/{id}/extensions/{extensionType}",
-		bouncer.RestrictedAccess(httperror.LoggerHandler(h.endpointExtensionRemove))).Methods(http.MethodDelete)
+		bouncer.AuthenticatedAccess(httperror.LoggerHandler(h.endpointDockerhubStatus))).Methods(http.MethodGet)
 	h.Handle("/endpoints/{id}/snapshot",
 		bouncer.AdminAccess(httperror.LoggerHandler(h.endpointSnapshot))).Methods(http.MethodPost)
-	h.Handle("/endpoints/{id}/status",
-		bouncer.PublicAccess(httperror.LoggerHandler(h.endpointStatusInspect))).Methods(http.MethodGet)
 	h.Handle("/endpoints/{id}/registries",
 		bouncer.AuthenticatedAccess(httperror.LoggerHandler(h.endpointRegistriesList))).Methods(http.MethodGet)
 	h.Handle("/endpoints/{id}/registries/{registryId}",
-		bouncer.AuthenticatedAccess(httperror.LoggerHandler(h.endpointRegistryInspect))).Methods(http.MethodGet)
-	h.Handle("/endpoints/{id}/registries/{registryId}",
 		bouncer.AuthenticatedAccess(httperror.LoggerHandler(h.endpointRegistryAccess))).Methods(http.MethodPut)
+
+	h.Handle("/endpoints/global-key", bouncer.PublicAccess(httperror.LoggerHandler(h.endpointCreateGlobalKey))).Methods(http.MethodPost)
+	h.Handle("/endpoints/{id}/forceupdateservice",
+		bouncer.AuthenticatedAccess(httperror.LoggerHandler(h.endpointForceUpdateService))).Methods(http.MethodPut)
+
+	// DEPRECATED
+	h.Handle("/endpoints/{id}/status", bouncer.PublicAccess(httperror.LoggerHandler(h.endpointStatusInspect))).Methods(http.MethodGet)
+	h.Handle("/endpoints", bouncer.AdminAccess(httperror.LoggerHandler(h.endpointDeleteBatchDeprecated))).Methods(http.MethodDelete)
+
 	return h
 }

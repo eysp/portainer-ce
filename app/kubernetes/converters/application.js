@@ -1,15 +1,12 @@
 import _ from 'lodash-es';
 import filesizeParser from 'filesize-parser';
 
+import { KubernetesApplicationDataAccessPolicies, KubernetesApplicationDeploymentTypes, KubernetesApplicationTypes } from 'Kubernetes/models/application/models/appConstants';
 import {
   KubernetesApplication,
   KubernetesApplicationConfigurationVolume,
-  KubernetesApplicationDataAccessPolicies,
-  KubernetesApplicationDeploymentTypes,
   KubernetesApplicationPersistedFolder,
   KubernetesApplicationPort,
-  KubernetesApplicationPublishingTypes,
-  KubernetesApplicationTypes,
   KubernetesPortainerApplicationNameLabel,
   KubernetesPortainerApplicationNote,
   KubernetesPortainerApplicationOwnerLabel,
@@ -25,11 +22,13 @@ import KubernetesApplicationHelper from 'Kubernetes/helpers/application';
 import KubernetesDeploymentConverter from 'Kubernetes/converters/deployment';
 import KubernetesDaemonSetConverter from 'Kubernetes/converters/daemonSet';
 import KubernetesStatefulSetConverter from 'Kubernetes/converters/statefulSet';
+import KubernetesPodConverter from 'Kubernetes/pod/converter';
 import KubernetesServiceConverter from 'Kubernetes/converters/service';
 import KubernetesPersistentVolumeClaimConverter from 'Kubernetes/converters/persistentVolumeClaim';
 import PortainerError from 'Portainer/error';
 import { KubernetesIngressHelper } from 'Kubernetes/ingress/helper';
 import KubernetesCommonHelper from 'Kubernetes/helpers/commonHelper';
+import { KubernetesConfigurationKinds } from 'Kubernetes/models/configuration/models';
 
 function _apiPortsToPublishedPorts(pList, pRefs) {
   const ports = _.map(pList, (item) => {
@@ -57,6 +56,8 @@ class KubernetesApplicationConverter {
     res.Id = data.metadata.uid;
     res.Name = data.metadata.name;
     res.Metadata = data.metadata;
+    res.ApplicationType = data.kind;
+    res.Labels = data.metadata.labels || {};
 
     if (data.metadata.labels) {
       const { labels } = data.metadata;
@@ -120,6 +121,8 @@ class KubernetesApplicationConverter {
       res.ServiceType = serviceType;
       res.ServiceId = service.metadata.uid;
       res.ServiceName = service.metadata.name;
+      res.ClusterIp = service.spec.clusterIP;
+      res.ExternalIp = service.spec.externalIP;
 
       if (serviceType === KubernetesServiceTypes.LOAD_BALANCER) {
         if (service.status.loadBalancer.ingress && service.status.loadBalancer.ingress.length > 0) {
@@ -177,7 +180,7 @@ class KubernetesApplicationConverter {
         persistedFolder.MountPath = matchingVolumeMount.mountPath;
 
         if (volume.persistentVolumeClaim) {
-          persistedFolder.PersistentVolumeClaimName = volume.persistentVolumeClaim.claimName;
+          persistedFolder.persistentVolumeClaimName = volume.persistentVolumeClaim.claimName;
         } else {
           persistedFolder.HostPath = volume.hostPath.path;
         }
@@ -211,6 +214,7 @@ class KubernetesApplicationConverter {
               configurationVolume.fileMountPath = matchingVolumeMount.mountPath;
               configurationVolume.rootMountPath = matchingVolumeMount.mountPath;
               configurationVolume.configurationName = configurationName;
+              configurationVolume.configurationType = volume.configMap ? KubernetesConfigurationKinds.CONFIGMAP : KubernetesConfigurationKinds.SECRET;
 
               acc.push(configurationVolume);
             } else {
@@ -220,6 +224,7 @@ class KubernetesApplicationConverter {
                 configurationVolume.rootMountPath = matchingVolumeMount.mountPath;
                 configurationVolume.configurationKey = item.key;
                 configurationVolume.configurationName = configurationName;
+                configurationVolume.configurationType = volume.configMap ? KubernetesConfigurationKinds.CONFIGMAP : KubernetesConfigurationKinds.SECRET;
 
                 acc.push(configurationVolume);
               });
@@ -236,16 +241,16 @@ class KubernetesApplicationConverter {
   static apiPodToApplication(data, pods, service, ingresses) {
     const res = new KubernetesApplication();
     KubernetesApplicationConverter.applicationCommon(res, data, pods, service, ingresses);
-    res.ApplicationType = KubernetesApplicationTypes.POD;
+    res.ApplicationType = KubernetesApplicationTypes.Pod;
     return res;
   }
 
   static apiDeploymentToApplication(data, pods, service, ingresses) {
     const res = new KubernetesApplication();
     KubernetesApplicationConverter.applicationCommon(res, data, pods, service, ingresses);
-    res.ApplicationType = KubernetesApplicationTypes.DEPLOYMENT;
-    res.DeploymentType = KubernetesApplicationDeploymentTypes.REPLICATED;
-    res.DataAccessPolicy = KubernetesApplicationDataAccessPolicies.SHARED;
+    res.ApplicationType = KubernetesApplicationTypes.Deployment;
+    res.DeploymentType = KubernetesApplicationDeploymentTypes.Replicated;
+    res.DataAccessPolicy = KubernetesApplicationDataAccessPolicies.Shared;
     res.RunningPodsCount = data.status.availableReplicas || data.status.replicas - data.status.unavailableReplicas || 0;
     res.TotalPodsCount = data.spec.replicas;
     return res;
@@ -254,9 +259,9 @@ class KubernetesApplicationConverter {
   static apiDaemonSetToApplication(data, pods, service, ingresses) {
     const res = new KubernetesApplication();
     KubernetesApplicationConverter.applicationCommon(res, data, pods, service, ingresses);
-    res.ApplicationType = KubernetesApplicationTypes.DAEMONSET;
-    res.DeploymentType = KubernetesApplicationDeploymentTypes.GLOBAL;
-    res.DataAccessPolicy = KubernetesApplicationDataAccessPolicies.SHARED;
+    res.ApplicationType = KubernetesApplicationTypes.DaemonSet;
+    res.DeploymentType = KubernetesApplicationDeploymentTypes.Global;
+    res.DataAccessPolicy = KubernetesApplicationDataAccessPolicies.Shared;
     res.RunningPodsCount = data.status.numberAvailable || data.status.desiredNumberScheduled - data.status.numberUnavailable || 0;
     res.TotalPodsCount = data.status.desiredNumberScheduled;
     return res;
@@ -265,9 +270,9 @@ class KubernetesApplicationConverter {
   static apiStatefulSetToapplication(data, pods, service, ingresses) {
     const res = new KubernetesApplication();
     KubernetesApplicationConverter.applicationCommon(res, data, pods, service, ingresses);
-    res.ApplicationType = KubernetesApplicationTypes.STATEFULSET;
-    res.DeploymentType = KubernetesApplicationDeploymentTypes.REPLICATED;
-    res.DataAccessPolicy = KubernetesApplicationDataAccessPolicies.ISOLATED;
+    res.ApplicationType = KubernetesApplicationTypes.StatefulSet;
+    res.DeploymentType = KubernetesApplicationDeploymentTypes.Replicated;
+    res.DataAccessPolicy = KubernetesApplicationDataAccessPolicies.Isolated;
     res.RunningPodsCount = data.status.readyReplicas || 0;
     res.TotalPodsCount = data.spec.replicas;
     res.HeadlessServiceName = data.spec.serviceName;
@@ -279,6 +284,9 @@ class KubernetesApplicationConverter {
     res.ApplicationType = app.ApplicationType;
     res.ResourcePool = _.find(resourcePools, ['Namespace.Name', app.ResourcePool]);
     res.Name = app.Name;
+    res.Labels = app.Labels;
+    res.Services = KubernetesApplicationHelper.generateServicesFormValuesFromServices(app, ingresses);
+    res.Selector = KubernetesApplicationHelper.generateSelectorFromService(app);
     res.StackName = app.StackName;
     res.ApplicationOwner = app.ApplicationOwner;
     res.ImageModel.Image = app.Image;
@@ -290,24 +298,26 @@ class KubernetesApplicationConverter {
     res.DataAccessPolicy = app.DataAccessPolicy;
     res.EnvironmentVariables = KubernetesApplicationHelper.generateEnvVariablesFromEnv(app.Env);
     res.PersistedFolders = KubernetesApplicationHelper.generatePersistedFoldersFormValuesFromPersistedFolders(app.PersistedFolders, persistentVolumeClaims); // generate from PVC and app.PersistedFolders
-    res.Configurations = KubernetesApplicationHelper.generateConfigurationFormValuesFromEnvAndVolumes(app.Env, app.ConfigurationVolumes, configurations);
+    res.Secrets = KubernetesApplicationHelper.generateConfigurationFormValuesFromEnvAndVolumes(
+      app.Env,
+      app.ConfigurationVolumes,
+      configurations,
+      KubernetesConfigurationKinds.SECRET
+    );
+    res.ConfigMaps = KubernetesApplicationHelper.generateConfigurationFormValuesFromEnvAndVolumes(
+      app.Env,
+      app.ConfigurationVolumes,
+      configurations,
+      KubernetesConfigurationKinds.CONFIGMAP
+    );
     res.AutoScaler = KubernetesApplicationHelper.generateAutoScalerFormValueFromHorizontalPodAutoScaler(app.AutoScaler, res.ReplicaCount);
     res.PublishedPorts = KubernetesApplicationHelper.generatePublishedPortsFormValuesFromPublishedPorts(app.ServiceType, app.PublishedPorts, ingresses);
     res.Containers = app.Containers;
 
-    const isIngress = _.filter(res.PublishedPorts, (p) => p.IngressName).length;
-    if (app.ServiceType === KubernetesServiceTypes.LOAD_BALANCER) {
-      res.PublishingType = KubernetesApplicationPublishingTypes.LOAD_BALANCER;
-    } else if (app.ServiceType === KubernetesServiceTypes.NODE_PORT) {
-      res.PublishingType = KubernetesApplicationPublishingTypes.NODE_PORT;
-    } else if (app.ServiceType === KubernetesServiceTypes.CLUSTER_IP && isIngress) {
-      res.PublishingType = KubernetesApplicationPublishingTypes.INGRESS;
-    } else {
-      res.PublishingType = KubernetesApplicationPublishingTypes.CLUSTER_IP;
-    }
+    res.PublishingType = app.ServiceType;
 
     if (app.Pods && app.Pods.length) {
-      KubernetesApplicationHelper.generatePlacementsFormValuesFromAffinity(res, app.Pods[0].Affinity, nodesLabels);
+      KubernetesApplicationHelper.generatePlacementsFormValuesFromAffinity(res, app.Pods[0].Affinity);
     }
 
     return res;
@@ -320,20 +330,22 @@ class KubernetesApplicationConverter {
     const rwx = KubernetesApplicationHelper.hasRWX(claims);
 
     const deployment =
-      (formValues.DeploymentType === KubernetesApplicationDeploymentTypes.REPLICATED &&
-        (claims.length === 0 || (claims.length > 0 && formValues.DataAccessPolicy === KubernetesApplicationDataAccessPolicies.SHARED))) ||
-      formValues.ApplicationType === KubernetesApplicationTypes.DEPLOYMENT;
+      (formValues.DeploymentType === KubernetesApplicationDeploymentTypes.Replicated &&
+        (claims.length === 0 || (claims.length > 0 && formValues.DataAccessPolicy === KubernetesApplicationDataAccessPolicies.Shared))) ||
+      formValues.ApplicationType === KubernetesApplicationTypes.Deployment;
 
     const statefulSet =
-      (formValues.DeploymentType === KubernetesApplicationDeploymentTypes.REPLICATED &&
+      (formValues.DeploymentType === KubernetesApplicationDeploymentTypes.Replicated &&
         claims.length > 0 &&
-        formValues.DataAccessPolicy === KubernetesApplicationDataAccessPolicies.ISOLATED) ||
-      formValues.ApplicationType === KubernetesApplicationTypes.STATEFULSET;
+        formValues.DataAccessPolicy === KubernetesApplicationDataAccessPolicies.Isolated) ||
+      formValues.ApplicationType === KubernetesApplicationTypes.StatefulSet;
 
     const daemonSet =
-      (formValues.DeploymentType === KubernetesApplicationDeploymentTypes.GLOBAL &&
-        (claims.length === 0 || (claims.length > 0 && formValues.DataAccessPolicy === KubernetesApplicationDataAccessPolicies.SHARED && rwx))) ||
-      formValues.ApplicationType === KubernetesApplicationTypes.DAEMONSET;
+      (formValues.DeploymentType === KubernetesApplicationDeploymentTypes.Global &&
+        (claims.length === 0 || (claims.length > 0 && formValues.DataAccessPolicy === KubernetesApplicationDataAccessPolicies.Shared && rwx))) ||
+      formValues.ApplicationType === KubernetesApplicationTypes.DaemonSet;
+
+    const pod = formValues.ApplicationType === KubernetesApplicationTypes.Pod;
 
     let app;
     if (deployment) {
@@ -342,9 +354,12 @@ class KubernetesApplicationConverter {
       app = KubernetesStatefulSetConverter.applicationFormValuesToStatefulSet(formValues, claims);
     } else if (daemonSet) {
       app = KubernetesDaemonSetConverter.applicationFormValuesToDaemonSet(formValues, claims);
+    } else if (pod) {
+      app = KubernetesPodConverter.applicationFormValuesToPod(formValues, claims);
     } else {
       throw new PortainerError('Unable to determine which association to use to convert form');
     }
+    app.ApplicationType = formValues.ApplicationType;
 
     let headlessService;
     if (statefulSet) {
@@ -356,7 +371,9 @@ class KubernetesApplicationConverter {
       service = undefined;
     }
 
-    return [app, headlessService, service, claims];
+    let services = KubernetesServiceConverter.applicationFormValuesToServices(formValues);
+
+    return [app, headlessService, services, service, claims];
   }
 }
 

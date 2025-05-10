@@ -39,6 +39,7 @@ angular.module('portainer.app').factory('ChartService', [
               ticks: {
                 beginAtZero: true,
                 callback: scalesCallback,
+                precision: 0,
               },
             },
           ],
@@ -76,7 +77,7 @@ angular.module('portainer.app').factory('ChartService', [
           labels: [],
           datasets: [
             {
-              label: '内存',
+              label: 'Memory',
               data: [],
               fill: true,
               backgroundColor: 'rgba(151,187,205,0.4)',
@@ -87,7 +88,7 @@ angular.module('portainer.app').factory('ChartService', [
               borderWidth: 2,
             },
             {
-              label: '缓存',
+              label: 'Cache',
               data: [],
               fill: true,
               backgroundColor: 'rgba(255,180,174,0.4)',
@@ -110,7 +111,7 @@ angular.module('portainer.app').factory('ChartService', [
           labels: [],
           datasets: [
             {
-              label: '读取（聚合）',
+              label: 'Read (Aggregate)',
               data: [],
               fill: true,
               backgroundColor: 'rgba(151,187,205,0.4)',
@@ -121,7 +122,7 @@ angular.module('portainer.app').factory('ChartService', [
               borderWidth: 2,
             },
             {
-              label: '写入（聚合）',
+              label: 'Write (Aggregate)',
               data: [],
               fill: true,
               backgroundColor: 'rgba(255,180,174,0.4)',

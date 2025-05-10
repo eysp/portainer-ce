@@ -4,10 +4,11 @@ import _ from 'lodash-es';
 import filesizeParser from 'filesize-parser';
 import KubernetesResourceReservationHelper from 'Kubernetes/helpers/resourceReservationHelper';
 import KubernetesPodConverter from 'Kubernetes/pod/converter';
+import { getMetricsForPod } from '@/react/kubernetes/metrics/metrics.ts';
 
 class KubernetesApplicationStatsController {
   /* @ngInject */
-  constructor($async, $state, $interval, $document, Notifications, KubernetesPodService, KubernetesNodeService, KubernetesMetricsService, ChartService) {
+  constructor($async, $state, $interval, $document, Notifications, KubernetesPodService, KubernetesNodeService, ChartService) {
     this.$async = $async;
     this.$state = $state;
     this.$interval = $interval;
@@ -15,10 +16,10 @@ class KubernetesApplicationStatsController {
     this.Notifications = Notifications;
     this.KubernetesPodService = KubernetesPodService;
     this.KubernetesNodeService = KubernetesNodeService;
-    this.KubernetesMetricsService = KubernetesMetricsService;
     this.ChartService = ChartService;
 
     this.onInit = this.onInit.bind(this);
+    this.initCharts = this.initCharts.bind(this);
   }
 
   changeUpdateRepeater() {
@@ -62,29 +63,38 @@ class KubernetesApplicationStatsController {
         this.updateMemoryChart();
       } catch (error) {
         this.stopRepeater();
-        this.Notifications.error('失败', error);
+        this.Notifications.error('Failure', error);
       }
     }, refreshRate * 1000);
   }
 
   initCharts() {
-    const cpuChartCtx = $('#cpuChart');
-    const cpuChart = this.ChartService.CreateCPUChart(cpuChartCtx);
-    this.cpuChart = cpuChart;
-
-    const memoryChartCtx = $('#memoryChart');
-    const memoryChart = this.ChartService.CreateMemoryChart(memoryChartCtx);
-    this.memoryChart = memoryChart;
-
-    this.updateCPUChart();
-    this.updateMemoryChart();
-    this.setUpdateRepeater();
+    let i = 0;
+    const findCharts = setInterval(() => {
+      let cpuChartCtx = $('#cpuChart');
+      let memoryChartCtx = $('#memoryChart');
+      if (cpuChartCtx.length !== 0 && memoryChartCtx.length !== 0) {
+        const cpuChart = this.ChartService.CreateCPUChart(cpuChartCtx);
+        this.cpuChart = cpuChart;
+        const memoryChart = this.ChartService.CreateMemoryChart(memoryChartCtx);
+        this.memoryChart = memoryChart;
+        this.updateCPUChart();
+        this.updateMemoryChart();
+        this.setUpdateRepeater();
+        clearInterval(findCharts);
+        return;
+      }
+      i++;
+      if (i >= 10) {
+        clearInterval(findCharts);
+      }
+    }, 200);
   }
 
   getStats() {
     return this.$async(async () => {
       try {
-        const stats = await this.KubernetesMetricsService.getPod(this.state.transition.namespace, this.state.transition.podName);
+        const stats = await getMetricsForPod(this.$state.params.endpointId, this.state.transition.namespace, this.state.transition.podName);
         const container = _.find(stats.containers, { name: this.state.transition.containerName });
         if (container) {
           const memory = filesizeParser(container.usage.memory);
@@ -102,7 +112,7 @@ class KubernetesApplicationStatsController {
           };
         }
       } catch (err) {
-        this.Notifications.error('失败', err, '无法检索应用程序统计信息');
+        this.Notifications.error('Failure', err, 'Unable to retrieve application stats');
       }
     });
   }
@@ -126,7 +136,7 @@ class KubernetesApplicationStatsController {
     };
 
     try {
-      await this.KubernetesMetricsService.getPod(this.state.transition.namespace, this.state.transition.podName);
+      await getMetricsForPod(this.$state.params.endpointId, this.state.transition.namespace, this.state.transition.podName);
     } catch (error) {
       this.state.getMetrics = false;
       this.state.viewReady = true;
@@ -140,7 +150,7 @@ class KubernetesApplicationStatsController {
         const node = await this.KubernetesNodeService.get(pod.Node);
         this.nodeCPU = node.CPU;
       } else {
-        throw new Error('找不到 pod');
+        throw new Error('Unable to find pod');
       }
       await this.getStats();
       this.state.getMetrics = true;
@@ -149,7 +159,7 @@ class KubernetesApplicationStatsController {
         this.initCharts();
       });
     } catch (err) {
-      this.Notifications.error('失败', err, '无法检索应用程序统计信息');
+      this.Notifications.error('Failure', err, 'Unable to retrieve application stats');
     } finally {
       this.state.viewReady = true;
     }

@@ -1,3 +1,5 @@
+import { processItemsInBatches } from '@/react/common/processItemsInBatches';
+
 angular.module('portainer.docker').controller('VolumesController', [
   '$q',
   '$scope',
@@ -6,39 +8,25 @@ angular.module('portainer.docker').controller('VolumesController', [
   'ServiceService',
   'VolumeHelper',
   'Notifications',
-  'HttpRequestHelper',
-  'EndpointProvider',
   'Authentication',
-  'ModalService',
   'endpoint',
-  function ($q, $scope, $state, VolumeService, ServiceService, VolumeHelper, Notifications, HttpRequestHelper, EndpointProvider, Authentication, ModalService, endpoint) {
-    $scope.removeAction = function (selectedItems) {
-      ModalService.confirmDeletion('您要删除选定的存储卷吗?', (confirmed) => {
-        if (confirmed) {
-          var actionCount = selectedItems.length;
-          angular.forEach(selectedItems, function (volume) {
-            HttpRequestHelper.setPortainerAgentTargetHeader(volume.NodeName);
-            VolumeService.remove(volume)
-              .then(function success() {
-                Notifications.success('成功删除存储卷', volume.Id);
-                var index = $scope.volumes.indexOf(volume);
-                $scope.volumes.splice(index, 1);
-              })
-              .catch(function error(err) {
-                Notifications.error('失败', err, '无法删除存储卷');
-              })
-              .finally(function final() {
-                --actionCount;
-                if (actionCount === 0) {
-                  $state.reload();
-                }
-              });
+  function ($q, $scope, $state, VolumeService, ServiceService, VolumeHelper, Notifications, Authentication, endpoint) {
+    $scope.removeAction = async function (selectedItems) {
+      async function doRemove(volume) {
+        return VolumeService.remove(volume.Name, volume.NodeName)
+          .then(function success() {
+            Notifications.success('Volume successfully removed', volume.Name);
+            var index = $scope.volumes.indexOf(volume);
+            $scope.volumes.splice(index, 1);
+          })
+          .catch(function error(err) {
+            Notifications.error('Failure', err, 'Unable to remove volume');
           });
-        }
-      });
-    };
+      }
 
-    $scope.offlineMode = false;
+      await processItemsInBatches(selectedItems, doRemove);
+      $state.reload();
+    };
 
     $scope.getVolumes = getVolumes;
     function getVolumes() {
@@ -46,13 +34,12 @@ angular.module('portainer.docker').controller('VolumesController', [
       var endpointRole = $scope.applicationState.endpoint.mode.role;
 
       $q.all({
-        attached: VolumeService.volumes({ filters: { dangling: ['false'] } }),
-        dangling: VolumeService.volumes({ filters: { dangling: ['true'] } }),
+        attached: VolumeService.volumes({ dangling: ['false'] }),
+        dangling: VolumeService.volumes({ dangling: ['true'] }),
         services: endpointProvider === 'DOCKER_SWARM_MODE' && endpointRole === 'MANAGER' ? ServiceService.services() : [],
       })
         .then(function success(data) {
           var services = data.services;
-          $scope.offlineMode = EndpointProvider.offlineMode();
           $scope.volumes = data.attached
             .map(function (volume) {
               volume.dangling = false;
@@ -69,7 +56,7 @@ angular.module('portainer.docker').controller('VolumesController', [
             );
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索存储卷');
+          Notifications.error('Failure', err, 'Unable to retrieve volumes');
         });
     }
 

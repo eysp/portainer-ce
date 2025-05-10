@@ -3,8 +3,11 @@ angular.module('portainer.kubernetes').component('kubernetesConfigurationData', 
   controller: 'KubernetesConfigurationDataController',
   bindings: {
     formValues: '=',
+    isDockerConfig: '=',
+    onChangeValidation: '&',
     isValid: '=',
     isCreation: '=',
     isEditorDirty: '=',
+    type: '<',
   },
 });

@@ -1,26 +1,40 @@
-<form class="form-horizontal" name="registryFormProGet" ng-submit="$ctrl.formAction()">
-  <div class="col-sm-12 form-section-title">
-    重要通知
-  </div>
+<form class="form-horizontal" name="$ctrl.registryFormProGet" ng-submit="$ctrl.formAction()">
+  <div class="col-sm-12 form-section-title"> Important notice </div>
   <div class="form-group">
     <div class="col-sm-12 text-muted small">
-      任何有权访问此注册表的 Portainer 用户将能够针对 ProGet 用户有权访问的 ProGet 注册表中的任何订阅源的内容使用注册表管理器功能。
+      Any Portainer user that has access to this registry will be able to use the Registry Manager features against the content of any Feed in the ProGet registry that the ProGet
+      user has access to.
     </div>
   </div>
-  <div class="col-sm-12 form-section-title">
-    ProGet 注册表详细信息
-  </div>
+  <div class="col-sm-12 form-section-title"> ProGet registry details </div>
   <!-- name-input -->
   <div class="form-group">
-    <label for="registry_name" class="col-sm-3 col-lg-2 control-label text-left">名称</label>
+    <label for="registry_name" class="col-sm-3 col-lg-2 control-label required text-left">Name</label>
     <div class="col-sm-9 col-lg-10">
-      <input type="text" class="form-control" id="registry_name" name="registry_name" ng-model="$ctrl.model.Name" placeholder="proget-registry" required auto-focus />
-    </div>
-  </div>
-  <div class="form-group" ng-show="registryFormProGet.registry_name.$invalid">
-    <div class="col-sm-12 small text-warning">
-      <div ng-messages="registryFormProGet.registry_name.$error">
-        <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i>此字段是必需的。</p>
+      <input
+        type="text"
+        class="form-control"
+        id="registry_name"
+        name="registry_name"
+        ng-model="$ctrl.model.Name"
+        placeholder="proget-registry"
+        required
+        auto-focus
+        data-cy="registry-name-input"
+      />
+      <div class="help-block" ng-show="$ctrl.registryFormProGet.registry_name.$invalid">
+        <div class="small text-warning">
+          <div ng-messages="$ctrl.registryFormProGet.registry_name.$error">
+            <p ng-message="required" class="vertical-center">
+              <pr-icon icon="'alert-triangle'"></pr-icon>
+              This field is required.
+            </p>
+            <p ng-message="used" class="vertical-center">
+              <pr-icon icon="'alert-triangle'"></pr-icon>
+              A registry with the same name already exists.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -28,17 +42,29 @@
   <!-- url-input -->
   <div class="form-group">
     <label for="registry_url" class="col-sm-3 col-lg-2 control-label text-left">
-      注册表URL
-      <portainer-tooltip position="bottom" message="The URL of the ProGet registry including the Feed name"></portainer-tooltip>
+      <span class="required">Registry URL</span>
+      <portainer-tooltip message="'The URL of the ProGet registry including the Feed name'"></portainer-tooltip>
     </label>
     <div class="col-sm-9 col-lg-10">
-      <input type="text" class="form-control" id="registry_url" name="registry_url" ng-model="$ctrl.model.URL" placeholder="proget.example.com/example-registry" required />
-    </div>
-  </div>
-  <div class="form-group" ng-show="registryFormProGet.registry_url.$invalid">
-    <div class="col-sm-12 small text-warning">
-      <div ng-messages="registryFormProGet.registry_url.$error">
-        <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此字段是必需的。</p>
+      <input
+        type="text"
+        class="form-control"
+        id="registry_url"
+        name="registry_url"
+        ng-model="$ctrl.model.URL"
+        placeholder="proget.example.com/example-registry"
+        required
+        data-cy="registry-url-input"
+      />
+      <div class="help-block" ng-show="$ctrl.registryFormProGet.registry_url.$invalid">
+        <div class="small text-warning">
+          <div ng-messages="$ctrl.registryFormProGet.registry_url.$error">
+            <p ng-message="required" class="vertical-center">
+              <pr-icon icon="'alert-triangle'"></pr-icon>
+              This field is required.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -46,17 +72,29 @@
   <!-- base-url-input -->
   <div class="form-group">
     <label for="registry_base_url" class="col-sm-3 col-lg-2 control-label text-left">
-      基本URL
-      <portainer-tooltip position="bottom" message="The base URL of the ProGet registry"></portainer-tooltip>
+      <span class="required">Base URL</span>
+      <portainer-tooltip message="'The base URL of the ProGet registry'"></portainer-tooltip>
     </label>
     <div class="col-sm-9 col-lg-10">
-      <input type="text" class="form-control" id="registry_base_url" name="registry_base_url" ng-model="$ctrl.model.BaseURL" placeholder="proget.example.com" required />
-    </div>
-  </div>
-  <div class="form-group" ng-show="registryFormProGet.registry_base_url.$invalid">
-    <div class="col-sm-12 small text-warning">
-      <div ng-messages="registryFormProGet.registry_base_url.$error">
-        <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此字段是必需的。</p>
+      <input
+        type="text"
+        class="form-control"
+        id="registry_base_url"
+        name="registry_base_url"
+        ng-model="$ctrl.model.BaseURL"
+        placeholder="proget.example.com"
+        required
+        data-cy="registry-base-url-input"
+      />
+      <div class="help-block" ng-show="$ctrl.registryFormProGet.registry_base_url.$invalid">
+        <div class="small text-warning">
+          <div ng-messages="$ctrl.registryFormProGet.registry_base_url.$error">
+            <p ng-message="required" class="vertical-center">
+              <pr-icon icon="'alert-triangle'"></pr-icon>
+              This field is required.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -64,45 +102,49 @@
   <div>
     <!-- credentials-user -->
     <div class="form-group">
-      <label for="registry_username" class="col-sm-3 col-lg-2 control-label text-left">用户名</label>
+      <label for="registry_username" class="col-sm-3 col-lg-2 control-label required text-left">Username</label>
       <div class="col-sm-9 col-lg-10">
-        <input type="text" class="form-control" id="registry_username" name="registry_username" ng-model="$ctrl.model.Username" required />
-      </div>
-    </div>
-    <div class="form-group" ng-show="registryFormProGet.registry_username.$invalid">
-      <div class="col-sm-12 small text-warning">
-        <div ng-messages="registryFormProGet.registry_username.$error">
-          <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此字段是必需的。</p>
+        <input type="text" class="form-control" id="registry_username" name="registry_username" ng-model="$ctrl.model.Username" required data-cy="registry-username-input" />
+        <div class="help-block" ng-show="$ctrl.registryFormProGet.registry_username.$invalid">
+          <div class="small text-warning">
+            <div ng-messages="$ctrl.registryFormProGet.registry_username.$error">
+              <p ng-message="required" class="vertical-center">
+                <pr-icon icon="'alert-triangle'"></pr-icon>
+                This field is required.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
     <!-- !credentials-user -->
     <!-- credentials-password -->
     <div class="form-group">
-      <label for="registry_password" class="col-sm-3 col-lg-2 control-label text-left">密码</label>
+      <label for="registry_password" class="col-sm-3 col-lg-2 control-label required text-left">Password</label>
       <div class="col-sm-9 col-lg-10">
         <input type="password" class="form-control" id="registry_password" name="registry_password" ng-model="$ctrl.model.Password" required />
-      </div>
-    </div>
-    <div class="form-group" ng-show="registryFormProGet.registry_password.$invalid">
-      <div class="col-sm-12 small text-warning">
-        <div ng-messages="registryFormProGet.registry_password.$error">
-          <p ng-message="required"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 此字段是必需的。</p>
+        <div class="help-block" ng-show="$ctrl.registryFormProGet.registry_password.$invalid">
+          <div class="small text-warning">
+            <div ng-messages="$ctrl.registryFormProGet.registry_password.$error">
+              <p ng-message="required" class="vertical-center">
+                <pr-icon icon="'alert-triangle'"></pr-icon>
+                This field is required.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
     <!-- !credentials-password -->
   </div>
   <!-- actions -->
-  <div class="col-sm-12 form-section-title">
-    操作
-  </div>
+  <div class="col-sm-12 form-section-title"> Actions </div>
   <div class="form-group">
     <div class="col-sm-12">
       <button
         type="submit"
         class="btn btn-primary btn-sm"
-        ng-disabled="$ctrl.actionInProgress || !registryFormProGet.$valid"
+        ng-disabled="$ctrl.actionInProgress || !$ctrl.registryFormProGet.$valid"
         button-spinner="$ctrl.actionInProgress"
         analytics-on
         analytics-category="portainer"
@@ -110,7 +152,7 @@
         analytics-properties="{ metadata: { type: 'proget' } }"
       >
         <span ng-hide="$ctrl.actionInProgress">{{ $ctrl.formActionLabel }}</span>
-        <span ng-show="$ctrl.actionInProgress">进行中...</span>
+        <span ng-show="$ctrl.actionInProgress">In progress...</span>
       </button>
     </div>
   </div>

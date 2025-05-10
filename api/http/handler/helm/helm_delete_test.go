@@ -1,39 +1,42 @@
 package helm
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/portainer/libhelm/binary/test"
-	"github.com/portainer/libhelm/options"
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/datastore"
 	"github.com/portainer/portainer/api/exec/exectest"
 	"github.com/portainer/portainer/api/http/security"
-	"github.com/portainer/portainer/api/kubernetes"
-	"github.com/stretchr/testify/assert"
-
-	"github.com/portainer/portainer/api/bolt"
+	"github.com/portainer/portainer/api/internal/testhelpers"
 	helper "github.com/portainer/portainer/api/internal/testhelpers"
+	"github.com/portainer/portainer/api/jwt"
+	"github.com/portainer/portainer/api/kubernetes"
+	"github.com/portainer/portainer/pkg/libhelm/binary/test"
+	"github.com/portainer/portainer/pkg/libhelm/options"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_helmDelete(t *testing.T) {
 	is := assert.New(t)
 
-	store, teardown := bolt.MustNewTestStore(true)
-	defer teardown()
+	_, store := datastore.MustNewTestStore(t, true, true)
 
-	err := store.Endpoint().CreateEndpoint(&portainer.Endpoint{ID: 1})
+	err := store.Endpoint().Create(&portainer.Endpoint{ID: 1})
 	is.NoError(err, "Error creating environment")
 
-	err = store.User().CreateUser(&portainer.User{Username: "admin", Role: portainer.AdministratorRole})
+	err = store.User().Create(&portainer.User{Username: "admin", Role: portainer.AdministratorRole})
 	is.NoError(err, "Error creating a user")
+
+	jwtService, err := jwt.NewService("1h", store)
+	is.NoError(err, "Error initiating jwt service")
 
 	kubernetesDeployer := exectest.NewKubernetesDeployer()
 	helmPackageManager := test.NewMockHelmBinaryPackageManager("")
-	kubeConfigService := kubernetes.NewKubeConfigCAService("", "")
-	h := NewHandler(helper.NewTestRequestBouncer(), store, kubernetesDeployer, helmPackageManager, kubeConfigService)
+	kubeClusterAccessService := kubernetes.NewKubeClusterAccessService("", "", "")
+	h := NewHandler(helper.NewTestRequestBouncer(), store, jwtService, kubernetesDeployer, helmPackageManager, kubeClusterAccessService)
 
 	is.NotNil(h, "Handler should not fail")
 
@@ -42,10 +45,10 @@ func Test_helmDelete(t *testing.T) {
 	h.helmPackageManager.Install(options)
 
 	t.Run("helmDelete succeeds with admin user", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("/1/kubernetes/helm/%s", options.Name), nil)
+		req := httptest.NewRequest(http.MethodDelete, "/1/kubernetes/helm/"+options.Name, nil)
 		ctx := security.StoreTokenData(req, &portainer.TokenData{ID: 1, Username: "admin", Role: 1})
 		req = req.WithContext(ctx)
-		req.Header.Add("Authorization", "Bearer dummytoken")
+		testhelpers.AddTestSecurityCookie(req, "Bearer dummytoken")
 
 		rr := httptest.NewRecorder()
 		h.ServeHTTP(rr, req)

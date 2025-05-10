@@ -12,7 +12,7 @@ import {
 import KubernetesApplicationHelper from 'Kubernetes/helpers/application';
 import KubernetesResourceReservationHelper from 'Kubernetes/helpers/resourceReservationHelper';
 import KubernetesCommonHelper from 'Kubernetes/helpers/commonHelper';
-import { buildImageFullURI } from 'Docker/helpers/imageHelper';
+import { buildImageFullURIFromModel } from '@/react/docker/images/utils';
 import KubernetesPersistentVolumeClaimConverter from './persistentVolumeClaim';
 
 class KubernetesStatefulSetConverter {
@@ -24,7 +24,9 @@ class KubernetesStatefulSetConverter {
     const res = new KubernetesStatefulSet();
     res.Namespace = formValues.ResourcePool.Namespace.Name;
     res.Name = formValues.Name;
-    res.StackName = formValues.StackName ? formValues.StackName : formValues.Name;
+    if (formValues.StackName) {
+      res.StackName = formValues.StackName;
+    }
     res.ApplicationOwner = formValues.ApplicationOwner;
     res.ApplicationName = formValues.Name;
     res.ReplicaCount = formValues.ReplicaCount;
@@ -33,7 +35,7 @@ class KubernetesStatefulSetConverter {
     res.MemoryLimit = KubernetesResourceReservationHelper.bytesValue(formValues.MemoryLimit);
     res.Env = KubernetesApplicationHelper.generateEnvFromEnvVariables(formValues.EnvironmentVariables);
     KubernetesApplicationHelper.generateVolumesFromPersistentVolumClaims(res, volumeClaims);
-    KubernetesApplicationHelper.generateEnvOrVolumesFromConfigurations(res, formValues.Configurations);
+    KubernetesApplicationHelper.generateEnvOrVolumesFromConfigurations(res, formValues.ConfigMaps, formValues.Secrets);
     KubernetesApplicationHelper.generateAffinityFromPlacements(res, formValues);
     return res;
   }
@@ -46,7 +48,9 @@ class KubernetesStatefulSetConverter {
     const payload = new KubernetesStatefulSetCreatePayload();
     payload.metadata.name = statefulSet.Name;
     payload.metadata.namespace = statefulSet.Namespace;
-    payload.metadata.labels[KubernetesPortainerApplicationStackNameLabel] = statefulSet.StackName;
+    if (statefulSet.StackName) {
+      payload.metadata.labels[KubernetesPortainerApplicationStackNameLabel] = statefulSet.StackName;
+    }
     payload.metadata.labels[KubernetesPortainerApplicationNameLabel] = statefulSet.ApplicationName;
     payload.metadata.labels[KubernetesPortainerApplicationOwnerLabel] = statefulSet.ApplicationOwner;
     payload.metadata.annotations[KubernetesPortainerApplicationNote] = statefulSet.Note;
@@ -58,7 +62,7 @@ class KubernetesStatefulSetConverter {
     payload.spec.template.metadata.labels[KubernetesPortainerApplicationNameLabel] = statefulSet.ApplicationName;
     payload.spec.template.spec.containers[0].name = statefulSet.Name;
     if (statefulSet.ImageModel.Image) {
-      payload.spec.template.spec.containers[0].image = buildImageFullURI(statefulSet.ImageModel);
+      payload.spec.template.spec.containers[0].image = buildImageFullURIFromModel(statefulSet.ImageModel);
       if (statefulSet.ImageModel.Registry && statefulSet.ImageModel.Registry.Authentication) {
         payload.spec.template.spec.imagePullSecrets = [{ name: `registry-${statefulSet.ImageModel.Registry.Id}` }];
       }

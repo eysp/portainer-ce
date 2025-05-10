@@ -3,17 +3,17 @@ package endpointgroups
 import (
 	"net/http"
 
-	httperror "github.com/portainer/libhttp/error"
-	"github.com/portainer/libhttp/request"
-	"github.com/portainer/libhttp/response"
 	portainer "github.com/portainer/portainer/api"
-	"github.com/portainer/portainer/api/bolt/errors"
+	httperror "github.com/portainer/portainer/pkg/libhttp/error"
+	"github.com/portainer/portainer/pkg/libhttp/request"
+	"github.com/portainer/portainer/pkg/libhttp/response"
 )
 
 // @summary Inspect an Environment(Endpoint) group
 // @description Retrieve details abont an environment(endpoint) group.
 // @description **Access policy**: administrator
 // @tags endpoint_groups
+// @security ApiKeyAuth
 // @security jwt
 // @accept json
 // @produce json
@@ -26,14 +26,14 @@ import (
 func (handler *Handler) endpointGroupInspect(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	endpointGroupID, err := request.RetrieveNumericRouteVariableValue(r, "id")
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid environment group identifier route variable", err}
+		return httperror.BadRequest("Invalid environment group identifier route variable", err)
 	}
 
-	endpointGroup, err := handler.DataStore.EndpointGroup().EndpointGroup(portainer.EndpointGroupID(endpointGroupID))
-	if err == errors.ErrObjectNotFound {
-		return &httperror.HandlerError{http.StatusNotFound, "Unable to find an environment group with the specified identifier inside the database", err}
+	endpointGroup, err := handler.DataStore.EndpointGroup().Read(portainer.EndpointGroupID(endpointGroupID))
+	if handler.DataStore.IsErrObjectNotFound(err) {
+		return httperror.NotFound("Unable to find an environment group with the specified identifier inside the database", err)
 	} else if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to find an environment group with the specified identifier inside the database", err}
+		return httperror.InternalServerError("Unable to find an environment group with the specified identifier inside the database", err)
 	}
 
 	return response.JSON(w, endpointGroup)

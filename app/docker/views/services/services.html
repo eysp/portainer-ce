@@ -1,27 +1,10 @@
-<rd-header>
-  <rd-header-title title-text="服务列表">
-    <a data-toggle="tooltip" title="刷新" ui-sref="docker.services" ui-sref-opts="{reload: true}">
-      <i class="fa fa-sync" aria-hidden="true"></i>
-    </a>
-  </rd-header-title>
-  <rd-header-content>服务</rd-header-content>
-</rd-header>
+<page-header title="'Service list'" breadcrumbs="['Services']" reload="true"> </page-header>
 
-<div class="row" ng-if="services">
-  <div class="col-sm-12">
-    <services-datatable
-      title-text="服务"
-      title-icon="fa-list-alt"
-      dataset="services"
-      table-key="services"
-      order-by="Name"
-      nodes="nodes"
-      agent-proxy="applicationState.endpoint.mode.agentProxy"
-      show-update-action="applicationState.endpoint.apiVersion >= 1.25"
-      show-task-logs-button="applicationState.endpoint.apiVersion >= 1.30"
-      show-add-action="true"
-      show-stack-column="true"
-      refresh-callback="getServices"
-    ></services-datatable>
-  </div>
-</div>
+<docker-services-datatable
+  dataset="services"
+  title-icon="shuffle"
+  on-refresh="(getServices)"
+  is-add-action-visible="true"
+  is-stack-column-visible="true"
+  table-key="'services'"
+></docker-services-datatable>

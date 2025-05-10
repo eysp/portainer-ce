@@ -1,19 +1,63 @@
 package main
 
 import (
-	"log"
+	"fmt"
+	stdlog "log"
+	"os"
 
-	"github.com/sirupsen/logrus"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"github.com/rs/zerolog/pkgerrors"
 )
 
 func configureLogger() {
-	logger := logrus.New() // logger is to implicitly substitute stdlib's log
-	log.SetOutput(logger.Writer())
+	zerolog.ErrorStackFieldName = "stack_trace"
+	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 
-	formatter := &logrus.TextFormatter{DisableTimestamp: true, DisableLevelTruncation: true}
-	logger.SetFormatter(formatter)
-	logrus.SetFormatter(formatter)
+	stdlog.SetFlags(0)
+	stdlog.SetOutput(log.Logger)
 
-	logger.SetLevel(logrus.DebugLevel)
-	logrus.SetLevel(logrus.DebugLevel)
+	log.Logger = log.Logger.With().Caller().Stack().Logger()
+}
+
+func setLoggingLevel(level string) {
+	switch level {
+	case "ERROR":
+		zerolog.SetGlobalLevel(zerolog.ErrorLevel)
+	case "WARN":
+		zerolog.SetGlobalLevel(zerolog.WarnLevel)
+	case "INFO":
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	case "DEBUG":
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	}
+}
+
+func setLoggingMode(mode string) {
+	switch mode {
+	case "PRETTY":
+		log.Logger = log.Output(zerolog.ConsoleWriter{
+			Out:           os.Stderr,
+			TimeFormat:    "2006/01/02 03:04PM",
+			FormatMessage: formatMessage,
+		})
+	case "NOCOLOR":
+		log.Logger = log.Output(zerolog.ConsoleWriter{
+			Out:           os.Stderr,
+			TimeFormat:    "2006/01/02 03:04PM",
+			FormatMessage: formatMessage,
+			NoColor:       true,
+		})
+	case "JSON":
+		log.Logger = log.Output(os.Stderr)
+	}
+}
+
+func formatMessage(i any) string {
+	if i == nil {
+		return ""
+	}
+
+	return fmt.Sprintf("%s |", i)
 }

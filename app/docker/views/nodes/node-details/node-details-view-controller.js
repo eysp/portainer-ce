@@ -4,9 +4,9 @@ angular.module('portainer.docker').controller('NodeDetailsViewController', [
   'NodeService',
   'StateManager',
   'AgentService',
-  'ContainerService',
   'Authentication',
-  function NodeDetailsViewController($q, $stateParams, NodeService, StateManager, AgentService, ContainerService, Authentication) {
+  'Notifications',
+  function NodeDetailsViewController($q, $stateParams, NodeService, StateManager, AgentService, Authentication, Notifications) {
     var ctrl = this;
 
     ctrl.$onInit = initView;
@@ -22,32 +22,32 @@ angular.module('portainer.docker').controller('NodeDetailsViewController', [
       ctrl.state.isAdmin = Authentication.isAdmin();
       ctrl.state.enableHostManagementFeatures = ctrl.endpoint.SecuritySettings.enableHostManagementFeatures;
 
-      var fetchJobs = ctrl.state.isAdmin && ctrl.state.isAgent;
-
       var nodeId = $stateParams.id;
       $q.all({
         node: NodeService.node(nodeId),
-        jobs: fetchJobs ? ContainerService.containers(true, { label: ['io.portainer.job.endpoint'] }) : [],
-      }).then(function (data) {
-        var node = data.node;
-        ctrl.originalNode = node;
-        ctrl.hostDetails = buildHostDetails(node);
-        ctrl.engineDetails = buildEngineDetails(node);
-        ctrl.nodeDetails = buildNodeDetails(node);
-        ctrl.jobs = data.jobs;
-        if (ctrl.state.isAgent) {
-          var agentApiVersion = applicationState.endpoint.agentApiVersion;
-          ctrl.state.agentApiVersion = agentApiVersion;
-          if (agentApiVersion < 2) {
-            return;
-          }
+      })
+        .then(function (data) {
+          var node = data.node;
+          ctrl.originalNode = node;
+          ctrl.hostDetails = buildHostDetails(node);
+          ctrl.engineDetails = buildEngineDetails(node);
+          ctrl.nodeDetails = buildNodeDetails(node);
+          if (ctrl.state.isAgent) {
+            var agentApiVersion = applicationState.endpoint.agentApiVersion;
+            ctrl.state.agentApiVersion = agentApiVersion;
+            if (agentApiVersion < 2 || !ctrl.state.enableHostManagementFeatures) {
+              return;
+            }
 
-          AgentService.hostInfo(node.Hostname).then(function onHostInfoLoad(agentHostInfo) {
-            ctrl.devices = agentHostInfo.PCIDevices;
-            ctrl.disks = agentHostInfo.PhysicalDisks;
-          });
-        }
-      });
+            AgentService.hostInfo(ctrl.endpoint.Id, node.Hostname).then(function onHostInfoLoad(agentHostInfo) {
+              ctrl.devices = agentHostInfo.PCIDevices;
+              ctrl.disks = agentHostInfo.PhysicalDisks;
+            });
+          }
+        })
+        .catch(function (err) {
+          Notifications.error('Failure', err, 'Unable to retrieve node details');
+        });
     }
 
     function buildHostDetails(node) {

@@ -1,12 +1,13 @@
 package azure
 
 import (
-	"log"
 	"net/http"
 
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/http/security"
 	"github.com/portainer/portainer/api/internal/authorization"
+
+	"github.com/rs/zerolog/log"
 )
 
 func (transport *Transport) createAzureRequestContext(request *http.Request) (*azureRequestContext, error) {
@@ -17,7 +18,7 @@ func (transport *Transport) createAzureRequestContext(request *http.Request) (*a
 		return nil, err
 	}
 
-	resourceControls, err := transport.dataStore.ResourceControl().ResourceControls()
+	resourceControls, err := transport.dataStore.ResourceControl().ReadAll()
 	if err != nil {
 		return nil, err
 	}
@@ -46,13 +47,14 @@ func (transport *Transport) createAzureRequestContext(request *http.Request) (*a
 	return context, nil
 }
 
-func decorateObject(object map[string]interface{}, resourceControl *portainer.ResourceControl) map[string]interface{} {
+func decorateObject(object map[string]any, resourceControl *portainer.ResourceControl) map[string]any {
 	if object["Portainer"] == nil {
-		object["Portainer"] = make(map[string]interface{})
+		object["Portainer"] = make(map[string]any)
 	}
 
-	portainerMetadata := object["Portainer"].(map[string]interface{})
+	portainerMetadata := object["Portainer"].(map[string]any)
 	portainerMetadata["ResourceControl"] = resourceControl
+
 	return object
 }
 
@@ -63,9 +65,12 @@ func (transport *Transport) createPrivateResourceControl(
 
 	resourceControl := authorization.NewPrivateResourceControl(resourceIdentifier, resourceType, userID)
 
-	err := transport.dataStore.ResourceControl().CreateResourceControl(resourceControl)
-	if err != nil {
-		log.Printf("[ERROR] [http,proxy,azure,transport] [message: unable to persist resource control] [resource: %s] [err: %s]", resourceIdentifier, err)
+	if err := transport.dataStore.ResourceControl().Create(resourceControl); err != nil {
+		log.Error().
+			Str("resource", resourceIdentifier).
+			Err(err).
+			Msg("unable to persist resource control")
+
 		return nil, err
 	}
 
@@ -76,23 +81,25 @@ func (transport *Transport) userCanDeleteContainerGroup(request *http.Request, c
 	if context.isAdmin {
 		return true
 	}
+
 	resourceIdentifier := request.URL.Path
 	resourceControl := transport.findResourceControl(resourceIdentifier, context)
+
 	return authorization.UserCanAccessResource(context.userID, context.userTeamIDs, resourceControl)
 }
 
-func (transport *Transport) decorateContainerGroups(containerGroups []interface{}, context *azureRequestContext) []interface{} {
-	decoratedContainerGroups := make([]interface{}, 0)
+func (transport *Transport) decorateContainerGroups(containerGroups []any, context *azureRequestContext) []any {
+	decoratedContainerGroups := make([]any, 0)
 
 	for _, containerGroup := range containerGroups {
-		containerGroup = transport.decorateContainerGroup(containerGroup.(map[string]interface{}), context)
+		containerGroup = transport.decorateContainerGroup(containerGroup.(map[string]any), context)
 		decoratedContainerGroups = append(decoratedContainerGroups, containerGroup)
 	}
 
 	return decoratedContainerGroups
 }
 
-func (transport *Transport) decorateContainerGroup(containerGroup map[string]interface{}, context *azureRequestContext) map[string]interface{} {
+func (transport *Transport) decorateContainerGroup(containerGroup map[string]any, context *azureRequestContext) map[string]any {
 	containerGroupId, ok := containerGroup["id"].(string)
 	if ok {
 		resourceControl := transport.findResourceControl(containerGroupId, context)
@@ -100,19 +107,19 @@ func (transport *Transport) decorateContainerGroup(containerGroup map[string]int
 			containerGroup = decorateObject(containerGroup, resourceControl)
 		}
 	} else {
-		log.Printf("[WARN] [http,proxy,azure,decorate] [message: unable to find resource id property in container group]")
+		log.Warn().Msg("unable to find resource id property in container group")
 	}
 
 	return containerGroup
 }
 
-func (transport *Transport) filterContainerGroups(containerGroups []interface{}, context *azureRequestContext) []interface{} {
-	filteredContainerGroups := make([]interface{}, 0)
+func (transport *Transport) filterContainerGroups(containerGroups []any, context *azureRequestContext) []any {
+	filteredContainerGroups := make([]any, 0)
 
 	for _, containerGroup := range containerGroups {
 		userCanAccessResource := false
-		containerGroup := containerGroup.(map[string]interface{})
-		portainerObject, ok := containerGroup["Portainer"].(map[string]interface{})
+		containerGroup := containerGroup.(map[string]any)
+		portainerObject, ok := containerGroup["Portainer"].(map[string]any)
 		if ok {
 			resourceControl, ok := portainerObject["ResourceControl"].(*portainer.ResourceControl)
 			if ok {
@@ -128,22 +135,21 @@ func (transport *Transport) filterContainerGroups(containerGroups []interface{},
 	return filteredContainerGroups
 }
 
-func (transport *Transport) removeResourceControl(containerGroup map[string]interface{}, context *azureRequestContext) error {
+func (transport *Transport) removeResourceControl(containerGroup map[string]any, context *azureRequestContext) error {
 	containerGroupID, ok := containerGroup["id"].(string)
-	if ok {
-		resourceControl := transport.findResourceControl(containerGroupID, context)
-		if resourceControl != nil {
-			err := transport.dataStore.ResourceControl().DeleteResourceControl(resourceControl.ID)
-			return err
-		}
-	} else {
-		log.Printf("[WARN] [http,proxy,azure] [message: missign ID in container group]")
+	if !ok {
+		log.Debug().Msg("missing ID in container group")
+
+		return nil
+	}
+
+	if resourceControl := transport.findResourceControl(containerGroupID, context); resourceControl != nil {
+		return transport.dataStore.ResourceControl().Delete(resourceControl.ID)
 	}
 
 	return nil
 }
 
 func (transport *Transport) findResourceControl(containerGroupId string, context *azureRequestContext) *portainer.ResourceControl {
-	resourceControl := authorization.GetResourceControlByResourceIDAndType(containerGroupId, portainer.ContainerGroupResourceControl, context.resourceControls)
-	return resourceControl
+	return authorization.GetResourceControlByResourceIDAndType(containerGroupId, portainer.ContainerGroupResourceControl, context.resourceControls)
 }

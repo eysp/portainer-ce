@@ -1,141 +1,272 @@
 package endpoints
 
 import (
+	"errors"
 	"net/http"
+	"slices"
 	"strconv"
 
-	httperror "github.com/portainer/libhttp/error"
-	"github.com/portainer/libhttp/request"
-	"github.com/portainer/libhttp/response"
 	portainer "github.com/portainer/portainer/api"
-	"github.com/portainer/portainer/api/bolt/errors"
+	"github.com/portainer/portainer/api/dataservices"
+	"github.com/portainer/portainer/api/internal/endpointutils"
+	httperror "github.com/portainer/portainer/pkg/libhttp/error"
+	"github.com/portainer/portainer/pkg/libhttp/request"
+	"github.com/portainer/portainer/pkg/libhttp/response"
+
+	"github.com/rs/zerolog/log"
 )
 
+type endpointDeleteRequest struct {
+	ID            int  `json:"id"`
+	DeleteCluster bool `json:"deleteCluster"`
+}
+
+type endpointDeleteBatchPayload struct {
+	Endpoints []endpointDeleteRequest `json:"endpoints"`
+}
+
+type endpointDeleteBatchPartialResponse struct {
+	Deleted []int `json:"deleted"`
+	Errors  []int `json:"errors"`
+}
+
+func (payload *endpointDeleteBatchPayload) Validate(r *http.Request) error {
+	if payload == nil || len(payload.Endpoints) == 0 {
+		return errors.New("invalid request payload. You must provide a list of environments to delete")
+	}
+
+	return nil
+}
+
 // @id EndpointDelete
-// @summary Remove an environment(endpoint)
-// @description Remove an environment(endpoint).
-// @description **Access policy**: administrator
+// @summary Remove an environment
+// @description Remove the environment associated to the specified identifier and optionally clean-up associated resources.
+// @description **Access policy**: Administrator only.
 // @tags endpoints
-// @security jwt
+// @security ApiKeyAuth || jwt
 // @param id path int true "Environment(Endpoint) identifier"
-// @success 204 "Success"
-// @failure 400 "Invalid request"
-// @failure 404 "Environment(Endpoint) not found"
-// @failure 500 "Server error"
+// @success 204 "Environment successfully deleted."
+// @failure 400 "Invalid request payload, such as missing required fields or fields not meeting validation criteria."
+// @failure 403 "Unauthorized access or operation not allowed."
+// @failure 404 "Unable to find the environment with the specified identifier inside the database."
+// @failure 500 "Server error occurred while attempting to delete the environment."
 // @router /endpoints/{id} [delete]
 func (handler *Handler) endpointDelete(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	endpointID, err := request.RetrieveNumericRouteVariableValue(r, "id")
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid environment identifier route variable", err}
+		return httperror.BadRequest("Invalid environment identifier route variable", err)
 	}
 
-	endpoint, err := handler.DataStore.Endpoint().Endpoint(portainer.EndpointID(endpointID))
-	if err == errors.ErrObjectNotFound {
-		return &httperror.HandlerError{http.StatusNotFound, "Unable to find an environment with the specified identifier inside the database", err}
+	// This is a Portainer provisioned cloud environment
+	deleteCluster, err := request.RetrieveBooleanQueryParameter(r, "deleteCluster", true)
+	if err != nil {
+		return httperror.BadRequest("Invalid boolean query parameter", err)
+	}
+
+	if err := handler.DataStore.UpdateTx(func(tx dataservices.DataStoreTx) error {
+		return handler.deleteEndpoint(tx, portainer.EndpointID(endpointID), deleteCluster)
+	}); err != nil {
+		var handlerError *httperror.HandlerError
+		if errors.As(err, &handlerError) {
+			return handlerError
+		}
+
+		return httperror.InternalServerError("Unexpected error", err)
+	}
+
+	return response.Empty(w)
+}
+
+// @id EndpointDeleteBatch
+// @summary Remove multiple environments
+// @description Remove multiple environments and optionally clean-up associated resources.
+// @description **Access policy**: Administrator only.
+// @tags endpoints
+// @security ApiKeyAuth || jwt
+// @accept json
+// @produce json
+// @param body body endpointDeleteBatchPayload true "List of environments to delete, with optional deleteCluster flag to clean-up associated resources (cloud environments only)"
+// @success 204 "Environment(s) successfully deleted."
+// @failure 207 {object} endpointDeleteBatchPartialResponse "Partial success. Some environments were deleted successfully, while others failed."
+// @failure 400 "Invalid request payload, such as missing required fields or fields not meeting validation criteria."
+// @failure 403 "Unauthorized access or operation not allowed."
+// @failure 500 "Server error occurred while attempting to delete the specified environments."
+// @router /endpoints/delete [post]
+func (handler *Handler) endpointDeleteBatch(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
+	var p endpointDeleteBatchPayload
+	if err := request.DecodeAndValidateJSONPayload(r, &p); err != nil {
+		return httperror.BadRequest("Invalid request payload", err)
+	}
+
+	resp := endpointDeleteBatchPartialResponse{
+		Deleted: []int{},
+		Errors:  []int{},
+	}
+
+	if err := handler.DataStore.UpdateTx(func(tx dataservices.DataStoreTx) error {
+		for _, e := range p.Endpoints {
+			if err := handler.deleteEndpoint(tx, portainer.EndpointID(e.ID), e.DeleteCluster); err != nil {
+				resp.Errors = append(resp.Errors, e.ID)
+				log.Warn().Err(err).Int("environment_id", e.ID).Msg("Unable to remove environment")
+
+				continue
+			}
+
+			resp.Deleted = append(resp.Deleted, e.ID)
+		}
+
+		return nil
+	}); err != nil {
+		return httperror.InternalServerError("Unable to delete environments", err)
+	}
+
+	if len(resp.Errors) > 0 {
+		return response.JSONWithStatus(w, resp, http.StatusPartialContent)
+	}
+
+	return response.Empty(w)
+}
+
+// @id EndpointDeleteBatchDeprecated
+// @summary Remove multiple environments
+// @deprecated
+// @description Deprecated: use the `POST` endpoint instead.
+// @description Remove multiple environments and optionally clean-up associated resources.
+// @description **Access policy**: Administrator only.
+// @tags endpoints
+// @security ApiKeyAuth || jwt
+// @accept json
+// @produce json
+// @param body body endpointDeleteBatchPayload true "List of environments to delete, with optional deleteCluster flag to clean-up associated resources (cloud environments only)"
+// @success 204 "Environment(s) successfully deleted."
+// @failure 207 {object} endpointDeleteBatchPartialResponse "Partial success. Some environments were deleted successfully, while others failed."
+// @failure 400 "Invalid request payload, such as missing required fields or fields not meeting validation criteria."
+// @failure 403 "Unauthorized access or operation not allowed."
+// @failure 500 "Server error occurred while attempting to delete the specified environments."
+// @router /endpoints [delete]
+func (handler *Handler) endpointDeleteBatchDeprecated(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
+	return handler.endpointDeleteBatch(w, r)
+}
+
+func (handler *Handler) deleteEndpoint(tx dataservices.DataStoreTx, endpointID portainer.EndpointID, deleteCluster bool) error {
+	endpoint, err := tx.Endpoint().Endpoint(endpointID)
+	if tx.IsErrObjectNotFound(err) {
+		return httperror.NotFound("Unable to find an environment with the specified identifier inside the database", err)
 	} else if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to find an environment with the specified identifier inside the database", err}
+		return httperror.InternalServerError("Unable to read the environment record from the database", err)
 	}
 
 	if endpoint.TLSConfig.TLS {
-		folder := strconv.Itoa(endpointID)
-		err = handler.FileService.DeleteTLSFiles(folder)
-		if err != nil {
-			return &httperror.HandlerError{http.StatusInternalServerError, "Unable to remove TLS files from disk", err}
+		folder := strconv.Itoa(int(endpointID))
+		if err := handler.FileService.DeleteTLSFiles(folder); err != nil {
+			log.Error().Err(err).Msgf("Unable to remove TLS files from disk when deleting endpoint %d", endpointID)
 		}
 	}
 
-	err = handler.DataStore.Endpoint().DeleteEndpoint(portainer.EndpointID(endpointID))
-	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to remove environment from the database", err}
+	if err := tx.Snapshot().Delete(endpointID); err != nil {
+		log.Warn().Err(err).Msg("Unable to remove the snapshot from the database")
 	}
 
-	handler.ProxyManager.DeleteEndpointProxy(endpoint)
+	handler.ProxyManager.DeleteEndpointProxy(endpoint.ID)
 
-	err = handler.DataStore.EndpointRelation().DeleteEndpointRelation(endpoint.ID)
-	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to remove environment relation from the database", err}
+	if len(endpoint.UserAccessPolicies) > 0 || len(endpoint.TeamAccessPolicies) > 0 {
+		if err := handler.AuthorizationService.UpdateUsersAuthorizationsTx(tx); err != nil {
+			log.Warn().Err(err).Msg("Unable to update user authorizations")
+		}
+	}
+
+	if err := tx.EndpointRelation().DeleteEndpointRelation(endpoint.ID); err != nil {
+		log.Warn().Err(err).Msg("Unable to remove environment relation from the database")
 	}
 
 	for _, tagID := range endpoint.TagIDs {
-		tag, err := handler.DataStore.Tag().Tag(tagID)
-		if err != nil {
-			return &httperror.HandlerError{http.StatusNotFound, "Unable to find tag inside the database", err}
+		var tag *portainer.Tag
+		tag, err = tx.Tag().Read(tagID)
+		if err == nil {
+			delete(tag.Endpoints, endpoint.ID)
+			err = tx.Tag().Update(tagID, tag)
 		}
 
-		delete(tag.Endpoints, endpoint.ID)
-
-		err = handler.DataStore.Tag().UpdateTag(tagID, tag)
-		if err != nil {
-			return &httperror.HandlerError{http.StatusInternalServerError, "Unable to persist tag relation inside the database", err}
+		if handler.DataStore.IsErrObjectNotFound(err) {
+			log.Warn().Err(err).Msg("Unable to find tag inside the database")
+		} else if err != nil {
+			log.Warn().Err(err).Msg("Unable to delete tag relation from the database")
 		}
 	}
 
-	edgeGroups, err := handler.DataStore.EdgeGroup().EdgeGroups()
+	edgeGroups, err := tx.EdgeGroup().ReadAll()
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve edge groups from the database", err}
+		log.Warn().Err(err).Msgf("Unable to retrieve edge groups from the database")
 	}
 
-	for idx := range edgeGroups {
-		edgeGroup := &edgeGroups[idx]
-		endpointIdx := findEndpointIndex(edgeGroup.Endpoints, endpoint.ID)
-		if endpointIdx != -1 {
-			edgeGroup.Endpoints = removeElement(edgeGroup.Endpoints, endpointIdx)
-			err = handler.DataStore.EdgeGroup().UpdateEdgeGroup(edgeGroup.ID, edgeGroup)
-			if err != nil {
-				return &httperror.HandlerError{http.StatusInternalServerError, "Unable to update edge group", err}
-			}
+	for _, edgeGroup := range edgeGroups {
+		edgeGroup.Endpoints = slices.DeleteFunc(edgeGroup.Endpoints, func(e portainer.EndpointID) bool {
+			return e == endpoint.ID
+		})
+
+		if err := tx.EdgeGroup().Update(edgeGroup.ID, &edgeGroup); err != nil {
+			log.Warn().Err(err).Msg("Unable to update edge group")
 		}
 	}
 
-	edgeStacks, err := handler.DataStore.EdgeStack().EdgeStacks()
+	edgeStacks, err := tx.EdgeStack().EdgeStacks()
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve edge stacks from the database", err}
+		log.Warn().Err(err).Msg("Unable to retrieve edge stacks from the database")
 	}
 
 	for idx := range edgeStacks {
 		edgeStack := &edgeStacks[idx]
 		if _, ok := edgeStack.Status[endpoint.ID]; ok {
 			delete(edgeStack.Status, endpoint.ID)
-			err = handler.DataStore.EdgeStack().UpdateEdgeStack(edgeStack.ID, edgeStack)
-			if err != nil {
-				return &httperror.HandlerError{http.StatusInternalServerError, "Unable to update edge stack", err}
+
+			if err := tx.EdgeStack().UpdateEdgeStack(edgeStack.ID, edgeStack); err != nil {
+				log.Warn().Err(err).Msg("Unable to update edge stack")
 			}
 		}
 	}
 
-	registries, err := handler.DataStore.Registry().Registries()
+	registries, err := tx.Registry().ReadAll()
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to retrieve registries from the database", err}
+		log.Warn().Err(err).Msg("Unable to retrieve registries from the database")
 	}
 
 	for idx := range registries {
 		registry := &registries[idx]
 		if _, ok := registry.RegistryAccesses[endpoint.ID]; ok {
 			delete(registry.RegistryAccesses, endpoint.ID)
-			err = handler.DataStore.Registry().UpdateRegistry(registry.ID, registry)
-			if err != nil {
-				return &httperror.HandlerError{StatusCode: http.StatusInternalServerError, Message: "Unable to update registry accesses", Err: err}
+
+			if err := tx.Registry().Update(registry.ID, registry); err != nil {
+				log.Warn().Err(err).Msg("Unable to update registry accesses")
 			}
 		}
 	}
 
-	return response.Empty(w)
-}
+	if endpointutils.IsEdgeEndpoint(endpoint) {
+		edgeJobs, err := handler.DataStore.EdgeJob().ReadAll()
+		if err != nil {
+			log.Warn().Err(err).Msg("Unable to retrieve edge jobs from the database")
+		}
 
-func findEndpointIndex(tags []portainer.EndpointID, searchEndpointID portainer.EndpointID) int {
-	for idx, tagID := range tags {
-		if searchEndpointID == tagID {
-			return idx
+		for idx := range edgeJobs {
+			edgeJob := &edgeJobs[idx]
+			if _, ok := edgeJob.Endpoints[endpoint.ID]; ok {
+				delete(edgeJob.Endpoints, endpoint.ID)
+
+				if err := tx.EdgeJob().Update(edgeJob.ID, edgeJob); err != nil {
+					log.Warn().Err(err).Msg("Unable to update edge job")
+				}
+			}
 		}
 	}
-	return -1
-}
 
-func removeElement(arr []portainer.EndpointID, index int) []portainer.EndpointID {
-	if index < 0 {
-		return arr
+	// delete the pending actions
+	if err := tx.PendingActions().DeleteByEndpointID(endpoint.ID); err != nil {
+		log.Warn().Err(err).Int("endpointId", int(endpoint.ID)).Msg("Unable to delete pending actions")
 	}
-	lastTagIdx := len(arr) - 1
-	arr[index] = arr[lastTagIdx]
-	return arr[:lastTagIdx]
+
+	if err := tx.Endpoint().DeleteEndpoint(endpointID); err != nil {
+		return httperror.InternalServerError("Unable to delete the environment from the database", err)
+	}
+
+	return nil
 }

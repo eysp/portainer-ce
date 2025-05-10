@@ -15,7 +15,8 @@ import (
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/adminmonitor"
 	"github.com/portainer/portainer/api/http/offlinegate"
-	i "github.com/portainer/portainer/api/internal/testhelpers"
+	"github.com/portainer/portainer/api/internal/testhelpers"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -48,10 +49,20 @@ func Test_restoreArchive_usingCombinationOfPasswords(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			datastore := i.NewDatastore(i.WithUsers([]portainer.User{}), i.WithEdgeJobs([]portainer.EdgeJob{}))
+			datastore := testhelpers.NewDatastore(
+				testhelpers.WithUsers([]portainer.User{}),
+				testhelpers.WithEdgeJobs([]portainer.EdgeJob{}),
+			)
 			adminMonitor := adminmonitor.New(time.Hour, datastore, context.Background())
 
-			h := NewHandler(nil, datastore, offlinegate.NewOfflineGate(), "./test_assets/handler_test", func() {}, adminMonitor)
+			h := NewHandler(
+				testhelpers.NewTestRequestBouncer(),
+				datastore,
+				offlinegate.NewOfflineGate(),
+				"./test_assets/handler_test",
+				func() {},
+				adminMonitor,
+			)
 
 			//backup
 			archive := backup(t, h, test.backupPassword)
@@ -71,10 +82,19 @@ func Test_restoreArchive_shouldFailIfSystemWasAlreadyInitialized(t *testing.T) {
 	admin := portainer.User{
 		Role: portainer.AdministratorRole,
 	}
-	datastore := i.NewDatastore(i.WithUsers([]portainer.User{admin}), i.WithEdgeJobs([]portainer.EdgeJob{}))
+	datastore := testhelpers.NewDatastore(
+		testhelpers.WithUsers([]portainer.User{admin}),
+		testhelpers.WithEdgeJobs([]portainer.EdgeJob{}),
+	)
 	adminMonitor := adminmonitor.New(time.Hour, datastore, context.Background())
 
-	h := NewHandler(nil, datastore, offlinegate.NewOfflineGate(), "./test_assets/handler_test", func() {}, adminMonitor)
+	h := NewHandler(testhelpers.NewTestRequestBouncer(),
+		datastore,
+		offlinegate.NewOfflineGate(),
+		"./test_assets/handler_test",
+		func() {},
+		adminMonitor,
+	)
 
 	//backup
 	archive := backup(t, h, "password")
@@ -98,16 +118,20 @@ func backup(t *testing.T, h *Handler, password string) []byte {
 
 	response := w.Result()
 	archive, _ := io.ReadAll(response.Body)
+	response.Body.Close()
+
 	return archive
 }
 
 func prepareMultipartRequest(password string, file []byte) (*http.Request, error) {
 	var body bytes.Buffer
+
 	w := multipart.NewWriter(&body)
 	err := w.WriteField("password", password)
 	if err != nil {
 		return nil, err
 	}
+
 	fw, err := w.CreateFormFile("file", "filename")
 	if err != nil {
 		return nil, err

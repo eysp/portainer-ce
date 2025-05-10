@@ -2,18 +2,19 @@ package authorization
 
 import (
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/kubernetes/cli"
 )
 
 // Service represents a service used to
 // update authorizations associated to a user or team.
 type Service struct {
-	dataStore        portainer.DataStore
+	dataStore        dataservices.DataStoreTx
 	K8sClientFactory *cli.ClientFactory
 }
 
 // NewService returns a point to a new Service instance.
-func NewService(dataStore portainer.DataStore) *Service {
+func NewService(dataStore dataservices.DataStoreTx) *Service {
 	return &Service{
 		dataStore: dataStore,
 	}
@@ -152,7 +153,6 @@ func DefaultEndpointAuthorizationsForEndpointAdministratorRole() portainer.Autho
 		portainer.OperationPortainerWebhookList:               true,
 		portainer.OperationPortainerWebhookCreate:             true,
 		portainer.OperationPortainerWebhookDelete:             true,
-		portainer.OperationIntegrationStoridgeAdmin:           true,
 		portainer.EndpointResourcesAccess:                     true,
 	}
 }
@@ -411,33 +411,187 @@ func DefaultEndpointAuthorizationsForReadOnlyUserRole(volumeBrowsingAuthorizatio
 // DefaultPortainerAuthorizations returns the default Portainer authorizations used by non-admin users.
 func DefaultPortainerAuthorizations() portainer.Authorizations {
 	return map[portainer.Authorization]bool{
-		portainer.OperationPortainerDockerHubInspect:        true,
-		portainer.OperationPortainerEndpointGroupList:       true,
-		portainer.OperationPortainerEndpointList:            true,
-		portainer.OperationPortainerEndpointInspect:         true,
-		portainer.OperationPortainerEndpointExtensionAdd:    true,
-		portainer.OperationPortainerEndpointExtensionRemove: true,
-		portainer.OperationPortainerMOTD:                    true,
-		portainer.OperationPortainerRegistryList:            true,
-		portainer.OperationPortainerRegistryInspect:         true,
-		portainer.OperationPortainerTeamList:                true,
-		portainer.OperationPortainerTemplateList:            true,
-		portainer.OperationPortainerTemplateInspect:         true,
-		portainer.OperationPortainerUserList:                true,
-		portainer.OperationPortainerUserInspect:             true,
-		portainer.OperationPortainerUserMemberships:         true,
+		portainer.OperationPortainerDockerHubInspect:  true,
+		portainer.OperationPortainerEndpointGroupList: true,
+		portainer.OperationPortainerEndpointList:      true,
+		portainer.OperationPortainerEndpointInspect:   true,
+		portainer.OperationPortainerMOTD:              true,
+		portainer.OperationPortainerRegistryList:      true,
+		portainer.OperationPortainerRegistryInspect:   true,
+		portainer.OperationPortainerTeamList:          true,
+		portainer.OperationPortainerTemplateList:      true,
+		portainer.OperationPortainerTemplateInspect:   true,
+		portainer.OperationPortainerUserList:          true,
+		portainer.OperationPortainerUserInspect:       true,
+		portainer.OperationPortainerUserMemberships:   true,
+		portainer.OperationPortainerUserListToken:     true,
+		portainer.OperationPortainerUserCreateToken:   true,
+		portainer.OperationPortainerUserRevokeToken:   true,
 	}
+}
+
+// RemoveTeamAccessPolicies will remove all existing access policies associated to the specified team
+func (service *Service) RemoveTeamAccessPolicies(tx dataservices.DataStoreTx, teamID portainer.TeamID) error {
+	endpoints, err := tx.Endpoint().Endpoints()
+	if err != nil {
+		return err
+	}
+	for _, endpoint := range endpoints {
+		for policyTeamID := range endpoint.TeamAccessPolicies {
+			if policyTeamID == teamID {
+				delete(endpoint.TeamAccessPolicies, policyTeamID)
+
+				err := tx.Endpoint().UpdateEndpoint(endpoint.ID, &endpoint)
+				if err != nil {
+					return err
+				}
+
+				break
+			}
+		}
+	}
+
+	endpointGroups, err := tx.EndpointGroup().ReadAll()
+	if err != nil {
+		return err
+	}
+
+	for _, endpointGroup := range endpointGroups {
+		for policyTeamID := range endpointGroup.TeamAccessPolicies {
+			if policyTeamID == teamID {
+				delete(endpointGroup.TeamAccessPolicies, policyTeamID)
+
+				err := tx.EndpointGroup().Update(endpointGroup.ID, &endpointGroup)
+				if err != nil {
+					return err
+				}
+
+				break
+			}
+		}
+	}
+
+	registries, err := tx.Registry().ReadAll()
+	if err != nil {
+		return err
+	}
+
+	// iterate over all environments for all registries
+	// and evict all direct accesses to the registries the team had
+	// we could have built a range of the teams's environments accesses while removing them above
+	// but ranging over all environments (registryAccessPolicy is indexed by environmentId)
+	// makes sure we cleanup all resources in case an access was not removed when a team was removed from an env
+	for _, registry := range registries {
+		updateRegistry := false
+		for _, registryAccessPolicy := range registry.RegistryAccesses {
+			if _, ok := registryAccessPolicy.TeamAccessPolicies[teamID]; ok {
+				delete(registryAccessPolicy.TeamAccessPolicies, teamID)
+				updateRegistry = true
+			}
+		}
+		if updateRegistry {
+			if err := tx.Registry().Update(registry.ID, &registry); err != nil {
+				return err
+			}
+		}
+	}
+
+	return service.UpdateUsersAuthorizationsTx(tx)
+}
+
+// RemoveUserAccessPolicies will remove all existing access policies associated to the specified user
+func (service *Service) RemoveUserAccessPolicies(tx dataservices.DataStoreTx, userID portainer.UserID) error {
+	endpoints, err := tx.Endpoint().Endpoints()
+	if err != nil {
+		return err
+	}
+
+	for _, endpoint := range endpoints {
+		for policyUserID := range endpoint.UserAccessPolicies {
+			if policyUserID == userID {
+				delete(endpoint.UserAccessPolicies, policyUserID)
+
+				err := tx.Endpoint().UpdateEndpoint(endpoint.ID, &endpoint)
+				if err != nil {
+					return err
+				}
+
+				break
+			}
+		}
+	}
+
+	endpointGroups, err := tx.EndpointGroup().ReadAll()
+	if err != nil {
+		return err
+	}
+
+	for _, endpointGroup := range endpointGroups {
+		for policyUserID := range endpointGroup.UserAccessPolicies {
+			if policyUserID == userID {
+				delete(endpointGroup.UserAccessPolicies, policyUserID)
+
+				err := tx.EndpointGroup().Update(endpointGroup.ID, &endpointGroup)
+				if err != nil {
+					return err
+				}
+
+				break
+			}
+		}
+	}
+
+	registries, err := tx.Registry().ReadAll()
+	if err != nil {
+		return err
+	}
+
+	// iterate over all environments for all registries
+	// and evict all direct accesses to the registries the user had
+	// we could have built a range of the user's environments accesses while removing them above
+	// but ranging over all environments (registryAccessPolicy is indexed by environmentId)
+	// makes sure we cleanup all resources in case an access was not removed when a user was removed from an env
+	for _, registry := range registries {
+		updateRegistry := false
+		for _, registryAccessPolicy := range registry.RegistryAccesses {
+			if _, ok := registryAccessPolicy.UserAccessPolicies[userID]; ok {
+				delete(registryAccessPolicy.UserAccessPolicies, userID)
+				updateRegistry = true
+			}
+		}
+		if updateRegistry {
+			if err := tx.Registry().Update(registry.ID, &registry); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+// UpdateUserAuthorizations will update the authorizations for the provided userid
+func (service *Service) UpdateUserAuthorizations(tx dataservices.DataStoreTx, userID portainer.UserID) error {
+	err := service.updateUserAuthorizations(tx, userID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // UpdateUsersAuthorizations will trigger an update of the authorizations for all the users.
 func (service *Service) UpdateUsersAuthorizations() error {
-	users, err := service.dataStore.User().Users()
+	return service.UpdateUsersAuthorizationsTx(service.dataStore)
+}
+
+func (service *Service) UpdateUsersAuthorizationsTx(tx dataservices.DataStoreTx) error {
+	users, err := tx.User().ReadAll()
 	if err != nil {
 		return err
 	}
 
 	for _, user := range users {
-		err := service.updateUserAuthorizations(user.ID)
+		err := service.updateUserAuthorizations(tx, user.ID)
 		if err != nil {
 			return err
 		}
@@ -446,44 +600,44 @@ func (service *Service) UpdateUsersAuthorizations() error {
 	return nil
 }
 
-func (service *Service) updateUserAuthorizations(userID portainer.UserID) error {
-	user, err := service.dataStore.User().User(userID)
+func (service *Service) updateUserAuthorizations(tx dataservices.DataStoreTx, userID portainer.UserID) error {
+	user, err := tx.User().Read(userID)
 	if err != nil {
 		return err
 	}
 
-	endpointAuthorizations, err := service.getAuthorizations(user)
+	endpointAuthorizations, err := service.getAuthorizations(tx, user)
 	if err != nil {
 		return err
 	}
 
 	user.EndpointAuthorizations = endpointAuthorizations
 
-	return service.dataStore.User().UpdateUser(userID, user)
+	return tx.User().Update(userID, user)
 }
 
-func (service *Service) getAuthorizations(user *portainer.User) (portainer.EndpointAuthorizations, error) {
+func (service *Service) getAuthorizations(tx dataservices.DataStoreTx, user *portainer.User) (portainer.EndpointAuthorizations, error) {
 	endpointAuthorizations := portainer.EndpointAuthorizations{}
 	if user.Role == portainer.AdministratorRole {
 		return endpointAuthorizations, nil
 	}
 
-	userMemberships, err := service.dataStore.TeamMembership().TeamMembershipsByUserID(user.ID)
+	userMemberships, err := tx.TeamMembership().TeamMembershipsByUserID(user.ID)
 	if err != nil {
 		return endpointAuthorizations, err
 	}
 
-	endpoints, err := service.dataStore.Endpoint().Endpoints()
+	endpoints, err := tx.Endpoint().Endpoints()
 	if err != nil {
 		return endpointAuthorizations, err
 	}
 
-	endpointGroups, err := service.dataStore.EndpointGroup().EndpointGroups()
+	endpointGroups, err := tx.EndpointGroup().ReadAll()
 	if err != nil {
 		return endpointAuthorizations, err
 	}
 
-	roles, err := service.dataStore.Role().Roles()
+	roles, err := tx.Role().ReadAll()
 	if err != nil {
 		return endpointAuthorizations, err
 	}
@@ -507,18 +661,21 @@ func getUserEndpointAuthorizations(user *portainer.User, endpoints []portainer.E
 		authorizations := getAuthorizationsFromUserEndpointPolicy(user, &endpoint, roles)
 		if len(authorizations) > 0 {
 			endpointAuthorizations[endpoint.ID] = authorizations
+
 			continue
 		}
 
 		authorizations = getAuthorizationsFromUserEndpointGroupPolicy(user, &endpoint, roles, groupUserAccessPolicies)
 		if len(authorizations) > 0 {
 			endpointAuthorizations[endpoint.ID] = authorizations
+
 			continue
 		}
 
 		authorizations = getAuthorizationsFromTeamEndpointPolicies(userMemberships, &endpoint, roles)
 		if len(authorizations) > 0 {
 			endpointAuthorizations[endpoint.ID] = authorizations
+
 			continue
 		}
 
@@ -586,6 +743,7 @@ func getAuthorizationsFromRoles(roleIdentifiers []portainer.RoleID, roles []port
 		for _, role := range roles {
 			if role.ID == id {
 				associatedRoles = append(associatedRoles, role)
+
 				break
 			}
 		}
@@ -601,4 +759,24 @@ func getAuthorizationsFromRoles(roleIdentifiers []portainer.RoleID, roles []port
 	}
 
 	return authorizations
+}
+
+func (service *Service) UserIsAdminOrAuthorized(tx dataservices.DataStoreTx, userID portainer.UserID, endpointID portainer.EndpointID, authorizations []portainer.Authorization) (bool, error) {
+	user, err := tx.User().Read(userID)
+	if err != nil {
+		return false, err
+	}
+
+	if user.Role == portainer.AdministratorRole {
+		return true, nil
+	}
+
+	for _, authorization := range authorizations {
+		_, authorized := user.EndpointAuthorizations[endpointID][authorization]
+		if authorized {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }

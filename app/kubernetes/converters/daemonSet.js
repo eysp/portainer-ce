@@ -10,7 +10,7 @@ import {
 import KubernetesApplicationHelper from 'Kubernetes/helpers/application';
 import KubernetesResourceReservationHelper from 'Kubernetes/helpers/resourceReservationHelper';
 import KubernetesCommonHelper from 'Kubernetes/helpers/commonHelper';
-import { buildImageFullURI } from 'Docker/helpers/imageHelper';
+import { buildImageFullURIFromModel } from '@/react/docker/images/utils';
 
 class KubernetesDaemonSetConverter {
   /**
@@ -21,7 +21,9 @@ class KubernetesDaemonSetConverter {
     const res = new KubernetesDaemonSet();
     res.Namespace = formValues.ResourcePool.Namespace.Name;
     res.Name = formValues.Name;
-    res.StackName = formValues.StackName ? formValues.StackName : formValues.Name;
+    if (formValues.StackName) {
+      res.StackName = formValues.StackName;
+    }
     res.ApplicationOwner = formValues.ApplicationOwner;
     res.ApplicationName = formValues.Name;
     res.ImageModel = formValues.ImageModel;
@@ -29,7 +31,7 @@ class KubernetesDaemonSetConverter {
     res.MemoryLimit = KubernetesResourceReservationHelper.bytesValue(formValues.MemoryLimit);
     res.Env = KubernetesApplicationHelper.generateEnvFromEnvVariables(formValues.EnvironmentVariables);
     KubernetesApplicationHelper.generateVolumesFromPersistentVolumClaims(res, volumeClaims);
-    KubernetesApplicationHelper.generateEnvOrVolumesFromConfigurations(res, formValues.Configurations);
+    KubernetesApplicationHelper.generateEnvOrVolumesFromConfigurations(res, formValues.ConfigMaps, formValues.Secrets);
     KubernetesApplicationHelper.generateAffinityFromPlacements(res, formValues);
     return res;
   }
@@ -42,7 +44,9 @@ class KubernetesDaemonSetConverter {
     const payload = new KubernetesDaemonSetCreatePayload();
     payload.metadata.name = daemonSet.Name;
     payload.metadata.namespace = daemonSet.Namespace;
-    payload.metadata.labels[KubernetesPortainerApplicationStackNameLabel] = daemonSet.StackName;
+    if (daemonSet.StackName) {
+      payload.metadata.labels[KubernetesPortainerApplicationStackNameLabel] = daemonSet.StackName;
+    }
     payload.metadata.labels[KubernetesPortainerApplicationNameLabel] = daemonSet.ApplicationName;
     payload.metadata.labels[KubernetesPortainerApplicationOwnerLabel] = daemonSet.ApplicationOwner;
     payload.metadata.annotations[KubernetesPortainerApplicationNote] = daemonSet.Note;
@@ -51,7 +55,7 @@ class KubernetesDaemonSetConverter {
     payload.spec.template.metadata.labels.app = daemonSet.Name;
     payload.spec.template.metadata.labels[KubernetesPortainerApplicationNameLabel] = daemonSet.ApplicationName;
     payload.spec.template.spec.containers[0].name = daemonSet.Name;
-    payload.spec.template.spec.containers[0].image = buildImageFullURI(daemonSet.ImageModel);
+    payload.spec.template.spec.containers[0].image = buildImageFullURIFromModel(daemonSet.ImageModel);
     if (daemonSet.ImageModel.Registry && daemonSet.ImageModel.Registry.Authentication) {
       payload.spec.template.spec.imagePullSecrets = [{ name: `registry-${daemonSet.ImageModel.Registry.Id}` }];
     }

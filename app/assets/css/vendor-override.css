@@ -1,7 +1,7 @@
 /* Overide Vendor CSS */
 .form-control {
-  background-color: var(--bg-main-color) !important;
   border: 1px solid var(--border-form-control-color);
+  background-color: var(--bg-inputbox);
   color: var(--text-form-control-color);
 }
 
@@ -10,16 +10,17 @@
 }
 
 .table > thead > tr > th {
-  border-bottom: 2px solid var(--border-table-color);
+  border-bottom: 1px solid var(--border-table-color);
 }
 
 .table-hover > tbody > tr:hover {
   background-color: var(--bg-hover-table-color);
 }
 
-.switch i,
-.bootbox-form .checkbox i {
-  background: var(--bg-switch-box-color);
+.switch i {
+  @apply bg-gray-6;
+  @apply th-dark:bg-gray-warm-8;
+  @apply th-highcontrast:bg-gray-warm-8;
 }
 
 .table > thead > tr > th,
@@ -31,13 +32,32 @@
   border-top: 1px solid var(--border-table-top-color);
 }
 
-a {
-  color: var(--text-link-color);
+/* the first cell in the table should have 20px padding instead of 5px to match all other widgets */
+.widget .table:not(td .table) > thead > tr > th:first-child,
+.widget .table:not(td .table) > tbody > tr > th:first-child,
+.widget .table:not(td .table) > tfoot > tr > th:first-child,
+.widget .table:not(td .table) > thead > tr > td:first-child,
+.widget .table:not(td .table) > tbody > tr > td:first-child,
+.widget .table:not(td .table) > tfoot > tr > td:first-child {
+  padding-left: 20px;
 }
 
-a:hover,
-a:focus {
-  color: var(--text-link-hover-color);
+/* the last cell in the table should have 20px padding instead of 5px to match all other widgets */
+.widget .table:not(td .table) > thead > tr > th:last-child,
+.widget .table:not(td .table) > tbody > tr > th:last-child,
+.widget .table:not(td .table) > tfoot > tr > th:last-child,
+.widget .table:not(td .table) > thead > tr > td:last-child,
+.widget .table:not(td .table) > tbody > tr > td:last-child,
+.widget .table:not(td .table) > tfoot > tr > td:last-child {
+  padding-right: 20px;
+}
+
+/* tables inside widgets should extend the full width of the widget, with 20px table cell padding padding on the left and right */
+.widget-body:not(.no-padding) > .table,
+.widget-body:not(.no-padding) > .widget-content > .table {
+  margin: 0 -20px;
+  width: calc(100% + 40px);
+  max-width: calc(100% + 40px);
 }
 
 .input-group-addon {
@@ -46,18 +66,20 @@ a:focus {
   border: 1px solid var(--border-input-group-addon-color);
 }
 
-.btn-default {
-  color: var(--text-btn-default-color);
-  background-color: var(--bg-btn-default-color);
-  border-color: var(--border-btn-default-color);
+.input-group .form-control {
+  z-index: unset;
+}
+
+.input-group-sm > .input-group-addon {
+  line-height: 1;
 }
 
 .text-danger {
-  color: var(--text-danger-color);
+  color: var(--ui-error-9);
 }
 
 .table .table {
-  background-color: var(--bg-table-color);
+  background-color: initial;
 }
 
 .table-bordered {
@@ -92,48 +114,48 @@ fieldset[disabled] .form-control {
   background-color: var(--bg-modal-content-color);
 }
 
-.modal-header {
-  border-bottom: 1px solid var(--border-modal-header-color);
-}
-
-.modal-footer {
-  border-top: 1px solid var(--border-modal-header-color);
-}
-
-.close {
-  color: var(--button-close-color);
-  opacity: var(--button-opacity);
-}
-
-.close:hover,
-.close:focus {
-  color: var(--button-close-color);
-  opacity: var(--button-opacity-hover);
-}
-
 code {
   color: var(--text-code-color);
   background-color: var(--bg-code-color);
-}
-
-.nav-tabs > li.active > a,
-.nav-tabs > li.active > a:hover,
-.nav-tabs > li.active > a:focus {
-  color: var(--text-navtabs-color);
-  background-color: var(--bg-navtabs-color);
-  border: 1px solid var(--border-navtabs-color);
 }
 
 .nav-tabs {
   border-bottom: 1px solid var(--border-navtabs-color);
 }
 
+.nav-tabs > li {
+  background-color: var(--bg-nav-tabs-active-color);
+  border-top-right-radius: 8px;
+}
+
+.nav-tabs > li.active > a {
+  border: 1px solid transparent;
+}
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus {
+  color: var(--text-nav-tab-active-color);
+  background-color: var(--bg-nav-tab-active-color);
+  border: 1px solid var(--border-navtabs-color);
+}
+
+.nav-tabs > li.disabled > a {
+  border-color: transparent;
+  pointer-events: none;
+}
+
 .nav-tabs > li > a:hover {
   border-color: var(--border-navtabs-color);
 }
 
+.nav > li > a {
+  color: var(--text-navtabs-color);
+}
+
 .nav > li > a:hover,
 .nav > li > a:focus {
+  color: var(--text-navtabs-hover-color);
   background-color: var(--bg-navtabs-hover-color);
 }
 
@@ -159,42 +181,9 @@ code {
   background-color: var(--bg-table-selected-color);
 }
 
-.CodeMirror-gutters {
-  background: var(--bg-codemirror-gutters-color);
-  border-right: 1px solid var(--border-codemirror-gutters-color);
-}
-
-.CodeMirror {
-  background: var(--bg-codemirror-color);
-  color: var(--text-codemirror-color);
-}
-
-.CodeMirror-selected {
-  background: var(--bg-codemirror-selected-color) !important;
-}
-
-.CodeMirror-cursor {
-  border-left: 1px solid var(--border-codemirror-cursor-color);
-}
-
-.cm-s-default .cm-atom {
-  color: var(--text-cm-default-color);
-}
-
-.cm-s-default .cm-meta {
-  color: var(--text-cm-meta-color);
-}
-
-.cm-s-default .cm-string {
-  color: var(--text-cm-string-color);
-}
-
-.cm-s-default .cm-number {
-  color: var(--text-cm-number-color);
-}
-
 .dropdown-menu {
   background: var(--bg-dropdown-menu-color);
+  border-radius: 8px;
 }
 
 .dropdown-menu > li > a {
@@ -203,60 +192,13 @@ code {
 
 pre {
   border: 1px solid var(--border-pre-color);
+  border-radius: 8px;
   background-color: var(--bg-pre-color);
   color: var(--text-pre-color);
-}
-json-tree .key {
-  color: var(--text-json-tree-color);
-}
-
-json-tree .leaf-value {
-  color: var(--text-json-tree-leaf-color);
-}
-
-json-tree .branch-preview {
-  color: var(--text-json-tree-branch-preview-color);
 }
 
 .progress {
   background-color: var(--bg-progress-color);
-}
-
-.pagination > .disabled > span,
-.pagination > .disabled > span:hover,
-.pagination > .disabled > span:focus,
-.pagination > .disabled > a,
-.pagination > .disabled > a:hover,
-.pagination > .disabled > a:focus {
-  color: var(--text-pagination-color);
-  background-color: var(--bg-pagination-color);
-  border-color: var(--border-pagination-color);
-}
-
-.pagination > li > a,
-.pagination > li > span {
-  background-color: var(--bg-pagination-span-color);
-  border-color: var(--border-pagination-span-color);
-  color: var(--text-pagination-span-color);
-}
-
-.pagination > li > a:hover,
-.pagination > li > span:hover,
-.pagination > li > a:focus,
-.pagination > li > span:focus {
-  background-color: var(--bg-pagination-hover-color);
-  border-color: var(--border-pagination-hover-color);
-  color: var(--text-pagination-span-hover-color);
-}
-
-.ui-select-bootstrap .ui-select-choices-row > span {
-  color: var(--text-ui-select-color);
-}
-
-.ui-select-bootstrap .ui-select-choices-row > span:hover,
-.ui-select-bootstrap .ui-select-choices-row > span:focus {
-  background-color: var(--bg-ui-select-hover-color);
-  color: var(--text-ui-select-hover-color);
 }
 
 .motd-body {
@@ -269,6 +211,11 @@ json-tree .branch-preview {
 
 .panel {
   border: 1px solid var(--border-panel-color);
+  background-color: var(--bg-panel-body-color);
+  border-radius: 8px;
+  -webkit-box-shadow: 0 4px 4px rgba(0, 0, 0, 0.05);
+  -moz-box-shadow: 0 4px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.05);
 }
 
 .theme-information .col-sm-12 {
@@ -298,11 +245,24 @@ json-tree .branch-preview {
 .rzslider .rz-bubble.rz-limit {
   color: var(--text-rzslider-limit-color);
 }
+
+.rz-bubble.rz-limit.rz-ceil {
+  position: absolute;
+  right: 0;
+  left: auto !important;
+  top: -26px;
+}
+
 input,
-button,
 select,
 textarea {
   background: var(--text-input-textarea);
+}
+
+[theme='highcontrast'] input,
+[theme='highcontrast'] select,
+[theme='highcontrast'] textarea {
+  border: 1px solid var(--white-color);
 }
 
 .daterangepicker {
@@ -379,30 +339,91 @@ input:-webkit-autofill {
   -webkit-text-fill-color: var(--text-input-autofill-color) !important;
 }
 
-.btn:hover {
-  color: var(--text-button-hover-color);
-}
-
-.btn-default:hover {
-  background-color: var(--bg-btn-default-hover-color);
-}
-
-.btn-primary:hover {
-  color: var(--white-color) !important;
-}
-
-.btn-danger:hover {
-  color: var(--white-color);
-}
 /* Overide Vendor CSS */
-
-.btn.disabled,
-.btn[disabled],
-fieldset[disabled] .btn {
-  pointer-events: none;
-  touch-action: none;
-}
-
 .multiSelect.inlineBlock button {
   margin: 0;
+}
+
+.label-default {
+  line-height: 11px;
+}
+
+/* Code Script Style */
+.code-script {
+  background-color: var(--bg-code-script-color);
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  padding: 5px;
+}
+
+/* Tippy */
+/* For triangle arrow (Sharp) */
+/* Tippy */
+/* For triangle arrow (Sharp) */
+.tippy-box[data-placement^='top'] > .tippy-arrow:before {
+  border-top: 8px solid var(--bg-tooltip-color);
+}
+
+.tippy-box[data-placement^='bottom'] > .tippy-arrow:before {
+  border-bottom: 8px solid var(--bg-tooltip-color);
+}
+
+.tippy-box[data-placement^='right'] > .tippy-arrow:before {
+  border-right: 8px solid var(--bg-tooltip-color);
+}
+
+.tippy-box[data-placement^='left'] > .tippy-arrow:before {
+  border-left: 8px solid var(--bg-tooltip-color);
+}
+
+[theme='highcontrast'] .tippy-box[data-placement^='top'] > .tippy-arrow:before {
+  border-top: 8px solid var(--white-color);
+  margin-bottom: -1px;
+}
+
+[theme='highcontrast'] .tippy-box[data-placement^='bottom'] > .tippy-arrow:before {
+  border-bottom: 8px solid var(--white-color);
+  margin-top: -1px;
+}
+
+[theme='highcontrast'] .tippy-box[data-placement^='right'] > .tippy-arrow:before {
+  border-right: 8px solid var(--white-color);
+  margin-left: -1px;
+}
+
+[theme='highcontrast'] .tippy-box[data-placement^='left'] > .tippy-arrow:before {
+  border-left: 8px solid var(--white-color);
+  margin-right: -1px;
+}
+
+/* Sidebar */
+.sidebar .tippy-box {
+  font-size: 12px;
+}
+
+.sidebar.tippy-box[data-placement^='right'] > .tippy-arrow {
+  width: 12px;
+  height: 12px;
+  margin-left: -1px;
+}
+
+.sidebar.tippy-box[data-placement^='right'] > .tippy-arrow:before {
+  border-right: 8px solid var(--ui-blue-9);
+  border-width: 6px 8px 6px 0;
+}
+
+[theme='dark'] .sidebar.tippy-box[data-placement^='right'] > .tippy-arrow:before {
+  border-right: 8px solid var(--ui-gray-true-9);
+}
+
+[theme='highcontrast'] .sidebar.tippy-box[data-placement^='right'] > .tippy-arrow:before {
+  border-right: 8px solid var(--ui-white);
+}
+
+.sidebar .tippy-content {
+  white-space: nowrap;
+}
+
+.tippy-content {
+  padding: 0;
 }

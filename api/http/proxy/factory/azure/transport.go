@@ -2,11 +2,13 @@ package azure
 
 import (
 	"net/http"
+	"path"
 	"strconv"
 	"sync"
 	"time"
-	"path"
-	"github.com/portainer/portainer/api"
+
+	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/http/client"
 )
 
@@ -21,7 +23,7 @@ type (
 		client      *client.HTTPClient
 		token       *azureAPIToken
 		mutex       sync.Mutex
-		dataStore   portainer.DataStore
+		dataStore   dataservices.DataStore
 		endpoint    *portainer.Endpoint
 	}
 
@@ -35,7 +37,7 @@ type (
 
 // NewTransport returns a pointer to a new instance of Transport that implements the HTTP Transport
 // interface for proxying requests to the Azure API.
-func NewTransport(credentials *portainer.AzureCredentials, dataStore portainer.DataStore, endpoint *portainer.Endpoint) *Transport {
+func NewTransport(credentials *portainer.AzureCredentials, dataStore dataservices.DataStore, endpoint *portainer.Endpoint) *Transport {
 	return &Transport{
 		credentials: credentials,
 		client:      client.NewHTTPClient(),
@@ -44,7 +46,7 @@ func NewTransport(credentials *portainer.AzureCredentials, dataStore portainer.D
 	}
 }
 
-// RoundTrip is the implementation of the the http.RoundTripper interface
+// RoundTrip is the implementation of the http.RoundTripper interface
 func (transport *Transport) RoundTrip(request *http.Request) (*http.Response, error) {
 	return transport.proxyAzureRequest(request)
 }

@@ -1,14 +1,16 @@
+export { StorageClass as KubernetesStorageClass } from './StorageClass';
+
 /**
  * KubernetesStorageClassAccessPolicies Model
  */
 const _KubernetesStorageClassAccessPolicies = Object.freeze([
   {
-    Name: 'RWO',
+    Name: 'ReadWriteOnce',
     Description: 'Allow read-write from a single pod only (RWO)',
     selected: true,
   },
   {
-    Name: 'RWX',
+    Name: 'ReadWriteMany',
     Description: 'Allow read-write access from one or more pods concurrently (RWX)',
     selected: false,
   },
@@ -16,20 +18,4 @@ const _KubernetesStorageClassAccessPolicies = Object.freeze([
 
 export function KubernetesStorageClassAccessPolicies() {
   return JSON.parse(JSON.stringify(_KubernetesStorageClassAccessPolicies));
-}
-
-/**
- * KubernetesStorageClass Model
- */
-const _KubernetesStorageClass = Object.freeze({
-  Name: '',
-  AccessModes: [],
-  Provisioner: '',
-  AllowVolumeExpansion: false,
-});
-
-export class KubernetesStorageClass {
-  constructor() {
-    Object.assign(this, JSON.parse(JSON.stringify(_KubernetesStorageClass)));
-  }
 }

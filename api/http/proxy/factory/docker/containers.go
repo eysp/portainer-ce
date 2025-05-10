@@ -3,20 +3,29 @@ package docker
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
+	"strings"
 
-	"github.com/docker/docker/client"
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/http/proxy/factory/utils"
 	"github.com/portainer/portainer/api/http/security"
 	"github.com/portainer/portainer/api/internal/authorization"
+
+	"github.com/docker/docker/client"
+	"github.com/segmentio/encoding/json"
 )
 
-const (
-	containerObjectIdentifier = "Id"
+const containerObjectIdentifier = "Id"
+
+var (
+	ErrPrivilegedModeForbidden        = errors.New("forbidden to use privileged mode")
+	ErrPIDHostNamespaceForbidden      = errors.New("forbidden to use pid host namespace")
+	ErrDeviceMappingForbidden         = errors.New("forbidden to use device mapping")
+	ErrSysCtlSettingsForbidden        = errors.New("forbidden to use sysctl settings")
+	ErrContainerCapabilitiesForbidden = errors.New("forbidden to use container capabilities")
+	ErrBindMountsForbidden            = errors.New("forbidden to use bind mounts")
 )
 
 func getInheritedResourceControlFromContainerLabels(dockerClient *client.Client, endpointID portainer.EndpointID, containerID string, resourceControls []portainer.ResourceControl) (*portainer.ResourceControl, error) {
@@ -69,6 +78,11 @@ func (transport *Transport) containerListOperation(response *http.Response, exec
 		}
 	}
 
+	responseArray, err = transport.applyPortainerContainers(responseArray)
+	if err != nil {
+		return err
+	}
+
 	return utils.RewriteResponse(response, responseArray, http.StatusOK)
 }
 
@@ -88,6 +102,8 @@ func (transport *Transport) containerInspectOperation(response *http.Response, e
 		labelsObjectSelector:        selectorContainerLabelsFromContainerInspectOperation,
 	}
 
+	responseObject, _ = transport.applyPortainerContainer(responseObject)
+
 	return transport.applyAccessControlOnResource(resourceOperationParameters, responseObject, response, executor)
 }
 
@@ -95,12 +111,13 @@ func (transport *Transport) containerInspectOperation(response *http.Response, e
 // This selector is specific to the containerInspect Docker operation.
 // Labels are available under the "Config.Labels" property.
 // API schema reference: https://docs.docker.com/engine/api/v1.28/#operation/ContainerInspect
-func selectorContainerLabelsFromContainerInspectOperation(responseObject map[string]interface{}) map[string]interface{} {
+func selectorContainerLabelsFromContainerInspectOperation(responseObject map[string]any) map[string]any {
 	containerConfigObject := utils.GetJSONObject(responseObject, "Config")
 	if containerConfigObject != nil {
 		containerLabelsObject := utils.GetJSONObject(containerConfigObject, "Labels")
 		return containerLabelsObject
 	}
+
 	return nil
 }
 
@@ -108,33 +125,33 @@ func selectorContainerLabelsFromContainerInspectOperation(responseObject map[str
 // This selector is specific to the containerList Docker operation.
 // Labels are available under the "Labels" property.
 // API schema reference: https://docs.docker.com/engine/api/v1.28/#operation/ContainerList
-func selectorContainerLabelsFromContainerListOperation(responseObject map[string]interface{}) map[string]interface{} {
+func selectorContainerLabelsFromContainerListOperation(responseObject map[string]any) map[string]any {
 	containerLabelsObject := utils.GetJSONObject(responseObject, "Labels")
+
 	return containerLabelsObject
 }
 
 // filterContainersWithLabels loops through a list of containers, and filters containers that do not contains
 // any labels in the labels black list.
-func filterContainersWithBlackListedLabels(containerData []interface{}, labelBlackList []portainer.Pair) ([]interface{}, error) {
-	filteredContainerData := make([]interface{}, 0)
+func filterContainersWithBlackListedLabels(containerData []any, labelBlackList []portainer.Pair) ([]any, error) {
+	filteredContainerData := make([]any, 0)
 
 	for _, container := range containerData {
-		containerObject := container.(map[string]interface{})
+		containerObject := container.(map[string]any)
 
 		containerLabels := selectorContainerLabelsFromContainerListOperation(containerObject)
-		if containerLabels != nil {
-			if !containerHasBlackListedLabel(containerLabels, labelBlackList) {
-				filteredContainerData = append(filteredContainerData, containerObject)
-			}
-		} else {
-			filteredContainerData = append(filteredContainerData, containerObject)
+
+		if containerHasBlackListedLabel(containerLabels, labelBlackList) {
+			continue
 		}
+
+		filteredContainerData = append(filteredContainerData, containerObject)
 	}
 
 	return filteredContainerData, nil
 }
 
-func containerHasBlackListedLabel(containerLabels map[string]interface{}, labelBlackList []portainer.Pair) bool {
+func containerHasBlackListedLabel(containerLabels map[string]any, labelBlackList []portainer.Pair) bool {
 	for key, value := range containerLabels {
 		labelName := key
 		labelValue := value.(string)
@@ -152,13 +169,13 @@ func containerHasBlackListedLabel(containerLabels map[string]interface{}, labelB
 func (transport *Transport) decorateContainerCreationOperation(request *http.Request, resourceIdentifierAttribute string, resourceType portainer.ResourceControlType) (*http.Response, error) {
 	type PartialContainer struct {
 		HostConfig struct {
-			Privileged bool                   `json:"Privileged"`
-			PidMode    string                 `json:"PidMode"`
-			Devices    []interface{}          `json:"Devices"`
-			Sysctls    map[string]interface{} `json:"Sysctls"`
-			CapAdd     []string               `json:"CapAdd"`
-			CapDrop    []string               `json:"CapDrop"`
-			Binds      []string               `json:"Binds"`
+			Privileged bool           `json:"Privileged"`
+			PidMode    string         `json:"PidMode"`
+			Devices    []any          `json:"Devices"`
+			Sysctls    map[string]any `json:"Sysctls"`
+			CapAdd     []string       `json:"CapAdd"`
+			CapDrop    []string       `json:"CapDrop"`
+			Binds      []string       `json:"Binds"`
 		} `json:"HostConfig"`
 	}
 
@@ -182,42 +199,45 @@ func (transport *Transport) decorateContainerCreationOperation(request *http.Req
 			return nil, err
 		}
 
-		body, err := ioutil.ReadAll(request.Body)
+		body, err := io.ReadAll(request.Body)
 		if err != nil {
 			return nil, err
 		}
 
 		partialContainer := &PartialContainer{}
-		err = json.Unmarshal(body, partialContainer)
-		if err != nil {
+		if err := json.Unmarshal(body, partialContainer); err != nil {
 			return nil, err
 		}
 
 		if !securitySettings.AllowPrivilegedModeForRegularUsers && partialContainer.HostConfig.Privileged {
-			return forbiddenResponse, errors.New("forbidden to use privileged mode")
+			return forbiddenResponse, ErrPrivilegedModeForbidden
 		}
 
 		if !securitySettings.AllowHostNamespaceForRegularUsers && partialContainer.HostConfig.PidMode == "host" {
-			return forbiddenResponse, errors.New("forbidden to use pid host namespace")
+			return forbiddenResponse, ErrPIDHostNamespaceForbidden
 		}
 
 		if !securitySettings.AllowDeviceMappingForRegularUsers && len(partialContainer.HostConfig.Devices) > 0 {
-			return forbiddenResponse, errors.New("forbidden to use device mapping")
+			return forbiddenResponse, ErrDeviceMappingForbidden
 		}
 
 		if !securitySettings.AllowSysctlSettingForRegularUsers && len(partialContainer.HostConfig.Sysctls) > 0 {
-			return forbiddenResponse, errors.New("forbidden to use sysctl settings")
+			return forbiddenResponse, ErrSysCtlSettingsForbidden
 		}
 
 		if !securitySettings.AllowContainerCapabilitiesForRegularUsers && (len(partialContainer.HostConfig.CapAdd) > 0 || len(partialContainer.HostConfig.CapDrop) > 0) {
-			return nil, errors.New("forbidden to use container capabilities")
+			return nil, ErrContainerCapabilitiesForbidden
 		}
 
 		if !securitySettings.AllowBindMountsForRegularUsers && (len(partialContainer.HostConfig.Binds) > 0) {
-			return forbiddenResponse, errors.New("forbidden to use bind mounts")
+			for _, bind := range partialContainer.HostConfig.Binds {
+				if strings.HasPrefix(bind, "/") {
+					return forbiddenResponse, ErrBindMountsForbidden
+				}
+			}
 		}
 
-		request.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+		request.Body = io.NopCloser(bytes.NewBuffer(body))
 	}
 
 	response, err := transport.executeDockerRequest(request)

@@ -11,7 +11,7 @@ import {
 import KubernetesApplicationHelper from 'Kubernetes/helpers/application';
 import KubernetesResourceReservationHelper from 'Kubernetes/helpers/resourceReservationHelper';
 import KubernetesCommonHelper from 'Kubernetes/helpers/commonHelper';
-import { buildImageFullURI } from 'Docker/helpers/imageHelper';
+import { buildImageFullURIFromModel } from '@/react/docker/images/utils';
 
 class KubernetesDeploymentConverter {
   /**
@@ -22,7 +22,9 @@ class KubernetesDeploymentConverter {
     const res = new KubernetesDeployment();
     res.Namespace = formValues.ResourcePool.Namespace.Name;
     res.Name = formValues.Name;
-    res.StackName = formValues.StackName ? formValues.StackName : formValues.Name;
+    if (formValues.StackName) {
+      res.StackName = formValues.StackName;
+    }
     res.ApplicationOwner = formValues.ApplicationOwner;
     res.ApplicationName = formValues.Name;
     res.ReplicaCount = formValues.ReplicaCount;
@@ -32,7 +34,7 @@ class KubernetesDeploymentConverter {
     res.Env = KubernetesApplicationHelper.generateEnvFromEnvVariables(formValues.EnvironmentVariables);
     res.Containers = formValues.Containers;
     KubernetesApplicationHelper.generateVolumesFromPersistentVolumClaims(res, volumeClaims);
-    KubernetesApplicationHelper.generateEnvOrVolumesFromConfigurations(res, formValues.Configurations);
+    KubernetesApplicationHelper.generateEnvOrVolumesFromConfigurations(res, formValues.ConfigMaps, formValues.Secrets);
     KubernetesApplicationHelper.generateAffinityFromPlacements(res, formValues);
     return res;
   }
@@ -45,7 +47,9 @@ class KubernetesDeploymentConverter {
     const payload = new KubernetesDeploymentCreatePayload();
     payload.metadata.name = deployment.Name;
     payload.metadata.namespace = deployment.Namespace;
-    payload.metadata.labels[KubernetesPortainerApplicationStackNameLabel] = deployment.StackName;
+    if (deployment.StackName) {
+      payload.metadata.labels[KubernetesPortainerApplicationStackNameLabel] = deployment.StackName;
+    }
     payload.metadata.labels[KubernetesPortainerApplicationNameLabel] = deployment.ApplicationName;
     payload.metadata.labels[KubernetesPortainerApplicationOwnerLabel] = deployment.ApplicationOwner;
     payload.metadata.annotations[KubernetesPortainerApplicationNote] = deployment.Note;
@@ -56,7 +60,7 @@ class KubernetesDeploymentConverter {
     payload.spec.template.spec.containers[0].name = deployment.Name;
 
     if (deployment.ImageModel) {
-      payload.spec.template.spec.containers[0].image = buildImageFullURI(deployment.ImageModel);
+      payload.spec.template.spec.containers[0].image = buildImageFullURIFromModel(deployment.ImageModel);
 
       if (deployment.ImageModel.Registry && deployment.ImageModel.Registry.Authentication) {
         payload.spec.template.spec.imagePullSecrets = [{ name: `registry-${deployment.ImageModel.Registry.Id}` }];

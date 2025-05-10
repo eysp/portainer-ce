@@ -1,456 +1,435 @@
-import _ from 'lodash-es';
+import featureFlagModule from '@/react/portainer/feature-flags';
 
 import './rbac';
+
 import componentsModule from './components';
 import settingsModule from './settings';
-import featureFlagModule from './feature-flags';
 import userActivityModule from './user-activity';
+import servicesModule from './services';
+import { reactModule } from './react';
+import { sidebarModule } from './react/views/sidebar';
+import environmentsModule from './environments';
+import { helpersModule } from './helpers';
+import { AccessHeaders, requiresAuthHook } from './authorization-guard';
 
-async function initAuthentication(authManager, Authentication, $rootScope, $state) {
-  authManager.checkAuthOnRefresh();
-  // The unauthenticated event is broadcasted by the jwtInterceptor when
-  // hitting a 401. We're using this instead of the usual combination of
-  // authManager.redirectWhenUnauthenticated() + unauthenticatedRedirector
-  // to have more controls on which URL should trigger the unauthenticated state.
-  $rootScope.$on('unauthenticated', function (event, data) {
-    if (!_.includes(data.config.url, '/v2/') && !_.includes(data.config.url, '/api/v4/') && isTransitionRequiresAuthentication($state.transition)) {
-      $state.go('portainer.logout', { error: '您的会话已过期' });
-    }
-  });
-
+async function initAuthentication(Authentication) {
   return await Authentication.init();
 }
 
-angular.module('portainer.app', ['portainer.oauth', 'portainer.rbac', componentsModule, settingsModule, featureFlagModule, userActivityModule, 'portainer.shared.datatable']).config([
-  '$stateRegistryProvider',
-  function ($stateRegistryProvider) {
-    'use strict';
-
-    var root = {
-      name: 'root',
-      abstract: true,
-      onEnter: /* @ngInject */ function onEnter($async, StateManager, Authentication, Notifications, authManager, $rootScope, $state) {
-        return $async(async () => {
-          const appState = StateManager.getState();
-          if (!appState.loading) {
-            return;
-          }
-          try {
-            const loggedIn = await initAuthentication(authManager, Authentication, $rootScope, $state);
-            await StateManager.initialize();
-            if (!loggedIn && isTransitionRequiresAuthentication($state.transition)) {
-              $state.go('portainer.logout');
-              return Promise.reject('Unauthenticated');
-            }
-          } catch (err) {
-            Notifications.error('失败', err, '无法检索应用程序设置');
-            throw err;
-          }
-        });
-      },
-      views: {
-        'sidebar@': {
-          templateUrl: './views/sidebar/sidebar.html',
-          controller: 'SidebarController',
-        },
-      },
-      resolve: {
-        featuresServiceInitialized: /* @ngInject */ function featuresServiceInitialized($async, featureService, Notifications) {
+angular
+  .module('portainer.app', [
+    'portainer.oauth',
+    'portainer.rbac',
+    'portainer.registrymanagement',
+    componentsModule,
+    settingsModule,
+    featureFlagModule,
+    userActivityModule,
+    servicesModule,
+    reactModule,
+    sidebarModule,
+    environmentsModule,
+    helpersModule,
+  ])
+  .config([
+    '$stateRegistryProvider',
+    function ($stateRegistryProvider) {
+      var root = {
+        name: 'root',
+        abstract: true,
+        onEnter: /* @ngInject */ function onEnter($async, StateManager, Authentication, Notifications, $state) {
           return $async(async () => {
-            try {
-              await featureService.init();
-            } catch (e) {
-              Notifications.error('初始化功能服务失败', e);
-              throw e;
-            }
-          });
-        },
-      },
-    };
-
-    var endpointRoot = {
-      name: 'endpoint',
-      url: '/:endpointId',
-      parent: 'root',
-      abstract: true,
-      resolve: {
-        endpoint: /* @ngInject */ function endpoint($async, $state, $transition$, EndpointService, Notifications) {
-          return $async(async () => {
-            try {
-              const endpointId = +$transition$.params().endpointId;
-
-              const endpoint = await EndpointService.endpoint(endpointId);
-              if ((endpoint.Type === 4 || endpoint.Type === 7) && !endpoint.EdgeID) {
-                $state.go('portainer.endpoints.endpoint', { id: endpoint.Id });
-                return;
-              }
-
-              return endpoint;
-            } catch (e) {
-              Notifications.error('加载环境失败', e);
-              $state.go('portainer.home', {}, { reload: true });
+            const appState = StateManager.getState();
+            if (!appState.loading) {
               return;
             }
+            try {
+              const loggedIn = await initAuthentication(Authentication);
+              await StateManager.initialize();
+              if (!loggedIn && isTransitionRequiresAuthentication($state.transition)) {
+                $state.go('portainer.logout');
+                return Promise.reject('Unauthenticated');
+              }
+            } catch (err) {
+              Notifications.error('Failure', err, 'Unable to retrieve application settings');
+              throw err;
+            }
           });
         },
-      },
-    };
-
-    var portainer = {
-      name: 'portainer',
-      parent: 'root',
-      abstract: true,
-    };
-
-    var account = {
-      name: 'portainer.account',
-      url: '/account',
-      views: {
-        'content@': {
-          templateUrl: './views/account/account.html',
-          controller: 'AccountController',
+        views: {
+          'sidebar@': {
+            component: 'sidebar',
+          },
         },
-      },
-    };
-
-    var authentication = {
-      name: 'portainer.auth',
-      url: '/auth',
-      params: {
-        reload: false,
-      },
-      views: {
-        'content@': {
-          templateUrl: './views/auth/auth.html',
-          controller: 'AuthenticationController',
-          controllerAs: 'ctrl',
+        data: {
+          access: AccessHeaders.Restricted,
         },
-        'sidebar@': {},
-      },
-    };
-    const logout = {
-      name: 'portainer.logout',
-      url: '/logout',
-      params: {
-        error: '',
-        performApiLogout: false,
-      },
-      views: {
-        'content@': {
-          templateUrl: './views/logout/logout.html',
-          controller: 'LogoutController',
-          controllerAs: 'ctrl',
+      };
+
+      var endpointRoot = {
+        name: 'endpoint',
+        url: '/:endpointId',
+        parent: 'root',
+        abstract: true,
+        resolve: {
+          endpoint: /* @ngInject */ function endpoint($async, $state, $transition$, EndpointProvider, EndpointService, Notifications) {
+            return $async(async () => {
+              try {
+                const endpointId = +$transition$.params().endpointId;
+
+                const endpoint = await EndpointService.endpoint(endpointId);
+                if ((endpoint.Type === 4 || endpoint.Type === 7) && !endpoint.EdgeID) {
+                  $state.go('portainer.endpoints.endpoint', { id: endpoint.Id });
+                  return;
+                }
+
+                EndpointProvider.setCurrentEndpoint(endpoint);
+
+                return endpoint;
+              } catch (e) {
+                Notifications.error('Failed loading environment', e);
+                $state.go('portainer.home', {}, { reload: true });
+                return;
+              }
+            });
+          },
         },
-        'sidebar@': {},
-      },
-    };
+      };
 
-    var endpoints = {
-      name: 'portainer.endpoints',
-      url: '/endpoints',
-      views: {
-        'content@': {
-          templateUrl: './views/endpoints/endpoints.html',
-          controller: 'EndpointsController',
+      var portainer = {
+        name: 'portainer',
+        parent: 'root',
+        abstract: true,
+      };
+
+      var account = {
+        name: 'portainer.account',
+        url: '/account',
+        views: {
+          'content@': {
+            templateUrl: './views/account/account.html',
+            controller: 'AccountController',
+          },
         },
-      },
-    };
-
-    var endpoint = {
-      name: 'portainer.endpoints.endpoint',
-      url: '/:id',
-      views: {
-        'content@': {
-          templateUrl: './views/endpoints/edit/endpoint.html',
-          controller: 'EndpointController',
+        data: {
+          docs: '/user/account-settings',
         },
-      },
-    };
+      };
 
-    const endpointKubernetesConfiguration = {
-      name: 'portainer.endpoints.endpoint.kubernetesConfig',
-      url: '/configure',
-      views: {
-        'content@': {
-          templateUrl: '../kubernetes/views/configure/configure.html',
-          controller: 'KubernetesConfigureController',
-          controllerAs: 'ctrl',
+      const tokenCreation = {
+        name: 'portainer.account.new-access-token',
+        url: '/tokens/new',
+        views: {
+          'content@': {
+            component: 'createUserAccessToken',
+          },
         },
-      },
-    };
+      };
 
-    var endpointCreation = {
-      name: 'portainer.endpoints.new',
-      url: '/new',
-      views: {
-        'content@': {
-          templateUrl: './views/endpoints/create/createendpoint.html',
-          controller: 'CreateEndpointController',
+      const createHelmRepository = {
+        name: 'portainer.account.createHelmRepository',
+        url: '/helm-repository/new',
+        views: {
+          'content@': {
+            component: 'createHelmRepositoryView',
+          },
         },
-      },
-    };
+      };
 
-    var endpointAccess = {
-      name: 'portainer.endpoints.endpoint.access',
-      url: '/access',
-      views: {
-        'content@': {
-          templateUrl: './views/endpoints/access/endpointAccess.html',
-          controller: 'EndpointAccessController',
-          controllerAs: 'ctrl',
+      var authentication = {
+        name: 'portainer.auth',
+        url: '/auth',
+        params: {
+          reload: false,
         },
-      },
-    };
-
-    var groups = {
-      name: 'portainer.groups',
-      url: '/groups',
-      views: {
-        'content@': {
-          templateUrl: './views/groups/groups.html',
-          controller: 'GroupsController',
+        views: {
+          'content@': {
+            templateUrl: './views/auth/auth.html',
+            controller: 'AuthenticationController',
+            controllerAs: 'ctrl',
+          },
+          'sidebar@': {},
         },
-      },
-    };
-
-    var group = {
-      name: 'portainer.groups.group',
-      url: '/:id',
-      views: {
-        'content@': {
-          templateUrl: './views/groups/edit/group.html',
-          controller: 'GroupController',
+        data: {
+          access: undefined,
         },
-      },
-    };
+      };
 
-    var groupCreation = {
-      name: 'portainer.groups.new',
-      url: '/new',
-      views: {
-        'content@': {
-          templateUrl: './views/groups/create/creategroup.html',
-          controller: 'CreateGroupController',
+      const logout = {
+        name: 'portainer.logout',
+        url: '/logout',
+        params: {
+          error: '',
         },
-      },
-    };
-
-    var groupAccess = {
-      name: 'portainer.groups.group.access',
-      url: '/access',
-      views: {
-        'content@': {
-          templateUrl: './views/groups/access/groupAccess.html',
-          controller: 'GroupAccessController',
+        views: {
+          'content@': {
+            templateUrl: './views/logout/logout.html',
+            controller: 'LogoutController',
+            controllerAs: 'ctrl',
+          },
+          'sidebar@': {},
         },
-      },
-    };
-
-    var home = {
-      name: 'portainer.home',
-      url: '/home',
-      views: {
-        'content@': {
-          templateUrl: './views/home/home.html',
-          controller: 'HomeController',
+        data: {
+          access: undefined,
         },
-      },
-    };
+      };
 
-    var init = {
-      name: 'portainer.init',
-      abstract: true,
-      url: '/init',
-      views: {
-        'sidebar@': {},
-      },
-    };
-
-    const wizard = {
-      name: 'portainer.wizard',
-      url: '/wizard',
-      views: {
-        'content@': {
-          component: 'wizardView',
+      var endpoints = {
+        name: 'portainer.endpoints',
+        url: '/endpoints',
+        views: {
+          'content@': {
+            component: 'environmentsListView',
+          },
         },
-      },
-    };
-
-    const wizardEndpoints = {
-      name: 'portainer.wizard.endpoints',
-      url: '/endpoints',
-      views: {
-        'content@': {
-          component: 'wizardEndpoints',
+        data: {
+          docs: '/admin/environments/environments',
         },
-      },
-    };
+      };
 
-    var initEndpoint = {
-      name: 'portainer.init.endpoint',
-      url: '/endpoint',
-      views: {
-        'content@': {
-          templateUrl: './views/init/endpoint/initEndpoint.html',
-          controller: 'InitEndpointController',
-          controllerAs: 'ctrl',
+      var endpoint = {
+        name: 'portainer.endpoints.endpoint',
+        url: '/:id?redirectTo',
+        params: {
+          redirectTo: '',
         },
-      },
-    };
-
-    var initAdmin = {
-      name: 'portainer.init.admin',
-      url: '/admin',
-      views: {
-        'content@': {
-          templateUrl: './views/init/admin/initAdmin.html',
-          controller: 'InitAdminController',
+        views: {
+          'content@': {
+            templateUrl: './views/endpoints/edit/endpoint.html',
+            controller: 'EndpointController',
+          },
         },
-      },
-    };
+      };
 
-    var registries = {
-      name: 'portainer.registries',
-      url: '/registries',
-      views: {
-        'content@': {
-          templateUrl: './views/registries/registries.html',
-          controller: 'RegistriesController',
+      const edgeAutoCreateScript = {
+        name: 'portainer.endpoints.edgeAutoCreateScript',
+        url: '/aeec',
+        views: {
+          'content@': {
+            component: 'edgeAutoCreateScriptView',
+          },
         },
-      },
-    };
-
-    var registry = {
-      name: 'portainer.registries.registry',
-      url: '/:id',
-      views: {
-        'content@': {
-          templateUrl: './views/registries/edit/registry.html',
-          controller: 'RegistryController',
+        data: {
+          docs: '/admin/environments/aeec',
         },
-      },
-    };
+      };
 
-    const registryCreation = {
-      name: 'portainer.registries.new',
-      url: '/new',
-      views: {
-        'content@': {
-          component: 'createRegistry',
+      var endpointAccess = {
+        name: 'portainer.endpoints.endpoint.access',
+        url: '/access',
+        views: {
+          'content@': {
+            templateUrl: './views/endpoints/access/endpointAccess.html',
+            controller: 'EndpointAccessController',
+            controllerAs: 'ctrl',
+          },
         },
-      },
-    };
+      };
 
-    var settings = {
-      name: 'portainer.settings',
-      url: '/settings',
-      views: {
-        'content@': {
-          templateUrl: './views/settings/settings.html',
-          controller: 'SettingsController',
+      var endpointKVM = {
+        name: 'portainer.endpoints.endpoint.kvm',
+        url: '/kvm?deviceId&deviceName',
+        views: {
+          'content@': {
+            templateUrl: './views/endpoints/kvm/endpointKVM.html',
+            controller: 'EndpointKVMController',
+          },
         },
-      },
-    };
+      };
 
-    var settingsAuthentication = {
-      name: 'portainer.settings.authentication',
-      url: '/auth',
-      views: {
-        'content@': {
-          templateUrl: './views/settings/authentication/settingsAuthentication.html',
-          controller: 'SettingsAuthenticationController',
+      var groups = {
+        name: 'portainer.groups',
+        url: '/groups',
+        views: {
+          'content@': {
+            component: 'environmentGroupsListView',
+          },
         },
-      },
-    };
-
-    var tags = {
-      name: 'portainer.tags',
-      url: '/tags',
-      views: {
-        'content@': {
-          templateUrl: './views/tags/tags.html',
-          controller: 'TagsController',
+        data: {
+          docs: '/admin/environments/groups',
+          access: AccessHeaders.Admin,
         },
-      },
-    };
+      };
 
-    var users = {
-      name: 'portainer.users',
-      url: '/users',
-      views: {
-        'content@': {
-          templateUrl: './views/users/users.html',
-          controller: 'UsersController',
+      var group = {
+        name: 'portainer.groups.group',
+        url: '/:id',
+        views: {
+          'content@': {
+            templateUrl: './views/groups/edit/group.html',
+            controller: 'GroupController',
+          },
         },
-      },
-    };
+      };
 
-    var user = {
-      name: 'portainer.users.user',
-      url: '/:id',
-      views: {
-        'content@': {
-          templateUrl: './views/users/edit/user.html',
-          controller: 'UserController',
+      var groupCreation = {
+        name: 'portainer.groups.new',
+        url: '/new',
+        views: {
+          'content@': {
+            templateUrl: './views/groups/create/creategroup.html',
+            controller: 'CreateGroupController',
+          },
         },
-      },
-    };
+      };
 
-    var teams = {
-      name: 'portainer.teams',
-      url: '/teams',
-      views: {
-        'content@': {
-          templateUrl: './views/teams/teams.html',
-          controller: 'TeamsController',
+      var groupAccess = {
+        name: 'portainer.groups.group.access',
+        url: '/access',
+        views: {
+          'content@': {
+            templateUrl: './views/groups/access/groupAccess.html',
+            controller: 'GroupAccessController',
+          },
         },
-      },
-    };
+      };
 
-    var team = {
-      name: 'portainer.teams.team',
-      url: '/:id',
-      views: {
-        'content@': {
-          templateUrl: './views/teams/edit/team.html',
-          controller: 'TeamController',
+      var home = {
+        name: 'portainer.home',
+        url: '/home?redirect&environmentId&environmentName&route',
+        views: {
+          'content@': {
+            component: 'homeView',
+          },
         },
-      },
-    };
+        data: {
+          docs: '/user/home',
+        },
+      };
 
-    $stateRegistryProvider.register(root);
-    $stateRegistryProvider.register(endpointRoot);
-    $stateRegistryProvider.register(portainer);
-    $stateRegistryProvider.register(account);
-    $stateRegistryProvider.register(authentication);
-    $stateRegistryProvider.register(logout);
-    $stateRegistryProvider.register(endpoints);
-    $stateRegistryProvider.register(endpoint);
-    $stateRegistryProvider.register(endpointAccess);
-    $stateRegistryProvider.register(endpointCreation);
-    $stateRegistryProvider.register(endpointKubernetesConfiguration);
-    $stateRegistryProvider.register(groups);
-    $stateRegistryProvider.register(group);
-    $stateRegistryProvider.register(groupAccess);
-    $stateRegistryProvider.register(groupCreation);
-    $stateRegistryProvider.register(home);
-    $stateRegistryProvider.register(init);
-    $stateRegistryProvider.register(wizard);
-    $stateRegistryProvider.register(wizardEndpoints);
-    $stateRegistryProvider.register(initEndpoint);
-    $stateRegistryProvider.register(initAdmin);
-    $stateRegistryProvider.register(registries);
-    $stateRegistryProvider.register(registry);
-    $stateRegistryProvider.register(registryCreation);
-    $stateRegistryProvider.register(settings);
-    $stateRegistryProvider.register(settingsAuthentication);
-    $stateRegistryProvider.register(tags);
-    $stateRegistryProvider.register(users);
-    $stateRegistryProvider.register(user);
-    $stateRegistryProvider.register(teams);
-    $stateRegistryProvider.register(team);
-  },
-]);
+      var init = {
+        name: 'portainer.init',
+        abstract: true,
+        url: '/init',
+        views: {
+          'sidebar@': {},
+        },
+        data: {
+          access: undefined,
+        },
+      };
+
+      var initAdmin = {
+        name: 'portainer.init.admin',
+        url: '/admin',
+        views: {
+          'content@': {
+            templateUrl: './views/init/admin/initAdmin.html',
+            controller: 'InitAdminController',
+          },
+        },
+      };
+
+      var settings = {
+        name: 'portainer.settings',
+        url: '/settings',
+        views: {
+          'content@': {
+            component: 'settingsView',
+          },
+        },
+        data: {
+          docs: '/admin/settings',
+          access: AccessHeaders.Admin,
+        },
+      };
+
+      var settingsAuthentication = {
+        name: 'portainer.settings.authentication',
+        url: '/auth',
+        views: {
+          'content@': {
+            templateUrl: './views/settings/authentication/settingsAuthentication.html',
+            controller: 'SettingsAuthenticationController',
+          },
+        },
+        data: {
+          docs: '/admin/settings/authentication',
+        },
+      };
+
+      var settingsEdgeCompute = {
+        name: 'portainer.settings.edgeCompute',
+        url: '/edge',
+        views: {
+          'content@': {
+            component: 'settingsEdgeComputeView',
+          },
+        },
+        data: {
+          docs: '/admin/settings/edge',
+        },
+      };
+
+      var tags = {
+        name: 'portainer.tags',
+        url: '/tags',
+        views: {
+          'content@': {
+            templateUrl: './views/tags/tags.html',
+            controller: 'TagsController',
+          },
+        },
+        data: {
+          docs: '/admin/environments/tags',
+          access: AccessHeaders.Admin,
+        },
+      };
+
+      var users = {
+        name: 'portainer.users',
+        url: '/users',
+        views: {
+          'content@': {
+            component: 'usersListView',
+          },
+        },
+        data: {
+          docs: '/admin/user/users',
+          access: AccessHeaders.Restricted, // allow for team leaders
+        },
+      };
+
+      var user = {
+        name: 'portainer.users.user',
+        url: '/:id',
+        views: {
+          'content@': {
+            templateUrl: './views/users/edit/user.html',
+            controller: 'UserController',
+          },
+        },
+      };
+
+      $stateRegistryProvider.register(root);
+      $stateRegistryProvider.register(endpointRoot);
+      $stateRegistryProvider.register(portainer);
+      $stateRegistryProvider.register(account);
+      $stateRegistryProvider.register(tokenCreation);
+      $stateRegistryProvider.register(authentication);
+      $stateRegistryProvider.register(logout);
+      $stateRegistryProvider.register(endpoints);
+      $stateRegistryProvider.register(endpoint);
+      $stateRegistryProvider.register(endpointAccess);
+      $stateRegistryProvider.register(endpointKVM);
+      $stateRegistryProvider.register(edgeAutoCreateScript);
+      $stateRegistryProvider.register(groups);
+      $stateRegistryProvider.register(group);
+      $stateRegistryProvider.register(groupAccess);
+      $stateRegistryProvider.register(groupCreation);
+      $stateRegistryProvider.register(home);
+      $stateRegistryProvider.register(init);
+      $stateRegistryProvider.register(initAdmin);
+      $stateRegistryProvider.register(settings);
+      $stateRegistryProvider.register(settingsAuthentication);
+      $stateRegistryProvider.register(settingsEdgeCompute);
+      $stateRegistryProvider.register(tags);
+      $stateRegistryProvider.register(users);
+      $stateRegistryProvider.register(user);
+      $stateRegistryProvider.register(createHelmRepository);
+    },
+  ])
+  .run(run);
 
 function isTransitionRequiresAuthentication(transition) {
   const UNAUTHENTICATED_ROUTES = ['portainer.logout', 'portainer.auth'];
@@ -460,4 +439,9 @@ function isTransitionRequiresAuthentication(transition) {
   const nextTransition = transition && transition.to();
   const nextTransitionName = nextTransition ? nextTransition.name : '';
   return !UNAUTHENTICATED_ROUTES.some((route) => nextTransitionName.startsWith(route));
+}
+
+/* @ngInject */
+function run($transitions) {
+  requiresAuthHook($transitions);
 }

@@ -1,88 +1,90 @@
 package templates
 
 import (
-	"errors"
-	"log"
 	"net/http"
-	"path"
+	"slices"
 
-	"github.com/asaskevich/govalidator"
-	httperror "github.com/portainer/libhttp/error"
-	"github.com/portainer/libhttp/request"
-	"github.com/portainer/libhttp/response"
+	portainer "github.com/portainer/portainer/api"
+	httperror "github.com/portainer/portainer/pkg/libhttp/error"
+	"github.com/portainer/portainer/pkg/libhttp/request"
+	"github.com/portainer/portainer/pkg/libhttp/response"
+
+	"github.com/rs/zerolog/log"
 )
-
-type filePayload struct {
-	// URL of a git repository where the file is stored
-	RepositoryURL string `example:"https://github.com/portainer/portainer-compose" validate:"required"`
-	// Path to the file inside the git repository
-	ComposeFilePathInRepository string `example:"./subfolder/docker-compose.yml" validate:"required"`
-}
 
 type fileResponse struct {
 	// The requested file content
-	FileContent string `example: "version:2"`
-}
-
-func (payload *filePayload) Validate(r *http.Request) error {
-	if govalidator.IsNull(payload.RepositoryURL) {
-		return errors.New("Invalid repository url")
-	}
-
-	if govalidator.IsNull(payload.ComposeFilePathInRepository) {
-		return errors.New("Invalid file path")
-	}
-
-	return nil
+	FileContent string `example:"version:2"`
 }
 
 // @id TemplateFile
 // @summary Get a template's file
 // @description Get a template's file
-// @description **Access policy**: restricted
+// @description **Access policy**: authenticated
 // @tags templates
+// @security ApiKeyAuth
 // @security jwt
 // @accept json
 // @produce json
-// @param body body filePayload true "File details"
+// @param id path int true "Template identifier"
 // @success 200 {object} fileResponse "Success"
 // @failure 400 "Invalid request"
 // @failure 500 "Server error"
-// @router /templates/file [post]
+// @router /templates/{id}/file [post]
 func (handler *Handler) templateFile(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
-	var payload filePayload
-	err := request.DecodeAndValidateJSONPayload(r, &payload)
+	id, err := request.RetrieveNumericRouteVariableValue(r, "id")
 	if err != nil {
-		return &httperror.HandlerError{http.StatusBadRequest, "Invalid request payload", err}
+		return httperror.BadRequest("Invalid template identifier", err)
+	}
+
+	templatesResponse, httpErr := handler.fetchTemplates()
+	if httpErr != nil {
+		return httpErr
+	}
+
+	templateIdx := slices.IndexFunc(templatesResponse.Templates, func(template portainer.Template) bool {
+		return template.ID == portainer.TemplateID(id)
+	})
+
+	if templateIdx == -1 {
+		return httperror.NotFound("Unable to find a template with the specified identifier", nil)
+	}
+
+	template := templatesResponse.Templates[templateIdx]
+
+	if template.Type == portainer.ContainerTemplate {
+		return httperror.BadRequest("Invalid template type", nil)
+	}
+
+	if template.StackFile != "" {
+		return response.JSON(w, fileResponse{FileContent: template.StackFile})
+	}
+
+	if template.Repository.StackFile == "" || template.Repository.URL == "" {
+		return httperror.BadRequest("Invalid template configuration", nil)
 	}
 
 	projectPath, err := handler.FileService.GetTemporaryPath()
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to create temporary folder", err}
+		return httperror.InternalServerError("Unable to create temporary folder", err)
 	}
 
 	defer handler.cleanUp(projectPath)
 
-	err = handler.GitService.CloneRepository(projectPath, payload.RepositoryURL, "", "", "")
-	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Unable to clone git repository", err}
+	if err := handler.GitService.CloneRepository(projectPath, template.Repository.URL, "", "", "", false); err != nil {
+		return httperror.InternalServerError("Unable to clone git repository", err)
 	}
 
-	composeFilePath := path.Join(projectPath, payload.ComposeFilePathInRepository)
-
-	fileContent, err := handler.FileService.GetFileContent(composeFilePath)
+	fileContent, err := handler.FileService.GetFileContent(projectPath, template.Repository.StackFile)
 	if err != nil {
-		return &httperror.HandlerError{http.StatusInternalServerError, "Failed loading file content", err}
+		return httperror.InternalServerError("Failed loading file content", err)
 	}
 
 	return response.JSON(w, fileResponse{FileContent: string(fileContent)})
-
 }
 
-func (handler *Handler) cleanUp(projectPath string) error {
-	err := handler.FileService.RemoveDirectory(projectPath)
-	if err != nil {
-		log.Printf("http error: Unable to cleanup stack creation (err=%s)\n", err)
+func (handler *Handler) cleanUp(projectPath string) {
+	if err := handler.FileService.RemoveDirectory(projectPath); err != nil {
+		log.Debug().Err(err).Msg("HTTP error: unable to cleanup stack creation")
 	}
-	return nil
 }

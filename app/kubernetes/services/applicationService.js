@@ -2,23 +2,18 @@ import _ from 'lodash-es';
 import angular from 'angular';
 import PortainerError from 'Portainer/error';
 
-import {
-  KubernetesApplication,
-  KubernetesApplicationDeploymentTypes,
-  KubernetesApplicationPublishingTypes,
-  KubernetesApplicationTypes,
-} from 'Kubernetes/models/application/models';
+import { KubernetesApplicationDeploymentTypes, KubernetesApplicationTypes } from 'Kubernetes/models/application/models/appConstants';
 import KubernetesApplicationHelper from 'Kubernetes/helpers/application';
-import KubernetesApplicationRollbackHelper from 'Kubernetes/helpers/application/rollback';
 import KubernetesApplicationConverter from 'Kubernetes/converters/application';
-import { KubernetesDeployment } from 'Kubernetes/models/deployment/models';
 import { KubernetesStatefulSet } from 'Kubernetes/models/stateful-set/models';
-import { KubernetesDaemonSet } from 'Kubernetes/models/daemon-set/models';
 import KubernetesServiceHelper from 'Kubernetes/helpers/serviceHelper';
 import { KubernetesHorizontalPodAutoScalerHelper } from 'Kubernetes/horizontal-pod-auto-scaler/helper';
 import { KubernetesHorizontalPodAutoScalerConverter } from 'Kubernetes/horizontal-pod-auto-scaler/converter';
-import { KubernetesIngressConverter } from 'Kubernetes/ingress/converter';
 import KubernetesPodConverter from 'Kubernetes/pod/converter';
+import { notifyError } from '@/portainer/services/notifications';
+import { KubernetesIngressConverter } from 'Kubernetes/ingress/converter';
+import { generateNewIngressesFromFormPaths } from '@/react/kubernetes/applications/CreateView/application-services/utils';
+import { KubernetesPod } from '../pod/models';
 
 class KubernetesApplicationService {
   /* #region  CONSTRUCTOR */
@@ -34,7 +29,6 @@ class KubernetesApplicationService {
     KubernetesPersistentVolumeClaimService,
     KubernetesNamespaceService,
     KubernetesPodService,
-    KubernetesHistoryService,
     KubernetesHorizontalPodAutoScalerService,
     KubernetesIngressService
   ) {
@@ -48,7 +42,6 @@ class KubernetesApplicationService {
     this.KubernetesPersistentVolumeClaimService = KubernetesPersistentVolumeClaimService;
     this.KubernetesNamespaceService = KubernetesNamespaceService;
     this.KubernetesPodService = KubernetesPodService;
-    this.KubernetesHistoryService = KubernetesHistoryService;
     this.KubernetesHorizontalPodAutoScalerService = KubernetesHorizontalPodAutoScalerService;
     this.KubernetesIngressService = KubernetesIngressService;
 
@@ -57,7 +50,6 @@ class KubernetesApplicationService {
     this.createAsync = this.createAsync.bind(this);
     this.patchAsync = this.patchAsync.bind(this);
     this.patchPartialAsync = this.patchPartialAsync.bind(this);
-    this.rollbackAsync = this.rollbackAsync.bind(this);
     this.deleteAsync = this.deleteAsync.bind(this);
   }
   /* #endregion */
@@ -65,13 +57,13 @@ class KubernetesApplicationService {
   /* #region  UTILS */
   _getApplicationApiService(app) {
     let apiService;
-    if (app instanceof KubernetesDeployment || (app instanceof KubernetesApplication && app.ApplicationType === KubernetesApplicationTypes.DEPLOYMENT)) {
+    if (app.ApplicationType === KubernetesApplicationTypes.Deployment) {
       apiService = this.KubernetesDeploymentService;
-    } else if (app instanceof KubernetesDaemonSet || (app instanceof KubernetesApplication && app.ApplicationType === KubernetesApplicationTypes.DAEMONSET)) {
+    } else if (app.ApplicationType === KubernetesApplicationTypes.DaemonSet) {
       apiService = this.KubernetesDaemonSetService;
-    } else if (app instanceof KubernetesStatefulSet || (app instanceof KubernetesApplication && app.ApplicationType === KubernetesApplicationTypes.STATEFULSET)) {
+    } else if (app.ApplicationType === KubernetesApplicationTypes.StatefulSet) {
       apiService = this.KubernetesStatefulSetService;
-    } else if (app instanceof KubernetesApplication && app.ApplicationType === KubernetesApplicationTypes.POD) {
+    } else if (app instanceof KubernetesPod || KubernetesApplicationTypes.Pod) {
       apiService = this.KubernetesPodService;
     } else {
       throw new PortainerError('Unable to determine which association to use to retrieve API Service');
@@ -120,18 +112,18 @@ class KubernetesApplicationService {
     const services = await this.KubernetesServiceService.get(namespace);
     const boundService = KubernetesServiceHelper.findApplicationBoundService(services, rootItem.value.Raw);
     const service = boundService ? await this.KubernetesServiceService.get(namespace, boundService.metadata.name) : {};
+    const boundServices = KubernetesServiceHelper.findApplicationBoundServices(services, rootItem.value.Raw);
 
     const application = converterFunc(rootItem.value.Raw, pods.value, service.Raw, ingresses.value);
     application.Yaml = rootItem.value.Yaml;
     application.Raw = rootItem.value.Raw;
     application.Pods = _.map(application.Pods, (item) => KubernetesPodConverter.apiToModel(item));
     application.Containers = KubernetesApplicationHelper.associateContainersAndApplication(application);
+    application.Services = boundServices;
 
     const boundScaler = KubernetesHorizontalPodAutoScalerHelper.findApplicationBoundScaler(autoScalers.value, application);
     const scaler = boundScaler ? await this.KubernetesHorizontalPodAutoScalerService.get(namespace, boundScaler.Name) : undefined;
     application.AutoScaler = scaler;
-
-    await this.KubernetesHistoryService.get(application);
 
     if (service.Yaml) {
       application.Yaml += '---\n' + service.Yaml;
@@ -149,8 +141,10 @@ class KubernetesApplicationService {
 
     const convertToApplication = (item, converterFunc, services, pods, ingresses) => {
       const service = KubernetesServiceHelper.findApplicationBoundService(services, item);
+      const servicesFound = KubernetesServiceHelper.findApplicationBoundServices(services, item);
       const application = converterFunc(item, pods, service, ingresses);
       application.Containers = KubernetesApplicationHelper.associateContainersAndApplication(application);
+      application.Services = servicesFound;
       return application;
     };
 
@@ -213,14 +207,33 @@ class KubernetesApplicationService {
    *    To synchronise with kubernetes resource creation summary output, any new resources created in this method should
    *    also be displayed in the summary output (getCreatedApplicationResources)
    */
-  async createAsync(formValues) {
-    let [app, headlessService, service, claims] = KubernetesApplicationConverter.applicationFormValuesToApplication(formValues);
+  async createAsync(formValues, hideStacks) {
+    // formValues -> Application
+    let [app, headlessService, services, , claims] = KubernetesApplicationConverter.applicationFormValuesToApplication(formValues);
 
-    if (service) {
-      await this.KubernetesServiceService.create(service);
-      if (formValues.PublishingType === KubernetesApplicationPublishingTypes.INGRESS) {
-        const ingresses = KubernetesIngressConverter.applicationFormValuesToIngresses(formValues, service.Name);
-        await Promise.all(this._generateIngressPatchPromises(formValues.OriginalIngresses, ingresses));
+    if (hideStacks) {
+      app.StackName = '';
+    }
+
+    if (services) {
+      services.forEach(async (service) => {
+        try {
+          await this.KubernetesServiceService.create(service);
+        } catch (error) {
+          notifyError('Unable to create service', error);
+        }
+      });
+
+      try {
+        //Generate all ingresses from current form by passing services object
+        const newServicePorts = formValues.Services.flatMap((service) => service.Ports);
+        const newIngresses = generateNewIngressesFromFormPaths(formValues.OriginalIngresses, newServicePorts);
+        if (newIngresses) {
+          //Update original ingress with current ingress
+          await Promise.all(this._generateIngressPatchPromises(formValues.OriginalIngresses, newIngresses));
+        }
+      } catch (error) {
+        notifyError('Unable to update service', error);
       }
     }
 
@@ -228,7 +241,11 @@ class KubernetesApplicationService {
 
     if (app instanceof KubernetesStatefulSet) {
       app.VolumeClaims = claims;
-      headlessService = await this.KubernetesServiceService.create(headlessService);
+      try {
+        headlessService = await this.KubernetesServiceService.create(headlessService);
+      } catch (error) {
+        notifyError('Unable to create service', error);
+      }
       app.ServiceName = headlessService.metadata.name;
     } else {
       const claimPromises = _.map(claims, (item) => {
@@ -239,8 +256,8 @@ class KubernetesApplicationService {
       await Promise.all(_.without(claimPromises, undefined));
     }
 
-    if (formValues.AutoScaler.IsUsed && formValues.DeploymentType !== KubernetesApplicationDeploymentTypes.GLOBAL) {
-      const kind = KubernetesHorizontalPodAutoScalerHelper.getApplicationTypeString(app);
+    if (formValues.AutoScaler.isUsed && formValues.DeploymentType !== KubernetesApplicationDeploymentTypes.Global) {
+      const kind = app.ApplicationType;
       const autoScaler = KubernetesHorizontalPodAutoScalerConverter.applicationFormValuesToModel(formValues, kind);
       await this.KubernetesHorizontalPodAutoScalerService.create(autoScaler);
     }
@@ -248,8 +265,8 @@ class KubernetesApplicationService {
     await apiService.create(app);
   }
 
-  create(formValues) {
-    return this.$async(this.createAsync, formValues);
+  create(formValues, _, hideStacks) {
+    return this.$async(this.createAsync, formValues, hideStacks);
   }
   /* #endregion */
 
@@ -260,22 +277,34 @@ class KubernetesApplicationService {
    *    To synchronise with kubernetes resource creation, update and delete summary output, any new resources created
    *    in this method should also be displayed in the summary output (getUpdatedApplicationResources)
    */
-  async patchAsync(oldFormValues, newFormValues) {
-    const [oldApp, oldHeadlessService, oldService, oldClaims] = KubernetesApplicationConverter.applicationFormValuesToApplication(oldFormValues);
-    const [newApp, newHeadlessService, newService, newClaims] = KubernetesApplicationConverter.applicationFormValuesToApplication(newFormValues);
+  async patchAsync(oldFormValues, newFormValues, originalServicePorts) {
+    const [oldApp, oldHeadlessService, oldServices, , oldClaims] = KubernetesApplicationConverter.applicationFormValuesToApplication(oldFormValues);
+    const [newApp, newHeadlessService, newServices, , newClaims] = KubernetesApplicationConverter.applicationFormValuesToApplication(newFormValues);
     const oldApiService = this._getApplicationApiService(oldApp);
     const newApiService = this._getApplicationApiService(newApp);
 
     if (oldApiService !== newApiService) {
-      await this.delete(oldApp);
-      if (oldService) {
-        await this.KubernetesServiceService.delete(oldService);
+      // delete services first
+      if (oldServices) {
+        await this.KubernetesServiceService.delete(oldServices);
       }
+
+      // delete the app
+      await this.delete(oldApp);
+
+      // sleep for 5 seconds to allow the app/services to be deleted
+      await new Promise((r) => setTimeout(r, 5000));
+
+      // create the app
       return await this.create(newFormValues);
     }
 
     if (newApp instanceof KubernetesStatefulSet) {
-      await this.KubernetesServiceService.patch(oldHeadlessService, newHeadlessService);
+      try {
+        await this.KubernetesServiceService.patch(oldHeadlessService, newHeadlessService);
+      } catch (error) {
+        notifyError('Unable to update service', error);
+      }
     } else {
       const claimPromises = _.map(newClaims, (newClaim) => {
         if (!newClaim.PreviousName && !newClaim.Id) {
@@ -290,37 +319,74 @@ class KubernetesApplicationService {
 
     await newApiService.patch(oldApp, newApp);
 
-    if (oldService && newService) {
-      await this.KubernetesServiceService.patch(oldService, newService);
-      if (newFormValues.PublishingType === KubernetesApplicationPublishingTypes.INGRESS || oldFormValues.PublishingType === KubernetesApplicationPublishingTypes.INGRESS) {
-        const oldIngresses = KubernetesIngressConverter.applicationFormValuesToIngresses(oldFormValues, oldService.Name);
-        const newIngresses = KubernetesIngressConverter.applicationFormValuesToIngresses(newFormValues, newService.Name);
-        await Promise.all(this._generateIngressPatchPromises(oldIngresses, newIngresses));
-      }
-    } else if (!oldService && newService) {
-      await this.KubernetesServiceService.create(newService);
-      if (newFormValues.PublishingType === KubernetesApplicationPublishingTypes.INGRESS) {
-        const ingresses = KubernetesIngressConverter.applicationFormValuesToIngresses(newFormValues, newService.Name);
-        await Promise.all(this._generateIngressPatchPromises(newFormValues.OriginalIngresses, ingresses));
-      }
-    } else if (oldService && !newService) {
-      await this.KubernetesServiceService.delete(oldService);
-      if (oldFormValues.PublishingType === KubernetesApplicationPublishingTypes.INGRESS) {
-        const ingresses = KubernetesIngressConverter.applicationFormValuesToIngresses(newFormValues, oldService.Name);
-        await Promise.all(this._generateIngressPatchPromises(oldFormValues.OriginalIngresses, ingresses));
+    // Create services
+    if (oldServices.length === 0 && newServices.length !== 0) {
+      newServices.forEach(async (service) => {
+        try {
+          await this.KubernetesServiceService.create(service);
+        } catch (error) {
+          notifyError('Unable to create service', error);
+        }
+      });
+    }
+
+    // Delete services ( only called when all services been deleted )
+    if (oldServices.length !== 0 && newServices.length === 0) {
+      await this.KubernetesServiceService.deleteAll(oldServices);
+    }
+
+    // Patch services ( Action including: Delete, Update, Create )
+    if (oldServices.length !== 0 && newServices.length !== 0) {
+      oldServices.forEach(async (oldService) => {
+        const newServiceMatched = _.find(newServices, { Name: oldService.Name });
+        if (!newServiceMatched) {
+          await this.KubernetesServiceService.deleteSingle(oldService);
+        }
+      });
+
+      newServices.forEach(async (newService) => {
+        const oldServiceMatched = _.find(oldServices, { Name: newService.Name });
+        if (oldServiceMatched) {
+          try {
+            await this.KubernetesServiceService.patch(oldServiceMatched, newService);
+          } catch (error) {
+            notifyError('Unable to update service', error);
+          }
+        } else {
+          try {
+            await this.KubernetesServiceService.create(newService);
+          } catch (error) {
+            notifyError('Unable to create service', error);
+          }
+        }
+      });
+    }
+
+    // Update ingresses
+    if (newServices) {
+      try {
+        //Generate all ingresses from current form by passing services object
+        const newServicePorts = newFormValues.Services.flatMap((service) => service.Ports);
+        const newIngresses = generateNewIngressesFromFormPaths(newFormValues.OriginalIngresses, newServicePorts, originalServicePorts);
+        if (newIngresses) {
+          //Update original ingress with current ingress
+          await Promise.all(this._generateIngressPatchPromises(newFormValues.OriginalIngresses, newIngresses));
+        }
+      } catch (error) {
+        notifyError('Unable to update service', error);
       }
     }
 
-    const newKind = KubernetesHorizontalPodAutoScalerHelper.getApplicationTypeString(newApp);
+    const newKind = newApp.ApplicationType;
     const newAutoScaler = KubernetesHorizontalPodAutoScalerConverter.applicationFormValuesToModel(newFormValues, newKind);
-    if (!oldFormValues.AutoScaler.IsUsed) {
-      if (newFormValues.AutoScaler.IsUsed) {
+    if (!oldFormValues.AutoScaler.isUsed) {
+      if (newFormValues.AutoScaler.isUsed) {
         await this.KubernetesHorizontalPodAutoScalerService.create(newAutoScaler);
       }
     } else {
-      const oldKind = KubernetesHorizontalPodAutoScalerHelper.getApplicationTypeString(oldApp);
+      const oldKind = oldApp.ApplicationType;
       const oldAutoScaler = KubernetesHorizontalPodAutoScalerConverter.applicationFormValuesToModel(oldFormValues, oldKind);
-      if (newFormValues.AutoScaler.IsUsed) {
+      if (newFormValues.AutoScaler.isUsed) {
         await this.KubernetesHorizontalPodAutoScalerService.patch(oldAutoScaler, newAutoScaler);
       } else {
         await this.KubernetesHorizontalPodAutoScalerService.delete(oldAutoScaler);
@@ -346,15 +412,19 @@ class KubernetesApplicationService {
     await apiService.patch(oldAppPayload, newAppPayload);
   }
 
-  // accept either formValues or applications as parameters
-  // depending on partial value
+  // accept either formValues or applications as parameters depending on partial value
   // true = KubernetesApplication
   // false = KubernetesApplicationFormValues
-  patch(oldValues, newValues, partial = false) {
+  //
+  // e.g. signatures are
+  //
+  // patch(oldValues: KubernetesApplication, newValues: KubernetesApplication, partial: (undefined | false)): Promise<unknown>
+  // patch(oldValues: KubernetesApplicationFormValues, newValues: KubernetesApplicationFormValues, partial: true): Promise<unknown>
+  patch(oldValues, newValues, partial = false, originalServicePorts) {
     if (partial) {
       return this.$async(this.patchPartialAsync, oldValues, newValues);
     }
-    return this.$async(this.patchAsync, oldValues, newValues);
+    return this.$async(this.patchAsync, oldValues, newValues, originalServicePorts);
   }
   /* #endregion */
 
@@ -373,20 +443,20 @@ class KubernetesApplicationService {
     if (apiService === this.KubernetesStatefulSetService) {
       const headlessServicePayload = angular.copy(payload);
       headlessServicePayload.Name = application instanceof KubernetesStatefulSet ? application.ServiceName : application.HeadlessServiceName;
-      await this.KubernetesServiceService.delete(headlessServicePayload);
     }
 
     if (application.ServiceType) {
-      await this.KubernetesServiceService.delete(servicePayload);
-      const isIngress = _.filter(application.PublishedPorts, (p) => p.IngressRules.length).length;
-      if (isIngress) {
+      // delete headless service && non-headless service
+      await this.KubernetesServiceService.delete(application.Services);
+      const appHasIngressPath = application.PublishedPorts && application.PublishedPorts.flatMap((pp) => pp.IngressRules).length >= 1;
+      if (appHasIngressPath) {
         const originalIngresses = await this.KubernetesIngressService.get(payload.Namespace);
         const formValues = {
           OriginalIngresses: originalIngresses,
           PublishedPorts: KubernetesApplicationHelper.generatePublishedPortsFormValuesFromPublishedPorts(application.ServiceType, application.PublishedPorts),
         };
-        _.forEach(formValues.PublishedPorts, (p) => (p.NeedsDeletion = true));
-        const ingresses = KubernetesIngressConverter.applicationFormValuesToIngresses(formValues, servicePayload.Name);
+        const ingresses = KubernetesIngressConverter.applicationFormValuesToDeleteIngresses(formValues, application);
+
         await Promise.all(this._generateIngressPatchPromises(formValues.OriginalIngresses, ingresses));
       }
     }
@@ -397,18 +467,6 @@ class KubernetesApplicationService {
 
   delete(application) {
     return this.$async(this.deleteAsync, application);
-  }
-  /* #endregion */
-
-  /* #region  ROLLBACK */
-  async rollbackAsync(application, targetRevision) {
-    const payload = KubernetesApplicationRollbackHelper.getPatchPayload(application, targetRevision);
-    const apiService = this._getApplicationApiService(application);
-    await apiService.rollback(application.ResourcePool, application.Name, payload);
-  }
-
-  rollback(application, targetRevision) {
-    return this.$async(this.rollbackAsync, application, targetRevision);
   }
   /* #endregion */
 }

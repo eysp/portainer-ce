@@ -3,6 +3,7 @@ import _ from 'lodash-es';
 import angular from 'angular';
 import KubernetesResourcePoolConverter from 'Kubernetes/converters/resourcePool';
 import KubernetesResourceQuotaHelper from 'Kubernetes/helpers/resourceQuotaHelper';
+import { getNamespaces } from '@/react/kubernetes/namespaces/queries/useNamespacesQuery';
 
 /* @ngInject */
 export function KubernetesResourcePoolService(
@@ -11,7 +12,8 @@ export function KubernetesResourcePoolService(
   KubernetesNamespaceService,
   KubernetesResourceQuotaService,
   KubernetesIngressService,
-  KubernetesPortainerNamespaces
+  KubernetesPortainerNamespaces,
+  EndpointProvider
 ) {
   return {
     get,
@@ -21,27 +23,38 @@ export function KubernetesResourcePoolService(
     toggleSystem,
   };
 
-  async function getOne(name) {
+  // getting quota isn't a costly operation for one namespace, so we can get it by default
+  async function getOne(name, { getQuota = true }) {
     const namespace = await KubernetesNamespaceService.get(name);
-    const [quotaAttempt] = await Promise.allSettled([KubernetesResourceQuotaService.get(name, KubernetesResourceQuotaHelper.generateResourceQuotaName(name))]);
     const pool = KubernetesResourcePoolConverter.apiToResourcePool(namespace);
-    if (quotaAttempt.status === 'fulfilled') {
-      pool.Quota = quotaAttempt.value;
-      pool.Yaml += '---\n' + quotaAttempt.value.Yaml;
+    if (getQuota) {
+      const [quotaAttempt] = await Promise.allSettled([KubernetesResourceQuotaService.get(name, KubernetesResourceQuotaHelper.generateResourceQuotaName(name))]);
+      if (quotaAttempt.status === 'fulfilled') {
+        pool.Quota = quotaAttempt.value;
+        pool.Yaml += '---\n' + quotaAttempt.value.Yaml;
+      }
     }
     return pool;
   }
 
-  async function getAll() {
-    const namespaces = await KubernetesNamespaceService.get();
+  // getting the quota for all namespaces is costly by default, so disable getting it by default
+  async function getAll({ getQuota = false }) {
+    const namespaces = await getNamespaces(EndpointProvider.endpointID());
+    // there is a lot of downstream logic using the angular namespace type with a '.Status' field (not '.Status.phase'), so format the status here to match this logic
+    const namespacesFormattedStatus = namespaces.map((namespace) => ({
+      ...namespace,
+      Status: namespace.Status.phase,
+    }));
     const pools = await Promise.all(
-      _.map(namespaces, async (namespace) => {
+      _.map(namespacesFormattedStatus, async (namespace) => {
         const name = namespace.Name;
-        const [quotaAttempt] = await Promise.allSettled([KubernetesResourceQuotaService.get(name, KubernetesResourceQuotaHelper.generateResourceQuotaName(name))]);
         const pool = KubernetesResourcePoolConverter.apiToResourcePool(namespace);
-        if (quotaAttempt.status === 'fulfilled') {
-          pool.Quota = quotaAttempt.value;
-          pool.Yaml += '---\n' + quotaAttempt.value.Yaml;
+        if (getQuota) {
+          const [quotaAttempt] = await Promise.allSettled([KubernetesResourceQuotaService.get(name, KubernetesResourceQuotaHelper.generateResourceQuotaName(name))]);
+          if (quotaAttempt.status === 'fulfilled') {
+            pool.Quota = quotaAttempt.value;
+            pool.Yaml += '---\n' + quotaAttempt.value.Yaml;
+          }
         }
         return pool;
       })
@@ -49,11 +62,11 @@ export function KubernetesResourcePoolService(
     return pools;
   }
 
-  function get(name) {
+  function get(name, options = {}) {
     if (name) {
-      return $async(getOne, name);
+      return $async(getOne, name, options);
     }
-    return $async(getAll);
+    return $async(getAll, options);
   }
 
   function create(formValues) {
