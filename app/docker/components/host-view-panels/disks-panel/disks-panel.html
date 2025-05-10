@@ -4,28 +4,28 @@
       <rd-widget-header icon="code" title-text="Physical Disks"></rd-widget-header>
       <rd-widget-body classes="no-padding">
         <table class="table">
-          <thead>
-            <tr>
-              <th>Vendor</th>
-              <th>Size</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr ng-if="$ctrl.disks" ng-repeat="disk in $ctrl.disks">
-              <td>{{ disk.Vendor }}</td>
-              <td>{{ disk.Size | humansize }}</td>
-            </tr>
-            <tr ng-if="$ctrl.disks === undefined">
-              <td colspan="2" class="text-muted text-center">Loading...</td>
-            </tr>
-            <tr ng-if="$ctrl.disks === null">
-              <td colspan="2" class="text-muted text-center"> Failed to load devices. </td>
-            </tr>
-            <tr ng-if="$ctrl.disks.length === 0">
-              <td colspan="2" class="text-muted text-center"> No disks available. </td>
-            </tr>
-          </tbody>
-        </table>
+  <thead>
+    <tr>
+      <th>供应商</th>
+      <th>大小</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-if="$ctrl.disks" ng-repeat="disk in $ctrl.disks">
+      <td>{{ disk.Vendor }}</td>
+      <td>{{ disk.Size | humansize }}</td>
+    </tr>
+    <tr ng-if="$ctrl.disks === undefined">
+      <td colspan="2" class="text-muted text-center">加载中...</td>
+    </tr>
+    <tr ng-if="$ctrl.disks === null">
+      <td colspan="2" class="text-muted text-center">无法加载设备。</td>
+    </tr>
+    <tr ng-if="$ctrl.disks.length === 0">
+      <td colspan="2" class="text-muted text-center">没有可用磁盘。</td>
+    </tr>
+  </tbody>
+</table>
       </rd-widget-body>
     </rd-widget>
   </div>
