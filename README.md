@@ -65,8 +65,7 @@ When Portainer first starts, you are given the option to DISABLE analytics. If y
 
 Portainer supports "Current - 2 docker versions only. Prior versions may operate, however these are not supported.
 
-## Licensing
+# Apache [License](./LICENSE) 2.0
 
-Portainer is licensed under the zlib license. See [LICENSE](./LICENSE) for reference.
-
-Portainer also contains code from open source projects. See [ATTRIBUTIONS.md](./ATTRIBUTIONS.md) for a list.
+# 赞助声明
+  本项目由 [VTEXS](https://vtexs.com/) 【开源项目免费VPS计划】 提供算力支持
