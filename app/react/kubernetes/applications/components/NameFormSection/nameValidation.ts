@@ -10,7 +10,7 @@ export function appNameValidation(
   validationData?: ValidationData
 ): SchemaOf<string> {
   return yupString()
-    .required('This field is required.')
+    .required('此字段为必填项。')
     .test(
       'is-unique',
       'An application with the same name already exists inside the selected namespace.',

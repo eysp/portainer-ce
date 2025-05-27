@@ -133,7 +133,7 @@
                           <div class="form-inline">
                             <div class="small text-warning" style="margin-top: 5px" ng-show="ctrl.state.errors.volumeSize || kubernetesVolumeUpdateForm.size.$invalid">
                               <div class="vertical-center" ng-messages="kubernetesVolumeUpdateForm.size.$error">
-                                <p ng-message="required"><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> This field is required.</p>
+                                <p ng-message="required"><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 此字段为必填项。</p>
                               </div>
                               <p class="vertical-center" ng-show="ctrl.state.errors.volumeSize"
                                 ><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> The new size must be greater than the actual size.</p

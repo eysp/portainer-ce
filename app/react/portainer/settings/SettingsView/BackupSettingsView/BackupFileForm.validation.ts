@@ -9,7 +9,7 @@ export function validationSchema(): SchemaOf<BackupFileSettings> {
       .default('')
       .when('passwordProtect', {
         is: true,
-        then: (schema) => schema.required('This field is required.'),
+        then: (schema) => schema.required('此字段为必填项。'),
       }),
   });
 }

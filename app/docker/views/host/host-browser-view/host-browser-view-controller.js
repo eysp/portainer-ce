@@ -11,7 +11,7 @@ angular.module('portainer.docker').controller('HostBrowserViewController', [
           ctrl.host = host;
         })
         .catch(function onError(err) {
-          Notifications.error('Unable to retrieve host information', err);
+          Notifications.error('无法获取主机信息', err);
         });
     }
   },
