@@ -76,7 +76,7 @@ export function ServiceWidget({
                 <div className="mt-3 bg-white th-highcontrast:bg-black th-dark:bg-black">
                   <MenuItem onSelect={() => onReset()}>重置更改</MenuItem>
                   <MenuItem onSelect={() => onReset(true)}>
-                    Reset all changes
+                    重置所有更改
                   </MenuItem>
                 </div>
               </MenuPopover>

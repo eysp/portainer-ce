@@ -1,21 +1,21 @@
 <div ng-if="service.ServiceConstraints" id="service-placement-constraints">
   <rd-widget>
-    <rd-widget-header icon="list" title-text="Placement constraints">
+    <rd-widget-header icon="list" title-text="部署约束">
       <div class="nopadding" authorization="DockerServiceUpdate">
         <a class="btn btn-secondary btn-sm pull-right" ng-click="isUpdating || addPlacementConstraint(service)" ng-disabled="isUpdating">
-          <pr-icon icon="'plus'"></pr-icon> placement constraint
+          <pr-icon icon="'plus'"></pr-icon> 部署约束
         </a>
       </div>
     </rd-widget-header>
     <rd-widget-body ng-if="service.ServiceConstraints.length === 0">
-      <p>There are no placement constraints for this service.</p>
+      <p>此服务没有部署约束。</p>
     </rd-widget-body>
     <rd-widget-body ng-if="service.ServiceConstraints.length > 0" classes="no-padding">
       <table class="table">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Operator</th>
+            <th>名称</th>
+            <th>运算符</th>
             <th>Value</th>
           </tr>
         </thead>
@@ -28,7 +28,7 @@
                   data-cy="placement-constraint-key-input-{{ $index }}"
                   class="form-control"
                   ng-model="constraint.key"
-                  placeholder="e.g. node.role"
+                  placeholder="例如 node.role"
                   ng-change="updatePlacementConstraint(service, constraint)"
                   ng-disabled="isUpdating"
                   disable-authorization="DockerServiceUpdate"
@@ -58,7 +58,7 @@
                   data-cy="placement-constraint-value-input-{{ $index }}"
                   class="form-control"
                   ng-model="constraint.value"
-                  placeholder="e.g. manager"
+                  placeholder="例如 manager"
                   ng-change="updatePlacementConstraint(service, constraint)"
                   ng-disabled="isUpdating"
                   disable-authorization="DockerServiceUpdate"
@@ -83,7 +83,7 @@
           </button>
           <ul class="dropdown-menu">
             <li><a ng-click="cancelChanges(service, ['ServiceConstraints'])">重置更改</a></li>
-            <li><a ng-click="cancelChanges(service)">Reset all changes</a></li>
+            <li><a ng-click="cancelChanges(service)">重置所有更改</a></li>
           </ul>
         </div>
       </div>

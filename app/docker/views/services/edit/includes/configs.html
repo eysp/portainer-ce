@@ -1,27 +1,27 @@
 <form ng-if="applicationState.endpoint.apiVersion >= 1.3" id="service-configs" ng-submit="updateService(service)">
   <rd-widget>
-    <rd-widget-header icon="list" title-text="Configs"> </rd-widget-header>
+    <rd-widget-header icon="list" title-text="配置"> </rd-widget-header>
     <rd-widget-body classes="no-padding">
       <div class="form-inline" style="padding: 10px 20px" authorization="DockerServiceUpdate">
-        Add a config:
+        添加配置：
         <select
           class="form-control !h-[30px] !text-[13px]"
           ng-options="config.Name for config in filterConfigs(configs) | orderBy: 'Name'"
           ng-model="newConfig"
           data-cy="service-configs-select"
         >
-          <option selected disabled hidden value="">Select a config</option>
+          <option selected disabled hidden value="">选择一个配置</option>
         </select>
-        <a class="btn btn-default btn-sm" ng-click="addConfig(service, newConfig)"> <pr-icon icon="'plus'"></pr-icon> Add config </a>
+        <a class="btn btn-default btn-sm" ng-click="addConfig(service, newConfig)"> <pr-icon icon="'plus'"></pr-icon> 添加配置 </a>
       </div>
       <table class="table" style="margin-top: 5px">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Path in container</th>
+            <th>名称</th>
+            <th>容器中的路径</th>
             <th>UID</th>
             <th>GID</th>
-            <th>Mode</th>
+            <th>模式</th>
             <th></th>
           </tr>
         </thead>
@@ -44,7 +44,7 @@
             <td ng-if="!config.credSpec">{{ config.Uid }}</td>
             <td ng-if="!config.credSpec">{{ config.Gid }}</td>
             <td ng-if="!config.credSpec">{{ config.Mode }}</td>
-            <td ng-if="config.credSpec" colspan="4">Credential Spec</td>
+            <td ng-if="config.credSpec" colspan="4">凭证规范</td>
             <td authorization="DockerServiceUpdate">
               <button class="btn btn-dangerlight pull-right" type="button" ng-click="removeConfig(service, $index)" ng-disabled="isUpdating">
                 <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
@@ -52,7 +52,7 @@
             </td>
           </tr>
           <tr ng-if="service.ServiceConfigs.length === 0">
-            <td colspan="6" class="text-muted text-center">No configs associated to this service.</td>
+            <td colspan="6" class="text-muted text-center">该服务没有配置。</td>
           </tr>
         </tbody>
       </table>
@@ -66,7 +66,7 @@
           </button>
           <ul class="dropdown-menu">
             <li><a ng-click="cancelChanges(service, ['ServiceConfigs'])">重置更改</a></li>
-            <li><a ng-click="cancelChanges(service)">Reset all changes</a></li>
+            <li><a ng-click="cancelChanges(service)">重置所有更改</a></li>
           </ul>
         </div>
       </div>

@@ -1,14 +1,14 @@
 <ng-form ng-if="service.EnvironmentVariables" id="service-env-variables" name="serviceEnvForm" class="form-horizontal">
   <rd-widget>
-    <rd-widget-header icon="list" title-text="Environment variables">
+    <rd-widget-header icon="list" title-text="环境变量">
       <div class="nopadding" authorization="DockerServiceUpdate">
         <a class="btn btn-secondary btn-sm pull-right" ng-click="isUpdating || addEnvironmentVariable(service)" ng-disabled="isUpdating">
-          <pr-icon icon="'plus'"></pr-icon> environment variable
+          <pr-icon icon="'plus'"></pr-icon> 环境变量
         </a>
       </div>
     </rd-widget-header>
     <rd-widget-body ng-if="service.EnvironmentVariables.length === 0">
-      <p>There are no environment variables for this service.</p>
+      <p>此服务没有环境变量。.</p>
     </rd-widget-body>
     <rd-widget-body ng-if="service.EnvironmentVariables.length > 0">
       <environment-variables-fieldset values="service.EnvironmentVariables" on-change="(onChangeEnvVars)"></environment-variables-fieldset>
@@ -29,7 +29,7 @@
           </button>
           <ul class="dropdown-menu">
             <li><a ng-click="cancelChanges(service, ['EnvironmentVariables'])">重置更改</a></li>
-            <li><a ng-click="cancelChanges(service)">Reset all changes</a></li>
+            <li><a ng-click="cancelChanges(service)">重置所有更改</a></li>
           </ul>
         </div>
       </div>
