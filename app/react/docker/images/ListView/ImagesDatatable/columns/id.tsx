@@ -6,7 +6,7 @@ import { getValueAsArrayOfStrings } from '@/portainer/helpers/array';
 import { ImagesListResponse } from '@/react/docker/images/queries/useImages';
 
 import { MultipleSelectionFilter } from '@@/datatables/Filter';
-import { usedBadge } from '@@/Badge/usedBadge';
+import { UnusedBadge } from '@@/Badge/UnusedBadge';
 
 import { columnHelper } from './helper';
 
@@ -77,7 +77,7 @@ function Cell({
       <a href={linkProps.href} onClick={linkProps.onClick} title={name}>
         {truncate(name, 40)}
       </a>
-      {!image.used && <usedBadge />}
+      {!image.used && <UnusedBadge />}
     </div>
   );
 }
