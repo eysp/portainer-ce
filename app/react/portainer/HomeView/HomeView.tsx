@@ -62,8 +62,8 @@ export function HomeView() {
     <>
       <PageHeader
         reload
-        title="Home"
-        breadcrumbs={[{ label: 'Environments' }]}
+        title="首页"
+        breadcrumbs={[{ label: '环境' }]}
       />
 
       {process.env.PORTAINER_EDITION !== 'CE' && <LicenseNodePanel />}
@@ -90,13 +90,13 @@ export function HomeView() {
     }
     try {
       await snapshotEndpoints();
-      notifications.success('Success', 'Environments updated');
+      notifications.success('成功', '环境已更新');
       router.stateService.reload();
     } catch (err) {
       notifications.error(
-        'Failure',
+        '失败',
         err as Error,
-        'An error occurred during environment snapshot'
+        '环境快照过程中发生错误'
       );
     }
   }
@@ -110,9 +110,9 @@ export function HomeView() {
 
 async function confirmEndpointSnapshot() {
   return confirm({
-    title: 'Are you sure?',
+    title: '你确定吗？',
     modalType: ModalType.Warn,
     message:
-      'Triggering a manual refresh will poll each environment to retrieve its information, this may take a few moments.',
+      '触发手动刷新将轮询每个环境以获取其信息，这可能需要一些时间。',
   });
 }

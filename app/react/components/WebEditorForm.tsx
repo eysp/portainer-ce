@@ -21,36 +21,36 @@ import { buildConfirmButton } from './modals/utils';
 const otherEditorConfig = {
   tooltip: (
     <>
-      <div>Ctrl+F - Start searching</div>
-      <div>Ctrl+G - Find next</div>
-      <div>Ctrl+Shift+G - Find previous</div>
-      <div>Ctrl+Shift+F - Replace</div>
-      <div>Ctrl+Shift+R - Replace all</div>
-      <div>Alt+G - Jump to line</div>
-      <div>Persistent search:</div>
-      <div className="ml-5">Enter - Find next</div>
-      <div className="ml-5">Shift+Enter - Find previous</div>
+      <div>Ctrl+F - 开始搜索</div>
+      <div>Ctrl+G - 查找下一个</div>
+      <div>Ctrl+Shift+G - 查找上一个</div>
+      <div>Ctrl+Shift+F - 替换</div>
+      <div>Ctrl+Shift+R - 全部替换</div>
+      <div>Alt+G - 跳转到行</div>
+      <div>持久搜索：</div>
+      <div className="ml-5">Enter - 查找下一个</div>
+      <div className="ml-5">Shift+Enter - 查找上一个</div>
     </>
   ),
-  searchCmdLabel: 'Ctrl+F for search',
+  searchCmdLabel: 'Ctrl+F 搜索',
 } as const;
 
 export const editorConfig = {
   mac: {
     tooltip: (
       <>
-        <div>Cmd+F - Start searching</div>
-        <div>Cmd+G - Find next</div>
-        <div>Cmd+Shift+G - Find previous</div>
-        <div>Cmd+Option+F - Replace</div>
-        <div>Cmd+Option+R - Replace all</div>
-        <div>Option+G - Jump to line</div>
-        <div>Persistent search:</div>
-        <div className="ml-5">Enter - Find next</div>
-        <div className="ml-5">Shift+Enter - Find previous</div>
+        <div>Cmd+F - 开始搜索</div>
+        <div>Cmd+G - 查找下一个</div>
+        <div>Cmd+Shift+G - 查找上一个</div>
+        <div>Cmd+Option+F - 替换</div>
+        <div>Cmd+Option+R - 全部替换</div>
+        <div>Option+G - 跳转到行</div>
+        <div>持久搜索：</div>
+        <div className="ml-5">Enter - 查找下一个</div>
+        <div className="ml-5">Shift+Enter - 查找上一个</div>
       </>
     ),
-    searchCmdLabel: 'Cmd+F for search',
+    searchCmdLabel: 'Cmd+F 搜索',
   },
 
   lin: otherEditorConfig,
@@ -107,7 +107,7 @@ export function WebEditorForm({
 function DefaultTitle({ id }: { id: string }) {
   return (
     <FormSectionTitle htmlFor={id}>
-      Web editor
+      网页编辑器
       <div className="text-muted small vertical-center ml-auto">
         {editorConfig[BROWSER_OS_PLATFORM].searchCmdLabel}
 
@@ -136,10 +136,10 @@ export function usePreventExit(
     }
     const confirmed = await confirm({
       modalType: ModalType.Warn,
-      title: 'Are you sure?',
+      title: '您确定吗？',
       message:
-        'You currently have unsaved changes in the text editor. Are you sure you want to leave?',
-      confirmButton: buildConfirmButton('Yes', 'danger'),
+        '您当前在文本编辑器中有未保存的更改。您确定要离开吗？',
+      confirmButton: buildConfirmButton('是的', 'danger'),
     });
     return confirmed;
   });

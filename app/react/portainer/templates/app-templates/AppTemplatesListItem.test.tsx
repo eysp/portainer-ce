@@ -60,9 +60,9 @@ copyAsCustomTestCases.forEach(({ type, expected }) => {
     });
 
     if (expected) {
-      expect(queryByText('Copy as Custom')).toBeVisible();
+      expect(queryByText('复制为自定义')).toBeVisible();
     } else {
-      expect(queryByText('Copy as Custom')).toBeNull();
+      expect(queryByText('复制为自定义')).toBeNull();
     }
 
     unmount();

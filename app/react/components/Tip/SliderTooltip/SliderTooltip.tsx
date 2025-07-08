@@ -35,7 +35,7 @@ export function SliderTooltip({ value, child, delay, zIndex = 50 }: Props) {
 function messageHTML(value: string) {
   let message = value;
   if (message === '0') {
-    message = 'unlimited';
+    message = '无限制';
   }
 
   return <div className={styles.tooltipContainer}>{message}</div>;

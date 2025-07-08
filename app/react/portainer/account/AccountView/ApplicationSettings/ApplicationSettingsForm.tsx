@@ -33,13 +33,11 @@ export function ApplicationSettingsForm() {
       {({ isValid, dirty, values, setFieldValue }) => (
         <Form className="form-horizontal">
           <TextTip color="orange" className="mb-3">
-            Enabling front-end data caching can mean that changes to Kubernetes
-            clusters made by other users or outside of Portainer may take up to
-            five minutes to show in your session. This caching only applies to
-            Kubernetes environments.
+            启用前端数据缓存可能会导致由其他用户或在 Portainer 之外对 Kubernetes 集群所做的更改，
+            最多需要五分钟才会在您的会话中显示。此缓存仅适用于 Kubernetes 环境。
           </TextTip>
           <SwitchField
-            label="Enable front-end data caching for Kubernetes environments"
+            label="环境启用前端数据缓存"
             data-cy="account-applicationSettingsUseCacheSwitch"
             checked={values.useCache}
             onChange={(value) => setFieldValue('useCache', value)}
@@ -49,13 +47,13 @@ export function ApplicationSettingsForm() {
           <div className="form-group">
             <div className="col-sm-12">
               <LoadingButton
-                loadingText="Saving..."
+                loadingText="保存中..."
                 isLoading={updateSettingsMutation.isLoading}
                 disabled={!isValid || !dirty}
                 className="!ml-0"
                 data-cy="account-applicationSettingsSaveButton"
               >
-                Save
+                保存
               </LoadingButton>
             </div>
           </div>

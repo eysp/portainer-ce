@@ -48,7 +48,7 @@ export function AppTemplatesListItem({
                 },
               }}
             >
-              Copy as Custom
+              复制为自定义
             </Button>
           </div>
         )

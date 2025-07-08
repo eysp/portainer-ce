@@ -13,7 +13,7 @@ import { columnHelper } from './helper';
 
 export function buildActions({ nodeName }: { nodeName?: string } = {}) {
   return columnHelper.display({
-    header: 'Actions',
+    header: '操作',
     cell: Cell,
   });
 
@@ -38,18 +38,18 @@ export function buildActions({ nodeName }: { nodeName?: string } = {}) {
           color="dangerlight"
           data-cy="disconnect-network-button"
           isLoading={disconnectMutation.isLoading}
-          loadingText="Leaving network..."
+          loadingText="正在断开网络..."
           type="button"
           onClick={handleSubmit}
         >
-          Leave network
+          断开网络
         </LoadingButton>
       </Authorized>
     );
 
     function handleSubmit() {
       if (!isContainerNetworkTableMeta(meta)) {
-        throw new Error('Invalid row meta');
+        throw new Error('无效的行元数据');
       }
 
       disconnectMutation.mutate(
@@ -59,7 +59,7 @@ export function buildActions({ nodeName }: { nodeName?: string } = {}) {
         },
         {
           onSuccess() {
-            notifySuccess('Container successfully disconnected', networkId);
+            notifySuccess('容器成功断开连接', networkId);
             router.stateService.reload();
           },
         }

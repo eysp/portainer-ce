@@ -1,4 +1,4 @@
-<page-header ng-if="endpoint" title="'Environment details'" breadcrumbs="[{label:'Environments', link:'portainer.endpoints'}, endpoint.Name]" reload="true"> </page-header>
+<page-header ng-if="endpoint" title="'环境详情'" breadcrumbs="[{label:'环境', link:'portainer.endpoints'}, endpoint.Name]" reload="true"> </page-header>
 
 <div class="row">
   <div ng-if="state.edgeEndpoint">
@@ -6,13 +6,13 @@
       <span class="small text-muted">
         <p class="vertical-center">
           <pr-icon icon="'alert-circle'" mode="'primary'"></pr-icon>
-          This Edge environment is associated to an Edge environment {{ state.kubernetesEndpoint ? '(Kubernetes)' : '(Docker)' }}.
+          此边缘环境已关联至一个边缘环境 {{ state.kubernetesEndpoint ? '(Kubernetes)' : '(Docker)' }}.
         </p>
         <p>
-          Edge key: <code>{{ endpoint.EdgeKey }}</code>
+          边缘密钥： <code>{{ endpoint.EdgeKey }}</code>
         </p>
         <p>
-          Edge identifier: <code>{{ endpoint.EdgeID }}</code>
+          边缘标识符： <code>{{ endpoint.EdgeID }}</code>
         </p>
         <p>
           <button
@@ -25,7 +25,7 @@
             analytics-event="edge-endpoint-disassociate"
             analytics-category="edge"
           >
-            <span ng-hide="state.actionInProgress">Disassociate</span>
+            <span ng-hide="state.actionInProgress">解除关联</span>
           </button>
         </p>
       </span>
@@ -34,18 +34,18 @@
     <div class="col-sm-12" ng-if="!state.edgeAssociated">
       <rd-widget>
         <rd-widget-body>
-          <div class="col-sm-12 form-section-title">Deploy an agent</div>
+          <div class="col-sm-12 form-section-title">部署代理</div>
           <span class="small text-muted">
             <p class="vertical-center">
               <pr-icon icon="'alert-circle'" mode="'primary'"></pr-icon>
-              Refer to the platform related command below to deploy the Edge agent in your remote cluster.
+              请参考下方与平台相关的命令，在您的远程集群中部署 Edge 代理。
             </p>
             <p>
-              The agent will communicate with Portainer via <u>{{ edgeKeyDetails.instanceURL }}</u> and <u>tcp://{{ edgeKeyDetails.tunnelServerAddr }}</u>
+              代理将通过 <u>{{ edgeKeyDetails.instanceURL }}</u> 和 <u>tcp://{{ edgeKeyDetails.tunnelServerAddr }}</u> 与 Portainer 通信
             </p>
           </span>
 
-          <div class="col-sm-12 form-section-title"> Edge agent deployment script </div>
+          <div class="col-sm-12 form-section-title"> Edge 代理部署脚本 </div>
           <edge-script-form edge-info="{ key: endpoint.EdgeKey, id: endpoint.EdgeID }" commands="state.edgeScriptCommands" async-mode="endpoint.Edge.AsyncMode"></edge-script-form>
 
           <edge-key-display edge-key="endpoint.EdgeKey"> </edge-key-display>
@@ -54,11 +54,11 @@
     </div>
   </div>
 
-  <information-panel ng-if="state.kubernetesEndpoint && (!state.edgeEndpoint || state.edgeAssociated)" title-text="Kubernetes features configuration">
+  <information-panel ng-if="state.kubernetesEndpoint && (!state.edgeEndpoint || state.edgeAssociated)" title-text="Kubernetes 功能配置">
     <span class="small text-muted vertical-center">
       <pr-icon icon="'wrench'" mode="'primary'"></pr-icon>
-      You should configure the features available in this Kubernetes environment in the
-      <a ui-sref="kubernetes.cluster.setup({endpointId: endpoint.Id})">Kubernetes configuration</a> view.
+      您应在
+      <a ui-sref="kubernetes.cluster.setup({endpointId: endpoint.Id})">Kubernetes 配置</a> 视图中配置此 Kubernetes 环境中可用的功能。
     </span>
   </information-panel>
 </div>
@@ -68,10 +68,10 @@
     <rd-widget>
       <rd-widget-body>
         <form class="form-horizontal" name="$ctrl.endpointForm">
-          <div class="col-sm-12 form-section-title"> Configuration </div>
+          <div class="col-sm-12 form-section-title"> 配置 </div>
           <!-- name-input -->
           <div class="form-group">
-            <label for="container_name" class="col-sm-3 col-lg-2 control-label text-left">Name</label>
+            <label for="container_name" class="col-sm-3 col-lg-2 control-label text-left">名称e</label>
             <div class="col-sm-9 col-lg-10">
               <input
                 type="text"
@@ -79,7 +79,7 @@
                 class="form-control"
                 id="container_name"
                 ng-model="endpoint.Name"
-                placeholder="e.g. kubernetes-cluster01 / docker-prod01"
+                placeholder="例如 kubernetes-cluster01 / docker-prod01"
               />
             </div>
           </div>
@@ -87,14 +87,14 @@
           <!-- endpoint-url-input -->
           <div class="form-group" ng-if="!state.edgeEndpoint">
             <label for="endpoint_url" class="col-sm-3 col-lg-2 control-label text-left">
-              <span ng-if="!state.agentEndpoint">Environment URL</span>
-              <span ng-if="state.agentEndpoint">Environment address</span>
+              <span ng-if="!state.agentEndpoint">环境URL</span>
+              <span ng-if="state.agentEndpoint">环境地址</span>
               <portainer-tooltip
                 ng-if="!state.agentEndpoint"
-                message="'URL or IP address of a Docker host. The Docker API must be exposed over a TCP port. Please refer to the Docker documentation to configure it.'"
+                message="'Docker 主机的 URL 或 IP 地址。Docker API 必须通过 TCP 端口公开。请参考 Docker 文档进行配置。'"
               >
               </portainer-tooltip>
-              <portainer-tooltip ng-if="state.agentEndpoint" message="'The address for the Portainer agent in the format <HOST>:<PORT> or <IP>:<PORT>'"> </portainer-tooltip>
+              <portainer-tooltip ng-if="state.agentEndpoint" message="'Portainer 代理地址，格式为 <HOST>:<PORT> 或 <IP>:<PORT>'"> </portainer-tooltip>
             </label>
             <div class="col-sm-9 col-lg-10">
               <input
@@ -104,7 +104,7 @@
                 class="form-control"
                 id="endpoint_url"
                 ng-model="endpoint.URL"
-                placeholder="e.g. 10.0.0.10:2375 or mydocker.mydomain.com:2375"
+                placeholder="例如 10.0.0.10:2375 或 mydocker.mydomain.com:2375"
               />
             </div>
           </div>
@@ -112,8 +112,8 @@
           <!-- endpoint-public-url-input -->
           <div class="form-group" ng-if="!state.azureEndpoint">
             <label for="endpoint_public_url" class="col-sm-3 col-lg-2 control-label text-left">
-              Public IP
-              <portainer-tooltip message="'URL or IP address where exposed containers will be reachable. This field is optional and will default to the environment URL.'">
+              公网 IP
+              <portainer-tooltip message="'容器公开后可以访问的 URL 或 IP 地址。此字段可选，默认为环境 URL。'">
               </portainer-tooltip>
             </label>
             <div class="col-sm-9 col-lg-10">
@@ -122,14 +122,14 @@
                 class="form-control"
                 id="endpoint_public_url"
                 ng-model="endpoint.PublicURL"
-                placeholder="e.g. 10.0.0.10 or mydocker.mydomain.com"
+                placeholder="例如 10.0.0.10 或 mydocker.mydomain.com"
                 data-cy="public-url-input"
               />
             </div>
           </div>
 
           <div ng-if="endpoint && state.edgeEndpoint">
-            <div class="col-sm-12 form-section-title"> Check-in Intervals </div>
+            <div class="col-sm-12 form-section-title"> 检查间隔时间 </div>
             <edge-checkin-interval-field value="endpoint.EdgeCheckinInterval" on-change="(onChangeCheckInInterval)"></edge-checkin-interval-field>
           </div>
 
@@ -148,10 +148,10 @@
             tenant-id="endpoint.AzureCredentials.TenantID"
             authentication-key="endpoint.AzureCredentials.AuthenticationKey"
           ></azure-endpoint-config>
-          <div class="col-sm-12 form-section-title"> Metadata </div>
+          <div class="col-sm-12 form-section-title"> 元数据 </div>
           <!-- group -->
           <div class="form-group">
-            <label for="endpoint_group" class="col-sm-3 col-lg-2 control-label text-left"> Group </label>
+            <label for="endpoint_group" class="col-sm-3 col-lg-2 control-label text-left"> 分组 </label>
             <div class="col-sm-9 col-lg-10">
               <select
                 ng-options="group.Id as group.Name for group in groups"
@@ -168,10 +168,10 @@
 
           <!-- open-amt info -->
           <div ng-if="state.showAMTInfo">
-            <div class="col-sm-12 form-section-title"> Open Active Management Technology </div>
+            <div class="col-sm-12 form-section-title"> 开放式主动管理技术 </div>
 
             <div class="form-group">
-              <label for="endpoint_managementinfoVersion" class="col-sm-3 col-lg-2 control-label text-left"> AMT Version </label>
+              <label for="endpoint_managementinfoVersion" class="col-sm-3 col-lg-2 control-label text-left"> AMT 版本 </label>
               <div class="col-sm-9 col-lg-10">
                 <input
                   type="text"
@@ -179,7 +179,7 @@
                   class="form-control"
                   id="endpoint_managementinfoVersion"
                   ng-model="endpoint.ManagementInfo['AMT']"
-                  placeholder="Loading..."
+                  placeholder="加载中..."
                   data-cy="endpoint-managementinfoVersion"
                 />
               </div>
@@ -194,14 +194,14 @@
                   class="form-control"
                   id="endpoint_managementinfoUUID"
                   ng-model="endpoint.ManagementInfo['UUID']"
-                  placeholder="Loading..."
+                  placeholder="加载中..."
                   data-cy="endpoint-managementinfoUUID"
                 />
               </div>
             </div>
 
             <div class="form-group">
-              <label for="endpoint_managementinfoBuildNumber" class="col-sm-3 col-lg-2 control-label text-left"> Build Number </label>
+              <label for="endpoint_managementinfoBuildNumber" class="col-sm-3 col-lg-2 control-label text-left"> 构建号 </label>
               <div class="col-sm-9 col-lg-10">
                 <input
                   type="text"
@@ -210,13 +210,13 @@
                   class="form-control"
                   id="endpoint_managementinfoBuildNumber"
                   ng-model="endpoint.ManagementInfo['Build Number']"
-                  placeholder="Loading..."
+                  placeholder="加载中..."
                 />
               </div>
             </div>
 
             <div class="form-group">
-              <label for="endpoint_managementinfoControlMode" class="col-sm-3 col-lg-2 control-label text-left"> Control Mode </label>
+              <label for="endpoint_managementinfoControlMode" class="col-sm-3 col-lg-2 control-label text-left"> 控制模式 </label>
               <div class="col-sm-9 col-lg-10">
                 <input
                   type="text"
@@ -225,13 +225,13 @@
                   class="form-control"
                   id="endpoint_managementinfoControlMode"
                   ng-model="endpoint.ManagementInfo['Control Mode']"
-                  placeholder="Loading..."
+                  placeholder="加载中..."
                 />
               </div>
             </div>
 
             <div class="form-group">
-              <label for="endpoint_managementinfoDNSSuffix" class="col-sm-3 col-lg-2 control-label text-left"> DNS Suffix </label>
+              <label for="endpoint_managementinfoDNSSuffix" class="col-sm-3 col-lg-2 control-label text-left"> DNS 后缀 </label>
               <div class="col-sm-9 col-lg-10">
                 <input
                   type="text"
@@ -240,7 +240,7 @@
                   class="form-control"
                   id="endpoint_managementinfoDNSSuffix"
                   ng-model="endpoint.ManagementInfo['DNS Suffix']"
-                  placeholder="Loading..."
+                  placeholder="加载中.."
                 />
               </div>
             </div>
@@ -255,10 +255,10 @@
                 ng-click="updateEndpoint()"
                 button-spinner="state.actionInProgress"
               >
-                <span ng-hide="state.actionInProgress">Update environment</span>
-                <span ng-show="state.actionInProgress">Updating environment...</span>
+                <span ng-hide="state.actionInProgress">更新环境</span>
+                <span ng-show="state.actionInProgress">正在更新环境...</span>
               </button>
-              <a type="button" class="btn btn-default btn-sm" ui-sref="portainer.endpoints">Cancel</a>
+              <a type="button" class="btn btn-default btn-sm" ui-sref="portainer.endpoints">取消</a>
             </div>
           </div>
         </form>

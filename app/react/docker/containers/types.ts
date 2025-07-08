@@ -14,7 +14,7 @@ export enum ContainerStatus {
   Exited = 'exited',
 }
 
-export type QuickAction = 'attach' | 'exec' | 'inspect' | 'logs' | 'stats';
+export type QuickAction = '附加' | '执行' | '检查' | '日志' | '统计';
 
 export interface Port {
   host?: string;

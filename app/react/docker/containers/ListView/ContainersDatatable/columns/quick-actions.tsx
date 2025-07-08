@@ -11,7 +11,7 @@ import { TableSettings } from '../types';
 import { columnHelper } from './helper';
 
 export const quickActions = columnHelper.display({
-  header: 'Quick Actions',
+  header: '快速操作',
   id: 'actions',
   cell: QuickActionsCell,
 });
@@ -24,11 +24,11 @@ function QuickActionsCell({
   const { hiddenQuickActions = [] } = settings;
 
   const wrapperState = {
-    showQuickActionAttach: !hiddenQuickActions.includes('attach'),
-    showQuickActionExec: !hiddenQuickActions.includes('exec'),
-    showQuickActionInspect: !hiddenQuickActions.includes('inspect'),
-    showQuickActionLogs: !hiddenQuickActions.includes('logs'),
-    showQuickActionStats: !hiddenQuickActions.includes('stats'),
+  showQuickActionAttach: !hiddenQuickActions.includes('附加'),
+  showQuickActionExec: !hiddenQuickActions.includes('执行'),
+  showQuickActionInspect: !hiddenQuickActions.includes('检查'),
+  showQuickActionLogs: !hiddenQuickActions.includes('日志'),
+  showQuickActionStats: !hiddenQuickActions.includes('统计'),
   };
 
   const someOn =

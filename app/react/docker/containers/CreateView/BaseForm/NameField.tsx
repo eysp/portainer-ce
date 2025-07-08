@@ -13,14 +13,14 @@ export function NameField({
   onChange: (value: string) => void;
 }) {
   return (
-    <FormControl label="Name" inputId="name-input" errors={error}>
+    <FormControl label="名称" inputId="name-input" errors={error}>
       <Input
         id="name-input"
         value={value}
         onChange={(e) => {
           onChange(e.target.value);
         }}
-        placeholder="e.g. myContainer"
+        placeholder="例如 myContainer"
         data-cy="container-name-input"
       />
     </FormControl>

@@ -1,7 +1,7 @@
 import { columnHelper } from './helper';
 
 export const details = columnHelper.accessor('details', {
-  header: 'Details',
+  header: '详情',
   id: 'details',
   cell: ({ getValue }) => {
     const value = getValue();

@@ -79,7 +79,7 @@ function extractPortInfo(portBinding: PortMapping): {
 } {
   const containerPortRange = parsePortRange(portBinding.containerPort);
   if (!isValidPortRange(containerPortRange)) {
-    throw new Error(`Invalid port specification: ${portBinding.containerPort}`);
+    throw new Error(`无效的端口规范： ${portBinding.containerPort}`);
   }
 
   const startPort = containerPortRange.start;
@@ -101,7 +101,7 @@ function extractPortInfo(portBinding: PortMapping): {
 
     if (hostAndPort.length < 2) {
       throw new Error(
-        `Invalid port specification: ${portBinding.containerPort}`
+        `无效的端口规范： ${portBinding.containerPort}`
       );
     }
 
@@ -113,7 +113,7 @@ function extractPortInfo(portBinding: PortMapping): {
 
   const hostPortRange = parsePortRange(hostPort);
   if (!isValidPortRange(hostPortRange)) {
-    throw new Error(`Invalid port specification: ${hostPort}`);
+    throw new Error(`无效的端口规范： ${hostPort}`);
   }
 
   const { start: startHostPort, end: endHostPort } = hostPortRange;
@@ -121,7 +121,7 @@ function extractPortInfo(portBinding: PortMapping): {
     endPort !== startPort &&
     endPort - startPort !== endHostPort - startHostPort
   ) {
-    throw new Error(`Invalid port specification: ${hostPort}`);
+    throw new Error(`无效的端口规范： ${hostPort}`);
   }
 
   return { startPort, endPort, hostIp, startHostPort, endHostPort };

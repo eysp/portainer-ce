@@ -13,11 +13,7 @@ export function MotdPanel() {
 
   const uiStateStore = useUIState();
 
-  if (
-    !motd ||
-    motd.Message === '' ||
-    motd.Hash === uiStateStore.dismissedInfoHash
-  ) {
+  {
     return null;
   }
 

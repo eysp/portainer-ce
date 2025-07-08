@@ -229,7 +229,7 @@ angular
         var isAdmin = Authentication.isAdmin();
 
         if (method === 'editor' && $scope.formValues.StackFileContent === '') {
-          $scope.state.formValidationError = 'Stack file content must not be empty';
+          $scope.state.formValidationError = '堆栈文件内容不能为空';
           return;
         }
 
@@ -253,12 +253,12 @@ angular
             return ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl);
           })
           .then(function success() {
-            Notifications.success('Success', 'Stack successfully deployed');
+            Notifications.success('成功', '堆栈部署成功');
             $scope.state.isEditorDirty = false;
             $state.go('docker.stacks');
           })
           .catch(function error(err) {
-            Notifications.error('Deployment error', err, 'Unable to deploy stack');
+            Notifications.error('部署错误', err, '无法部署堆栈');
           })
           .finally(function final() {
             $scope.state.actionInProgress = false;
@@ -317,7 +317,7 @@ angular
               onChangeTemplateVariables(variables);
             }
           } catch (err) {
-            Notifications.error('Failure', err, 'Unable to retrieve Custom Template file');
+            Notifications.error('失败', err, '无法获取自定义模板文件');
           }
         });
       }
@@ -349,7 +349,7 @@ angular
           const containers = await ContainerService.containers(endpoint.Id, true);
           $scope.containerNames = ContainerHelper.getContainerNames(containers);
         } catch (err) {
-          Notifications.error('Failure', err, 'Unable to retrieve Containers');
+          Notifications.error('失败', err, '无法获取容器');
         }
       }
 

@@ -8,28 +8,28 @@ import {
 } from './CustomTemplatesVariablesField';
 
 export default {
-  title: 'Custom Templates/Variables Field',
+  title: '自定义模板/变量字段',
   component: CustomTemplatesVariablesField,
 };
 
 const definitions: VariableDefinition[] = [
   {
-    label: 'Image Name',
+    label: '镜像名称',
     name: 'image_name',
     defaultValue: 'nginx',
     description: '',
   },
   {
-    label: 'Required field',
+    label: '必填字段',
     name: 'required_field',
     defaultValue: '',
     description: '',
   },
   {
-    label: 'Required field with tooltip',
+    label: '带提示的必填字段',
     name: 'required_field',
     defaultValue: '',
-    description: 'tooltip',
+    description: '提示信息',
   },
 ];
 

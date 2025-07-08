@@ -8,7 +8,7 @@ import styles from './EdgeLoadingSpinner.module.css';
 export function EdgeLoadingSpinner() {
   return (
     <div className={clsx('row', styles.root)}>
-      Connecting to the Edge environment...
+      正在连接到 Edge 环境...
       <Icon icon={Settings} className="!ml-1 animate-spin-slow" />
     </div>
   );

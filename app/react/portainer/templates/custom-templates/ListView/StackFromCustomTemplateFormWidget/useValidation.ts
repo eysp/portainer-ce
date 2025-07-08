@@ -25,11 +25,11 @@ export function useValidation({
       object({
         name: name.test({
           name: 'is-deployable',
-          message: 'This template cannot be deployed on this environment',
+          message: '该模板无法在此环境中部署',
           test: () => isDeployable,
         }),
         accessControl: accessControlFormValidation(isAdmin),
-        fileContent: string().required('Required'),
+        fileContent: string().required('必填'),
         variables: variablesFieldValidation(variableDefs),
       }),
     [isAdmin, isDeployable, name, variableDefs]

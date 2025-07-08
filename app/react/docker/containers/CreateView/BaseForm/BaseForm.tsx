@@ -82,7 +82,7 @@ export function BaseForm({
           error={errors?.name}
         />
 
-        <FormSection title="Image Configuration">
+        <FormSection title="镜像配置">
           <ImageConfigFieldset
             values={values.image}
             setFieldValue={(field, value) =>
@@ -96,8 +96,8 @@ export function BaseForm({
             <div className="form-group">
               <div className="col-sm-12">
                 <SwitchField
-                  label="Always pull the image"
-                  tooltip="When enabled, Portainer will automatically try to pull the specified image before creating the container."
+                  label="始终拉取镜像"
+                  tooltip="启用后，Portainer 会在创建容器前自动尝试拉取指定的镜像。"
                   checked={values.alwaysPull}
                   onChange={(alwaysPull) =>
                     setFieldValue('alwaysPull', alwaysPull)
@@ -116,9 +116,9 @@ export function BaseForm({
               <div className="form-group">
                 <div className="col-sm-12">
                   <SwitchField
-                    label="Create a container webhook"
+                    label="创建容器 Webhook"
                     data-cy="container-webhook-switch"
-                    tooltip="Create a webhook (or callback URI) to automate the recreate this container. Sending a POST request to this callback URI (without requiring any authentication) will pull the most up-to-date version of the associated image and recreate this container."
+                    tooltip="启用后，Portainer 会为此容器生成一个回调地址，发送 POST 请求到该地址可拉取镜像并重新创建容器（无需身份验证）。"
                     checked={values.enableWebhook}
                     onChange={(enableWebhook) =>
                       setFieldValue('enableWebhook', enableWebhook)
@@ -132,13 +132,13 @@ export function BaseForm({
           </Authorized>
         )}
 
-        <FormSection title="Network ports configuration">
+        <FormSection title="网络端口配置">
           <div className="form-group">
             <div className="col-sm-12">
               <SwitchField
-                label="Publish all exposed ports to random host ports"
+                label="将所有暴露的端口映射到随机主机端口"
                 data-cy="publish-all-ports-switch"
-                tooltip="When enabled, Portainer will let Docker automatically map a random port on the host to each one defined in the image Dockerfile."
+                tooltip="启用后，Portainer 将让 Docker 自动为每个镜像中定义的端口分配一个主机上的随机端口。"
                 checked={values.publishAllPorts}
                 onChange={(publishAllPorts) =>
                   setFieldValue('publishAllPorts', publishAllPorts)
@@ -156,7 +156,7 @@ export function BaseForm({
         </FormSection>
 
         {isAgentOnSwarm && (
-          <FormSection title="Deployment">
+          <FormSection title="部署选项">
             <NodeSelector
               value={values.nodeName}
               onChange={(nodeName) => setFieldValue('nodeName', nodeName)}
@@ -176,9 +176,9 @@ export function BaseForm({
         <div className="form-group">
           <div className="col-sm-12">
             <SwitchField
-              label="Auto remove"
+              label="自动删除"
               data-cy="container-auto-remove-switch"
-              tooltip="When enabled, Portainer will automatically remove the container when it exits. This is useful when you want to use the container only once."
+              tooltip="启用后，容器退出时将自动删除。适用于只运行一次的临时容器。"
               checked={values.autoRemove}
               onChange={(autoRemove) => setFieldValue('autoRemove', autoRemove)}
               labelClass="col-sm-3 col-lg-2"
@@ -189,12 +189,12 @@ export function BaseForm({
         <div className="form-group">
           <div className="col-sm-12">
             <LoadingButton
-              loadingText="Deployment in progress..."
+              loadingText="正在部署容器..."
               data-cy="deploy-container-button"
               isLoading={isLoading}
               disabled={!isValid}
             >
-              Deploy the container
+              部署容器
             </LoadingButton>
           </div>
         </div>

@@ -19,7 +19,7 @@ export function TeamsField({
     useField<FormValues['teams']>('teams');
 
   return (
-    <FormControl label="Add to team(s)" inputId="teams-field" errors={error}>
+    <FormControl label="添加到团队" inputId="teams-field" errors={error}>
       {teams.length > 0 ? (
         <TeamsSelector
           dataCy="user-teamSelect"
@@ -32,12 +32,11 @@ export function TeamsField({
         />
       ) : (
         <span className="small text-muted">
-          You don&apos;t seem to have any teams to add users into. Head over to
-          the{' '}
+          你似乎还没有可以添加用户的团队。请前往{' '}
           <Link to="portainer.teams" data-cy="teams-view-link">
-            Teams view
+            团队视图
           </Link>{' '}
-          to create some.
+          创建团队。
         </span>
       )}
     </FormControl>

@@ -16,29 +16,29 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
     actionInProgress: false,
     availableUserSessionTimeoutOptions: [
       {
-        key: '30 minutes',
+        key: '30 分钟',
         value: '30m',
       },
       {
-        key: '1 hour',
+        key: '1 小时',
         value: '1h',
       },
       {
-        key: '4 hours',
+        key: '4 小时',
         value: '4h',
       },
       {
-        key: '8 hours',
+        key: '8 小时',
         value: '8h',
       },
       {
-        key: '24 hours',
+        key: '24 小时',
         value: '24h',
       },
-      { key: '1 week', value: `${24 * 7}h` },
-      { key: '1 month', value: `${24 * 30}h` },
-      { key: '6 months', value: `${24 * 30 * 6}h` },
-      { key: '1 year', value: `${24 * 30 * 12}h` },
+      { key: '1 周', value: `${24 * 7}h` },
+      { key: '1 个月', value: `${24 * 30}h` },
+      { key: '6 个月', value: `${24 * 30 * 6}h` },
+      { key: '1 年', value: `${24 * 30 * 12}h` },
     ],
   };
 

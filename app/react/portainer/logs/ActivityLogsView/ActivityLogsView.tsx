@@ -39,8 +39,8 @@ export function ActivityLogsView() {
   return (
     <>
       <PageHeader
-        title="User activity logs"
-        breadcrumbs="User activity logs"
+        title="用户活动日志"
+        breadcrumbs="用户活动日志"
         reload
       />
 

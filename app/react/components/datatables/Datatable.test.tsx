@@ -220,12 +220,12 @@ describe('Datatable', () => {
     await user.click(checkboxes[2]); // Select the second row
 
     // Search for John (will hide selected Jane)
-    const searchInput = screen.getByPlaceholderText('Search...');
+    const searchInput = screen.getByPlaceholderText('搜索...');
     await user.type(searchInput, 'John');
 
     // Check if the footer text is correct
     expect(
-      await screen.findByText('1 item selected (1 hidden by filters)')
+      await screen.findByText('已选择 1 项（1 项被筛选隐藏')
     ).toBeInTheDocument();
 
     // Check if the checkbox is indeterminate

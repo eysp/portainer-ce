@@ -6,7 +6,7 @@ import type { ContainerListViewModel } from '@/react/docker/containers/types';
 import { columnHelper } from './helper';
 
 export const image = columnHelper.accessor('Image', {
-  header: 'Image',
+  header: '镜像',
   id: 'image',
   cell: ImageCell,
 });

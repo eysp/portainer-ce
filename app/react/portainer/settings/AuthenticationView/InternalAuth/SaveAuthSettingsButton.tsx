@@ -13,12 +13,12 @@ export function SaveAuthSettingsButton({ onSubmit, isLoading }: Props) {
       <div className="form-group">
         <div className="col-sm-12">
           <LoadingButton
-            loadingText="Saving..."
+            loadingText="保存中..."
             data-cy="save-auth-settings-button"
             isLoading={isLoading}
             onClick={() => onSubmit()}
           >
-            Save settings
+            保存设置
           </LoadingButton>
         </div>
       </div>

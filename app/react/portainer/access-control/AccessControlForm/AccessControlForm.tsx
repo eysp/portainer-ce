@@ -46,9 +46,9 @@ export function AccessControlForm({
             data-cy="portainer-accessMgmtToggle"
             checked={accessControlEnabled}
             name={withNamespace('accessControlEnabled')}
-            label="Enable access control"
+            label="启用访问控制"
             labelClass="col-sm-3 col-lg-2"
-            tooltip="When enabled, you can restrict the access and management of this resource."
+            tooltip="启用后，您可以限制对该资源的访问和管理"
             onChange={handleToggleEnable}
           />
         </div>

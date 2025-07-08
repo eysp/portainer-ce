@@ -1,12 +1,12 @@
 <page-header
-  title="'Environment access'"
+  title="'环境访问'"
   breadcrumbs="[
-    { label:'Environments', link:'portainer.endpoints' },
+    { label:'环境', link:'portainer.endpoints' },
     {
       label:ctrl.endpoint.Name,
       link: 'portainer.endpoints.endpoint',
       linkParams:{id: ctrl.endpoint.Id}
-    }, 'Access management']"
+    }, '访问管理']"
   reload="true"
 >
 </page-header>
@@ -14,12 +14,12 @@
 <div class="row" ng-if="ctrl.endpoint">
   <div class="col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="hard-drive" title-text="Environment"></rd-widget-header>
+      <rd-widget-header icon="hard-drive" title-text="环境"></rd-widget-header>
       <rd-widget-body classes="no-padding">
         <table class="table">
           <tbody>
             <tr>
-              <td>Name</td>
+              <td>名称</td>
               <td>
                 {{ ctrl.endpoint.Name }}
               </td>
@@ -31,7 +31,7 @@
               </td>
             </tr>
             <tr>
-              <td>Group</td>
+              <td>分组</td>
               <td>
                 <a ui-sref="portainer.groups.group({ id: ctrl.group.Id })">{{ ctrl.group.Name }}</a>
               </td>

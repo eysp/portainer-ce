@@ -10,8 +10,8 @@
       <!-- !login box logo -->
 
       <div class="row p-5 text-center">
-        <p class="text-xl">Log in to your account</p>
-        <p class="text-md text-muted fw-bold">Welcome back! Please enter your details</p>
+        <p class="text-xl">登录到您的账户</p>
+        <p class="text-md text-muted fw-bold">欢迎回来！请输入您的信息</p>
       </div>
 
       <!-- login panel -->
@@ -24,19 +24,19 @@
                 <a ng-href="{{ ctrl.OAuthLoginURI }}">
                   <div class="btn btn-primary btn-lg btn-block" ng-if="ctrl.state.OAuthProvider === 'Microsoft'">
                     <pr-icon icon="'svg-microsoft'"></pr-icon>
-                    Login with Microsoft
+                    使用 Microsoft 登录
                   </div>
                   <div class="btn btn-primary btn-lg btn-block" ng-if="ctrl.state.OAuthProvider === 'Google'">
                     <pr-icon icon="'svg-google'"></pr-icon>
-                    Login with Google
+                    使用 Google 登录
                   </div>
                   <div class="btn btn-primary btn-lg btn-block" ng-if="ctrl.state.OAuthProvider === 'Github'">
                     <pr-icon icon="'svg-github'"></pr-icon>
-                    Login with GitHub
+                    使用 GitHub 登录
                   </div>
                   <div class="btn btn-primary btn-lg btn-block" ng-if="ctrl.state.OAuthProvider === 'OAuth'">
                     <pr-icon icon="'log-in'"></pr-icon>
-                    Login with OAuth
+                    使用 OAuth 登录
                   </div>
                 </a>
               </div>
@@ -45,20 +45,20 @@
             <!-- divider -->
             <div class="form-group" ng-if="ctrl.state.showOAuthLogin">
               <div class="col-sm-12" style="display: flex; align-items: center; justify-content: center">
-                <div class="striketext small text-muted" style="display: flex; align-items: center; justify-content: center; width: 90%">or</div>
+                <div class="striketext small text-muted" style="display: flex; align-items: center; justify-content: center; width: 90%">或</div>
               </div>
             </div>
 
             <!-- use internal auth button -->
             <div class="form-group" ng-if="ctrl.state.showOAuthLogin && !ctrl.state.showStandardLogin">
               <div class="col-sm-12" style="display: flex; justify-content: center">
-                <div class="btn btn-primary btn-md btn-block" style="margin-left: 2px" ng-click="ctrl.toggleStandardLogin()"> Use internal authentication </div>
+                <div class="btn btn-primary btn-md btn-block" style="margin-left: 2px" ng-click="ctrl.toggleStandardLogin()"> 使用内部认证 </div>
               </div>
             </div>
 
             <!-- !username input -->
             <div ng-if="ctrl.state.showStandardLogin">
-              <div class="pb-2">Username</div>
+              <div class="pb-2">用户名</div>
               <input
                 id="username"
                 type="text"
@@ -67,13 +67,13 @@
                 name="username"
                 ng-model="ctrl.formValues.Username"
                 auto-focus
-                placeholder="Enter your username"
+                placeholder="请输入您的用户名"
               />
             </div>
 
             <!-- password input -->
             <div ng-if="ctrl.state.showStandardLogin">
-              <div class="pb-2">Password</div>
+              <div class="pb-2">密码</div>
               <div class="relative">
                 <input
                   id="password"
@@ -83,7 +83,7 @@
                   ng-model="ctrl.formValues.Password"
                   autocomplete="off"
                   data-cy="auth-passwordInput"
-                  placeholder="Enter your password"
+                  placeholder="请输入您的密码"
                   ng-trim="false"
                 />
                 <button
@@ -94,7 +94,7 @@
                   tooltip-append-to-body="true"
                   tooltip-placement="top"
                   tooltip-class="portainer-tooltip"
-                  uib-tooltip="{{ ctrl.state.passwordInputType === 'password' ? 'Show password' : 'Hide password' }}"
+                  uib-tooltip="{{ ctrl.state.passwordInputType === 'password' ? '显示密码' : '隐藏密码' }}"
                 >
                   <pr-icon icon="ctrl.state.passwordInputType === 'password' ? 'eye-off' : 'eye'" size="'md'"></pr-icon>
                 </button>
@@ -112,8 +112,8 @@
                   ng-disabled="ctrl.state.loginInProgress"
                   data-cy="auth-loginButton"
                 >
-                  <span ng-hide="ctrl.state.loginInProgress">Login</span>
-                  <span ng-show="ctrl.state.loginInProgress">Login in progress...</span>
+                  <span ng-hide="ctrl.state.loginInProgress">登录</span>
+                  <span ng-show="ctrl.state.loginInProgress">登录中...</span>
                 </button>
               </div>
             </div>
@@ -132,7 +132,7 @@
       <div class="panel panel-default" ng-show="ctrl.state.loginInProgress">
         <div class="panel-body">
           <div class="form-group text-center">
-            <span class="small text-muted">Authentication in progress... <span button-spinner="true"></span></span>
+            <span class="small text-muted">认证进行中... <span button-spinner="true"></span></span>
           </div>
         </div>
       </div>

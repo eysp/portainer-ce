@@ -27,7 +27,7 @@ export function ContainersDatatable({ dataset, onRemoveClick }: Props) {
       dataset={dataset}
       columns={columns}
       settingsManager={tableState}
-      title="Containers"
+      title="容器"
       titleIcon={Box}
       getRowId={(container) => container.id}
       data-cy="containers-datatable"
@@ -40,12 +40,12 @@ export function ContainersDatatable({ dataset, onRemoveClick }: Props) {
               onConfirmed={() =>
                 handleRemoveClick(selectedRows.map((r) => r.id))
               }
-              confirmMessage="Are you sure you want to delete the selected containers?"
+              confirmMessage="您确定要删除选中的容器吗？"
             />
           </Authorized>
 
           <Authorized authorizations="AzureContainerGroupCreate">
-            <AddButton data-cy="add-container-button">Add container</AddButton>
+            <AddButton data-cy="add-container-button">添加容器</AddButton>
           </Authorized>
         </div>
       )}

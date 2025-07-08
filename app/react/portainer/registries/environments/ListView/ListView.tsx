@@ -6,8 +6,8 @@ export function ListView() {
   return (
     <>
       <PageHeader
-        title="Environment registries"
-        breadcrumbs="Registry management"
+        title="环境注册表"
+        breadcrumbs="注册表管理"
         reload
       />
 

@@ -8,17 +8,17 @@ const columnHelper = createColumnHelper<AccessToken>();
 
 export const columns = [
   columnHelper.accessor('description', {
-    header: 'Description',
+    header: '描述',
   }),
   columnHelper.accessor('prefix', {
-    header: 'Prefix',
+    header: '前缀',
   }),
   columnHelper.accessor('dateCreated', {
-    header: 'Created',
+    header: '创建时间',
     cell: ({ getValue }) => isoDateFromTimestamp(getValue()),
   }),
   columnHelper.accessor('lastUsed', {
-    header: 'Last Used',
+    header: '最后使用时间',
     cell: ({ getValue }) => isoDateFromTimestamp(getValue()),
   }),
 ];

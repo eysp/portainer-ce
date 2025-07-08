@@ -18,7 +18,7 @@ interface Props extends AutomationTestingProps {
 
 export function SearchBar({
   value,
-  placeholder = 'Search...',
+  placeholder = '搜索...',
   onChange,
   'data-cy': dataCy,
   className,

@@ -39,7 +39,7 @@ export function UsersList({ users, disabled, teamId }: Props) {
         dataset={users}
         columns={columns}
         titleIcon={Users}
-        title="Users"
+        title="用户"
         renderTableActions={() =>
           isPureAdmin && (
             <Button
@@ -48,7 +48,7 @@ export function UsersList({ users, disabled, teamId }: Props) {
               icon={UserPlus}
               data-cy="add-all-users-button"
             >
-              Add all users
+              添加所有用户
             </Button>
           )
         }
@@ -73,7 +73,7 @@ export function UsersList({ users, disabled, teamId }: Props) {
   function handleAddAllMembers(userIds: UserId[]) {
     addMemberMutation.mutate(userIds, {
       onSuccess() {
-        notifySuccess('Success', 'All users successfully added');
+        notifySuccess('成功', '所有用户已成功添加');
       },
     });
   }

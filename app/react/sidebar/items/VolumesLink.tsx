@@ -20,7 +20,7 @@ export function VolumesLink({
       to={`${platformPath}.volumes`}
       params={{ endpointId: environmentId }}
       icon={Database}
-      label="Volumes"
+      label="卷"
       data-cy={dataCy}
     />
   );

@@ -26,24 +26,24 @@ const sliderProperties: Record<
   { strength: string; color: string; text: string }
 > = {
   weak: {
-    strength: 'weak',
+    strength: '弱',
     color: '#F04438',
-    text: 'Weak password',
+    text: '弱密码',
   },
   good: {
-    strength: 'good',
+    strength: '良好',
     color: '#F79009',
-    text: 'Good password',
+    text: '良好密码',
   },
   strong: {
-    strength: 'strong',
+    strength: '强',
     color: '#12B76A',
-    text: 'Strong password',
+    text: '强密码',
   },
   veryStrong: {
-    strength: 'veryStrong',
+    strength: '非常强',
     color: '#0BA5EC',
-    text: 'Very strong password',
+    text: '非常强密码',
   },
 };
 

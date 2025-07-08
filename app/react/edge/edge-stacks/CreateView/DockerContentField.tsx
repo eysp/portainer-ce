@@ -15,7 +15,7 @@ export function DockerContentField({
   isLoading?: boolean;
 }) {
   if (isLoading) {
-    return <InlineLoader>Loading stack content...</InlineLoader>;
+    return <InlineLoader>正在加载堆栈内容...</InlineLoader>;
   }
 
   return (
@@ -24,20 +24,20 @@ export function DockerContentField({
       value={value}
       onChange={onChange}
       type="yaml"
-      placeholder="Define or paste the content of your docker compose file here"
+      placeholder="在此定义或粘贴您的 Docker Compose 文件内容"
       error={error}
       readonly={readonly}
       data-cy="stack-creation-editor"
     >
-      You can get more information about Compose file format in the{' '}
+      您可以在{' '}
       <a
         href="https://docs.docker.com/compose/compose-file/"
         target="_blank"
         rel="noreferrer"
       >
-        official documentation
+        官方文档
       </a>
-      .
+      中获取有关 Compose 文件格式的更多信息。
     </WebEditorForm>
   );
 }

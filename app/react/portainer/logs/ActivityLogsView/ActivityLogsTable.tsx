@@ -15,7 +15,7 @@ const columnHelper = createColumnHelper<ActivityLog>();
 const columns = [
   columnHelper.accessor('timestamp', {
     id: 'Timestamp',
-    header: 'Time',
+    header: '时间',
     cell: ({ getValue }) => {
       const value = getValue();
       return value ? isoDateFromTimestamp(value) : '';
@@ -23,18 +23,18 @@ const columns = [
   }),
   columnHelper.accessor('username', {
     id: 'Username',
-    header: 'User',
+    header: '用户',
   }),
   columnHelper.accessor('context', {
     id: 'Context',
-    header: 'Environment',
+    header: '环境',
   }),
   columnHelper.accessor('action', {
     id: 'Action',
-    header: 'Action',
+    header: '操作',
   }),
   columnHelper.accessor('payload', {
-    header: 'Payload',
+    header: '负载',
     enableSorting: false,
     cell: ({ row, getValue }) =>
       getValue() ? (
@@ -44,7 +44,7 @@ const columns = [
           icon={Search}
           data-cy={`activity-logs-inspect_${row.index}`}
         >
-          inspect
+          查看
         </Button>
       ) : null,
   }),
@@ -75,7 +75,7 @@ export function ActivityLogsTable({
 }) {
   return (
     <ExpandableDatatable<ActivityLog>
-      title="Activity logs"
+      title="活动日志"
       titleIcon={History}
       columns={columns}
       dataset={dataset || []}

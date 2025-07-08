@@ -8,12 +8,12 @@ export const inheritedName = helper.accessor('Name', {
         {name}
         {item.Inherited && (
           <span className="text-muted small">
-            <code className="text-sm">inherited</code>
+            <code className="text-sm">继承</code>
           </span>
         )}
         {item.Override && (
           <span className="text-muted small">
-            <code className="text-sm">override</code>
+            <code className="text-sm">覆盖</code>
           </span>
         )}
       </>

@@ -13,7 +13,7 @@ export function RuntimeSelector({
   const environmentId = useEnvironmentId();
   const infoQuery = useInfo(environmentId, {
     select: (info) => [
-      { label: 'Default', value: '' },
+      { label: '默认', value: '' },
       ...Object.keys(info?.Runtimes || {}).map((runtime) => ({
         label: runtime,
         value: runtime,

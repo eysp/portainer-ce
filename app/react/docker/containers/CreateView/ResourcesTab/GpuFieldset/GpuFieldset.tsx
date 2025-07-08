@@ -117,18 +117,18 @@ export function GpuFieldset({
   return (
     <div>
       <TextTip inline={false} color="blue">
-        <p>GPU support is currently limited to NVIDIA graphics cards only.</p>
+        <p>支持目前仅限于 NVIDIA 显卡。</p>
       </TextTip>
 
       {!enableGpuManagement && (
         <TextTip color="blue">
-          GPU in the UI is not currently enabled for this environment.
+          该环境的 UI 当前未启用 GPU 功能。
         </TextTip>
       )}
 
       <div className="form-group">
         <div className="col-sm-3 col-lg-2 control-label text-left">
-          Enable GPU
+          启用 GPU
           <Switch
             id="enabled"
             name="enabled"
@@ -162,8 +162,8 @@ export function GpuFieldset({
         <>
           <div className="form-group">
             <div className="col-sm-3 col-lg-2 control-label text-left">
-              Capabilities
-              <Tooltip message="‘compute’ and ‘utility’ capabilities are preselected by Portainer because they are used by default when you don’t explicitly specify capabilities with docker CLI ‘--gpus’ option." />
+              功能
+              <Tooltip message="Portainer 预选了‘compute’和‘utility’功能，因为当你未显式用 docker CLI ‘--gpus’ 参数指定功能时，这些是默认使用的。" />
             </div>
             <div className="col-sm-9 col-lg-10 text-left">
               <Select<GpuOption, true>
@@ -181,8 +181,8 @@ export function GpuFieldset({
 
           <div className="form-group">
             <div className="col-sm-3 col-lg-2 control-label text-left">
-              Control
-              <Tooltip message="This is the generated equivalent of the '--gpus' docker CLI parameter based on your settings." />
+              控制
+              <Tooltip message="这是基于你的设置生成的等效 '--gpus' docker CLI 参数。" />
             </div>
             <div className="col-sm-9 col-lg-10">
               <code>{gpuCmd}</code>

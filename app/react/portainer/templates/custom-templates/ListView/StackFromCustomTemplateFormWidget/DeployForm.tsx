@@ -81,12 +81,12 @@ export function DeployForm({
     >
       {({ values, errors, setFieldValue, isValid }) => (
         <Form className="form-horizontal">
-          <FormSection title="Configuration">
+          <FormSection title="配置">
             <NameField
               value={values.name}
               onChange={(v) => setFieldValue('name', v)}
               errors={errors.name}
-              placeholder="e.g. mystack"
+              placeholder="例如 mystack"
             />
           </FormSection>
 
@@ -121,20 +121,20 @@ export function DeployForm({
               }}
               type="yaml"
               error={errors.fileContent}
-              placeholder="Define or paste the content of your docker compose file here"
+              placeholder="在此处定义或粘贴你的 docker compose 文件内容"
               readonly={isGit}
               data-cy="custom-template-creation-editor"
             >
               <p>
-                You can get more information about Compose file format in the{' '}
+                你可以在{' '}
                 <a
                   href="https://docs.docker.com/compose/compose-file/"
                   target="_blank"
                   rel="noreferrer"
                 >
-                  official documentation
+                  官方文档
                 </a>
-                .
+                中获取关于 Compose 文件格式的更多信息。
               </p>
             </WebEditorForm>
           </AdvancedSettings>
@@ -150,8 +150,8 @@ export function DeployForm({
           <FormActions
             isLoading={mutation.isLoading}
             isValid={isValid}
-            loadingText="Deployment in progress..."
-            submitLabel="Deploy the stack"
+            loadingText="部署进行中..."
+            submitLabel="部署堆栈"
             data-cy="deploy-stack-button"
           >
             <Button
@@ -164,7 +164,7 @@ export function DeployForm({
               color="default"
               data-cy="cancel-stack-creation"
             >
-              Hide
+              隐藏
             </Button>
           </FormActions>
         </Form>
@@ -177,7 +177,7 @@ export function DeployForm({
 
     return mutation.mutate(payload, {
       onSuccess() {
-        notifySuccess('Success', 'Stack created');
+        notifySuccess('成功', '堆栈已创建');
         router.stateService.go('docker.stacks');
       },
     });
@@ -239,8 +239,8 @@ export function DeployForm({
 
 function advancedSettingsLabel(isOpen: boolean, isGit: boolean) {
   if (isGit) {
-    return isOpen ? 'Hide stack' : 'View stack';
+    return isOpen ? '隐藏堆栈' : '查看堆栈';
   }
 
-  return isOpen ? 'Hide custom stack' : 'Customize stack';
+  return isOpen ? '隐藏自定义堆栈' : '自定义堆栈';
 }

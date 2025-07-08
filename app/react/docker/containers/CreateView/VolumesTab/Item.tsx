@@ -24,8 +24,8 @@ export function Item({
     <div>
       <div className="col-sm-12 form-inline flex gap-1">
         <InputLabeled
-          label="container"
-          placeholder="e.g. /path/in/container"
+          label="容器"
+          placeholder="例如 /path/in/container"
           value={volume.containerPath}
           onChange={(e) => setValue({ containerPath: e.target.value })}
           size="small"
@@ -42,8 +42,8 @@ export function Item({
                 onChange({ ...volume, type, name: '' });
               }}
               options={[
-                { value: 'volume', label: 'Volume' },
-                { value: 'bind', label: 'Bind' },
+                { value: 'volume', label: '卷' },
+                { value: 'bind', label: '绑定' },
               ]}
               aria-label="Volume type"
             />
@@ -55,7 +55,7 @@ export function Item({
         {volume.type === 'volume' && (
           <InputGroup size="small" className="flex-1">
             <InputGroup.Addon as="label" htmlFor={`volume-${index}`}>
-              volume
+              卷
             </InputGroup.Addon>
             <VolumeSelector
               value={volume.name}
@@ -70,8 +70,8 @@ export function Item({
           <InputLabeled
             size="small"
             className="flex-1"
-            label="host"
-            placeholder="e.g. /path/on/host"
+            label="主机"
+            placeholder="例如 /path/on/host"
             value={volume.name}
             onChange={(e) => setValue({ name: e.target.value })}
             id={`host-path-${index}`}
@@ -85,8 +85,8 @@ export function Item({
             value={volume.readOnly}
             onChange={(readOnly) => setValue({ readOnly })}
             options={[
-              { value: false, label: 'Writable' },
-              { value: true, label: 'Read-only' },
+              { value: false, label: '读写' },
+              { value: true, label: '只读' },
             ]}
           />
         </InputGroup>

@@ -1,6 +1,6 @@
 import { columnHelper } from './helper';
 
 export const stack = columnHelper.accessor((row) => row.StackName || '-', {
-  header: 'Stack',
+  header: '堆栈',
   id: 'stack',
 });

@@ -30,7 +30,7 @@ angular.module('portainer.app').controller('UserController', [
     };
 
     $scope.deleteUser = function () {
-      confirmDelete('Do you want to remove this user? This user will not be able to login into Portainer anymore.').then((confirmed) => {
+      confirmDelete('你确定要删除这个用户吗？该用户将无法再登录Portainer。').then((confirmed) => {
         if (!confirmed) {
           return;
         }
@@ -45,10 +45,10 @@ angular.module('portainer.app').controller('UserController', [
 
       if (username != oldUsername) {
         const confirmed = await confirm({
-          title: 'Are you sure?',
+          title: '你确定吗？',
           modalType: ModalType.Warn,
-          message: `Are you sure you want to rename the user ${oldUsername} to ${username}?`,
-          confirmButton: buildConfirmButton('Update'),
+          message: `你确定要将用户 ${oldUsername} 重命名为 ${username} 吗？`,
+          confirmButton: buildConfirmButton('更新'),
         });
 
         if (!confirmed) {
@@ -58,11 +58,11 @@ angular.module('portainer.app').controller('UserController', [
 
       UserService.updateUser($scope.user.Id, { role, username })
         .then(function success() {
-          Notifications.success('Success', 'User successfully updated');
+          Notifications.success('成功', '用户更新成功');
           $state.reload();
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to update user permissions');
+          Notifications.error('失败', err, '无法更新用户权限');
         });
     };
 
