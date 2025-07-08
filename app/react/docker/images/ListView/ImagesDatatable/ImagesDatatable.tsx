@@ -130,7 +130,7 @@ function RemoveButtonMenu({
             onRemove(selectedItems, false);
           }}
         >
-          Remove
+          删除
         </Button>
         <Menu>
           <MenuButton
@@ -141,7 +141,7 @@ function RemoveButtonMenu({
             icon={ChevronDown}
             data-cy="image-toggleRemoveButtonMenu"
           >
-            <span className="sr-only">Toggle Dropdown</span>
+            <span className="sr-only">切换下拉菜单</span>
           </MenuButton>
           <MenuPopover position={positionRight}>
             <div className="mt-3 bg-white th-highcontrast:bg-black th-dark:bg-black">
@@ -150,7 +150,7 @@ function RemoveButtonMenu({
                   onRemove(selectedItems, true);
                 }}
               >
-                Force Remove
+                强制删除
               </MenuItem>
             </div>
           </MenuPopover>
