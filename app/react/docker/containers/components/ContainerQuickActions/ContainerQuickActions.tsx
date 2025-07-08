@@ -44,7 +44,7 @@ export function ContainerQuickActions({
           <Link
             to="docker.containers.container.logs"
             params={{ id: containerId, nodeName }}
-            title="Logs"
+            title="日志"
             data-cy={`container-logs-${containerId}`}
           >
             <Icon icon={FileText} className="space-right" />
@@ -57,7 +57,7 @@ export function ContainerQuickActions({
           <Link
             to="docker.containers.container.inspect"
             params={{ id: containerId, nodeName }}
-            title="Inspect"
+            title="查看详情"
             data-cy={`container-inspect-${containerId}`}
           >
             <Icon icon={Info} className="space-right" />
@@ -70,7 +70,7 @@ export function ContainerQuickActions({
           <Link
             to="docker.containers.container.stats"
             params={{ id: containerId, nodeName }}
-            title="Stats"
+            title="统计"
             data-cy={`container-stats-${containerId}`}
           >
             <Icon icon={BarChart} className="space-right" />
@@ -83,7 +83,7 @@ export function ContainerQuickActions({
           <Link
             to="docker.containers.container.exec"
             params={{ id: containerId, nodeName }}
-            title="Exec Console"
+            title="执行终端"
             data-cy={`container-exec-${containerId}`}
           >
             <Icon icon={Terminal} className="space-right" />
@@ -96,7 +96,7 @@ export function ContainerQuickActions({
           <Link
             to="docker.containers.container.attach"
             params={{ id: containerId, nodeName }}
-            title="Attach Console"
+            title="附加终端"
             data-cy={`container-attach-${containerId}`}
           >
             <Icon icon={Paperclip} className="space-right" />

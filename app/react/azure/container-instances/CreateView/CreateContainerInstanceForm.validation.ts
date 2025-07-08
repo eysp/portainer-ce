@@ -6,11 +6,11 @@ import { validationSchema as portsSchema } from './PortsMappingField.validation'
 
 export function validationSchema(isAdmin: boolean) {
   return object().shape({
-    name: string().required('Name is required.'),
-    image: string().required('Image is required.'),
-    subscription: string().required('Subscription is required.'),
-    resourceGroup: string().required('Resource group is required.'),
-    location: string().required('Location is required.'),
+    name: string().required('镜像名称为必填项。'),
+    image: string().required('镜像为必填项。'),
+    subscription: string().required('订阅为必填项。'),
+    resourceGroup: string().required('资源组为必填项。'),
+    location: string().required('位置为必填项。'),
     os: string().oneOf(['Linux', 'Windows']),
     cpu: number().positive(),
     memory: number().positive(),

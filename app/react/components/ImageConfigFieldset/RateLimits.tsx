@@ -95,7 +95,7 @@ function RateLimitsInner({
                     >
                       镜像仓库视图
                     </Link>
-                    中配置 DockerHub 身份验证。剩余拉取次数：{' '}
+                     中配置 DockerHub 身份验证。剩余拉取次数：{' '}
                     <span className="font-bold">
                       {pullRateLimits.remaining}/{pullRateLimits.limit}
                     </span>

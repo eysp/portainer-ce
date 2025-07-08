@@ -124,7 +124,7 @@ export function EnvironmentListFilters({
         <HomepageFilter
           filterOptions={uniqueGroup}
           onChange={groupOnChange}
-          placeHolder="组"
+          placeHolder="分组"
           value={groupState}
         />
       </div>

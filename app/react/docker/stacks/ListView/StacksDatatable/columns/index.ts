@@ -18,7 +18,7 @@ export function useColumns(isImageNotificationEnabled: boolean) {
       (item) => (item.Type === StackType.DockerCompose ? 'Compose' : 'Swarm'),
       {
         id: 'type',
-        header: 'Type',
+        header: '类型',
         enableHiding: false,
       }
     ),
@@ -26,7 +26,7 @@ export function useColumns(isImageNotificationEnabled: boolean) {
     control,
     columnHelper.accessor('CreationDate', {
       id: 'creationDate',
-      header: 'Created',
+      header: '创建时间',
       enableHiding: false,
       cell: ({ getValue, row: { original: item } }) => {
         const value = getValue();
@@ -40,7 +40,7 @@ export function useColumns(isImageNotificationEnabled: boolean) {
     }),
     columnHelper.accessor('UpdateDate', {
       id: 'updateDate',
-      header: 'Updated',
+      header: '更新时间',
       cell: ({ getValue, row: { original: item } }) => {
         const value = getValue();
         if (!value) {

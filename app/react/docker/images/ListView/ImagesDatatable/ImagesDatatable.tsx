@@ -68,7 +68,7 @@ export function ImagesDatatable({
 
   return (
     <Datatable
-      title="Images"
+      title="镜像"
       titleIcon={List}
       data-cy="docker-images-datatable"
       extendTableOptions={mergeOptions(
@@ -89,7 +89,7 @@ export function ImagesDatatable({
               to="docker.images.build"
               data-cy="image-buildImageButton"
             >
-              Build a new image
+              构建新镜像
             </AddButton>
           </Authorized>
         </div>
@@ -183,7 +183,7 @@ function ImportExportButtons({
             to: 'docker.images.import',
           }}
         >
-          Import
+          导入
         </Button>
       </Authorized>
       <Authorized authorizations="DockerImageGet">
@@ -192,12 +192,12 @@ function ImportExportButtons({
           color="light"
           icon={Download}
           isLoading={isExportInProgress}
-          loadingText="Export in progress..."
+          loadingText="导出进行中..."
           data-cy="image-exportImageButton"
           onClick={() => onExportClick(selectedItems)}
           disabled={selectedItems.length === 0}
         >
-          Export
+          导出
         </LoadingButton>
       </Authorized>
     </ButtonGroup>

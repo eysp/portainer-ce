@@ -25,7 +25,7 @@ export function CommonFields({
   return (
     <>
       <FormControl
-        label="Title"
+        label="标题"
         required
         inputId="template-title"
         errors={errors?.Title}
@@ -33,7 +33,7 @@ export function CommonFields({
         <Input
           name="title"
           data-cy="custom-templates-title-input"
-          placeholder="e.g. mytemplate"
+          placeholder="例如 mytemplate"
           id="template-title"
           required
           value={values.Title}
@@ -44,7 +44,7 @@ export function CommonFields({
       </FormControl>
 
       <FormControl
-        label="Description"
+        label="描述"
         required
         inputId="template-description"
         errors={errors?.Description}
@@ -61,7 +61,7 @@ export function CommonFields({
         />
       </FormControl>
 
-      <FormControl label="Note" inputId="template-note" errors={errors?.Note}>
+      <FormControl label="备注" inputId="template-note" errors={errors?.Note}>
         <Input
           name="note"
           data-cy="custom-templates-note-input"

@@ -21,7 +21,7 @@ interface Props {
 export function DockerfileDetails({ image }: Props) {
   return (
     <TableContainer>
-      <TableTitle label="Dockerfile details" icon={List} />
+      <TableTitle label="Dockerfile 详情" icon={List} />
       <DetailsTable dataCy="dockerfile-details-table">
         <DetailsTable.Row label="CMD">
           <code>{image.Command ? joinCommand(image.Command) : '-'}</code>

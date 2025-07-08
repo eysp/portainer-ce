@@ -160,7 +160,7 @@ export function EnvironmentList({ onClickBrowse, onRefresh }: Props) {
                 className="!m-0 !min-w-[350px] !bg-transparent"
                 value={searchBarValue}
                 onChange={setSearchBarValue}
-                placeholder="按名称、组、标签、状态、URL 搜索..."
+                placeholder="按名称、分组、标签、状态、URL 搜索..."
                 data-cy="home-endpointsSearchInput"
               />
               {isPureAdmin && (

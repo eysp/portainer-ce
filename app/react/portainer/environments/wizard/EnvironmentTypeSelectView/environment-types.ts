@@ -95,11 +95,11 @@ export const environmentTypes: EnvironmentOption[] = [
 ];
 
 export const formTitles: Record<EnvironmentOptionValue, string> = {
-  dockerStandalone: 'Connect to your Docker Standalone environment',
-  dockerSwarm: 'Connect to your Docker Swarm environment',
-  podman: 'Connect to your Podman environment',
-  kubernetes: 'Connect to your Kubernetes environment',
-  aci: 'Connect to your ACI environment',
-  kaas: 'Provision a KaaS environment',
-  k8sInstall: 'Create a Kubernetes cluster',
+  dockerStandalone: '连接到您的 Docker 独立环境',
+  dockerSwarm: '连接到您的 Docker Swarm 环境',
+  podman: '连接到您的 Podman 环境',
+  kubernetes: '连接到您的 Kubernetes 环境',
+  aci: '连接到您的 ACI 环境',
+  kaas: '配置一个 KaaS 环境',
+  k8sInstall: '创建一个 Kubernetes 集群',
 };

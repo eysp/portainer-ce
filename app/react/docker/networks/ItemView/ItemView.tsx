@@ -55,9 +55,9 @@ export function ItemView() {
   return (
     <>
       <PageHeader
-        title="Network details"
+        title="网络详情"
         breadcrumbs={[
-          { link: 'docker.networks', label: 'Networks' },
+          { link: 'docker.networks', label: '网络' },
           {
             link: 'docker.networks.network',
             label: networkQuery.data.Name,
