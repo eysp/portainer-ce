@@ -17,23 +17,23 @@ import { columnHelper } from './helper';
 
 export const name = columnHelper.accessor('Name', {
   id: 'name',
-  header: 'Name',
+  header: '名称',
   cell: Cell,
   enableColumnFilter: true,
   filterFn: (
     { original: { dangling } },
     columnId,
-    filterValue: Array<'Used' | 'Unused'>
+    filterValue: Array<'已使用' | '未使用'>
   ) => {
     if (filterValue.length === 0) {
       return true;
     }
 
-    if (filterValue.includes('Used') && !dangling) {
+    if (filterValue.includes('已使用') && !dangling) {
       return true;
     }
 
-    if (filterValue.includes('Unused') && dangling) {
+    if (filterValue.includes('未使用') && dangling) {
       return true;
     }
 
@@ -49,7 +49,7 @@ function FilterByUsage<TData extends { Used: boolean }>({
 }: {
   column: Column<TData>;
 }) {
-  const options = ['Used', 'Unused'];
+  const options = ['已使用', '未使用'];
 
   const value = getFilterValue();
 
@@ -61,7 +61,7 @@ function FilterByUsage<TData extends { Used: boolean }>({
       filterKey={id}
       value={valueAsArray}
       onChange={setFilterValue}
-      menuTitle="Filter by usage"
+      menuTitle="按使用情况筛选"
     />
   );
 }
@@ -105,7 +105,7 @@ function Cell({
             }}
             data-cy={`volume-browse-button-${name}`}
           >
-            Browse
+            浏览
           </Button>
         </Authorized>
       )}
