@@ -41,7 +41,7 @@ export function EnvironmentInfo() {
       <Widget.Title icon={GaugeIcon} title="环境信息" />
       <Widget.Body className="!px-5 !py-0">
         <DetailsTable dataCy="environment-info">
-          <DetailsTable.Row label="Environment">
+          <DetailsTable.Row label="环境">
             <div className="flex items-center gap-2">
               {environment.Name}
               <SnapshotStats snapshot={environment.Snapshots[0]} />
