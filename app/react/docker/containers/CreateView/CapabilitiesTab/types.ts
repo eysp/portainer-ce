@@ -7,178 +7,165 @@ export interface Capability {
 const capDesc: Array<Capability> = [
   {
     key: 'SETPCAP',
-    description: 'Modify process capabilities.',
+    description: '修改进程权限。',
     default: true,
   },
   {
     key: 'MKNOD',
-    description: 'Create special files using mknod(2).',
+    description: '使用 mknod(2) 创建特殊文件。',
     default: true,
   },
   {
     key: 'AUDIT_WRITE',
-    description: 'Write records to kernel auditing log.',
+    description: '向内核审计日志写入记录。',
     default: true,
   },
   {
     key: 'CHOWN',
-    description: 'Make arbitrary changes to file UIDs and GIDs (see chown(2)).',
+    description: '对文件的用户 ID 和组 ID 进行任意更改（参见 chown(2)）。',
     default: true,
   },
   {
     key: 'NET_RAW',
-    description: 'Use RAW and PACKET sockets.',
+    description: '使用 RAW 和 PACKET 套接字。',
     default: true,
   },
   {
     key: 'DAC_OVERRIDE',
-    description: 'Bypass file read, write, and execute permission checks.',
+    description: '绕过文件的读取、写入和执行权限检查。',
     default: true,
   },
   {
     key: 'FOWNER',
-    description:
-      'Bypass permission checks on operations that normally require the file system UID of the process to match the UID of the file.',
+    description: '绕过需要进程文件系统 UID 与文件 UID 匹配的操作权限检查。',
     default: true,
   },
   {
     key: 'FSETID',
-    description:
-      'Don’t clear set-user-ID and set-group-ID permission bits when a file is modified.',
+    description: '当文件被修改时，不清除 set-user-ID 和 set-group-ID 权限位。',
     default: true,
   },
   {
     key: 'KILL',
-    description: 'Bypass permission checks for sending signals.',
+    description: '绕过发送信号的权限检查。',
     default: true,
   },
   {
     key: 'SETGID',
-    description:
-      'Make arbitrary manipulations of process GIDs and supplementary GID list.',
+    description: '对进程的 GID 和附加 GID 列表进行任意操作。',
     default: true,
   },
   {
     key: 'SETUID',
-    description: 'Make arbitrary manipulations of process UIDs.',
+    description: '对进程的 UID 进行任意操作。',
     default: true,
   },
   {
     key: 'NET_BIND_SERVICE',
-    description:
-      'Bind a socket to internet domain privileged ports (port numbers less than 1024).',
+    description: '将套接字绑定到特权端口（小于 1024 的端口号）。',
     default: true,
   },
   {
     key: 'SYS_CHROOT',
-    description: 'Use chroot(2), change root directory.',
+    description: '使用 chroot(2)，更改根目录。',
     default: true,
   },
   {
     key: 'SETFCAP',
-    description: 'Set file capabilities.',
+    description: '设置文件权限。',
     default: true,
   },
   {
     key: 'SYS_MODULE',
-    description: 'Load and unload kernel modules.',
+    description: '加载和卸载内核模块。',
   },
   {
     key: 'SYS_RAWIO',
-    description: 'Perform I/O port operations (iopl(2) and ioperm(2)).',
+    description: '执行 I/O 端口操作（iopl(2) 和 ioperm(2)）。',
   },
   {
     key: 'SYS_PACCT',
-    description: 'Use acct(2), switch process accounting on or off.',
+    description: '使用 acct(2)，开启或关闭进程统计。',
   },
   {
     key: 'SYS_ADMIN',
-    description: 'Perform a range of system administration operations.',
+    description: '执行一系列系统管理操作。',
   },
   {
     key: 'SYS_NICE',
-    description:
-      'Raise process nice value (nice(2), setpriority(2)) and change the nice value for arbitrary processes.',
+    description: '提升进程优先级（nice(2), setpriority(2)）并更改任意进程的 nice 值。',
   },
   {
     key: 'SYS_RESOURCE',
-    description: 'Override resource Limits.',
+    description: '覆盖资源限制。',
   },
   {
     key: 'SYS_TIME',
-    description:
-      'Set system clock (settimeofday(2), stime(2), adjtimex(2)); set real-time (hardware) clock.',
+    description: '设置系统时钟（settimeofday(2), stime(2), adjtimex(2)）；设置实时时钟。',
   },
   {
     key: 'SYS_TTY_CONFIG',
-    description:
-      'Use vhangup(2); employ various privileged ioctl(2) operations on virtual terminals.',
+    description: '使用 vhangup(2)；对虚拟终端执行特权 ioctl(2) 操作。',
   },
   {
     key: 'AUDIT_CONTROL',
-    description:
-      'Enable and disable kernel auditing; change auditing filter rules; retrieve auditing status and filtering rules.',
+    description: '启用或禁用内核审计；更改审计过滤规则；获取审计状态和过滤规则。',
   },
   {
     key: 'MAC_ADMIN',
-    description:
-      'Allow MAC configuration or state changes. Implemented for the Smack LSM.',
+    description: '允许 MAC 配置或状态更改。为 Smack LSM 实现。',
   },
   {
     key: 'MAC_OVERRIDE',
-    description:
-      'Override Mandatory Access Control (MAC). Implemented for the Smack Linux Security Module (LSM).',
+    description: '绕过强制访问控制（MAC）。为 Smack Linux 安全模块实现。',
   },
   {
     key: 'NET_ADMIN',
-    description: 'Perform various network-related operations.',
+    description: '执行各种网络相关操作。',
   },
   {
     key: 'SYSLOG',
-    description: 'Perform privileged syslog(2) operations.',
+    description: '执行特权的 syslog(2) 操作。',
   },
   {
     key: 'DAC_READ_SEARCH',
-    description:
-      'Bypass file read permission checks and directory read and execute permission checks.',
+    description: '绕过文件读取权限检查和目录读取及执行权限检查。',
   },
   {
     key: 'LINUX_IMMUTABLE',
-    description: 'Set the FS_APPEND_FL and FS_IMMUTABLE_FL i-node flags.',
+    description: '设置 FS_APPEND_FL 和 FS_IMMUTABLE_FL i-node 标志。',
   },
   {
     key: 'NET_BROADCAST',
-    description: 'Make socket broadcasts, and listen to multicasts.',
+    description: '进行套接字广播，监听组播。',
   },
   {
     key: 'IPC_LOCK',
-    description: 'Lock memory (mlock(2), mlockall(2), mmap(2), shmctl(2)).',
+    description: '锁定内存（mlock(2), mlockall(2), mmap(2), shmctl(2)）。',
   },
   {
     key: 'IPC_OWNER',
-    description:
-      'Bypass permission checks for operations on System V IPC objects.',
+    description: '绕过对 System V IPC 对象操作的权限检查。',
   },
   {
     key: 'SYS_PTRACE',
-    description: 'Trace arbitrary processes using ptrace(2).',
+    description: '使用 ptrace(2) 追踪任意进程。',
   },
   {
     key: 'SYS_BOOT',
-    description:
-      'Use reboot(2) and kexec_load(2), reboot and load a new kernel for later execution.',
+    description: '使用 reboot(2) 和 kexec_load(2)，重启并加载新内核。',
   },
   {
     key: 'LEASE',
-    description: 'Establish leases on arbitrary files (see fcntl(2)).',
+    description: '对任意文件建立租约（参见 fcntl(2)）。',
   },
   {
     key: 'WAKE_ALARM',
-    description: 'Trigger something that will wake up the system.',
+    description: '触发可唤醒系统的事件。',
   },
   {
     key: 'BLOCK_SUSPEND',
-    description: 'Employ features that can block system suspend.',
+    description: '使用可阻止系统挂起的功能。',
   },
 ];
 

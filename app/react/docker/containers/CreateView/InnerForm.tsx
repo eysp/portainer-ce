@@ -106,7 +106,7 @@ export function InnerForm({
                       },
                       {
                         id: 'network',
-                        label: 'Network网络',
+                        label: '网络',
                         children: (
                           <NetworkTab
                             values={values.network}
@@ -198,7 +198,7 @@ export function InnerForm({
                       },
                       {
                         id: 'capabilities',
-                        label: 'Capabilities',
+                        label: '权限',
                         hidden: hideCapabilities,
                         children: (
                           <CapabilitiesTab

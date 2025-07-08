@@ -41,7 +41,7 @@ export function VolumesTab({
         label="卷映射"
         onChange={(volumes) => handleChange(volumes)}
         value={values}
-        addLabel="map additional volume"
+        addLabel="映射额外卷"
         item={Item}
         itemBuilder={() => ({
           containerPath: '',
