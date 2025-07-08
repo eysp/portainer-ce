@@ -13,14 +13,14 @@ export const options = [
   {
     id: 'backup_file',
     icon: <BadgeIcon icon={DownloadCloud} />,
-    label: 'Download backup file',
+    label: '下载备份文件',
     value: BackupFormType.File,
   },
   {
     id: 'backup_s3',
     icon: <BadgeIcon icon={UploadCloud} />,
-    label: 'Store in S3',
-    description: 'Define a cron schedule',
+    label: '存储到 S3',
+    description: '定义定时任务计划',
     value: BackupFormType.S3,
     feature: FeatureId.S3_BACKUP_SETTING,
   },

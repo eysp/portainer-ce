@@ -198,7 +198,7 @@ angular.module('portainer.docker').controller('ImageController', [
       try {
         $scope.registries = await RegistryService.loadRegistriesForDropdown(endpoint.Id);
       } catch (err) {
-        this.Notifications.error('失败', err, '无法加载注册表');
+        this.Notifications.error('失败', err, '无法加载镜像仓库');
       }
 
       $q.all({

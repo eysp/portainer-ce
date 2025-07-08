@@ -16,7 +16,7 @@ import { DecoratedStack } from '../types';
 import { columnHelper } from './helper';
 
 export const control = columnHelper.display({
-  header: 'Control',
+  header: '控制',
   id: 'control',
   cell: ControlCell,
   enableHiding: false,
@@ -31,16 +31,16 @@ function ControlCell({
 
   if (isExternalStack(item)) {
     return (
-      <Warning tooltip="This stack was created outside of Portainer. Control over this stack is limited.">
-        Limited
+      <Warning tooltip="此堆栈是在 Portainer 之外创建的，对该堆栈的控制有限。">
+        有限制
       </Warning>
     );
   }
 
   if (isOrphanedStack(item)) {
     return (
-      <Warning tooltip="This stack was created inside an environment that is no longer registered inside Portainer.">
-        Orphaned
+      <Warning tooltip="此堆栈是在不再注册在 Portainer 中的环境内创建的。">
+        孤立
       </Warning>
     );
   }

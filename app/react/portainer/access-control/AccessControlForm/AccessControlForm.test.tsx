@@ -33,7 +33,7 @@ test.each([
     const values = buildFormData(ownership);
 
     const { findByRole, getByLabelText } = await renderComponent(values);
-    const accessSwitch = getByLabelText(/Enable access control/);
+    const accessSwitch = getByLabelText(/启用访问控制/);
 
     expect(accessSwitch).toBeEnabled();
 
@@ -330,7 +330,7 @@ async function renderComponent(
   );
 
   await expect(
-    renderResult.findByLabelText(/Enable access control/)
+    renderResult.findByLabelText(/启用访问控制/)
   ).resolves.toBeVisible();
   return renderResult;
 }

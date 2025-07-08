@@ -23,7 +23,7 @@ export function buildColumns({ nodeName }: { nodeName?: string } = {}) {
       enableSorting: false,
     }),
     columnHelper.accessor((item) => item.Gateway || '-', {
-      header: 'Gateway网关',
+      header: '网关',
       id: 'gateway',
       enableSorting: false,
     }),

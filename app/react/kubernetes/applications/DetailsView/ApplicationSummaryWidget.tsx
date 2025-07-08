@@ -92,7 +92,7 @@ export function ApplicationSummaryWidget() {
         <Widget>
           <WidgetBody>
             {applicationQuery.isLoading && (
-              <InlineLoader>Loading application...</InlineLoader>
+              <InlineLoader>正在加载应用程序...</InlineLoader>
             )}
             {application && (
               <>
@@ -110,7 +110,7 @@ export function ApplicationSummaryWidget() {
                     </div>
                     <div>
                       <div className="font-semibold">
-                        Failed to create application
+                        创建应用程序失败
                       </div>
                       {failedCreateCondition.message}
                     </div>
@@ -118,7 +118,7 @@ export function ApplicationSummaryWidget() {
                 )}
                 <DetailsTable dataCy="k8sAppDetail-table">
                   <tr>
-                    <td>Name</td>
+                    <td>名称</td>
                     <td>
                       <div
                         className="flex items-center gap-x-2"
@@ -135,7 +135,7 @@ export function ApplicationSummaryWidget() {
                     !globalDeploymentOptionsQuery.data
                       .hideStacksFunctionality && (
                       <tr>
-                        <td>Stack</td>
+                        <td>堆栈</td>
                         <td data-cy="k8sAppDetail-stackName">
                           {application?.metadata?.labels?.[appStackNameLabel] ||
                             '-'}
@@ -143,7 +143,7 @@ export function ApplicationSummaryWidget() {
                       </tr>
                     )}
                   <tr>
-                    <td>Namespace</td>
+                    <td>命名空间</td>
                     <td>
                       <div
                         className="flex items-center gap-x-2"
@@ -161,14 +161,14 @@ export function ApplicationSummaryWidget() {
                     </td>
                   </tr>
                   <tr>
-                    <td>Application type</td>
+                    <td>应用类型</td>
                     <td data-cy="k8sAppDetail-appType">
                       {application?.kind || '-'}
                     </td>
                   </tr>
                   {application?.kind && (
                     <tr>
-                      <td>Status</td>
+                      <td>状态</td>
                       {applicationIsKind<Pod>('Pod', application) && (
                         <td data-cy="k8sAppDetail-appType">
                           {application?.status?.phase}
@@ -189,7 +189,7 @@ export function ApplicationSummaryWidget() {
                     !!applicationRequests?.memoryBytes) && (
                     <tr>
                       <td>
-                        Resource reservations
+                        资源预留
                         {!applicationIsKind<Pod>('Pod', application) && (
                           <div className="text-muted small">per instance</div>
                         )}
@@ -202,7 +202,7 @@ export function ApplicationSummaryWidget() {
                         )}
                         {!!applicationRequests?.memoryBytes && (
                           <div data-cy="k8sAppDetail-memoryReservation">
-                            Memory{' '}
+                            内存{' '}
                             {bytesToReadableFormat(
                               applicationRequests.memoryBytes
                             )}
@@ -212,7 +212,7 @@ export function ApplicationSummaryWidget() {
                     </tr>
                   )}
                   <tr>
-                    <td>Creation</td>
+                    <td>创建</td>
                     <td>
                       <div className="flex flex-wrap items-center gap-3">
                         {applicationOwner && (
@@ -239,7 +239,7 @@ export function ApplicationSummaryWidget() {
                             data-cy="k8sAppDetail-creationMethod"
                           >
                             <Clock />
-                            Deployed from {applicationDeployMethod}
+                            部署方式： {applicationDeployMethod}
                           </span>
                         )}
                       </div>
@@ -272,10 +272,10 @@ export function ApplicationSummaryWidget() {
                                 data-cy="k8sAppDetail-saveNoteButton"
                                 isLoading={patchApplicationMutation.isLoading}
                                 loadingText={
-                                  applicationNote ? 'Updating' : 'Saving'
+                                  applicationNote ? '正在更新' : '正在保存'
                                 }
                               >
-                                {applicationNote ? 'Update' : 'Save'} note
+                                {applicationNote ? '更新' : '保存'} 备注
                               </LoadingButton>
                             </div>
                           </div>

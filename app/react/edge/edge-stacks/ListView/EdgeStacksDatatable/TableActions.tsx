@@ -18,11 +18,11 @@ export function TableActions({
       <DeleteButton
         disabled={selectedItems.length === 0}
         onConfirmed={() => handleRemove(selectedItems)}
-        confirmMessage="Are you sure you want to remove the selected Edge stack(s)?"
+        confirmMessage="您确定要删除选中的 Edge 堆栈吗？"
         data-cy="edgeStack-removeStackButton"
       />
 
-      <AddButton data-cy="edgeStack-addStackButton">Add stack</AddButton>
+      <AddButton data-cy="edgeStack-addStackButton">添加堆栈</AddButton>
     </div>
   );
 

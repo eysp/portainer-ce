@@ -8,11 +8,11 @@ import { filterHOC } from '@@/datatables/Filter';
 import { columnHelper } from './helper';
 
 export const status = columnHelper.accessor((item) => item.Status?.State, {
-  header: 'Status',
+  header: '状态',
   enableColumnFilter: true,
   filterFn: multiple,
   meta: {
-    filter: filterHOC('Filter by state'),
+    filter: filterHOC('按状态过滤'),
     width: 100,
   },
   cell({ getValue }) {

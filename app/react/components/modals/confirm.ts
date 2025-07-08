@@ -40,18 +40,18 @@ export function confirmDestructive(options: Omit<ConfirmOptions, 'modalType'>) {
 export function confirmWebEditorDiscard() {
   return openConfirm({
     modalType: ModalType.Warn,
-    title: 'Are you sure?',
+    title: '你确定吗？',
     message:
-      'You currently have unsaved changes in the editor. Are you sure you want to leave?',
-    confirmButton: buildConfirmButton('Yes', 'danger'),
+      '编辑器中有未保存的更改。你确定要离开吗？',
+    confirmButton: buildConfirmButton('是', 'danger'),
   });
 }
 
 export function confirmDelete(message: ReactNode) {
   return confirmDestructive({
-    title: 'Are you sure?',
+    title: '你确定吗？',
     message,
-    confirmButton: buildConfirmButton('Remove', 'danger'),
+    confirmButton: buildConfirmButton('删除', 'danger'),
   });
 }
 
@@ -60,10 +60,10 @@ export async function confirmUpdate(
   callback: ConfirmCallback
 ) {
   const result = await openConfirm({
-    title: 'Are you sure?',
+    title: '你确定吗？',
     modalType: ModalType.Warn,
     message,
-    confirmButton: buildConfirmButton('Update'),
+    confirmButton: buildConfirmButton('更新'),
   });
 
   callback(result);
@@ -74,9 +74,9 @@ export async function confirmUpdate(
 export function confirmChangePassword() {
   return openConfirm({
     modalType: ModalType.Warn,
-    title: 'Are you sure?',
+    title: '你确定吗？',
     message:
-      'You will be logged out after the password change. Do you want to change your password?',
-    confirmButton: buildConfirmButton('Change'),
+      '密码更改后你将被登出。你确定要更改密码吗？',
+    confirmButton: buildConfirmButton('更改'),
   });
 }

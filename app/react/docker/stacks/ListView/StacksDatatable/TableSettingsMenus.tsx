@@ -31,7 +31,7 @@ export function TableSettingsMenus({
           <Checkbox
             id="setting_all_orphaned_stacks"
             data-cy="show-all-orphaned-stacks"
-            label="Show all orphaned stacks"
+            label="显示所有孤立的堆栈"
             checked={tableState.showOrphanedStacks}
             onChange={(e) => {
               tableState.setShowOrphanedStacks(e.target.checked);

@@ -38,7 +38,7 @@ export function AccessControlForm({
     values.ownership !== ResourceControlOwnership.PUBLIC;
   return (
     <>
-      {!hideTitle && <FormSectionTitle>Access control</FormSectionTitle>}
+      {!hideTitle && <FormSectionTitle>访问控制</FormSectionTitle>}
 
       <div className="form-group">
         <div className="col-sm-12">

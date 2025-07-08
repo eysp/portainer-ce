@@ -81,7 +81,7 @@ function InnerForm({ isLoading }: { isLoading: boolean }) {
   return (
     <Form className="form-horizontal">
       <FormControl
-        label="Snapshot interval"
+        label="快照间隔"
         inputId="snapshot_interval"
         errors={errors.snapshotInterval}
         required

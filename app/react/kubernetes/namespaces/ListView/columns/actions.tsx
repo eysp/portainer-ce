@@ -13,7 +13,7 @@ import { PortainerNamespace } from '../../types';
 import { helper } from './helper';
 
 export const actions = helper.display({
-  header: 'Actions',
+  header: '操作',
   cell: Cell,
 });
 
@@ -43,7 +43,7 @@ function Cell({
       icon={Users}
       data-cy={`manage-access-button-${namespace.Name}`}
     >
-      Manage access
+      管理访问
     </Button>
   );
 

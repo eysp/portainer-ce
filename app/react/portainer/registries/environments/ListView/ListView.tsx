@@ -6,8 +6,8 @@ export function ListView() {
   return (
     <>
       <PageHeader
-        title="环境注册表"
-        breadcrumbs="注册表管理"
+        title="环境镜像仓库"
+        breadcrumbs="镜像仓库管理"
         reload
       />
 

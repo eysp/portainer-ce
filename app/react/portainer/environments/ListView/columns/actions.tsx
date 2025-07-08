@@ -11,7 +11,7 @@ import { EnvironmentListItem } from '../types';
 import { columnHelper } from './helper';
 
 export const actions = columnHelper.display({
-  header: 'Actions',
+  header: '操作',
   cell: Cell,
 });
 
@@ -36,7 +36,7 @@ function Cell({
       icon={Users}
       data-cy={`environment-manage-access-button-${environment.Name}`}
     >
-      Manage access
+      管理访问
     </Button>
   );
 }

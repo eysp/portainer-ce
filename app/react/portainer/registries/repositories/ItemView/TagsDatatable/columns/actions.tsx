@@ -17,7 +17,7 @@ import { helper } from './helper';
 import { useDetails } from './buildCell';
 
 export const actions = helper.display({
-  header: 'Actions',
+  header: '操作',
   cell: ActionsCell,
 });
 
@@ -45,7 +45,7 @@ function ActionsCell({
         onClick={() => state.setName(item.Name, tagDetails)}
         data-cy={`retag-${item.Name}`}
       >
-        Retag
+        重新标记
       </Button>
     );
   }

@@ -18,12 +18,12 @@ export function TableActions({
     <>
       <DeleteButton
         disabled={selectedItems.length === 0}
-        confirmMessage="Are you sure you want to remove the selected environment group(s)?"
+        confirmMessage="您确定要删除选中的环境分组吗？"
         onConfirmed={handleRemove}
         data-cy="remove-environment-groups-button"
       />
 
-      <AddButton data-cy="add-environment-group-button">Add group</AddButton>
+      <AddButton data-cy="add-environment-group-button">添加分组</AddButton>
     </>
   );
 
@@ -31,7 +31,7 @@ export function TableActions({
     const ids = selectedItems.map((item) => item.Id);
     deleteMutation.mutate(ids, {
       onSuccess() {
-        notifySuccess('Success', 'Environment Group(s) removed');
+        notifySuccess('成功', '环境组已删除');
       },
     });
   }

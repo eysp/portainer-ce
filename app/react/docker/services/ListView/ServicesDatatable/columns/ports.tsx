@@ -13,7 +13,7 @@ export const ports = columnHelper.accessor(
       .map((port) => `${port.PublishedPort}:${port.TargetPort}`)
       .join(','),
   {
-    header: 'Published Ports',
+    header: '发布端口',
     id: 'ports',
     cell: Cell,
   }

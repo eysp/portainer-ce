@@ -8,7 +8,7 @@ import { columnHelper } from '@/react/docker/services/ItemView/TasksDatatable/co
 import { Link } from '@@/Link';
 
 export const task = columnHelper.accessor('Id', {
-  header: 'Task',
+  header: '任务',
   cell: Cell,
 });
 

@@ -8,7 +8,7 @@ export function validationSchema(teams: Team[]) {
       .required('此字段为必填项。')
       .test(
         'is-unique',
-        'This team already exists.',
+        '该团队已存在。',
         (name) => !!name && teams.every((team) => team.Name !== name)
       ),
     leaders: array().of(number()),

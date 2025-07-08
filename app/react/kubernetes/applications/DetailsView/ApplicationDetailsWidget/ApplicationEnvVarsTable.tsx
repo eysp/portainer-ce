@@ -20,22 +20,21 @@ export function ApplicationEnvVarsTable({ namespace, app }: Props) {
     <>
       <div className="text-muted mb-4 mt-6 flex items-center">
         <Icon icon={File} className="!mr-2" />
-        Environment variables, ConfigMaps or Secrets
+        环境变量、ConfigMap 或 Secret
       </div>
       {appEnvVars.length === 0 && (
         <TextTip color="blue">
-          This application is not using any environment variable, ConfigMap or
-          Secret.
+          此应用未使用任何环境变量、ConfigMap 或 Secret。
         </TextTip>
       )}
       {appEnvVars.length > 0 && (
         <table className="table">
           <tbody>
             <tr className="text-muted">
-              <td className="w-1/4">Container</td>
-              <td className="w-1/4">Environment variable</td>
+              <td className="w-1/4">容器</td>
+              <td className="w-1/4">环境变量</td>
               <td className="w-1/4">Value</td>
-              <td className="w-1/4">Configuration</td>
+              <td className="w-1/4">配置</td>
             </tr>
             {appEnvVars.map((envVar, index) => (
               <tr key={index}>
@@ -50,7 +49,7 @@ export function ApplicationEnvVarsTable({ namespace, app }: Props) {
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        init container
+                        初始化容器
                       </a>
                       )
                     </span>

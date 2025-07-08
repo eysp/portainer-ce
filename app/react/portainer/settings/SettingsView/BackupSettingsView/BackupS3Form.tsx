@@ -69,7 +69,7 @@ export function BackupS3Form() {
                   name="schedule-automatic-backup"
                   data-cy="settings-scheduleAutomaticBackupSwitch"
                   labelClass="col-sm-3 col-lg-2"
-                  label="Schedule automatic backups"
+                  label="安排自动备份"
                   checked={values.scheduleAutomaticBackup}
                   onChange={(e) => setFieldValue('scheduleAutomaticBackup', e)}
                 />
@@ -79,7 +79,7 @@ export function BackupS3Form() {
             {values.scheduleAutomaticBackup && (
               <FormControl
                 inputId="cron_rule"
-                label="Cron rule"
+                label="Cron 规则"
                 size="small"
                 errors={errors.cronRule}
                 required
@@ -98,7 +98,7 @@ export function BackupS3Form() {
             )}
 
             <FormControl
-              label="Access key ID"
+              label="访问密钥 ID"
               inputId="access_key_id"
               errors={errors.accessKeyID}
             >
@@ -114,7 +114,7 @@ export function BackupS3Form() {
             </FormControl>
 
             <FormControl
-              label="Secret access key"
+              label="访问密钥"
               inputId="secret_access_key"
               errors={errors.secretAccessKey}
             >
@@ -129,13 +129,13 @@ export function BackupS3Form() {
               />
             </FormControl>
 
-            <FormControl label="Region" inputId="region" errors={errors.region}>
+            <FormControl label="区域" inputId="region" errors={errors.region}>
               <Field
                 id="region"
                 name="region"
                 type="text"
                 as={Input}
-                placeholder="default region is us-east-1 if left empty"
+                placeholder="为空时默认为 us-east-1 区域"
                 data-cy="settings-backupRegionInput"
                 className={clsx({ 'limited-be': limitedToBE })}
                 disabled={limitedToBE}
@@ -196,7 +196,7 @@ export function BackupS3Form() {
                     handleExport(values);
                   }}
                 >
-                  Export backup
+                  导出备份
                 </LoadingButton>
               </div>
             </div>
@@ -209,7 +209,7 @@ export function BackupS3Form() {
                   disabled={!isValid || limitedToBE}
                   data-cy="settings-saveBackupSettingsButton"
                 >
-                  Save backup settings
+                  保存备份设置
                 </LoadingButton>
               </div>
             </div>

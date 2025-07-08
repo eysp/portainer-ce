@@ -58,7 +58,7 @@ class DockerRegistryAccessController {
         this.registryEndpointAccesses = this.registry.RegistryAccesses[this.state.endpointId] || {};
         this.endpointGroup = await this.GroupService.group(this.endpoint.GroupId);
       } catch (err) {
-        this.Notifications.error('失败', err, '无法获取注册表详情');
+        this.Notifications.error('失败', err, '无法获取镜像仓库详情');
       } finally {
         this.state.viewReady = true;
       }

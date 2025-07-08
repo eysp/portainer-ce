@@ -90,7 +90,7 @@ export function SettingsSidebar({ isPureAdmin, isAdmin, isTeamLeader }: Props) {
             />
             <SidebarItem
               to="portainer.groups"
-              label="Groups分组"
+              label="分组"
               isSubMenu
               data-cy="portainerSidebar-environmentGroups"
             />

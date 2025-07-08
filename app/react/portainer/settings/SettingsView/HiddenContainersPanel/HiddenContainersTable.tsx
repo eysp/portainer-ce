@@ -16,9 +16,9 @@ export function HiddenContainersTable({
 }) {
   return (
     <DetailsTable
-      headers={['Name', 'Value', '']}
+      headers={['名称', 'Value', '']}
       className="table-hover"
-      emptyMessage="No filter available."
+      emptyMessage="无可用筛选。"
       dataCy="hidden-containers-table"
     >
       {labels.map((label, index) => (
@@ -34,7 +34,7 @@ export function HiddenContainersTable({
               onClick={() => onDelete(label.name)}
               disabled={isLoading}
             >
-              Remove
+              删除
             </Button>,
           ]}
         >

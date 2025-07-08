@@ -16,14 +16,14 @@ export function EnvironmentInfo() {
 
   return (
     <Widget>
-      <WidgetTitle icon={Gauge} title="Environment info" />
+      <WidgetTitle icon={Gauge} title="环境信息" />
       <WidgetBody loading={environmentQuery.isLoading}>
-        {environmentQuery.isError && <div>Failed to load environment</div>}
+        {environmentQuery.isError && <div>加载环境失败</div>}
         {environmentData && (
           <table className="table">
             <tbody>
               <tr>
-                <td className="!border-none">Environment</td>
+                <td className="!border-none">环境</td>
                 <td
                   className="!border-none"
                   data-cy="dashboard-environmentName"
@@ -38,7 +38,7 @@ export function EnvironmentInfo() {
                 </td>
               </tr>
               <tr>
-                <td>Tags</td>
+                <td>标签</td>
                 <td data-cy="dashboard-environmentTags">{tagNames}</td>
               </tr>
             </tbody>
