@@ -58,7 +58,7 @@ export function useGenericRegistriesQuery<T = Registry[]>(
 
       return [
         {
-          Name: 'Docker Hub (anonymous)',
+          Name: 'Docker Hub (匿名)',
           Id: 0,
           Type: RegistryTypes.DOCKERHUB,
         } as Registry,
