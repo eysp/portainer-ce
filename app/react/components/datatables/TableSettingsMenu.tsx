@@ -38,7 +38,6 @@ export function TableSettingsMenu({
                   <div className="menuHeader">快速操作</div>
                   <div className="menuContent">{quickActions}</div>
                 </div>
-              </div>
               )}
             </div>
           </MenuList>
