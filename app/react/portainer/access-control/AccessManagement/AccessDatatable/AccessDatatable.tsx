@@ -50,7 +50,7 @@ export function AccessDatatable({
   return (
     <Datatable
       data-cy="access-datatable"
-      title="Access"
+      title="访问权限"
       titleIcon={UserX}
       dataset={dataset || []}
       isLoading={!dataset}
@@ -75,7 +75,7 @@ export function AccessDatatable({
               disabled={rolesState.count === 0}
               onClick={handleUpdate}
             >
-              Update
+              更新
             </Button>
           )}
         </>
@@ -85,20 +85,17 @@ export function AccessDatatable({
           {inheritFrom && (
             <div className="small text-muted">
               <div>
-                Access tagged as <code>inherited</code> are inherited from the
-                group access. They cannot be removed or modified at the
-                environment level but they can be overridden.
+                标记为 <code>inherited</code> 的访问权限是从组访问权限继承来的，不能在环境级别删除或修改，但可以被覆盖。
               </div>
               <div>
-                Access tagged as <code>override</code> are overriding the group
+                标记为 <code>override</code> 的访问权限是覆盖组访问权限的。
               </div>
             </div>
           )}
           {isBE && showWarning && isUpdateEnabled && (
             <TextTip>
               <div className="text-warning-9 th-highcontrast:text-warning-1 th-dark:text-warning-7">
-                Updating user access will require the affected user(s) to logout
-                and login for the changes to be taken into account.
+                更新用户访问权限后，相关用户需要退出并重新登录，变更才能生效。
               </div>
             </TextTip>
           )}

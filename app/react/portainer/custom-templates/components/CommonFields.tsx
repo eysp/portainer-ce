@@ -101,10 +101,10 @@ export function validation({
 } = {}): SchemaOf<Values> {
   return object({
     Title: string()
-      .required('Title is required.')
+      .required('标题是必填项。')
       .test(
         'is-unique',
-        'Title must be unique',
+        '标题必须唯一',
         (value) =>
           !value ||
           !templates.some(
@@ -114,9 +114,9 @@ export function validation({
       )
       .max(
         200,
-        'Custom template title must be less than or equal to 200 characters'
+        '自定义模板标题必须小于或等于200个字符'
       ),
-    Description: string().required('Description is required.'),
+    Description: string().required('描述是必填项。'),
     Note: string().default(''),
     Logo: string().default(''),
   });

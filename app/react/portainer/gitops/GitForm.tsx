@@ -55,7 +55,7 @@ export function GitForm({
   const [value, setValue] = useState(initialValue); // TODO: remove this state when form is not inside angularjs
 
   return (
-    <FormSection title="Git repository">
+    <FormSection title="Git 仓库">
       <AuthFieldset
         value={value}
         onChange={handleChange}
@@ -77,12 +77,12 @@ export function GitForm({
       <div className="form-group">
         <div className="col-sm-12">
           <SwitchField
-            label="Skip TLS Verification"
+            label="跳过 TLS 验证"
             data-cy="gitops-skip-tls-verification-switch"
             checked={value.TLSSkipVerify || false}
             onChange={(value) => handleChange({ TLSSkipVerify: value })}
             name="TLSSkipVerify"
-            tooltip="Enabling this will allow skipping TLS validation for any self-signed certificate."
+            tooltip="启用此选项将跳过任何自签名证书的 TLS 验证。"
             labelClass="col-sm-3 col-lg-2"
           />
         </div>
@@ -164,7 +164,7 @@ export function buildGitValidationSchema(
 ): SchemaOf<GitFormModel> {
   return object({
     RepositoryURL: string()
-      .test('valid URL', 'The URL must be a valid URL', (value) => {
+      .test('valid URL', 'URL 必须是一个有效的链接', (value) => {
         if (!value) {
           return true;
         }
@@ -176,14 +176,14 @@ export function buildGitValidationSchema(
           return false;
         }
       })
-      .required('Repository URL is required'),
+      .required('仓库 URL 为必填项'),
     RepositoryReferenceName: refFieldValidation(),
     ComposeFilePathInRepository: string().required(
       deployMethod === 'compose'
-        ? 'Compose file path is required'
-        : 'Manifest file path is required'
+        ? '必须填写 Compose 文件路径'
+        : '必须填写清单文件路径'
     ),
-    AdditionalFiles: array(string().required('Path is required')).default([]),
+    AdditionalFiles: array(string().required('路径为必填项')).default([]),
     RepositoryURLValid: boolean().default(false),
     AutoUpdate: autoUpdateValidation().nullable(),
     TLSSkipVerify: boolean().default(false),

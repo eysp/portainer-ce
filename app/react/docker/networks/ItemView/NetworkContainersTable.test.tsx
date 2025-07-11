@@ -48,7 +48,7 @@ test('Network container values should be visible and the link should be valid', 
     />
   );
 
-  await expect(findByText('Containers in network')).resolves.toBeVisible();
+  await expect(findByText('网络中的容器')).resolves.toBeVisible();
   await expect(findByText(networkContainers[0].Name)).resolves.toBeVisible();
   await expect(
     findByText(networkContainers[0].IPv4Address)
@@ -57,6 +57,6 @@ test('Network container values should be visible and the link should be valid', 
     findByText(networkContainers[0].MacAddress)
   ).resolves.toBeVisible();
   await expect(
-    findByText('Leave network', { exact: false })
+    findByText('断开网络', { exact: false })
   ).resolves.toBeVisible();
 });

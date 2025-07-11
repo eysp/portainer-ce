@@ -7,11 +7,11 @@ export async function confirmStackUpdate(
   defaultValue: boolean
 ) {
   const result = await openSwitchPrompt(
-    'Are you sure?',
-    'Re-pull image and redeploy',
+    '您确定吗？',
+    '重新拉取镜像并重新部署',
     {
       message,
-      confirmButton: buildConfirmButton('Update'),
+      confirmButton: buildConfirmButton('更新'),
       modalType: ModalType.Warn,
       defaultValue,
       'data-cy': 'confirm-stack-update',

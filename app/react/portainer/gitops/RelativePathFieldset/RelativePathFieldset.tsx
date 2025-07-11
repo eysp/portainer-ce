@@ -53,9 +53,9 @@ export function RelativePathFieldset({
           <SwitchField
             name="EnableRelativePaths"
             data-cy="gitops-enable-relative-paths-switch"
-            label="Enable relative path volumes"
+            label="启用相对路径卷"
             labelClass="col-sm-3 col-lg-2"
-            tooltip="Enabling this means you can specify relative path volumes in your Compose files, with Portainer pulling the content from your git repository to the environment the stack is deployed to."
+            tooltip="启用此选项后，您可以在 Compose 文件中指定相对路径卷，Portainer 会将内容从您的 git 仓库拉取到堆栈部署的环境中。"
             disabled={isEditing || relativePathForcedEnabled}
             checked={value.SupportRelativePath}
             onChange={(value) => {
@@ -80,7 +80,7 @@ export function RelativePathFieldset({
             <div className="form-group">
               <div className="col-sm-12">
                 <FormControl
-                  label="Local filesystem path"
+                  label="本地文件系统路径"
                   errors={errors?.FilesystemPath}
                   required
                 >
@@ -106,8 +106,7 @@ export function RelativePathFieldset({
           <div className="form-group">
             <div className="col-sm-12">
               <TextTip color="blue">
-                When enabled, corresponding Edge ID will be passed through as an
-                environment variable: PORTAINER_EDGE_ID.
+                启用后，相关的 Edge ID 将作为环境变量传递： PORTAINER_EDGE_ID.
               </TextTip>
             </div>
           </div>
@@ -117,9 +116,9 @@ export function RelativePathFieldset({
               <SwitchField
                 name="EnablePerDeviceConfigs"
                 data-cy="gitops-enable-per-device-configs-switch"
-                label="GitOps Edge configurations"
+                label="GitOps Edge 配置"
                 labelClass="col-sm-3 col-lg-2"
-                tooltip="By enabling the GitOps Edge Configurations feature, you gain the ability to define relative path volumes in your configuration files. Portainer will then automatically fetch the content from your git repository by matching the folder name or file name with the Portainer Edge ID, and apply it to the environment where the stack is deployed"
+                tooltip="启用 GitOps Edge 配置功能后，您可以在配置文件中定义相对路径卷。Portainer 会自动从您的 git 仓库中获取内容，通过匹配文件夹名或文件名与 Portainer Edge ID，将其应用到部署堆栈的环境中。"
                 disabled={isEditing}
                 checked={!!value.SupportPerDeviceConfigs}
                 onChange={(v) => {
@@ -144,7 +143,7 @@ export function RelativePathFieldset({
               <div className="form-group">
                 <div className="col-sm-12">
                   <FormControl
-                    label="Local filesystem path"
+                    label="本地文件系统路径"
                     errors={errors?.FilesystemPath}
                     required
                   >
@@ -165,9 +164,7 @@ export function RelativePathFieldset({
               <div className="form-group">
                 <div className="col-sm-12">
                   <TextTip color="blue">
-                    Specify the directory name where your configuration will be
-                    located. This will allow you to manage device configuration
-                    settings with a Git repo as your template.
+                    指定配置所在的目录名称。这样您就可以使用 Git 仓库作为模板管理设备配置设置。
                   </TextTip>
                 </div>
               </div>
@@ -175,7 +172,7 @@ export function RelativePathFieldset({
               <div className="form-group">
                 <div className="col-sm-12">
                   <FormControl
-                    label="Directory"
+                    label="目录"
                     errors={errors?.PerDeviceConfigsPath}
                     inputId="per_device_configs_path_input"
                     required
@@ -198,19 +195,17 @@ export function RelativePathFieldset({
               <div className="form-group">
                 <div className="col-sm-12">
                   <TextTip color="blue">
-                    Select which rule to use when matching configuration with
-                    Portainer Edge ID either on a per-device basis or group-wide
-                    with an Edge Group. Only configurations that match the
-                    selected rule will be accessible through their corresponding
-                    paths. Deployments that rely on accessing the configuration
-                    may experience errors.
+                    选择匹配配置与 Portainer Edge ID 的规则，
+                    是基于单设备还是基于 Edge 组。只有符合选中
+                    规则的配置路径可访问。依赖配置访问的部署可
+                    能会出现错误。
                   </TextTip>
                 </div>
               </div>
 
               <div className="form-group">
                 <div className="col-sm-12">
-                  <FormControl label="Device matching rule">
+                  <FormControl label="设备匹配规则">
                     <Select
                       value={value.PerDeviceConfigsMatchType}
                       data-cy="per-device-configs-match-type-select"
@@ -227,11 +222,11 @@ export function RelativePathFieldset({
                           value: '',
                         },
                         {
-                          label: 'Match file name with Portainer Edge ID',
+                          label: '文件名匹配 Portainer Edge ID',
                           value: 'file',
                         },
                         {
-                          label: 'Match folder name with Portainer Edge ID',
+                          label: '文件夹名匹配 Portainer Edge ID',
                           value: 'dir',
                         },
                       ]}
@@ -243,7 +238,7 @@ export function RelativePathFieldset({
 
               <div className="form-group">
                 <div className="col-sm-12">
-                  <FormControl label="Group matching rule">
+                  <FormControl label="组匹配规则">
                     <Select
                       value={value.PerDeviceConfigsGroupMatchType}
                       data-cy="per-device-configs-group-match-type-select"
@@ -259,11 +254,11 @@ export function RelativePathFieldset({
                           value: '',
                         },
                         {
-                          label: 'Match file name with Edge Group',
+                          label: '文件名匹配 Edge 组',
                           value: 'file',
                         },
                         {
-                          label: 'Match folder name with Edge Group',
+                          label: '文件夹名匹配 Edge 组',
                           value: 'dir',
                         },
                       ]}
@@ -277,19 +272,19 @@ export function RelativePathFieldset({
                 <div className="col-sm-12">
                   <TextTip color="blue">
                     <div>
-                      You can use it as an environment variable with an image:{' '}
-                      <code>myapp:$&#123;PORTAINER_EDGE_ID&#125;</code> or{' '}
-                      <code>myapp:$&#123;PORTAINER_EDGE_GROUP&#125;</code>. You
-                      can also use it with the relative path for volumes:{' '}
+                      可以将其用作带镜像的环境变量：{' '}
+                      <code>myapp:$&#123;PORTAINER_EDGE_ID&#125;</code> 或{' '}
+                      <code>myapp:$&#123;PORTAINER_EDGE_GROUP&#125;</code>
+                      也可以用作卷的相对路径：{' '}
                       <code>
                         ./config/$&#123;PORTAINER_EDGE_ID&#125;:/myapp/config
                       </code>{' '}
-                      or{' '}
+                      或{' '}
                       <code>
                         ./config/$&#123;PORTAINER_EDGE_GROUP&#125;:/myapp/groupconfig
                       </code>
-                      . More documentation can be found{' '}
-                      <a href={gitoptsEdgeConfigDocUrl}>here</a>.
+                      更多文档请见{' '}
+                      <a href={gitoptsEdgeConfigDocUrl}>这里</a>。
                     </div>
                   </TextTip>
                 </div>

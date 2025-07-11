@@ -14,43 +14,41 @@ export interface EdgeAsyncIntervalsValues {
 }
 
 export const options: Options = [
-  { label: 'Use default interval', value: -1, isDefault: true },
+  { label: '使用默认间隔', value: -1, isDefault: true },
   {
     value: 0,
-    label: 'disabled',
+    label: '禁用',
   },
   {
     value: 60,
-    label: '1 minute',
+    label: '1 分钟',
   },
   {
     value: 60 * 60,
-    label: '1 hour',
+    label: '1 小时',
   },
   {
     value: 24 * 60 * 60,
-    label: '1 day',
+    label: '1 天',
   },
   {
     value: 7 * 24 * 60 * 60,
-    label: '1 week',
+    label: '1 周',
   },
 ];
 
 const defaultFieldSettings = {
   ping: {
-    label: 'Ping interval',
-    tooltip:
-      'Interval used by this Edge agent to check in with the Portainer instance',
+    label: 'Ping 间隔',
+    tooltip: '该 Edge agent 与 Portainer 实例通信的时间间隔',
   },
   snapshot: {
-    label: 'Snapshot interval',
-    tooltip: 'Interval used by this Edge agent to snapshot the agent state',
+    label: '快照间隔',
+    tooltip: '该 Edge agent 用于快照其状态的时间间隔',
   },
   command: {
-    label: 'Command interval',
-    tooltip:
-      'Interval used by this Edge agent to fetch commands from the Portainer instance',
+    label: '命令间隔',
+    tooltip: '该 Edge agent 从 Portainer 实例获取命令的时间间隔',
   },
 };
 

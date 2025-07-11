@@ -29,7 +29,7 @@ export function CustomTemplatesVariablesDefinitionField({
 }: Props) {
   return (
     <InputList
-      label="Variables definition"
+      label="变量定义"
       onChange={onChange}
       value={value}
       renderItem={(item, onChange, index, error) => (
@@ -48,7 +48,7 @@ export function CustomTemplatesVariablesDefinitionField({
         description: '',
       })}
       errors={errors}
-      textTip="List should map the mustache variables in the template file, if default value is empty, the variable will be required."
+      textTip="该列表应映射模板文件中的 mustache 变量，如果默认值为空，则该变量为必填。"
       isAddButtonHidden={isVariablesNamesFromParent}
       data-cy="custom-templates-variables-field"
     />
@@ -75,7 +75,7 @@ function Item({
           value={item.name}
           name="name"
           onChange={handleChange}
-          placeholder="Name (e.g var_name)"
+          placeholder="名称(例如 var_name)"
           readOnly={isNameReadonly}
           data-cy={`custom-templates-item-name-field_${index}`}
         />
@@ -85,7 +85,7 @@ function Item({
         <Input
           value={item.label}
           onChange={handleChange}
-          placeholder="Label"
+          placeholder="标签"
           name="label"
           data-cy={`custom-templates-item-label-field_${index}`}
         />
@@ -96,7 +96,7 @@ function Item({
           name="description"
           value={item.description}
           onChange={handleChange}
-          placeholder="Description"
+          placeholder="描述"
           data-cy={`custom-templates-item-description-field_${index}`}
         />
         {errorObj?.description && <FormError>{errorObj.description}</FormError>}
@@ -105,7 +105,7 @@ function Item({
         <Input
           value={item.defaultValue}
           onChange={handleChange}
-          placeholder="Default Value"
+          placeholder="默认值"
           name="defaultValue"
           data-cy={`custom-templates-item-default-value-field_${index}`}
         />

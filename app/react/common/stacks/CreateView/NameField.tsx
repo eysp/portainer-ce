@@ -22,7 +22,7 @@ export function NameField({
   placeholder?: string;
 }) {
   return (
-    <FormControl inputId="name-input" label="Name" errors={errors} required>
+    <FormControl inputId="name-input" label="名称" errors={errors} required>
       <Input
         id="name-input"
         onChange={(e) => onChange(e.target.value)}
@@ -43,10 +43,10 @@ export function useNameValidation(
   return useMemo(
     () =>
       string()
-        .required('Name is required')
+        .required('名称为必填项')
         .test(
           'unique',
-          'Name should be unique',
+          '名称必须唯一',
           (value) =>
             stacksQuery.data?.every(
               (s) => s.EndpointId !== environmentId || s.Name !== value
@@ -54,7 +54,7 @@ export function useNameValidation(
         )
         .matches(
           new RegExp(STACK_NAME_VALIDATION_REGEX),
-          "This field must consist of lower case alphanumeric characters, '_' or '-' (e.g. 'my-name', or 'abc-123')."
+          "此字段必须由小写字母数字字符、'_' 或 '-' 组成（例如 'my-name' 或 'abc-123'）。"
         ),
     [environmentId, stacksQuery.data]
   );

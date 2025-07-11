@@ -21,11 +21,11 @@ type Props = {
 };
 
 const tableHeaders = [
-  'Container Name',
-  'IPv4 Address',
-  'IPv6 Address',
-  'MacAddress',
-  'Actions',
+  '容器名称',
+  'IPv4 地址',
+  'IPv6 地址',
+  'Mac地址',
+  '操作',
 ];
 
 export function NetworkContainersTable({
@@ -45,7 +45,7 @@ export function NetworkContainersTable({
 
   return (
     <TableContainer>
-      <TableTitle label="Containers in network" icon={Server} />
+      <TableTitle label="网络中的容器" icon={Server} />
       <DetailsTable
         headers={tableHeaders}
         dataCy="networkDetails-networkContainers"
@@ -84,7 +84,7 @@ export function NetworkContainersTable({
                         {
                           onSuccess: () =>
                             notifySuccess(
-                              'Container successfully disconnected',
+                              '容器已成功断开连接',
                               networkId
                             ),
                         }
@@ -93,7 +93,7 @@ export function NetworkContainersTable({
                   }}
                 >
                   <Icon icon={Trash2} class-name="icon-secondary icon-md" />
-                  Leave Network
+                  断开网络
                 </Button>
               </Authorized>
             </td>

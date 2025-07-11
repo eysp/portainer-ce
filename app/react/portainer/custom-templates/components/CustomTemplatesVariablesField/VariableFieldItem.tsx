@@ -32,7 +32,7 @@ export function VariableFieldItem({
         id={inputId}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={`Enter value or leave blank to use default of ${definition.defaultValue}`}
+        placeholder={`输入值，或留空以使用默认值 ${definition.defaultValue}`}
       />
     </FormControl>
   );

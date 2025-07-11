@@ -19,12 +19,12 @@ export function InfoPanel({
     <div className={clsx('form-group', className)}>
       <div className="col-sm-12">
         <p>
-          This {type} was deployed from the git repository <code>{url}</code>.
+          这个 {type} 是从 git 仓库 <code>{url}</code> 部署的。
         </p>
         <p>
-          Update
+          在 git 中更新
           <code>{[configFilePath, ...additionalFiles].join(', ')}</code>
-          in git and pull from here to update the {type}.
+          ，然后从这里拉取以更新该 {type}。
         </p>
       </div>
     </div>

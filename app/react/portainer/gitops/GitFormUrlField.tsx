@@ -69,11 +69,11 @@ export function GitFormUrlField({
   return (
     <div className="form-group">
       <span className="col-sm-12">
-        <TextTip color="blue">You can use the URL of a git repository.</TextTip>
+        <TextTip color="blue">您可以使用 Git 仓库的 URL。</TextTip>
       </span>
       <div className="col-sm-12">
         <FormControl
-          label="Repository URL"
+          label="仓库 URL"
           inputId="stack_repository_url"
           errors={errorMessage || errors}
           required
@@ -132,7 +132,7 @@ export function useUrlValidation(force: boolean) {
   );
 
   return (string() as StringSchema<string, GitFormModel>)
-    .url('Invalid Url')
-    .required('Repository URL is required')
-    .test('repo-exists', 'Repository does not exist', existenceTest);
+  .url('无效的 URL')
+  .required('仓库 URL 为必填项')
+  .test('repo-exists', '仓库不存在', existenceTest);
 }

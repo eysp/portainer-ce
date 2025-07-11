@@ -16,7 +16,7 @@ export function TemplateTypeSelector({
   value: StackType;
 }) {
   return (
-    <FormControl label="Type" required inputId="template-type">
+    <FormControl label="类型" required inputId="template-type">
       <Select
         name="type"
         data-cy="custom-template-template-type"
