@@ -83,7 +83,7 @@ function FileEnv({ onChooseFile }: { onChooseFile: (file: Values) => void }) {
       <FileUploadField
         inputId="env-file-upload"
         onChange={handleChange}
-        title=".env 文件加载变量e"
+        title=".env 文件加载变量"
         accept=".env"
         value={file}
         color="default"

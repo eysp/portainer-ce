@@ -26,7 +26,7 @@ const columnHelper = createColumnHelper<EdgeStackEnvironment>();
 export const columns = _.compact([
   columnHelper.accessor('Name', {
     id: 'name',
-    header: 'Name',
+    header: '名称',
     cell({ row: { original: env } }) {
       const { to, params } = getDashboardRoute(env);
       return (
@@ -42,7 +42,7 @@ export const columns = _.compact([
   }),
   columnHelper.accessor((env) => endpointStatusLabel(env.StackStatus.Status), {
     id: 'status',
-    header: 'Status',
+    header: '状态',
     cell({ row: { original: env } }) {
       return (
         <ul className="list-none space-y-2">
@@ -57,7 +57,7 @@ export const columns = _.compact([
   }),
   columnHelper.accessor((env) => _.last(env.StackStatus.Status)?.Time, {
     id: 'statusDate',
-    header: 'Time',
+    header: '时间',
     cell({ row: { original: env } }) {
       return (
         <ul className="list-none space-y-2">
@@ -74,14 +74,14 @@ export const columns = _.compact([
     ? [
         columnHelper.accessor((env) => endpointTargetVersionLabel(env), {
           id: 'targetVersion',
-          header: 'Target version',
+          header: '目标版本',
           cell: TargetVersionCell,
         }),
         columnHelper.accessor(
           (env) => endpointDeployedVersionLabel(env.StackStatus),
           {
             id: 'deployedVersion',
-            header: 'Deployed version',
+            header: '部署版本',
             cell: DeployedVersionCell,
           }
         ),
@@ -92,7 +92,7 @@ export const columns = _.compact([
       env.StackStatus.Status.find((s) => s.Type === StatusType.Error)?.Error,
     {
       id: 'error',
-      header: 'Error',
+      header: '错误',
       cell: ErrorCell,
     }
   ),
@@ -100,14 +100,14 @@ export const columns = _.compact([
     ? [
         columnHelper.display({
           id: 'actions',
-          header: 'Actions',
+          header: '操作s',
           cell({ row: { original: env } }) {
             return <EnvironmentActions environment={env} />;
           },
         }),
         columnHelper.display({
           id: 'actionStatus',
-          header: 'Action Status',
+          header: '操作状态',
           cell({ row: { original: env } }) {
             return <ActionStatus environmentId={env.Id} />;
           },
