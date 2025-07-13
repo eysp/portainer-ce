@@ -16,7 +16,7 @@ export interface Props {
 export function FileUploadForm({
   onChange,
   value,
-  title = 'Select a file',
+  title = '选择文件',
   required = false,
   description,
   'data-cy': dataCy,

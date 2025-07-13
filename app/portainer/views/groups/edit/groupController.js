@@ -14,11 +14,11 @@ angular.module('portainer.app').controller('GroupController', function GroupCont
     $scope.state.actionInProgress = true;
     GroupService.updateGroup(model)
       .then(function success() {
-        Notifications.success('Success', 'Group successfully updated');
+        Notifications.success('成功', '用户组更新成功');
         $state.go('portainer.groups', {}, { reload: true });
       })
       .catch(function error(err) {
-        Notifications.error('Failure', err, 'Unable to update group');
+        Notifications.error('失败', err, '无法更新用户组');
       })
       .finally(function final() {
         $scope.state.actionInProgress = false;
@@ -44,10 +44,10 @@ angular.module('portainer.app').controller('GroupController', function GroupCont
     try {
       await GroupService.addEndpoint($scope.group.Id, endpointId);
 
-      notifySuccess('Success', `Environment successfully added to group`);
+      notifySuccess('成功', `环境已成功添加到用户组`);
       return true;
     } catch (err) {
-      notifyError('Failure', err, `Unable to add environment to group`);
+      notifyError('失败', err, `无法将环境添加到用户组`);
     }
   }
 
@@ -55,10 +55,10 @@ angular.module('portainer.app').controller('GroupController', function GroupCont
     try {
       await GroupService.removeEndpoint($scope.group.Id, endpointId);
 
-      notifySuccess('Success', `Environment successfully removed to group`);
+      notifySuccess('成功', `环境已成功从用户组移除`);
       return true;
     } catch (err) {
-      notifyError('Failure', err, `Unable to remove environment to group`);
+      notifyError('失败', err, `无法将环境从用户组移除`);
     }
   }
 
@@ -75,7 +75,7 @@ angular.module('portainer.app').controller('GroupController', function GroupCont
         $scope.loaded = true;
       })
       .catch(function error(err) {
-        Notifications.error('Failure', err, 'Unable to load group details');
+        Notifications.error('失败', err, '无法加载用户组详情');
       });
   }
 

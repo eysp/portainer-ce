@@ -74,7 +74,7 @@ angular.module('portainer.app').controller('UserController', [
       }
       UserService.updateUser($scope.user.Id, { newPassword: $scope.formValues.newPassword })
         .then(function success() {
-          Notifications.success('Success', 'Password successfully updated');
+          Notifications.success('成功', '密码更新成功');
 
           if (isCurrentUser) {
             $state.go('portainer.logout');
@@ -83,18 +83,18 @@ angular.module('portainer.app').controller('UserController', [
           }
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to update user password');
+          Notifications.error('失败', err, '无法更新用户密码');
         });
     };
 
     function deleteUser() {
       UserService.deleteUser($scope.user.Id)
         .then(function success() {
-          Notifications.success('User successfully deleted', $scope.user.Username);
+          Notifications.success('用户删除成功', $scope.user.Username);
           $state.go('portainer.users');
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to remove user');
+          Notifications.error('失败', err, '无法删除用户');
         });
     }
 
@@ -126,7 +126,7 @@ angular.module('portainer.app').controller('UserController', [
           $scope.requiredPasswordLength = data.settings.RequiredPasswordLength;
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve user information');
+          Notifications.error('失败', err, '无法获取用户信息');
         });
     }
 

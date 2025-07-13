@@ -32,7 +32,7 @@ export function SettingsView() {
 
   return (
     <>
-      <PageHeader title="Settings" breadcrumbs="Settings" reload />
+      <PageHeader title="设置" breadcrumbs="设置" reload />
 
       <div className="mx-4 space-y-4">
         {settingsQuery.data && (

@@ -266,7 +266,7 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
         $scope.state.initialServerType = settings.LDAPSettings.ServerType;
       })
       .catch(function error(err) {
-        Notifications.error('Failure', err, 'Unable to retrieve application settings');
+        Notifications.error('失败', err, '无法获取应用程序设置');
       });
   }
 

@@ -13,12 +13,12 @@ angular.module('portainer.app').controller('GroupAccessController', [
       $scope.state.actionInProgress = true;
       GroupService.updateGroup($scope.group, $scope.group.AssociatedEndpoints)
         .then(() => {
-          Notifications.success('Success', 'Access successfully updated');
+          Notifications.success('成功', '访问权限更新成功');
           $state.reload();
         })
         .catch((err) => {
           $scope.state.actionInProgress = false;
-          Notifications.error('Failure', err, 'Unable to update accesses');
+          Notifications.error('失败', err, '无法更新访问权限');
         });
     };
 
@@ -31,7 +31,7 @@ angular.module('portainer.app').controller('GroupAccessController', [
           $scope.group = data;
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to load view');
+          Notifications.error('失败', err, '无法加载视图');
         });
     }
 

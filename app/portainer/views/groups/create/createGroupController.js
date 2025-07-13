@@ -13,11 +13,11 @@ angular.module('portainer.app').controller('CreateGroupController', function Cre
     $scope.state.actionInProgress = true;
     GroupService.createGroup(model, $scope.associatedEndpoints)
       .then(function success() {
-        Notifications.success('Success', 'Group successfully created');
+        Notifications.success('成功', '用户组创建成功');
         $state.go('portainer.groups', {}, { reload: true });
       })
       .catch(function error(err) {
-        Notifications.error('Failure', err, 'Unable to create group');
+        Notifications.error('失败', err, '无法创建用户组');
       })
       .finally(function final() {
         $scope.state.actionInProgress = false;

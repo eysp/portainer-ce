@@ -90,7 +90,7 @@ function EditTag({
     >
       {({ values, errors, setFieldValue }) => (
         <Form className="vertical-center">
-          <Tooltip message="'Tag can only contain alphanumeric (a-zA-Z0-9) and special _ . - characters. Tag must not start with . - characters.'" />
+          <Tooltip message="'标签只能包含字母数字 (a-zA-Z0-9) 和特殊字符 _ . -，且标签不能以 . 或 - 开头。'" />
 
           <Input
             className="input-sm"

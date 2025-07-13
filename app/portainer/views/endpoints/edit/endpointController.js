@@ -123,10 +123,10 @@ function EndpointController(
     try {
       $scope.state.actionInProgress = true;
       await EndpointService.disassociateEndpoint(endpoint.Id);
-      Notifications.success('Environment disassociated', $scope.endpoint.Name);
+      Notifications.success('环境已取消关联', $scope.endpoint.Name);
       $state.reload();
     } catch (err) {
-      Notifications.error('Failure', err, 'Unable to disassociate environment');
+      Notifications.error('失败', err, '无法取消关联环境');
     } finally {
       $scope.state.actionInProgress = false;
     }
@@ -176,8 +176,8 @@ function EndpointController(
 
     if (isEdgeEnvironment(endpoint.Type) && _.difference($scope.initialTagIds, endpoint.TagIds).length > 0) {
       let confirmed = await confirmDestructive({
-        title: 'Confirm action',
-        message: 'Removing tags from this environment will remove the corresponding edge stacks when dynamic grouping is being used',
+        title: '确认操作',
+        message: '从该环境中移除标签将在使用动态分组时移除相应的边缘堆栈',
         confirmButton: buildConfirmButton(),
       });
 
@@ -230,11 +230,11 @@ function EndpointController(
     $scope.state.actionInProgress = true;
     EndpointService.updateEndpoint(endpoint.Id, payload).then(
       function success() {
-        Notifications.success('Environment updated', $scope.endpoint.Name);
+        Notifications.success('环境已更新', $scope.endpoint.Name);
         $state.go($state.params.redirectTo || 'portainer.endpoints', {}, { reload: true });
       },
       function error(err) {
-        Notifications.error('Failure', err, 'Unable to update environment');
+        Notifications.error('失败', err, '无法更新环境');
         $scope.state.actionInProgress = false;
       },
       function update(evt) {
@@ -340,7 +340,7 @@ function EndpointController(
           $scope.state.showAMTInfo = settings && settings.openAMTConfiguration && settings.openAMTConfiguration.enabled;
         }
       } catch (err) {
-        Notifications.error('Failure', err, 'Unable to retrieve environment details');
+        Notifications.error('败', err, '无法获取环境详情');
       }
 
       if ($scope.state.showAMTInfo) {
@@ -353,7 +353,7 @@ function EndpointController(
             clearAMTManagementInfo(amtInfo.RawOutput);
           }
         } catch (err) {
-          clearAMTManagementInfo('Unable to retrieve AMT environment details');
+          clearAMTManagementInfo('无法获取 AMT 环境详情');
         }
       }
     });
