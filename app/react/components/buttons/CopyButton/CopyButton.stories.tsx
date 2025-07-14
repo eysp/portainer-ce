@@ -26,13 +26,13 @@ function Template({
 
 export const Primary: Story<PropsWithChildren<Props>> = Template.bind({});
 Primary.args = {
-  children: 'Copy to clipboard',
-  copyText: 'this will be copied to clipboard',
+  children: '复制到剪贴板',
+  copyText: '这将被复制到剪贴板',
 };
 
 export const NoCopyText: Story<PropsWithChildren<Props>> = Template.bind({});
 NoCopyText.args = {
-  children: 'Copy to clipboard without copied text',
-  copyText: 'clipboard override',
+  children: '复制到剪贴板但无显示文本',
+  copyText: '剪贴板覆盖内容',
   displayText: '',
 };
