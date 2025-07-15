@@ -17,8 +17,8 @@ export function ListView() {
   return (
     <>
       <PageHeader
-        title="Teams"
-        breadcrumbs={[{ label: 'Teams management' }]}
+        title="团队"
+        breadcrumbs={[{ label: '团队管理' }]}
         reload
       />
 

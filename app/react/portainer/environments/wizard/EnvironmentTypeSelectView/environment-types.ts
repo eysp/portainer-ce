@@ -26,10 +26,10 @@ export const existingEnvironmentTypes: EnvironmentOption[] = [
   {
     id: 'dockerStandalone',
     value: 'dockerStandalone',
-    label: 'Docker Standalone',
+    label: 'Docker 单机版',
     icon: Docker,
     iconType: 'logo',
-    description: 'Connect to Docker Standalone via URL/IP, API or Socket',
+    description: '通过 URL/IP、API 或 Socket 连接到 Docker 单机版',
   },
   {
     id: 'dockerSwarm',
@@ -37,7 +37,7 @@ export const existingEnvironmentTypes: EnvironmentOption[] = [
     label: 'Docker Swarm',
     icon: Docker,
     iconType: 'logo',
-    description: 'Connect to Docker Swarm via URL/IP, API or Socket',
+    description: '通过 URL/IP、API 或 Socket 连接到 Docker Swarm',
   },
   {
     id: 'podman',
@@ -45,7 +45,7 @@ export const existingEnvironmentTypes: EnvironmentOption[] = [
     label: 'Podman',
     icon: Podman,
     iconType: 'logo',
-    description: 'Connect to Podman via URL/IP or Socket',
+    description: '通过 URL/IP 或 Socket 连接到 Podman',
   },
   {
     id: 'kubernetes',
@@ -53,13 +53,13 @@ export const existingEnvironmentTypes: EnvironmentOption[] = [
     label: 'Kubernetes',
     icon: Kubernetes,
     iconType: 'logo',
-    description: 'Connect to a Kubernetes environment via URL/IP',
+    description: '通过 URL/IP 连接到 Kubernetes 环境',
   },
   {
     id: 'aci',
     value: 'aci',
     label: 'ACI',
-    description: 'Connect to ACI environment via API',
+    description: '通过 API 连接到 ACI 环境',
     iconType: 'logo',
     icon: Azure,
   },
@@ -69,9 +69,9 @@ export const newEnvironmentTypes: EnvironmentOption[] = [
   {
     id: 'kaas',
     value: 'kaas',
-    label: 'Provision KaaS Cluster',
+    label: '部署 KaaS 集群',
     description:
-      "Provision a Kubernetes cluster via a cloud provider's Kubernetes as a Service",
+      '通过云服务商的 Kubernetes 即服务部署 Kubernetes 集群',
     icon: KaaS,
     iconType: 'logo',
     feature: FeatureId.KAAS_PROVISIONING,
@@ -80,8 +80,8 @@ export const newEnvironmentTypes: EnvironmentOption[] = [
   {
     id: 'k8sInstall',
     value: 'k8sInstall',
-    label: 'Create Kubernetes cluster',
-    description: 'Create a Kubernetes cluster on existing infrastructure',
+    label: '创建 Kubernetes 集群',
+    description: '在现有基础设施上创建 Kubernetes 集群',
     icon: InstallK8s,
     iconType: 'logo',
     feature: FeatureId.K8SINSTALL,

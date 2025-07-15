@@ -16,7 +16,7 @@ import { DecoratedStack } from '../types';
 
 import { columnHelper } from './helper';
 
-const filterOptions = ['Active Stacks', 'Inactive Stacks'] as const;
+const filterOptions = ['活跃堆栈', '不活跃堆栈'] as const;
 
 type FilterOption = (typeof filterOptions)[number];
 
@@ -41,9 +41,9 @@ export const name = columnHelper.accessor('Name', {
 
     return (
       (stack.Status === StackStatus.Active &&
-        filterValue.includes('Active Stacks')) ||
+        filterValue.includes('活跃堆栈')) ||
       (stack.Status === StackStatus.Inactive &&
-        filterValue.includes('Inactive Stacks'))
+        filterValue.includes('不活跃堆栈'))
     );
   },
   meta: {
