@@ -21,7 +21,7 @@ function Item({ item, onChange, index }: ItemProps<Gpu>) {
   return (
     <div className="flex flex-grow gap-2">
       <InputGroup size="small" className="flex-grow">
-        <InputGroup.Addon>GPU Name</InputGroup.Addon>
+        <InputGroup.Addon>GPU 名称</InputGroup.Addon>
         <InputGroup.Input
           placeholder="my-gpu"
           value={item.name}
@@ -33,9 +33,9 @@ function Item({ item, onChange, index }: ItemProps<Gpu>) {
       </InputGroup>
 
       <InputGroup size="small" className="flex-grow">
-        <InputGroup.Addon>Index or UUID</InputGroup.Addon>
+        <InputGroup.Addon>Index 或 UUID</InputGroup.Addon>
         <InputGroup.Input
-          placeholder="0 or GPU-6e2c7185-c3d3-ae22-da43-bc5267b89061"
+          placeholder="0 或 GPU-6e2c7185-c3d3-ae22-da43-bc5267b89061"
           value={item.value}
           onChange={(e) => {
             onChange({ ...item, value: e.target.value });
@@ -51,11 +51,11 @@ export function GpusList({ value, onChange }: Props) {
   return (
     <InputList<Gpu>
       label="GPUs"
-      tooltip="You may optionally set up the GPUs that will be selectable against containers, although 'All GPUs' will always be available."
+      tooltip="您可以选择性地设置可供容器选择的 GPU，尽管“所有 GPU”始终可用。e."
       value={value}
       onChange={onChange}
       itemBuilder={() => ({ value: '', name: '' })}
-      addLabel="Add GPU"
+      addLabel="添加 GPU"
       item={Item}
       data-cy="docker-containers-gpus"
     />
