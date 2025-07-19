@@ -1,7 +1,7 @@
 <page-header title="'用户身份验证日志'" breadcrumbs="['用户身份验证日志']" reload="true"> </page-header>
 
 <div class="mx-4">
-  <div class="be-indicator-container limited-be">
+  
     <div class="limited-be-link vertical-center m-4"> </div>
     <!-- 15px matches the padding for col-sm-12 for the widget and table -->
     <div class="limited-be-content !p-0 !pt-[15px]">
@@ -22,7 +22,7 @@
                 Portainer 用户身份验证日志的最长保留时间为 7 天。
               </p>
               <div>
-                <button type="button" class="btn btn-sm btn-primary" limited-feature-dir="{{::$ctrl.limitedFeature}}" limited-feature-class="limited-be" limited-feature-disabled
+                <button type="button" class="btn btn-sm btn-primary"
                   ><pr-icon icon="'download'" class-name="'icon icon-sm'"></pr-icon>导出为 CSV
                 </button>
               </div>
@@ -48,5 +48,5 @@
         on-change-page="($ctrl.onChangePage)"
       ></authentication-logs-table>
     </div>
-  </div>
+
 </div>
