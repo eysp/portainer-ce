@@ -23,7 +23,7 @@ export function ScreenBannerFieldset() {
             checked={isEnabled}
             name="toggle_login_banner"
             onChange={(checked) => setIsEnabled(checked)}
-            featureId={FeatureId.CUSTOM_LOGIN_BANNER}
+            
           />
         </div>
 

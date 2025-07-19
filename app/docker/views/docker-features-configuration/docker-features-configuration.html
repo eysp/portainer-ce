@@ -24,7 +24,7 @@
                 label="'启用主机管理功能'"
                 tooltip="'启用主机管理功能：主机系统浏览与高级主机详情。'"
                 label-class="'col-sm-7 col-lg-4'"
-                disabled="!$ctrl.isAgent"
+
                 on-change="($ctrl.onChangeEnableHostManagementFeatures)"
               ></por-switch-field>
             </div>
@@ -38,7 +38,7 @@
                 tooltip="'启用后，普通用户将能够使用 Portainer 的卷管理功能。'"
                 label-class="'col-sm-7 col-lg-4'"
                 on-change="($ctrl.onChangeAllowVolumeBrowserForRegularUsers)"
-                disabled="!$ctrl.isAgent"
+
               ></por-switch-field>
             </div>
           </div>
