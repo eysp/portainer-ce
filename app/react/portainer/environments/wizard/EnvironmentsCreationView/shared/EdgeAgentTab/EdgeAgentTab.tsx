@@ -66,7 +66,7 @@ export function EdgeAgentTab({
                 onClick={handleReset}
                 data-cy="edge-agent-tab-add-environment-button"
               >
-                Add another environment
+                添加另一个环境
               </Button>
             </div>
           </div>
