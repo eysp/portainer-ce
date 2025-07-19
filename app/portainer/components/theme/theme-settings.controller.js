@@ -33,9 +33,9 @@ export default class ThemeSettingsController {
       await this.UserService.updateUserTheme(this.state.userId, theme);
       await queryClient.invalidateQueries(userQueryKeys.user(this.state.userId));
 
-      notifySuccess('Success', 'User theme settings successfully updated');
+      notifySuccess('成功', '用户主题设置已成功更新');
     } catch (err) {
-      notifyError('Failure', err, 'Unable to update user theme settings');
+      notifyError('失败', err, '无法更新用户主题设置');
     }
   }
 
@@ -54,7 +54,7 @@ export default class ThemeSettingsController {
 
         this.state.themeColor = user.ThemeSettings.color || this.state.themeColor;
       } catch (err) {
-        notifyError('Failure', err, 'Unable to get user details');
+        notifyError('失败', err, '无法获取用户详细信息');
       }
     });
   }

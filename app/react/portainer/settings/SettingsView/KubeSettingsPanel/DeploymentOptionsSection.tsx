@@ -17,18 +17,18 @@ export function DeploymentOptionsSection() {
 
   const limitedFeature = isLimitedToBE(FeatureId.ENFORCE_DEPLOYMENT_OPTIONS);
   return (
-    <FormSection title="Deployment options">
+    <FormSection title="部署选项">
       <div className="form-group">
         <div className="col-sm-12">
           <SwitchField
-            label="Enforce code-based deployment"
+            label="强制基于代码的部署"
             data-cy="kube-settings-enforce-code-based-deployment"
             checked={values.hideAddWithForm}
             name="toggle_hideAddWithForm"
             featureId={FeatureId.ENFORCE_DEPLOYMENT_OPTIONS}
             onChange={(value) => handleToggleAddWithForm(value)}
             labelClass="col-sm-3 col-lg-2"
-            tooltip="Hides the 'Add with form' buttons and prevents adding/editing of resources via forms"
+            tooltip="隐藏“使用表单添加”按钮，并阻止通过表单添加/编辑资源"
           />
         </div>
       </div>
@@ -36,7 +36,7 @@ export function DeploymentOptionsSection() {
         <div className="form-group flex flex-col gap-y-1">
           <div className="col-sm-12">
             <SwitchField
-              label="Allow web editor and custom template use"
+              label="允许使用网页编辑器和自定义模板"
               data-cy="kube-settings-allow-web-editor-and-custom-template-use"
               checked={!values.hideWebEditor}
               name="toggle_hideWebEditor"
@@ -48,7 +48,7 @@ export function DeploymentOptionsSection() {
           </div>
           <div className="col-sm-12">
             <SwitchField
-              label="Allow specifying of a manifest via a URL"
+              label="允许通过 URL 指定清单"
               data-cy="kube-settings-allow-specifying-of-a-manifest-via-a-url"
               checked={!values.hideFileUpload}
               name="toggle_hideFileUpload"
@@ -64,7 +64,7 @@ export function DeploymentOptionsSection() {
         <div className="form-group">
           <div className="col-sm-12">
             <SwitchField
-              label="Allow per environment override"
+              label="允许每个环境单独覆盖"
               data-cy="kube-settings-allow-per-environment-override"
               checked={values.perEnvOverride}
               onChange={(value) =>
@@ -72,7 +72,7 @@ export function DeploymentOptionsSection() {
               }
               name="toggle_perEnvOverride"
               labelClass="col-sm-3 col-lg-2"
-              tooltip="Allows overriding of deployment options in the Cluster setup screen of each environment"
+              tooltip="允许在每个环境的集群设置界面中覆盖部署选项"
             />
           </div>
         </div>
@@ -83,7 +83,7 @@ export function DeploymentOptionsSection() {
       <div className="form-group">
         <div className="col-sm-12">
           <SwitchField
-            label="Allow stacks functionality with Kubernetes environments"
+            label="允许在 Kubernetes 环境中使用 Stack 功能"
             data-cy="kube-settings-allow-stacks-functionality"
             checked={!values.hideStacksFunctionality}
             onChange={(value) =>
@@ -94,7 +94,7 @@ export function DeploymentOptionsSection() {
             }
             name="toggle_stacksFunctionality"
             labelClass="col-sm-3 col-lg-2"
-            tooltip="This allows you to group your applications/workloads into a single ‘stack’, and then view or delete an entire stack. If disabled, stacks functionality will not show in the UI."
+            tooltip="此选项允许您将应用程序/工作负载分组为一个 Stack，然后查看或删除整个 Stack。如果禁用，UI 中将不显示 Stack 功能。"
           />
         </div>
       </div>

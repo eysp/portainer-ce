@@ -23,7 +23,7 @@ export function FileUploadForm({
 }: PropsWithChildren<Props> & AutomationTestingProps) {
   return (
     <div className="file-upload-form">
-      <FormSectionTitle>Upload</FormSectionTitle>
+      <FormSectionTitle>上传</FormSectionTitle>
       <div className="form-group">
         <span className="col-sm-12 text-muted small">{description}</span>
       </div>

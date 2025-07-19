@@ -34,7 +34,7 @@ const options: BoxSelectorOption<CreationType>[] = _.compact([
     id: 'agent_endpoint',
     icon: Zap,
     iconType: 'badge',
-    label: 'Agent',
+    label: '代理 (Agent)',
     value: 'agent',
     description: '',
   },
@@ -42,7 +42,7 @@ const options: BoxSelectorOption<CreationType>[] = _.compact([
     id: 'edgeAgentStandard',
     icon: EdgeAgentStandardIcon,
     iconType: 'badge',
-    label: 'Edge Agent Standard',
+    label: '边缘代理标准版',
     description: '',
     value: 'edgeAgentStandard',
   },
@@ -50,7 +50,7 @@ const options: BoxSelectorOption<CreationType>[] = _.compact([
     id: 'edgeAgentAsync',
     icon: EdgeAgentAsyncIcon,
     iconType: 'badge',
-    label: 'Edge Agent Async',
+    label: '边缘代理异步版',
     description: '',
     value: 'edgeAgentAsync',
   },
@@ -58,9 +58,9 @@ const options: BoxSelectorOption<CreationType>[] = _.compact([
     id: 'kubeconfig_endpoint',
     icon: UploadCloud,
     iconType: 'badge',
-    label: 'Import',
+    label: '导入',
     value: 'kubeconfig',
-    description: 'Import an existing Kubernetes config',
+    description: '导入一个已有的 Kubernetes 配置',
     feature: FeatureId.K8S_CREATE_FROM_KUBECONFIG,
   },
 ]);
@@ -119,7 +119,7 @@ export function WizardKubernetes({ onCreate }: Props) {
           </div>
         );
       default:
-        throw new Error('Creation type not supported');
+        throw new Error('不支持的创建类型');
     }
   }
 }

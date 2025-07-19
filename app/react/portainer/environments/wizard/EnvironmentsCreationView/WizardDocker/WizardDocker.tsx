@@ -54,14 +54,14 @@ const options: BoxSelectorOption<
   {
     id: 'edgeAgentStandard',
     icon: <BadgeIcon icon={EdgeAgentStandardIcon} size="3xl" />,
-    label: 'Edge Agent Standard',
+    label: 'Edge 代理标准版',
     description: '',
     value: 'edgeAgentStandard',
   },
   isBE && {
     id: 'edgeAgentAsync',
     icon: <BadgeIcon icon={EdgeAgentAsyncIcon} size="3xl" />,
-    label: 'Edge Agent Async',
+    label: 'Edge 代理异步版',
     description: '',
     value: 'edgeAgentAsync',
   },
@@ -79,11 +79,9 @@ export function WizardDocker({ onCreate, isDockerStandalone }: Props) {
       {!isDockerStandalone && (
         <Alert color="warn" className="col-sm-12 mb-2">
           <div>
-            Only do this <b>once</b> for your environment, regardless of how
-            many nodes are in the cluster. You do <b>not</b> need to add each
-            node as an individual environment in Portainer. Adding just one node
-            (we recommend the manager node) will allow Portainer to manage the
-            entire cluster.
+            只需为您的环境执行 <b>一次</b>，无论集群中有多少节点。
+            您 <b>不需要</b> 在 Portainer 中为每个节点单独添加环境。
+            只需添加一个节点（我们推荐管理节点）即可让 Portainer 管理整个集群。
           </div>
         </Alert>
       )}

@@ -29,7 +29,7 @@ function Example({ title }: Args) {
         value={value}
         title={title}
         description={
-          <span>You can upload a Compose file from your computer.</span>
+          <span>您可以从您的电脑上传 Compose 文件。</span>
         }
         data-cy="file-upload-form"
       />

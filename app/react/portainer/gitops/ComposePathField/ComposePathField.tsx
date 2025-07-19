@@ -35,26 +35,24 @@ export function ComposePathField({
       <span className="col-sm-12">
         <TextTip color="blue" className="mb-2">
           <span>
-            Indicate the path to the {isCompose ? 'Compose' : 'Manifest'} file
-            from the root of your repository (requires a yaml, yml, json, or hcl
-            file extension).
+            指定仓库根目录下的 {isCompose ? 'Compose' : 'Manifest'} 
+            文件路径（要求文件扩展名为 yaml、yml、json 或 hcl）。
           </span>
           {isDockerStandalone && (
             <span className="ml-2">
-              To enable rebuilding of an image if already present on Docker
-              standalone environments, include
-              <code>pull_policy: build</code> in your compose file as per{' '}
+              若要在 Docker 独立环境中启用镜像重建（如果镜像已存在），请在您的 compose 文件中包含
+              <code>pull_policy: build</code> ，具体请参考{' '}
               <a href="https://docs.docker.com/compose/compose-file/#pull_policy">
-                Docker documentation
+                Docker 文档
               </a>
-              .
+             。
             </span>
           )}
         </TextTip>
       </span>
       <div className="col-sm-12">
         <FormControl
-          label={isCompose ? 'Compose path' : 'Manifest path'}
+          label={isCompose ? 'Compose 路径' : 'Manifest 路径'}
           inputId="stack_repository_path"
           required
           errors={errors}

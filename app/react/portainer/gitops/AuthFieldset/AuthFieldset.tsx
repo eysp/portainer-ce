@@ -44,7 +44,7 @@ export function AuthFieldset({
       <div className="form-group">
         <div className="col-sm-12">
           <SwitchField
-            label="Authentication"
+            label="认证"
             labelClass="col-sm-3 col-lg-2"
             name="authentication"
             checked={value.RepositoryAuthentication || false}
@@ -60,8 +60,7 @@ export function AuthFieldset({
         <>
           {isAuthExplanationVisible && (
             <TextTip color="orange" className="mb-2">
-              Enabling authentication will store the credentials and it is
-              advisable to use a git service account
+              启用认证将会存储凭据，建议使用 Git 服务账号
             </TextTip>
           )}
 
@@ -74,12 +73,12 @@ export function AuthFieldset({
 
           <div className="form-group">
             <div className="col-sm-12">
-              <FormControl label="Username" errors={errors?.RepositoryUsername}>
+              <FormControl label="用户名" errors={errors?.RepositoryUsername}>
                 <Input
                   value={username}
                   name="repository_username"
                   placeholder={
-                    value.RepositoryGitCredentialID ? '' : 'git username'
+                    value.RepositoryGitCredentialID ? '' : 'git 用户名'
                   }
                   onChange={(e) => setUsername(e.target.value)}
                   data-cy="component-gitUsernameInput"
@@ -91,8 +90,8 @@ export function AuthFieldset({
           <div className="form-group !mb-0">
             <div className="col-sm-12">
               <FormControl
-                label="Personal Access Token"
-                tooltip="Provide a personal access token or password"
+                label="个人访问令牌"
+                tooltip="请输入个人访问令牌或密码"
                 errors={errors?.RepositoryPassword}
               >
                 <Input
@@ -156,14 +155,14 @@ export function gitAuthValidation(
     RepositoryUsername: string()
       .when(['RepositoryAuthentication', 'RepositoryGitCredentialID'], {
         is: (auth: boolean, id: number) => auth && !id,
-        then: string().required('Username is required'),
+        then: string().required('用户名是必填项'),
       })
       .default(''),
     RepositoryPassword: string()
       .when(['RepositoryAuthentication', 'RepositoryGitCredentialID'], {
         is: (auth: boolean, id: number) =>
           auth && !id && !isAuthEdit && !isCreatedFromCustomTemplate,
-        then: string().required('Password is required'),
+        then: string().required('密码是必填项'),
       })
       .default(''),
     SaveCredential: boolean().default(false),
@@ -173,15 +172,15 @@ export function gitAuthValidation(
         is: (RepositoryAuthentication: boolean, SaveCredential: boolean) =>
           RepositoryAuthentication && SaveCredential && !isAuthEdit,
         then: string()
-          .required('Name is required')
+          .required('名称是必填项')
           .test(
             'is-unique',
-            'This name is already been used, please try another one',
+            '该名称已被使用，请尝试其他名称',
             (name) => !!name && !gitCredentials.find((x) => x.name === name)
           )
           .matches(
             /^[-_a-z0-9]+$/,
-            "This field must consist of lower case alphanumeric characters, '_' or '-' (e.g. 'my-name', or 'abc-123')."
+            "该字段只能包含小写字母、数字、'-' 或 '_'（例如 'my-name' 或 'abc-123'）。"
           ),
       }),
   });

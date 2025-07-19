@@ -79,8 +79,8 @@ function Item({
           readOnly={readOnly}
           value={item.hostPort}
           onChange={(e) => handleChange('hostPort', e.target.value)}
-          label="Host"
-          placeholder="e.g. 80"
+          label="主机"
+          placeholder="例如 80"
           className="w-1/2"
           id={`hostPort-${index}`}
         />
@@ -95,8 +95,8 @@ function Item({
           readOnly={readOnly}
           value={item.containerPort}
           onChange={(e) => handleChange('containerPort', e.target.value)}
-          label="Container"
-          placeholder="e.g. 80"
+          label="容器"
+          placeholder="例如 80"
           className="w-1/2"
           id={`containerPort-${index}`}
           data-cy={`containerPort-${index}`}

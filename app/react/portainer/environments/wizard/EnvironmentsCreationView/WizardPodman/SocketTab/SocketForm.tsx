@@ -58,12 +58,12 @@ export function SocketForm({ onCreate, containerEngine }: Props) {
               <LoadingButton
                 className="wizard-connect-button vertical-center"
                 data-cy="docker-socket-connect-button"
-                loadingText="Connecting environment..."
+                loadingText="正在连接环境..."
                 isLoading={mutation.isLoading}
                 disabled={!dirty || !isValid}
                 icon={Plug2}
               >
-                Connect
+                连接
               </LoadingButton>
             </div>
           </div>
@@ -82,7 +82,7 @@ export function SocketForm({ onCreate, containerEngine }: Props) {
       },
       {
         onSuccess(environment) {
-          notifySuccess('Environment created', environment.Name);
+          notifySuccess('环境已创建', environment.Name);
           clearForm();
           onCreate(environment);
         },
@@ -102,21 +102,21 @@ function OverrideSocketFieldset() {
             checked={values.overridePath}
             data-cy="create-docker-env-socket-override-switch"
             onChange={(checked) => setFieldValue('overridePath', checked)}
-            label="Override default socket path"
+            label="覆盖默认 socket 路径"
             labelClass="col-sm-3 col-lg-2"
           />
         </div>
       </div>
       {values.overridePath && (
         <FormControl
-          label="Socket Path"
-          tooltip="Path to the Podman socket. Remember to bind-mount the socket, see the important notice above for more information."
+          label="Socket 路径"
+          tooltip="Podman socket 的路径。请记得绑定挂载该 socket，详见上方的重要提示。"
           errors={errors.socketPath}
         >
           <Field
             name="socketPath"
             as={Input}
-            placeholder="e.g. /run/podman/podman.sock (on Linux)"
+            placeholder="例如 /run/podman/podman.sock (在 Linux)"
           />
         </FormControl>
       )}

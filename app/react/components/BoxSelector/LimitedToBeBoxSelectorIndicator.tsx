@@ -22,12 +22,12 @@ export function LimitedToBeBoxSelectorIndicator({
           rel="noreferrer"
         >
           <Icon icon={Briefcase} className="!mr-1" />
-          <span>Business Feature</span>
+          <span>企业版功能</span>
         </a>
         {showTooltip && (
           <Tooltip
             size="sm"
-            message="Select this option to preview this business feature."
+            message="选择此选项以预览此企业版功能。"
           />
         )}
       </div>

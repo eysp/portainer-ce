@@ -123,8 +123,8 @@ function Item({
 
 function itemValidation(): SchemaOf<VariableDefinition> {
   return object().shape({
-    name: string().required('Name is required'),
-    label: string().required('Label is required'),
+    name: string().required('名称是必填项'),
+    label: string().required('标签是必填项'),
     defaultValue: string().default(''),
     description: string().default(''),
   });

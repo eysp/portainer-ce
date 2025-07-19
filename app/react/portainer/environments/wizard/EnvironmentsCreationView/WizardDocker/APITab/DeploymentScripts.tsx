@@ -47,14 +47,13 @@ function DeployCode({ code }: DeployCodeProps) {
   return (
     <>
       <TextTip color="blue" className="mb-1">
-        When using the socket, ensure that you have started the Portainer
-        container with the following Docker flag:
+        当使用 Socket 时，请确保你在启动 Portainer 容器时添加了以下 Docker 参数：
       </TextTip>
 
       <Code>{code}</Code>
       <div className="mt-2">
         <CopyButton copyText={code} data-cy="copy-deployment-command">
-          Copy command
+          复制命令
         </CopyButton>
       </div>
     </>
