@@ -88,8 +88,8 @@ export function BackupS3Form() {
                   as={Input}
                   placeholder="0 2 * * *"
                   data-cy="settings-backupCronRuleInput"
-                  className={clsx({ 'limited-be': limitedToBE })}
-                  disabled={limitedToBE}
+                  
+                  
                 />
               </FormControl>
             )}
@@ -105,8 +105,8 @@ export function BackupS3Form() {
                 type="text"
                 as={Input}
                 data-cy="settings-accessKeyIdInput"
-                className={clsx({ 'limited-be': limitedToBE })}
-                disabled={limitedToBE}
+                
+                
               />
             </FormControl>
 
@@ -121,8 +121,8 @@ export function BackupS3Form() {
                 type="password"
                 as={Input}
                 data-cy="settings-secretAccessKeyInput"
-                className={clsx({ 'limited-be': limitedToBE })}
-                disabled={limitedToBE}
+                
+                
               />
             </FormControl>
 
@@ -134,8 +134,8 @@ export function BackupS3Form() {
                 as={Input}
                 placeholder="为空时默认为 us-east-1 区域"
                 data-cy="settings-backupRegionInput"
-                className={clsx({ 'limited-be': limitedToBE })}
-                disabled={limitedToBE}
+                
+                
               />
             </FormControl>
 
@@ -150,8 +150,8 @@ export function BackupS3Form() {
                 type="text"
                 as={Input}
                 data-cy="settings-backupBucketNameInput"
-                className={clsx({ 'limited-be': limitedToBE })}
-                disabled={limitedToBE}
+                
+                
               />
             </FormControl>
 
@@ -168,15 +168,15 @@ export function BackupS3Form() {
                 as={Input}
                 placeholder="leave empty for AWS S3"
                 data-cy="settings-backupS3CompatibleHostInput"
-                className={clsx({ 'limited-be': limitedToBE })}
-                disabled={limitedToBE}
+                
+                
               />
             </FormControl>
 
             <SecurityFieldset
               switchDataCy="settings-passwordProtectToggleS3"
               inputDataCy="settings-backups3pw"
-              disabled={limitedToBE}
+              
             />
 
             <div className="form-group">
@@ -185,8 +185,8 @@ export function BackupS3Form() {
                   type="button"
                   loadingText="Exporting..."
                   isLoading={isSubmitting}
-                  className={clsx('!ml-0', { 'limited-be': limitedToBE })}
-                  disabled={!isValid || limitedToBE}
+                  
+                  
                   data-cy="settings-exportBackupS3Button"
                   icon={Upload}
                   onClick={() => {
@@ -200,10 +200,10 @@ export function BackupS3Form() {
             <div className="form-group">
               <div className="col-sm-12">
                 <LoadingButton
-                  loadingText="Saving settings..."
+                  loadingText="设置保存中..."
                   isLoading={isSubmitting}
-                  className={clsx('!ml-0', { 'limited-be': limitedToBE })}
-                  disabled={!isValid || limitedToBE}
+                  
+                  
                   data-cy="settings-saveBackupSettingsButton"
                 >
                   保存备份设置
