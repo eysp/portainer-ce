@@ -24,7 +24,7 @@ export function DateRangePicker({
   error?: FormikErrors<Value>;
 }) {
   return (
-    <FormControl label="Date range" errors={error}>
+    <FormControl label="日期范围" errors={error}>
       <div className="w-1/2">
         <WojtekmajRangePicker
           format="y-MM-dd"

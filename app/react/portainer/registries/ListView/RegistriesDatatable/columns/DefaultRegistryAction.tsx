@@ -38,7 +38,7 @@ export function DefaultRegistryAction() {
           >
             对所有用户隐藏
           </Button>
-          <BEFeatureIndicator featureId={FeatureId.HIDE_DOCKER_HUB_ANONYMOUS} />
+
           {isLimited && (
             <Tooltip
               message="这将在任何注册表下拉提示中隐藏该选项，但不会阻止用户通过 YAML 直接从 Docker Hub 匿名部署。

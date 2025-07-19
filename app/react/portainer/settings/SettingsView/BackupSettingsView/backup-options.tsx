@@ -22,6 +22,6 @@ export const options = [
     label: '存储到 S3',
     description: '定义定时任务计划',
     value: BackupFormType.S3,
-    feature: FeatureId.S3_BACKUP_SETTING,
+    
   },
 ];

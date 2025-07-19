@@ -29,7 +29,7 @@ export const options = [
     description: 'Active Directory 认证',
     iconType: 'logo',
     value: 4,
-    feature: FeatureId.HIDE_INTERNAL_AUTH,
+    
   },
   {
     id: 'auth_oauth',
