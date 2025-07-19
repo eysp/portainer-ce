@@ -123,7 +123,7 @@ export function BaseForm({
                     onChange={(enableWebhook) =>
                       setFieldValue('enableWebhook', enableWebhook)
                     }
-                    featureId={FeatureId.CONTAINER_WEBHOOK}
+                    
                     labelClass="col-sm-3 col-lg-2"
                   />
                 </div>
