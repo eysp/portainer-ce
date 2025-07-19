@@ -74,7 +74,7 @@ export const newEnvironmentTypes: EnvironmentOption[] = [
       '通过云服务商的 Kubernetes 即服务部署 Kubernetes 集群',
     icon: KaaS,
     iconType: 'logo',
-
+    feature: FeatureId.KAAS_PROVISIONING,
     disabledWhenLimited: true,
   },
   {
@@ -84,7 +84,7 @@ export const newEnvironmentTypes: EnvironmentOption[] = [
     description: '在现有基础设施上创建 Kubernetes 集群',
     icon: InstallK8s,
     iconType: 'logo',
-
+    feature: FeatureId.K8SINSTALL,
     disabledWhenLimited: true,
   },
 ];
