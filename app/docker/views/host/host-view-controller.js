@@ -44,7 +44,7 @@ angular.module('portainer.docker').controller('HostViewController', [
           }
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法获取引擎详细信息');
+          Notifications.error('Failure', err, 'Unable to retrieve engine details');
         });
     }
 

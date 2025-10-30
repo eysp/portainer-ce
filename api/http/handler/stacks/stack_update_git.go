@@ -19,14 +19,15 @@ import (
 )
 
 type stackGitUpdatePayload struct {
-	AutoUpdate               *portainer.AutoUpdateSettings
-	Env                      []portainer.Pair
-	Prune                    bool
-	RepositoryReferenceName  string
-	RepositoryAuthentication bool
-	RepositoryUsername       string
-	RepositoryPassword       string
-	TLSSkipVerify            bool
+	AutoUpdate                  *portainer.AutoUpdateSettings
+	Env                         []portainer.Pair
+	Prune                       bool
+	RepositoryReferenceName     string
+	RepositoryAuthentication    bool
+	RepositoryUsername          string
+	RepositoryPassword          string
+	RepositoryAuthorizationType gittypes.GitCredentialAuthType
+	TLSSkipVerify               bool
 }
 
 func (payload *stackGitUpdatePayload) Validate(r *http.Request) error {
@@ -70,6 +71,14 @@ func (handler *Handler) stackUpdateGit(w http.ResponseWriter, r *http.Request) *
 	} else if stack.GitConfig == nil {
 		msg := "No Git config in the found stack"
 		return httperror.InternalServerError(msg, errors.New(msg))
+	}
+
+	if payload.AutoUpdate != nil && payload.AutoUpdate.Webhook != "" &&
+		(stack.AutoUpdate == nil ||
+			(stack.AutoUpdate != nil && stack.AutoUpdate.Webhook != payload.AutoUpdate.Webhook)) {
+		if isUnique, err := handler.checkUniqueWebhookID(payload.AutoUpdate.Webhook); !isUnique || err != nil {
+			return httperror.Conflict("Webhook ID already exists", errors.New("webhook ID already exists"))
+		}
 	}
 
 	// TODO: this is a work-around for stacks created with Portainer version >= 1.17.1
@@ -151,11 +160,19 @@ func (handler *Handler) stackUpdateGit(w http.ResponseWriter, r *http.Request) *
 		}
 
 		stack.GitConfig.Authentication = &gittypes.GitAuthentication{
-			Username: payload.RepositoryUsername,
-			Password: password,
+			Username:          payload.RepositoryUsername,
+			Password:          password,
+			AuthorizationType: payload.RepositoryAuthorizationType,
 		}
 
-		if _, err := handler.GitService.LatestCommitID(stack.GitConfig.URL, stack.GitConfig.ReferenceName, stack.GitConfig.Authentication.Username, stack.GitConfig.Authentication.Password, stack.GitConfig.TLSSkipVerify); err != nil {
+		if _, err := handler.GitService.LatestCommitID(
+			stack.GitConfig.URL,
+			stack.GitConfig.ReferenceName,
+			stack.GitConfig.Authentication.Username,
+			stack.GitConfig.Authentication.Password,
+			stack.GitConfig.Authentication.AuthorizationType,
+			stack.GitConfig.TLSSkipVerify,
+		); err != nil {
 			return httperror.InternalServerError("Unable to fetch git repository", err)
 		}
 	} else {

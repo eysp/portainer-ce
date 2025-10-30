@@ -36,11 +36,14 @@ func deprecatedNamespaceParser(w http.ResponseWriter, r *http.Request) (string, 
 
 	// Restore the original body for further use
 	bodyBytes, err := io.ReadAll(r.Body)
+	if err != nil {
+		return "", httperror.InternalServerError("Unable to read request body", err)
+	}
+
 	r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
 	payload := models.K8sNamespaceDetails{}
-	err = request.DecodeAndValidateJSONPayload(r, &payload)
-	if err != nil {
+	if err := request.DecodeAndValidateJSONPayload(r, &payload); err != nil {
 		return "", httperror.BadRequest("Invalid request. Unable to parse namespace payload", err)
 	}
 	namespaceName := payload.Name

@@ -56,7 +56,7 @@ export function EnvironmentsDatatable({
 
   return (
     <Datatable
-      title="环境"
+      title="Environments"
       titleIcon={HardDrive}
       dataset={environmentsWithGroups}
       columns={columns}
@@ -79,7 +79,7 @@ export function EnvironmentsDatatable({
             className="!m-0"
             data-cy="remove-environments-button"
           >
-            删除
+            Remove
           </Button>
 
           {isBE && (
@@ -88,7 +88,7 @@ export function EnvironmentsDatatable({
               data-cy="environments-auto-onboarding-button"
               to="portainer.endpoints.edgeAutoCreateScript"
             >
-              自动注册
+              Auto onboarding
             </AddButton>
           )}
 
@@ -97,7 +97,7 @@ export function EnvironmentsDatatable({
             params={{ referrer: 'environments' }}
             data-cy="environments-add-environments-button"
           >
-            添加环境
+            Add environment
           </AddButton>
         </div>
       )}

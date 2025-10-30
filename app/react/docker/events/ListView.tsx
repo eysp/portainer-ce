@@ -16,7 +16,7 @@ export function ListView() {
 
   return (
     <>
-      <PageHeader title="事件列表" breadcrumbs="事件" reload />
+      <PageHeader title="Event list" breadcrumbs="Events" reload />
 
       <EventsDatatable dataset={eventsQuery.data} />
     </>

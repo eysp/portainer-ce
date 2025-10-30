@@ -59,12 +59,13 @@ export function HelmRepositoryDatatable() {
 
   return (
     <Datatable
+      id="helm-repositories"
       getRowId={(row) => String(row.Id)}
       dataset={helmRepos}
       description={<HelmDatatableDescription isAdmin={isAdminUser} />}
       settingsManager={tableState}
       columns={columns}
-      title="Helm 仓库"
+      title="Helm repositories"
       titleIcon={helm}
       titleId="helm-repositories"
       renderTableActions={(selectedRows) => (
@@ -80,20 +81,25 @@ export function HelmRepositoryDatatable() {
 function HelmDatatableDescription({ isAdmin }: { isAdmin: boolean }) {
   return (
     <TextTip color="blue" className="mb-3">
-  在此添加 Helm 仓库只会使其在您自己的用户账户的 Portainer UI 中可用。Helm 图表将从这些仓库
-  （以及
-  {isAdmin ? (
-    <Link
-      to="portainer.settings"
-      params={{ '#': 'kubernetes-settings' }}
-      data-cy="k8s-globally-select-repo-link"
-    >
-      <span>全局设置的 Helm 仓库</span>
-    </Link>
-  ) : (
-    <span>全局设置的 Helm 仓库</span>
-  )}
-  ）中拉取，并显示在“从代码创建”界面的 Helm 图表列表中。
-</TextTip>
+      <p>
+        Adding a Helm repository here makes it available only in your Portainer
+        user account. The Helm charts from these repositories (along with the
+        globally set Helm repository) are shown in the &apos;Create from
+        Code&apos; screen.
+      </p>
+      {isAdmin && (
+        <>
+          To manage your helm repositories globally, navigate to{' '}
+          <Link
+            to="portainer.settings"
+            params={{ '#': 'kubernetes-settings' }}
+            data-cy="helm-settings-link"
+          >
+            Settings &gt; General
+          </Link>
+          .
+        </>
+      )}
+    </TextTip>
   );
 }

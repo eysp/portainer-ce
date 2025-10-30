@@ -5,7 +5,7 @@ import { columnHelper } from '@/react/portainer/registries/ListView/RegistriesDa
 import { NameCell } from '@/react/portainer/registries/ListView/RegistriesDatatable/columns/name';
 
 export const name = columnHelper.accessor('Name', {
-  header: '名称',
+  header: 'Name',
   cell: Cell,
 });
 

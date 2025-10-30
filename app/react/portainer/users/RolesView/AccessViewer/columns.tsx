@@ -12,15 +12,15 @@ const helper = createColumnHelper<AccessViewerPolicyModel>();
 
 export const columns = [
   helper.accessor('EndpointName', {
-    header: '环境',
+    header: 'Environment',
     id: 'Environment',
   }),
   helper.accessor('RoleName', {
-    header: '角色',
+    header: 'Role',
     id: 'Role',
   }),
   helper.display({
-    header: '访问来源',
+    header: 'Access Origin',
     cell: AccessCell,
   }),
 ];
@@ -33,12 +33,12 @@ function AccessCell({
   if (item.RoleId === 0) {
     return (
       <>
-        用户可访问所有环境
+        User access all environments
         <Link
           to="portainer.settings.edgeCompute"
           data-cy={`manage-access-button-${item.RoleName}`}
         >
-          <Icon icon={Users} /> 管理访问
+          <Icon icon={Users} /> Manage access
         </Link>
       </>
     );
@@ -46,7 +46,7 @@ function AccessCell({
 
   return (
     <>
-      {prefix(item.TeamName)} 的访问权限定义在 {item.AccessLocation}{' '}
+      {prefix(item.TeamName)} access defined on {item.AccessLocation}{' '}
       {!!item.GroupName && <code>{item.GroupName}</code>}{' '}
       {manageAccess(item, isPureAdmin)}
     </>
@@ -59,7 +59,7 @@ function prefix(teamName: string | undefined) {
   }
   return (
     <>
-      团队 <code>{teamName}</code>
+      Team <code>{teamName}</code>
     </>
   );
 }
@@ -75,7 +75,7 @@ function manageAccess(item: AccessViewerPolicyModel, isPureAdmin: boolean) {
       params={{ id: item.GroupId }}
       data-cy={`manage-access-button-${item.RoleName}`}
     >
-      <Icon icon={Users} /> 管理访问
+      <Icon icon={Users} /> Manage access
     </Link>
   ) : (
     <Link
@@ -83,7 +83,7 @@ function manageAccess(item: AccessViewerPolicyModel, isPureAdmin: boolean) {
       params={{ id: item.EndpointId }}
       data-cy={`manage-access-button-${item.RoleName}`}
     >
-      <Icon icon={Users} /> 管理访问
+      <Icon icon={Users} /> Manage access
     </Link>
   );
 }

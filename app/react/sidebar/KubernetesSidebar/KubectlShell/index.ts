@@ -1,1 +1,0 @@
-export { KubectlShellButton } from './KubectlShellButton';

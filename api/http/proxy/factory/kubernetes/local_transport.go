@@ -14,8 +14,8 @@ type localTransport struct {
 }
 
 // NewLocalTransport returns a new transport that can be used to send requests to the local Kubernetes API
-func NewLocalTransport(tokenManager *tokenManager, endpoint *portainer.Endpoint, k8sClientFactory *cli.ClientFactory, dataStore dataservices.DataStore) (*localTransport, error) {
-	config, err := crypto.CreateTLSConfigurationFromBytes(nil, nil, nil, true, true)
+func NewLocalTransport(tokenManager *tokenManager, endpoint *portainer.Endpoint, k8sClientFactory *cli.ClientFactory, dataStore dataservices.DataStore, jwtService portainer.JWTService) (*localTransport, error) {
+	config, err := crypto.CreateTLSConfigurationFromBytes(true, nil, nil, nil, true, true)
 	if err != nil {
 		return nil, err
 	}
@@ -29,6 +29,7 @@ func NewLocalTransport(tokenManager *tokenManager, endpoint *portainer.Endpoint,
 			endpoint,
 			k8sClientFactory,
 			dataStore,
+			jwtService,
 		),
 	}
 

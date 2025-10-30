@@ -272,7 +272,7 @@ func (handler *Handler) endpointUpdate(w http.ResponseWriter, r *http.Request) *
 		}
 	}
 
-	if err := handler.SnapshotService.FillSnapshotData(endpoint); err != nil {
+	if err := handler.SnapshotService.FillSnapshotData(endpoint, true); err != nil {
 		return httperror.InternalServerError("Unable to add snapshot data", err)
 	}
 

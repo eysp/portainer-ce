@@ -1,5 +1,4 @@
 import { PorImageRegistryModel } from 'Docker/models/porImageRegistry';
-import { fullURIIntoRepoAndTag } from '@/react/docker/images/utils';
 
 angular.module('portainer.docker').controller('ImportImageController', [
   '$scope',
@@ -34,12 +33,11 @@ angular.module('portainer.docker').controller('ImportImageController', [
     async function tagImage(id) {
       const registryModel = $scope.formValues.RegistryModel;
       if (registryModel.Image) {
-        const image = ImageHelper.createImageConfigForContainer(registryModel);
-        const { repo, tag } = fullURIIntoRepoAndTag(image.fromImage);
+        const { repo, tag } = ImageHelper.createImageConfigForContainer(registryModel);
         try {
           await ImageService.tagImage(id, repo, tag);
         } catch (err) {
-          Notifications.error('失败', err, '无法标记镜像');
+          Notifications.error('Failure', err, 'Unable to tag image');
         }
       }
     }
@@ -57,7 +55,7 @@ angular.module('portainer.docker').controller('ImportImageController', [
       try {
         const { data } = await ImageService.uploadImage(file);
         if (data.error) {
-          Notifications.error('失败', data.error, '无法上传镜像');
+          Notifications.error('Failure', data.error, 'Unable to upload image');
         } else if (data.stream) {
           // docker has /n at the end of the stream, podman doesn't
           var regex = /Loaded.*?: (.*?)(?:\n|$)/g;
@@ -66,12 +64,12 @@ angular.module('portainer.docker').controller('ImportImageController', [
             await tagImage(imageIds[1]);
             $state.go('docker.images.image', { id: imageIds[1] }, { reload: true });
           }
-          Notifications.success('成功', '镜像成功上传');
+          Notifications.success('Success', 'Images successfully uploaded');
         } else {
-          Notifications.success('成功', '上传的tar文件包含多个镜像，因此提供的标签已被忽略。');
+          Notifications.success('Success', 'The uploaded tar file contained multiple images. The provided tag therefore has been ignored.');
         }
       } catch (err) {
-        Notifications.error('失败', err, '无法上传镜像');
+        Notifications.error('Failure', err, 'Unable to upload image');
       } finally {
         $scope.state.actionInProgress = false;
       }

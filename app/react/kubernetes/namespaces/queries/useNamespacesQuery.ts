@@ -8,20 +8,32 @@ import { PortainerNamespace } from '../types';
 
 import { queryKeys } from './queryKeys';
 
-export function useNamespacesQuery(
+export function useNamespacesQuery<T = PortainerNamespace[]>(
   environmentId: EnvironmentId,
-  options?: { autoRefreshRate?: number; withResourceQuota?: boolean }
+  options?: {
+    autoRefreshRate?: number;
+    withResourceQuota?: boolean;
+    withUnhealthyEvents?: boolean;
+    select?: (namespaces: PortainerNamespace[]) => T;
+  }
 ) {
   return useQuery(
     queryKeys.list(environmentId, {
       withResourceQuota: !!options?.withResourceQuota,
+      withUnhealthyEvents: !!options?.withUnhealthyEvents,
     }),
-    async () => getNamespaces(environmentId, options?.withResourceQuota),
+    async () =>
+      getNamespaces(
+        environmentId,
+        options?.withResourceQuota,
+        options?.withUnhealthyEvents
+      ),
     {
       ...withGlobalError('Unable to get namespaces.'),
       refetchInterval() {
         return options?.autoRefreshRate ?? false;
       },
+      select: options?.select,
     }
   );
 }
@@ -29,9 +41,13 @@ export function useNamespacesQuery(
 // getNamespaces is used to retrieve namespaces using the Portainer backend with caching
 export async function getNamespaces(
   environmentId: EnvironmentId,
-  withResourceQuota?: boolean
+  withResourceQuota?: boolean,
+  withUnhealthyEvents?: boolean
 ) {
-  const params = withResourceQuota ? { withResourceQuota } : {};
+  const params = {
+    withResourceQuota,
+    withUnhealthyEvents,
+  };
   try {
     const { data: namespaces } = await axios.get<PortainerNamespace[]>(
       `kubernetes/${environmentId}/namespaces`,

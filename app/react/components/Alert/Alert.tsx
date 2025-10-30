@@ -6,36 +6,36 @@ import { Icon } from '@@/Icon';
 
 type AlertType = 'success' | 'error' | 'info' | 'warn';
 
-const alertSettings: Record<
+export const alertSettings: Record<
   AlertType,
   { container: string; header: string; body: string; icon: ReactNode }
 > = {
   success: {
     container:
-      'border-green-4 bg-green-2 th-dark:bg-green-3 th-dark:border-green-5',
-    header: 'text-green-8',
-    body: 'text-green-7',
+      'border-green-4 bg-green-2 th-dark:bg-green-10 th-dark:border-green-8 th-highcontrast:bg-green-10 th-highcontrast:border-green-8',
+    header: 'text-green-8 th-dark:text-white th-highcontrast:text-white',
+    body: 'text-green-7 th-dark:text-white th-highcontrast:text-white',
     icon: CheckCircle,
   },
   error: {
     container:
-      'border-error-4 bg-error-2 th-dark:bg-error-3 th-dark:border-error-5',
-    header: 'text-error-8',
-    body: 'text-error-7',
+      'border-error-4 bg-error-2 th-dark:bg-error-10 th-dark:border-error-8 th-highcontrast:bg-error-10 th-highcontrast:border-error-8',
+    header: 'text-error-8 th-dark:text-white th-highcontrast:text-white',
+    body: 'text-error-7 th-dark:text-white th-highcontrast:text-white',
     icon: XCircle,
   },
   info: {
     container:
-      'border-blue-4 bg-blue-2 th-dark:bg-blue-3 th-dark:border-blue-5',
-    header: 'text-blue-8',
-    body: 'text-blue-7',
+      'border-blue-4 bg-blue-2 th-dark:bg-blue-10 th-dark:border-blue-8 th-highcontrast:bg-blue-10 th-highcontrast:border-blue-8',
+    header: 'text-blue-8 th-dark:text-white th-highcontrast:text-white',
+    body: 'text-blue-7 th-dark:text-white th-highcontrast:text-white',
     icon: AlertCircle,
   },
   warn: {
     container:
-      'border-warning-4 bg-warning-2 th-dark:bg-warning-3 th-dark:border-warning-5',
-    header: 'text-warning-8',
-    body: 'text-warning-7',
+      'border-warning-4 bg-warning-2 th-dark:bg-warning-10 th-dark:border-warning-8 th-highcontrast:bg-warning-10 th-highcontrast:border-warning-8',
+    header: 'text-warning-8 th-dark:text-white th-highcontrast:text-white',
+    body: 'text-warning-7 th-dark:text-white th-highcontrast:text-white',
     icon: AlertTriangle,
   },
 };
@@ -76,12 +76,18 @@ export function Alert({
   );
 }
 
-function AlertContainer({
+export function AlertContainer({
   className,
   children,
 }: PropsWithChildren<{ className?: string }>) {
   return (
-    <div className={clsx('rounded-md border-2 border-solid', 'p-3', className)}>
+    <div
+      className={clsx(
+        'border rounded-lg border-solid [&_ul]:ps-8',
+        'p-3',
+        className
+      )}
+    >
       {children}
     </div>
   );

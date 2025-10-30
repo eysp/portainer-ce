@@ -11,7 +11,7 @@ import { TableSettings } from '../types';
 import { columnHelper } from './helper';
 
 export const name = columnHelper.accessor((row) => row.Names[0], {
-  header: '名称',
+  header: 'Name',
   id: 'name',
   cell: NameCell,
 });

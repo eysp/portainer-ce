@@ -35,8 +35,8 @@ type (
 	}
 
 	K8sServiceIngress struct {
-		IP   string `json:"IP"`
-		Host string `json:"Host"`
+		IP       string `json:"IP"`
+		Hostname string `json:"Hostname"`
 	}
 
 	// K8sServiceDeleteRequests is a mapping of namespace names to a slice of

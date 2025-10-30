@@ -14,7 +14,7 @@ export function validation(): SchemaOf<Values> {
       .when('loginBannerEnabled', {
         is: true,
         then: (schema) =>
-          schema.required('启用时登录横幅为必填项'),
+          schema.required('Login banner is required when enabled'),
       }),
     logoEnabled: boolean().default(false),
     logo: string()
@@ -23,17 +23,17 @@ export function validation(): SchemaOf<Values> {
         is: true,
         then: (schema) =>
           schema
-            .required('启用时 Logo URL 为必填项')
+            .required('Logo url is required when enabled')
             .test('valid-url', 'Must be a valid URL', (value) =>
               isValidUrl(value)
             ),
       }),
-    snapshotInterval: string().required('快照间隔为必填项'),
+    snapshotInterval: string().required('Snapshot interval is required'),
     templatesUrl: string()
       .default('')
       .test(
         'valid-url',
-        '必须是有效的 URL',
+        'Must be a valid URL',
         (value) => !value || isValidUrl(value)
       ),
   });

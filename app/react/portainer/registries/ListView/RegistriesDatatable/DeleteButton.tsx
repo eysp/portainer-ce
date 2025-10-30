@@ -26,7 +26,7 @@ export function DeleteButton({ selectedItems }: { selectedItems: Registry[] }) {
       selectedItems.map((item) => item.Id),
       {
         onSuccess() {
-          notifySuccess('成功', '镜像仓库已删除');
+          notifySuccess('Success', 'Registries removed');
         },
       }
     );
@@ -34,7 +34,7 @@ export function DeleteButton({ selectedItems }: { selectedItems: Registry[] }) {
 }
 
 function getMessage(selectedCount: number) {
-  const regAttrMsg = selectedCount > 1 ? '些' : '个';
-  const registriesMsg = pluralize(selectedCount, '镜像仓库', '镜像仓库');
-  return `这${regAttrMsg}${registriesMsg}可能正被一个或多个环境中的应用程序使用。移除这${regAttrMsg}${registriesMsg}可能会导致使用这些镜像仓库的应用程序出现服务中断。你确定要移除所选的${registriesMsg}吗？`;
+  const regAttrMsg = selectedCount > 1 ? 'hese' : 'his';
+  const registriesMsg = pluralize(selectedCount, 'registry', 'registries');
+  return `T${regAttrMsg} ${registriesMsg} might be used by applications inside one or more environments. Removing the ${registriesMsg} could lead to a service interruption for the applications using t${regAttrMsg} ${registriesMsg}. Do you want to remove the selected ${registriesMsg}?`;
 }

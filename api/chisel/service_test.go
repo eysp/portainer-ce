@@ -9,9 +9,14 @@ import (
 
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/datastore"
+	"github.com/portainer/portainer/pkg/fips"
 
 	"github.com/stretchr/testify/require"
 )
+
+func init() {
+	fips.InitFIPS(false)
+}
 
 func TestPingAgentPanic(t *testing.T) {
 	endpoint := &portainer.Endpoint{

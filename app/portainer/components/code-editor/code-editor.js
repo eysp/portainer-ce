@@ -5,7 +5,7 @@ angular.module('portainer.app').component('codeEditor', {
   controller,
   bindings: {
     identifier: '@',
-    placeholder: '@',
+    textTip: '@',
     yml: '<',
     dockerFile: '<',
     shell: '<',
@@ -13,5 +13,6 @@ angular.module('portainer.app').component('codeEditor', {
     onChange: '<',
     value: '<',
     height: '@',
+    schema: '<',
   },
 });

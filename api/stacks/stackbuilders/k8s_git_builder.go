@@ -99,5 +99,5 @@ func (b *KubernetesStackGitBuilder) SetAutoUpdate(payload *StackPayload) GitMeth
 }
 
 func (b *KubernetesStackGitBuilder) GetResponse() string {
-	return b.GitMethodStackBuilder.deploymentConfiger.GetResponse()
+	return b.deploymentConfiger.GetResponse()
 }

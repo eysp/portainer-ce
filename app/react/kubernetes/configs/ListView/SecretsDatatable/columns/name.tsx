@@ -43,7 +43,7 @@ function Cell({ row }: CellContext<SecretRowData, string>) {
 
   return (
     <Authorized authorizations="K8sSecretsR" childrenUnauthorized={name}>
-      <div className="flex w-fit gap-x-2">
+      <div className="flex gap-2">
         <Link
           to="kubernetes.secrets.secret"
           params={{
@@ -56,9 +56,11 @@ function Cell({ row }: CellContext<SecretRowData, string>) {
         >
           {name}
         </Link>
-        {isSystemSecret && <SystemBadge />}
-        {!isSystemToken && !hasConfigurationOwner && <ExternalBadge />}
-        {!row.original.inUse && !isSystemSecret && <UnusedBadge />}
+        <div className="ml-auto flex gap-2">
+          {isSystemSecret && <SystemBadge />}
+          {!isSystemToken && !hasConfigurationOwner && <ExternalBadge />}
+          {!row.original.inUse && !isSystemSecret && <UnusedBadge />}
+        </div>
       </div>
     </Authorized>
   );

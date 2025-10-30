@@ -2,7 +2,6 @@ import _ from 'lodash-es';
 import { PorImageRegistryModel } from 'Docker/models/porImageRegistry';
 import { confirmImageExport } from '@/react/docker/images/common/ConfirmExportModal';
 import { confirmDelete } from '@@/modals/confirm';
-import { fullURIIntoRepoAndTag } from '@/react/docker/images/utils';
 
 angular.module('portainer.docker').controller('ImageController', [
   '$async',
@@ -71,16 +70,15 @@ angular.module('portainer.docker').controller('ImageController', [
     $scope.tagImage = function () {
       const registryModel = $scope.formValues.RegistryModel;
 
-      const image = ImageHelper.createImageConfigForContainer(registryModel);
-      const { repo, tag } = fullURIIntoRepoAndTag(image.fromImage);
+      const { repo, tag } = ImageHelper.createImageConfigForContainer(registryModel);
 
       ImageService.tagImage($transition$.params().id, repo, tag)
         .then(function success() {
-          Notifications.success('成功', '镜像成功标记');
+          Notifications.success('Success', 'Image successfully tagged');
           $state.go('docker.images.image', { id: $transition$.params().id }, { reload: true });
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法标记镜像');
+          Notifications.error('Failure', err, 'Unable to tag image');
         });
     };
 
@@ -94,10 +92,10 @@ angular.module('portainer.docker').controller('ImageController', [
           if (registryModel) {
             $('#uploadResourceHint').show();
             await ImageService.pushImage(registryModel);
-            Notifications.success('镜像成功推送', repository);
+            Notifications.success('Image successfully pushed', repository);
           }
         } catch (err) {
-          Notifications.error('失败', err, '无法将镜像推送到仓库');
+          Notifications.error('Failure', err, 'Unable to push image to repository');
         } finally {
           $('#uploadResourceHint').hide();
         }
@@ -112,10 +110,10 @@ angular.module('portainer.docker').controller('ImageController', [
           if (registryModel) {
             $('#downloadResourceHint').show();
             await ImageService.pullImage(registryModel);
-            Notifications.success('镜像成功拉取', repository);
+            Notifications.success('Image successfully pulled', repository);
           }
         } catch (err) {
-          Notifications.error('失败', err, '无法从仓库拉取镜像');
+          Notifications.error('Failure', err, 'Unable to pull image from repository');
         } finally {
           $('#downloadResourceHint').hide();
         }
@@ -124,39 +122,39 @@ angular.module('portainer.docker').controller('ImageController', [
 
     $scope.removeTag = function (repository) {
       return $async(async () => {
-        if (!(await confirmDelete('你确定要删除这个标签吗？'))) {
+        if (!(await confirmDelete('Are you sure you want to delete this tag?'))) {
           return;
         }
 
         ImageService.deleteImage(repository, false)
           .then(function success() {
             if ($scope.image.RepoTags.length === 1) {
-              Notifications.success('镜像成功删除', repository);
+              Notifications.success('Image successfully deleted', repository);
               $state.go('docker.images', {}, { reload: true });
             } else {
-              Notifications.success('标签成功删除', repository);
+              Notifications.success('Tag successfully deleted', repository);
               $state.go('docker.images.image', { id: $transition$.params().id }, { reload: true });
             }
           })
           .catch(function error(err) {
-            Notifications.error('失败', err, '无法删除镜像');
+            Notifications.error('Failure', err, 'Unable to remove image');
           });
       });
     };
 
     $scope.removeImage = function (id) {
       return $async(async () => {
-        if (!(await confirmDelete('删除此镜像将同时删除所有关联的标签。你确定要删除这个镜像吗？'))) {
+        if (!(await confirmDelete('Deleting this image will also delete all associated tags. Are you sure you want to delete this image?'))) {
           return;
         }
 
         ImageService.deleteImage(id, false)
           .then(function success() {
-            Notifications.success('镜像成功删除', id);
+            Notifications.success('Image successfully deleted', id);
             $state.go('docker.images', {}, { reload: true });
           })
           .catch(function error(err) {
-            Notifications.error('失败', err, '无法删除镜像');
+            Notifications.error('Failure', err, 'Unable to remove image');
           });
       });
     };
@@ -168,10 +166,10 @@ angular.module('portainer.docker').controller('ImageController', [
         .then(function success(data) {
           var downloadData = new Blob([data], { type: 'application/x-tar' });
           FileSaver.saveAs(downloadData, 'images.tar');
-          Notifications.success('成功', '镜像成功下载');
+          Notifications.success('Success', 'Image successfully downloaded');
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法下载镜像');
+          Notifications.error('Failure', err, 'Unable to download image');
         })
         .finally(function final() {
           $scope.state.exportInProgress = false;
@@ -180,7 +178,7 @@ angular.module('portainer.docker').controller('ImageController', [
 
     $scope.exportImage = function (image) {
       if (image.RepoTags.length === 0 || _.includes(image.RepoTags, '<none>')) {
-        Notifications.warning('', '无法下载未打标签的镜像');
+        Notifications.warning('', 'Cannot download a untagged image');
         return;
       }
 
@@ -198,7 +196,7 @@ angular.module('portainer.docker').controller('ImageController', [
       try {
         $scope.registries = await RegistryService.loadRegistriesForDropdown(endpoint.Id);
       } catch (err) {
-        this.Notifications.error('失败', err, '无法加载镜像仓库');
+        this.Notifications.error('Failure', err, 'Unable to load registries');
       }
 
       $q.all({
@@ -211,7 +209,7 @@ angular.module('portainer.docker').controller('ImageController', [
           $scope.image.Env = _.sortBy($scope.image.Env, _.toLower);
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索镜像详情');
+          Notifications.error('Failure', err, 'Unable to retrieve image details');
           $state.go('docker.images');
         });
     }

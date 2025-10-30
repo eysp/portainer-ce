@@ -29,7 +29,7 @@ export function RbacRolesDatatable({
 
   return (
     <Datatable
-      title="角色"
+      title="Roles"
       titleIcon={FileCode}
       dataset={dataset || []}
       columns={columns}
@@ -46,7 +46,7 @@ function getColumns() {
 
   return _.compact([
     columnHelper.accessor('Name', {
-      header: '名称',
+      header: 'Name',
     }),
     columnHelper.accessor('Description', {
       header: 'Description',

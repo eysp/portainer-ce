@@ -1,52 +1,32 @@
-import { createColumnHelper } from '@tanstack/react-table';
-import { truncate } from 'lodash';
 import { useMemo, useState } from 'react';
 
 import { useTags } from '@/portainer/tags/queries';
 import { useGroups } from '@/react/portainer/environments/environment-groups/queries';
 import { EnvironmentsQueryParams } from '@/react/portainer/environments/environment.service';
 import { useEnvironmentList } from '@/react/portainer/environments/queries';
-import { Environment } from '@/react/portainer/environments/types';
+import { EdgeTypes, Environment } from '@/react/portainer/environments/types';
 import { AutomationTestingProps } from '@/types';
+import {
+  columns,
+  DecoratedEnvironment,
+} from '@/react/edge/components/associationTableColumnHelper';
 
 import { Datatable, TableRow } from '@@/datatables';
 import { useTableStateWithoutStorage } from '@@/datatables/useTableState';
-
-type DecoratedEnvironment = Environment & {
-  Tags: string[];
-  Group: string;
-};
-
-const columHelper = createColumnHelper<DecoratedEnvironment>();
-
-const columns = [
-  columHelper.accessor('Name', {
-    header: 'Name',
-    id: 'Name',
-    cell: ({ getValue }) => truncate(getValue(), { length: 64 }),
-  }),
-  columHelper.accessor('Group', {
-    header: 'Group',
-    id: 'Group',
-    cell: ({ getValue }) => truncate(getValue(), { length: 64 }),
-  }),
-  columHelper.accessor((row) => row.Tags.join(','), {
-    header: 'Tags',
-    id: 'tags',
-    enableSorting: false,
-    cell: ({ getValue }) => truncate(getValue(), { length: 64 }),
-  }),
-];
 
 export function EdgeGroupAssociationTable({
   title,
   query,
   onClickRow = () => {},
+  addEnvironments = [],
+  excludeEnvironments = [],
   'data-cy': dataCy,
 }: {
   title: string;
   query: EnvironmentsQueryParams;
   onClickRow?: (env: Environment) => void;
+  addEnvironments?: Environment[];
+  excludeEnvironments?: Environment[];
 } & AutomationTestingProps) {
   const tableState = useTableStateWithoutStorage('Name');
   const [page, setPage] = useState(0);
@@ -56,8 +36,11 @@ export function EdgeGroupAssociationTable({
     search: tableState.search,
     sort: tableState.sortBy?.id as 'Group' | 'Name',
     order: tableState.sortBy?.desc ? 'desc' : 'asc',
+    types: EdgeTypes,
+    excludeIds: excludeEnvironments?.map((env) => env.Id),
     ...query,
   });
+
   const groupsQuery = useGroups({
     enabled: environmentsQuery.environments.length > 0,
   });
@@ -65,7 +48,7 @@ export function EdgeGroupAssociationTable({
     enabled: environmentsQuery.environments.length > 0,
   });
 
-  const environments: Array<DecoratedEnvironment> = useMemo(
+  const memoizedEnvironments: Array<DecoratedEnvironment> = useMemo(
     () =>
       environmentsQuery.environments.map((env) => ({
         ...env,
@@ -79,12 +62,29 @@ export function EdgeGroupAssociationTable({
 
   const { totalCount } = environmentsQuery;
 
+  const memoizedAddEnvironments: Array<DecoratedEnvironment> = useMemo(
+    () =>
+      addEnvironments.map((env) => ({
+        ...env,
+        Group: groupsQuery.data?.find((g) => g.Id === env.GroupId)?.Name || '',
+        Tags: env.TagIds.map(
+          (tagId) => tagsQuery.data?.find((t) => t.ID === tagId)?.Name || ''
+        ),
+      })),
+    [addEnvironments, groupsQuery.data, tagsQuery.data]
+  );
+
+  // Filter out environments that are already in the table, this is to prevent duplicates, which can happen when an environment is associated and then disassociated
+  const filteredAddEnvironments = memoizedAddEnvironments.filter(
+    (env) => !memoizedEnvironments.some((e) => e.Id === env.Id)
+  );
+
   return (
     <Datatable<DecoratedEnvironment>
       title={title}
       columns={columns}
       settingsManager={tableState}
-      dataset={environments}
+      dataset={memoizedEnvironments.concat(filteredAddEnvironments)}
       isServerSidePagination
       page={page}
       onPageChange={setPage}

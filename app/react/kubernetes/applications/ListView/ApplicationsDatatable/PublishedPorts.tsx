@@ -14,7 +14,7 @@ export function PublishedPorts({ item }: { item: Application }) {
   }
 
   return (
-    <div className="published-url-container pl-10 flex">
+    <div className="published-url-container flex">
       <div className="text-muted mr-12">Published URL(s)</div>
       <div className="flex flex-col">
         {urlsWithTypes.map(({ url, type }) => (

@@ -54,8 +54,8 @@ func ecdsaGenerateKey(c elliptic.Curve, rand io.Reader) (*ecdsa.PrivateKey, erro
 	}
 
 	priv := new(ecdsa.PrivateKey)
-	priv.PublicKey.Curve = c
+	priv.Curve = c
 	priv.D = k
-	priv.PublicKey.X, priv.PublicKey.Y = c.ScalarBaseMult(k.Bytes())
+	priv.X, priv.Y = c.ScalarBaseMult(k.Bytes())
 	return priv, nil
 }

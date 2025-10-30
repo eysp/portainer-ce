@@ -16,29 +16,29 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
     actionInProgress: false,
     availableUserSessionTimeoutOptions: [
       {
-        key: '30 分钟',
+        key: '30 minutes',
         value: '30m',
       },
       {
-        key: '1 小时',
+        key: '1 hour',
         value: '1h',
       },
       {
-        key: '4 小时',
+        key: '4 hours',
         value: '4h',
       },
       {
-        key: '8 小时',
+        key: '8 hours',
         value: '8h',
       },
       {
-        key: '24 小时',
+        key: '24 hours',
         value: '24h',
       },
-      { key: '1 周', value: `${24 * 7}h` },
-      { key: '1 个月', value: `${24 * 30}h` },
-      { key: '6 个月', value: `${24 * 30 * 6}h` },
-      { key: '1 年', value: `${24 * 30 * 12}h` },
+      { key: '1 week', value: `${24 * 7}h` },
+      { key: '1 month', value: `${24 * 30}h` },
+      { key: '6 months', value: `${24 * 30 * 6}h` },
+      { key: '1 year', value: `${24 * 30 * 12}h` },
     ],
   };
 
@@ -266,7 +266,7 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
         $scope.state.initialServerType = settings.LDAPSettings.ServerType;
       })
       .catch(function error(err) {
-        Notifications.error('失败', err, '无法获取应用程序设置');
+        Notifications.error('Failure', err, 'Unable to retrieve application settings');
       });
   }
 

@@ -16,6 +16,7 @@ import { DefaultDatatableSettings } from '@/react/kubernetes/datatables/DefaultD
 import { SystemResourceDescription } from '@/react/kubernetes/datatables/SystemResourceDescription';
 import { useNamespacesQuery } from '@/react/kubernetes/namespaces/queries/useNamespacesQuery';
 import { CreateFromManifestButton } from '@/react/kubernetes/components/CreateFromManifestButton';
+import { createStore } from '@/react/kubernetes/datatables/default-kube-datatable-store';
 
 import { Datatable, Table, TableSettingsMenu } from '@@/datatables';
 import { useTableState } from '@@/datatables/useTableState';
@@ -25,7 +26,6 @@ import { useMutationDeleteServices, useClusterServices } from '../../service';
 import { Service } from '../../types';
 
 import { columns } from './columns';
-import { createStore } from './datatable-store';
 import { ServiceRowData } from './types';
 
 const storageKey = 'k8sServicesDatatable';
@@ -34,52 +34,53 @@ const settingsStore = createStore(storageKey);
 export function ServicesDatatable() {
   const tableState = useTableState(settingsStore, storageKey);
   const environmentId = useEnvironmentId();
-  const { data: namespacesArray, ...namespacesQuery } =
-    useNamespacesQuery(environmentId);
+  const { data: namespaces, ...namespacesQuery } = useNamespacesQuery(
+    environmentId,
+    {
+      select: (namespacesArray) =>
+        namespacesArray?.reduce<Record<string, PortainerNamespace>>(
+          (acc, namespace) => {
+            acc[namespace.Name] = namespace;
+            return acc;
+          },
+          {}
+        ),
+    }
+  );
+  const { authorized: canWrite } = useAuthorizations(['K8sServiceW']);
+  const { authorized: canAccessSystemResources } = useAuthorizations(
+    'K8sAccessSystemNamespaces'
+  );
   const { data: services, ...servicesQuery } = useClusterServices(
     environmentId,
     {
       autoRefreshRate: tableState.autoRefreshRate * 1000,
       withApplications: true,
+      select: (services) =>
+        services?.filter(
+          (service) =>
+            (canAccessSystemResources && tableState.showSystemResources) ||
+            !namespaces?.[service.Namespace]?.IsSystem
+        ),
     }
   );
 
-  const namespaces: Record<string, PortainerNamespace> = {};
-  if (Array.isArray(namespacesArray)) {
-    for (let i = 0; i < namespacesArray.length; i++) {
-      const namespace = namespacesArray[i];
-      namespaces[namespace.Name] = namespace;
-    }
-  }
-
-  const { authorized: canWrite } = useAuthorizations(['K8sServiceW']);
-  const readOnly = !canWrite;
-  const { authorized: canAccessSystemResources } = useAuthorizations(
-    'K8sAccessSystemNamespaces'
-  );
-  const filteredServices = services?.filter(
-    (service) =>
-      (canAccessSystemResources && tableState.showSystemResources) ||
-      !namespaces?.[service.Namespace]?.IsSystem
-  );
-
-  const servicesWithIsSystem = useServicesRowData(
-    filteredServices || [],
-    namespaces
-  );
+  const servicesWithIsSystem = useServicesRowData(services || [], namespaces);
 
   return (
     <Datatable
       dataset={servicesWithIsSystem || []}
       columns={columns}
       settingsManager={tableState}
-      isLoading={servicesQuery.isLoading || namespacesQuery.isLoading}
+      isLoading={
+        servicesQuery.isInitialLoading || namespacesQuery.isInitialLoading
+      }
       emptyContentLabel="No services found"
       title="Services"
       titleIcon={Shuffle}
       getRowId={(row) => row.UID}
       isRowSelectable={(row) => !namespaces?.[row.original.Namespace]?.IsSystem}
-      disableSelect={readOnly}
+      disableSelect={!canWrite}
       renderTableActions={(selectedRows) => (
         <TableActions selectedItems={selectedRows} />
       )}

@@ -82,7 +82,7 @@ function InnerForm({ isLoading }: { isLoading: boolean }) {
         id="edge-job-editor"
         onChange={(value) => setFieldValue('fileContent', value)}
         value={values.fileContent}
-        placeholder="Define or paste the content of your script file here"
+        textTip="Define or paste the content of your script file here"
         type="shell"
         error={errors.fileContent}
       />

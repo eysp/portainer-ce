@@ -5,7 +5,11 @@ import (
 	"path"
 	"testing"
 
+	"github.com/portainer/portainer/api/filesystem"
+
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.etcd.io/bbolt"
 )
 
 func Test_NeedsEncryptionMigration(t *testing.T) {
@@ -118,4 +122,60 @@ func Test_NeedsEncryptionMigration(t *testing.T) {
 			is.Equal(result, tc.expectResult, "Failed test: %s", tc.name)
 		})
 	}
+}
+
+func TestDBCompaction(t *testing.T) {
+	db := &DbConnection{Path: t.TempDir()}
+
+	err := db.Open()
+	require.NoError(t, err)
+
+	err = db.Update(func(tx *bbolt.Tx) error {
+		b, err := tx.CreateBucketIfNotExists([]byte("testbucket"))
+		if err != nil {
+			return err
+		}
+
+		b.Put([]byte("key"), []byte("value"))
+
+		return nil
+	})
+	require.NoError(t, err)
+
+	err = db.Close()
+	require.NoError(t, err)
+
+	// Reopen the DB to trigger compaction
+	db.Compact = true
+	err = db.Open()
+	require.NoError(t, err)
+
+	// Check that the data is still there
+	err = db.View(func(tx *bbolt.Tx) error {
+		b := tx.Bucket([]byte("testbucket"))
+		if b == nil {
+			return nil
+		}
+
+		val := b.Get([]byte("key"))
+		require.Equal(t, []byte("value"), val)
+
+		return nil
+	})
+	require.NoError(t, err)
+
+	err = db.Close()
+	require.NoError(t, err)
+
+	// Failures
+	compactedPath := db.GetDatabaseFilePath() + compactedSuffix
+	err = os.Mkdir(compactedPath, 0o755)
+	require.NoError(t, err)
+
+	f, err := os.Create(filesystem.JoinPaths(compactedPath, "somefile"))
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	err = db.Open()
+	require.NoError(t, err)
 }

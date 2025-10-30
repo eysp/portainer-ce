@@ -1,7 +1,6 @@
 package client
 
 import (
-	"crypto/tls"
 	"errors"
 	"fmt"
 	"io"
@@ -11,6 +10,7 @@ import (
 	"time"
 
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/crypto"
 
 	"github.com/rs/zerolog/log"
 	"github.com/segmentio/encoding/json"
@@ -105,21 +105,28 @@ func Get(url string, timeout int) ([]byte, error) {
 // ExecutePingOperation will send a SystemPing operation HTTP request to a Docker environment(endpoint)
 // using the specified host and optional TLS configuration.
 // It uses a new Http.Client for each operation.
-func ExecutePingOperation(host string, tlsConfig *tls.Config) (bool, error) {
+func ExecutePingOperation(host string, tlsConfiguration portainer.TLSConfiguration) (bool, error) {
 	transport := &http.Transport{}
 
 	scheme := "http"
-	if tlsConfig != nil {
+
+	if tlsConfiguration.TLS {
+		tlsConfig, err := crypto.CreateTLSConfigurationFromDisk(tlsConfiguration)
+		if err != nil {
+			return false, err
+		}
+
 		transport.TLSClientConfig = tlsConfig
 		scheme = "https"
 	}
 
 	client := &http.Client{
-		Timeout:   time.Second * 3,
+		Timeout:   3 * time.Second,
 		Transport: transport,
 	}
 
 	target := strings.Replace(host, "tcp://", scheme+"://", 1)
+
 	return pingOperation(client, target)
 }
 
@@ -134,10 +141,7 @@ func pingOperation(client *http.Client, target string) (bool, error) {
 	io.Copy(io.Discard, resp.Body)
 	resp.Body.Close()
 
-	agentOnDockerEnvironment := false
-	if resp.Header.Get(portainer.PortainerAgentHeader) != "" {
-		agentOnDockerEnvironment = true
-	}
+	agentOnDockerEnvironment := resp.Header.Get(portainer.PortainerAgentHeader) != ""
 
 	return agentOnDockerEnvironment, nil
 }

@@ -15,7 +15,7 @@ func newAzureProxy(endpoint *portainer.Endpoint, dataStore dataservices.DataStor
 		return nil, err
 	}
 
-	proxy := newSingleHostReverseProxyWithHostHeader(remoteURL)
+	proxy := NewSingleHostReverseProxyWithHostHeader(remoteURL)
 	proxy.Transport = azure.NewTransport(&endpoint.AzureCredentials, dataStore, endpoint)
 	return proxy, nil
 }

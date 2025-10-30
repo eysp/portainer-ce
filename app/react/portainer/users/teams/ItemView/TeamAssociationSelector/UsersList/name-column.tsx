@@ -10,7 +10,7 @@ import { Button } from '@@/buttons';
 import { useRowContext } from './RowContext';
 
 export const name: ColumnDef<User, string> = {
-  header: '名称',
+  header: 'Name',
   accessorFn: (row) => row.Username,
   id: 'name',
   cell: NameCell,
@@ -37,7 +37,7 @@ export function NameCell({
         icon={PlusCircle}
         onClick={() => handleAddMember()}
       >
-        添加
+        Add
       </Button>
     </>
   );
@@ -45,7 +45,7 @@ export function NameCell({
   function handleAddMember() {
     addMemberMutation.mutate([user.Id], {
       onSuccess() {
-        notifySuccess('用户已添加到团队', name);
+        notifySuccess('User added to team', name);
       },
     });
   }

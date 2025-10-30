@@ -2,6 +2,7 @@ package auth
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/portainer/portainer/api/http/security"
 	"github.com/portainer/portainer/api/logoutcontext"
@@ -23,12 +24,12 @@ func (handler *Handler) logout(w http.ResponseWriter, r *http.Request) *httperro
 
 	if tokenData != nil {
 		handler.KubernetesTokenCacheManager.RemoveUserFromCache(tokenData.ID)
+		handler.KubernetesClientFactory.ClearUserClientCache(strconv.Itoa(int(tokenData.ID)))
 		logoutcontext.Cancel(tokenData.Token)
+		handler.bouncer.RevokeJWT(tokenData.Token)
 	}
 
 	security.RemoveAuthCookie(w)
-
-	handler.bouncer.RevokeJWT(tokenData.Token)
 
 	return response.Empty(w)
 }

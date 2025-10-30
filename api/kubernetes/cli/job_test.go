@@ -3,8 +3,11 @@ package cli
 import (
 	"context"
 	"testing"
+	"time"
 
 	models "github.com/portainer/portainer/api/http/models/kubernetes"
+
+	"github.com/stretchr/testify/require"
 	batchv1 "k8s.io/api/batch/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kfake "k8s.io/client-go/kubernetes/fake"
@@ -18,7 +21,7 @@ func (kcl *KubeClient) TestFetchJobs(t *testing.T) {
 	t.Run("admin client can fetch jobs from all namespaces", func(t *testing.T) {
 		kcl.cli = kfake.NewSimpleClientset()
 		kcl.instanceID = "test"
-		kcl.IsKubeAdmin = true
+		kcl.isKubeAdmin = true
 
 		jobs, err := kcl.GetJobs("", false)
 		if err != nil {
@@ -31,8 +34,8 @@ func (kcl *KubeClient) TestFetchJobs(t *testing.T) {
 	t.Run("non-admin client can fetch jobs from the default namespace only", func(t *testing.T) {
 		kcl.cli = kfake.NewSimpleClientset()
 		kcl.instanceID = "test"
-		kcl.IsKubeAdmin = false
-		kcl.NonAdminNamespaces = []string{"default"}
+		kcl.isKubeAdmin = false
+		kcl.SetClientNonAdminNamespaces([]string{"default"})
 
 		jobs, err := kcl.GetJobs("", false)
 		if err != nil {
@@ -61,4 +64,28 @@ func (kcl *KubeClient) TestFetchJobs(t *testing.T) {
 			t.Fatalf("Failed to delete jobs: %v", err)
 		}
 	})
+}
+
+func TestParseJobTimes(t *testing.T) {
+	// Empty job
+	jobTimes := parseJobTimes(batchv1.Job{})
+
+	require.Equal(t, "N/A", jobTimes.duration)
+	require.Equal(t, "N/A", jobTimes.start)
+	require.Equal(t, "N/A", jobTimes.finish)
+
+	// Full job
+	now := time.Now()
+	completionTime := now.Add(10 * time.Minute)
+
+	jobTimes = parseJobTimes(batchv1.Job{
+		Status: batchv1.JobStatus{
+			StartTime:      &metav1.Time{Time: now},
+			CompletionTime: &metav1.Time{Time: completionTime},
+		},
+	})
+
+	require.Equal(t, "10m0s", jobTimes.duration)
+	require.Equal(t, now.Format(time.RFC3339), jobTimes.start)
+	require.Equal(t, completionTime.Format(time.RFC3339), jobTimes.finish)
 }

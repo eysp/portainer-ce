@@ -33,7 +33,7 @@ export function AppTemplatesView() {
 
   return (
     <>
-      <PageHeader title="应用模板列表" breadcrumbs="模板" />
+      <PageHeader title="Application templates list" breadcrumbs="Templates" />
       {selectedTemplate && (
         <DeployForm
           template={selectedTemplate}

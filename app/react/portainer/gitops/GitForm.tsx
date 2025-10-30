@@ -7,7 +7,6 @@ import { RefField } from '@/react/portainer/gitops/RefField';
 import { GitFormUrlField } from '@/react/portainer/gitops/GitFormUrlField';
 import { DeployMethod, GitFormModel } from '@/react/portainer/gitops/types';
 import { TimeWindowDisplay } from '@/react/portainer/gitops/TimeWindowDisplay';
-import { isBE } from '@/react/portainer/feature-flags/feature-flags.service';
 
 import { FormSection } from '@@/form-components/FormSection';
 import { validateForm } from '@@/form-components/validate-form';
@@ -35,6 +34,7 @@ interface Props {
   webhookId?: string;
   webhooksDocs?: string;
   createdFromCustomTemplateId?: number;
+  isAutoUpdateVisible?: boolean;
 }
 
 export function GitForm({
@@ -51,11 +51,12 @@ export function GitForm({
   webhookId,
   webhooksDocs,
   createdFromCustomTemplateId,
+  isAutoUpdateVisible = true,
 }: Props) {
   const [value, setValue] = useState(initialValue); // TODO: remove this state when form is not inside angularjs
 
   return (
-    <FormSection title="Git 仓库">
+    <FormSection title="Git repository">
       <AuthFieldset
         value={value}
         onChange={handleChange}
@@ -77,12 +78,12 @@ export function GitForm({
       <div className="form-group">
         <div className="col-sm-12">
           <SwitchField
-            label="跳过 TLS 验证"
+            label="Skip TLS Verification"
             data-cy="gitops-skip-tls-verification-switch"
             checked={value.TLSSkipVerify || false}
             onChange={(value) => handleChange({ TLSSkipVerify: value })}
             name="TLSSkipVerify"
-            tooltip="启用此选项将跳过任何自签名证书的 TLS 验证。"
+            tooltip="Enabling this will allow skipping TLS validation for any self-signed certificate."
             labelClass="col-sm-3 col-lg-2"
           />
         </div>
@@ -117,7 +118,7 @@ export function GitForm({
         />
       )}
 
-      {isBE && value.AutoUpdate && (
+      {isAutoUpdateVisible && value.AutoUpdate && (
         <AutoUpdateFieldset
           environmentType={environmentType}
           webhookId={webhookId || ''}
@@ -164,7 +165,7 @@ export function buildGitValidationSchema(
 ): SchemaOf<GitFormModel> {
   return object({
     RepositoryURL: string()
-      .test('valid URL', 'URL 必须是一个有效的链接', (value) => {
+      .test('valid URL', 'The URL must be a valid URL', (value) => {
         if (!value) {
           return true;
         }
@@ -176,14 +177,14 @@ export function buildGitValidationSchema(
           return false;
         }
       })
-      .required('仓库 URL 为必填项'),
+      .required('Repository URL is required'),
     RepositoryReferenceName: refFieldValidation(),
     ComposeFilePathInRepository: string().required(
       deployMethod === 'compose'
-        ? '必须填写 Compose 文件路径'
-        : '必须填写清单文件路径'
+        ? 'Compose file path is required'
+        : 'Manifest file path is required'
     ),
-    AdditionalFiles: array(string().required('路径为必填项')).default([]),
+    AdditionalFiles: array(string().required('Path is required')).default([]),
     RepositoryURLValid: boolean().default(false),
     AutoUpdate: autoUpdateValidation().nullable(),
     TLSSkipVerify: boolean().default(false),

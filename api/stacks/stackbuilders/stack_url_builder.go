@@ -36,7 +36,6 @@ func (b *UrlMethodStackBuilder) SetGeneralInfo(payload *StackPayload, endpoint *
 }
 
 func (b *UrlMethodStackBuilder) SetUniqueInfo(payload *StackPayload) UrlMethodStackBuildProcess {
-
 	return b
 }
 

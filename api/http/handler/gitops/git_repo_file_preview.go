@@ -9,8 +9,7 @@ import (
 	httperror "github.com/portainer/portainer/pkg/libhttp/error"
 	"github.com/portainer/portainer/pkg/libhttp/request"
 	"github.com/portainer/portainer/pkg/libhttp/response"
-
-	"github.com/asaskevich/govalidator"
+	"github.com/portainer/portainer/pkg/validate"
 )
 
 type fileResponse struct {
@@ -18,10 +17,11 @@ type fileResponse struct {
 }
 
 type repositoryFilePreviewPayload struct {
-	Repository string `json:"repository" example:"https://github.com/openfaas/faas" validate:"required"`
-	Reference  string `json:"reference" example:"refs/heads/master"`
-	Username   string `json:"username" example:"myGitUsername"`
-	Password   string `json:"password" example:"myGitPassword"`
+	Repository        string                         `json:"repository" example:"https://github.com/openfaas/faas" validate:"required"`
+	Reference         string                         `json:"reference" example:"refs/heads/master"`
+	Username          string                         `json:"username" example:"myGitUsername"`
+	Password          string                         `json:"password" example:"myGitPassword"`
+	AuthorizationType gittypes.GitCredentialAuthType `json:"authorizationType"`
 	// Path to file whose content will be read
 	TargetFile string `json:"targetFile" example:"docker-compose.yml"`
 	// TLSSkipVerify skips SSL verification when cloning the Git repository
@@ -29,7 +29,7 @@ type repositoryFilePreviewPayload struct {
 }
 
 func (payload *repositoryFilePreviewPayload) Validate(r *http.Request) error {
-	if len(payload.Repository) == 0 || !govalidator.IsURL(payload.Repository) {
+	if len(payload.Repository) == 0 || !validate.IsURL(payload.Repository) {
 		return errors.New("invalid repository URL. Must correspond to a valid URL format")
 	}
 
@@ -69,7 +69,15 @@ func (handler *Handler) gitOperationRepoFilePreview(w http.ResponseWriter, r *ht
 		return httperror.InternalServerError("Unable to create temporary folder", err)
 	}
 
-	err = handler.gitService.CloneRepository(projectPath, payload.Repository, payload.Reference, payload.Username, payload.Password, payload.TLSSkipVerify)
+	err = handler.gitService.CloneRepository(
+		projectPath,
+		payload.Repository,
+		payload.Reference,
+		payload.Username,
+		payload.Password,
+		payload.AuthorizationType,
+		payload.TLSSkipVerify,
+	)
 	if err != nil {
 		if errors.Is(err, gittypes.ErrAuthenticationFailure) {
 			return httperror.BadRequest("Invalid git credential", err)

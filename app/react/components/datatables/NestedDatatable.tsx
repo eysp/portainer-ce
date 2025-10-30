@@ -25,7 +25,7 @@ interface Props<D extends DefaultType> extends AutomationTestingProps {
   initialTableState?: Partial<TableState>;
   isLoading?: boolean;
   initialSortBy?: BasicTableSettings['sortBy'];
-
+  enablePagination?: boolean;
   /**
    * keyword to filter by
    */
@@ -42,6 +42,7 @@ export function NestedDatatable<D extends DefaultType>({
   initialTableState = {},
   isLoading,
   initialSortBy,
+  enablePagination = true,
   search,
   'data-cy': dataCy,
   'aria-label': ariaLabel,
@@ -65,7 +66,7 @@ export function NestedDatatable<D extends DefaultType>({
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    ...(enablePagination && { getPaginationRowModel: getPaginationRowModel() }),
   });
 
   return (

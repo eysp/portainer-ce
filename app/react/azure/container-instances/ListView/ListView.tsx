@@ -32,8 +32,8 @@ export function ListView() {
   return (
     <>
       <PageHeader
-        title="容器列表"
-        breadcrumbs="容器实例"
+        title="Container list"
+        breadcrumbs="Container instances"
         reload
       />
 

@@ -50,7 +50,7 @@ export function SidebarParent({
     <Wrapper className="flex flex-col">
       <div
         className={clsx(
-          'w-full h-8 items-center ease-in-out transition-colors flex duration-200 hover:bg-blue-5/20 be:hover:bg-gray-5/20 th-dark:hover:bg-gray-true-5/20 rounded-md',
+          'w-full h-8 items-center ease-in-out transition-colors flex duration-200 hover:bg-graphite-500 rounded-md',
           isSidebarOpen && 'pl-3',
           // only highlight the parent when the sidebar is closed/contracted and a child item is selected
           (!isSidebarOpen || !isExpanded) && anchorProps.className
@@ -117,7 +117,7 @@ export function SidebarParent({
           <li className="flex items-center space-x-2 text-sm mb-1">
             <span>{title}</span>
           </li>
-          <div className="bg-blue-8 be:bg-gray-8 th-dark:bg-gray-true-8 th-highcontrast:bg-black th-highcontrast:border th-highcontrast:border-solid th-highcontrast:border-white rounded">
+          <div className="th-highcontrast:bg-black th-highcontrast:border th-highcontrast:border-solid th-highcontrast:border-white rounded">
             {children}
           </div>
         </ul>

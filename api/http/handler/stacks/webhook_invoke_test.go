@@ -30,21 +30,21 @@ func TestHandler_webhookInvoke(t *testing.T) {
 	t.Run("invalid uuid results in http.StatusBadRequest", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req := newRequest("notuuid")
-		h.Router.ServeHTTP(w, req)
+		h.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusBadRequest, w.Code)
 	})
 
 	t.Run("registered webhook ID in http.StatusNoContent", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req := newRequest(webhookID)
-		h.Router.ServeHTTP(w, req)
+		h.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusNoContent, w.Code)
 	})
 
 	t.Run("unregistered webhook ID in http.StatusNotFound", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req := newRequest(newGuidString(t))
-		h.Router.ServeHTTP(w, req)
+		h.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusNotFound, w.Code)
 	})
 }

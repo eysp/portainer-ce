@@ -41,6 +41,7 @@ export function NamespacesDatatable() {
   const namespacesQuery = useNamespacesQuery(environmentId, {
     autoRefreshRate: tableState.autoRefreshRate * 1000,
     withResourceQuota: true,
+    withUnhealthyEvents: true,
   });
   const namespaces = Object.values(namespacesQuery.data ?? []);
 
@@ -181,6 +182,7 @@ function TableActions({
           queryClient.setQueryData(
             queryKeys.list(environmentId, {
               withResourceQuota: true,
+              withUnhealthyEvents: true,
             }),
             () => remainingNamespaces
           );

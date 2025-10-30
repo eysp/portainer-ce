@@ -28,7 +28,7 @@ type PortainerApplicationResources struct {
 // if the user is an admin, all namespaces in the current k8s environment(endpoint) are fetched using the fetchApplications function.
 // otherwise, namespaces the non-admin user has access to will be used to filter the applications based on the allowed namespaces.
 func (kcl *KubeClient) GetApplications(namespace, nodeName string) ([]models.K8sApplication, error) {
-	if kcl.IsKubeAdmin {
+	if kcl.GetIsKubeAdmin() {
 		return kcl.fetchApplications(namespace, nodeName)
 	}
 
@@ -64,9 +64,13 @@ func (kcl *KubeClient) fetchApplications(namespace, nodeName string) ([]models.K
 // fetchApplicationsForNonAdmin fetches the applications in the namespaces the user has access to.
 // This function is called when the user is not an admin.
 func (kcl *KubeClient) fetchApplicationsForNonAdmin(namespace, nodeName string) ([]models.K8sApplication, error) {
-	log.Debug().Msgf("Fetching applications for non-admin user: %v", kcl.NonAdminNamespaces)
+	nonAdminNamespaces := kcl.GetClientNonAdminNamespaces()
 
-	if len(kcl.NonAdminNamespaces) == 0 {
+	log.Debug().
+		Strs("non_admin_namespaces", nonAdminNamespaces).
+		Msg("fetching applications for non-admin user")
+
+	if len(nonAdminNamespaces) == 0 {
 		return nil, nil
 	}
 
@@ -151,46 +155,6 @@ func (kcl *KubeClient) GetApplicationsResource(namespace, node string) (models.K
 	}
 
 	return resource, nil
-}
-
-// GetApplicationsFromConfigMap gets a list of applications that use a specific ConfigMap
-// by checking all pods in the same namespace as the ConfigMap
-func (kcl *KubeClient) GetApplicationNamesFromConfigMap(configMap models.K8sConfigMap, pods []corev1.Pod, replicaSets []appsv1.ReplicaSet) ([]string, error) {
-	applications := []string{}
-	for _, pod := range pods {
-		if pod.Namespace == configMap.Namespace {
-			if isPodUsingConfigMap(&pod, configMap.Name) {
-				application, err := kcl.ConvertPodToApplication(pod, PortainerApplicationResources{
-					ReplicaSets: replicaSets,
-				}, false)
-				if err != nil {
-					return nil, err
-				}
-				applications = append(applications, application.Name)
-			}
-		}
-	}
-
-	return applications, nil
-}
-
-func (kcl *KubeClient) GetApplicationNamesFromSecret(secret models.K8sSecret, pods []corev1.Pod, replicaSets []appsv1.ReplicaSet) ([]string, error) {
-	applications := []string{}
-	for _, pod := range pods {
-		if pod.Namespace == secret.Namespace {
-			if isPodUsingSecret(&pod, secret.Name) {
-				application, err := kcl.ConvertPodToApplication(pod, PortainerApplicationResources{
-					ReplicaSets: replicaSets,
-				}, false)
-				if err != nil {
-					return nil, err
-				}
-				applications = append(applications, application.Name)
-			}
-		}
-	}
-
-	return applications, nil
 }
 
 // ConvertPodToApplication converts a pod to an application, updating owner references if necessary
@@ -309,7 +273,8 @@ func populateApplicationFromDeployment(application *models.K8sApplication, deplo
 	application.RunningPodsCount = int(deployment.Status.ReadyReplicas)
 	application.DeploymentType = "Replicated"
 	application.Metadata = &models.Metadata{
-		Labels: deployment.Labels,
+		Labels:      deployment.Labels,
+		Annotations: deployment.Annotations,
 	}
 
 	// If the deployment has containers, use the first container's image
@@ -337,7 +302,8 @@ func populateApplicationFromStatefulSet(application *models.K8sApplication, stat
 	application.RunningPodsCount = int(statefulSet.Status.ReadyReplicas)
 	application.DeploymentType = "Replicated"
 	application.Metadata = &models.Metadata{
-		Labels: statefulSet.Labels,
+		Labels:      statefulSet.Labels,
+		Annotations: statefulSet.Annotations,
 	}
 
 	// If the statefulSet has containers, use the first container's image
@@ -362,7 +328,8 @@ func populateApplicationFromDaemonSet(application *models.K8sApplication, daemon
 	application.RunningPodsCount = int(daemonSet.Status.NumberReady)
 	application.DeploymentType = "Global"
 	application.Metadata = &models.Metadata{
-		Labels: daemonSet.Labels,
+		Labels:      daemonSet.Labels,
+		Annotations: daemonSet.Annotations,
 	}
 
 	if len(daemonSet.Spec.Template.Spec.Containers) > 0 {
@@ -391,7 +358,8 @@ func populateApplicationFromPod(application *models.K8sApplication, pod corev1.P
 	application.RunningPodsCount = runningPodsCount
 	application.DeploymentType = string(pod.Status.Phase)
 	application.Metadata = &models.Metadata{
-		Labels: pod.Labels,
+		Labels:      pod.Labels,
+		Annotations: pod.Annotations,
 	}
 
 	// If the pod has containers, use the first container's image
@@ -473,23 +441,23 @@ func (kcl *KubeClient) GetApplicationFromServiceSelector(pods []corev1.Pod, serv
 func (kcl *KubeClient) GetApplicationConfigurationOwnersFromConfigMap(configMap models.K8sConfigMap, pods []corev1.Pod, replicaSets []appsv1.ReplicaSet) ([]models.K8sConfigurationOwnerResource, error) {
 	configurationOwners := []models.K8sConfigurationOwnerResource{}
 	for _, pod := range pods {
-		if pod.Namespace == configMap.Namespace {
-			if isPodUsingConfigMap(&pod, configMap.Name) {
-				application, err := kcl.ConvertPodToApplication(pod, PortainerApplicationResources{
-					ReplicaSets: replicaSets,
-				}, false)
-				if err != nil {
-					return nil, err
-				}
+		if isPodUsingConfigMap(&pod, configMap) {
+			kind := "Pod"
+			name := pod.Name
 
-				if application != nil {
-					configurationOwners = append(configurationOwners, models.K8sConfigurationOwnerResource{
-						Name:         application.Name,
-						ResourceKind: application.Kind,
-						Id:           application.UID,
-					})
-				}
+			if len(pod.OwnerReferences) > 0 {
+				kind = pod.OwnerReferences[0].Kind
+				name = pod.OwnerReferences[0].Name
 			}
+
+			if isReplicaSetOwner(pod) {
+				updateOwnerReferenceToDeployment(&pod, replicaSets)
+			}
+
+			configurationOwners = append(configurationOwners, models.K8sConfigurationOwnerResource{
+				Name:         name,
+				ResourceKind: kind,
+			})
 		}
 	}
 
@@ -501,23 +469,23 @@ func (kcl *KubeClient) GetApplicationConfigurationOwnersFromConfigMap(configMap 
 func (kcl *KubeClient) GetApplicationConfigurationOwnersFromSecret(secret models.K8sSecret, pods []corev1.Pod, replicaSets []appsv1.ReplicaSet) ([]models.K8sConfigurationOwnerResource, error) {
 	configurationOwners := []models.K8sConfigurationOwnerResource{}
 	for _, pod := range pods {
-		if pod.Namespace == secret.Namespace {
-			if isPodUsingSecret(&pod, secret.Name) {
-				application, err := kcl.ConvertPodToApplication(pod, PortainerApplicationResources{
-					ReplicaSets: replicaSets,
-				}, false)
-				if err != nil {
-					return nil, err
-				}
+		if isPodUsingSecret(&pod, secret) {
+			kind := "Pod"
+			name := pod.Name
 
-				if application != nil {
-					configurationOwners = append(configurationOwners, models.K8sConfigurationOwnerResource{
-						Name:         application.Name,
-						ResourceKind: application.Kind,
-						Id:           application.UID,
-					})
-				}
+			if len(pod.OwnerReferences) > 0 {
+				kind = pod.OwnerReferences[0].Kind
+				name = pod.OwnerReferences[0].Name
 			}
+
+			if isReplicaSetOwner(pod) {
+				updateOwnerReferenceToDeployment(&pod, replicaSets)
+			}
+
+			configurationOwners = append(configurationOwners, models.K8sConfigurationOwnerResource{
+				Name:         name,
+				ResourceKind: kind,
+			})
 		}
 	}
 

@@ -1,11 +1,11 @@
 import { useEnvironmentList } from '@/react/portainer/environments/queries/useEnvironmentList';
-import { EdgeTypes, EnvironmentId } from '@/react/portainer/environments/types';
+import { EdgeGroupId, EdgeTypes } from '@/react/portainer/environments/types';
 
-export function useEnvironments(environmentsIds: Array<EnvironmentId>) {
+export function useEnvironments(edgeGroupIds: Array<EdgeGroupId>) {
   const environmentsQuery = useEnvironmentList(
-    { endpointIds: environmentsIds, types: EdgeTypes, pageLimit: 0 },
+    { edgeGroupIds, types: EdgeTypes, pageLimit: 0, excludeSnapshots: true },
     {
-      enabled: environmentsIds.length > 0,
+      enabled: edgeGroupIds.length > 0,
     }
   );
 

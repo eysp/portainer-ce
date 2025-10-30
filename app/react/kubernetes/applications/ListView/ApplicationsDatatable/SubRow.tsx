@@ -11,19 +11,22 @@ export function SubRow({
   item,
   hideStacks,
   areSecretsRestricted,
+  selectDisabled,
 }: {
   item: ApplicationRowData;
   hideStacks: boolean;
   areSecretsRestricted: boolean;
+  selectDisabled: boolean;
 }) {
   const {
     user: { Username: username },
   } = useCurrentUser();
-  const colSpan = hideStacks ? 8 : 9;
+  const colSpan = hideStacks ? 7 : 8;
+  const alignColSpan = selectDisabled ? 1 : 2;
 
   return (
     <tr className={clsx({ 'secondary-body': !item.KubernetesApplications })}>
-      <td />
+      <td colSpan={alignColSpan} />
       <td colSpan={colSpan} className="datatable-padding-vertical">
         {item.KubernetesApplications ? (
           <InnerTable

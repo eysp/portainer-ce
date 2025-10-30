@@ -91,7 +91,7 @@
           "
         >
           <ng-messages for="kubernetesConfigurationDataCreationForm['configuration_data_key_' + index].$error">
-            <p ng-message="required" class="vertical-center"> <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 此字段为必填项。 </p>
+            <p ng-message="required" class="vertical-center"> <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> This field is required. </p>
           </ng-messages>
           <div>
             <p ng-if="$ctrl.state.duplicateKeys[index] !== undefined" class="vertical-center">
@@ -122,7 +122,7 @@
         ></textarea>
         <div class="small text-warning" style="margin-top: 5px" ng-show="kubernetesConfigurationDataCreationForm['configuration_data_value_' + index].$invalid">
           <ng-messages for="kubernetesConfigurationDataCreationForm['configuration_data_value_' + index].$error">
-            <p ng-message="required" class="vertical-center"><pr-icon class="vertical-center" icon="'alert-triangle'" mode="'warning'"></pr-icon> 此字段为必填项。</p>
+            <p ng-message="required" class="vertical-center"><pr-icon class="vertical-center" icon="'alert-triangle'" mode="'warning'"></pr-icon> This field is required.</p>
           </ng-messages>
         </div>
       </div>
@@ -165,7 +165,7 @@
       value="$ctrl.formValues.DataYaml"
       on-change="($ctrl.editorUpdate)"
       yml="true"
-      placeholder="Define or paste key-value pairs, one pair per line"
+      text-tip="Define or paste key-value pairs, one pair per line"
     >
     </web-editor-form>
   </div>

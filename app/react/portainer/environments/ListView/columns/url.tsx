@@ -55,7 +55,7 @@ function Cell({
                           onClick={handleDismissButton}
                         >
                           <span className="text-muted-light">
-                            忽略错误（仍可在日志中查看）
+                            Dismiss error (still visible in logs)
                           </span>
                         </Button>
                       </div>

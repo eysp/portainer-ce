@@ -23,14 +23,14 @@ import (
 type Service struct{}
 
 // NewService returns a pointer to a new instance of this service
-func NewService() *Service {
-	return &Service{}
+func NewService() Service {
+	return Service{}
 }
 
 // Authenticate takes an access code and exchanges it for an access token from portainer OAuthSettings token environment(endpoint).
 // On success, it will then return the username and token expiry time associated to authenticated user by fetching this information
 // from the resource server and matching it with the user identifier setting.
-func (*Service) Authenticate(code string, configuration *portainer.OAuthSettings) (string, error) {
+func (Service) Authenticate(code string, configuration *portainer.OAuthSettings) (string, error) {
 	token, err := GetOAuthToken(code, configuration)
 	if err != nil {
 		log.Error().Err(err).Msg("failed retrieving oauth token")

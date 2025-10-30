@@ -30,7 +30,7 @@ angular.module('portainer.app').factory('LocalStorage', [
         return localStorageService.get('UI_STATE');
       },
       getUserId() {
-        localStorageService.get('USER_ID');
+        return localStorageService.get('USER_ID');
       },
       storeUserId: function (userId) {
         localStorageService.set('USER_ID', userId);

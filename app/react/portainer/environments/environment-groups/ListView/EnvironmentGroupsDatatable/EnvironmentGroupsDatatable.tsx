@@ -22,7 +22,7 @@ export function EnvironmentGroupsDatatable() {
       isLoading={query.isLoading}
       dataset={query.data || []}
       settingsManager={tableState}
-      title="环境分组"
+      title="Environment Groups"
       titleIcon={Dice4}
       renderTableActions={(selectedItems) => (
         <TableActions selectedItems={selectedItems} />

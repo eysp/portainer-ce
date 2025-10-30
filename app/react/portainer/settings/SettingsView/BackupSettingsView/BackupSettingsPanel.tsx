@@ -14,12 +14,13 @@ export function BackupSettingsPanel() {
 
   return (
     <Widget>
-      <WidgetTitle icon={Download} title="备份 Portainer" />
+      <WidgetTitle icon={Download} title="Back up Portainer" />
       <WidgetBody>
         <div className="form-horizontal">
-          <FormSection title="备份配置">
+          <FormSection title="Backup configuration">
             <div className="form-group col-sm-12 text-muted small">
-              这将备份您的 Portainer 服务器配置，不包括容器。
+              This will back up your Portainer server configuration and does not
+              include containers.
             </div>
             <BoxSelector
               slim

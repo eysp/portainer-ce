@@ -50,7 +50,7 @@ export function CreateAccessInnerForm({
   const isAdminQuery = useIsEdgeAdmin();
   return (
     <Form className="form-horizontal" onSubmit={handleSubmit} noValidate>
-      <FormControl label="选择用户和/或团队">
+      <FormControl label="Select user(s) and/or team(s)">
         {availableTeamOrUserOptions.length > 0 ||
         values.selectedUsersAndTeams.length > 0 ? (
           <NamespaceAccessUsersSelector
@@ -62,18 +62,18 @@ export function CreateAccessInnerForm({
           />
         ) : (
           <span className="small text-muted pt-2">
-            该环境尚未设置任何用户或团队访问权限。
+            No user or team access has been set on the environment.
             {isAdminQuery.isAdmin && (
               <>
                 {' '}
-                请前往{' '}
+                Head over to the{' '}
                 <Link
                   to="portainer.endpoints"
                   data-cy="namespaceAccess-environmentsLink"
                 >
-                  环境视图
+                  Environments view
                 </Link>{' '}
-                进行管理。
+                to manage them.
               </>
             )}
           </span>
@@ -85,11 +85,11 @@ export function CreateAccessInnerForm({
             disabled={!isValid || !dirty}
             data-cy="namespaceAccess-createAccessButton"
             isLoading={isSubmitting}
-            loadingText="正在创建访问权限..."
+            loadingText="Creating access..."
             icon={Plus}
             className="!ml-0"
           >
-            创建访问权限
+            Create access
           </LoadingButton>
         </div>
       </div>

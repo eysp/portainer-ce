@@ -1,6 +1,9 @@
 package release
 
-import "github.com/portainer/portainer/pkg/libhelm/time"
+import (
+	"github.com/portainer/portainer/pkg/libhelm/time"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+)
 
 // Release is the struct that holds the information for a helm release.
 // The struct definitions have been copied from the official Helm Golang client/library.
@@ -14,7 +17,7 @@ type ReleaseElement struct {
 	Updated    string `json:"updated"`
 	Status     string `json:"status"`
 	Chart      string `json:"chart"`
-	AppVersion string `json:"app_version"`
+	AppVersion string `json:"appVersion"`
 }
 
 // Release describes a deployment of a chart, together with the chart
@@ -23,7 +26,7 @@ type Release struct {
 	// Name is the name of the release
 	Name string `json:"name,omitempty"`
 	// Info provides information about a release
-	// Info *Info `json:"info,omitempty"`
+	Info *Info `json:"info,omitempty"`
 	// Chart is the chart that was released.
 	Chart Chart `json:"chart,omitempty"`
 	// Config is the set of extra Values added to the chart.
@@ -33,6 +36,8 @@ type Release struct {
 	Manifest string `json:"manifest,omitempty"`
 	// Hooks are all of the hooks declared for this release.
 	Hooks []*Hook `json:"hooks,omitempty"`
+	// AppVersion is the app version of the release.
+	AppVersion string `json:"appVersion,omitempty"`
 	// Version is an int which represents the revision of the release.
 	Version int `json:"version,omitempty"`
 	// Namespace is the kubernetes namespace of the release.
@@ -40,6 +45,21 @@ type Release struct {
 	// Labels of the release.
 	// Disabled encoding into Json cause labels are stored in storage driver metadata field.
 	Labels map[string]string `json:"-"`
+	// ChartReference are the labels that are used to identify the chart source.
+	ChartReference ChartReference `json:"chartReference,omitempty"`
+	// Values are the values used to deploy the chart.
+	Values Values `json:"values,omitempty"`
+}
+
+type Values struct {
+	UserSuppliedValues string `json:"userSuppliedValues,omitempty"`
+	ComputedValues     string `json:"computedValues,omitempty"`
+}
+
+type ChartReference struct {
+	ChartPath  string `json:"chartPath,omitempty"`
+	RepoURL    string `json:"repoURL,omitempty"`
+	RegistryID int64  `json:"registryID,omitempty"`
 }
 
 // Chart is a helm package that contains metadata, a default config, zero or more
@@ -183,6 +203,8 @@ type Info struct {
 	Status Status `json:"status,omitempty"`
 	// Contains the rendered templates/NOTES.txt if available
 	Notes string `json:"notes,omitempty"`
+	// Resources is the list of resources that are part of the release
+	Resources []*unstructured.Unstructured `json:"resources,omitempty"`
 }
 
 // Status is the status of a release

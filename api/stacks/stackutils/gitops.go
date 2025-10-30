@@ -19,13 +19,23 @@ var (
 func DownloadGitRepository(config gittypes.RepoConfig, gitService portainer.GitService, getProjectPath func() string) (string, error) {
 	username := ""
 	password := ""
+	authType := gittypes.GitCredentialAuthType_Basic
 	if config.Authentication != nil {
 		username = config.Authentication.Username
 		password = config.Authentication.Password
+		authType = config.Authentication.AuthorizationType
 	}
 
 	projectPath := getProjectPath()
-	err := gitService.CloneRepository(projectPath, config.URL, config.ReferenceName, username, password, config.TLSSkipVerify)
+	err := gitService.CloneRepository(
+		projectPath,
+		config.URL,
+		config.ReferenceName,
+		username,
+		password,
+		authType,
+		config.TLSSkipVerify,
+	)
 	if err != nil {
 		if errors.Is(err, gittypes.ErrAuthenticationFailure) {
 			newErr := git.ErrInvalidGitCredential
@@ -36,7 +46,14 @@ func DownloadGitRepository(config gittypes.RepoConfig, gitService portainer.GitS
 		return "", newErr
 	}
 
-	commitID, err := gitService.LatestCommitID(config.URL, config.ReferenceName, username, password, config.TLSSkipVerify)
+	commitID, err := gitService.LatestCommitID(
+		config.URL,
+		config.ReferenceName,
+		username,
+		password,
+		authType,
+		config.TLSSkipVerify,
+	)
 	if err != nil {
 		newErr := fmt.Errorf("unable to fetch git repository id: %w", err)
 		return "", newErr

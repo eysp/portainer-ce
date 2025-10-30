@@ -45,7 +45,7 @@ export function WizardEndpointsList({ environmentIds }: Props) {
 
   return (
     <Widget>
-      <WidgetTitle icon={Plug2} title="新环境" />
+      <WidgetTitle icon={Plug2} title="New Environments" />
       <WidgetBody>
         {environments.map((environment) => (
           <div className={styles.wizardListWrapper} key={environment.Id}>
@@ -68,7 +68,7 @@ export function WizardEndpointsList({ environmentIds }: Props) {
               URL: {stripProtocol(environment.URL)}
             </div>
             <div className={styles.wizardListType}>
-              类型： {endpointTypeName(environment.Type)}
+              Type: {endpointTypeName(environment.Type)}
             </div>
             {isEdgeEnvironment(environment.Type) && (
               <div className={styles.wizardListEdgeStatus}>

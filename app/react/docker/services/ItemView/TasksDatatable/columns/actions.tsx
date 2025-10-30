@@ -11,7 +11,7 @@ import { DecoratedTask } from '../types';
 import { columnHelper } from './helper';
 
 export const actions = columnHelper.display({
-  header: '操作',
+  header: 'Actions',
   cell: Cell,
 });
 

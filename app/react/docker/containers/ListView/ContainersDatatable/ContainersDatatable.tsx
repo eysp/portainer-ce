@@ -30,11 +30,11 @@ const storageKey = 'containers';
 const settingsStore = createStore(storageKey);
 
 const actions = [
-  buildAction('logs', '日志'),
-  buildAction('inspect', '检查'),
-  buildAction('stats', '统计'),
-  buildAction('exec', '控制台'),
-  buildAction('attach', '附加'),
+  buildAction('logs', 'Logs'),
+  buildAction('inspect', 'Inspect'),
+  buildAction('stats', 'Stats'),
+  buildAction('exec', 'Console'),
+  buildAction('attach', 'Attach'),
 ];
 
 export interface Props {
@@ -59,7 +59,7 @@ export function ContainersDatatable({
       <TableSettingsProvider settings={settingsStore}>
         <Datatable
           titleIcon={Box}
-          title="容器"
+          title="Containers"
           settingsManager={tableState}
           columns={columns}
           renderTableActions={(selectedRows) => (

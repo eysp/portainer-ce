@@ -11,7 +11,7 @@ import (
 // logrus is the logging library used by Docker Compose.
 type LogrusToZerologWriter struct{}
 
-func (ltzw *LogrusToZerologWriter) Write(p []byte) (n int, err error) {
+func (ltzw LogrusToZerologWriter) Write(p []byte) (n int, err error) {
 	logMessage := string(p)
 	logMessage = strings.TrimSuffix(logMessage, "\n")
 

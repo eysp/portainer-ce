@@ -1,4 +1,4 @@
-import { CellContext } from '@tanstack/react-table';
+import { CellContext, Row } from '@tanstack/react-table';
 import clsx from 'clsx';
 
 import {
@@ -6,14 +6,22 @@ import {
   KubernetesApplicationTypes,
 } from '@/kubernetes/models/application/models/appConstants';
 
+import { filterHOC } from '@@/datatables/Filter';
+
 import styles from './columns.status.module.css';
 import { helper } from './columns.helper';
 import { ApplicationRowData } from './types';
 
-export const status = helper.accessor('Status', {
+export const status = helper.accessor(getStatusSummary, {
   header: 'Status',
   cell: Cell,
-  enableSorting: false,
+  meta: {
+    filter: filterHOC('Filter by status'),
+  },
+  enableColumnFilter: true,
+  filterFn: (row: Row<ApplicationRowData>, _: string, filterValue: string[]) =>
+    filterValue.length === 0 ||
+    filterValue.includes(getStatusSummary(row.original)),
 });
 
 function Cell({
@@ -66,4 +74,18 @@ function Cell({
       {item.KubernetesApplications && <span>{item.Status}</span>}
     </>
   );
+}
+
+function getStatusSummary(item: ApplicationRowData): 'Ready' | 'Not Ready' {
+  if (
+    item.ApplicationType === KubernetesApplicationTypes.Pod &&
+    item.Pods &&
+    item.Pods.length > 0
+  ) {
+    return item.Pods[0].Status === 'Running' ? 'Ready' : 'Not Ready';
+  }
+  return item.TotalPodsCount > 0 &&
+    item.TotalPodsCount === item.RunningPodsCount
+    ? 'Ready'
+    : 'Not Ready';
 }

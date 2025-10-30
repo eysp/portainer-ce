@@ -4,7 +4,7 @@ import { Values } from './types';
 
 export function validation(): SchemaOf<Values> {
   return object({
-    image: string().required('镜像为必填项'),
+    image: string().required('Image is required'),
     registryId: number().default(0),
     useRegistry: bool().default(false),
   });

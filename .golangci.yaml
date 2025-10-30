@@ -1,40 +1,59 @@
+version: "2"
 linters:
-  # Disable all linters, the defaults don't pass on our code yet
-  disable-all: true
-
-  # Enable these for now
+  default: none
   enable:
-    - unused
-    - depguard
-    - gosimple
-    - govet
-    - errorlint
+    - bodyclose
     - copyloopvar
+    - depguard
+    - errorlint
+    - forbidigo
+    - govet
+    - ineffassign
     - intrange
     - perfsprint
-
-linters-settings:
-  depguard:
-    rules:
-      main:
-        deny:
-          - pkg: 'encoding/json'
-            desc: 'use github.com/segmentio/encoding/json'
-          - pkg: 'golang.org/x/exp'
-            desc: 'exp is not allowed'
-          - pkg: 'github.com/portainer/libcrypto'
-            desc: 'use github.com/portainer/portainer/pkg/libcrypto'
-          - pkg: 'github.com/portainer/libhttp'
-            desc: 'use github.com/portainer/portainer/pkg/libhttp'
-        files:
-          - '!**/*_test.go'
-          - '!**/base.go'
-          - '!**/base_tx.go'
-
-# errorlint is causing a typecheck error for some reason. The go compiler will report these
-# anyway, so ignore them from the linter
-issues:
-  exclude-rules:
-    - path: ./
-      linters:
-        - typecheck
+    - staticcheck
+    - unused
+  settings:
+    staticcheck:
+      checks: ["all", "-ST1003", "-ST1005", "-ST1016", "-SA1019", "-QF1003"]
+    depguard:
+      rules:
+        main:
+          files:
+            - '!**/*_test.go'
+            - '!**/base.go'
+            - '!**/base_tx.go'
+          deny:
+            - pkg: encoding/json
+              desc: use github.com/segmentio/encoding/json
+            - pkg: golang.org/x/exp
+              desc: exp is not allowed
+            - pkg: github.com/portainer/libcrypto
+              desc: use github.com/portainer/portainer/pkg/libcrypto
+            - pkg: github.com/portainer/libhttp
+              desc: use github.com/portainer/portainer/pkg/libhttp
+    forbidigo:
+      forbid:
+        - pattern: ^tls\.Config$
+          msg: Use crypto.CreateTLSConfiguration() instead
+        - pattern: ^tls\.Config\.(InsecureSkipVerify|MinVersion|MaxVersion|CipherSuites|CurvePreferences)$
+          msg: Do not set this field directly, use crypto.CreateTLSConfiguration() instead
+      analyze-types: true
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

@@ -9,8 +9,8 @@ import (
 	"github.com/portainer/portainer/api/ws"
 	httperror "github.com/portainer/portainer/pkg/libhttp/error"
 	"github.com/portainer/portainer/pkg/libhttp/request"
+	"github.com/portainer/portainer/pkg/validate"
 
-	"github.com/asaskevich/govalidator"
 	"github.com/gorilla/websocket"
 )
 
@@ -38,7 +38,7 @@ func (handler *Handler) websocketAttach(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		return httperror.BadRequest("Invalid query parameter: id", err)
 	}
-	if !govalidator.IsHexadecimal(attachID) {
+	if !validate.IsHexadecimal(attachID) {
 		return httperror.BadRequest("Invalid query parameter: id (must be hexadecimal identifier)", err)
 	}
 

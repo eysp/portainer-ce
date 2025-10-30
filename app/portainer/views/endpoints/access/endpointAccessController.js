@@ -24,7 +24,7 @@ class EndpointAccessController {
       this.endpoint = await this.EndpointService.endpoint(this.$transition$.params().id);
       this.group = await this.GroupService.group(this.endpoint.GroupId);
     } catch (err) {
-      this.Notifications.error('失败', err, '无法获取环境信息');
+      this.Notifications.error('Failure', err, 'Unable to retrieve environment information');
     }
   }
 
@@ -36,11 +36,11 @@ class EndpointAccessController {
     try {
       this.state.actionInProgress = true;
       await this.EndpointService.updateEndpoint(this.$transition$.params().id, this.endpoint);
-      this.Notifications.success('成功', '访问权限更新成功');
+      this.Notifications.success('Success', 'Access successfully updated');
       this.$state.reload(this.$state.current);
     } catch (err) {
       this.state.actionInProgress = false;
-      this.Notifications.error('失败', err, '无法更新访问权限');
+      this.Notifications.error('Failure', err, 'Unable to update accesses');
     }
   }
 }

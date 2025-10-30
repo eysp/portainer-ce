@@ -71,7 +71,7 @@ func (handler *Handler) customTemplateList(w http.ResponseWriter, r *http.Reques
 	customTemplates = filterByType(customTemplates, templateTypes)
 
 	if edge != nil {
-		customTemplates = slicesx.Filter(customTemplates, func(customTemplate portainer.CustomTemplate) bool {
+		customTemplates = slicesx.FilterInPlace(customTemplates, func(customTemplate portainer.CustomTemplate) bool {
 			return customTemplate.EdgeTemplate == *edge
 		})
 	}

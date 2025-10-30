@@ -19,9 +19,9 @@ function NameCell({
   const className = getValue();
 
   return (
-    <span className="flex flex-nowrap">
+    <span className="flex gap-2 flex-nowrap">
       {className}
-      {row.original.New && <Badge className="ml-1">Newly detected</Badge>}
+      {row.original.New && <Badge className="ml-auto">Newly detected</Badge>}
     </span>
   );
 }

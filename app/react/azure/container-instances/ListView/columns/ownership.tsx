@@ -14,7 +14,7 @@ export const ownership = columnHelper.accessor(
       ? determineOwnership(row.Portainer.ResourceControl)
       : ResourceControlOwnership.ADMINISTRATORS,
   {
-    header: '所有权',
+    header: 'Ownership',
     cell: OwnershipCell,
     id: 'ownership',
   }

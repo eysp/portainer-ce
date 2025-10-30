@@ -16,14 +16,14 @@ export interface Props {
 export function FileUploadForm({
   onChange,
   value,
-  title = '选择文件',
+  title = 'Select a file',
   required = false,
   description,
   'data-cy': dataCy,
 }: PropsWithChildren<Props> & AutomationTestingProps) {
   return (
     <div className="file-upload-form">
-      <FormSectionTitle>上传</FormSectionTitle>
+      <FormSectionTitle>Upload</FormSectionTitle>
       <div className="form-group">
         <span className="col-sm-12 text-muted small">{description}</span>
       </div>

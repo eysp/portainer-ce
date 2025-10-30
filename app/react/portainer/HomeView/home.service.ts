@@ -9,7 +9,7 @@ export async function getMotd() {
   } catch (err) {
     throw parseAxiosError(
       err as Error,
-      '无法获取信息消息'
+      'Unable to retrieve information message'
     );
   }
 }

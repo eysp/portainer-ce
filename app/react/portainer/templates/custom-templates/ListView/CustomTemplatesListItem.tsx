@@ -58,7 +58,7 @@ export function CustomTemplatesListItem({
                 icon={Edit}
                 data-cy={`custom-templates-edit-button-${template.Id}`}
               >
-                编辑
+                Edit
               </Button>
               <Button
                 data-cy="custom-templates-delete-"
@@ -69,7 +69,7 @@ export function CustomTemplatesListItem({
                 color="dangerlight"
                 icon={Trash2}
               >
-                删除
+                Delete
               </Button>
             </div>
           )}

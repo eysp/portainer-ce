@@ -27,8 +27,8 @@ export function DevicesField({
       value={values}
       onChange={onChange}
       item={Item}
-      addLabel="添加设备"
-      label="设备"
+      addLabel="Add device"
+      label="Devices"
       errors={errors}
       itemBuilder={() => ({ pathOnHost: '', pathInContainer: '' })}
       data-cy="docker-container-devices"
@@ -44,8 +44,8 @@ function Item({ item, onChange, error, index }: ItemProps<Device>) {
           value={item.pathOnHost}
           data-cy={`device-path-on-host_${index}`}
           onChange={(e) => onChange({ ...item, pathOnHost: e.target.value })}
-          label="宿主机"
-          placeholder="例如 /dev/tty0"
+          label="host"
+          placeholder="e.g. /dev/tty0"
           className="w-1/2"
           size="small"
         />
@@ -55,8 +55,8 @@ function Item({ item, onChange, error, index }: ItemProps<Device>) {
           onChange={(e) =>
             onChange({ ...item, pathInContainer: e.target.value })
           }
-          label="容器"
-          placeholder="例如 /dev/tty0"
+          label="container"
+          placeholder="e.g. /dev/tty0"
           className="w-1/2"
           size="small"
         />

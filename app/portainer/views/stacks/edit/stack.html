@@ -1,4 +1,4 @@
-<page-header title="'堆栈详情'" breadcrumbs="[{label:'堆栈', link:'docker.stacks'}, stackName]" reload="true"> </page-header>
+<page-header title="'Stack details'" breadcrumbs="[{label:'Stacks', link:'docker.stacks'}, stackName]" reload="true"> </page-header>
 
 <div class="row">
   <div class="col-sm-12">
@@ -9,18 +9,18 @@
           <uib-tab index="0">
             <uib-tab-heading>
               <pr-icon icon="'list'"></pr-icon>
-              堆栈
+              Stack
             </uib-tab-heading>
             <div style="margin-top: 10px">
               <!-- stack-information -->
               <div ng-if="external || orphaned">
-                <div class="col-sm-12 form-section-title"> 信息 </div>
+                <div class="col-sm-12 form-section-title"> Information </div>
                 <div class="form-group">
                   <span class="small">
                     <p class="text-muted">
                       <pr-icon icon="'alert-triangle'" mode="'warning'" class-name="'mr-0.5'"></pr-icon>
-                      <span ng-if="external">此堆栈是在 Portainer 之外创建的。对此堆栈的控制有限。</span>
-                      <span ng-if="orphaned">此堆栈已孤立。您可以使用“关联到此环境”功能将其重新关联到当前环境。</span>
+                      <span ng-if="external">This stack was created outside of Portainer. Control over this stack is limited.</span>
+                      <span ng-if="orphaned">This stack is orphaned. You can re-associate it with the current environment using the "Associate to this environment" feature.</span>
                     </p>
                   </span>
                 </div>
@@ -28,7 +28,7 @@
               <!-- !stack-information -->
               <!-- stack-details -->
               <div>
-                <div class="col-sm-12 form-section-title"> 堆栈详情 </div>
+                <div class="col-sm-12 form-section-title"> Stack details </div>
                 <div class="form-group">
                   {{ stackName }}
 
@@ -40,7 +40,7 @@
                     ng-click="startStack()"
                   >
                     <pr-icon icon="'play'"></pr-icon>
-                    启动此堆栈
+                    Start this stack
                   </button>
 
                   <button
@@ -51,12 +51,12 @@
                     ng-click="stopStack()"
                   >
                     <pr-icon icon="'stop-circle'"></pr-icon>
-                    停止此堆栈
+                    Stop this stack
                   </button>
 
                   <button authorization="PortainerStackDelete" class="btn btn-xs btn-light" ng-click="removeStack()" ng-if="!external || stack.Type == 1">
                     <pr-icon icon="'trash-2'"></pr-icon>
-                    删除此堆栈
+                    Delete this stack
                   </button>
 
                   <button
@@ -65,7 +65,7 @@
                     ui-sref="docker.templates.custom.new({fileContent: stackFileContent, type: stack.Type})"
                   >
                     <pr-icon icon="'plus'"></pr-icon>
-                    从堆栈创建模板
+                    Create template from stack
                   </button>
                   <button
                     authorization="PortainerStackUpdate"
@@ -76,8 +76,8 @@
                     class="btn btn-primary btn-xs"
                   >
                     <pr-icon icon="'arrow-right'" class-name="'mr-1'"></pr-icon>
-                    <span ng-hide="state.actionInProgress">从 Git 分离</span>
-                    <span ng-show="state.actionInProgress">分离中...</span>
+                    <span ng-hide="state.actionInProgress">Detach from Git</span>
+                    <span ng-show="state.actionInProgress">Detachment in progress...</span>
                   </button>
                 </div>
               </div>
@@ -85,8 +85,8 @@
 
               <!-- associate -->
               <div ng-if="orphaned">
-                <div class="col-sm-12 form-section-title"> 关联到此环境 </div>
-                <p class="small text-muted"> 此功能允许您将此堆栈重新关联到当前环境。</p>
+                <div class="col-sm-12 form-section-title"> Associate to this environment </div>
+                <p class="small text-muted"> This feature allows you to re-associate this stack to the current environment. </p>
                 <form class="form-horizontal">
                   <por-access-control-form form-data="formValues.AccessControlData" hide-title="true"></por-access-control-form>
                   <div class="form-group">
@@ -100,8 +100,8 @@
                         style="margin-left: -5px"
                       >
                         <pr-icon icon="'refresh-cw'" class="!mr-1"></pr-icon>
-                        <span ng-hide="state.actionInProgress">关联</span>
-                        <span ng-show="state.actionInProgress">关联中...</span>
+                        <span ng-hide="state.actionInProgress">Associate</span>
+                        <span ng-show="state.actionInProgress">Association in progress...</span>
                       </button>
                       <span class="text-danger" ng-if="state.formValidationError" style="margin-left: 5px">{{ state.formValidationError }}</span>
                     </div>
@@ -137,21 +137,22 @@
           <uib-tab index="1" select="showEditor()" ng-if="!external && (!stack.GitConfig || stack.FromAppTemplate)">
             <uib-tab-heading>
               <pr-icon icon="'edit-2'" class-name="'mr-1'"></pr-icon>
-              编辑器
+              Editor
             </uib-tab-heading>
             <form class="form-horizontal" ng-if="state.showEditorTab" style="margin-top: 10px" name="stackUpdateForm">
               <div class="form-group">
                 <span class="col-sm-12 text-muted small" style="margin-bottom: 7px" ng-if="stackType == STACK_TYPES.DockerCompose && composeSyntaxMaxVersion == 2">
-                  此堆栈将使用等同于 <code>docker compose</code> 的方式部署。目前仅支持 Compose 文件格式版本 <b>2</b>。
+                  This stack will be deployed using the equivalent of <code>docker compose</code>. Only Compose file format version <b>2</b> is supported at the moment.
                 </span>
                 <span class="col-sm-12 text-muted small" style="margin-bottom: 7px" ng-if="stackType == STACK_TYPES.DockerCompose && composeSyntaxMaxVersion > 2">
-                  此堆栈将使用 <code>docker compose</code> 部署。
+                  This stack will be deployed using <code>docker compose</code>.
                 </span>
                 <span class="col-sm-12 text-muted small">
-                  您可以在 <a href="https://docs.docker.com/compose/compose-file/" target="_blank">官方文档</a> 中获取有关 Compose 文件格式的更多信息。
+                  You can get more information about Compose file format in the <a href="https://docs.docker.com/compose/compose-file/" target="_blank">official documentation</a>.
                 </span>
-                <div class="col-sm-12" ng-if="state.yamlError">
-                  <span class="text-danger small">{{ state.yamlError }}</span>
+                <!-- opacity-0 with &nbsp; fixes the layout shift causing tooltips to go over hovered text -->
+                <div class="col-sm-12" ng-class="{ 'opacity-100': state.yamlError, 'opacity-0': !state.yamlError }">
+                  <span class="text-danger small">{{ state.yamlError || '&nbsp;' }}</span>
                 </div>
               </div>
               <div class="form-group">
@@ -159,10 +160,11 @@
                   <code-editor
                     read-only="orphaned"
                     identifier="stack-editor"
-                    placeholder="在此定义或粘贴您的 docker compose 文件内容"
+                    text-tip="Define or paste the content of your docker compose file here"
                     yml="true"
                     on-change="(editorUpdate)"
                     value="stackFileContent"
+                    schema="dockerComposeSchema"
                   ></code-editor>
                 </div>
               </div>
@@ -185,8 +187,8 @@
                   name="EnableWebhook"
                   checked="formValues.EnableWebhook"
                   label-class="'col-sm-2'"
-                  tooltip="'创建一个 webhook（或回调 URI）以自动更新此堆栈。向该回调 URI 发送 POST 请求（无需任何身份验证）将拉取最新版本的相关镜像并重新部署此堆栈。'"
-                  label="'创建堆栈 webhook'"
+                  tooltip="'Create a webhook (or callback URI) to automate the update of this stack. Sending a POST request to this callback URI (without requiring any authentication) will pull the most up-to-date version of the associated image and re-deploy this stack.'"
+                  label="'Create a Stack webhook'"
                   feature-id="'stack-webhook'"
                 ></por-switch-field>
               </div>
@@ -194,15 +196,15 @@
 
               <!-- options -->
               <div ng-if="stack.Type === 1 && applicationState.endpoint.apiVersion >= 1.27" authorization="PortainerStackUpdate">
-                <div class="col-sm-12 form-section-title"> 选项 </div>
+                <div class="col-sm-12 form-section-title"> Options </div>
                 <div class="form-group">
                   <div class="col-sm-12">
                     <por-switch-field
                       name="prune"
                       checked="formValues.Prune"
-                      tooltip="'清理不再被引用的服务。'"
+                      tooltip="'Prune services that are no longer referenced.'"
                       label-class="'col-sm-2'"
-                      label="'清理服务'"
+                      label="'Prune services'"
                       on-change="(onPruneChange)"
                     ></por-switch-field>
                   </div>
@@ -210,7 +212,7 @@
               </div>
               <!-- !options -->
               <div authorization="PortainerStackUpdate">
-                <div class="col-sm-12 form-section-title"> 操作 </div>
+                <div class="col-sm-12 form-section-title"> Actions </div>
                 <div class="form-group">
                   <div class="col-sm-12">
                     <button
@@ -220,8 +222,8 @@
                       ng-click="deployStack()"
                       button-spinner="state.actionInProgress"
                     >
-                      <span ng-hide="state.actionInProgress">更新堆栈</span>
-                      <span ng-show="state.actionInProgress">部署进行中...</span>
+                      <span ng-hide="state.actionInProgress">Update the stack</span>
+                      <span ng-show="state.actionInProgress">Deployment in progress...</span>
                     </button>
                   </div>
                 </div>

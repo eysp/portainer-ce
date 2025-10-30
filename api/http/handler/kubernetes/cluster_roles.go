@@ -32,7 +32,7 @@ func (handler *Handler) getAllKubernetesClusterRoles(w http.ResponseWriter, r *h
 		return httperror.Forbidden("User is not authorized to fetch cluster roles from the Kubernetes cluster.", httpErr)
 	}
 
-	if !cli.IsKubeAdmin {
+	if !cli.GetIsKubeAdmin() {
 		log.Error().Str("context", "getAllKubernetesClusterRoles").Msg("user is not authorized to fetch cluster roles from the Kubernetes cluster.")
 		return httperror.Forbidden("User is not authorized to fetch cluster roles from the Kubernetes cluster.", nil)
 	}

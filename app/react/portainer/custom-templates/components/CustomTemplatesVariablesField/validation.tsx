@@ -7,7 +7,7 @@ export function validation(definitions: VariableDefinition[]) {
     object({
       key: string().default(''),
       value: string().default(''),
-    }).test('required-if-no-default-value', '该字段是必填项', (obj) => {
+    }).test('required-if-no-default-value', 'This field is required', (obj) => {
       const definition = definitions.find((d) => d.name === obj.key);
       if (!definition) {
         return true;

@@ -10,6 +10,7 @@ export interface PortainerNamespace {
   Id: string;
   Name: string;
   Status: NamespaceStatus;
+  UnhealthyEventCount: number;
   Annotations: Record<string, string> | null;
   CreationDate: string;
   NamespaceOwner: string;

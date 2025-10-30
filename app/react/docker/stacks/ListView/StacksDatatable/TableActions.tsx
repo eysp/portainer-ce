@@ -18,14 +18,14 @@ export function TableActions({
         <DeleteButton
           disabled={selectedItems.length === 0}
           onConfirmed={() => onRemove(selectedItems)}
-          confirmMessage="您确定要删除选中的堆栈吗？相关的服务也将被删除。"
+          confirmMessage="Do you want to remove the selected stack(s)? Associated services will be removed as well."
           data-cy="stack-removeStackButton"
         />
       </Authorized>
 
       <Authorized authorizations="PortainerStackCreate">
         <AddButton data-cy="stack-addStackButton" to=".newstack">
-          添加堆栈
+          Add stack
         </AddButton>
       </Authorized>
     </div>

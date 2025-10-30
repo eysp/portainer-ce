@@ -6,6 +6,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
+	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/swarm"
 	"github.com/docker/docker/api/types/volume"
 	portainer "github.com/portainer/portainer/api"
@@ -44,7 +45,7 @@ type dashboardResponse struct {
 // @success 200 {object} dashboardResponse "Success"
 // @failure 400 "Bad request"
 // @failure 500 "Internal server error"
-// @router /docker/{environmentId}/dashboard [post]
+// @router /docker/{environmentId}/dashboard [get]
 func (h *Handler) dashboard(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	var resp dashboardResponse
 	err := h.dataStore.ViewTx(func(tx dataservices.DataStoreTx) error {
@@ -116,12 +117,12 @@ func (h *Handler) dashboard(w http.ResponseWriter, r *http.Request) *httperror.H
 			return err
 		}
 
-		networks, err := cli.NetworkList(r.Context(), types.NetworkListOptions{})
+		networks, err := cli.NetworkList(r.Context(), network.ListOptions{})
 		if err != nil {
 			return httperror.InternalServerError("Unable to retrieve Docker networks", err)
 		}
 
-		networks, err = utils.FilterByResourceControl(tx, networks, portainer.NetworkResourceControl, context, func(c types.NetworkResource) string {
+		networks, err = utils.FilterByResourceControl(tx, networks, portainer.NetworkResourceControl, context, func(c network.Summary) string {
 			return c.Name
 		})
 		if err != nil {

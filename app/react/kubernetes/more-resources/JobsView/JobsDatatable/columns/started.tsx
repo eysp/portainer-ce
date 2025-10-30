@@ -7,6 +7,6 @@ export const started = columnHelper.accessor(
   {
     header: 'Started',
     id: 'started',
-    cell: ({ getValue }) => getValue(),
+    cell: ({ getValue }) => getValue() ?? '',
   }
 );

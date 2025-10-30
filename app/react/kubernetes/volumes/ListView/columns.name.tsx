@@ -41,12 +41,12 @@ export function NameCell({
         {item.PersistentVolumeClaim.Name}
       </Link>
       {isSystem ? (
-        <SystemBadge />
+        <SystemBadge className="ml-auto" />
       ) : (
-        <>
+        <div className="ml-auto flex gap-2">
           {item.PersistentVolumeClaim.IsExternal && <ExternalBadge />}
           {!isVolumeUsed(item) && <UnusedBadge />}
-        </>
+        </div>
       )}
     </div>
   );

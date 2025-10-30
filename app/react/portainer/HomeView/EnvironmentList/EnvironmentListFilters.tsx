@@ -92,7 +92,7 @@ export function EnvironmentListFilters({
         <HomepageFilter
           filterOptions={platformTypeOptions}
           onChange={setPlatformTypes}
-          placeHolder="平台"
+          placeHolder="Platform"
           value={platformTypes}
         />
       </div>
@@ -100,7 +100,7 @@ export function EnvironmentListFilters({
         <HomepageFilter
           filterOptions={connectionTypeOptions}
           onChange={setConnectionTypes}
-          placeHolder="连接类型"
+          placeHolder="Connection Type"
           value={connectionTypes}
         />
       </div>
@@ -108,7 +108,7 @@ export function EnvironmentListFilters({
         <HomepageFilter
           filterOptions={status}
           onChange={statusOnChange}
-          placeHolder="状态"
+          placeHolder="Status"
           value={statusState}
         />
       </div>
@@ -116,7 +116,7 @@ export function EnvironmentListFilters({
         <HomepageFilter
           filterOptions={uniqueTag}
           onChange={tagOnChange}
-          placeHolder="标签"
+          placeHolder="Tags"
           value={tagState}
         />
       </div>
@@ -124,7 +124,7 @@ export function EnvironmentListFilters({
         <HomepageFilter
           filterOptions={uniqueGroup}
           onChange={groupOnChange}
-          placeHolder="分组"
+          placeHolder="Groups"
           value={groupState}
         />
       </div>
@@ -137,7 +137,7 @@ export function EnvironmentListFilters({
             })) || []
           }
           onChange={setAgentVersions}
-          placeHolder="代理版本"
+          placeHolder="Agent Version"
           value={agentVersions}
         />
       </div>
@@ -146,14 +146,14 @@ export function EnvironmentListFilters({
         className={styles.clearButton}
         onClick={clearFilter}
       >
-        清除全部
+        Clear all
       </button>
 
       <div className={styles.filterRight}>
         <SortbySelector
           onChange={sortOnChange}
           onDescending={sortOnDescending}
-          placeHolder="排序方式"
+          placeHolder="Sort By"
           sortByDescending={sortByDescending}
           sortByButton={sortByButton}
           value={sortByState}
@@ -186,12 +186,12 @@ function getConnectionTypeOptions(platformTypes: PlatformType[]) {
     ],
   };
 
- const connectionTypesDefaultOptions = [
-  { value: ConnectionType.API, label: 'API' },
-  { value: ConnectionType.Agent, label: '代理' },
-  { value: ConnectionType.EdgeAgentStandard, label: 'Edge 代理标准' },
-  { value: ConnectionType.EdgeAgentAsync, label: 'Edge 代理异步' },
- ];
+  const connectionTypesDefaultOptions = [
+    { value: ConnectionType.API, label: 'API' },
+    { value: ConnectionType.Agent, label: 'Agent' },
+    { value: ConnectionType.EdgeAgentStandard, label: 'Edge Agent Standard' },
+    { value: ConnectionType.EdgeAgentAsync, label: 'Edge Agent Async' },
+  ];
 
   if (platformTypes.length === 0) {
     return connectionTypesDefaultOptions;

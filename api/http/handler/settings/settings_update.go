@@ -14,8 +14,8 @@ import (
 	httperror "github.com/portainer/portainer/pkg/libhttp/error"
 	"github.com/portainer/portainer/pkg/libhttp/request"
 	"github.com/portainer/portainer/pkg/libhttp/response"
+	"github.com/portainer/portainer/pkg/validate"
 
-	"github.com/asaskevich/govalidator"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
 )
@@ -46,7 +46,7 @@ type settingsUpdatePayload struct {
 	// Whether telemetry is enabled
 	EnableTelemetry *bool `example:"false"`
 	// Helm repository URL
-	HelmRepositoryURL *string `example:"https://kubernetes.github.io/ingress-nginx"`
+	HelmRepositoryURL *string `example:"https://charts.bitnami.com/bitnami"`
 	// Kubectl Shell Image
 	KubectlShellImage *string `example:"portainer/kubectl-shell:latest"`
 	// TrustOnFirstConnect makes Portainer accepting edge agent connection by default
@@ -62,15 +62,15 @@ func (payload *settingsUpdatePayload) Validate(r *http.Request) error {
 		return errors.New("Invalid authentication method value. Value must be one of: 1 (internal), 2 (LDAP/AD) or 3 (OAuth)")
 	}
 
-	if payload.LogoURL != nil && *payload.LogoURL != "" && !govalidator.IsURL(*payload.LogoURL) {
+	if payload.LogoURL != nil && *payload.LogoURL != "" && !validate.IsURL(*payload.LogoURL) {
 		return errors.New("Invalid logo URL. Must correspond to a valid URL format")
 	}
 
-	if payload.TemplatesURL != nil && *payload.TemplatesURL != "" && !govalidator.IsURL(*payload.TemplatesURL) {
+	if payload.TemplatesURL != nil && *payload.TemplatesURL != "" && !validate.IsURL(*payload.TemplatesURL) {
 		return errors.New("Invalid external templates URL. Must correspond to a valid URL format")
 	}
 
-	if payload.HelmRepositoryURL != nil && *payload.HelmRepositoryURL != "" && !govalidator.IsURL(*payload.HelmRepositoryURL) {
+	if payload.HelmRepositoryURL != nil && *payload.HelmRepositoryURL != "" && !validate.IsURL(*payload.HelmRepositoryURL) {
 		return errors.New("Invalid Helm repository URL. Must correspond to a valid URL format")
 	}
 

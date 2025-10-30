@@ -16,6 +16,7 @@ import (
 	"github.com/portainer/portainer/api/filesystem"
 	"github.com/portainer/portainer/api/http/security"
 	"github.com/portainer/portainer/api/jwt"
+	"github.com/portainer/portainer/api/roar"
 
 	"github.com/segmentio/encoding/json"
 	"github.com/stretchr/testify/assert"
@@ -287,11 +288,8 @@ func TestEdgeStackStatus(t *testing.T) {
 
 	edgeStackID := portainer.EdgeStackID(17)
 	edgeStack := portainer.EdgeStack{
-		ID:   edgeStackID,
-		Name: "test-edge-stack-17",
-		Status: map[portainer.EndpointID]portainer.EdgeStackStatus{
-			endpointID: {},
-		},
+		ID:             edgeStackID,
+		Name:           "test-edge-stack-17",
 		CreationDate:   time.Now().Unix(),
 		EdgeGroups:     []portainer.EdgeGroupID{1, 2},
 		ProjectPath:    "/project/path",
@@ -369,8 +367,8 @@ func TestEdgeJobsResponse(t *testing.T) {
 	unrelatedEndpoint := localCreateEndpoint(80, nil)
 
 	staticEdgeGroup := portainer.EdgeGroup{
-		ID:        1,
-		Endpoints: []portainer.EndpointID{endpointFromStaticEdgeGroup.ID},
+		ID:          1,
+		EndpointIDs: roar.FromSlice([]portainer.EndpointID{endpointFromStaticEdgeGroup.ID}),
 	}
 	err := handler.DataStore.EdgeGroup().Create(&staticEdgeGroup)
 	require.NoError(t, err)

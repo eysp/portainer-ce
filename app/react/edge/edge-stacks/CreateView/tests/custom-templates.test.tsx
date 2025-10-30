@@ -4,8 +4,9 @@ import userEvent from '@testing-library/user-event';
 
 import { http, server } from '@/setup-tests/server';
 import selectEvent from '@/react/test-utils/react-select';
+import { mockCodeMirror } from '@/setup-tests/mock-codemirror';
 
-import { mockCodeMirror, renderCreateForm } from './utils.test';
+import { renderCreateForm } from './utils.test';
 
 // keep mockTemplateId and mockTemplateType in module scope
 let mockTemplateId: number;

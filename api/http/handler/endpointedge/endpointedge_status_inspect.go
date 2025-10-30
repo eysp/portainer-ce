@@ -170,7 +170,7 @@ func (handler *Handler) inspectStatus(tx dataservices.DataStoreTx, r *http.Reque
 		Credentials:     tunnel.Credentials,
 	}
 
-	schedules, handlerErr := handler.buildSchedules(tx, endpoint.ID)
+	schedules, handlerErr := handler.buildSchedules(tx, endpoint)
 	if handlerErr != nil {
 		return nil, handlerErr
 	}
@@ -208,7 +208,7 @@ func parseAgentPlatform(r *http.Request) (portainer.EndpointType, error) {
 	}
 }
 
-func (handler *Handler) buildSchedules(tx dataservices.DataStoreTx, endpointID portainer.EndpointID) ([]edgeJobResponse, *httperror.HandlerError) {
+func (handler *Handler) buildSchedules(tx dataservices.DataStoreTx, endpoint *portainer.Endpoint) ([]edgeJobResponse, *httperror.HandlerError) {
 	schedules := []edgeJobResponse{}
 
 	edgeJobs, err := tx.EdgeJob().ReadAll()
@@ -216,11 +216,16 @@ func (handler *Handler) buildSchedules(tx dataservices.DataStoreTx, endpointID p
 		return nil, httperror.InternalServerError("Unable to retrieve Edge Jobs", err)
 	}
 
+	endpointGroups, err := tx.EndpointGroup().ReadAll()
+	if err != nil {
+		return nil, httperror.InternalServerError("Unable to retrieve endpoint groups", err)
+	}
+
 	for _, job := range edgeJobs {
-		_, endpointHasJob := job.Endpoints[endpointID]
+		_, endpointHasJob := job.Endpoints[endpoint.ID]
 		if !endpointHasJob {
 			for _, edgeGroupID := range job.EdgeGroups {
-				member, _, err := edge.EndpointInEdgeGroup(tx, endpointID, edgeGroupID)
+				member, _, err := edge.EndpointInEdgeGroup(tx, endpoint, edgeGroupID, endpointGroups)
 				if err != nil {
 					return nil, httperror.InternalServerError("Unable to retrieve relations", err)
 				} else if member {
@@ -236,10 +241,10 @@ func (handler *Handler) buildSchedules(tx dataservices.DataStoreTx, endpointID p
 		}
 
 		var collectLogs bool
-		if _, ok := job.GroupLogsCollection[endpointID]; ok {
-			collectLogs = job.GroupLogsCollection[endpointID].CollectLogs
+		if _, ok := job.GroupLogsCollection[endpoint.ID]; ok {
+			collectLogs = job.GroupLogsCollection[endpoint.ID].CollectLogs
 		} else {
-			collectLogs = job.Endpoints[endpointID].CollectLogs
+			collectLogs = job.Endpoints[endpoint.ID].CollectLogs
 		}
 
 		schedule := edgeJobResponse{
@@ -264,9 +269,6 @@ func (handler *Handler) buildSchedules(tx dataservices.DataStoreTx, endpointID p
 func (handler *Handler) buildEdgeStacks(tx dataservices.DataStoreTx, endpointID portainer.EndpointID) ([]stackStatusResponse, *httperror.HandlerError) {
 	relation, err := tx.EndpointRelation().EndpointRelation(endpointID)
 	if err != nil {
-		if tx.IsErrObjectNotFound(err) {
-			return nil, nil
-		}
 		return nil, httperror.InternalServerError("Unable to retrieve relation object from the database", err)
 	}
 

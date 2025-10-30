@@ -30,24 +30,24 @@ function NamespaceCell({ row, getValue }: CellContext<Stack, string>) {
       >
         {value}
       </Link>
-      {isSystem && <SystemBadge />}
+      {isSystem && <SystemBadge className="ml-auto" />}
     </div>
   );
 }
 
 const name = columnHelper.accessor('Name', {
   id: 'name',
-  header: '堆栈',
+  header: 'Stack',
 });
 
 const applications = columnHelper.accessor((row) => row.Applications.length, {
   id: 'applications',
-  header: '应用程序',
+  header: 'Applications',
 });
 
 const actions = columnHelper.display({
   id: 'actions',
-  header: '操作',
+  header: 'Actions',
   cell: ({ row: { original: item } }) => (
     <Link
       to="kubernetes.stacks.stack.logs"
@@ -56,7 +56,7 @@ const actions = columnHelper.display({
       data-cy={`app-stack-logs-link-${item.Name}`}
     >
       <Icon icon={FileText} />
-      日志
+      Logs
     </Link>
   ),
 });

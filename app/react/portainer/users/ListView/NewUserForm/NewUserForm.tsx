@@ -37,7 +37,7 @@ export function NewUserForm() {
     <div className="row">
       <div className="col-sm-12">
         <Widget>
-          <Widget.Title icon={PlusIcon} title="添加新用户" />
+          <Widget.Title icon={PlusIcon} title="Add a new user" />
           <Widget.Body>
             <Formik<FormValues>
               initialValues={{
@@ -60,7 +60,7 @@ export function NewUserForm() {
                   {
                     onSuccess() {
                       notifySuccess(
-                        '用户创建成功',
+                        'User successfully created',
                         values.username
                       );
                       resetForm();
@@ -85,10 +85,10 @@ export function NewUserForm() {
 
                   <FormActions
                     data-cy="user-createUserButton"
-                    submitLabel="创建用户"
+                    submitLabel="Create user"
                     isLoading={createUserMutation.isLoading}
                     isValid={isValid}
-                    loadingText="正在创建用户..."
+                    loadingText="Creating user..."
                     errors={errors}
                     submitIcon={PlusIcon}
                   />

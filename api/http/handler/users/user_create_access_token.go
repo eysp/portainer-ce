@@ -11,8 +11,7 @@ import (
 	httperror "github.com/portainer/portainer/pkg/libhttp/error"
 	"github.com/portainer/portainer/pkg/libhttp/request"
 	"github.com/portainer/portainer/pkg/libhttp/response"
-
-	"github.com/asaskevich/govalidator"
+	"github.com/portainer/portainer/pkg/validate"
 )
 
 type userAccessTokenCreatePayload struct {
@@ -24,10 +23,10 @@ func (payload *userAccessTokenCreatePayload) Validate(r *http.Request) error {
 	if len(payload.Description) == 0 {
 		return errors.New("invalid description: cannot be empty")
 	}
-	if govalidator.HasWhitespaceOnly(payload.Description) {
+	if validate.HasWhitespaceOnly(payload.Description) {
 		return errors.New("invalid description: cannot contain only whitespaces")
 	}
-	if govalidator.MinStringLength(payload.Description, "128") {
+	if validate.MinStringLength(payload.Description, 128) {
 		return errors.New("invalid description: cannot be longer than 128 characters")
 	}
 	return nil
@@ -50,7 +49,7 @@ type accessTokenResponse struct {
 // @produce json
 // @param id path int true "User identifier"
 // @param body body userAccessTokenCreatePayload true "details"
-// @success 200 {object} accessTokenResponse "Created"
+// @success 200 {object} accessTokenResponse "Success"
 // @failure 400 "Invalid request"
 // @failure 401 "Unauthorized"
 // @failure 403 "Permission denied"
@@ -115,7 +114,7 @@ func (handler *Handler) userCreateAccessToken(w http.ResponseWriter, r *http.Req
 		return httperror.InternalServerError("Internal Server Error", err)
 	}
 
-	return response.JSONWithStatus(w, accessTokenResponse{rawAPIKey, *apiKey}, http.StatusCreated)
+	return response.JSONWithStatus(w, accessTokenResponse{rawAPIKey, *apiKey}, http.StatusOK)
 }
 
 func (handler *Handler) usesInternalAuthentication(userid portainer.UserID) (bool, error) {

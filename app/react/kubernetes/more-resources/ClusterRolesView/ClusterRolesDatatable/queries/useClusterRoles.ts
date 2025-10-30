@@ -21,7 +21,7 @@ export function useClusterRoles(
     },
     {
       ...withGlobalError('Unable to get cluster roles'),
-      ...options,
+      refetchInterval: options?.autoRefreshRate,
     }
   );
 }

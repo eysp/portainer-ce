@@ -36,7 +36,9 @@
       "Azure/*": ["azure/*"],
       "Docker/*": ["docker/*"],
       "Kubernetes/*": ["kubernetes/*"],
-      "Portainer/*": ["portainer/*"]
+      "Portainer/*": ["portainer/*"],
+      // https://github.com/jsonnext/codemirror-json-schema/issues/107#issuecomment-2144584296
+      "yaml-schema": ["../node_modules/codemirror-json-schema/dist/yaml"]
     },
     "types": ["vitest/globals"]
   },

@@ -6,6 +6,7 @@ import (
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/datastore"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -14,10 +15,9 @@ func Test_updateEdgeGroups(t *testing.T) {
 		groups := make([]portainer.EdgeGroup, len(names))
 		for index, name := range names {
 			group := &portainer.EdgeGroup{
-				Name:      name,
-				Dynamic:   false,
-				TagIDs:    make([]portainer.TagID, 0),
-				Endpoints: make([]portainer.EndpointID, 0),
+				Name:    name,
+				Dynamic: false,
+				TagIDs:  make([]portainer.TagID, 0),
 			}
 
 			if err := store.EdgeGroup().Create(group); err != nil {
@@ -35,13 +35,8 @@ func Test_updateEdgeGroups(t *testing.T) {
 			group, err := store.EdgeGroup().Read(groupID)
 			is.NoError(err)
 
-			for _, endpoint := range group.Endpoints {
-				if endpoint == endpointID {
-					return
-				}
-			}
-
-			is.Fail("expected endpoint to be in group")
+			is.True(group.EndpointIDs.Contains(endpointID),
+				"expected endpoint to be in group")
 		}
 	}
 
@@ -81,7 +76,7 @@ func Test_updateEdgeGroups(t *testing.T) {
 
 		endpointGroups := groupsByName(groups, testCase.endpointGroupNames)
 		for _, group := range endpointGroups {
-			group.Endpoints = append(group.Endpoints, testCase.endpoint.ID)
+			group.EndpointIDs.Add(testCase.endpoint.ID)
 
 			err = store.EdgeGroup().Update(group.ID, &group)
 			is.NoError(err)

@@ -7,12 +7,14 @@ import (
 	"strings"
 
 	gittypes "github.com/portainer/portainer/api/git/types"
+	"github.com/rs/zerolog/log"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/filemode"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/v5/plumbing/transport"
 	githttp "github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/pkg/errors"
@@ -33,7 +35,7 @@ func (c *gitClient) download(ctx context.Context, dst string, opt cloneOption) e
 		URL:             opt.repositoryUrl,
 		Depth:           opt.depth,
 		InsecureSkipTLS: opt.tlsSkipVerify,
-		Auth:            getAuth(opt.username, opt.password),
+		Auth:            getAuth(opt.authType, opt.username, opt.password),
 		Tags:            git.NoTags,
 	}
 
@@ -51,7 +53,10 @@ func (c *gitClient) download(ctx context.Context, dst string, opt cloneOption) e
 	}
 
 	if !c.preserveGitDirectory {
-		os.RemoveAll(filepath.Join(dst, ".git"))
+		err := os.RemoveAll(filepath.Join(dst, ".git"))
+		if err != nil {
+			log.Error().Err(err).Msg("failed to remove .git directory")
+		}
 	}
 
 	return nil
@@ -64,7 +69,7 @@ func (c *gitClient) latestCommitID(ctx context.Context, opt fetchOption) (string
 	})
 
 	listOptions := &git.ListOptions{
-		Auth:            getAuth(opt.username, opt.password),
+		Auth:            getAuth(opt.authType, opt.username, opt.password),
 		InsecureSkipTLS: opt.tlsSkipVerify,
 	}
 
@@ -94,7 +99,23 @@ func (c *gitClient) latestCommitID(ctx context.Context, opt fetchOption) (string
 	return "", errors.Errorf("could not find ref %q in the repository", opt.referenceName)
 }
 
-func getAuth(username, password string) *githttp.BasicAuth {
+func getAuth(authType gittypes.GitCredentialAuthType, username, password string) transport.AuthMethod {
+	if password == "" {
+		return nil
+	}
+
+	switch authType {
+	case gittypes.GitCredentialAuthType_Basic:
+		return getBasicAuth(username, password)
+	case gittypes.GitCredentialAuthType_Token:
+		return getTokenAuth(password)
+	default:
+		log.Warn().Msg("unknown git credentials authorization type, defaulting to None")
+		return nil
+	}
+}
+
+func getBasicAuth(username, password string) *githttp.BasicAuth {
 	if password != "" {
 		if username == "" {
 			username = "token"
@@ -108,6 +129,15 @@ func getAuth(username, password string) *githttp.BasicAuth {
 	return nil
 }
 
+func getTokenAuth(token string) *githttp.TokenAuth {
+	if token != "" {
+		return &githttp.TokenAuth{
+			Token: token,
+		}
+	}
+	return nil
+}
+
 func (c *gitClient) listRefs(ctx context.Context, opt baseOption) ([]string, error) {
 	rem := git.NewRemote(memory.NewStorage(), &config.RemoteConfig{
 		Name: "origin",
@@ -115,7 +145,7 @@ func (c *gitClient) listRefs(ctx context.Context, opt baseOption) ([]string, err
 	})
 
 	listOptions := &git.ListOptions{
-		Auth:            getAuth(opt.username, opt.password),
+		Auth:            getAuth(opt.authType, opt.username, opt.password),
 		InsecureSkipTLS: opt.tlsSkipVerify,
 	}
 
@@ -143,7 +173,7 @@ func (c *gitClient) listFiles(ctx context.Context, opt fetchOption) ([]string, e
 		Depth:           1,
 		SingleBranch:    true,
 		ReferenceName:   plumbing.ReferenceName(opt.referenceName),
-		Auth:            getAuth(opt.username, opt.password),
+		Auth:            getAuth(opt.authType, opt.username, opt.password),
 		InsecureSkipTLS: opt.tlsSkipVerify,
 		Tags:            git.NoTags,
 	}

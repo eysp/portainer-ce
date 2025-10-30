@@ -88,6 +88,7 @@ type RemoveOptions struct {
 }
 
 type EdgeStack struct {
-	ID   int
-	Name string
+	ID       int
+	Name     string
+	ExitCode int
 }

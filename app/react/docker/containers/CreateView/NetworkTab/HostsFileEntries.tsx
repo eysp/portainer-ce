@@ -20,7 +20,7 @@ export function HostsFileEntries({
 }) {
   return (
     <InputList
-      label="主机文件条目"
+      label="Hosts file entries"
       value={values}
       onChange={(hostsFileEntries) => onChange(hostsFileEntries)}
       errors={errors}

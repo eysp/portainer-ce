@@ -55,12 +55,13 @@ func createRegistryAuthenticationHeader(
 		return
 	}
 
-	if err = registryutils.EnsureRegTokenValid(dataStore, matchingRegistry); err != nil {
+	if err = registryutils.PrepareRegistryCredentials(dataStore, matchingRegistry); err != nil {
 		return
 	}
 
 	authenticationHeader.Serveraddress = matchingRegistry.URL
-	authenticationHeader.Username, authenticationHeader.Password, err = registryutils.GetRegEffectiveCredential(matchingRegistry)
+	authenticationHeader.Username = matchingRegistry.Username
+	authenticationHeader.Password = matchingRegistry.Password
 
 	return
 }

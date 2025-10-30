@@ -40,10 +40,10 @@ export function NotificationsView() {
 
   return (
     <>
-      <PageHeader title="通知" breadcrumbs={breadcrumbs} reload />
+      <PageHeader title="Notifications" breadcrumbs={breadcrumbs} reload />
       <Datatable
         columns={columns}
-        title="通知"
+        title="Notifications"
         titleIcon={Bell}
         dataset={userNotifications}
         settingsManager={tableState}
@@ -66,7 +66,7 @@ function TableActions({ selectedRows }: { selectedRows: ToastNotification[] }) {
       onConfirmed={() => handleRemove()}
       disabled={selectedRows.length === 0}
       data-cy="remove-notifications-button"
-      confirmMessage="你确定要删除所选通知吗？"
+      confirmMessage="Are you sure you want to remove the selected notifications?"
     />
   );
 

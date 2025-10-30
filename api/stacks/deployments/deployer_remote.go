@@ -5,13 +5,13 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"math/rand"
 	"os"
 	"strings"
 	"time"
 
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/filesystem"
+	"github.com/portainer/portainer/pkg/librand"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -210,7 +210,7 @@ func (d *stackDeployer) remoteStack(stack *portainer.Stack, endpoint *portainer.
 			fmt.Sprintf("%s:%s", composeDestination, composeDestination),
 			fmt.Sprintf("%s:%s", targetSocketBindHost, targetSocketBindContainer),
 		},
-	}, nil, nil, fmt.Sprintf("portainer-unpacker-%d-%s-%d", stack.ID, stack.Name, rand.Intn(100)))
+	}, nil, nil, fmt.Sprintf("portainer-unpacker-%d-%s-%d", stack.ID, stack.Name, librand.Intn(100)))
 
 	if err != nil {
 		return errors.Wrap(err, "unable to create unpacker container")

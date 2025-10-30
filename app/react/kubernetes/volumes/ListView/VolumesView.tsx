@@ -30,7 +30,7 @@ export function VolumesView() {
 
   return (
     <>
-      <PageHeader title="卷列表" breadcrumbs="卷" reload />
+      <PageHeader title="Volume list" breadcrumbs="Volumes" reload />
       <>
         <WidgetTabs tabs={tabs} currentTabIndex={currentTabIndex} />
         <div className="content">{tabs[currentTabIndex].widget}</div>

@@ -9,9 +9,10 @@ import (
 	"testing"
 
 	portainer "github.com/portainer/portainer/api"
-	"github.com/stretchr/testify/require"
+	"github.com/portainer/portainer/api/roar"
 
 	"github.com/segmentio/encoding/json"
+	"github.com/stretchr/testify/require"
 )
 
 // Update
@@ -25,9 +26,8 @@ func TestUpdateAndInspect(t *testing.T) {
 	endpointID := portainer.EndpointID(6)
 	newEndpoint := createEndpointWithId(t, handler.DataStore, endpointID)
 
-	if err := handler.DataStore.Endpoint().Create(&newEndpoint); err != nil {
-		t.Fatal(err)
-	}
+	err := handler.DataStore.Endpoint().Create(&newEndpoint)
+	require.NoError(t, err)
 
 	endpointRelation := portainer.EndpointRelation{
 		EndpointID: endpointID,
@@ -36,22 +36,20 @@ func TestUpdateAndInspect(t *testing.T) {
 		},
 	}
 
-	if err := handler.DataStore.EndpointRelation().Create(&endpointRelation); err != nil {
-		t.Fatal(err)
-	}
+	err = handler.DataStore.EndpointRelation().Create(&endpointRelation)
+	require.NoError(t, err)
 
 	newEdgeGroup := portainer.EdgeGroup{
 		ID:           2,
 		Name:         "EdgeGroup 2",
 		Dynamic:      false,
 		TagIDs:       nil,
-		Endpoints:    []portainer.EndpointID{newEndpoint.ID},
+		EndpointIDs:  roar.FromSlice([]portainer.EndpointID{newEndpoint.ID}),
 		PartialMatch: false,
 	}
 
-	if err := handler.DataStore.EdgeGroup().Create(&newEdgeGroup); err != nil {
-		t.Fatal(err)
-	}
+	err = handler.DataStore.EdgeGroup().Create(&newEdgeGroup)
+	require.NoError(t, err)
 
 	payload := updateEdgeStackPayload{
 		StackFileContent: "update-test",
@@ -61,15 +59,11 @@ func TestUpdateAndInspect(t *testing.T) {
 	}
 
 	jsonPayload, err := json.Marshal(payload)
-	if err != nil {
-		t.Fatal("request error:", err)
-	}
+	require.NoError(t, err)
 
 	r := bytes.NewBuffer(jsonPayload)
 	req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/edge_stacks/%d", edgeStack.ID), r)
-	if err != nil {
-		t.Fatal("request error:", err)
-	}
+	require.NoError(t, err)
 
 	req.Header.Add("x-api-key", rawAPIKey)
 	rec := httptest.NewRecorder()
@@ -81,9 +75,7 @@ func TestUpdateAndInspect(t *testing.T) {
 
 	// Get updated edge stack
 	req, err = http.NewRequest(http.MethodGet, fmt.Sprintf("/edge_stacks/%d", edgeStack.ID), nil)
-	if err != nil {
-		t.Fatal("request error:", err)
-	}
+	require.NoError(t, err)
 
 	req.Header.Add("x-api-key", rawAPIKey)
 	rec = httptest.NewRecorder()
@@ -94,9 +86,8 @@ func TestUpdateAndInspect(t *testing.T) {
 	}
 
 	updatedStack := portainer.EdgeStack{}
-	if err := json.NewDecoder(rec.Body).Decode(&updatedStack); err != nil {
-		t.Fatal("error decoding response:", err)
-	}
+	err = json.NewDecoder(rec.Body).Decode(&updatedStack)
+	require.NoError(t, err)
 
 	if payload.UpdateVersion && updatedStack.Version != edgeStack.Version+1 {
 		t.Fatalf("expected EdgeStack version %d, found %d", edgeStack.Version+1, updatedStack.Version+1)
@@ -122,7 +113,7 @@ func TestUpdateWithInvalidEdgeGroups(t *testing.T) {
 		Name:         "EdgeGroup 2",
 		Dynamic:      false,
 		TagIDs:       nil,
-		Endpoints:    []portainer.EndpointID{8889},
+		EndpointIDs:  roar.FromSlice([]portainer.EndpointID{8889}),
 		PartialMatch: false,
 	}
 
@@ -226,15 +217,11 @@ func TestUpdateWithInvalidPayload(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.Name, func(t *testing.T) {
 			jsonPayload, err := json.Marshal(tc.Payload)
-			if err != nil {
-				t.Fatal("request error:", err)
-			}
+			require.NoError(t, err)
 
 			r := bytes.NewBuffer(jsonPayload)
 			req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/edge_stacks/%d", edgeStack.ID), r)
-			if err != nil {
-				t.Fatal("request error:", err)
-			}
+			require.NoError(t, err)
 
 			req.Header.Add("x-api-key", rawAPIKey)
 			rec := httptest.NewRecorder()

@@ -26,7 +26,7 @@ export function OverridableInput({
           className={clsx('!ml-0', { active: !override })}
           onClick={() => onChange(null)}
         >
-          默认
+          Default
         </Button>
         <Button
           color="light"
@@ -35,7 +35,7 @@ export function OverridableInput({
           className={clsx({ active: override })}
           onClick={() => onChange('')}
         >
-          覆盖
+          Override
         </Button>
       </InputGroup.ButtonWrapper>
       <InputGroup.Input

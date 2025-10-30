@@ -133,7 +133,7 @@ func (service *Service) ParseAndVerifyToken(token string) (*portainer.TokenData,
 	}
 
 	user, err := service.dataStore.User().Read(portainer.UserID(cl.UserID))
-	if err != nil || user.TokenIssueAt > cl.RegisteredClaims.IssuedAt.Unix() {
+	if err != nil || user.TokenIssueAt > cl.IssuedAt.Unix() {
 		return nil, "", time.Time{}, errInvalidJWTToken
 	}
 
@@ -205,7 +205,7 @@ func (service *Service) generateSignedToken(data *portainer.TokenData, expiresAt
 
 	// If expiresAt is set to a zero value, the token should never expire
 	if expiresAt.IsZero() {
-		cl.RegisteredClaims.ExpiresAt = nil
+		cl.ExpiresAt = nil
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, cl)

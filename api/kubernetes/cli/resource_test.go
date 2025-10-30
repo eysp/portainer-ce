@@ -4,6 +4,11 @@ import (
 	"strings"
 	"testing"
 
+	portainer "github.com/portainer/portainer/api"
+
+	"github.com/stretchr/testify/require"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientV1 "k8s.io/client-go/tools/clientcmd/api/v1"
 )
@@ -90,4 +95,36 @@ func Test_GenerateYAML(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGetResourceQuotaFromNamespace(t *testing.T) {
+	kcl := &KubeClient{}
+
+	namespace := portainer.K8sNamespaceInfo{Name: "my-namespace"}
+	resourceQuotas := []v1.ResourceQuota{
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "portainer-rq-" + namespace.Name + "-1",
+				Namespace: namespace.Name,
+			},
+		},
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "portainer-rq-" + namespace.Name,
+				Namespace: namespace.Name,
+			},
+		},
+	}
+
+	rq := kcl.GetResourceQuotaFromNamespace(namespace, resourceQuotas)
+	require.NotNil(t, rq)
+	require.Equal(t, namespace.Name, rq.Namespace)
+
+	// Empty cases
+	rq = kcl.GetResourceQuotaFromNamespace(namespace, nil)
+	require.Nil(t, rq)
+
+	namespace.Name = "another-namespace"
+	rq = kcl.GetResourceQuotaFromNamespace(namespace, resourceQuotas)
+	require.Nil(t, rq)
 }

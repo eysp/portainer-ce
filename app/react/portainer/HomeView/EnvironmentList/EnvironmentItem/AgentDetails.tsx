@@ -46,7 +46,7 @@ function EdgeAgentDetails({ environment }: { environment: Environment }) {
     <span className="flex items-center gap-1">
       <Icon icon={AlertTriangle} className="icon-warning" />
       <span className="icon-warning">{agentVersion || '< 2.15'}</span>
-      <Tooltip message="当前 Portainer 服务器版本中的功能和修复可能在升级 Edge 代理之前不可用。" />
+      <Tooltip message="Features and bug fixes in your current Portainer Server release may not be available to this Edge Agent until it is upgraded." />
     </span>
   );
 }

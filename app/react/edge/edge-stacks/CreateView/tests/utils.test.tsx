@@ -6,6 +6,7 @@ import { withUserProvider } from '@/react/test-utils/withUserProvider';
 import { withTestRouter } from '@/react/test-utils/withRouter';
 import { withTestQueryProvider } from '@/react/test-utils/withTestQuery';
 import { http, server } from '@/setup-tests/server';
+import { mockCodeMirror } from '@/setup-tests/mock-codemirror';
 
 import { CreateForm } from '../CreateForm';
 
@@ -210,13 +211,6 @@ test('The form should render', async () => {
     expect(getByRole('form')).toBeInTheDocument();
   });
 });
-
-export function mockCodeMirror() {
-  vi.mock('@uiw/react-codemirror', () => ({
-    __esModule: true,
-    default: () => <div />,
-  }));
-}
 
 export function renderCreateForm() {
   // user declaration needs to go at the start for user id related requests (e.g. git credentials)

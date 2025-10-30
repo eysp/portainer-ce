@@ -110,6 +110,7 @@ export function EnvironmentList({ onClickBrowse, onRefresh }: Props) {
     updateInformation: isBE,
     edgeAsync: getEdgeAsyncValue(connectionTypes),
     platformTypes,
+    excludeSnapshotRaw: true,
   };
 
   const queryWithSort = {
@@ -148,10 +149,10 @@ export function EnvironmentList({ onClickBrowse, onRefresh }: Props) {
           <TableTitle
             className="!px-0"
             icon={HardDrive}
-            label="环境"
+            label="Environments"
             description={
               <div className="w-full text-sm text-gray-7">
-                点击环境以进行管理
+                Click on an environment to manage
               </div>
             }
           >
@@ -160,7 +161,7 @@ export function EnvironmentList({ onClickBrowse, onRefresh }: Props) {
                 className="!m-0 !min-w-[350px] !bg-transparent"
                 value={searchBarValue}
                 onChange={setSearchBarValue}
-                placeholder="按名称、分组、标签、状态、URL 搜索..."
+                placeholder="Search by name, group, tag, status, URL..."
                 data-cy="home-endpointsSearchInput"
               />
               {isPureAdmin && (
@@ -172,7 +173,7 @@ export function EnvironmentList({ onClickBrowse, onRefresh }: Props) {
                   icon={RefreshCcw}
                   className="!m-0"
                 >
-                  刷新
+                  Refresh
                 </Button>
               )}
               <KubeconfigButton
@@ -373,7 +374,7 @@ function renderItems(
   if (isLoading) {
     return (
       <div className="text-muted text-center" data-cy="home-loadingEndpoints">
-        加载中...
+        Loading...
       </div>
     );
   }
@@ -381,7 +382,7 @@ function renderItems(
   if (!totalCount) {
     return (
       <div className="text-muted text-center" data-cy="home-noEndpoints">
-        没有可用的环境。
+        No environments available.
       </div>
     );
   }

@@ -2,7 +2,6 @@ package snapshot
 
 import (
 	"context"
-	"crypto/tls"
 	"errors"
 	"time"
 
@@ -138,14 +137,9 @@ func SupportDirectSnapshot(endpoint *portainer.Endpoint) bool {
 // If the snapshot is a success, it will be associated to the environment(endpoint).
 func (service *Service) SnapshotEndpoint(endpoint *portainer.Endpoint) error {
 	if endpoint.Type == portainer.AgentOnDockerEnvironment || endpoint.Type == portainer.AgentOnKubernetesEnvironment {
-		var err error
-		var tlsConfig *tls.Config
-
-		if endpoint.TLSConfig.TLS {
-			tlsConfig, err = crypto.CreateTLSConfigurationFromDisk(endpoint.TLSConfig.TLSCACertPath, endpoint.TLSConfig.TLSCertPath, endpoint.TLSConfig.TLSKeyPath, endpoint.TLSConfig.TLSSkipVerify)
-			if err != nil {
-				return err
-			}
+		tlsConfig, err := crypto.CreateTLSConfigurationFromDisk(endpoint.TLSConfig)
+		if err != nil {
+			return err
 		}
 
 		_, version, err := agent.GetAgentVersionAndPlatform(endpoint.URL, tlsConfig)
@@ -170,8 +164,8 @@ func (service *Service) Create(snapshot portainer.Snapshot) error {
 	return service.dataStore.Snapshot().Create(&snapshot)
 }
 
-func (service *Service) FillSnapshotData(endpoint *portainer.Endpoint) error {
-	return FillSnapshotData(service.dataStore, endpoint)
+func (service *Service) FillSnapshotData(endpoint *portainer.Endpoint, includeRaw bool) error {
+	return FillSnapshotData(service.dataStore, endpoint, includeRaw)
 }
 
 func (service *Service) snapshotKubernetesEndpoint(endpoint *portainer.Endpoint) error {
@@ -328,8 +322,16 @@ func FetchDockerID(snapshot portainer.DockerSnapshot) (string, error) {
 	return info.Swarm.Cluster.ID, nil
 }
 
-func FillSnapshotData(tx dataservices.DataStoreTx, endpoint *portainer.Endpoint) error {
-	snapshot, err := tx.Snapshot().Read(endpoint.ID)
+func FillSnapshotData(tx dataservices.DataStoreTx, endpoint *portainer.Endpoint, includeRaw bool) error {
+	var snapshot *portainer.Snapshot
+	var err error
+
+	if includeRaw {
+		snapshot, err = tx.Snapshot().Read(endpoint.ID)
+	} else {
+		snapshot, err = tx.Snapshot().ReadWithoutSnapshotRaw(endpoint.ID)
+	}
+
 	if tx.IsErrObjectNotFound(err) {
 		endpoint.Snapshots = []portainer.DockerSnapshot{}
 		endpoint.Kubernetes.Snapshots = []portainer.KubernetesSnapshot{}

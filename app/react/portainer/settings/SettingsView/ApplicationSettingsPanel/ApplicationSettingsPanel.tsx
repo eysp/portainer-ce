@@ -41,7 +41,7 @@ export function ApplicationSettingsPanel({
 
   return (
     <Widget>
-      <Widget.Title icon={SettingsIcon} title="应用设置" />
+      <Widget.Title icon={SettingsIcon} title="Application settings" />
       <Widget.Body>
         <Formik
           initialValues={initialValues}
@@ -67,7 +67,7 @@ export function ApplicationSettingsPanel({
       },
       {
         onSuccess(settings) {
-          notifySuccess('成功', '应用设置已更新');
+          notifySuccess('Success', 'Application settings updated');
           onSuccess(settings);
         },
       }
@@ -81,7 +81,7 @@ function InnerForm({ isLoading }: { isLoading: boolean }) {
   return (
     <Form className="form-horizontal">
       <FormControl
-        label="快照间隔"
+        label="Snapshot interval"
         inputId="snapshot_interval"
         errors={errors.snapshotInterval}
         required
@@ -89,14 +89,14 @@ function InnerForm({ isLoading }: { isLoading: boolean }) {
         <Field
           as={Input}
           id="snapshot_interval"
-          placeholder="例如 15m"
+          placeholder="e.g. 15m"
           name="snapshotInterval"
         />
       </FormControl>
 
       <EdgeCheckinIntervalField
         value={values.edgeAgentCheckinInterval}
-        label="边缘代理默认轮询频率"
+        label="Edge agent default poll frequency"
         isDefaultHidden
         onChange={(value) => setFieldValue('edgeAgentCheckinInterval', value)}
       />
@@ -115,9 +115,9 @@ function InnerForm({ isLoading }: { isLoading: boolean }) {
             isLoading={isLoading}
             disabled={!isValid}
             data-cy="settings-saveSettingsButton"
-            loadingText="保存中..."
+            loadingText="Saving..."
           >
-            保存应用设置
+            Save application settings
           </LoadingButton>
         </div>
       </div>

@@ -89,6 +89,12 @@ module.exports = {
           },
         ],
       },
+      {
+        test: /\.m?js/,
+        resolve: {
+          fullySpecified: false,
+        },
+      },
     ],
   },
   devServer: {
@@ -188,6 +194,7 @@ module.exports = {
       Kubernetes: path.resolve(projectRoot, 'app/kubernetes'),
       Portainer: path.resolve(projectRoot, 'app/portainer'),
       'lodash-es': 'lodash',
+      'yaml-schema': path.resolve(projectRoot, 'node_modules/codemirror-json-schema/dist/yaml'),
     },
     extensions: ['.js', '.ts', '.tsx'],
     plugins: [

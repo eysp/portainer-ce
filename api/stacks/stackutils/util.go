@@ -45,11 +45,6 @@ func SanitizeLabel(value string) string {
 	return strings.Trim(onlyAllowedCharacterString, ".-_")
 }
 
-// IsGitStack checks if the stack is a git stack or not
-func IsGitStack(stack *portainer.Stack) bool {
-	return stack.GitConfig != nil && len(stack.GitConfig.URL) != 0
-}
-
 // IsRelativePathStack checks if the stack is a git stack or not
 func IsRelativePathStack(stack *portainer.Stack) bool {
 	// Always return false in CE

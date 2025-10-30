@@ -6,7 +6,7 @@ import { TemplateEnv } from '@/react/portainer/templates/app-templates/types';
 import { FormControl } from '@@/form-components/FormControl';
 import { Input, Select } from '@@/form-components/Input';
 
-type Value = Record<string, string>;
+type Value = Record<string, string | undefined>;
 
 export { type Value as EnvVarsValue };
 
@@ -27,7 +27,7 @@ export function EnvVarsFieldset({
         <Item
           key={env.name}
           option={env}
-          value={values[env.name]}
+          value={values[env.name] || ''}
           onChange={(value) => handleChange(env.name, value)}
           errors={errors?.[env.name]}
         />
@@ -36,7 +36,7 @@ export function EnvVarsFieldset({
   );
 
   function handleChange(name: string, envValue: string) {
-    onChange({ ...values, [name]: envValue });
+    onChange({ ...values, [name]: envValue || undefined });
   }
 }
 
@@ -55,7 +55,7 @@ function Item({
   return (
     <FormControl
       label={option.label || option.name}
-      required={!option.preset}
+      required={false}
       errors={errors}
       inputId={inputId}
     >
@@ -101,7 +101,9 @@ export function envVarsFieldsetValidation(
 ): SchemaOf<Value> {
   return object(
     Object.fromEntries(
-      definitions.map((v) => [v.name, string().required('Required')])
+      definitions
+        .filter((v) => !v.preset)
+        .map((v) => [v.name, string().optional()])
     )
   );
 }

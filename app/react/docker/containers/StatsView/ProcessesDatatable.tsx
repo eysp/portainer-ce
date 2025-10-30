@@ -38,7 +38,7 @@ export function ProcessesDatatable() {
 
   return (
     <Datatable
-      title="进程"
+      title="Processes"
       titleIcon={List}
       dataset={topQuery.data?.rows ?? []}
       columns={topQuery.data?.columns ?? []}

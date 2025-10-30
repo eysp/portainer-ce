@@ -28,6 +28,7 @@ const tests: NamespaceTestData[] = [
         Status: {
           phase: 'Active',
         },
+        UnhealthyEventCount: 0,
         Annotations: null,
         CreationDate: '2024-10-17T17:50:08+13:00',
         NamespaceOwner: 'admin',
@@ -118,6 +119,7 @@ const tests: NamespaceTestData[] = [
         Status: {
           phase: 'Active',
         },
+        UnhealthyEventCount: 0,
         Annotations: {
           asdf: 'asdf',
         },

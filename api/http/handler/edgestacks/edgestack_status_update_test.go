@@ -10,6 +10,7 @@ import (
 	portainer "github.com/portainer/portainer/api"
 
 	"github.com/segmentio/encoding/json"
+	"github.com/stretchr/testify/require"
 )
 
 // Update Status
@@ -28,15 +29,11 @@ func TestUpdateStatusAndInspect(t *testing.T) {
 	}
 
 	jsonPayload, err := json.Marshal(payload)
-	if err != nil {
-		t.Fatal("request error:", err)
-	}
+	require.NoError(t, err)
 
 	r := bytes.NewBuffer(jsonPayload)
 	req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/edge_stacks/%d/status", edgeStack.ID), r)
-	if err != nil {
-		t.Fatal("request error:", err)
-	}
+	require.NoError(t, err)
 
 	req.Header.Set(portainer.PortainerAgentEdgeIDHeader, endpoint.EdgeID)
 	rec := httptest.NewRecorder()
@@ -48,9 +45,7 @@ func TestUpdateStatusAndInspect(t *testing.T) {
 
 	// Get updated edge stack
 	req, err = http.NewRequest(http.MethodGet, fmt.Sprintf("/edge_stacks/%d", edgeStack.ID), nil)
-	if err != nil {
-		t.Fatal("request error:", err)
-	}
+	require.NoError(t, err)
 
 	req.Header.Add("x-api-key", rawAPIKey)
 	rec = httptest.NewRecorder()
@@ -62,14 +57,10 @@ func TestUpdateStatusAndInspect(t *testing.T) {
 
 	updatedStack := portainer.EdgeStack{}
 	err = json.NewDecoder(rec.Body).Decode(&updatedStack)
-	if err != nil {
-		t.Fatal("error decoding response:", err)
-	}
+	require.NoError(t, err)
 
 	endpointStatus, ok := updatedStack.Status[payload.EndpointID]
-	if !ok {
-		t.Fatal("Missing status")
-	}
+	require.True(t, ok)
 
 	lastStatus := endpointStatus.Status[len(endpointStatus.Status)-1]
 
@@ -84,8 +75,8 @@ func TestUpdateStatusAndInspect(t *testing.T) {
 	if endpointStatus.EndpointID != payload.EndpointID {
 		t.Fatalf("expected EndpointID %d, found %d", payload.EndpointID, endpointStatus.EndpointID)
 	}
-
 }
+
 func TestUpdateStatusWithInvalidPayload(t *testing.T) {
 	handler, _ := setupHandler(t)
 
@@ -136,15 +127,11 @@ func TestUpdateStatusWithInvalidPayload(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.Name, func(t *testing.T) {
 			jsonPayload, err := json.Marshal(tc.Payload)
-			if err != nil {
-				t.Fatal("request error:", err)
-			}
+			require.NoError(t, err)
 
 			r := bytes.NewBuffer(jsonPayload)
 			req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/edge_stacks/%d/status", edgeStack.ID), r)
-			if err != nil {
-				t.Fatal("request error:", err)
-			}
+			require.NoError(t, err)
 
 			req.Header.Set(portainer.PortainerAgentEdgeIDHeader, endpoint.EdgeID)
 			rec := httptest.NewRecorder()

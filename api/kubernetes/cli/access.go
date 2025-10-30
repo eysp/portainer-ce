@@ -143,3 +143,35 @@ func (kcl *KubeClient) GetNonAdminNamespaces(userID int, teamIDs []int, isRestri
 
 	return nonAdminNamespaces, nil
 }
+
+// GetIsKubeAdmin retrieves true if client is admin
+func (kcl *KubeClient) GetIsKubeAdmin() bool {
+	kcl.mu.Lock()
+	defer kcl.mu.Unlock()
+
+	return kcl.isKubeAdmin
+}
+
+// UpdateIsKubeAdmin sets whether the kube client is admin
+func (kcl *KubeClient) SetIsKubeAdmin(isKubeAdmin bool) {
+	kcl.mu.Lock()
+	defer kcl.mu.Unlock()
+
+	kcl.isKubeAdmin = isKubeAdmin
+}
+
+// GetClientNonAdminNamespaces retrieves non-admin namespaces
+func (kcl *KubeClient) GetClientNonAdminNamespaces() []string {
+	kcl.mu.Lock()
+	defer kcl.mu.Unlock()
+
+	return kcl.nonAdminNamespaces
+}
+
+// UpdateClientNonAdminNamespaces sets the client non admin namespace list
+func (kcl *KubeClient) SetClientNonAdminNamespaces(nonAdminNamespaces []string) {
+	kcl.mu.Lock()
+	defer kcl.mu.Unlock()
+
+	kcl.nonAdminNamespaces = nonAdminNamespaces
+}

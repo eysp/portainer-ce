@@ -15,6 +15,7 @@ import (
 	"github.com/portainer/portainer/api/kubernetes/cli"
 	httperror "github.com/portainer/portainer/pkg/libhttp/error"
 	"github.com/portainer/portainer/pkg/libhttp/request"
+	"github.com/portainer/portainer/pkg/libkubectl"
 	"github.com/rs/zerolog/log"
 
 	"github.com/gorilla/mux"
@@ -57,6 +58,7 @@ func NewHandler(bouncer security.BouncerService, authorizationService *authoriza
 	endpointRouter.Handle("/configmaps/count", httperror.LoggerHandler(h.getAllKubernetesConfigMapsCount)).Methods(http.MethodGet)
 	endpointRouter.Handle("/cron_jobs", httperror.LoggerHandler(h.getAllKubernetesCronJobs)).Methods(http.MethodGet)
 	endpointRouter.Handle("/cron_jobs/delete", httperror.LoggerHandler(h.deleteKubernetesCronJobs)).Methods(http.MethodPost)
+	endpointRouter.Handle("/events", httperror.LoggerHandler(h.getAllKubernetesEvents)).Methods(http.MethodGet)
 	endpointRouter.Handle("/jobs", httperror.LoggerHandler(h.getAllKubernetesJobs)).Methods(http.MethodGet)
 	endpointRouter.Handle("/jobs/delete", httperror.LoggerHandler(h.deleteKubernetesJobs)).Methods(http.MethodPost)
 	endpointRouter.Handle("/cluster_roles", httperror.LoggerHandler(h.getAllKubernetesClusterRoles)).Methods(http.MethodGet)
@@ -102,12 +104,14 @@ func NewHandler(bouncer security.BouncerService, authorizationService *authoriza
 	endpointRouter.Handle("/cluster_roles/delete", httperror.LoggerHandler(h.deleteClusterRoles)).Methods(http.MethodPost)
 	endpointRouter.Handle("/cluster_role_bindings", httperror.LoggerHandler(h.getAllKubernetesClusterRoleBindings)).Methods(http.MethodGet)
 	endpointRouter.Handle("/cluster_role_bindings/delete", httperror.LoggerHandler(h.deleteClusterRoleBindings)).Methods(http.MethodPost)
+	endpointRouter.Handle("/describe", httperror.LoggerHandler(h.describeResource)).Methods(http.MethodGet)
 
 	// namespaces
 	// in the future this piece of code might be in another package (or a few different packages - namespaces/namespace?)
 	// to keep it simple, we've decided to leave it like this.
 	namespaceRouter := endpointRouter.PathPrefix("/namespaces/{namespace}").Subrouter()
 	namespaceRouter.Handle("/configmaps/{configmap}", httperror.LoggerHandler(h.getKubernetesConfigMap)).Methods(http.MethodGet)
+	namespaceRouter.Handle("/events", httperror.LoggerHandler(h.getKubernetesEventsForNamespace)).Methods(http.MethodGet)
 	namespaceRouter.Handle("/system", bouncer.RestrictedAccess(httperror.LoggerHandler(h.namespacesToggleSystem))).Methods(http.MethodPut)
 	namespaceRouter.Handle("/ingresscontrollers", httperror.LoggerHandler(h.getKubernetesIngressControllersByNamespace)).Methods(http.MethodGet)
 	namespaceRouter.Handle("/ingresscontrollers", httperror.LoggerHandler(h.updateKubernetesIngressControllersByNamespace)).Methods(http.MethodPut)
@@ -131,7 +135,7 @@ func NewHandler(bouncer security.BouncerService, authorizationService *authoriza
 // getProxyKubeClient gets a kubeclient for the user.  It's generally what you want as it retrieves the kubeclient
 // from the Authorization token of the currently logged in user.  The kubeclient that is not from the proxy is actually using
 // admin permissions.  If you're unsure which one to use, use this.
-func (h *Handler) getProxyKubeClient(r *http.Request) (*cli.KubeClient, *httperror.HandlerError) {
+func (h *Handler) getProxyKubeClient(r *http.Request) (portainer.KubeClient, *httperror.HandlerError) {
 	endpointID, err := request.RetrieveNumericRouteVariableValue(r, "id")
 	if err != nil {
 		return nil, httperror.BadRequest(fmt.Sprintf("an error occurred during the getProxyKubeClient operation, the environment identifier route variable is invalid for /api/kubernetes/%d. Error: ", endpointID), err)
@@ -142,7 +146,7 @@ func (h *Handler) getProxyKubeClient(r *http.Request) (*cli.KubeClient, *httperr
 		return nil, httperror.Forbidden(fmt.Sprintf("an error occurred during the getProxyKubeClient operation, permission denied to access the environment /api/kubernetes/%d. Error: ", endpointID), err)
 	}
 
-	cli, ok := h.KubernetesClientFactory.GetProxyKubeClient(strconv.Itoa(endpointID), tokenData.Token)
+	cli, ok := h.KubernetesClientFactory.GetProxyKubeClient(strconv.Itoa(endpointID), strconv.Itoa(int(tokenData.ID)))
 	if !ok {
 		return nil, httperror.InternalServerError("an error occurred during the getProxyKubeClient operation,failed to get proxy KubeClient", nil)
 	}
@@ -175,7 +179,7 @@ func (handler *Handler) kubeClientMiddleware(next http.Handler) http.Handler {
 		}
 
 		// Check if we have a kubeclient against this auth token already, otherwise generate a new one
-		_, ok := handler.KubernetesClientFactory.GetProxyKubeClient(strconv.Itoa(endpointID), tokenData.Token)
+		_, ok := handler.KubernetesClientFactory.GetProxyKubeClient(strconv.Itoa(endpointID), strconv.Itoa(int(tokenData.ID)))
 		if ok {
 			next.ServeHTTP(w, r)
 			return
@@ -251,7 +255,7 @@ func (handler *Handler) kubeClientMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		serverURL.Scheme = "https"
-		serverURL.Host = "localhost" + handler.KubernetesClientFactory.AddrHTTPS
+		serverURL.Host = "localhost" + handler.KubernetesClientFactory.GetAddrHTTPS()
 		config.Clusters[0].Cluster.Server = serverURL.String()
 
 		yaml, err := cli.GenerateYAML(config)
@@ -265,7 +269,40 @@ func (handler *Handler) kubeClientMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		handler.KubernetesClientFactory.SetProxyKubeClient(strconv.Itoa(int(endpoint.ID)), tokenData.Token, kubeCli)
+		handler.KubernetesClientFactory.SetProxyKubeClient(strconv.Itoa(int(endpoint.ID)), strconv.Itoa(int(tokenData.ID)), kubeCli)
 		next.ServeHTTP(w, r)
 	})
+}
+
+func (handler *Handler) getLibKubectlAccess(r *http.Request) (*libkubectl.ClientAccess, error) {
+	tokenData, err := security.RetrieveTokenData(r)
+	if err != nil {
+		return nil, httperror.InternalServerError("Unable to retrieve user authentication token", err)
+	}
+
+	bearerToken, _, err := handler.JwtService.GenerateToken(tokenData)
+	if err != nil {
+		return nil, httperror.Unauthorized("Unauthorized", err)
+	}
+
+	endpoint, err := middlewares.FetchEndpoint(r)
+	if err != nil {
+		return nil, httperror.InternalServerError("Unable to find the Kubernetes endpoint associated to the request.", err)
+	}
+
+	sslSettings, err := handler.DataStore.SSLSettings().Settings()
+	if err != nil {
+		return nil, httperror.InternalServerError("Unable to retrieve settings from the database", err)
+	}
+
+	hostURL := "localhost"
+	if !sslSettings.SelfSigned {
+		hostURL = r.Host
+	}
+
+	kubeConfigInternal := handler.kubeClusterAccessService.GetClusterDetails(hostURL, endpoint.ID, true)
+	return &libkubectl.ClientAccess{
+		Token:     bearerToken,
+		ServerUrl: kubeConfigInternal.ClusterServerURL,
+	}, nil
 }

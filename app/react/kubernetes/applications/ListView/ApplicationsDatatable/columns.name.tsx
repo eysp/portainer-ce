@@ -43,7 +43,11 @@ function Cell({
         </Link>
       )}
 
-      {isSystem ? <SystemBadge /> : !item.ApplicationOwner && <ExternalBadge />}
+      {isSystem ? (
+        <SystemBadge className="ml-auto" />
+      ) : (
+        !item.ApplicationOwner && <ExternalBadge className="ml-auto" />
+      )}
     </div>
   );
 }

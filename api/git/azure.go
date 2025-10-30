@@ -60,15 +60,9 @@ func NewAzureClient() *azureClient {
 }
 
 func newHttpClientForAzure(insecureSkipVerify bool) *http.Client {
-	tlsConfig := crypto.CreateTLSConfiguration()
-
-	if insecureSkipVerify {
-		tlsConfig.InsecureSkipVerify = true
-	}
-
 	httpsCli := &http.Client{
 		Transport: &http.Transport{
-			TLSClientConfig: tlsConfig,
+			TLSClientConfig: crypto.CreateTLSConfiguration(insecureSkipVerify),
 			Proxy:           http.ProxyFromEnvironment,
 		},
 		Timeout: 300 * time.Second,

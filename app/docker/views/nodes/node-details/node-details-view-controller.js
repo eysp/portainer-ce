@@ -46,7 +46,7 @@ angular.module('portainer.docker').controller('NodeDetailsViewController', [
           }
         })
         .catch(function (err) {
-          Notifications.error('失败', err, '无法获取节点详情');
+          Notifications.error('Failure', err, 'Unable to retrieve node details');
         });
     }
 

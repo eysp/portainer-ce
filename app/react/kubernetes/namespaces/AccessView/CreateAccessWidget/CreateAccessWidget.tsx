@@ -66,11 +66,12 @@ export function CreateAccessWidget() {
     <div className="row">
       <div className="col-sm-12">
         <Widget aria-label="Create access">
-          <WidgetTitle icon={UserPlusIcon} title="创建访问权限" />
+          <WidgetTitle icon={UserPlusIcon} title="Create access" />
           <WidgetBody>
             {isRBACEnabledQuery.data === false && <RBACAlert />}
             <TextTip className="mb-2" childrenWrapperClassName="text-warning">
-              添加用户访问权限后，受影响的用户需要退出并重新登录，变更才会生效。
+              Adding user access will require the affected user(s) to logout and
+              login for the changes to be taken into account.
             </TextTip>
             {isRBACEnabledQuery.data !== false && (
               <Formik<CreateAccessValues>

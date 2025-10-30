@@ -59,7 +59,7 @@ export function SidebarItem({
   return (
     <SidebarTooltip
       content={
-        <div className="rounded bg-blue-8 be:bg-gray-8 th-highcontrast:border th-highcontrast:border-solid th-highcontrast:border-white th-highcontrast:bg-black th-dark:bg-gray-true-8">
+        <div className="rounded th-highcontrast:border th-highcontrast:border-solid th-highcontrast:border-white th-highcontrast:bg-black">
           <Wrapper label={label}>
             <ItemAnchor
               href={anchorProps.href}
@@ -106,7 +106,7 @@ function ItemAnchor({
         className,
         'text-inherit no-underline hover:text-inherit hover:no-underline focus:text-inherit focus:no-underline',
         'flex h-8 w-full flex-1 items-center space-x-4 rounded-md text-sm',
-        'transition-colors duration-200 hover:bg-blue-5/20 be:hover:bg-gray-5/20 th-dark:hover:bg-gray-true-5/20',
+        'transition-colors duration-200 hover:bg-graphite-500',
         {
           // submenu items are always expanded (in a tooltip or in the sidebar)
           'w-full justify-start px-3': isOpen || isSubMenu,

@@ -104,5 +104,5 @@ func (b *K8sStackFileContentBuilder) Deploy(payload *StackPayload, endpoint *por
 }
 
 func (b *K8sStackFileContentBuilder) GetResponse() string {
-	return b.FileContentMethodStackBuilder.deploymentConfiger.GetResponse()
+	return b.deploymentConfiger.GetResponse()
 }

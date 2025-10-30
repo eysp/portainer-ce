@@ -100,7 +100,7 @@ function InnerForm({ isLoading }: { isLoading: boolean }) {
       <FormActions
         isValid={isValid}
         isLoading={isLoading}
-        submitLabel="应用更改"
+        submitLabel="Apply changes"
         loadingText="Saving in progress..."
         data-cy="helm-cert-panel-submit-button"
       />

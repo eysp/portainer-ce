@@ -100,18 +100,14 @@ function useSecretRowData(
 ): SecretRowData[] {
   return useMemo(
     () =>
-      secrets?.map(
-        (secret) =>
-          ({
-            ...secret,
-            inUse: secret.IsUsed,
-            isSystem: namespaces
-              ? namespaces.find(
-                  (namespace) => namespace.Name === secret.Namespace
-                )?.IsSystem ?? false
-              : false,
-          }) ?? []
-      ),
+      (secrets ?? []).map((secret) => ({
+        ...secret,
+        inUse: secret.IsUsed,
+        isSystem: namespaces
+          ? namespaces.find((namespace) => namespace.Name === secret.Namespace)
+              ?.IsSystem ?? false
+          : false,
+      })),
     [secrets, namespaces]
   );
 }

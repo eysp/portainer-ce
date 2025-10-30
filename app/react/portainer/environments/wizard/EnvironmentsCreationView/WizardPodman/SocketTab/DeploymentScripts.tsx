@@ -43,22 +43,24 @@ function DeployCode({ code }: DeployCodeProps) {
   return (
     <>
       <TextTip color="blue" className="mb-1">
-        使用 Socket 时，请确保你在启动 Portainer 容器时添加了以下 Podman 参数：
+        When using the socket, ensure that you have started the Portainer
+        container with the following Podman flag:
       </TextTip>
       <Code>{bindMountCode}</Code>
       <div className="mt-2 mb-4">
         <CopyButton copyText={bindMountCode} data-cy="copy-deployment-command">
-          复制命令
+          Copy command
         </CopyButton>
       </div>
 
       <TextTip color="blue" className="mb-1">
-        若要使用 Socket，请确保你已启动 Podman 的 rootful 模式下的 socket
+        To use the socket, ensure that you have started the Podman rootful
+        socket:
       </TextTip>
       <Code>{code}</Code>
       <div className="mt-2">
         <CopyButton copyText={code} data-cy="copy-deployment-command">
-          复制命令
+          Copy command
         </CopyButton>
       </div>
     </>

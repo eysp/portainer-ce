@@ -112,7 +112,7 @@ func (service *ECDSAService) CreateSignature(message string) (string, error) {
 		message = service.secret
 	}
 
-	hash := libcrypto.HashFromBytes([]byte(message))
+	hash := libcrypto.InsecureHashFromBytes([]byte(message))
 
 	r, s, err := ecdsa.Sign(rand.Reader, service.privateKey, hash)
 	if err != nil {

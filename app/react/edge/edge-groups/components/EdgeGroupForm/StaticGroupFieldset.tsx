@@ -1,6 +1,6 @@
 import { useFormikContext } from 'formik';
 
-import { AssociatedEdgeEnvironmentsSelector } from '@/react/edge/components/AssociatedEdgeEnvironmentsSelector';
+import { AssociatedEdgeGroupEnvironmentsSelector } from '@/react/edge/components/AssociatedEdgeGroupEnvironmentsSelector';
 
 import { FormSection } from '@@/form-components/FormSection';
 import { confirmDestructive } from '@@/modals/confirm';
@@ -14,7 +14,7 @@ export function StaticGroupFieldset({ isEdit }: { isEdit?: boolean }) {
   return (
     <FormSection title="Associated environments">
       <div className="form-group">
-        <AssociatedEdgeEnvironmentsSelector
+        <AssociatedEdgeGroupEnvironmentsSelector
           value={values.environmentIds}
           error={errors.environmentIds}
           onChange={async (environmentIds, meta) => {
@@ -33,6 +33,7 @@ export function StaticGroupFieldset({ isEdit }: { isEdit?: boolean }) {
 
             setFieldValue('environmentIds', environmentIds);
           }}
+          edgeGroupId={values.edgeGroupId}
         />
       </div>
     </FormSection>

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 
 	portainer "github.com/portainer/portainer/api"
@@ -80,6 +81,11 @@ func (handler *Handler) authenticate(rw http.ResponseWriter, r *http.Request) *h
 				Password: "$2a$10$abcdefghijklmnopqrstuvwx..ABCDEFGHIJKLMNOPQRSTUVWXYZ12", // fake but valid format bcrypt hash
 			}
 		}
+	}
+
+	// Clear any existing user caches
+	if user != nil {
+		handler.KubernetesClientFactory.ClearUserClientCache(strconv.Itoa(int(user.ID)))
 	}
 
 	if user != nil && isUserInitialAdmin(user) || settings.AuthenticationMethod == portainer.AuthenticationInternal {

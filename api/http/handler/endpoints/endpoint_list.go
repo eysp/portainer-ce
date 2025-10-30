@@ -38,15 +38,19 @@ const (
 // @param tagIds query []int false "search environments(endpoints) with these tags (depends on tagsPartialMatch)"
 // @param tagsPartialMatch query bool false "If true, will return environment(endpoint) which has one of tagIds, if false (or missing) will return only environments(endpoints) that has all the tags"
 // @param endpointIds query []int false "will return only these environments(endpoints)"
+// @param excludeIds query []int false "will exclude these environments(endpoints)"
 // @param provisioned query bool false "If true, will return environment(endpoint) that were provisioned"
 // @param agentVersions query []string false "will return only environments with on of these agent versions"
 // @param edgeAsync query bool false "if exists true show only edge async agents, false show only standard edge agents. if missing, will show both types (relevant only for edge agents)"
 // @param edgeDeviceUntrusted query bool false "if true, show only untrusted edge agents, if false show only trusted edge agents (relevant only for edge agents)"
 // @param edgeCheckInPassedSeconds query number false "if bigger then zero, show only edge agents that checked-in in the last provided seconds (relevant only for edge agents)"
 // @param excludeSnapshots query bool false "if true, the snapshot data won't be retrieved"
+// @param excludeSnapshotRaw query bool false "if true, the SnapshotRaw field won't be retrieved"
 // @param name query string false "will return only environments(endpoints) with this name"
 // @param edgeStackId query portainer.EdgeStackID false "will return the environements of the specified edge stack"
 // @param edgeStackStatus query string false "only applied when edgeStackId exists. Filter the returned environments based on their deployment status in the stack (not the environment status!)" Enum("Pending", "Ok", "Error", "Acknowledged", "Remove", "RemoteUpdateSuccess", "ImagesPulled")
+// @param edgeGroupIds query []int false "List environments(endpoints) of these edge groups"
+// @param excludeEdgeGroupIds query []int false "Exclude environments(endpoints) of these edge groups"
 // @success 200 {array} portainer.Endpoint "Endpoints"
 // @failure 500 "Server error"
 // @router /endpoints [get]
@@ -59,6 +63,7 @@ func (handler *Handler) endpointList(w http.ResponseWriter, r *http.Request) *ht
 	limit, _ := request.RetrieveNumericQueryParameter(r, "limit", true)
 	sortField, _ := request.RetrieveQueryParameter(r, "sort", true)
 	sortOrder, _ := request.RetrieveQueryParameter(r, "order", true)
+	excludeRaw, _ := request.RetrieveBooleanQueryParameter(r, "excludeSnapshotRaw", true)
 
 	endpointGroups, err := handler.DataStore.EndpointGroup().ReadAll()
 	if err != nil {
@@ -90,12 +95,11 @@ func (handler *Handler) endpointList(w http.ResponseWriter, r *http.Request) *ht
 		return httperror.BadRequest("Invalid query parameters", err)
 	}
 
-	filteredEndpoints := security.FilterEndpoints(endpoints, endpointGroups, securityContext)
-
-	filteredEndpoints, totalAvailableEndpoints, err := handler.filterEndpointsByQuery(filteredEndpoints, query, endpointGroups, edgeGroups, settings)
+	filteredEndpoints, totalAvailableEndpoints, err := handler.filterEndpointsByQuery(endpoints, query, endpointGroups, edgeGroups, settings, securityContext)
 	if err != nil {
 		return httperror.InternalServerError("Unable to filter endpoints", err)
 	}
+	filteredEndpoints = security.FilterEndpoints(filteredEndpoints, endpointGroups, securityContext)
 
 	sortEnvironmentsByField(filteredEndpoints, endpointGroups, getSortKey(sortField), sortOrder == "desc")
 
@@ -105,14 +109,16 @@ func (handler *Handler) endpointList(w http.ResponseWriter, r *http.Request) *ht
 
 	for idx := range paginatedEndpoints {
 		hideFields(&paginatedEndpoints[idx])
+
 		paginatedEndpoints[idx].ComposeSyntaxMaxVersion = handler.ComposeStackManager.ComposeSyntaxMaxVersion()
 		if paginatedEndpoints[idx].EdgeCheckinInterval == 0 {
 			paginatedEndpoints[idx].EdgeCheckinInterval = settings.EdgeAgentCheckinInterval
 		}
+
 		endpointutils.UpdateEdgeEndpointHeartbeat(&paginatedEndpoints[idx], settings)
+
 		if !query.excludeSnapshots {
-			err = handler.SnapshotService.FillSnapshotData(&paginatedEndpoints[idx])
-			if err != nil {
+			if err := handler.SnapshotService.FillSnapshotData(&paginatedEndpoints[idx], !excludeRaw); err != nil {
 				return httperror.InternalServerError("Unable to add snapshot data", err)
 			}
 		}
@@ -120,6 +126,7 @@ func (handler *Handler) endpointList(w http.ResponseWriter, r *http.Request) *ht
 
 	w.Header().Set("X-Total-Count", strconv.Itoa(filteredEndpointCount))
 	w.Header().Set("X-Total-Available", strconv.Itoa(totalAvailableEndpoints))
+
 	return response.JSON(w, paginatedEndpoints)
 }
 
@@ -130,18 +137,8 @@ func paginateEndpoints(endpoints []portainer.Endpoint, start, limit int) []porta
 
 	endpointCount := len(endpoints)
 
-	if start < 0 {
-		start = 0
-	}
-
-	if start > endpointCount {
-		start = endpointCount
-	}
-
-	end := start + limit
-	if end > endpointCount {
-		end = endpointCount
-	}
+	start = min(max(start, 0), endpointCount)
+	end := min(start+limit, endpointCount)
 
 	return endpoints[start:end]
 }
@@ -151,8 +148,10 @@ func getEndpointGroup(groupID portainer.EndpointGroupID, groups []portainer.Endp
 	for _, group := range groups {
 		if group.ID == groupID {
 			endpointGroup = group
+
 			break
 		}
 	}
+
 	return endpointGroup
 }

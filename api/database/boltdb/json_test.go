@@ -1,16 +1,23 @@
 package boltdb
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
 	"crypto/sha256"
+	"encoding/base64"
 	"fmt"
+	"io"
 	"testing"
 
 	"github.com/gofrs/uuid"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
-	jsonobject = `{"LogoURL":"","BlackListedLabels":[],"AuthenticationMethod":1,"InternalAuthSettings": {"RequiredPasswordLength": 12}"LDAPSettings":{"AnonymousMode":true,"ReaderDN":"","URL":"","TLSConfig":{"TLS":false,"TLSSkipVerify":false},"StartTLS":false,"SearchSettings":[{"BaseDN":"","Filter":"","UserNameAttribute":""}],"GroupSearchSettings":[{"GroupBaseDN":"","GroupFilter":"","GroupAttribute":""}],"AutoCreateUsers":true},"OAuthSettings":{"ClientID":"","AccessTokenURI":"","AuthorizationURI":"","ResourceURI":"","RedirectURI":"","UserIdentifier":"","Scopes":"","OAuthAutoCreateUsers":false,"DefaultTeamID":0,"SSO":true,"LogoutURI":"","KubeSecretKey":"j0zLVtY/lAWBk62ByyF0uP80SOXaitsABP0TTJX8MhI="},"OpenAMTConfiguration":{"Enabled":false,"MPSServer":"","MPSUser":"","MPSPassword":"","MPSToken":"","CertFileContent":"","CertFileName":"","CertFilePassword":"","DomainName":""},"FeatureFlagSettings":{},"SnapshotInterval":"5m","TemplatesURL":"https://raw.githubusercontent.com/portainer/templates/master/templates-2.0.json","EdgeAgentCheckinInterval":5,"EnableEdgeComputeFeatures":false,"UserSessionTimeout":"8h","KubeconfigExpiry":"0","EnableTelemetry":true,"HelmRepositoryURL":"https://kubernetes.github.io/ingress-nginx","KubectlShellImage":"portainer/kubectl-shell","DisplayDonationHeader":false,"DisplayExternalContributors":false,"EnableHostManagementFeatures":false,"AllowVolumeBrowserForRegularUsers":false,"AllowBindMountsForRegularUsers":false,"AllowPrivilegedModeForRegularUsers":false,"AllowHostNamespaceForRegularUsers":false,"AllowStackManagementForRegularUsers":false,"AllowDeviceMappingForRegularUsers":false,"AllowContainerCapabilitiesForRegularUsers":false}`
+	jsonobject = `{"LogoURL":"","BlackListedLabels":[],"AuthenticationMethod":1,"InternalAuthSettings": {"RequiredPasswordLength": 12}"LDAPSettings":{"AnonymousMode":true,"ReaderDN":"","URL":"","TLSConfig":{"TLS":false,"TLSSkipVerify":false},"StartTLS":false,"SearchSettings":[{"BaseDN":"","Filter":"","UserNameAttribute":""}],"GroupSearchSettings":[{"GroupBaseDN":"","GroupFilter":"","GroupAttribute":""}],"AutoCreateUsers":true},"OAuthSettings":{"ClientID":"","AccessTokenURI":"","AuthorizationURI":"","ResourceURI":"","RedirectURI":"","UserIdentifier":"","Scopes":"","OAuthAutoCreateUsers":false,"DefaultTeamID":0,"SSO":true,"LogoutURI":"","KubeSecretKey":"j0zLVtY/lAWBk62ByyF0uP80SOXaitsABP0TTJX8MhI="},"OpenAMTConfiguration":{"Enabled":false,"MPSServer":"","MPSUser":"","MPSPassword":"","MPSToken":"","CertFileContent":"","CertFileName":"","CertFilePassword":"","DomainName":""},"FeatureFlagSettings":{},"SnapshotInterval":"5m","TemplatesURL":"https://raw.githubusercontent.com/portainer/templates/master/templates-2.0.json","EdgeAgentCheckinInterval":5,"EnableEdgeComputeFeatures":false,"UserSessionTimeout":"8h","KubeconfigExpiry":"0","EnableTelemetry":true,"HelmRepositoryURL":"https://charts.bitnami.com/bitnami","KubectlShellImage":"portainer/kubectl-shell","DisplayDonationHeader":false,"DisplayExternalContributors":false,"EnableHostManagementFeatures":false,"AllowVolumeBrowserForRegularUsers":false,"AllowBindMountsForRegularUsers":false,"AllowPrivilegedModeForRegularUsers":false,"AllowHostNamespaceForRegularUsers":false,"AllowStackManagementForRegularUsers":false,"AllowDeviceMappingForRegularUsers":false,"AllowContainerCapabilitiesForRegularUsers":false}`
 	passphrase = "my secret key"
 )
 
@@ -160,7 +167,7 @@ func Test_ObjectMarshallingEncrypted(t *testing.T) {
 	}
 
 	key := secretToEncryptionKey(passphrase)
-	conn := DbConnection{EncryptionKey: key}
+	conn := DbConnection{EncryptionKey: key, isEncrypted: true}
 	for _, test := range tests {
 		t.Run(fmt.Sprintf("%s -> %s", test.object, test.expected), func(t *testing.T) {
 
@@ -173,5 +180,96 @@ func Test_ObjectMarshallingEncrypted(t *testing.T) {
 			is.NoError(err)
 			is.Equal(test.object, object)
 		})
+	}
+}
+
+func Test_NonceSources(t *testing.T) {
+	// ensure that the new go 1.24 NewGCMWithRandomNonce works correctly with
+	// the old way of creating and including the nonce
+
+	encryptOldFn := func(plaintext []byte, passphrase []byte) (encrypted []byte, err error) {
+		block, _ := aes.NewCipher(passphrase)
+		gcm, err := cipher.NewGCM(block)
+		if err != nil {
+			return encrypted, err
+		}
+
+		nonce := make([]byte, gcm.NonceSize())
+		if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+			return encrypted, err
+		}
+
+		return gcm.Seal(nonce, nonce, plaintext, nil), nil
+	}
+
+	decryptOldFn := func(encrypted []byte, passphrase []byte) (plaintext []byte, err error) {
+		block, err := aes.NewCipher(passphrase)
+		if err != nil {
+			return encrypted, errors.Wrap(err, "Error creating cypher block")
+		}
+
+		gcm, err := cipher.NewGCM(block)
+		if err != nil {
+			return encrypted, errors.Wrap(err, "Error creating GCM")
+		}
+
+		nonceSize := gcm.NonceSize()
+		if len(encrypted) < nonceSize {
+			return encrypted, errEncryptedStringTooShort
+		}
+
+		nonce, ciphertextByteClean := encrypted[:nonceSize], encrypted[nonceSize:]
+
+		plaintext, err = gcm.Open(nil, nonce, ciphertextByteClean, nil)
+		if err != nil {
+			return encrypted, errors.Wrap(err, "Error decrypting text")
+		}
+
+		return plaintext, err
+	}
+
+	encryptNewFn := encrypt
+	decryptNewFn := decrypt
+
+	passphrase := make([]byte, 32)
+	_, err := io.ReadFull(rand.Reader, passphrase)
+	require.NoError(t, err)
+
+	junk := make([]byte, 1024)
+	_, err = io.ReadFull(rand.Reader, junk)
+	require.NoError(t, err)
+
+	junkEnc := make([]byte, base64.StdEncoding.EncodedLen(len(junk)))
+	base64.StdEncoding.Encode(junkEnc, junk)
+
+	cases := [][]byte{
+		[]byte("test"),
+		[]byte("35"),
+		[]byte("9ca4a1dd-a439-4593-b386-a7dfdc2e9fc6"),
+		[]byte(jsonobject),
+		passphrase,
+		junk,
+		junkEnc,
+	}
+
+	for _, plain := range cases {
+		var enc, dec []byte
+		var err error
+
+		enc, err = encryptOldFn(plain, passphrase)
+		require.NoError(t, err)
+
+		dec, err = decryptNewFn(enc, passphrase)
+		require.NoError(t, err)
+
+		require.Equal(t, plain, dec)
+
+		enc, err = encryptNewFn(plain, passphrase)
+		require.NoError(t, err)
+
+		dec, err = decryptOldFn(enc, passphrase)
+		require.NoError(t, err)
+
+		require.Equal(t, plain, dec)
 	}
 }

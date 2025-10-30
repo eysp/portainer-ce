@@ -36,7 +36,7 @@ export function useDeleteVolumes(environmentId: EnvironmentId) {
         );
       }
       queryClient.invalidateQueries(queryKeys.storages(environmentId));
-      queryClient.invalidateQueries(queryKeys.volumes(environmentId));
+      return queryClient.invalidateQueries(queryKeys.volumes(environmentId));
     },
     ...withGlobalError('Unable to remove volumes'),
   });

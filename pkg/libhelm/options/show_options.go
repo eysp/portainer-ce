@@ -1,5 +1,7 @@
 package options
 
+import portainer "github.com/portainer/portainer/api"
+
 // ShowOutputFormat is the format of the output of `helm show`
 type ShowOutputFormat string
 
@@ -19,6 +21,7 @@ type ShowOptions struct {
 	OutputFormat ShowOutputFormat
 	Chart        string
 	Repo         string
-
-	Env []string
+	Version      string
+	Env          []string
+	Registry     *portainer.Registry // Registry credentials for authentication
 }

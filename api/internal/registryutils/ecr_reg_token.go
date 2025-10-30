@@ -62,3 +62,26 @@ func GetRegEffectiveCredential(registry *portainer.Registry) (username, password
 
 	return
 }
+
+// PrepareRegistryCredentials consolidates the common pattern of ensuring valid ECR token
+// and setting effective credentials on the registry when authentication is enabled.
+// This function modifies the registry in-place by setting Username and Password to the effective values.
+func PrepareRegistryCredentials(tx dataservices.DataStoreTx, registry *portainer.Registry) error {
+	if !registry.Authentication {
+		return nil
+	}
+
+	if err := EnsureRegTokenValid(tx, registry); err != nil {
+		return err
+	}
+
+	username, password, err := GetRegEffectiveCredential(registry)
+	if err != nil {
+		return err
+	}
+
+	registry.Username = username
+	registry.Password = password
+
+	return nil
+}

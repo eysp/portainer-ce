@@ -38,5 +38,6 @@ module.exports = {
     plugin(function ({ addVariant }) {
       addVariant('progress-filled', ['&::-webkit-progress-value', '&::-moz-progress-bar']);
     }),
+    require('tailwindcss-animate'),
   ],
 };

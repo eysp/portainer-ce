@@ -3,6 +3,8 @@ import { DockerSnapshot } from '@/react/docker/snapshots/types';
 
 export type EnvironmentGroupId = number;
 
+export type EdgeGroupId = number;
+
 type RoleId = number;
 interface AccessPolicy {
   RoleId: RoleId;
@@ -203,6 +205,8 @@ export enum EnvironmentCreationTypes {
 export enum ContainerEngine {
   Docker = 'docker',
   Podman = 'podman',
+  // an empty container engine means that the endpoint is a Kubernetes endpoint
+  Kubernetes = '',
 }
 
 export enum PlatformType {

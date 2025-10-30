@@ -23,7 +23,7 @@ export const type = columnHelper.accessor(
     containerEngine: rowItem.ContainerEngine,
   }),
   {
-    header: '类型',
+    header: 'Type',
     cell: Cell,
     id: 'Type',
   }

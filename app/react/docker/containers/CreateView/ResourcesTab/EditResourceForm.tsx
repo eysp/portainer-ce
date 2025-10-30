@@ -75,15 +75,16 @@ export function EditResourcesForm({
                 isLoading={updateMutation.isLoading}
                 data-cy="update-limits-button"
                 disabled={isImageInvalid || !dirty}
-                loadingText="更新进行中..."
+                loadingText="Update in progress..."
                 type="button"
                 onClick={submitForm}
               >
-                更新限制
+                Update Limits
               </LoadingButton>
               {settingUnlimitedResources(values) && (
                 <TextTip>
-                  将任何资源值更新为 &apos;无限制&apos; 将重新部署此容器。
+                  Updating any resource value to &apos;unlimited&apos; will
+                  redeploy this container.
                 </TextTip>
               )}
             </div>

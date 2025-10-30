@@ -20,12 +20,12 @@ export function UsernameField({
   return (
     <FormControl
       inputId="username-field"
-      label="用户名"
+      label="Username"
       required
       errors={error}
       tooltip={
         authMethod === AuthenticationMethod.LDAP
-          ? '用户名必须与外部 LDAP 源中定义的用户名完全匹配。'
+          ? 'Username must exactly match username defined in external LDAP source.'
           : null
       }
     >
@@ -33,7 +33,7 @@ export function UsernameField({
         <InputGroup.Input
           id="username-field"
           name={name}
-          placeholder="例如 jdoe"
+          placeholder="e.g. jdoe"
           data-cy="user-usernameInput"
           value={value}
           onChange={onChange}

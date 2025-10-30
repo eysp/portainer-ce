@@ -34,8 +34,11 @@ function NameCell({
           {nodeName}
         </Link>
       </Authorized>
-      {node.isApi && <Badge type="info">api</Badge>}
-      {node.isPublishedNode && <Badge type="success">environment IP</Badge>}
+
+      <div className="ml-auto flex gap-2">
+        {node.isApi && <Badge type="info">api</Badge>}
+        {node.isPublishedNode && <Badge type="success">environment IP</Badge>}
+      </div>
     </div>
   );
 }

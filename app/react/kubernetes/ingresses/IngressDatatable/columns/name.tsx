@@ -35,7 +35,7 @@ function Cell({ row, getValue }: CellContext<Ingress, string>) {
           {name}
         </Link>
       </Authorized>
-      {row.original.IsSystem && <SystemBadge />}
+      {row.original.IsSystem && <SystemBadge className="ml-auto" />}
     </div>
   );
 }

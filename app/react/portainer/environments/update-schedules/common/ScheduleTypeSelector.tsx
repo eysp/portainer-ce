@@ -7,7 +7,6 @@ import { NavContainer } from '@@/NavTabs/NavContainer';
 
 import { ScheduleType } from '../types';
 
-import { useEdgeGroupsEnvironmentIds } from './useEdgeGroupsEnvironmentIds';
 import { useEnvironments } from './useEnvironments';
 import { defaultValue } from './ScheduledTimeField';
 import { FormValues } from './types';
@@ -17,10 +16,7 @@ import { RollbackScheduleDetailsFieldset } from './RollbackScheduleDetailsFields
 export function ScheduleTypeSelector() {
   const { values, setFieldValue } = useFormikContext<FormValues>();
 
-  const environmentIdsQuery = useEdgeGroupsEnvironmentIds(values.groupIds);
-
-  const edgeGroupsEnvironmentIds = environmentIdsQuery.data || [];
-  const environments = useEnvironments(edgeGroupsEnvironmentIds);
+  const environments = useEnvironments(values.groupIds);
 
   // old version is version that doesn't support scheduling of updates
   const hasNoTimeZone = environments.some((env) => !env.LocalTimeZone);

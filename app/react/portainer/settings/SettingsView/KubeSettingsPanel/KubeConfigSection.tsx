@@ -6,23 +6,23 @@ import { PortainerSelect } from '@@/form-components/PortainerSelect';
 
 const options = [
   {
-    label: '1 天',
+    label: '1 day',
     value: '24h',
   },
   {
-    label: '7 天',
+    label: '7 days',
     value: `${24 * 7}h`,
   },
   {
-    label: '30 天',
+    label: '30 days',
     value: `${24 * 30}h`,
   },
   {
-    label: '1 年',
+    label: '1 year',
     value: `${24 * 30 * 12}h`,
   },
   {
-    label: '永不过期',
+    label: 'No expiry',
     value: '0',
   },
 ] as const;
@@ -33,7 +33,7 @@ export function KubeConfigSection() {
 
   return (
     <FormSection title="Kubeconfig">
-      <FormControl label="Kubeconfig 过期时间" errors={error}>
+      <FormControl label="Kubeconfig expiry" errors={error}>
         <PortainerSelect
           value={value}
           options={options}

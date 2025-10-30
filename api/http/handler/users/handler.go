@@ -52,11 +52,11 @@ func NewHandler(bouncer security.BouncerService, rateLimiter *security.RateLimit
 	teamLeaderRouter := h.NewRoute().Subrouter()
 	teamLeaderRouter.Use(bouncer.TeamLeaderAccess)
 
-	restrictedRouter := h.NewRoute().Subrouter()
-	restrictedRouter.Use(bouncer.RestrictedAccess)
-
 	authenticatedRouter := h.NewRoute().Subrouter()
 	authenticatedRouter.Use(bouncer.AuthenticatedAccess)
+
+	restrictedRouter := h.NewRoute().Subrouter()
+	restrictedRouter.Use(bouncer.RestrictedAccess)
 
 	publicRouter := h.NewRoute().Subrouter()
 	publicRouter.Use(bouncer.PublicAccess)
@@ -65,7 +65,6 @@ func NewHandler(bouncer security.BouncerService, rateLimiter *security.RateLimit
 	restrictedRouter.Handle("/users", httperror.LoggerHandler(h.userList)).Methods(http.MethodGet)
 
 	authenticatedRouter.Handle("/users/me", httperror.LoggerHandler(h.userInspectMe)).Methods(http.MethodGet)
-	restrictedRouter.Handle("/users/me", httperror.LoggerHandler(h.userInspectMe)).Methods(http.MethodGet)
 	restrictedRouter.Handle("/users/{id}", httperror.LoggerHandler(h.userInspect)).Methods(http.MethodGet)
 	authenticatedRouter.Handle("/users/{id}", httperror.LoggerHandler(h.userUpdate)).Methods(http.MethodPut)
 	adminRouter.Handle("/users/{id}", httperror.LoggerHandler(h.userDelete)).Methods(http.MethodDelete)

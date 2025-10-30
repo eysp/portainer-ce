@@ -1,6 +1,10 @@
 import { Meta } from '@storybook/react';
+import { useMemo } from 'react';
 
 import { createMockUsers } from '@/react-tools/test-mocks';
+import { Role } from '@/portainer/users/types';
+import { UserContext } from '@/react/hooks/useUser';
+import { UserViewModel } from '@/portainer/models/user';
 
 import { UsersList } from './UsersList';
 
@@ -13,10 +17,25 @@ export default meta;
 
 export { Example };
 
-function Example() {
-  const users = createMockUsers(20);
-
-  return <UsersList users={users} teamId={3} />;
+interface Args {
+  userRole: Role;
 }
 
-Example.args = {};
+function Example({ userRole }: Args) {
+  const userProviderState = useMemo(
+    () => ({ user: new UserViewModel({ Role: userRole }) }),
+    [userRole]
+  );
+
+  const users = createMockUsers(20, Role.Standard);
+
+  return (
+    <UserContext.Provider value={userProviderState}>
+      <UsersList users={users} teamId={3} />
+    </UserContext.Provider>
+  );
+}
+
+Example.args = {
+  userRole: Role.Admin,
+};

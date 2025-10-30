@@ -1,5 +1,7 @@
 import { useFormikContext } from 'formik';
 
+import { useDockerComposeSchema } from '@/react/hooks/useDockerComposeSchema/useDockerComposeSchema';
+
 import { TextTip } from '@@/Tip/TextTip';
 import { WebEditorForm } from '@@/WebEditorForm';
 
@@ -19,13 +21,14 @@ export function ComposeForm({
   versionOptions: number[] | undefined;
 }) {
   const { errors, values } = useFormikContext<FormValues>();
+  const { data: dockerComposeSchema } = useDockerComposeSchema();
 
   return (
     <>
       {hasKubeEndpoint && (
         <TextTip>
           <p>
-            Portainer 不再支持{' '}
+            Portainer no longer supports{' '}
             <a
               href="https://docs.docker.com/compose/compose-file/"
               target="_blank"
@@ -33,17 +36,26 @@ export function ComposeForm({
             >
               docker-compose
             </a>{' '}
-            格式的 Kubernetes 部署清单，我们也移除了{' '}
+            format manifests for Kubernetes deployments, and we have removed the{' '}
             <a href="https://kompose.io/" target="_blank" rel="noreferrer">
               Kompose
             </a>{' '}
-            转换工具，该工具曾用于实现此功能。原因是 Kompose 现在存在安全风险，包含多个常见漏洞（CVEs）。
+            conversion tool which enables this. The reason for this is because
+            Kompose now poses a security risk, since it has a number of Common
+            Vulnerabilities and Exposures (CVEs).
           </p>
           <p>
-            尽管 Kompose 项目有维护者，并且属于 CNCF，但其维护不够活跃。发布频率极低，我们提交的新拉取请求也往往数月未合并，同时新的 CVEs 持续出现。
+            Unfortunately, while the Kompose project has a maintainer and is
+            part of the CNCF, it is not being actively maintained. Releases are
+            very infrequent and new pull requests to the project (including ones
+            we&apos;ve submitted) are taking months to be merged, with new CVEs
+            arising in the meantime.
           </p>
           <p>
-            我们建议您在沙箱环境中安装自己的 Kompose 实例，将 Docker Compose 文件转换为 Kubernetes 清单，并使用这些清单来设置应用程序。
+            We advise installing your own instance of Kompose in a sandbox
+            environment, performing conversions of your Docker Compose files to
+            Kubernetes manifests and using those manifests to set up
+            applications.
           </p>
         </TextTip>
       )}
@@ -52,8 +64,9 @@ export function ComposeForm({
         data-cy="compose-editor"
         value={values.content}
         type="yaml"
+        schema={dockerComposeSchema}
         id="compose-editor"
-        placeholder="在此定义或粘贴您的 Docker Compose 文件内容"
+        textTip="Define or paste the content of your docker compose file here"
         onChange={(value) => handleContentChange(DeploymentType.Compose, value)}
         error={errors.content}
         readonly={hasKubeEndpoint}
@@ -61,15 +74,15 @@ export function ComposeForm({
         onVersionChange={handleVersionChange}
       >
         <div>
-          您可以在{' '}
+          You can get more information about Compose file format in the{' '}
           <a
             href="https://docs.docker.com/compose/compose-file/"
             target="_blank"
             rel="noreferrer"
           >
-            官方文档
+            official documentation
           </a>
-          中获取有关 Compose 文件格式的更多信息。
+          .
         </div>
       </WebEditorForm>
     </>

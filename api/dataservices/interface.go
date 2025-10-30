@@ -12,6 +12,7 @@ type (
 		EdgeGroup() EdgeGroupService
 		EdgeJob() EdgeJobService
 		EdgeStack() EdgeStackService
+		EdgeStackStatus() EdgeStackStatusService
 		Endpoint() EndpointService
 		EndpointGroup() EndpointGroupService
 		EndpointRelation() EndpointRelationService
@@ -39,8 +40,8 @@ type (
 		Open() (newStore bool, err error)
 		Init() error
 		Close() error
-		UpdateTx(func(DataStoreTx) error) error
-		ViewTx(func(DataStoreTx) error) error
+		UpdateTx(func(tx DataStoreTx) error) error
+		ViewTx(func(tx DataStoreTx) error) error
 		MigrateData() error
 		Rollback(force bool) error
 		CheckCurrentEdition() error
@@ -89,6 +90,16 @@ type (
 		BucketName() string
 	}
 
+	EdgeStackStatusService interface {
+		Create(edgeStackID portainer.EdgeStackID, endpointID portainer.EndpointID, status *portainer.EdgeStackStatusForEnv) error
+		Read(edgeStackID portainer.EdgeStackID, endpointID portainer.EndpointID) (*portainer.EdgeStackStatusForEnv, error)
+		ReadAll(edgeStackID portainer.EdgeStackID) ([]portainer.EdgeStackStatusForEnv, error)
+		Update(edgeStackID portainer.EdgeStackID, endpointID portainer.EndpointID, status *portainer.EdgeStackStatusForEnv) error
+		Delete(edgeStackID portainer.EdgeStackID, endpointID portainer.EndpointID) error
+		DeleteAll(edgeStackID portainer.EdgeStackID) error
+		Clear(edgeStackID portainer.EdgeStackID, relatedEnvironmentsIDs []portainer.EndpointID) error
+	}
+
 	// EndpointService represents a service for managing environment(endpoint) data
 	EndpointService interface {
 		Endpoint(ID portainer.EndpointID) (*portainer.Endpoint, error)
@@ -115,6 +126,8 @@ type (
 		EndpointRelation(EndpointID portainer.EndpointID) (*portainer.EndpointRelation, error)
 		Create(endpointRelation *portainer.EndpointRelation) error
 		UpdateEndpointRelation(EndpointID portainer.EndpointID, endpointRelation *portainer.EndpointRelation) error
+		AddEndpointRelationsForEdgeStack(endpointIDs []portainer.EndpointID, edgeStack *portainer.EdgeStack) error
+		RemoveEndpointRelationsForEdgeStack(endpointIDs []portainer.EndpointID, edgeStackID portainer.EdgeStackID) error
 		DeleteEndpointRelation(EndpointID portainer.EndpointID) error
 		BucketName() string
 	}
@@ -157,6 +170,7 @@ type (
 
 	SnapshotService interface {
 		BaseCRUD[portainer.Snapshot, portainer.EndpointID]
+		ReadWithoutSnapshotRaw(ID portainer.EndpointID) (*portainer.Snapshot, error)
 	}
 
 	// SSLSettingsService represents a service for managing application settings

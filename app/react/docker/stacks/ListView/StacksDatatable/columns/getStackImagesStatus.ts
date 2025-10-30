@@ -10,7 +10,7 @@ export async function getStackImagesStatus(id: number) {
   } catch (e) {
     throw parseAxiosError(
       e,
-      `无法获取堆栈的镜像状态： ${id}`
+      `Unable to retrieve image status for stack: ${id}`
     );
   }
 }

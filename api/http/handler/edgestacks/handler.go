@@ -22,17 +22,15 @@ type Handler struct {
 	GitService         portainer.GitService
 	edgeStacksService  *edgestackservice.Service
 	KubernetesDeployer portainer.KubernetesDeployer
-	stackCoordinator   *EdgeStackStatusUpdateCoordinator
 }
 
 // NewHandler creates a handler to manage environment(endpoint) group operations.
-func NewHandler(bouncer security.BouncerService, dataStore dataservices.DataStore, edgeStacksService *edgestackservice.Service, stackCoordinator *EdgeStackStatusUpdateCoordinator) *Handler {
+func NewHandler(bouncer security.BouncerService, dataStore dataservices.DataStore, edgeStacksService *edgestackservice.Service) *Handler {
 	h := &Handler{
 		Router:            mux.NewRouter(),
 		requestBouncer:    bouncer,
 		DataStore:         dataStore,
 		edgeStacksService: edgeStacksService,
-		stackCoordinator:  stackCoordinator,
 	}
 
 	h.Handle("/edge_stacks/create/{method}",

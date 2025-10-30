@@ -1,13 +1,17 @@
 import { RegistryId } from '../types/registry';
 
-export function buildUrl(registryId: RegistryId) {
-  const base = '/registries';
+export function buildUrl(registryId: RegistryId, resource?: 'repositories') {
+  let url = '/registries';
 
   if (registryId) {
-    return `${base}/${registryId}`;
+    url += `/${registryId}`;
   }
 
-  return base;
+  if (resource) {
+    url += `/${resource}`;
+  }
+
+  return url;
 }
 
 export function buildProxyUrl(registryId: RegistryId) {

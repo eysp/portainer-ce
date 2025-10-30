@@ -8,16 +8,16 @@ const intervals = asyncIntervalOptions.map((option) => option.value);
 
 export function validationSchema(): SchemaOf<FormValues> {
   return object({
-    EdgeAgentCheckinInterval: number().required('此字段为必填项。'),
+    EdgeAgentCheckinInterval: number().required('This field is required.'),
     Edge: object({
       PingInterval: number()
-        .required('此字段为必填项。')
+        .required('This field is required.')
         .oneOf(intervals),
       SnapshotInterval: number()
-        .required('此字段为必填项。')
+        .required('This field is required.')
         .oneOf(intervals),
       CommandInterval: number()
-        .required('此字段为必填项。')
+        .required('This field is required.')
         .oneOf(intervals),
       AsyncMode: boolean().default(false),
     }),

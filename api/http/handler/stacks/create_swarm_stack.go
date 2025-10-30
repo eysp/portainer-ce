@@ -11,8 +11,8 @@ import (
 	"github.com/portainer/portainer/api/stacks/stackutils"
 	httperror "github.com/portainer/portainer/pkg/libhttp/error"
 	"github.com/portainer/portainer/pkg/libhttp/request"
+	valid "github.com/portainer/portainer/pkg/validate"
 
-	"github.com/asaskevich/govalidator"
 	"github.com/pkg/errors"
 )
 
@@ -142,7 +142,7 @@ func (payload *swarmStackFromGitRepositoryPayload) Validate(r *http.Request) err
 	if len(payload.SwarmID) == 0 {
 		return errors.New("Invalid Swarm ID")
 	}
-	if len(payload.RepositoryURL) == 0 || !govalidator.IsURL(payload.RepositoryURL) {
+	if len(payload.RepositoryURL) == 0 || !valid.IsURL(payload.RepositoryURL) {
 		return errors.New("Invalid repository URL. Must correspond to a valid URL format")
 	}
 	if payload.RepositoryAuthentication && len(payload.RepositoryPassword) == 0 {

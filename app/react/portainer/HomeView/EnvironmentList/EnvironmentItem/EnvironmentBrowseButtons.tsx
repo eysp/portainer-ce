@@ -45,12 +45,12 @@ export function EnvironmentBrowseButtons({
             className="!m-0 w-full !py-0"
             title={
               !isEdgeAsync
-                ? '浏览快照仅适用于异步环境'
+                ? 'Browse snapshot is only available for async environments'
                 : ''
             }
             data-cy={`browse-snapshot-link-${environment.Name}`}
           >
-            浏览快照
+            Browse snapshot
           </LinkButton>
         ) : (
           <Button
@@ -61,7 +61,7 @@ export function EnvironmentBrowseButtons({
             size="medium"
             color="light"
           >
-            关闭快照
+            Close snapshot
           </Button>
         ))}
 
@@ -69,7 +69,7 @@ export function EnvironmentBrowseButtons({
         <LinkButton
           title={
             isEdgeAsync
-              ? '异步环境不支持实时连接s'
+              ? 'Live connection is not available for async environments'
               : ''
           }
           icon={Wifi}
@@ -82,7 +82,7 @@ export function EnvironmentBrowseButtons({
           className="!m-0 w-full !py-0"
           data-cy={`live-connect-link-${environment.Name}`}
         >
-          实时连接
+          Live connect
         </LinkButton>
       ) : (
         <Button
@@ -93,7 +93,7 @@ export function EnvironmentBrowseButtons({
           size="medium"
           color="primary"
         >
-          断开连接
+          Disconnect
         </Button>
       )}
 
@@ -131,7 +131,7 @@ function Disconnected() {
   return (
     <div className="flex items-center justify-center gap-2">
       <Icon icon={WifiOff} />
-      断开连接
+      Disconnected
     </div>
   );
 }
@@ -146,7 +146,7 @@ function Connected() {
       )}
     >
       <div className="h-2 w-2 rounded-full bg-green-8 th-dark:bg-green-4" />
-      连接
+      Connected
     </div>
   );
 }
@@ -161,7 +161,7 @@ function Snapshot() {
       )}
     >
       <div className="h-2 w-2 rounded-full bg-warning-7" />
-      浏览快照
+      Browsing Snapshot
     </div>
   );
 }

@@ -75,7 +75,7 @@ export function NotificationsMenu() {
             )}
           >
             <div>
-              <h4>通知</h4>
+              <h4>Notifications</h4>
             </div>
             <div className={notificationStyles.itemLast}>
               {reducedNotifications?.length > 0 && (
@@ -88,7 +88,7 @@ export function NotificationsMenu() {
                   }}
                   data-cy="notification-deleteButton"
                 >
-                  清除全部
+                  Clear all
                 </Button>
               )}
             </div>
@@ -114,14 +114,14 @@ export function NotificationsMenu() {
                 to="portainer.notifications"
                 data-cy="notifications-see-all-link"
               >
-                查看所有通知
+                View all notifications
               </Link>
             </div>
           </>
         ) : (
           <div className="flex flex-col items-center">
             <Icon icon={Bell} size="xl" />
-            <p className="my-5">您目前没有通知。</p>
+            <p className="my-5">You have no notifications yet.</p>
           </div>
         )}
       </MenuList>
@@ -196,16 +196,16 @@ function formatTime(timeCreated: Date) {
   if (diff <= 86400) {
     let interval = Math.floor(diff / 3600);
     if (interval >= 1) {
-      return `${interval} 小时前`;
+      return `${interval} hours ago`;
     }
     interval = Math.floor(diff / 60);
     if (interval >= 1) {
-      return `${interval} 分钟前`;
+      return `${interval} min ago`;
     }
   }
   if (diff > 86400) {
     const formatDate = Moment(timeCreated).format('YYYY-MM-DD h:mm:ss');
     return formatDate;
   }
-  return '刚刚';
+  return 'Just now';
 }

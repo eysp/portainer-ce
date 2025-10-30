@@ -25,7 +25,7 @@ export function RegistriesDatatable() {
       dataset={query.data || []}
       isLoading={query.isLoading}
       settingsManager={tableState}
-      title="镜像仓库"
+      title="Registries"
       titleIcon={Radio}
       renderTableActions={(selectedItems) => (
         <>

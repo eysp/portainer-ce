@@ -48,7 +48,7 @@ export function ImageConfigFieldset({
               onClick={() => setFieldValue('useRegistry', false)}
               data-cy="image-config-advanced-button"
             >
-              高级模式
+              Advanced mode
             </Button>
           ) : (
             <Button
@@ -59,7 +59,7 @@ export function ImageConfigFieldset({
               onClick={() => setFieldValue('useRegistry', true)}
               data-cy="image-config-simple-button"
             >
-              简单模式
+              Simple mode
             </Button>
           )}
         </div>

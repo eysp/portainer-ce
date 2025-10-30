@@ -6,6 +6,7 @@ import (
 
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/git"
+	gittypes "github.com/portainer/portainer/api/git/types"
 	httperrors "github.com/portainer/portainer/api/http/errors"
 	"github.com/portainer/portainer/api/http/security"
 	k "github.com/portainer/portainer/api/kubernetes"
@@ -19,12 +20,13 @@ import (
 )
 
 type stackGitRedployPayload struct {
-	RepositoryReferenceName  string
-	RepositoryAuthentication bool
-	RepositoryUsername       string
-	RepositoryPassword       string
-	Env                      []portainer.Pair
-	Prune                    bool
+	RepositoryReferenceName     string
+	RepositoryAuthentication    bool
+	RepositoryUsername          string
+	RepositoryPassword          string
+	RepositoryAuthorizationType gittypes.GitCredentialAuthType
+	Env                         []portainer.Pair
+	Prune                       bool
 	// Force a pulling to current image with the original tag though the image is already the latest
 	PullImage bool `example:"false"`
 
@@ -135,13 +137,16 @@ func (handler *Handler) stackGitRedeploy(w http.ResponseWriter, r *http.Request)
 
 	repositoryUsername := ""
 	repositoryPassword := ""
+	repositoryAuthType := gittypes.GitCredentialAuthType_Basic
 	if payload.RepositoryAuthentication {
 		repositoryPassword = payload.RepositoryPassword
+		repositoryAuthType = payload.RepositoryAuthorizationType
 
 		// When the existing stack is using the custom username/password and the password is not updated,
 		// the stack should keep using the saved username/password
 		if repositoryPassword == "" && stack.GitConfig != nil && stack.GitConfig.Authentication != nil {
 			repositoryPassword = stack.GitConfig.Authentication.Password
+			repositoryAuthType = stack.GitConfig.Authentication.AuthorizationType
 		}
 		repositoryUsername = payload.RepositoryUsername
 	}
@@ -152,6 +157,7 @@ func (handler *Handler) stackGitRedeploy(w http.ResponseWriter, r *http.Request)
 		ReferenceName: stack.GitConfig.ReferenceName,
 		Username:      repositoryUsername,
 		Password:      repositoryPassword,
+		AuthType:      repositoryAuthType,
 		TLSSkipVerify: stack.GitConfig.TLSSkipVerify,
 	}
 
@@ -166,7 +172,7 @@ func (handler *Handler) stackGitRedeploy(w http.ResponseWriter, r *http.Request)
 		return err
 	}
 
-	newHash, err := handler.GitService.LatestCommitID(stack.GitConfig.URL, stack.GitConfig.ReferenceName, repositoryUsername, repositoryPassword, stack.GitConfig.TLSSkipVerify)
+	newHash, err := handler.GitService.LatestCommitID(stack.GitConfig.URL, stack.GitConfig.ReferenceName, repositoryUsername, repositoryPassword, repositoryAuthType, stack.GitConfig.TLSSkipVerify)
 	if err != nil {
 		return httperror.InternalServerError("Unable get latest commit id", errors.WithMessagef(err, "failed to fetch latest commit id of the stack %v", stack.ID))
 	}

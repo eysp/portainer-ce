@@ -23,7 +23,7 @@ export function MultipleSelectionFilter({
   value = [],
   filterKey,
   onChange,
-  menuTitle = '按状态筛选',
+  menuTitle = 'Filter by state',
 }: MultipleSelectionFilterProps) {
   const enabled = value.length > 0;
   return (
@@ -34,7 +34,7 @@ export function MultipleSelectionFilter({
             'filter-active': enabled,
           })}
         >
-          筛选
+          Filter
           <Icon icon={enabled ? Check : Filter} />
         </MenuButton>
         <MenuPopover className="dropdown-menu">

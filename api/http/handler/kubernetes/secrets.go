@@ -130,13 +130,11 @@ func (handler *Handler) getAllKubernetesSecrets(r *http.Request) ([]models.K8sSe
 	}
 
 	if isUsed {
-		secretsWithApplications, err := cli.CombineSecretsWithApplications(secrets)
+		err = cli.SetSecretsIsUsed(&secrets)
 		if err != nil {
 			log.Error().Err(err).Str("context", "GetAllKubernetesSecrets").Msg("Unable to combine secrets with associated applications")
 			return nil, httperror.InternalServerError("unable to combine secrets with associated applications. Error: ", err)
 		}
-
-		return secretsWithApplications, nil
 	}
 
 	return secrets, nil

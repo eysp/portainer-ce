@@ -35,7 +35,7 @@ export function AgentVolumeBrowser({
     <FilesTable
       tableState={tableState}
       dataset={dataset}
-      title={`卷浏览 - ${relativePath}`}
+      title={`Volume browser - ${relativePath}`}
       isRoot={isRoot}
       onRename={onRename}
       onBrowse={onBrowse}

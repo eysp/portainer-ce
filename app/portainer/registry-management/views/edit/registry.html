@@ -1,4 +1,4 @@
-<page-header title="'镜像仓库详情'" breadcrumbs="[{label:'镜像仓库', link:'portainer.registries'}, $ctrl.registry.Name]" reload="true"> </page-header>
+<page-header title="'Registry details'" breadcrumbs="[{label:'Registries', link:'portainer.registries'}, $ctrl.registry.Name]" reload="true"> </page-header>
 
 <div class="row" ng-if="!$ctrl.state.loading">
   <div class="col-sm-12">
@@ -7,7 +7,7 @@
         <form class="form-horizontal" name="editRegistry">
           <!-- provider -->
           <div class="form-group">
-            <label for="registry_name" class="col-sm-3 col-lg-2 control-label text-left">提供商</label>
+            <label for="registry_name" class="col-sm-3 col-lg-2 control-label text-left">Provider</label>
             <div class="col-sm-9 col-lg-10">
               <input type="text" class="form-control" ng-model="$ctrl.provider" disabled data-cy="registries-provider-input" />
             </div>
@@ -15,7 +15,7 @@
 
           <!-- name-input -->
           <div class="form-group">
-            <label for="registry_name" class="col-sm-3 col-lg-2 control-label required text-left">名称</label>
+            <label for="registry_name" class="col-sm-3 col-lg-2 control-label required text-left">Name</label>
             <div class="col-sm-9 col-lg-10">
               <input
                 type="text"
@@ -24,7 +24,7 @@
                 id="registry_name"
                 name="registry_name"
                 ng-model="$ctrl.registry.Name"
-                placeholder="例如：my-registry"
+                placeholder="e.g. my-registry"
                 ng-change="$ctrl.onChangeName()"
                 required
               />
@@ -35,7 +35,7 @@
               <div>
                 <p class="vertical-center">
                   <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
-                  已存在具有相同名称的镜像仓库。
+                  A registry with the same name already exists.
                 </p>
               </div>
             </div>
@@ -45,17 +45,17 @@
               <div ng-messages="editRegistry.registry_name.$error">
                 <p ng-message="required" class="vertical-center">
                   <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
-                  此字段为必填项。
+                  This field is required.
                 </p>
               </div>
             </div>
           </div>
-
+          <!-- !name-input -->
           <!-- registry-url-input -->
           <div class="form-group">
             <label for="registry_url" class="col-sm-3 col-lg-2 control-label text-left">
-              <span class="required">镜像仓库 URL</span>
-              <portainer-tooltip message="'Docker 镜像仓库的 URL 或 IP 地址。如存在协议或斜杠，将被移除。'"> </portainer-tooltip>
+              <span class="required">Registry URL</span>
+              <portainer-tooltip message="'URL or IP address of a Docker registry. Any protocol or trailing slash will be stripped if present.'"> </portainer-tooltip>
             </label>
             <div class="col-sm-9 col-lg-10">
               <input
@@ -65,7 +65,7 @@
                 id="registry_url"
                 name="registry_url"
                 ng-model="$ctrl.registry.URL"
-                placeholder="例如：10.0.0.10:5000 或 myregistry.domain.tld"
+                placeholder="e.g. 10.0.0.10:5000 or myregistry.domain.tld"
                 ng-disabled="$ctrl.registry.Type === $ctrl.RegistryTypes.DOCKERHUB || $ctrl.registry.Type === $ctrl.RegistryTypes.QUAY || $ctrl.registry.Type === $ctrl.RegistryTypes.GITLAB"
                 required
               />
@@ -76,7 +76,7 @@
               <div ng-messages="editRegistry.registry_url.$error">
                 <p ng-message="required" class="vertical-center">
                   <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
-                  此字段为必填项。
+                  This field is required.
                 </p>
               </div>
             </div>
@@ -86,8 +86,8 @@
           <div ng-if="$ctrl.registry.Type === $ctrl.RegistryTypes.PROGET">
             <div class="form-group">
               <label for="registry_base_url" class="col-sm-3 col-lg-2 control-label text-left">
-                <span class="required">基础 URL</span>
-                <portainer-tooltip message="'ProGet 镜像仓库的基础 URL。'"> </portainer-tooltip>
+                <span class="required">Base URL</span>
+                <portainer-tooltip message="'The base URL of the ProGet registry.'"> </portainer-tooltip>
               </label>
               <div class="col-sm-9 col-lg-10">
                 <input
@@ -97,7 +97,7 @@
                   id="registry_base_url"
                   name="registry_base_url"
                   ng-model="$ctrl.registry.BaseURL"
-                  placeholder="例如：10.0.0.10:5000 或 myregistry.domain.tld"
+                  placeholder="e.g. 10.0.0.10:5000 or myregistry.domain.tld"
                   required
                 />
               </div>
@@ -107,12 +107,13 @@
                 <div ng-messages="editRegistry.registry_base_url.$error">
                   <p ng-message="required" class="vertical-center">
                     <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
-                    此字段为必填项。
+                    This field is required.
                   </p>
                 </div>
               </div>
             </div>
           </div>
+          <!-- !registry-url-input -->
 
           <!-- authentication-checkbox -->
           <div
@@ -126,20 +127,21 @@
             "
           >
             <label for="registry_auth" class="col-sm-3 col-lg-2 control-label text-left">
-              启用身份验证
-              <portainer-tooltip message="'如果连接此镜像仓库需要凭证，请启用此选项。'"> </portainer-tooltip>
+              Authentication
+              <portainer-tooltip message="'Enable this option if you need to specify credentials to connect to this registry.'"> </portainer-tooltip>
             </label>
             <div class="col-sm-9 col-lg-10">
-              <por-switch-field checked="$ctrl.registry.Authentication" on-change="($ctrl.toggleAuthentication)" switch-values="{on:'是',off:'否'}"></por-switch-field>
+              <por-switch-field checked="$ctrl.registry.Authentication" on-change="($ctrl.toggleAuthentication)" switch-values="{on:'Yes',off:'No'}"></por-switch-field>
             </div>
           </div>
+          <!-- !authentication-checkbox -->
 
           <!-- authentication-credentials -->
           <div ng-if="$ctrl.registry.Authentication">
             <!-- credentials-user -->
             <div class="form-group">
               <label for="credentials_username" class="col-sm-3 col-lg-2 control-label required text-left">
-                {{ $ctrl.registry.Type === $ctrl.RegistryTypes.ECR ? 'AWS 访问密钥' : '用户名' }}
+                {{ $ctrl.registry.Type === $ctrl.RegistryTypes.ECR ? 'AWS Access Key' : 'Username' }}
               </label>
               <div class="col-sm-9 col-lg-10">
                 <input
@@ -158,12 +160,12 @@
                 <div ng-messages="editRegistry.credentials_username.$error">
                   <p ng-message="required" class="vertical-center">
                     <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
-                    此字段为必填项。
+                    This field is required.
                   </p>
                 </div>
               </div>
             </div>
-
+            <!-- !credentials-user -->
             <!-- credentials-password -->
             <div class="form-group">
               <label for="credentials_password" class="col-sm-3 col-lg-2 control-label text-left"> {{ $ctrl.passwordLabel() }} </label>
@@ -179,11 +181,20 @@
                 />
               </div>
             </div>
-
+            <div class="form-group" ng-show="editRegistry.credentials_password.$invalid">
+              <div class="col-sm-12 small text-warning">
+                <div ng-messages="editRegistry.credentials_password.$error">
+                  <p ng-message="required" class="vertical-center">
+                    <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
+                    This field is required.
+                  </p>
+                </div>
+              </div>
+            </div>
             <!-- region -->
             <div ng-if="$ctrl.registry.Type == $ctrl.RegistryTypes.ECR">
               <div class="form-group">
-                <label for="registry_region" class="col-sm-3 col-lg-2 control-label required text-left">区域</label>
+                <label for="registry_region" class="col-sm-3 col-lg-2 control-label required text-left">Region</label>
                 <div class="col-sm-9 col-lg-10">
                   <input
                     type="text"
@@ -202,29 +213,34 @@
                   <div ng-messages="editRegistry.registry_region.$error">
                     <p ng-message="required" class="vertical-center">
                       <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
-                      此字段为必填项。
+                      This field is required.
                     </p>
                   </div>
                 </div>
               </div>
             </div>
+            <!-- !region -->
+            <!-- !credentials-password -->
           </div>
+          <!-- !authentication-credentials -->
 
-          <!-- quay organization -->
           <div ng-if="$ctrl.registry.Type == $ctrl.RegistryTypes.QUAY">
+            <!-- organisation-checkbox -->
             <div class="form-group">
-              <label class="col-sm-3 col-lg-2 control-label text-left"> 使用组织镜像仓库 </label>
+              <label class="col-sm-3 col-lg-2 control-label text-left"> Use organization registry </label>
               <div class="col-sm-9 col-lg-10">
                 <por-switch-field
                   checked="$ctrl.registry.Quay.UseOrganisation"
                   on-change="($ctrl.toggleQuayUseOrganisation)"
-                  switch-values="{on:'是',off:'否'}"
+                  switch-values="{on:'Yes',off:'No'}"
                 ></por-switch-field>
               </div>
             </div>
+            <!-- !organisation-checkbox -->
             <div ng-if="$ctrl.registry.Quay.UseOrganisation">
+              <!-- organisation_name -->
               <div class="form-group">
-                <label for="organisation_name" class="col-sm-3 col-lg-2 control-label required text-left">组织名称</label>
+                <label for="organisation_name" class="col-sm-3 col-lg-2 control-label required text-left">Organization name</label>
                 <div class="col-sm-9 col-lg-10">
                   <input
                     type="text"
@@ -242,15 +258,15 @@
                   <div ng-messages="editRegistry.organisation_name.$error">
                     <p ng-message="required" class="vertical-center">
                       <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
-                      此字段为必填项。
+                      This field is required.
                     </p>
                   </div>
                 </div>
               </div>
+              <!-- !organisation_name -->
             </div>
           </div>
 
-          <!-- buttons -->
           <div class="form-group">
             <div class="col-sm-12">
               <button
@@ -260,10 +276,10 @@
                 ng-click="$ctrl.updateRegistry()"
                 button-spinner="$ctrl.state.actionInProgress"
               >
-                <span ng-hide="$ctrl.state.actionInProgress">更新镜像仓库</span>
-                <span ng-show="$ctrl.state.actionInProgress">正在更新...</span>
+                <span ng-hide="$ctrl.state.actionInProgress">Update registry</span>
+                <span ng-show="$ctrl.state.actionInProgress">Updating registry...</span>
               </button>
-              <a type="button" class="btn btn-default btn-sm" ui-sref="portainer.registries">取消</a>
+              <a type="button" class="btn btn-default btn-sm" ui-sref="portainer.registries">Cancel</a>
             </div>
           </div>
         </form>

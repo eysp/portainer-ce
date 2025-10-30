@@ -6,11 +6,11 @@ import (
 	"testing"
 
 	portainer "github.com/portainer/portainer/api"
-	helper "github.com/portainer/portainer/api/internal/testhelpers"
+	"github.com/portainer/portainer/api/internal/testhelpers"
 )
 
 func TestEmptyGlobalKey(t *testing.T) {
-	handler := NewHandler(helper.NewTestRequestBouncer())
+	handler := NewHandler(testhelpers.NewTestRequestBouncer())
 
 	req, err := http.NewRequest(http.MethodPost, "https://portainer.io:9443/endpoints/global-key", nil)
 	if err != nil {

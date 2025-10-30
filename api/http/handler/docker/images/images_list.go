@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/portainer/portainer/api/docker/client"
 	"github.com/portainer/portainer/api/http/handler/docker/utils"
 	"github.com/portainer/portainer/api/set"
 	httperror "github.com/portainer/portainer/pkg/libhttp/error"
@@ -50,7 +51,7 @@ func (handler *Handler) imagesList(w http.ResponseWriter, r *http.Request) *http
 	nodeNames := make(map[string]string)
 
 	// Pass the node names map to the context so the custom NodeNameTransport can use it
-	ctx := context.WithValue(r.Context(), "nodeNames", nodeNames)
+	ctx := context.WithValue(r.Context(), client.NodeNamesCtxKey{}, nodeNames)
 
 	images, err := cli.ImageList(ctx, image.ListOptions{})
 	if err != nil {

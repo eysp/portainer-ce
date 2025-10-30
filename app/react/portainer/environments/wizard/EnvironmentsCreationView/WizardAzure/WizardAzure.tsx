@@ -80,7 +80,7 @@ export function WizardAzure({ onCreate }: Props) {
             <NameField />
 
             <FormControl
-              label="应用程序 ID"
+              label="Application ID"
               errors={errors.applicationId}
               inputId="applicationId-input"
               required
@@ -108,7 +108,7 @@ export function WizardAzure({ onCreate }: Props) {
             </FormControl>
 
             <FormControl
-              label="身份验证密钥"
+              label="Authentication Key"
               errors={errors.authenticationKey}
               inputId="authenticationKey-input"
               required
@@ -128,12 +128,12 @@ export function WizardAzure({ onCreate }: Props) {
                 <LoadingButton
                   className="vertical-center"
                   data-cy="create-azure-environment-button"
-                  loadingText="正在连接环境..."
+                  loadingText="Connecting environment..."
                   isLoading={mutation.isLoading}
                   disabled={!dirty || !isValid}
                   icon={Plug2}
                 >
-                  连接
+                  Connect
                 </LoadingButton>
               </div>
             </div>
@@ -174,9 +174,9 @@ export function WizardAzure({ onCreate }: Props) {
 function useValidation(): SchemaOf<FormValues> {
   return object({
     name: useNameValidation(),
-    applicationId: string().required('应用程序 ID 是必填项'),
-    tenantId: string().required('Tenant ID 是必填项'),
-    authenticationKey: string().required('身份验证密钥是必填项'),
+    applicationId: string().required('Application ID is required'),
+    tenantId: string().required('Tenant ID is required'),
+    authenticationKey: string().required('Authentication Key is required'),
     meta: metadataValidation(),
   });
 }

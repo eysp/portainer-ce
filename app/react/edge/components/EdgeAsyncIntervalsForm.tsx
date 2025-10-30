@@ -14,41 +14,43 @@ export interface EdgeAsyncIntervalsValues {
 }
 
 export const options: Options = [
-  { label: '使用默认间隔', value: -1, isDefault: true },
+  { label: 'Use default interval', value: -1, isDefault: true },
   {
     value: 0,
-    label: '禁用',
+    label: 'disabled',
   },
   {
     value: 60,
-    label: '1 分钟',
+    label: '1 minute',
   },
   {
     value: 60 * 60,
-    label: '1 小时',
+    label: '1 hour',
   },
   {
     value: 24 * 60 * 60,
-    label: '1 天',
+    label: '1 day',
   },
   {
     value: 7 * 24 * 60 * 60,
-    label: '1 周',
+    label: '1 week',
   },
 ];
 
 const defaultFieldSettings = {
   ping: {
-    label: 'Ping 间隔',
-    tooltip: '该 Edge agent 与 Portainer 实例通信的时间间隔',
+    label: 'Ping interval',
+    tooltip:
+      'Interval used by this Edge agent to check in with the Portainer instance',
   },
   snapshot: {
-    label: '快照间隔',
-    tooltip: '该 Edge agent 用于快照其状态的时间间隔',
+    label: 'Snapshot interval',
+    tooltip: 'Interval used by this Edge agent to snapshot the agent state',
   },
   command: {
-    label: '命令间隔',
-    tooltip: '该 Edge agent 从 Portainer 实例获取命令的时间间隔',
+    label: 'Command interval',
+    tooltip:
+      'Interval used by this Edge agent to fetch commands from the Portainer instance',
   },
 };
 
@@ -143,12 +145,12 @@ const intervals = options.map((option) => option.value);
 
 export function edgeAsyncIntervalsValidation(): SchemaOf<EdgeAsyncIntervalsValues> {
   return object({
-    PingInterval: number().required('此字段为必填项。').oneOf(intervals),
+    PingInterval: number().required('This field is required.').oneOf(intervals),
     SnapshotInterval: number()
-      .required('此字段为必填项。')
+      .required('This field is required.')
       .oneOf(intervals),
     CommandInterval: number()
-      .required('此字段为必填项。')
+      .required('This field is required.')
       .oneOf(intervals),
   });
 }

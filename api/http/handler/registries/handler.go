@@ -5,10 +5,10 @@ import (
 
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/dataservices"
+	httperrors "github.com/portainer/portainer/api/http/errors"
 	"github.com/portainer/portainer/api/http/proxy"
 	"github.com/portainer/portainer/api/http/security"
-	"github.com/portainer/portainer/api/internal/endpointutils"
-	"github.com/portainer/portainer/api/kubernetes"
+	"github.com/portainer/portainer/api/internal/registryutils/access"
 	"github.com/portainer/portainer/api/kubernetes/cli"
 	"github.com/portainer/portainer/api/pendingactions"
 	httperror "github.com/portainer/portainer/pkg/libhttp/error"
@@ -17,6 +17,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/pkg/errors"
+	"github.com/rs/zerolog/log"
 )
 
 func hideFields(registry *portainer.Registry, hideAccesses bool) {
@@ -56,17 +57,20 @@ func newHandler(bouncer security.BouncerService) *Handler {
 func (handler *Handler) initRouter(bouncer accessGuard) {
 	adminRouter := handler.NewRoute().Subrouter()
 	adminRouter.Use(bouncer.AdminAccess)
-
-	authenticatedRouter := handler.NewRoute().Subrouter()
-	authenticatedRouter.Use(bouncer.AuthenticatedAccess)
-
 	adminRouter.Handle("/registries", httperror.LoggerHandler(handler.registryList)).Methods(http.MethodGet)
 	adminRouter.Handle("/registries", httperror.LoggerHandler(handler.registryCreate)).Methods(http.MethodPost)
 	adminRouter.Handle("/registries/{id}", httperror.LoggerHandler(handler.registryUpdate)).Methods(http.MethodPut)
 	adminRouter.Handle("/registries/{id}/configure", httperror.LoggerHandler(handler.registryConfigure)).Methods(http.MethodPost)
 	adminRouter.Handle("/registries/{id}", httperror.LoggerHandler(handler.registryDelete)).Methods(http.MethodDelete)
 
-	authenticatedRouter.Handle("/registries/{id}", httperror.LoggerHandler(handler.registryInspect)).Methods(http.MethodGet)
+	// Use registry-specific access bouncer for inspect and repositories endpoints
+	registryAccessRouter := handler.NewRoute().Subrouter()
+	registryAccessRouter.Use(bouncer.AuthenticatedAccess, handler.RegistryAccess)
+	registryAccessRouter.Handle("/registries/{id}", httperror.LoggerHandler(handler.registryInspect)).Methods(http.MethodGet)
+
+	// Keep the gitlab proxy on the regular authenticated router as it doesn't require specific registry access
+	authenticatedRouter := handler.NewRoute().Subrouter()
+	authenticatedRouter.Use(bouncer.AuthenticatedAccess)
 	authenticatedRouter.PathPrefix("/registries/proxies/gitlab").Handler(httperror.LoggerHandler(handler.proxyRequestsToGitlabAPIWithoutRegistry))
 }
 
@@ -88,17 +92,10 @@ func (handler *Handler) registriesHaveSameURLAndCredentials(r1, r2 *portainer.Re
 }
 
 // this function validates that
-//
 // 1. user has the appropriate authorizations to perform the request
-//
 // 2. user has a direct or indirect access to the registry
 func (handler *Handler) userHasRegistryAccess(r *http.Request, registry *portainer.Registry) (hasAccess bool, isAdmin bool, err error) {
 	securityContext, err := security.RetrieveRestrictedRequestContext(r)
-	if err != nil {
-		return false, false, err
-	}
-
-	user, err := handler.DataStore.User().Read(securityContext.UserID)
 	if err != nil {
 		return false, false, err
 	}
@@ -128,47 +125,68 @@ func (handler *Handler) userHasRegistryAccess(r *http.Request, registry *portain
 		return false, false, err
 	}
 
-	memberships, err := handler.DataStore.TeamMembership().TeamMembershipsByUserID(user.ID)
+	// Use the enhanced registry access utility function that includes namespace validation
+	_, err = access.GetAccessibleRegistry(
+		handler.DataStore,
+		handler.K8sClientFactory,
+		securityContext.UserID,
+		endpointId,
+		registry.ID,
+	)
 	if err != nil {
-		return false, false, nil
+		return false, false, nil // No access
 	}
 
-	// validate access for kubernetes namespaces (leverage registry.RegistryAccesses[endpointId].Namespaces)
-	if endpointutils.IsKubernetesEndpoint(endpoint) {
-		kcl, err := handler.K8sClientFactory.GetPrivilegedKubeClient(endpoint)
+	return true, false, nil
+}
+
+// RegistryAccess defines a security check for registry-specific API endpoints.
+// Authentication is required to access these endpoints.
+// The user must have direct or indirect access to the specific registry being requested.
+// This bouncer validates registry access using the userHasRegistryAccess logic.
+func (handler *Handler) RegistryAccess(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// First ensure the user is authenticated
+		tokenData, err := security.RetrieveTokenData(r)
 		if err != nil {
-			return false, false, errors.Wrap(err, "unable to retrieve kubernetes client to validate registry access")
+			httperror.WriteError(w, http.StatusUnauthorized, "Authentication required", httperrors.ErrUnauthorized)
+			return
 		}
-		accessPolicies, err := kcl.GetNamespaceAccessPolicies()
+
+		// Extract registry ID from the route
+		registryID, err := request.RetrieveNumericRouteVariableValue(r, "id")
 		if err != nil {
-			return false, false, errors.Wrap(err, "unable to retrieve environment's namespaces policies to validate registry access")
+			httperror.WriteError(w, http.StatusBadRequest, "Invalid registry identifier route variable", err)
+			return
 		}
 
-		authorizedNamespaces := registry.RegistryAccesses[endpointId].Namespaces
-
-		for _, namespace := range authorizedNamespaces {
-			// when the default namespace is authorized to use a registry, all users have the ability to use it
-			// unless the default namespace is restricted: in this case continue to search for other potential accesses authorizations
-			if namespace == kubernetes.DefaultNamespace && !endpoint.Kubernetes.Configuration.RestrictDefaultNamespace {
-				return true, false, nil
-			}
-
-			namespacePolicy := accessPolicies[namespace]
-			if security.AuthorizedAccess(user.ID, memberships, namespacePolicy.UserAccessPolicies, namespacePolicy.TeamAccessPolicies) {
-				return true, false, nil
-			}
+		// Get the registry from the database
+		registry, err := handler.DataStore.Registry().Read(portainer.RegistryID(registryID))
+		if handler.DataStore.IsErrObjectNotFound(err) {
+			httperror.WriteError(w, http.StatusNotFound, "Unable to find a registry with the specified identifier inside the database", err)
+			return
+		} else if err != nil {
+			httperror.WriteError(w, http.StatusInternalServerError, "Unable to find a registry with the specified identifier inside the database", err)
+			return
 		}
-		return false, false, nil
-	}
 
-	// validate access for docker environments
-	// leverage registry.RegistryAccesses[endpointId].UserAccessPolicies (direct access)
-	// and registry.RegistryAccesses[endpointId].TeamAccessPolicies (indirect access via his teams)
-	if security.AuthorizedRegistryAccess(registry, user, memberships, endpoint.ID) {
-		return true, false, nil
-	}
+		// Check if user has access to this registry
+		hasAccess, _, err := handler.userHasRegistryAccess(r, registry)
+		if err != nil {
+			httperror.WriteError(w, http.StatusInternalServerError, "Unable to retrieve info from request context", err)
+			return
+		}
+		if !hasAccess {
+			log.Debug().
+				Int("registry_id", registryID).
+				Str("registry_name", registry.Name).
+				Int("user_id", int(tokenData.ID)).
+				Str("context", "RegistryAccessBouncer").
+				Msg("User access denied to registry")
+			httperror.WriteError(w, http.StatusForbidden, "Access denied to resource", httperrors.ErrResourceAccessDenied)
+			return
+		}
 
-	// when user has no access via their role, direct grant or indirect grant
-	// then they don't have access to the registry
-	return false, false, nil
+		next.ServeHTTP(w, r)
+	})
 }

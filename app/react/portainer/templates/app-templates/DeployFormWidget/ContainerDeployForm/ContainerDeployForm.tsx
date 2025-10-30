@@ -78,14 +78,14 @@ export function ContainerDeployForm({
     >
       {({ values, errors, setFieldValue, isValid }) => (
         <Form className="form-horizontal">
-          <FormSection title="配置">
+          <FormSection title="Configuration">
             <NameField
               value={values.name}
               onChange={(v) => setFieldValue('name', v)}
               error={errors.name}
             />
 
-            <FormControl label="网络" errors={errors?.network}>
+            <FormControl label="Network" errors={errors?.network}>
               <NetworkSelector
                 value={values.network}
                 onChange={(v) => setFieldValue('network', v)}
@@ -110,7 +110,7 @@ export function ContainerDeployForm({
 
           <AdvancedSettings
             label={(isOpen) =>
-              isOpen ? '隐藏高级选项' : '显示高级选项'
+              isOpen ? 'Hide advanced options' : 'Show advanced options'
             }
           >
             <PortsMappingField
@@ -148,8 +148,8 @@ export function ContainerDeployForm({
           <FormActions
             isLoading={createMutation.isLoading}
             isValid={isValid}
-            loadingText="部署进行中..."
-            submitLabel="部署容器"
+            loadingText="Deployment in progress..."
+            submitLabel="Deploy the container"
             data-cy="deploy-container-button"
           >
             <Button
@@ -158,7 +158,7 @@ export function ContainerDeployForm({
               color="default"
               data-cy="cancel-deploy-container-button"
             >
-              隐藏
+              Hide
             </Button>
           </FormActions>
         </Form>

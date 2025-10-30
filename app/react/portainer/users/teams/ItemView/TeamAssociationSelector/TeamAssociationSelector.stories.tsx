@@ -2,7 +2,7 @@ import { Meta } from '@storybook/react';
 import { useMemo, useState } from 'react';
 
 import { createMockUsers } from '@/react-tools/test-mocks';
-import { Role, User } from '@/portainer/users/types';
+import { Role } from '@/portainer/users/types';
 import { UserViewModel } from '@/portainer/models/user';
 import { UserContext } from '@/react/hooks/useUser';
 
@@ -28,7 +28,7 @@ function Example({ userRole }: Args) {
     () => ({ user: new UserViewModel({ Role: userRole }) }),
     [userRole]
   );
-  const [users] = useState(createMockUsers(20) as User[]);
+  const [users] = useState(createMockUsers(20, Role.Standard));
 
   const [memberships] = useState<Omit<TeamMembership, 'Id' | 'TeamID'>[]>(
     users

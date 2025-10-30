@@ -17,21 +17,21 @@ export function ContainerStatus({ stats }: Props) {
       <div>
         <div className="vertical-center space-right pr-5">
           <Icon icon={Power} mode="success" size="sm" />
-          {stats.running} 运行中
+          {stats.running} running
         </div>
         <div className="vertical-center space-right">
           <Icon icon={Power} mode="danger" size="sm" />
-          {stats.stopped} 已停止
+          {stats.stopped} stopped
         </div>
       </div>
       <div>
         <div className="vertical-center space-right pr-5">
           <Icon icon={Heart} mode="success" size="sm" />
-          {stats.healthy} 健康
+          {stats.healthy} healthy
         </div>
         <div className="vertical-center space-right">
           <Icon icon={Heart} mode="danger" size="sm" />
-          {stats.unhealthy} 不健康
+          {stats.unhealthy} unhealthy
         </div>
       </div>
     </div>

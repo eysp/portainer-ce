@@ -48,13 +48,13 @@ export function UserMenu() {
       >
         <MenuLink
           to="portainer.account"
-          label="我的账户"
+          label="My account"
           data-cy="userMenu-myAccount"
         />
 
         <MenuLink
           to="portainer.logout"
-          label="登出"
+          label="Log out"
           data-cy="userMenu-logOut"
         />
       </MenuList>

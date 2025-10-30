@@ -8,6 +8,7 @@ import { EdgeAsyncIntervalsForm } from '@/react/edge/components/EdgeAsyncInterva
 import { EdgeCheckinIntervalField } from '@/react/edge/components/EdgeCheckInIntervalField';
 import { EdgeScriptForm } from '@/react/edge/components/EdgeScriptForm';
 import { EdgeGroupsSelector } from '@/react/edge/edge-stacks/components/EdgeGroupsSelector';
+import { AssociatedEdgeGroupEnvironmentsSelector } from '@/react/edge/components/AssociatedEdgeGroupEnvironmentsSelector';
 
 const ngModule = angular
   .module('portainer.edge.react.components', [])
@@ -60,6 +61,15 @@ const ngModule = angular
       'onChange',
       'value',
       'error',
+    ])
+  )
+  .component(
+    'associatedEdgeGroupEnvironmentsSelector',
+    r2a(withReactQuery(AssociatedEdgeGroupEnvironmentsSelector), [
+      'onChange',
+      'value',
+      'error',
+      'edgeGroupId',
     ])
   );
 

@@ -36,8 +36,8 @@ export function ItemView() {
   return (
     <>
       <PageHeader
-        title="团队详情"
-        breadcrumbs={[{ label: '团队' }, { label: team.Name }]}
+        title="Team details"
+        breadcrumbs={[{ label: 'Teams' }, { label: team.Name }]}
         reload
       />
 
@@ -53,7 +53,8 @@ export function ItemView() {
         <div className="row">
           <div className="col-sm-12">
             <TextTip color="orange">
-              团队负责人功能已禁用，因为当前启用了带有团队同步的外部身份验证。
+              The team leader feature is disabled as external authentication is
+              currently enabled with team sync.
             </TextTip>
           </div>
         </div>

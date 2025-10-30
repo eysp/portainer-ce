@@ -9,10 +9,9 @@ import {
 
 import { Datatable, defaultGlobalFilterFn, Props } from './Datatable';
 import {
-  BasicTableSettings,
   createPersistedStore,
   refreshableSettings,
-  RefreshableTableSettings,
+  TableSettingsWithRefreshable,
 } from './types';
 import { useTableState } from './useTableState';
 
@@ -30,13 +29,14 @@ const mockColumns = [
 ];
 
 // mock table settings / state
-export interface TableSettings
-  extends BasicTableSettings,
-    RefreshableTableSettings {}
 function createStore(storageKey: string) {
-  return createPersistedStore<TableSettings>(storageKey, 'name', (set) => ({
-    ...refreshableSettings(set),
-  }));
+  return createPersistedStore<TableSettingsWithRefreshable>(
+    storageKey,
+    'name',
+    (set) => ({
+      ...refreshableSettings(set),
+    })
+  );
 }
 const storageKey = 'test-table';
 const settingsStore = createStore(storageKey);
@@ -174,7 +174,7 @@ describe('Datatable', () => {
     fireEvent.click(selectAllCheckbox);
 
     // Check if all rows on the page are selected
-    expect(screen.getByText('2 项已选择')).toBeInTheDocument();
+    expect(screen.getByText('2 items selected')).toBeInTheDocument();
 
     // Deselect
     fireEvent.click(selectAllCheckbox);
@@ -196,7 +196,7 @@ describe('Datatable', () => {
     fireEvent.click(selectAllCheckbox, { shiftKey: true });
 
     // Check if all rows on the page are selected
-    expect(screen.getByText('3 项已选择')).toBeInTheDocument();
+    expect(screen.getByText('3 items selected')).toBeInTheDocument();
 
     // Deselect
     fireEvent.click(selectAllCheckbox, { shiftKey: true });
@@ -220,12 +220,12 @@ describe('Datatable', () => {
     await user.click(checkboxes[2]); // Select the second row
 
     // Search for John (will hide selected Jane)
-    const searchInput = screen.getByPlaceholderText('搜索...');
+    const searchInput = screen.getByPlaceholderText('Search...');
     await user.type(searchInput, 'John');
 
     // Check if the footer text is correct
     expect(
-      await screen.findByText('已选择 1 项（1 项被筛选隐藏')
+      await screen.findByText('1 item selected (1 hidden by filters)')
     ).toBeInTheDocument();
 
     // Check if the checkbox is indeterminate

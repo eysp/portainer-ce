@@ -7,6 +7,7 @@ import (
 	"time"
 
 	portainer "github.com/portainer/portainer/api"
+	models "github.com/portainer/portainer/api/http/models/kubernetes"
 
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
@@ -235,16 +236,20 @@ func (kcl *KubeClient) fetchResourcesWithOwnerReferences(namespace string, podLi
 }
 
 // isPodUsingConfigMap checks if a pod is using a specific ConfigMap
-func isPodUsingConfigMap(pod *corev1.Pod, configMapName string) bool {
+func isPodUsingConfigMap(pod *corev1.Pod, configMap models.K8sConfigMap) bool {
+	if pod.Namespace != configMap.Namespace {
+		return false
+	}
+
 	for _, volume := range pod.Spec.Volumes {
-		if volume.ConfigMap != nil && volume.ConfigMap.Name == configMapName {
+		if volume.ConfigMap != nil && volume.ConfigMap.Name == configMap.Name {
 			return true
 		}
 	}
 
 	for _, container := range pod.Spec.Containers {
 		for _, env := range container.Env {
-			if env.ValueFrom != nil && env.ValueFrom.ConfigMapKeyRef != nil && env.ValueFrom.ConfigMapKeyRef.Name == configMapName {
+			if env.ValueFrom != nil && env.ValueFrom.ConfigMapKeyRef != nil && env.ValueFrom.ConfigMapKeyRef.Name == configMap.Name {
 				return true
 			}
 		}
@@ -254,16 +259,20 @@ func isPodUsingConfigMap(pod *corev1.Pod, configMapName string) bool {
 }
 
 // isPodUsingSecret checks if a pod is using a specific Secret
-func isPodUsingSecret(pod *corev1.Pod, secretName string) bool {
+func isPodUsingSecret(pod *corev1.Pod, secret models.K8sSecret) bool {
+	if pod.Namespace != secret.Namespace {
+		return false
+	}
+
 	for _, volume := range pod.Spec.Volumes {
-		if volume.Secret != nil && volume.Secret.SecretName == secretName {
+		if volume.Secret != nil && volume.Secret.SecretName == secret.Name {
 			return true
 		}
 	}
 
 	for _, container := range pod.Spec.Containers {
 		for _, env := range container.Env {
-			if env.ValueFrom != nil && env.ValueFrom.SecretKeyRef != nil && env.ValueFrom.SecretKeyRef.Name == secretName {
+			if env.ValueFrom != nil && env.ValueFrom.SecretKeyRef != nil && env.ValueFrom.SecretKeyRef.Name == secret.Name {
 				return true
 			}
 		}

@@ -58,6 +58,7 @@ import { AppDeploymentTypeFormSection } from '@/react/kubernetes/applications/co
 import { EnvironmentVariablesFormSection } from '@/react/kubernetes/applications/components/EnvironmentVariablesFormSection/EnvironmentVariablesFormSection';
 import { kubeEnvVarValidationSchema } from '@/react/kubernetes/applications/components/EnvironmentVariablesFormSection/kubeEnvVarValidationSchema';
 import { IntegratedAppsDatatable } from '@/react/kubernetes/components/IntegratedAppsDatatable/IntegratedAppsDatatable';
+import { HelmTemplates } from '@/react/kubernetes/helm/HelmTemplates/HelmTemplates';
 
 import { namespacesModule } from './namespaces';
 import { clusterManagementModule } from './clusterManagement';
@@ -91,6 +92,7 @@ export const ngModule = angular
       'onChange',
       'placeholder',
       'value',
+      'allowSelectAll',
     ])
   )
   .component(
@@ -204,6 +206,14 @@ export const ngModule = angular
       'tableKey',
       'tableTitle',
       'dataCy',
+    ])
+  )
+  .component(
+    'helmTemplatesView',
+    r2a(withUIRouter(withCurrentUser(HelmTemplates)), [
+      'onSelectHelmChart',
+      'namespace',
+      'name',
     ])
   );
 

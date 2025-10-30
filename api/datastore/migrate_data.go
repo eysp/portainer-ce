@@ -40,13 +40,11 @@ func (store *Store) MigrateData() error {
 	}
 
 	// before we alter anything in the DB, create a backup
-	_, err = store.Backup("")
-	if err != nil {
+	if _, err := store.Backup(""); err != nil {
 		return errors.Wrap(err, "while backing up database")
 	}
 
-	err = store.FailSafeMigrate(migrator, version)
-	if err != nil {
+	if err := store.FailSafeMigrate(migrator, version); err != nil {
 		err = errors.Wrap(err, "failed to migrate database")
 
 		log.Warn().Err(err).Msg("migration failed, restoring database to previous version")
@@ -85,7 +83,9 @@ func (store *Store) newMigratorParameters(version *models.Version, flags *portai
 		DockerhubService:        store.DockerHubService,
 		AuthorizationService:    authorization.NewService(store),
 		EdgeStackService:        store.EdgeStackService,
+		EdgeStackStatusService:  store.EdgeStackStatusService,
 		EdgeJobService:          store.EdgeJobService,
+		EdgeGroupService:        store.EdgeGroupService,
 		TunnelServerService:     store.TunnelServerService,
 		PendingActionsService:   store.PendingActionsService,
 	}
@@ -140,8 +140,7 @@ func (store *Store) connectionRollback(force bool) error {
 		}
 	}
 
-	err := store.Restore()
-	if err != nil {
+	if err := store.Restore(); err != nil {
 		return err
 	}
 

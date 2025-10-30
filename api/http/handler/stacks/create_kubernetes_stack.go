@@ -15,8 +15,8 @@ import (
 	httperror "github.com/portainer/portainer/pkg/libhttp/error"
 	"github.com/portainer/portainer/pkg/libhttp/request"
 	"github.com/portainer/portainer/pkg/libhttp/response"
+	"github.com/portainer/portainer/pkg/validate"
 
-	"github.com/asaskevich/govalidator"
 	"github.com/pkg/errors"
 )
 
@@ -96,7 +96,7 @@ func (payload *kubernetesStringDeploymentPayload) Validate(r *http.Request) erro
 }
 
 func (payload *kubernetesGitDeploymentPayload) Validate(r *http.Request) error {
-	if len(payload.RepositoryURL) == 0 || !govalidator.IsURL(payload.RepositoryURL) {
+	if len(payload.RepositoryURL) == 0 || !validate.IsURL(payload.RepositoryURL) {
 		return errors.New("Invalid repository URL. Must correspond to a valid URL format")
 	}
 
@@ -112,7 +112,7 @@ func (payload *kubernetesGitDeploymentPayload) Validate(r *http.Request) error {
 }
 
 func (payload *kubernetesManifestURLDeploymentPayload) Validate(r *http.Request) error {
-	if len(payload.ManifestURL) == 0 || !govalidator.IsURL(payload.ManifestURL) {
+	if len(payload.ManifestURL) == 0 || !validate.IsURL(payload.ManifestURL) {
 		return errors.New("Invalid manifest URL")
 	}
 

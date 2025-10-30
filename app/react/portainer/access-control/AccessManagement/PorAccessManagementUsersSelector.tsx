@@ -22,11 +22,11 @@ export function PorAccessManagementUsersSelector({
         className="col-sm-3 col-lg-2 control-label text-left"
         htmlFor="users-selector"
       >
-        选择用户和/或团队
+        Select user(s) and/or team(s)
       </label>
       <div className="col-sm-9 col-lg-4">
         {options.length === 0 ? (
-          <span className="small text-muted">没有可用的用户或团队。</span>
+          <span className="small text-muted">No users or teams available.</span>
         ) : (
           <Select
             isMulti
@@ -39,7 +39,7 @@ export function PorAccessManagementUsersSelector({
             data-cy="component-selectUser"
             id="component-selectUser"
             inputId="users-selector"
-            placeholder="选择一个或多个用户和/或团队"
+            placeholder="Select one or more users and/or teams"
             components={{ MultiValueLabel, Option: OptionComponent }}
           />
         )}

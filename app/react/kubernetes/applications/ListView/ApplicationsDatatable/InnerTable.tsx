@@ -17,6 +17,7 @@ export function InnerTable({
       dataset={dataset}
       columns={columns}
       data-cy="applications-nested-datatable"
+      enablePagination={false}
     />
   );
 }

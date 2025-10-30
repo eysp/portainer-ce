@@ -6,7 +6,7 @@ export function validationSchema(): SchemaOf<Values> {
   return array(
     object({
       hostPort: string().default(''),
-      containerPort: string().required('容器端口是必填项'),
+      containerPort: string().required('container is required'),
       protocol: mixed().oneOf(['tcp', 'udp']),
     })
   );

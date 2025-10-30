@@ -16,7 +16,7 @@ export function PlatformField({
   value: Platform;
 }) {
   return (
-    <FormControl label="平台" required inputId="template-platform">
+    <FormControl label="Platform" required inputId="template-platform">
       <Select
         name="platform"
         data-cy="custom-tempalte-platform-select"

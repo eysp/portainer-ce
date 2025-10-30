@@ -33,15 +33,17 @@ function LogsDisabledInfoPanel() {
       <div className="col-sm-12">
         <InformationPanel>
           <TextTip color="blue">
-            此容器已禁用日志记录。如果你想重新启用日志记录，请{' '}
+            Logging is disabled for this container. If you want to re-enable
+            logging, please{' '}
             <Link
               to="docker.containers.new"
               params={{ from: containerId, nodeName }}
               data-cy="redeploy-container-link"
             >
-              重新部署你的容器
+              redeploy your container
             </Link>{' '}
-            并在“命令与日志”面板中选择一个日志驱动程序。
+            and select a logging driver in the &quot;Command & logging&quot;
+            panel.
           </TextTip>
         </InformationPanel>
       </div>

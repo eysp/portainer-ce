@@ -1,13 +1,14 @@
 package networking
 
 import (
-	"crypto/tls"
 	"fmt"
 	"net"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/portainer/portainer/api/crypto"
 
 	"github.com/segmentio/encoding/json"
 )
@@ -71,9 +72,7 @@ func ProbeTelnetConnection(url string) string {
 func DetectProxy(url string) string {
 	client := &http.Client{
 		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
+			TLSClientConfig: crypto.CreateTLSConfiguration(true),
 		},
 		Timeout: 10 * time.Second,
 	}

@@ -16,7 +16,7 @@ import (
 // GetAgentVersionAndPlatform returns the agent version and platform
 //
 // it sends a ping to the agent and parses the version and platform from the headers
-func GetAgentVersionAndPlatform(endpointUrl string, tlsConfig *tls.Config) (portainer.AgentPlatform, string, error) {
+func GetAgentVersionAndPlatform(endpointUrl string, tlsConfig *tls.Config) (portainer.AgentPlatform, string, error) { //nolint:forbidigo
 	httpCli := &http.Client{
 		Timeout: 3 * time.Second,
 	}

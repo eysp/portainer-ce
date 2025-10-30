@@ -25,14 +25,14 @@ export function useColumns(isStackColumnVisible?: boolean) {
         ),
         isStackColumnVisible &&
           columnHelper.accessor((item) => item.StackName || '-', {
-            header: '堆栈',
+            header: 'Stack',
             enableHiding: false,
           }),
         image,
         schedulingMode,
         ports,
         columnHelper.accessor('UpdatedAt', {
-          header: '最后更新',
+          header: 'Last Update',
           cell: ({ getValue }) => isoDate(getValue()),
         }),
         createOwnershipColumn<ServiceViewModel>(),

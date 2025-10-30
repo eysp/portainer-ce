@@ -3,6 +3,7 @@ import { type } from './type';
 import { namespace } from './namespace';
 import { ports } from './ports';
 import { clusterIP } from './clusterIP';
+import { externalHost } from './externalHost';
 import { externalIP } from './externalIP';
 import { targetPorts } from './targetPorts';
 import { application } from './application';
@@ -16,6 +17,7 @@ export const columns = [
   ports,
   targetPorts,
   clusterIP,
+  externalHost,
   externalIP,
   created,
 ];

@@ -18,6 +18,7 @@ export default {
           'dangerSecondary',
           'warnSecondary',
           'infoSecondary',
+          'muted',
         ],
       },
     },
@@ -35,6 +36,7 @@ function Template({ type = 'success' }: Props) {
     dangerSecondary: 'dangerSecondary badge',
     warnSecondary: 'warnSecondary badge',
     infoSecondary: 'infoSecondary badge',
+    muted: 'muted badge',
   };
   return <Badge type={type}>{message[type]}</Badge>;
 }

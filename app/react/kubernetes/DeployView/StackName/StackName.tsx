@@ -70,7 +70,7 @@ export function StackName({
           Stack
           <Tooltip message={tooltip} setHtmlMessage />
         </label>
-        <div className={inputClassName || 'col-sm-8'}>
+        <div className={inputClassName || 'col-sm-9 col-lg-10'}>
           <AutocompleteSelect
             searchResults={stackResults?.map((result) => ({
               value: result,

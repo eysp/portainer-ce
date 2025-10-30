@@ -7,9 +7,9 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/docker/docker/api/types"
-
 	"github.com/containers/image/v5/docker/reference"
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/image"
 	"github.com/opencontainers/go-digest"
 	"github.com/pkg/errors"
 )
@@ -26,7 +26,7 @@ type Image struct {
 	Digest  digest.Digest
 	HubLink string
 	named   reference.Named
-	opts    ParseImageOptions
+	Opts    ParseImageOptions `json:"-"`
 }
 
 // ParseImageOptions holds image options for parsing.
@@ -43,9 +43,10 @@ func (i *Image) Name() string {
 // FullName return the real full name may include Tag or Digest of the image, Tag first.
 func (i *Image) FullName() string {
 	if i.Tag == "" {
-		return fmt.Sprintf("%s@%s", i.Name(), i.Digest)
+		return i.Name() + "@" + i.Digest.String()
 	}
-	return fmt.Sprintf("%s:%s", i.Name(), i.Tag)
+
+	return i.Name() + ":" + i.Tag
 }
 
 // String returns the string representation of an image, including Tag and Digest if existed.
@@ -66,22 +67,25 @@ func (i *Image) Reference() string {
 func (i *Image) WithDigest(digest digest.Digest) (err error) {
 	i.Digest = digest
 	i.named, err = reference.WithDigest(i.named, digest)
+
 	return err
 }
 
 func (i *Image) WithTag(tag string) (err error) {
 	i.Tag = tag
 	i.named, err = reference.WithTag(i.named, tag)
+
 	return err
 }
 
-func (i *Image) trimDigest() error {
+func (i *Image) TrimDigest() error {
 	i.Digest = ""
 	named, err := ParseImage(ParseImageOptions{Name: i.FullName()})
 	if err != nil {
 		return err
 	}
 	i.named = &named
+
 	return nil
 }
 
@@ -92,11 +96,12 @@ func ParseImage(parseOpts ParseImageOptions) (Image, error) {
 	if err != nil {
 		return Image{}, errors.Wrapf(err, "parsing image %s failed", parseOpts.Name)
 	}
+
 	// Add the latest lag if they did not provide one.
 	named = reference.TagNameOnly(named)
 
 	i := Image{
-		opts:   parseOpts,
+		Opts:   parseOpts,
 		named:  named,
 		Domain: reference.Domain(named),
 		Path:   reference.Path(named),
@@ -122,15 +127,16 @@ func ParseImage(parseOpts ParseImageOptions) (Image, error) {
 }
 
 func (i *Image) hubLink() (string, error) {
-	if i.opts.HubTpl != "" {
+	if i.Opts.HubTpl != "" {
 		var out bytes.Buffer
 		tmpl, err := template.New("tmpl").
 			Option("missingkey=error").
-			Parse(i.opts.HubTpl)
+			Parse(i.Opts.HubTpl)
 		if err != nil {
 			return "", err
 		}
 		err = tmpl.Execute(&out, i)
+
 		return out.String(), err
 	}
 
@@ -142,6 +148,7 @@ func (i *Image) hubLink() (string, error) {
 			prefix = "_"
 			path = strings.Replace(i.Path, "library/", "", 1)
 		}
+
 		return "https://hub.docker.com/" + prefix + "/" + path, nil
 	case "docker.bintray.io", "jfrog-docker-reg2.bintray.io":
 		return "https://bintray.com/jfrog/reg2/" + strings.ReplaceAll(i.Path, "/", "%3A"), nil
@@ -172,11 +179,11 @@ func IsLocalImage(image types.ImageInspect) bool {
 // IsDanglingImage returns whether the given image is "dangling" which means
 // that there are no repository references to the given image and it has no
 // child images
-func IsDanglingImage(image types.ImageInspect) bool {
+func IsDanglingImage(image image.InspectResponse) bool {
 	return len(image.RepoTags) == 1 && image.RepoTags[0] == "<none>:<none>" && len(image.RepoDigests) == 1 && image.RepoDigests[0] == "<none>@<none>"
 }
 
 // IsNoTagImage returns whether the given image is damaged, has no tags
-func IsNoTagImage(image types.ImageInspect) bool {
+func IsNoTagImage(image image.InspectResponse) bool {
 	return len(image.RepoTags) == 0
 }

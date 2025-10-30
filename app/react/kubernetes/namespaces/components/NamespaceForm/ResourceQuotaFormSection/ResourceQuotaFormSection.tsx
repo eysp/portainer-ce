@@ -13,8 +13,8 @@ import { SliderWithInput } from '@@/form-components/Slider/SliderWithInput';
 
 import { useClusterResourceLimitsQuery } from '../../../queries/useResourceLimitsQuery';
 
-import { ResourceReservationUsage } from './ResourceReservationUsage';
 import { ResourceQuotaFormValues } from './types';
+import { NamespaceResourceReservation } from './NamespaceResourceReservation';
 
 interface Props {
   values: ResourceQuotaFormValues;
@@ -128,7 +128,7 @@ export function ResourceQuotaFormSection({
         </div>
       )}
       {namespaceName && isEdit && (
-        <ResourceReservationUsage
+        <NamespaceResourceReservation
           namespaceName={namespaceName}
           environmentId={environmentId}
           resourceQuotaValues={values}

@@ -38,7 +38,7 @@ export function AccessControlForm({
     values.ownership !== ResourceControlOwnership.PUBLIC;
   return (
     <>
-      {!hideTitle && <FormSectionTitle>访问控制</FormSectionTitle>}
+      {!hideTitle && <FormSectionTitle>Access control</FormSectionTitle>}
 
       <div className="form-group">
         <div className="col-sm-12">
@@ -46,9 +46,9 @@ export function AccessControlForm({
             data-cy="portainer-accessMgmtToggle"
             checked={accessControlEnabled}
             name={withNamespace('accessControlEnabled')}
-            label="启用访问控制"
+            label="Enable access control"
             labelClass="col-sm-3 col-lg-2"
-            tooltip="启用后，您可以限制对该资源的访问和管理"
+            tooltip="When enabled, you can restrict the access and management of this resource."
             onChange={handleToggleEnable}
           />
         </div>

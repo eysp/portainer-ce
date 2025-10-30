@@ -5,7 +5,7 @@ import { Icon } from '@@/Icon';
 
 interface Props {
   icon?: ReactNode | ComponentType<unknown>;
-  label: string;
+  label: React.ReactNode;
   description?: ReactNode;
   className?: string;
   id?: string;

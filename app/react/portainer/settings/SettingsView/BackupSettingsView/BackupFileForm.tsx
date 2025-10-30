@@ -36,14 +36,14 @@ export function BackupFileForm() {
           <div className="form-group">
             <div className="col-sm-12">
               <LoadingButton
-                loadingText="正在下载设置..."
+                loadingText="Downloading settings..."
                 data-cy="settings-downloadBackupLocalButton"
                 isLoading={isSubmitting}
                 disabled={!isValid}
                 className="!ml-0"
                 icon={Download}
               >
-                下载备份
+                Download backup
               </LoadingButton>
             </div>
           </div>

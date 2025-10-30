@@ -6,7 +6,7 @@ import { Badge } from '@@/Badge';
 import { columnHelper } from './helper';
 
 export const name = columnHelper.accessor('Name', {
-  header: '名称',
+  header: 'Name',
   id: 'name',
   cell({ row: { original: item } }) {
     return (
@@ -21,7 +21,7 @@ export const name = columnHelper.accessor('Name', {
         </Link>
         {item.ResourceControl?.System && (
           <Badge type="info" className="ml-2">
-            系统
+            System
           </Badge>
         )}
       </>

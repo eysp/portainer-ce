@@ -1,13 +1,17 @@
 import _ from 'lodash';
 import { useMemo } from 'react';
+import { AlertTriangle } from 'lucide-react';
 
 import { isoDate } from '@/portainer/filters/filters';
 import { useAuthorizations } from '@/react/hooks/useUser';
+import { pluralize } from '@/portainer/helpers/strings';
 
 import { Link } from '@@/Link';
 import { StatusBadge } from '@@/StatusBadge';
 import { Badge } from '@@/Badge';
 import { SystemBadge } from '@@/Badge/SystemBadge';
+import { TooltipWithChildren } from '@@/Tip/TooltipWithChildren';
+import { Icon } from '@@/Icon';
 
 import { helper } from './helper';
 import { actions } from './actions';
@@ -28,7 +32,7 @@ export function useColumns() {
             const name = getValue();
 
             return (
-              <>
+              <div className="flex gap-2">
                 <Link
                   to="kubernetes.resourcePools.resourcePool"
                   params={{
@@ -38,23 +42,41 @@ export function useColumns() {
                 >
                   {name}
                 </Link>
-                {item.IsSystem && (
-                  <span className="ml-2">
-                    <SystemBadge />
-                  </span>
-                )}
-              </>
+                {item.IsSystem && <SystemBadge className="ml-auto" />}
+              </div>
             );
           },
         }),
         helper.accessor('Status', {
           header: 'Status',
-          cell({ getValue }) {
+          cell({ getValue, row: { original: item } }) {
             const status = getValue();
             return (
-              <StatusBadge color={getColor(status.phase)}>
-                {status.phase}
-              </StatusBadge>
+              <div className="flex items-center gap-2">
+                <StatusBadge color={getColor(status.phase)}>
+                  {status.phase}
+                </StatusBadge>
+                {item.UnhealthyEventCount > 0 && (
+                  <TooltipWithChildren message="View events" position="top">
+                    <span className="inline-flex">
+                      <Link
+                        to="kubernetes.resourcePools.resourcePool"
+                        params={{ id: item.Name, tab: 'events' }}
+                        data-cy={`namespace-warning-link-${item.Name}`}
+                      >
+                        <Badge type="warnSecondary">
+                          <Icon
+                            icon={AlertTriangle}
+                            className="!mr-1 h-3 w-3"
+                          />
+                          {item.UnhealthyEventCount}{' '}
+                          {pluralize(item.UnhealthyEventCount, 'warning')}
+                        </Badge>
+                      </Link>
+                    </span>
+                  </TooltipWithChildren>
+                )}
+              </div>
             );
 
             function getColor(status?: string) {

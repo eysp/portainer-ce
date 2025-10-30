@@ -22,11 +22,12 @@ export function HiddenContainersPanel() {
   const labels = settingsQuery.data;
   return (
     <Widget>
-      <Widget.Title icon={Box} title="隐藏容器" />
+      <Widget.Title icon={Box} title="Hidden containers" />
       <Widget.Body>
         <div className="mb-3">
           <TextTip color="blue">
-            你可以在 Portainer UI 中隐藏带有特定标签的容器。你需要指定标签名称和值。
+            You can hide containers with specific labels from Portainer UI. You
+            need to specify the label name and value.
           </TextTip>
         </div>
 
@@ -53,7 +54,7 @@ export function HiddenContainersPanel() {
       },
       {
         onSuccess: () => {
-          notifySuccess('成功', '隐藏容器设置已更新');
+          notifySuccess('Success', 'Hidden container settings updated');
         },
       }
     );

@@ -101,8 +101,7 @@ func (payload *edgeStackFromFileUploadPayload) Validate(r *http.Request) error {
 // @router /edge_stacks/create/file [post]
 func (handler *Handler) createEdgeStackFromFileUpload(r *http.Request, tx dataservices.DataStoreTx, dryrun bool) (*portainer.EdgeStack, error) {
 	payload := &edgeStackFromFileUploadPayload{}
-	err := payload.Validate(r)
-	if err != nil {
+	if err := payload.Validate(r); err != nil {
 		return nil, err
 	}
 

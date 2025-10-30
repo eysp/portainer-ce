@@ -15,8 +15,7 @@ import (
 	"github.com/portainer/portainer/api/internal/endpointutils"
 	httperror "github.com/portainer/portainer/pkg/libhttp/error"
 	"github.com/portainer/portainer/pkg/libhttp/request"
-
-	"github.com/asaskevich/govalidator"
+	"github.com/portainer/portainer/pkg/validate"
 )
 
 type edgeJobBasePayload struct {
@@ -53,7 +52,7 @@ func (payload *edgeJobCreateFromFileContentPayload) Validate(r *http.Request) er
 		return errors.New("invalid Edge job name")
 	}
 
-	if !govalidator.Matches(payload.Name, `^[a-zA-Z0-9][a-zA-Z0-9_.-]*$`) {
+	if !validate.Matches(payload.Name, `^[a-zA-Z0-9][a-zA-Z0-9_.-]*$`) {
 		return errors.New("invalid Edge job name format. Allowed characters are: [a-zA-Z0-9_.-]")
 	}
 
@@ -136,7 +135,7 @@ func (payload *edgeJobCreateFromFilePayload) Validate(r *http.Request) error {
 		return errors.New("invalid Edge job name")
 	}
 
-	if !govalidator.Matches(name, `^[a-zA-Z0-9][a-zA-Z0-9_.-]+$`) {
+	if !validate.Matches(name, `^[a-zA-Z0-9][a-zA-Z0-9_.-]+$`) {
 		return errors.New("invalid Edge job name format. Allowed characters are: [a-zA-Z0-9_.-]")
 	}
 	payload.Name = name

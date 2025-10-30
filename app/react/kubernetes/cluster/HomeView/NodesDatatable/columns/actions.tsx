@@ -10,7 +10,7 @@ import { columnHelper } from './helper';
 
 export function getActions(metricsEnabled: boolean) {
   return columnHelper.accessor(() => '', {
-    header: '操作',
+    header: 'Actions',
     enableSorting: false,
     cell: (props) => (
       <ActionsCell

@@ -1,13 +1,8 @@
 package exec
 
 import (
-	"bytes"
+	"context"
 	"fmt"
-	"os"
-	"os/exec"
-	"path"
-	"runtime"
-	"strings"
 
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/dataservices"
@@ -15,13 +10,17 @@ import (
 	"github.com/portainer/portainer/api/http/proxy/factory"
 	"github.com/portainer/portainer/api/http/proxy/factory/kubernetes"
 	"github.com/portainer/portainer/api/kubernetes/cli"
+	"github.com/portainer/portainer/pkg/libkubectl"
 
 	"github.com/pkg/errors"
 )
 
+const (
+	defaultServerURL = "https://kubernetes.default.svc"
+)
+
 // KubernetesDeployer represents a service to deploy resources inside a Kubernetes environment(endpoint).
 type KubernetesDeployer struct {
-	binaryPath                  string
 	dataStore                   dataservices.DataStore
 	reverseTunnelService        portainer.ReverseTunnelService
 	signatureService            portainer.DigitalSignatureService
@@ -31,9 +30,8 @@ type KubernetesDeployer struct {
 }
 
 // NewKubernetesDeployer initializes a new KubernetesDeployer service.
-func NewKubernetesDeployer(kubernetesTokenCacheManager *kubernetes.TokenCacheManager, kubernetesClientFactory *cli.ClientFactory, datastore dataservices.DataStore, reverseTunnelService portainer.ReverseTunnelService, signatureService portainer.DigitalSignatureService, proxyManager *proxy.Manager, binaryPath string) *KubernetesDeployer {
+func NewKubernetesDeployer(kubernetesTokenCacheManager *kubernetes.TokenCacheManager, kubernetesClientFactory *cli.ClientFactory, datastore dataservices.DataStore, reverseTunnelService portainer.ReverseTunnelService, signatureService portainer.DigitalSignatureService, proxyManager *proxy.Manager) *KubernetesDeployer {
 	return &KubernetesDeployer{
-		binaryPath:                  binaryPath,
 		dataStore:                   datastore,
 		reverseTunnelService:        reverseTunnelService,
 		signatureService:            signatureService,
@@ -78,63 +76,56 @@ func (deployer *KubernetesDeployer) getToken(userID portainer.UserID, endpoint *
 }
 
 // Deploy upserts Kubernetes resources defined in manifest(s)
-func (deployer *KubernetesDeployer) Deploy(userID portainer.UserID, endpoint *portainer.Endpoint, manifestFiles []string, namespace string) (string, error) {
-	return deployer.command("apply", userID, endpoint, manifestFiles, namespace)
+func (deployer *KubernetesDeployer) Deploy(userID portainer.UserID, endpoint *portainer.Endpoint, resources []string, namespace string) (string, error) {
+	return deployer.command("apply", userID, endpoint, resources, namespace)
 }
 
 // Remove deletes Kubernetes resources defined in manifest(s)
-func (deployer *KubernetesDeployer) Remove(userID portainer.UserID, endpoint *portainer.Endpoint, manifestFiles []string, namespace string) (string, error) {
-	return deployer.command("delete", userID, endpoint, manifestFiles, namespace)
+func (deployer *KubernetesDeployer) Remove(userID portainer.UserID, endpoint *portainer.Endpoint, resources []string, namespace string) (string, error) {
+	return deployer.command("delete", userID, endpoint, resources, namespace)
 }
 
-func (deployer *KubernetesDeployer) command(operation string, userID portainer.UserID, endpoint *portainer.Endpoint, manifestFiles []string, namespace string) (string, error) {
+func (deployer *KubernetesDeployer) command(operation string, userID portainer.UserID, endpoint *portainer.Endpoint, resources []string, namespace string) (string, error) {
 	token, err := deployer.getToken(userID, endpoint, endpoint.Type == portainer.KubernetesLocalEnvironment)
 	if err != nil {
 		return "", errors.Wrap(err, "failed generating a user token")
 	}
 
-	command := path.Join(deployer.binaryPath, "kubectl")
-	if runtime.GOOS == "windows" {
-		command = path.Join(deployer.binaryPath, "kubectl.exe")
-	}
-
-	args := []string{"--token", token}
-	if namespace != "" {
-		args = append(args, "--namespace", namespace)
-	}
-
+	serverURL := defaultServerURL
 	if endpoint.Type == portainer.AgentOnKubernetesEnvironment || endpoint.Type == portainer.EdgeAgentOnKubernetesEnvironment {
 		url, proxy, err := deployer.getAgentURL(endpoint)
 		if err != nil {
 			return "", errors.WithMessage(err, "failed generating endpoint URL")
 		}
-
 		defer proxy.Close()
-		args = append(args, "--server", url)
-		args = append(args, "--insecure-skip-tls-verify")
+
+		serverURL = url
 	}
 
-	if operation == "delete" {
-		args = append(args, "--ignore-not-found=true")
-	}
-
-	args = append(args, operation)
-	for _, path := range manifestFiles {
-		args = append(args, "-f", strings.TrimSpace(path))
-	}
-
-	var stderr bytes.Buffer
-	cmd := exec.Command(command, args...)
-	cmd.Env = os.Environ()
-	cmd.Env = append(cmd.Env, "POD_NAMESPACE=default")
-	cmd.Stderr = &stderr
-
-	output, err := cmd.Output()
+	client, err := libkubectl.NewClient(&libkubectl.ClientAccess{
+		Token:     token,
+		ServerUrl: serverURL,
+	}, namespace, "", true)
 	if err != nil {
-		return "", errors.Wrapf(err, "failed to execute kubectl command: %q", stderr.String())
+		return "", errors.Wrap(err, "failed to create kubectl client")
 	}
 
-	return string(output), nil
+	operations := map[string]func(context.Context, []string) (string, error){
+		"apply":  client.Apply,
+		"delete": client.Delete,
+	}
+
+	operationFunc, ok := operations[operation]
+	if !ok {
+		return "", errors.Errorf("unsupported operation: %s", operation)
+	}
+
+	output, err := operationFunc(context.Background(), resources)
+	if err != nil {
+		return "", errors.Wrapf(err, "failed to execute kubectl %s command", operation)
+	}
+
+	return output, nil
 }
 
 func (deployer *KubernetesDeployer) getAgentURL(endpoint *portainer.Endpoint) (string, *factory.ProxyServer, error) {

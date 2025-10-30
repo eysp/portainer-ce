@@ -6,7 +6,7 @@ import { Icon } from '@@/Icon';
 import { columnHelper } from './helper';
 
 export const actions = columnHelper.accessor(() => '', {
-  header: '操作',
+  header: 'Actions',
   id: 'actions',
   enableSorting: false,
   cell: ({ row: { original: job } }) => (
@@ -23,7 +23,7 @@ export const actions = columnHelper.accessor(() => '', {
         data-cy={`job-logs-${job.Namespace}-${job.Name}-${job.Container?.name}`}
       >
         <Icon icon={FileText} />
-        日志
+        Logs
       </Link>
     </div>
   ),

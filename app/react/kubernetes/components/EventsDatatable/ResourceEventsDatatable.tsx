@@ -29,9 +29,7 @@ export function ResourceEventsDatatable({
     params: { endpointId },
   } = useCurrentStateAndParams();
 
-  const params = resourceId
-    ? { fieldSelector: `involvedObject.uid=${resourceId}` }
-    : {};
+  const params = resourceId ? { resourceId: `${resourceId}` } : {};
   const resourceEventsQuery = useEvents(endpointId, {
     namespace,
     params,

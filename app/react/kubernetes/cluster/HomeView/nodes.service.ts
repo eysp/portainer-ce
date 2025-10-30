@@ -45,7 +45,7 @@ export function useNodeQuery(environmentId: EnvironmentId, nodeName: string) {
 }
 
 // getNodes is used to get a list of nodes using the kubernetes API
-async function getNodes(environmentId: EnvironmentId) {
+export async function getNodes(environmentId: EnvironmentId) {
   try {
     const { data: nodeList } = await axios.get<NodeList>(
       `/endpoints/${environmentId}/kubernetes/api/v1/nodes`

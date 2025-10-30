@@ -10,7 +10,7 @@ export function useDeleteUserMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: UserId) => deleteUser(id),
-    ...withGlobalError('无法删除用户'),
+    ...withGlobalError('Unable to delete user'),
     ...withInvalidate(queryClient, [userQueryKeys.base()]),
   });
 }

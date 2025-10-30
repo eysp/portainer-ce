@@ -35,10 +35,10 @@ export function CreateUserAccessToken() {
   return (
     <>
       <PageHeader
-        title="创建访问令牌"
+        title="Create access token"
         breadcrumbs={[
-          { label: '我的账户', link: 'portainer.account' },
-          '添加访问令牌',
+          { label: 'My account', link: 'portainer.account' },
+          'Add access token',
         ]}
         reload
       />

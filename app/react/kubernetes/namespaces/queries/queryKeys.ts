@@ -5,7 +5,7 @@ import { EnvironmentId } from '@/react/portainer/environments/types';
 export const queryKeys = {
   list: (
     environmentId: EnvironmentId,
-    options?: { withResourceQuota?: boolean }
+    options?: { withResourceQuota?: boolean; withUnhealthyEvents?: boolean }
   ) =>
     compact([
       'environments',
@@ -13,6 +13,7 @@ export const queryKeys = {
       'kubernetes',
       'namespaces',
       options?.withResourceQuota,
+      options?.withUnhealthyEvents,
     ]),
   namespace: (environmentId: EnvironmentId, namespace: string) =>
     [

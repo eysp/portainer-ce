@@ -1,6 +1,7 @@
 package helm
 
 import (
+	"fmt"
 	"net/http"
 
 	portainer "github.com/portainer/portainer/api"
@@ -8,8 +9,8 @@ import (
 	"github.com/portainer/portainer/api/http/middlewares"
 	"github.com/portainer/portainer/api/http/security"
 	"github.com/portainer/portainer/api/kubernetes"
-	"github.com/portainer/portainer/pkg/libhelm"
 	"github.com/portainer/portainer/pkg/libhelm/options"
+	libhelmtypes "github.com/portainer/portainer/pkg/libhelm/types"
 	httperror "github.com/portainer/portainer/pkg/libhttp/error"
 
 	"github.com/gorilla/mux"
@@ -23,11 +24,11 @@ type Handler struct {
 	jwtService               portainer.JWTService
 	kubeClusterAccessService kubernetes.KubeClusterAccessService
 	kubernetesDeployer       portainer.KubernetesDeployer
-	helmPackageManager       libhelm.HelmPackageManager
+	helmPackageManager       libhelmtypes.HelmPackageManager
 }
 
 // NewHandler creates a handler to manage endpoint group operations.
-func NewHandler(bouncer security.BouncerService, dataStore dataservices.DataStore, jwtService portainer.JWTService, kubernetesDeployer portainer.KubernetesDeployer, helmPackageManager libhelm.HelmPackageManager, kubeClusterAccessService kubernetes.KubeClusterAccessService) *Handler {
+func NewHandler(bouncer security.BouncerService, dataStore dataservices.DataStore, jwtService portainer.JWTService, kubernetesDeployer portainer.KubernetesDeployer, helmPackageManager libhelmtypes.HelmPackageManager, kubeClusterAccessService kubernetes.KubeClusterAccessService) *Handler {
 	h := &Handler{
 		Router:                   mux.NewRouter(),
 		requestBouncer:           bouncer,
@@ -53,11 +54,23 @@ func NewHandler(bouncer security.BouncerService, dataStore dataservices.DataStor
 	h.Handle("/{id}/kubernetes/helm",
 		httperror.LoggerHandler(h.helmInstall)).Methods(http.MethodPost)
 
+	// `helm get all [RELEASE_NAME]`
+	h.Handle("/{id}/kubernetes/helm/{release}",
+		httperror.LoggerHandler(h.helmGet)).Methods(http.MethodGet)
+
+	// `helm history [RELEASE_NAME]`
+	h.Handle("/{id}/kubernetes/helm/{release}/history",
+		httperror.LoggerHandler(h.helmGetHistory)).Methods(http.MethodGet)
+
+	// `helm rollback [RELEASE_NAME] [REVISION]`
+	h.Handle("/{id}/kubernetes/helm/{release}/rollback",
+		httperror.LoggerHandler(h.helmRollback)).Methods(http.MethodPost)
+
 	return h
 }
 
 // NewTemplateHandler creates a template handler to manage environment(endpoint) group operations.
-func NewTemplateHandler(bouncer security.BouncerService, helmPackageManager libhelm.HelmPackageManager) *Handler {
+func NewTemplateHandler(bouncer security.BouncerService, helmPackageManager libhelmtypes.HelmPackageManager) *Handler {
 	h := &Handler{
 		Router:             mux.NewRouter(),
 		helmPackageManager: helmPackageManager,
@@ -78,7 +91,7 @@ func NewTemplateHandler(bouncer security.BouncerService, helmPackageManager libh
 
 // getHelmClusterAccess obtains the core k8s cluster access details from request.
 // The cluster access includes the cluster server url, the user's bearer token and the tls certificate.
-// The cluster access is passed in as kube config CLI params to helm binary.
+// The cluster access is passed in as kube config CLI params to helm.
 func (handler *Handler) getHelmClusterAccess(r *http.Request) (*options.KubernetesClusterAccess, *httperror.HandlerError) {
 	endpoint, err := middlewares.FetchEndpoint(r)
 	if err != nil {
@@ -107,6 +120,9 @@ func (handler *Handler) getHelmClusterAccess(r *http.Request) (*options.Kubernet
 
 	kubeConfigInternal := handler.kubeClusterAccessService.GetClusterDetails(hostURL, endpoint.ID, true)
 	return &options.KubernetesClusterAccess{
+		ClusterName:              fmt.Sprintf("%s-%s", "portainer-cluster", endpoint.Name),
+		ContextName:              fmt.Sprintf("%s-%s", "portainer-ctx", endpoint.Name),
+		UserName:                 fmt.Sprintf("%s-%s", "portainer-sa-user", tokenData.Username),
 		ClusterServerURL:         kubeConfigInternal.ClusterServerURL,
 		CertificateAuthorityFile: kubeConfigInternal.CertificateAuthorityFile,
 		AuthToken:                bearerToken,

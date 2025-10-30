@@ -23,11 +23,11 @@ export function TeamsField({
 }: Props) {
   return (
     <FormControl
-      label="授权团队"
+      label="Authorized teams"
       tooltip={
         teams.length > 0
           ? overrideTooltip ||
-            '您可以选择允许哪些团队管理此资源。'
+            'You can select which team(s) will be able to manage this resource.'
           : undefined
       }
       inputId="authorized-teams-selector"
@@ -44,11 +44,11 @@ export function TeamsField({
         />
       ) : (
         <span className="small text-muted">
-          您还未创建任何团队。请前往{' '}
+          You have not yet created any teams. Head over to the{' '}
           <Link to="portainer.teams" data-cy="teams-view-link">
-            团队视图
+            Teams view
           </Link>{' '}
-          以管理团队。
+          to manage teams.
         </span>
       )}
     </FormControl>

@@ -45,7 +45,6 @@ func (payload *teamMembershipCreatePayload) Validate(r *http.Request) error {
 // @produce json
 // @param body body teamMembershipCreatePayload true "Team membership details"
 // @success 200 {object} portainer.TeamMembership "Success"
-// @success 204 "Success"
 // @failure 400 "Invalid request"
 // @failure 403 "Permission denied to manage memberships"
 // @failure 409 "Team membership already registered"

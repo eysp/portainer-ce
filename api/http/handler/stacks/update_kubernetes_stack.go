@@ -27,12 +27,13 @@ type kubernetesFileStackUpdatePayload struct {
 }
 
 type kubernetesGitStackUpdatePayload struct {
-	RepositoryReferenceName  string
-	RepositoryAuthentication bool
-	RepositoryUsername       string
-	RepositoryPassword       string
-	AutoUpdate               *portainer.AutoUpdateSettings
-	TLSSkipVerify            bool
+	RepositoryReferenceName     string
+	RepositoryAuthentication    bool
+	RepositoryUsername          string
+	RepositoryPassword          string
+	RepositoryAuthorizationType gittypes.GitCredentialAuthType
+	AutoUpdate                  *portainer.AutoUpdateSettings
+	TLSSkipVerify               bool
 }
 
 func (payload *kubernetesFileStackUpdatePayload) Validate(r *http.Request) error {
@@ -76,11 +77,19 @@ func (handler *Handler) updateKubernetesStack(r *http.Request, stack *portainer.
 			}
 
 			stack.GitConfig.Authentication = &gittypes.GitAuthentication{
-				Username: payload.RepositoryUsername,
-				Password: password,
+				Username:          payload.RepositoryUsername,
+				Password:          password,
+				AuthorizationType: payload.RepositoryAuthorizationType,
 			}
 
-			if _, err := handler.GitService.LatestCommitID(stack.GitConfig.URL, stack.GitConfig.ReferenceName, stack.GitConfig.Authentication.Username, stack.GitConfig.Authentication.Password, stack.GitConfig.TLSSkipVerify); err != nil {
+			if _, err := handler.GitService.LatestCommitID(
+				stack.GitConfig.URL,
+				stack.GitConfig.ReferenceName,
+				stack.GitConfig.Authentication.Username,
+				stack.GitConfig.Authentication.Password,
+				stack.GitConfig.Authentication.AuthorizationType,
+				stack.GitConfig.TLSSkipVerify,
+			); err != nil {
 				return httperror.InternalServerError("Unable to fetch git repository", err)
 			}
 		}

@@ -4,10 +4,12 @@ import (
 	"net/http"
 
 	portainer "github.com/portainer/portainer/api"
-	httperrors "github.com/portainer/portainer/api/http/errors"
+	"github.com/portainer/portainer/api/http/security"
 	httperror "github.com/portainer/portainer/pkg/libhttp/error"
 	"github.com/portainer/portainer/pkg/libhttp/request"
 	"github.com/portainer/portainer/pkg/libhttp/response"
+
+	"github.com/rs/zerolog/log"
 )
 
 // @id RegistryInspect
@@ -31,6 +33,11 @@ func (handler *Handler) registryInspect(w http.ResponseWriter, r *http.Request) 
 		return httperror.BadRequest("Invalid registry identifier route variable", err)
 	}
 
+	log.Debug().
+		Int("registry_id", registryID).
+		Str("context", "RegistryInspectHandler").
+		Msg("Starting registry inspection")
+
 	registry, err := handler.DataStore.Registry().Read(portainer.RegistryID(registryID))
 	if handler.DataStore.IsErrObjectNotFound(err) {
 		return httperror.NotFound("Unable to find a registry with the specified identifier inside the database", err)
@@ -38,14 +45,12 @@ func (handler *Handler) registryInspect(w http.ResponseWriter, r *http.Request) 
 		return httperror.InternalServerError("Unable to find a registry with the specified identifier inside the database", err)
 	}
 
-	hasAccess, isAdmin, err := handler.userHasRegistryAccess(r, registry)
+	// Check if user is admin to determine if we should hide sensitive fields
+	securityContext, err := security.RetrieveRestrictedRequestContext(r)
 	if err != nil {
 		return httperror.InternalServerError("Unable to retrieve info from request context", err)
 	}
-	if !hasAccess {
-		return httperror.Forbidden("Access denied to resource", httperrors.ErrResourceAccessDenied)
-	}
 
-	hideFields(registry, !isAdmin)
+	hideFields(registry, !securityContext.IsAdmin)
 	return response.JSON(w, registry)
 }

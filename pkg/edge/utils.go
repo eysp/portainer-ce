@@ -57,9 +57,10 @@ func IsValidEdgeStackName(name string) bool {
 	}
 
 	for _, r := range name {
-		if !(unicode.IsLower(r) || unicode.IsDigit(r) || r == '-' || r == '_') {
+		if !unicode.IsLower(r) && !unicode.IsDigit(r) && r != '-' && r != '_' {
 			return false
 		}
 	}
+
 	return true
 }

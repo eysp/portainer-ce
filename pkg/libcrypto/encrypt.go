@@ -3,8 +3,8 @@ package libcrypto
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/rand"
-	"io"
+
+	"github.com/portainer/portainer/pkg/fips"
 )
 
 // Encrypt encrypts data using 256-bit AES-GCM.  This both hides the content of
@@ -12,23 +12,26 @@ import (
 // form nonce|ciphertext|tag where '|' indicates concatenation.
 // Creates a 32bit hash of the key before encrypting the data.
 func Encrypt(data, key []byte) ([]byte, error) {
-	hashKey := Hash32Bit(key)
+	return encrypt(data, key, fips.FIPSMode())
+}
+
+func encrypt(data, key []byte, fips bool) ([]byte, error) {
+	var hashKey []byte
+	if fips {
+		hashKey = HashFromBytes(key)
+	} else {
+		hashKey = InsecureHash32Bytes(key)
+	}
 
 	block, err := aes.NewCipher(hashKey)
 	if err != nil {
 		return nil, err
 	}
 
-	gcm, err := cipher.NewGCM(block)
+	gcm, err := cipher.NewGCMWithRandomNonce(block)
 	if err != nil {
 		return nil, err
 	}
 
-	nonce := make([]byte, gcm.NonceSize())
-	_, err = io.ReadFull(rand.Reader, nonce)
-	if err != nil {
-		return nil, err
-	}
-
-	return gcm.Seal(nonce, nonce, data, nil), nil
+	return gcm.Seal(nil, nil, data, nil), nil
 }

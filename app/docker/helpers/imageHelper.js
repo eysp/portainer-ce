@@ -1,4 +1,4 @@
-import { buildImageFullURIFromModel, imageContainsURL } from '@/react/docker/images/utils';
+import { buildImageFullURIFromModel, imageContainsURL, fullURIIntoRepoAndTag } from '@/react/docker/images/utils';
 
 angular.module('portainer.docker').factory('ImageHelper', ImageHelperFactory);
 function ImageHelperFactory() {
@@ -18,8 +18,12 @@ function ImageHelperFactory() {
    * @param {PorImageRegistryModel} registry
    */
   function createImageConfigForContainer(imageModel) {
+    const fromImage = buildImageFullURIFromModel(imageModel);
+    const { tag, repo } = fullURIIntoRepoAndTag(fromImage);
     return {
-      fromImage: buildImageFullURIFromModel(imageModel),
+      fromImage,
+      tag,
+      repo,
     };
   }
 

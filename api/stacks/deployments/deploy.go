@@ -2,7 +2,6 @@ package deployments
 
 import (
 	"cmp"
-	"crypto/tls"
 	"fmt"
 	"strconv"
 	"time"
@@ -215,13 +214,9 @@ func isEnvironmentOnline(endpoint *portainer.Endpoint) bool {
 		return true
 	}
 
-	var err error
-	var tlsConfig *tls.Config
-	if endpoint.TLSConfig.TLS {
-		tlsConfig, err = crypto.CreateTLSConfigurationFromDisk(endpoint.TLSConfig.TLSCACertPath, endpoint.TLSConfig.TLSCertPath, endpoint.TLSConfig.TLSKeyPath, endpoint.TLSConfig.TLSSkipVerify)
-		if err != nil {
-			return false
-		}
+	tlsConfig, err := crypto.CreateTLSConfigurationFromDisk(endpoint.TLSConfig)
+	if err != nil {
+		return false
 	}
 
 	_, _, err = agent.GetAgentVersionAndPlatform(endpoint.URL, tlsConfig)

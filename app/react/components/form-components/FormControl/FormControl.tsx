@@ -1,4 +1,4 @@
-import { ComponentProps, PropsWithChildren, ReactNode } from 'react';
+import { PropsWithChildren, ReactNode } from 'react';
 import clsx from 'clsx';
 
 import { Tooltip } from '@@/Tip/Tooltip';
@@ -10,10 +10,11 @@ export type Size = 'xsmall' | 'small' | 'medium' | 'large' | 'vertical';
 
 export interface Props {
   inputId?: string;
+  dataCy?: string;
   label: ReactNode;
   size?: Size;
-  tooltip?: ComponentProps<typeof Tooltip>['message'];
-  setTooltipHtmlMessage?: ComponentProps<typeof Tooltip>['setHtmlMessage'];
+  tooltip?: ReactNode;
+  setTooltipHtmlMessage?: boolean;
   children: ReactNode;
   errors?: ReactNode;
   required?: boolean;
@@ -24,6 +25,7 @@ export interface Props {
 
 export function FormControl({
   inputId,
+  dataCy,
   label,
   size = 'small',
   tooltip = '',
@@ -42,6 +44,7 @@ export function FormControl({
         'form-group',
         'after:clear-both after:table after:content-[""]' // to fix issues with float
       )}
+      data-cy={dataCy}
     >
       <label
         htmlFor={inputId}
@@ -56,10 +59,15 @@ export function FormControl({
         )}
       </label>
 
-      <div className={sizeClassChildren(size)}>
-        {isLoading && <InlineLoader>{loadingText}</InlineLoader>}
+      <div className={clsx('flex flex-col', sizeClassChildren(size))}>
+        {isLoading && (
+          // 34px height to reduce layout shift when loading is complete
+          <div className="h-[34px] flex items-center">
+            <InlineLoader>{loadingText}</InlineLoader>
+          </div>
+        )}
         {!isLoading && children}
-        {errors && <FormError>{errors}</FormError>}
+        {!!errors && !isLoading && <FormError>{errors}</FormError>}
       </div>
     </div>
   );

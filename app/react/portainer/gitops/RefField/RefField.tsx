@@ -40,9 +40,9 @@ export function RefField({
       errors={error}
       tip={
         <>
-          使用以下语法指定仓库引用：
-          分支使用 <code>refs/heads/branch_name</code> ，标签使用{' '}
-          <code>refs/tags/tag_name</code>。
+          Specify a reference of the repository using the following syntax:
+          branches with <code>refs/heads/branch_name</code> or tags with{' '}
+          <code>refs/tags/tag_name</code>.
         </>
       }
     >
@@ -62,11 +62,11 @@ export function RefField({
       errors={error}
       tip={
         <>
-          使用以下语法指定仓库引用：
-          分支使用 <code>refs/heads/branch_name</code>，标签使用{' '}
-          <code>refs/tags/tag_name</code>。 如果未指定，则默认使用
-          <code>HEAD</code> 引用，通常是 <code>main</code>{' '}
-          branch.分支。
+          Specify a reference of the repository using the following syntax:
+          branches with <code>refs/heads/branch_name</code> or tags with{' '}
+          <code>refs/tags/tag_name</code>. If not specified, will use the
+          default <code>HEAD</code> reference normally the <code>main</code>{' '}
+          branch.
         </>
       }
     >
@@ -94,7 +94,7 @@ function Wrapper({
       </span>
       <div className="col-sm-12">
         <FormControl
-          label="仓库引用"
+          label="Repository reference"
           inputId={inputId}
           required
           errors={errors}
@@ -110,7 +110,7 @@ export function refFieldValidation(): SchemaOf<string> {
   return string()
     .when({
       is: isBE,
-      then: string().required('仓库引用名称是必填项'),
+      then: string().required('Repository reference name is required'),
     })
     .default('');
 }

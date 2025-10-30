@@ -10,8 +10,6 @@ USER ContainerAdministrator
 
 COPY dist/mingit/ mingit/
 COPY dist/docker.exe /
-COPY dist/helm.exe /
-COPY dist/kubectl.exe /
 COPY dist/mustache-templates /mustache-templates/
 COPY dist/portainer.exe /
 COPY dist/public /public/

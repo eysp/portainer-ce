@@ -29,7 +29,7 @@ func (c *RegistryClient) RegistryAuth(image Image) (string, string, error) {
 		return "", "", err
 	}
 
-	registry, err := findBestMatchRegistry(image.opts.Name, registries)
+	registry, err := findBestMatchRegistry(image.Opts.Name, registries)
 	if err != nil {
 		return "", "", err
 	}
@@ -59,7 +59,7 @@ func (c *RegistryClient) EncodedRegistryAuth(image Image) (string, error) {
 		return "", err
 	}
 
-	registry, err := findBestMatchRegistry(image.opts.Name, registries)
+	registry, err := findBestMatchRegistry(image.Opts.Name, registries)
 	if err != nil {
 		return "", err
 	}

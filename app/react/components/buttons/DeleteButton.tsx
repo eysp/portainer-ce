@@ -49,7 +49,7 @@ export function DeleteButton({
         className="!m-0"
         data-cy={dataCy}
       >
-        {children || '删除'}
+        {children || 'Remove'}
       </Button>
     );
   }
@@ -66,7 +66,7 @@ export function DeleteButton({
       isLoading={isLoading}
       loadingText={loadingText}
     >
-      {children || '删除'}
+      {children || 'Remove'}
     </LoadingButton>
   );
 

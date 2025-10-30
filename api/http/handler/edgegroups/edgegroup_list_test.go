@@ -1,11 +1,19 @@
 package edgegroups
 
 import (
+	"net/http"
+	"net/http/httptest"
+	"strconv"
 	"testing"
 
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/datastore"
 	"github.com/portainer/portainer/api/internal/testhelpers"
+	"github.com/portainer/portainer/api/roar"
+
+	"github.com/segmentio/encoding/json"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_getEndpointTypes(t *testing.T) {
@@ -38,7 +46,7 @@ func Test_getEndpointTypes(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		ans, err := getEndpointTypes(datastore, test.endpointIds)
+		ans, err := getEndpointTypes(datastore, roar.FromSlice(test.endpointIds))
 		assert.NoError(t, err, "getEndpointTypes shouldn't fail")
 
 		assert.ElementsMatch(t, test.expected, ans, "getEndpointTypes expected to return %b for %v, but returned %b", test.expected, test.endpointIds, ans)
@@ -48,6 +56,61 @@ func Test_getEndpointTypes(t *testing.T) {
 func Test_getEndpointTypes_failWhenEndpointDontExist(t *testing.T) {
 	datastore := testhelpers.NewDatastore(testhelpers.WithEndpoints([]portainer.Endpoint{}))
 
-	_, err := getEndpointTypes(datastore, []portainer.EndpointID{1})
+	_, err := getEndpointTypes(datastore, roar.FromSlice([]portainer.EndpointID{1}))
 	assert.Error(t, err, "getEndpointTypes should fail")
+}
+
+func TestEdgeGroupListHandler(t *testing.T) {
+	_, store := datastore.MustNewTestStore(t, true, true)
+
+	handler := NewHandler(testhelpers.NewTestRequestBouncer())
+	handler.DataStore = store
+
+	err := store.EndpointGroup().Create(&portainer.EndpointGroup{
+		ID:   1,
+		Name: "Test Group",
+	})
+	require.NoError(t, err)
+
+	for i := range 3 {
+		err = store.Endpoint().Create(&portainer.Endpoint{
+			ID:      portainer.EndpointID(i + 1),
+			Name:    "Test Endpoint " + strconv.Itoa(i+1),
+			Type:    portainer.EdgeAgentOnDockerEnvironment,
+			GroupID: 1,
+		})
+		require.NoError(t, err)
+
+		err = store.EndpointRelation().Create(&portainer.EndpointRelation{
+			EndpointID: portainer.EndpointID(i + 1),
+			EdgeStacks: map[portainer.EdgeStackID]bool{},
+		})
+		require.NoError(t, err)
+	}
+
+	err = store.EdgeGroup().Create(&portainer.EdgeGroup{
+		ID:          1,
+		Name:        "Test Edge Group",
+		EndpointIDs: roar.FromSlice([]portainer.EndpointID{1, 2, 3}),
+	})
+	require.NoError(t, err)
+
+	rr := httptest.NewRecorder()
+
+	req := httptest.NewRequest(
+		http.MethodGet,
+		"/edge_groups",
+		nil,
+	)
+
+	handler.ServeHTTP(rr, req)
+	require.Equal(t, http.StatusOK, rr.Result().StatusCode)
+
+	var responseGroups []decoratedEdgeGroup
+	err = json.NewDecoder(rr.Body).Decode(&responseGroups)
+	require.NoError(t, err)
+
+	require.Len(t, responseGroups, 1)
+	require.ElementsMatch(t, []portainer.EndpointID{1, 2, 3}, responseGroups[0].Endpoints)
+	require.Len(t, responseGroups[0].TrustedEndpoints, 0)
 }

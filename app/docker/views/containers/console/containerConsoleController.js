@@ -47,7 +47,7 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
       ContainerService.container(endpoint.Id, attachId)
         .then((details) => {
           if (!details.State.Running) {
-            Notifications.error('失败', details, '容器 ' + attachId + ' 未在运行！');
+            Notifications.error('Failure', details, 'Container ' + attachId + ' is not running!');
             $scope.disconnect();
             return;
           }
@@ -68,7 +68,7 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
           initTerm(url, ContainerService.resizeTTY.bind(this, endpoint.Id, attachId));
         })
         .catch(function error(err) {
-          Notifications.error('错误', err, '无法获取容器详细信息');
+          Notifications.error('Error', err, 'Unable to retrieve container details');
           $scope.disconnect();
         });
     };
@@ -108,7 +108,7 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
           initTerm(url, ExecService.resizeTTY.bind(this, params.id), isLinuxCommand);
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法执行进入容器的操作');
+          Notifications.error('Failure', err, 'Unable to exec into container');
           $scope.disconnect();
         });
     };
@@ -225,7 +225,7 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
           if (closeTerminal) {
             $scope.disconnect();
           } else {
-            Notifications.error('失败', err, '连接错误');
+            Notifications.error('Failure', err, 'Connection error');
           }
           $scope.$apply();
         };
@@ -268,7 +268,7 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
           $scope.loaded = true;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索容器详细信息');
+          Notifications.error('Error', err, 'Unable to retrieve container details');
         });
     };
 

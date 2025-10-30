@@ -110,5 +110,5 @@ func (b *KubernetesStackUrlBuilder) Deploy(payload *StackPayload, endpoint *port
 }
 
 func (b *KubernetesStackUrlBuilder) GetResponse() string {
-	return b.UrlMethodStackBuilder.deploymentConfiger.GetResponse()
+	return b.deploymentConfiger.GetResponse()
 }

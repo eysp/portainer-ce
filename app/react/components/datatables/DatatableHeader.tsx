@@ -8,7 +8,7 @@ import { SearchBar } from './SearchBar';
 import { Table } from './Table';
 
 type Props = {
-  title?: string;
+  title?: React.ReactNode;
   titleIcon?: IconProps['icon'];
   searchValue: string;
   onSearchChange(value: string): void;
@@ -16,6 +16,7 @@ type Props = {
   renderTableActions?(): ReactNode;
   description?: ReactNode;
   titleId?: string;
+  includeSearch?: boolean;
 } & AutomationTestingProps;
 
 export function DatatableHeader({
@@ -28,8 +29,9 @@ export function DatatableHeader({
   description,
   titleId,
   'data-cy': dataCy,
+  includeSearch = !!title,
 }: Props) {
-  if (!title) {
+  if (!title && !includeSearch) {
     return null;
   }
 
@@ -55,7 +57,7 @@ export function DatatableHeader({
       description={description}
       data-cy={dataCy}
     >
-      {searchBar}
+      {includeSearch && searchBar}
       {tableActions}
       {tableTitleSettings}
     </Table.Title>

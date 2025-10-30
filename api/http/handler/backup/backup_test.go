@@ -18,9 +18,14 @@ import (
 	"github.com/portainer/portainer/api/crypto"
 	"github.com/portainer/portainer/api/http/offlinegate"
 	"github.com/portainer/portainer/api/internal/testhelpers"
+	"github.com/portainer/portainer/pkg/fips"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func init() {
+	fips.InitFIPS(false)
+}
 
 func listFiles(dir string) []string {
 	items := make([]string, 0)

@@ -44,7 +44,7 @@ export function DashboardView() {
 
   return (
     <>
-      <PageHeader title="仪表盘" breadcrumbs="环境概览" reload />
+      <PageHeader title="Dashboard" breadcrumbs="Environment summary" reload />
 
       <div className="mx-4 space-y-6">
         <InfoPanels isAgent={isAgentEnvironment(env.Type)} />

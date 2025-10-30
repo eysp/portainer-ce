@@ -9,7 +9,7 @@ export function validationSchema(): SchemaOf<BackupS3Settings> {
       .default('')
       .when('passwordProtect', {
         is: true,
-        then: (schema) => schema.required('此字段为必填项。'),
+        then: (schema) => schema.required('This field is required.'),
       }),
     scheduleAutomaticBackup: boolean().default(false),
     cronRule: string()
@@ -17,7 +17,7 @@ export function validationSchema(): SchemaOf<BackupS3Settings> {
       .when('scheduleAutomaticBackup', {
         is: true,
         then: (schema) =>
-          schema.required('此字段为必填项。').when('cronRule', {
+          schema.required('This field is required.').when('cronRule', {
             is: (val: string) => val !== '',
             then: (schema) =>
               schema.matches(
@@ -30,20 +30,20 @@ export function validationSchema(): SchemaOf<BackupS3Settings> {
       .default('')
       .when('scheduleAutomaticBackup', {
         is: true,
-        then: (schema) => schema.required('此字段为必填项。'),
+        then: (schema) => schema.required('This field is required.'),
       }),
     secretAccessKey: string()
       .default('')
       .when('scheduleAutomaticBackup', {
         is: true,
-        then: (schema) => schema.required('此字段为必填项。'),
+        then: (schema) => schema.required('This field is required.'),
       }),
     region: string().default('').optional(),
     bucketName: string()
       .default('')
       .when('scheduleAutomaticBackup', {
         is: true,
-        then: (schema) => schema.required('此字段为必填项。'),
+        then: (schema) => schema.required('This field is required.'),
       }),
     s3CompatibleHost: string()
       .default('')

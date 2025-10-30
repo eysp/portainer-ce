@@ -33,8 +33,8 @@ export function ResourceFieldset({
   const { maxCpu, maxMemory } = useSystemLimits(environmentId);
 
   return (
-    <FormSection title="资源">
-      <FormControl label="内存预留 (MB)" errors={errors?.reservation}>
+    <FormSection title="Resources">
+      <FormControl label="Memory reservation (MB)" errors={errors?.reservation}>
         <SliderWithInput
           visibleTooltip
           value={values.reservation}
@@ -45,7 +45,7 @@ export function ResourceFieldset({
         />
       </FormControl>
 
-      <FormControl label="内存限制 (MB)" errors={errors?.limit}>
+      <FormControl label="Memory limit (MB)" errors={errors?.limit}>
         <SliderWithInput
           visibleTooltip
           value={values.limit}
@@ -56,7 +56,7 @@ export function ResourceFieldset({
         />
       </FormControl>
 
-      <FormControl label="最大CPU使用率" errors={errors?.cpu}>
+      <FormControl label="Maximum CPU usage" errors={errors?.cpu}>
         <Slider
           visibleTooltip
           value={values.cpu}
@@ -98,15 +98,15 @@ export function resourcesValidation({
   return object({
     reservation: nanNumberSchema()
       .min(0)
-      .max(maxMemory, `值必须在 0 和 ${maxMemory} 之间`)
+      .max(maxMemory, `Value must be between 0 and ${maxMemory}`)
       .default(0),
     limit: nanNumberSchema()
       .min(0)
-      .max(maxMemory, `值必须在 0 和 ${maxMemory} 之间`)
+      .max(maxMemory, `Value must be between 0 and ${maxMemory}`)
       .default(0),
     cpu: nanNumberSchema()
       .min(0)
-      .max(maxCpu, `值必须在 0 和 ${maxCpu} 之间`)
+      .max(maxCpu, `Value must be between 0 and ${maxCpu}`)
       .default(0),
   });
 }

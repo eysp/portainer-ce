@@ -19,7 +19,7 @@ export function validation(): SchemaOf<Values> {
       .default('')
       .when('network', {
         is: 'container',
-        then: string().required('容器为必填项'),
+        then: string().required('Container is required'),
       }),
   });
 }

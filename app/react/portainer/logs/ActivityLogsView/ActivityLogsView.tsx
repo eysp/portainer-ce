@@ -25,7 +25,7 @@ export function ActivityLogsView() {
     limit: tableState.pageSize,
     sortBy: getSortType(tableState.sortBy?.id),
     sortDesc: tableState.sortBy?.desc,
-    search: tableState.search,
+    keyword: tableState.search,
     ...(range
       ? {
           after: seconds(range?.start?.valueOf()),
@@ -39,13 +39,13 @@ export function ActivityLogsView() {
   return (
     <>
       <PageHeader
-        title="用户活动日志"
-        breadcrumbs="用户活动日志"
+        title="User activity logs"
+        breadcrumbs="User activity logs"
         reload
       />
 
       <div className="mx-4">
-        
+        <BEOverlay variant="multi-widget" featureId={FeatureId.ACTIVITY_AUDIT}>
           <div className="row">
             <div className="col-sm-12">
               <FilterBar
@@ -69,7 +69,7 @@ export function ActivityLogsView() {
             totalItems={logsQuery.data?.totalCount || 0}
             dataset={logsQuery.data?.logs}
           />
-        
+        </BEOverlay>
       </div>
     </>
   );

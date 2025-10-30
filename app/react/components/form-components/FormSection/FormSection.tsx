@@ -12,6 +12,7 @@ interface Props {
   titleClassName?: string;
   className?: string;
   htmlFor?: string;
+  setIsDefaultFolded?: (isDefaultFolded: boolean) => void;
 }
 
 export function FormSection({
@@ -23,6 +24,7 @@ export function FormSection({
   titleClassName,
   className,
   htmlFor = '',
+  setIsDefaultFolded,
 }: PropsWithChildren<Props>) {
   const [isExpanded, setIsExpanded] = useState(!defaultFolded);
   const id = `foldingButton${title}`;
@@ -39,14 +41,18 @@ export function FormSection({
             isExpanded={isExpanded}
             data-cy={id}
             id={id}
-            onClick={() => setIsExpanded((isExpanded) => !isExpanded)}
+            onClick={() => {
+              setIsExpanded((isExpanded) => !isExpanded);
+              setIsDefaultFolded?.(isExpanded);
+            }}
           />
         )}
 
         {title}
       </FormSectionTitle>
-
-      {isExpanded && children}
+      {/* col-sm-12 in the title has a 'float: left' style - 'clear-both' makes sure it doesn't get in the way of the next div */}
+      {/* https://stackoverflow.com/questions/7759837/put-divs-below-floatleft-divs */}
+      {isExpanded && <div className="clear-both">{children}</div>}
     </div>
   );
 }

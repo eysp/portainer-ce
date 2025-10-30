@@ -37,8 +37,8 @@ export type Usage = {
 };
 
 export type ApplicationResource = {
-  cpuRequest: number;
-  cpuLimit: number;
-  memoryRequest: number;
-  memoryLimit: number;
+  CpuRequest: number;
+  CpuLimit: number;
+  MemoryRequest: number;
+  MemoryLimit: number;
 };

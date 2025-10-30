@@ -68,7 +68,7 @@ export function ImagesDatatable({
 
   return (
     <Datatable
-      title="镜像"
+      title="Images"
       titleIcon={List}
       data-cy="docker-images-datatable"
       extendTableOptions={mergeOptions(
@@ -89,7 +89,7 @@ export function ImagesDatatable({
               to="docker.images.build"
               data-cy="image-buildImageButton"
             >
-              构建新镜像
+              Build a new image
             </AddButton>
           </Authorized>
         </div>
@@ -130,7 +130,7 @@ function RemoveButtonMenu({
             onRemove(selectedItems, false);
           }}
         >
-          删除
+          Remove
         </Button>
         <Menu>
           <MenuButton
@@ -141,7 +141,7 @@ function RemoveButtonMenu({
             icon={ChevronDown}
             data-cy="image-toggleRemoveButtonMenu"
           >
-            <span className="sr-only">切换下拉菜单</span>
+            <span className="sr-only">Toggle Dropdown</span>
           </MenuButton>
           <MenuPopover position={positionRight}>
             <div className="mt-3 bg-white th-highcontrast:bg-black th-dark:bg-black">
@@ -150,7 +150,7 @@ function RemoveButtonMenu({
                   onRemove(selectedItems, true);
                 }}
               >
-                强制删除
+                Force Remove
               </MenuItem>
             </div>
           </MenuPopover>
@@ -183,7 +183,7 @@ function ImportExportButtons({
             to: 'docker.images.import',
           }}
         >
-          导入
+          Import
         </Button>
       </Authorized>
       <Authorized authorizations="DockerImageGet">
@@ -192,12 +192,12 @@ function ImportExportButtons({
           color="light"
           icon={Download}
           isLoading={isExportInProgress}
-          loadingText="导出进行中..."
+          loadingText="Export in progress..."
           data-cy="image-exportImageButton"
           onClick={() => onExportClick(selectedItems)}
           disabled={selectedItems.length === 0}
         >
-          导出
+          Export
         </LoadingButton>
       </Authorized>
     </ButtonGroup>

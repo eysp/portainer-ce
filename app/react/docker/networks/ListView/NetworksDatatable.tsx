@@ -55,7 +55,7 @@ export function NetworksDatatable({ dataset, onRemove, onRefresh }: Props) {
   return (
     <ExpandableDatatable<DecoratedNetwork>
       settingsManager={settings}
-      title="网络"
+      title="Networks"
       titleIcon={Network}
       dataset={dataset}
       columns={columns}
@@ -82,13 +82,13 @@ export function NetworksDatatable({ dataset, onRemove, onRefresh }: Props) {
             <DeleteButton
               disabled={selectedRows.length === 0}
               data-cy="network-removeNetworkButton"
-              confirmMessage="是否要删除所选网络？"
+              confirmMessage="Do you want to remove the selected network(s)?"
               onConfirmed={() => onRemove(selectedRows)}
             />
           </Authorized>
           <Authorized authorizations="DockerNetworkCreate">
             <AddButton data-cy="network-addNetworkButton">
-              添加网络
+              Add network
             </AddButton>
           </Authorized>
         </div>

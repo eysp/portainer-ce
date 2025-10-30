@@ -16,7 +16,7 @@ export const name = columnHelper.accessor(
     cell: ({ row }) => (
       <div className="flex gap-2">
         {row.original.Name}
-        {row.original.IsSystem && <SystemBadge />}
+        {row.original.IsSystem && <SystemBadge className="ml-auto" />}
       </div>
     ),
   }

@@ -27,5 +27,5 @@ export function FallbackImage({ src, fallbackIcon, alt, className }: Props) {
   }
 
   // fallback icon if there is an error loading the image
-  return <>{fallbackIcon}</>;
+  return <div className={className}>{fallbackIcon}</div>;
 }

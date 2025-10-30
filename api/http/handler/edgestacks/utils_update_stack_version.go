@@ -5,15 +5,18 @@ import (
 	"strconv"
 
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/filesystem"
-	edgestackutils "github.com/portainer/portainer/api/internal/edge/edgestacks"
 
 	"github.com/rs/zerolog/log"
 )
 
-func (handler *Handler) updateStackVersion(stack *portainer.EdgeStack, deploymentType portainer.EdgeStackDeploymentType, config []byte, oldGitHash string, relatedEnvironmentsIDs []portainer.EndpointID) error {
-	stack.Version = stack.Version + 1
-	stack.Status = edgestackutils.NewStatus(stack.Status, relatedEnvironmentsIDs)
+func (handler *Handler) updateStackVersion(tx dataservices.DataStoreTx, stack *portainer.EdgeStack, deploymentType portainer.EdgeStackDeploymentType, config []byte, oldGitHash string, relatedEnvironmentsIDs []portainer.EndpointID) error {
+	stack.Version++
+
+	if err := tx.EdgeStackStatus().Clear(stack.ID, relatedEnvironmentsIDs); err != nil {
+		return err
+	}
 
 	return handler.storeStackFile(stack, deploymentType, config)
 }

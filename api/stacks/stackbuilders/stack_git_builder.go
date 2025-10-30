@@ -61,8 +61,8 @@ func (b *GitMethodStackBuilder) SetGitRepository(payload *StackPayload) GitMetho
 	var repoConfig gittypes.RepoConfig
 	if payload.Authentication {
 		repoConfig.Authentication = &gittypes.GitAuthentication{
-			Username: payload.RepositoryConfigPayload.Username,
-			Password: payload.RepositoryConfigPayload.Password,
+			Username: payload.Username,
+			Password: payload.Password,
 		}
 	}
 

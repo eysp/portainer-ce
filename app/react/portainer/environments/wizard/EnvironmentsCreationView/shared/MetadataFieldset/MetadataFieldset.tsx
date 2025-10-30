@@ -14,7 +14,7 @@ export function MetadataFieldset({ children }: PropsWithChildren<unknown>) {
   const { isPureAdmin } = useCurrentUser();
 
   return (
-    <FormSection title="元数据">
+    <FormSection title="Metadata">
       {children}
 
       <GroupField />

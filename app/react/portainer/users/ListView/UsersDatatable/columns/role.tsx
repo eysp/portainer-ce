@@ -13,7 +13,7 @@ export const role = helper.accessor(
       item.isTeamLeader ? ' - team leader' : ''
     }`.trim(),
   {
-    header: '角色',
+    header: 'Role',
     cell: ({ getValue, row: { original: item } }) => {
       const icon =
         isEdgeAdmin({ Role: item.Role }) || item.isTeamLeader ? User : UserPlus;

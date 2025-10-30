@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { withError } from '@/react-tools/react-query';
+import { withGlobalError } from '@/react-tools/react-query';
 import axios, { parseAxiosError } from '@/portainer/services/axios';
 
 import { EdgeStack } from '../types';
@@ -8,28 +8,30 @@ import { EdgeStack } from '../types';
 import { buildUrl } from './buildUrl';
 import { queryKeys } from './query-keys';
 
-export function useEdgeStacks<T = Array<EdgeStack>>({
-  select,
-  /**
-   * If set to a number, the query will continuously refetch at this frequency in milliseconds.
-   * If set to a function, the function will be executed with the latest data and query to compute a frequency
-   * Defaults to `false`.
-   */
+type QueryParams = {
+  summarizeStatuses?: boolean;
+};
+
+export function useEdgeStacks<T extends EdgeStack[] = EdgeStack[]>({
+  params,
   refetchInterval,
 }: {
-  select?: (stacks: EdgeStack[]) => T;
+  params?: QueryParams;
   refetchInterval?: number | false | ((data?: T) => false | number);
 } = {}) {
-  return useQuery(queryKeys.base(), () => getEdgeStacks(), {
-    ...withError('Failed loading Edge stack'),
-    select,
+  return useQuery({
+    queryKey: queryKeys.base(),
+    queryFn: () => getEdgeStacks<T>(params),
     refetchInterval,
+    ...withGlobalError('Failed loading Edge stack'),
   });
 }
 
-export async function getEdgeStacks() {
+async function getEdgeStacks<T extends EdgeStack[] = EdgeStack[]>(
+  params: QueryParams = {}
+) {
   try {
-    const { data } = await axios.get<EdgeStack[]>(buildUrl());
+    const { data } = await axios.get<T>(buildUrl(), { params });
     return data;
   } catch (e) {
     throw parseAxiosError(e as Error);

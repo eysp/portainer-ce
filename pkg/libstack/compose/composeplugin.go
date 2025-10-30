@@ -15,13 +15,14 @@ import (
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/pkg/libstack"
 
-	"github.com/compose-spec/compose-go/v2/dotenv"
-	"github.com/compose-spec/compose-go/v2/loader"
+	"github.com/compose-spec/compose-go/v2/cli"
 	"github.com/compose-spec/compose-go/v2/types"
 	"github.com/docker/cli/cli/command"
 	"github.com/docker/cli/cli/flags"
+	cmdcompose "github.com/docker/compose/v2/cmd/compose"
 	"github.com/docker/compose/v2/pkg/api"
 	"github.com/docker/compose/v2/pkg/compose"
+	"github.com/docker/compose/v2/pkg/utils"
 	"github.com/docker/docker/registry"
 	"github.com/rs/zerolog/log"
 	"github.com/sirupsen/logrus"
@@ -29,21 +30,23 @@ import (
 
 const PortainerEdgeStackLabel = "io.portainer.edge_stack_id"
 
+const portainerEnvVarsPrefix = "PORTAINER_"
+
 var mu sync.Mutex
 
 func init() {
-	logrus.SetOutput(&LogrusToZerologWriter{})
+	logrus.SetOutput(LogrusToZerologWriter{})
 	logrus.SetFormatter(&logrus.TextFormatter{
 		DisableTimestamp: true,
 	})
 }
 
 func withCli(
-	ctx context.Context,
+	ctx context.Context, //nolint:staticcheck
 	options libstack.Options,
 	cliFn func(context.Context, *command.DockerCli) error,
 ) error {
-	ctx = context.Background()
+	ctx = context.Background() //nolint:staticcheck
 
 	cli, err := command.NewDockerCli(command.WithCombinedStreams(log.Logger))
 	if err != nil {
@@ -72,69 +75,42 @@ func withCli(
 		cli.ConfigFile().AuthConfigs[r.ServerAddress] = r
 	}
 
+	if cli.ConfigFile().CredentialsStore == "portainer" {
+		log.Debug().Msg("completely disabling portainer credential store helper")
+		cli.ConfigFile().CredentialsStore = ""
+	}
+
 	return cliFn(ctx, cli)
 }
 
-func withComposeService(
+func (c *ComposeDeployer) withComposeService(
 	ctx context.Context,
 	filePaths []string,
 	options libstack.Options,
-	composeFn func(api.Service, *types.Project) error,
+	composeFn func(api.Compose, *types.Project) error,
 ) error {
 	return withCli(ctx, options, func(ctx context.Context, cli *command.DockerCli) error {
-		composeService := compose.NewComposeService(cli)
+		composeService := c.createComposeServiceFn(cli)
 
 		if len(filePaths) == 0 {
 			return composeFn(composeService, nil)
 		}
 
-		env, err := parseEnvironment(options, filePaths)
+		project, err := createProject(ctx, filePaths, options)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to create compose project: %w", err)
 		}
 
-		configDetails := types.ConfigDetails{
-			Environment: env,
-			WorkingDir:  filepath.Dir(filePaths[0]),
-		}
-
-		if options.ProjectDir != "" {
-			// When relative paths are used in the compose file, the project directory is used as the base path
-			configDetails.WorkingDir = options.ProjectDir
-		}
-
-		for _, p := range filePaths {
-			configDetails.ConfigFiles = append(configDetails.ConfigFiles, types.ConfigFile{Filename: p})
-		}
-
-		project, err := loader.LoadWithContext(ctx, configDetails,
-			func(o *loader.Options) {
-				o.SkipResolveEnvironment = true
-				o.ResolvePaths = !slices.Contains(options.ConfigOptions, "--no-path-resolution")
-
-				if options.ProjectName != "" {
-					o.SetProjectName(options.ProjectName, true)
-				}
-			},
-		)
-		if err != nil {
-			return fmt.Errorf("failed to load the compose file: %w", err)
-		}
-
-		// Work around compose path handling
-		for i, service := range project.Services {
-			for j, envFile := range service.EnvFiles {
-				if !filepath.IsAbs(envFile.Path) {
-					project.Services[i].EnvFiles[j].Path = filepath.Join(configDetails.WorkingDir, envFile.Path)
-				}
+		parallel := 0
+		if v, ok := project.Environment[cmdcompose.ComposeParallelLimit]; ok {
+			i, err := strconv.Atoi(v)
+			if err != nil {
+				return fmt.Errorf("%s must be an integer (found: %q)", cmdcompose.ComposeParallelLimit, v)
 			}
+			parallel = i
 		}
-
-		// Set the services environment variables
-		if p, err := project.WithServicesEnvironmentResolved(true); err == nil {
-			project = p
-		} else {
-			return fmt.Errorf("failed to resolve services environment: %w", err)
+		if parallel > 0 {
+			composeService.MaxConcurrency(parallel)
 		}
 
 		return composeFn(composeService, project)
@@ -143,7 +119,7 @@ func withComposeService(
 
 // Deploy creates and starts containers
 func (c *ComposeDeployer) Deploy(ctx context.Context, filePaths []string, options libstack.DeployOptions) error {
-	return withComposeService(ctx, filePaths, options.Options, func(composeService api.Service, project *types.Project) error {
+	return c.withComposeService(ctx, filePaths, options.Options, func(composeService api.Compose, project *types.Project) error {
 		addServiceLabels(project, false, options.EdgeStackID)
 
 		project = project.WithoutUnnecessaryResources()
@@ -154,6 +130,12 @@ func (c *ComposeDeployer) Deploy(ctx context.Context, filePaths []string, option
 		}
 
 		opts.Create.RemoveOrphans = options.RemoveOrphans
+		if removeOrphans, ok := project.Environment[cmdcompose.ComposeRemoveOrphans]; ok {
+			opts.Create.RemoveOrphans = utils.StringToBool(removeOrphans)
+		}
+		if ignoreOrphans, ok := project.Environment[cmdcompose.ComposeIgnoreOrphans]; ok {
+			opts.Create.IgnoreOrphans = utils.StringToBool(ignoreOrphans)
+		}
 
 		if options.AbortOnContainerExit {
 			opts.Start.OnExit = api.CascadeStop
@@ -175,7 +157,7 @@ func (c *ComposeDeployer) Deploy(ctx context.Context, filePaths []string, option
 
 // Run runs the given service just once, without considering dependencies
 func (c *ComposeDeployer) Run(ctx context.Context, filePaths []string, serviceName string, options libstack.RunOptions) error {
-	return withComposeService(ctx, filePaths, options.Options, func(composeService api.Service, project *types.Project) error {
+	return c.withComposeService(ctx, filePaths, options.Options, func(composeService api.Compose, project *types.Project) error {
 		addServiceLabels(project, true, 0)
 
 		for name, service := range project.Services {
@@ -227,7 +209,7 @@ func (c *ComposeDeployer) Remove(ctx context.Context, projectName string, filePa
 
 // Pull pulls images
 func (c *ComposeDeployer) Pull(ctx context.Context, filePaths []string, options libstack.Options) error {
-	if err := withComposeService(ctx, filePaths, options, func(composeService api.Service, project *types.Project) error {
+	if err := c.withComposeService(ctx, filePaths, options, func(composeService api.Compose, project *types.Project) error {
 		return composeService.Pull(ctx, project, api.PullOptions{})
 	}); err != nil {
 		return fmt.Errorf("compose pull operation failed: %w", err)
@@ -240,7 +222,7 @@ func (c *ComposeDeployer) Pull(ctx context.Context, filePaths []string, options 
 
 // Validate validates stack file
 func (c *ComposeDeployer) Validate(ctx context.Context, filePaths []string, options libstack.Options) error {
-	return withComposeService(ctx, filePaths, options, func(composeService api.Service, project *types.Project) error {
+	return c.withComposeService(ctx, filePaths, options, func(composeService api.Compose, project *types.Project) error {
 		return nil
 	})
 }
@@ -249,7 +231,7 @@ func (c *ComposeDeployer) Validate(ctx context.Context, filePaths []string, opti
 func (c *ComposeDeployer) Config(ctx context.Context, filePaths []string, options libstack.Options) ([]byte, error) {
 	var payload []byte
 
-	if err := withComposeService(ctx, filePaths, options, func(composeService api.Service, project *types.Project) error {
+	if err := c.withComposeService(ctx, filePaths, options, func(composeService api.Compose, project *types.Project) error {
 		var err error
 		payload, err = project.MarshalYAML()
 		if err != nil {
@@ -267,7 +249,7 @@ func (c *ComposeDeployer) Config(ctx context.Context, filePaths []string, option
 func (c *ComposeDeployer) GetExistingEdgeStacks(ctx context.Context) ([]libstack.EdgeStack, error) {
 	m := make(map[int]libstack.EdgeStack)
 
-	if err := withComposeService(ctx, nil, libstack.Options{}, func(composeService api.Service, project *types.Project) error {
+	if err := c.withComposeService(ctx, nil, libstack.Options{}, func(composeService api.Compose, project *types.Project) error {
 		stacks, err := composeService.List(ctx, api.ListOptions{
 			All: true,
 		})
@@ -293,8 +275,9 @@ func (c *ComposeDeployer) GetExistingEdgeStacks(ctx context.Context) ([]libstack
 					}
 
 					m[id] = libstack.EdgeStack{
-						ID:   id,
-						Name: cs.Labels[api.ProjectLabel],
+						ID:       id,
+						Name:     cs.Labels[api.ProjectLabel],
+						ExitCode: cs.ExitCode,
 					}
 				}
 			}
@@ -332,43 +315,75 @@ func addServiceLabels(project *types.Project, oneOff bool, edgeStackID portainer
 	}
 }
 
-func parseEnvironment(options libstack.Options, filePaths []string) (map[string]string, error) {
-	env := make(map[string]string)
-
-	for _, envLine := range options.Env {
-		e, err := dotenv.UnmarshalWithLookup(envLine, nil)
-		if err != nil {
-			return nil, fmt.Errorf("unable to parse environment variables: %w", err)
-		}
-
-		maps.Copy(env, e)
+func createProject(ctx context.Context, configFilepaths []string, options libstack.Options) (*types.Project, error) {
+	var workingDir string
+	if len(configFilepaths) > 0 {
+		workingDir = filepath.Dir(configFilepaths[0])
 	}
 
-	if options.EnvFilePath == "" {
-		if len(filePaths) == 0 {
-			return env, nil
-		}
-
-		defaultDotEnv := filepath.Join(filepath.Dir(filePaths[0]), ".env")
-		s, err := os.Stat(defaultDotEnv)
-		if os.IsNotExist(err) {
-			return env, nil
-		}
-		if err != nil {
-			return env, err
-		}
-		if s.IsDir() {
-			return env, nil
-		}
-		options.EnvFilePath = defaultDotEnv
+	if options.ProjectDir != "" {
+		// When relative paths are used in the compose file, the project directory is used as the base path
+		workingDir = options.ProjectDir
 	}
 
-	e, err := dotenv.GetEnvFromFile(make(map[string]string), []string{options.EnvFilePath})
+	var envFiles []string
+	if options.EnvFilePath != "" {
+		envFiles = append(envFiles, options.EnvFilePath)
+	}
+
+	var osPortainerEnvVars []string
+	for _, ev := range os.Environ() {
+		if strings.HasPrefix(ev, portainerEnvVarsPrefix) {
+			osPortainerEnvVars = append(osPortainerEnvVars, ev)
+		}
+	}
+
+	projectOptions, err := cli.NewProjectOptions(configFilepaths,
+		cli.WithWorkingDirectory(workingDir),
+		cli.WithName(options.ProjectName),
+		cli.WithoutEnvironmentResolution,
+		cli.WithResolvedPaths(!slices.Contains(options.ConfigOptions, "--no-path-resolution")),
+		cli.WithEnv(osPortainerEnvVars),
+		cli.WithEnv(options.Env),
+		cli.WithEnvFiles(envFiles...),
+		func(o *cli.ProjectOptions) error {
+			if len(o.EnvFiles) > 0 {
+				return nil
+			}
+
+			if fs, ok := o.Environment[cmdcompose.ComposeEnvFiles]; ok {
+				o.EnvFiles = strings.Split(fs, ",")
+			}
+			return nil
+		},
+		cli.WithDotEnv,
+		cli.WithDefaultProfiles(),
+		cli.WithConfigFileEnv,
+	)
 	if err != nil {
-		return nil, fmt.Errorf("unable to get the environment from the env file: %w", err)
+		return nil, fmt.Errorf("failed to load the compose file options : %w", err)
 	}
 
-	maps.Copy(env, e)
+	project, err := projectOptions.LoadProject(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load the compose file : %w", err)
+	}
 
-	return env, nil
+	// Work around compose path handling
+	for i, service := range project.Services {
+		for j, envFile := range service.EnvFiles {
+			if !filepath.IsAbs(envFile.Path) {
+				project.Services[i].EnvFiles[j].Path = filepath.Join(workingDir, envFile.Path)
+			}
+		}
+	}
+
+	// Set the services environment variables
+	if p, err := project.WithServicesEnvironmentResolved(true); err == nil {
+		project = p
+	} else {
+		return nil, fmt.Errorf("failed to resolve services environment: %w", err)
+	}
+
+	return project, nil
 }

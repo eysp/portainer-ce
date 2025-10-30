@@ -1,17 +1,17 @@
 <form class="form-horizontal" name="$ctrl.registryFormDockerhub" ng-submit="$ctrl.formAction()">
-  <div class="col-sm-12 form-section-title"> 重要提示 </div>
+  <div class="col-sm-12 form-section-title"> Important notice </div>
   <div class="form-group">
     <span class="col-sm-12 text-muted small">
       <p>
-        有关如何生成 DockerHub 访问令牌的信息，请参阅
-        <a href="https://docs.docker.com/docker-hub/access-tokens/" target="_blank">dockerhub 指南</a>。
+        For information on how to generate a DockerHub Access Token, follow the
+        <a href="https://docs.docker.com/docker-hub/access-tokens/" target="_blank">dockerhub guide</a>.
       </p>
     </span>
   </div>
-  <div class="col-sm-12 form-section-title"> DockerHub 账户信息 </div>
+  <div class="col-sm-12 form-section-title"> DockerHub account details </div>
   <!-- name-input -->
   <div class="form-group">
-    <label for="registry_name" class="col-sm-3 col-lg-2 control-label required text-left">名称</label>
+    <label for="registry_name" class="col-sm-3 col-lg-2 control-label required text-left">Name</label>
     <div class="col-sm-9 col-lg-10">
       <input
         type="text"
@@ -28,11 +28,11 @@
           <div ng-messages="$ctrl.registryFormDockerhub.registry_name.$error">
             <p ng-message="required" class="vertical-center">
               <pr-icon icon="'alert-triangle'"></pr-icon>
-              此字段为必填项。
+              This field is required.
             </p>
             <p ng-message="used" class="vertical-center">
               <pr-icon icon="'alert-triangle'"></pr-icon>
-              同名镜像仓库已存在。
+              A registry with the same name already exists.
             </p>
           </div>
         </div>
@@ -42,7 +42,7 @@
   <!-- !name-input -->
   <!-- credentials-user -->
   <div class="form-group">
-    <label for="registry_username" class="col-sm-3 col-lg-2 control-label required text-left">DockerHub 用户名</label>
+    <label for="registry_username" class="col-sm-3 col-lg-2 control-label required text-left">DockerHub username</label>
     <div class="col-sm-9 col-lg-10">
       <input type="text" class="form-control" id="registry_username" name="registry_username" ng-model="$ctrl.model.Username" required data-cy="component-registryUsername" />
       <div class="help-block" ng-show="$ctrl.registryFormDockerhub.registry_username.$invalid">
@@ -50,7 +50,7 @@
           <div ng-messages="$ctrl.registryFormDockerhub.registry_username.$error">
             <p ng-message="required" class="vertical-center">
               <pr-icon icon="'alert-triangle'"></pr-icon>
-              此字段为必填项。
+              This field is required.
             </p>
           </div>
         </div>
@@ -60,7 +60,7 @@
   <!-- !credentials-user -->
   <!-- credentials-password -->
   <div class="form-group">
-    <label for="registry_password" class="col-sm-3 col-lg-2 control-label required text-left">DockerHub 访问令牌</label>
+    <label for="registry_password" class="col-sm-3 col-lg-2 control-label required text-left">DockerHub access token</label>
     <div class="col-sm-9 col-lg-10">
       <input type="password" class="form-control" id="registry_password" name="registry_password" ng-model="$ctrl.model.Password" required />
       <div class="help-block" ng-show="$ctrl.registryFormDockerhub.registry_password.$invalid">
@@ -68,7 +68,7 @@
           <div ng-messages="$ctrl.registryFormDockerhub.registry_password.$error">
             <p ng-message="required" class="vertical-center">
               <pr-icon icon="'alert-triangle'"></pr-icon>
-              此字段为必填项。
+              This field is required.
             </p>
           </div>
         </div>
@@ -78,7 +78,7 @@
   <!-- !credentials-password -->
 
   <!-- actions -->
-  <div class="col-sm-12 form-section-title"> 操作 </div>
+  <div class="col-sm-12 form-section-title"> Actions </div>
   <div class="form-group">
     <div class="col-sm-12">
       <button
@@ -92,7 +92,7 @@
         analytics-properties="{ metadata: { type: 'dockerhub' } }"
       >
         <span ng-hide="$ctrl.actionInProgress">{{ $ctrl.formActionLabel }}</span>
-        <span ng-show="$ctrl.actionInProgress">正在进行中...</span>
+        <span ng-show="$ctrl.actionInProgress">In progress...</span>
       </button>
     </div>
   </div>

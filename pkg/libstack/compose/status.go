@@ -1,14 +1,19 @@
 package compose
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"github.com/portainer/portainer/pkg/libstack"
 
 	"github.com/compose-spec/compose-go/v2/types"
+	"github.com/docker/cli/cli/command"
 	"github.com/docker/compose/v2/pkg/api"
+	"github.com/docker/docker/api/types/container"
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 )
 
@@ -35,7 +40,7 @@ type service struct {
 }
 
 // docker container state can be one of "created", "running", "paused", "restarting", "removing", "exited", or "dead"
-func getServiceStatus(service service) (libstack.Status, string) {
+func getServiceStatus(ctx context.Context, service service) (libstack.Status, string) {
 	log.Debug().
 		Str("service", service.Name).
 		Str("state", service.State).
@@ -50,22 +55,70 @@ func getServiceStatus(service service) (libstack.Status, string) {
 	case "removing":
 		return libstack.StatusRemoving, ""
 	case "exited":
-		if service.ExitCode != 0 {
-			return libstack.StatusError, fmt.Sprintf("service %s exited with code %d", service.Name, service.ExitCode)
-		}
-		return libstack.StatusCompleted, ""
-	case "dead":
-		if service.ExitCode != 0 {
-			return libstack.StatusError, fmt.Sprintf("service %s exited with code %d", service.Name, service.ExitCode)
+		if service.ExitCode == 0 {
+			return libstack.StatusCompleted, ""
 		}
 
-		return libstack.StatusRemoved, ""
+		errorMessage, err := getContainerLogsTail(ctx, service)
+		if err != nil {
+			log.Error().
+				Err(err).
+				Str("service", service.Name).
+				Msg("failed to get logs from container")
+			errorMessage = fmt.Sprintf("service %s exited with code %d", service.Name, service.ExitCode)
+		}
+
+		return libstack.StatusError, errorMessage
+	case "dead":
+		if service.ExitCode == 0 {
+			return libstack.StatusRemoved, ""
+		}
+
+		errorMessage, err := getContainerLogsTail(ctx, service)
+		if err != nil {
+			log.Error().
+				Err(err).
+				Str("service", service.Name).
+				Msg("failed to get logs from container")
+			errorMessage = fmt.Sprintf("service %s exited with code %d", service.Name, service.ExitCode)
+		}
+
+		return libstack.StatusError, errorMessage
 	default:
 		return libstack.StatusUnknown, ""
 	}
 }
 
-func aggregateStatuses(services []service) (libstack.Status, string) {
+func getContainerLogsTail(ctx context.Context, service service) (string, error) {
+	var combinedOutput bytes.Buffer
+
+	if err := withCli(ctx, libstack.Options{ProjectName: service.Project}, func(ctx context.Context, cli *command.DockerCli) error {
+		out, err := cli.Client().ContainerLogs(ctx, service.Name, container.LogsOptions{
+			ShowStdout: true,
+			ShowStderr: true,
+			Timestamps: true,
+			Follow:     false,
+			Tail:       "20",
+		})
+		if err != nil {
+			return errors.Wrap(err, "unable to get logs from container")
+		}
+		defer out.Close()
+
+		_, err = io.Copy(&combinedOutput, out)
+		if err != nil {
+			return errors.Wrap(err, "unable to read container logs")
+		}
+
+		return nil
+	}); err != nil {
+		return "", errors.Wrap(err, "unable to get logs from container")
+	}
+
+	return combinedOutput.String(), nil
+}
+
+func aggregateStatuses(ctx context.Context, services []service) (libstack.Status, string) {
 	servicesCount := len(services)
 
 	if servicesCount == 0 {
@@ -78,7 +131,7 @@ func aggregateStatuses(services []service) (libstack.Status, string) {
 	statusCounts := make(map[libstack.Status]int)
 	errorMessage := ""
 	for _, service := range services {
-		status, serviceError := getServiceStatus(service)
+		status, serviceError := getServiceStatus(ctx, service)
 		if serviceError != "" {
 			errorMessage = serviceError
 		}
@@ -125,7 +178,7 @@ func (c *ComposeDeployer) WaitForStatus(ctx context.Context, name string, status
 
 		var containerSummaries []api.ContainerSummary
 
-		if err := withComposeService(ctx, nil, libstack.Options{ProjectName: name}, func(composeService api.Service, project *types.Project) error {
+		if err := c.withComposeService(ctx, nil, libstack.Options{ProjectName: name}, func(composeService api.Compose, project *types.Project) error {
 			var err error
 
 			psCtx, cancelFunc := context.WithTimeout(context.Background(), time.Minute)
@@ -148,7 +201,7 @@ func (c *ComposeDeployer) WaitForStatus(ctx context.Context, name string, status
 			return waitResult
 		}
 
-		aggregateStatus, errorMessage := aggregateStatuses(services)
+		aggregateStatus, errorMessage := aggregateStatuses(ctx, services)
 		if aggregateStatus == status {
 			return waitResult
 		}

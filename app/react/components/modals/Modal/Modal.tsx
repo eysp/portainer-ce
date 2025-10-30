@@ -21,7 +21,7 @@ interface Props {
   onDismiss?(): void;
   'aria-label'?: string;
   'aria-labelledby'?: string;
-  size?: 'md' | 'lg';
+  size?: 'md' | 'lg' | 'xl';
   className?: string;
 }
 
@@ -39,7 +39,7 @@ export function Modal({
         isOpen
         className={clsx(
           styles.overlay,
-          'z-50 flex items-center justify-center'
+          'flex items-center justify-center z-50'
         )}
         onDismiss={onDismiss}
         role="dialog"
@@ -47,12 +47,23 @@ export function Modal({
         <DialogContent
           aria-label={ariaLabel}
           aria-labelledby={ariaLabelledBy}
-          className={clsx(styles.modalDialog, 'bg-transparent p-0', {
-            'w-[450px]': size === 'md',
-            'w-[700px]': size === 'lg',
-          })}
+          className={clsx(
+            styles.modalDialog,
+            'max-w-[calc(100vw-2rem)] bg-transparent p-0',
+            {
+              'w-[450px]': size === 'md',
+              'w-[700px]': size === 'lg',
+              'w-[1000px]': size === 'xl',
+            }
+          )}
         >
-          <div className={clsx(styles.modalContent, 'relative', className)}>
+          <div
+            className={clsx(
+              styles.modalContent,
+              'relative overflow-y-auto p-5 rounded-lg',
+              className
+            )}
+          >
             {children}
             {onDismiss && <CloseButton onClose={onDismiss} />}
           </div>

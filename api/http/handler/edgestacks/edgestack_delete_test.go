@@ -8,9 +8,10 @@ import (
 	"testing"
 
 	portainer "github.com/portainer/portainer/api"
-	"github.com/stretchr/testify/assert"
 
 	"github.com/segmentio/encoding/json"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // Delete
@@ -23,9 +24,7 @@ func TestDeleteAndInspect(t *testing.T) {
 
 	// Inspect
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/edge_stacks/%d", edgeStack.ID), nil)
-	if err != nil {
-		t.Fatal("request error:", err)
-	}
+	require.NoError(t, err)
 
 	req.Header.Add("x-api-key", rawAPIKey)
 	rec := httptest.NewRecorder()
@@ -37,9 +36,7 @@ func TestDeleteAndInspect(t *testing.T) {
 
 	data := portainer.EdgeStack{}
 	err = json.NewDecoder(rec.Body).Decode(&data)
-	if err != nil {
-		t.Fatal("error decoding response:", err)
-	}
+	require.NoError(t, err)
 
 	if data.ID != edgeStack.ID {
 		t.Fatalf("expected EdgeStackID %d, found %d", int(edgeStack.ID), data.ID)
@@ -47,9 +44,7 @@ func TestDeleteAndInspect(t *testing.T) {
 
 	// Delete
 	req, err = http.NewRequest(http.MethodDelete, fmt.Sprintf("/edge_stacks/%d", edgeStack.ID), nil)
-	if err != nil {
-		t.Fatal("request error:", err)
-	}
+	require.NoError(t, err)
 
 	req.Header.Add("x-api-key", rawAPIKey)
 	rec = httptest.NewRecorder()
@@ -61,9 +56,7 @@ func TestDeleteAndInspect(t *testing.T) {
 
 	// Inspect
 	req, err = http.NewRequest(http.MethodGet, fmt.Sprintf("/edge_stacks/%d", edgeStack.ID), nil)
-	if err != nil {
-		t.Fatal("request error:", err)
-	}
+	require.NoError(t, err)
 
 	req.Header.Add("x-api-key", rawAPIKey)
 	rec = httptest.NewRecorder()
@@ -117,15 +110,12 @@ func TestDeleteEdgeStack_RemoveProjectFolder(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
-	if err := json.NewEncoder(&buf).Encode(payload); err != nil {
-		t.Fatal("error encoding payload:", err)
-	}
+	err := json.NewEncoder(&buf).Encode(payload)
+	require.NoError(t, err)
 
 	// Create
 	req, err := http.NewRequest(http.MethodPost, "/edge_stacks/create/string", &buf)
-	if err != nil {
-		t.Fatal("request error:", err)
-	}
+	require.NoError(t, err)
 
 	req.Header.Add("x-api-key", rawAPIKey)
 	rec := httptest.NewRecorder()
@@ -138,9 +128,8 @@ func TestDeleteEdgeStack_RemoveProjectFolder(t *testing.T) {
 	assert.DirExists(t, handler.FileService.GetEdgeStackProjectPath("1"))
 
 	// Delete
-	if req, err = http.NewRequest(http.MethodDelete, "/edge_stacks/1", nil); err != nil {
-		t.Fatal("request error:", err)
-	}
+	req, err = http.NewRequest(http.MethodDelete, "/edge_stacks/1", nil)
+	require.NoError(t, err)
 
 	req.Header.Add("x-api-key", rawAPIKey)
 	rec = httptest.NewRecorder()

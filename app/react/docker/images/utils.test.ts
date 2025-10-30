@@ -16,6 +16,24 @@ describe('fullURIIntoRepoAndTag', () => {
     expect(result).toEqual({ repo: 'nginx', tag: 'latest' });
   });
 
+  it('splits image-repo:port/image correctly', () => {
+    const result = fullURIIntoRepoAndTag('registry.example.com:5000/my-image');
+    expect(result).toEqual({
+      repo: 'registry.example.com:5000/my-image',
+      tag: 'latest',
+    });
+  });
+
+  it('splits image-repo:port/image:tag correctly', () => {
+    const result = fullURIIntoRepoAndTag(
+      'registry.example.com:5000/my-image:v1'
+    );
+    expect(result).toEqual({
+      repo: 'registry.example.com:5000/my-image',
+      tag: 'v1',
+    });
+  });
+
   it('splits registry:port/image-repo:tag correctly', () => {
     const result = fullURIIntoRepoAndTag(
       'registry.example.com:5000/my-image:v2.1'

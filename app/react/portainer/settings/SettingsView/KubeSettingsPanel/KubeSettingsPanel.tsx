@@ -41,7 +41,7 @@ export function KubeSettingsPanel({ settings }: { settings: Settings }) {
 
   return (
     <Widget id="kubernetes-settings">
-      <Widget.Title icon={kubeIcon} title="Kubernetes 设置" />
+      <Widget.Title icon={kubeIcon} title="Kubernetes settings" />
       <Widget.Body>
         <Formik
           initialValues={initialValues}
@@ -60,10 +60,10 @@ export function KubeSettingsPanel({ settings }: { settings: Settings }) {
                   <LoadingButton
                     isLoading={mutation.isLoading}
                     data-cy="save-kubernetes-settings-button"
-                    loadingText="设置"
+                    loadingText="Saving"
                     className="!ml-0"
                   >
-                    保存 Kubernetes 设置
+                    Save Kubernetes settings
                   </LoadingButton>
                 </div>
               </div>
@@ -98,7 +98,7 @@ export function KubeSettingsPanel({ settings }: { settings: Settings }) {
               'deploymentOptions',
             ]);
           }
-          notifySuccess('成功', 'Kubernetes 设置已更新');
+          notifySuccess('Success', 'Kubernetes settings updated');
         },
       }
     );

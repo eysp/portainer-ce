@@ -84,7 +84,7 @@ export function InnerForm({
         </>
       )}
 
-      <FormSection title="构建方式">
+      <FormSection title="Build method">
         <BoxSelector
           slim
           options={buildMethods}
@@ -101,7 +101,7 @@ export function InnerForm({
           value={values.FileContent}
           onChange={handleChangeFileContent}
           type="yaml"
-          placeholder={texts.editor.placeholder}
+          textTip={texts.editor.placeholder}
           error={errors.FileContent}
         >
           {texts.editor.description}
@@ -178,8 +178,8 @@ export function InnerForm({
       <FormActions
         isLoading={isLoading}
         isValid={isValid}
-        loadingText="正在创建自定义模板..."
-        submitLabel="创建自定义模板"
+        loadingText="Creating custom template..."
+        submitLabel="Create custom template"
         data-cy="custom-template-creation-submit-button"
       />
     </Form>

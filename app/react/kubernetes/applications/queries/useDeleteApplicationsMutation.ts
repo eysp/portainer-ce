@@ -7,6 +7,7 @@ import { getAllSettledItems } from '@/portainer/helpers/promise-utils';
 import { withGlobalError } from '@/react-tools/react-query';
 import { notifyError, notifySuccess } from '@/portainer/services/notifications';
 import { pluralize } from '@/portainer/helpers/strings';
+import { uninstallHelmApplication } from '@/react/kubernetes/helm/helmReleaseQueries/useUninstallHelmAppMutation';
 
 import { parseKubernetesAxiosError } from '../../axiosError';
 import { ApplicationRowData } from '../ListView/ApplicationsDatatable/types';
@@ -225,7 +226,11 @@ async function deleteApplication(
       await deletePodApplication(application, stacks, environmentId);
       break;
     case 'Helm':
-      await uninstallHelmApplication(application, environmentId);
+      await uninstallHelmApplication(
+        environmentId,
+        application.Name,
+        application.ResourcePool
+      );
       break;
     default:
       throw new Error(
@@ -263,21 +268,6 @@ async function deletePodApplication(
     removeApplicationFromStack(application, stacks);
   } catch (error) {
     throw parseKubernetesAxiosError(error, 'Unable to remove application');
-  }
-}
-
-async function uninstallHelmApplication(
-  application: ApplicationRowData,
-  environmentId: EnvironmentId
-) {
-  try {
-    await axios.delete(
-      `/endpoints/${environmentId}/kubernetes/helm/${application.Name}`,
-      { params: { namespace: application.ResourcePool } }
-    );
-  } catch (error) {
-    // parseAxiosError, because it's a regular portainer api error
-    throw parseAxiosError(error, 'Unable to remove application');
   }
 }
 

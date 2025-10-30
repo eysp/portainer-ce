@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	portainer "github.com/portainer/portainer/api"
-	"github.com/portainer/portainer/api/crypto"
 	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/http/client"
 
@@ -108,12 +107,7 @@ func createTLSSecuredEndpoint(flags *portainer.CLIFlags, dataStore dataservices.
 	}
 
 	if strings.HasPrefix(endpoint.URL, "tcp://") {
-		tlsConfig, err := crypto.CreateTLSConfigurationFromDisk(tlsConfiguration.TLSCACertPath, tlsConfiguration.TLSCertPath, tlsConfiguration.TLSKeyPath, tlsConfiguration.TLSSkipVerify)
-		if err != nil {
-			return err
-		}
-
-		agentOnDockerEnvironment, err := client.ExecutePingOperation(endpoint.URL, tlsConfig)
+		agentOnDockerEnvironment, err := client.ExecutePingOperation(endpoint.URL, tlsConfiguration)
 		if err != nil {
 			return err
 		}
@@ -136,7 +130,7 @@ func createTLSSecuredEndpoint(flags *portainer.CLIFlags, dataStore dataservices.
 
 func createUnsecuredEndpoint(endpointURL string, dataStore dataservices.DataStore, snapshotService portainer.SnapshotService) error {
 	if strings.HasPrefix(endpointURL, "tcp://") {
-		if _, err := client.ExecutePingOperation(endpointURL, nil); err != nil {
+		if _, err := client.ExecutePingOperation(endpointURL, portainer.TLSConfiguration{}); err != nil {
 			return err
 		}
 	}

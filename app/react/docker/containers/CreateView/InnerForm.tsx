@@ -68,7 +68,7 @@ export function InnerForm({
             <div className="mt-4">
               <Widget>
                 <Widget.Title
-                  title="高级容器设置"
+                  title="Advanced container settings"
                   icon={Settings}
                 />
                 <Widget.Body>
@@ -80,7 +80,7 @@ export function InnerForm({
                     options={[
                       {
                         id: 'commands',
-                        label: '命令和日志',
+                        label: 'Commands & logging',
                         children: (
                           <CommandsTab
                             apiVersion={apiVersion}
@@ -93,7 +93,7 @@ export function InnerForm({
                       },
                       {
                         id: 'volumes',
-                        label: '卷',
+                        label: 'Volumes',
                         children: (
                           <VolumesTab
                             values={values.volumes}
@@ -106,7 +106,7 @@ export function InnerForm({
                       },
                       {
                         id: 'network',
-                        label: '网络',
+                        label: 'Network',
                         children: (
                           <NetworkTab
                             values={values.network}
@@ -118,7 +118,7 @@ export function InnerForm({
                       },
                       {
                         id: 'env',
-                        label: '环境变量',
+                        label: 'Env',
                         children: (
                           <EnvVarsTab
                             values={values.env}
@@ -129,7 +129,7 @@ export function InnerForm({
                       },
                       {
                         id: 'labels',
-                        label: '标签',
+                        label: 'Labels',
                         children: (
                           <LabelsTab
                             values={values.labels}
@@ -140,7 +140,7 @@ export function InnerForm({
                       },
                       {
                         id: 'restart',
-                        label: '重启策略',
+                        label: 'Restart policy',
                         children: (
                           <RestartPolicyTab
                             values={values.restartPolicy}
@@ -152,7 +152,7 @@ export function InnerForm({
                       },
                       {
                         id: 'runtime',
-                        label: '运行时与资源',
+                        label: 'Runtime & resources',
                         children: (
                           <ResourcesTab
                             values={values.resources}
@@ -198,7 +198,7 @@ export function InnerForm({
                       },
                       {
                         id: 'capabilities',
-                        label: '权限',
+                        label: 'Capabilities',
                         hidden: hideCapabilities,
                         children: (
                           <CapabilitiesTab

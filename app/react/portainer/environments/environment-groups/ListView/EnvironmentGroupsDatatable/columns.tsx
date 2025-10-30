@@ -12,7 +12,7 @@ const columnHelper = createColumnHelper<EnvironmentGroup>();
 export const columns = [
   buildNameColumn<EnvironmentGroup>('Name', '.group', 'environment-group-name'),
   columnHelper.display({
-    header: '操作',
+    header: 'Actions',
     cell: ActionsCell,
   }),
 ];
@@ -31,7 +31,7 @@ function ActionsCell({
       icon={Users}
       data-cy={`manage-access-button_${item.Name}`}
     >
-      管理访问
+      Manage access
     </Button>
   );
 }

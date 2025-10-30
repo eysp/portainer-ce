@@ -82,7 +82,7 @@ export function EnvironmentItem({
                 {snapshotTime && (
                   <span
                     className="small text-muted vertical-center gap-1"
-                    title="最后快照时间"
+                    title="Last snapshot time"
                   >
                     <Activity className="icon icon-sm" aria-hidden="true" />
                     {snapshotTime}
@@ -100,7 +100,7 @@ export function EnvironmentItem({
           <div className="small text-muted flex flex-wrap items-center gap-x-4 gap-y-2">
             {groupName && (
               <span className="font-semibold">
-                <span>分组:  </span>
+                <span>Group: </span>
                 <span>{groupName}</span>
               </span>
             )}
@@ -154,10 +154,10 @@ function useEnvironmentTagNames(tagIds?: TagId[]) {
   }
 
   if (isLoading) {
-    return '正在加载标签...';
+    return 'Loading tags...';
   }
 
-  return '暂无标签';
+  return 'No tags';
 }
 
 function getSnapshotTime(environment: Environment) {

@@ -26,7 +26,7 @@ function Cell({ row: { original: item } }: CellContext<Job, string>) {
           },
         ])}
       />
-      {item.Status}
+      {item.Status ?? ''}
       {item.Status === 'Failed' && (
         <span className="ml-1">
           <TooltipWithChildren

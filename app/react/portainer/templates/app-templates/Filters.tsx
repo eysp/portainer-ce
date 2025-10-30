@@ -51,7 +51,7 @@ export function Filters({
               listState.setCategory(category);
               onChange();
             }}
-            placeholder="分类"
+            placeholder="Category"
             value={listState.category}
             bindToBody
             isClearable
@@ -69,7 +69,7 @@ export function Filters({
               listState.setTypes(types);
               onChange();
             }}
-            placeholder="类型"
+            placeholder="Type"
             value={listState.types}
             bindToBody
             isClearable
@@ -85,7 +85,7 @@ export function Filters({
             onChange();
           }}
           options={orderByFields}
-          placeholder="排序依据"
+          placeholder="Sort By"
           value={listState.sortBy}
           aria-label="Sort"
         />

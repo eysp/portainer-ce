@@ -54,9 +54,9 @@ export function CreateUserAccessTokenInnerForm({ showAuthentication }: Props) {
         disabled={!isValid || !dirty}
         data-cy="create-access-token-button"
         isLoading={false}
-        loadingText="正在添加访问令牌..."
+        loadingText="Adding access token..."
       >
-        添加访问令牌
+        Add access token
       </LoadingButton>
     </Form>
   );

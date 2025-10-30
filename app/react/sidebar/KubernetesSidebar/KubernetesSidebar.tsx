@@ -17,7 +17,7 @@ import { SidebarItem } from '../SidebarItem';
 import { VolumesLink } from '../items/VolumesLink';
 import { SidebarParent } from '../SidebarItem/SidebarParent';
 
-import { KubectlShellButton } from './KubectlShell';
+import { KubectlShellButton } from './KubectlShellButton';
 
 interface Props {
   environmentId: EnvironmentId;

@@ -13,6 +13,7 @@ import (
 	"github.com/portainer/portainer/api/dataservices/edgegroup"
 	"github.com/portainer/portainer/api/dataservices/edgejob"
 	"github.com/portainer/portainer/api/dataservices/edgestack"
+	"github.com/portainer/portainer/api/dataservices/edgestackstatus"
 	"github.com/portainer/portainer/api/dataservices/endpoint"
 	"github.com/portainer/portainer/api/dataservices/endpointgroup"
 	"github.com/portainer/portainer/api/dataservices/endpointrelation"
@@ -39,6 +40,8 @@ import (
 	"github.com/segmentio/encoding/json"
 )
 
+var _ dataservices.DataStore = &Store{}
+
 // Store defines the implementation of portainer.DataStore using
 // BoltDB as the storage system.
 type Store struct {
@@ -51,6 +54,7 @@ type Store struct {
 	EdgeGroupService          *edgegroup.Service
 	EdgeJobService            *edgejob.Service
 	EdgeStackService          *edgestack.Service
+	EdgeStackStatusService    *edgestackstatus.Service
 	EndpointGroupService      *endpointgroup.Service
 	EndpointService           *endpoint.Service
 	EndpointRelationService   *endpointrelation.Service
@@ -107,7 +111,13 @@ func (store *Store) initServices() error {
 		return err
 	}
 	store.EdgeStackService = edgeStackService
-	endpointRelationService.RegisterUpdateStackFunction(edgeStackService.UpdateEdgeStackFunc, edgeStackService.UpdateEdgeStackFuncTx)
+	endpointRelationService.RegisterUpdateStackFunction(edgeStackService.UpdateEdgeStackFuncTx)
+
+	edgeStackStatusService, err := edgestackstatus.NewService(store.connection)
+	if err != nil {
+		return err
+	}
+	store.EdgeStackStatusService = edgeStackStatusService
 
 	edgeGroupService, err := edgegroup.NewService(store.connection)
 	if err != nil {
@@ -267,6 +277,10 @@ func (store *Store) EdgeJob() dataservices.EdgeJobService {
 // EdgeStack gives access to the EdgeStack data management layer
 func (store *Store) EdgeStack() dataservices.EdgeStackService {
 	return store.EdgeStackService
+}
+
+func (store *Store) EdgeStackStatus() dataservices.EdgeStackStatusService {
+	return store.EdgeStackStatusService
 }
 
 // Environment(Endpoint) gives access to the Environment(Endpoint) data management layer

@@ -17,7 +17,7 @@ export function EnvironmentVariablesFormSection({
   errors,
 }: Props) {
   return (
-    <FormSection title="环境变量" titleSize="sm">
+    <FormSection title="Environment variables" titleSize="sm">
       <div className="mb-4">
         <EnvironmentVariablesFieldset
           values={values}

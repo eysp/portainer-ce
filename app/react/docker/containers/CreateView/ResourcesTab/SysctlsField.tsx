@@ -26,7 +26,7 @@ export function SysctlsField({
       value={values}
       onChange={onChange}
       item={Item}
-      addLabel="添加 sysctl"
+      addLabel="Add sysctl"
       label="Sysctls"
       errors={errors}
       itemBuilder={() => ({ name: '', value: '' })}
@@ -42,8 +42,8 @@ function Item({ item, onChange, error, index }: ItemProps<Sysctls>) {
         <InputLabeled
           value={item.name}
           onChange={(e) => onChange({ ...item, name: e.target.value })}
-          label="名称"
-          placeholder="例如 FOO"
+          label="name"
+          placeholder="e.g. FOO"
           className="w-1/2"
           size="small"
           data-cy={`docker-container-sysctl-name_${index}`}
@@ -52,7 +52,7 @@ function Item({ item, onChange, error, index }: ItemProps<Sysctls>) {
           value={item.value}
           onChange={(e) => onChange({ ...item, value: e.target.value })}
           label="value"
-          placeholder="例如 bar"
+          placeholder="e.g. bar"
           className="w-1/2"
           size="small"
           data-cy={`docker-container-sysctl-value_${index}`}
@@ -66,8 +66,8 @@ function Item({ item, onChange, error, index }: ItemProps<Sysctls>) {
 export function sysctlsValidation(): SchemaOf<Values> {
   return array(
     object({
-      name: string().required('名称为必填项'),
-      value: string().required('Value 为必填项'),
+      name: string().required('Name is required'),
+      value: string().required('Value is required'),
     })
   );
 }

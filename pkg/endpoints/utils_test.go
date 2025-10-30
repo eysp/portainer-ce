@@ -251,6 +251,11 @@ func TestIsNewerThan225(t *testing.T) {
 			version:  "2.24.0",
 			expected: false,
 		},
+		{
+			name:     "Not a version",
+			version:  "NotAVersion",
+			expected: false,
+		},
 	}
 
 	for _, tt := range tests {

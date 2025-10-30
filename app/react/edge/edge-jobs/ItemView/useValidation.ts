@@ -35,7 +35,7 @@ export function useValidation({
         edgeGroupIds: array(number().required()),
         environmentIds: array(number().required()),
 
-        fileContent: string().required('此字段为必填项。'),
+        fileContent: string().required('This field is required.'),
 
         cronMethod: mixed<'basic' | 'advanced'>()
           .oneOf(['basic', 'advanced'])
@@ -45,14 +45,14 @@ export function useValidation({
           .when(['recurring', 'cronMethod'], {
             is: (recurring: boolean, cronMethod: 'basic' | 'advanced') =>
               !recurring && cronMethod === 'basic',
-            then: (schema) => schema.required('此字段为必填项。'),
+            then: (schema) => schema.required('This field is required.'),
           }),
         recurringOption: mixed()
           .oneOf(timeOptions.map((o) => o.value))
           .when(['recurring', 'cronMethod'], {
             is: (recurring: boolean, cronMethod: 'basic' | 'advanced') =>
               recurring && cronMethod === 'basic',
-            then: (schema) => schema.required('此字段为必填项。'),
+            then: (schema) => schema.required('This field is required.'),
           }),
       }),
     [nameValidation]

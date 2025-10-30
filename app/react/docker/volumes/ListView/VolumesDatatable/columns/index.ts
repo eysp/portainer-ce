@@ -20,26 +20,26 @@ export function useColumns() {
       _.compact([
         name,
         columnHelper.accessor((item) => item.StackName || '-', {
-          header: '堆栈',
+          header: 'Stack',
         }),
         columnHelper.accessor((item) => item.Driver, {
-          header: '驱动',
+          header: 'Driver',
         }),
         columnHelper.accessor((item) => item.Mountpoint, {
-          header: '挂载路径',
+          header: 'Mount point',
           cell({ getValue }) {
             return truncateLeftRight(getValue());
           },
         }),
         columnHelper.accessor((item) => item.CreatedAt, {
-          header: '创建时间',
+          header: 'Created',
           cell({ getValue }) {
             return isoDate(getValue());
           },
         }),
         isSwarm &&
           columnHelper.accessor((item) => item.NodeName || '-', {
-            header: '宿主机t',
+            header: 'Host',
           }),
         createOwnershipColumn<DecoratedVolume>(),
       ]),

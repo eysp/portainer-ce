@@ -232,7 +232,7 @@ func (store *Store) createAccount(username, password string, role portainer.User
 	user := &portainer.User{Username: username, Role: role}
 
 	// encrypt the password
-	cs := &crypto.Service{}
+	cs := crypto.Service{}
 	user.Password, err = cs.Hash(password)
 	if err != nil {
 		return err
@@ -259,7 +259,7 @@ func (store *Store) checkAccount(username, expectPassword string, expectRole por
 	}
 
 	// Check the password
-	cs := &crypto.Service{}
+	cs := crypto.Service{}
 	expectPasswordHash, err := cs.Hash(expectPassword)
 	if err != nil {
 		return errors.Wrap(err, "hash failed")

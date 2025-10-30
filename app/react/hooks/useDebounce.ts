@@ -34,19 +34,23 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 //
 //   return (<Input value={debouncedValue} onChange={(e) => handleChange(e.target.value)} />)
 // }
-export function useDebounce(value: string, onChange: (value: string) => void) {
+export function useDebounce<T = string>(
+  value: T,
+  onChange: (value: T) => void,
+  delay = 300
+) {
   const [debouncedValue, setDebouncedValue] = useState(value);
 
   // Do not change. See notes above
   const onChangeDebouncer = useRef(
     debounce(
-      (value: string, onChangeFunc: (v: string) => void) => onChangeFunc(value),
-      300
+      (value: T, onChangeFunc: (v: T) => void) => onChangeFunc(value),
+      delay
     )
   );
 
   const handleChange = useCallback(
-    (value: string) => {
+    (value: T) => {
       setDebouncedValue(value);
       onChangeDebouncer.current(value, onChange);
     },

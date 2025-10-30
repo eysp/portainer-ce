@@ -14,8 +14,8 @@ import (
 	"github.com/portainer/portainer/api/stacks/stackutils"
 	httperror "github.com/portainer/portainer/pkg/libhttp/error"
 	"github.com/portainer/portainer/pkg/libhttp/request"
+	"github.com/portainer/portainer/pkg/validate"
 
-	"github.com/asaskevich/govalidator"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 )
@@ -205,7 +205,7 @@ func (payload *composeStackFromGitRepositoryPayload) Validate(r *http.Request) e
 	if len(payload.Name) == 0 {
 		return errors.New("Invalid stack name")
 	}
-	if len(payload.RepositoryURL) == 0 || !govalidator.IsURL(payload.RepositoryURL) {
+	if len(payload.RepositoryURL) == 0 || !validate.IsURL(payload.RepositoryURL) {
 		return errors.New("Invalid repository URL. Must correspond to a valid URL format")
 	}
 	if payload.RepositoryAuthentication && len(payload.RepositoryPassword) == 0 {

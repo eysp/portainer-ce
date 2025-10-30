@@ -76,8 +76,7 @@ func (payload *edgeStackFromStringPayload) Validate(r *http.Request) error {
 // @router /edge_stacks/create/string [post]
 func (handler *Handler) createEdgeStackFromFileContent(r *http.Request, tx dataservices.DataStoreTx, dryrun bool) (*portainer.EdgeStack, error) {
 	var payload edgeStackFromStringPayload
-	err := request.DecodeAndValidateJSONPayload(r, &payload)
-	if err != nil {
+	if err := request.DecodeAndValidateJSONPayload(r, &payload); err != nil {
 		return nil, err
 	}
 
@@ -96,11 +95,9 @@ func (handler *Handler) createEdgeStackFromFileContent(r *http.Request, tx datas
 }
 
 func (handler *Handler) storeFileContent(tx dataservices.DataStoreTx, stackFolder string, deploymentType portainer.EdgeStackDeploymentType, relatedEndpointIds []portainer.EndpointID, fileContent []byte) (composePath, manifestPath, projectPath string, err error) {
-	hasWrongType, err := hasWrongEnvironmentType(tx.Endpoint(), relatedEndpointIds, deploymentType)
-	if err != nil {
+	if hasWrongType, err := hasWrongEnvironmentType(tx.Endpoint(), relatedEndpointIds, deploymentType); err != nil {
 		return "", "", "", fmt.Errorf("unable to check for existence of non fitting environments: %w", err)
-	}
-	if hasWrongType {
+	} else if hasWrongType {
 		return "", "", "", errors.New("edge stack with config do not match the environment type")
 	}
 
@@ -124,7 +121,6 @@ func (handler *Handler) storeFileContent(tx dataservices.DataStoreTx, stackFolde
 		}
 
 		return "", manifestPath, projectPath, nil
-
 	}
 
 	errMessage := fmt.Sprintf("invalid deployment type: %d", deploymentType)

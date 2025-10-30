@@ -21,6 +21,7 @@ export function useValidation({
           is: true,
           then: (schema) => schema.min(1, 'Tags are required'),
         }),
+        edgeGroupId: number().default(0).notRequired(),
       }),
     [nameValidation]
   );

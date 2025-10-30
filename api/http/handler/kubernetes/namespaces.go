@@ -22,6 +22,7 @@ import (
 // @produce json
 // @param id path int true "Environment identifier"
 // @param withResourceQuota query boolean true "When set to true, include the resource quota information as part of the Namespace information. Default is false"
+// @param withUnhealthyEvents query boolean true "When set to true, include the unhealthy events information as part of the Namespace information. Default is false"
 // @success 200 {array} portainer.K8sNamespaceInfo "Success"
 // @failure 400 "Invalid request payload, such as missing required fields or fields not meeting validation criteria."
 // @failure 401 "Unauthorized access - the user is not authenticated or does not have the necessary permissions. Ensure that you have provided a valid API key or JWT token, and that you have the required permissions."
@@ -36,6 +37,12 @@ func (handler *Handler) getKubernetesNamespaces(w http.ResponseWriter, r *http.R
 		return httperror.BadRequest("an error occurred during the GetKubernetesNamespaces operation, invalid query parameter withResourceQuota. Error: ", err)
 	}
 
+	withUnhealthyEvents, err := request.RetrieveBooleanQueryParameter(r, "withUnhealthyEvents", true)
+	if err != nil {
+		log.Error().Err(err).Str("context", "GetKubernetesNamespaces").Msg("Invalid query parameter withUnhealthyEvents")
+		return httperror.BadRequest("an error occurred during the GetKubernetesNamespaces operation, invalid query parameter withUnhealthyEvents. Error: ", err)
+	}
+
 	cli, httpErr := handler.prepareKubeClient(r)
 	if httpErr != nil {
 		log.Error().Err(httpErr).Str("context", "GetKubernetesNamespaces").Msg("Unable to get a Kubernetes client for the user")
@@ -46,6 +53,14 @@ func (handler *Handler) getKubernetesNamespaces(w http.ResponseWriter, r *http.R
 	if err != nil {
 		log.Error().Err(err).Str("context", "GetKubernetesNamespaces").Msg("Unable to retrieve namespaces from the Kubernetes cluster")
 		return httperror.InternalServerError("an error occurred during the GetKubernetesNamespaces operation, unable to retrieve namespaces from the Kubernetes cluster. Error: ", err)
+	}
+
+	if withUnhealthyEvents {
+		namespaces, err = cli.CombineNamespacesWithUnhealthyEvents(namespaces)
+		if err != nil {
+			log.Error().Err(err).Str("context", "GetKubernetesNamespaces").Msg("Unable to combine namespaces with unhealthy events")
+			return httperror.InternalServerError("an error occurred during the GetKubernetesNamespaces operation, unable to combine namespaces with unhealthy events. Error: ", err)
+		}
 	}
 
 	if withResourceQuota {

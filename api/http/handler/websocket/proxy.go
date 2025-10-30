@@ -73,10 +73,7 @@ func (handler *Handler) doProxyWebsocketRequest(
 	proxy.Dialer = &proxyDialer
 
 	if enableTLS {
-		tlsConfig := crypto.CreateTLSConfiguration()
-		tlsConfig.InsecureSkipVerify = params.endpoint.TLSConfig.TLSSkipVerify
-
-		proxyDialer.TLSClientConfig = tlsConfig
+		proxyDialer.TLSClientConfig = crypto.CreateTLSConfiguration(params.endpoint.TLSConfig.TLSSkipVerify)
 	}
 
 	signature, err := handler.SignatureService.CreateSignature(portainer.PortainerAgentSignatureMessage)

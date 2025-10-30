@@ -9,7 +9,7 @@ export function ApplicationSettingsWidget() {
     <div className="row">
       <div className="col-sm-12">
         <Widget>
-          <WidgetTitle icon={Settings} title="应用设置" />
+          <WidgetTitle icon={Settings} title="Application settings" />
           <WidgetBody>
             <ApplicationSettingsForm />
           </WidgetBody>

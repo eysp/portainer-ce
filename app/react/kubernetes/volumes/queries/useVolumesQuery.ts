@@ -14,10 +14,11 @@ import { appOwnerLabel } from '../../applications/constants';
 import { queryKeys } from './query-keys';
 
 // useQuery to get a list of all volumes in a cluster
-export function useAllVolumesQuery(
+export function useAllVolumesQuery<T = K8sVolumeInfo>(
   environmentId: EnvironmentId,
   queryOptions?: {
     refetchInterval?: number;
+    select?: (volumes: K8sVolumeInfo[]) => T[];
   }
 ) {
   return useQuery(
@@ -25,7 +26,7 @@ export function useAllVolumesQuery(
     () => getAllVolumes(environmentId, { withApplications: true }),
     {
       refetchInterval: queryOptions?.refetchInterval,
-      select: convertToVolumeViewModels,
+      select: queryOptions?.select,
       ...withGlobalError('Unable to retrieve volumes'),
     }
   );

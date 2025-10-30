@@ -15,7 +15,7 @@ import { useRowContext } from '../RowContext';
 import { columnHelper } from './helper';
 
 export const name = columnHelper.accessor('Username', {
-  header: '名称',
+  header: 'Name',
   id: 'name',
   cell: NameCell,
 });
@@ -46,7 +46,7 @@ export function NameCell({
         disabled={disabled}
         icon={MinusCircle}
       >
-        删除
+        Remove
       </Button>
     </>
   );
@@ -54,7 +54,7 @@ export function NameCell({
   function handleRemoveMember(userId: UserId) {
     removeMemberMutation.mutate([userId], {
       onSuccess() {
-        notifySuccess('用户已从团队中移除', name);
+        notifySuccess('User removed from team', name);
       },
     });
   }

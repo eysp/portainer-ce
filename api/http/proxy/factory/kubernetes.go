@@ -7,7 +7,6 @@ import (
 	"github.com/portainer/portainer/api/http/proxy/factory/kubernetes"
 
 	portainer "github.com/portainer/portainer/api"
-	"github.com/portainer/portainer/api/crypto"
 )
 
 func (factory *ProxyFactory) newKubernetesProxy(endpoint *portainer.Endpoint) (http.Handler, error) {
@@ -38,12 +37,12 @@ func (factory *ProxyFactory) newKubernetesLocalProxy(endpoint *portainer.Endpoin
 		return nil, err
 	}
 
-	transport, err := kubernetes.NewLocalTransport(tokenManager, endpoint, factory.kubernetesClientFactory, factory.dataStore)
+	transport, err := kubernetes.NewLocalTransport(tokenManager, endpoint, factory.kubernetesClientFactory, factory.dataStore, factory.jwtService)
 	if err != nil {
 		return nil, err
 	}
 
-	proxy := newSingleHostReverseProxyWithHostHeader(remoteURL)
+	proxy := NewSingleHostReverseProxyWithHostHeader(remoteURL)
 	proxy.Transport = transport
 
 	return proxy, nil
@@ -73,8 +72,8 @@ func (factory *ProxyFactory) newKubernetesEdgeHTTPProxy(endpoint *portainer.Endp
 	}
 
 	endpointURL.Scheme = "http"
-	proxy := newSingleHostReverseProxyWithHostHeader(endpointURL)
-	proxy.Transport = kubernetes.NewEdgeTransport(factory.dataStore, factory.signatureService, factory.reverseTunnelService, endpoint, tokenManager, factory.kubernetesClientFactory)
+	proxy := NewSingleHostReverseProxyWithHostHeader(endpointURL)
+	proxy.Transport = kubernetes.NewEdgeTransport(factory.dataStore, factory.signatureService, factory.reverseTunnelService, endpoint, tokenManager, factory.kubernetesClientFactory, factory.jwtService)
 
 	return proxy, nil
 }
@@ -93,19 +92,19 @@ func (factory *ProxyFactory) newKubernetesAgentHTTPSProxy(endpoint *portainer.En
 		return nil, err
 	}
 
-	tlsConfig, err := crypto.CreateTLSConfigurationFromDisk(endpoint.TLSConfig.TLSCACertPath, endpoint.TLSConfig.TLSCertPath, endpoint.TLSConfig.TLSKeyPath, endpoint.TLSConfig.TLSSkipVerify)
-	if err != nil {
-		return nil, err
-	}
-
 	tokenCache := factory.kubernetesTokenCacheManager.GetOrCreateTokenCache(endpoint.ID)
 	tokenManager, err := kubernetes.NewTokenManager(kubecli, factory.dataStore, tokenCache, false)
 	if err != nil {
 		return nil, err
 	}
 
-	proxy := newSingleHostReverseProxyWithHostHeader(remoteURL)
-	proxy.Transport = kubernetes.NewAgentTransport(factory.signatureService, tlsConfig, tokenManager, endpoint, factory.kubernetesClientFactory, factory.dataStore)
+	transport, err := kubernetes.NewAgentTransport(factory.signatureService, tokenManager, endpoint, factory.kubernetesClientFactory, factory.dataStore, factory.jwtService)
+	if err != nil {
+		return nil, err
+	}
+
+	proxy := NewSingleHostReverseProxyWithHostHeader(remoteURL)
+	proxy.Transport = transport
 
 	return proxy, nil
 }

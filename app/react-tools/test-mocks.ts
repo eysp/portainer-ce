@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { QueryObserverResult } from '@tanstack/react-query';
 
 import { Team } from '@/react/portainer/users/teams/types';
 import { Role, User, UserId } from '@/portainer/users/types';
@@ -9,7 +10,7 @@ import {
 
 export function createMockUsers(
   count: number,
-  roles: Role | Role[] | ((id: UserId) => Role) = () => _.random(1, 3)
+  roles: Role | Role[] | ((id: UserId) => Role)
 ): User[] {
   return _.range(1, count + 1).map((value) => ({
     Id: value,
@@ -39,7 +40,14 @@ function getRoles(
     return roles;
   }
 
-  return roles[id];
+  // Roles is an array
+  if (roles.length === 0) {
+    throw new Error('No roles provided');
+  }
+
+  // The number of roles is not necessarily the same length as the number of users
+  // so we need to distribute the roles evenly and consistently
+  return roles[(id - 1) % roles.length];
 }
 
 export function createMockTeams(count: number): Team[] {
@@ -133,4 +141,39 @@ export function createMockEnvironment(): Environment {
       summary: '',
     },
   };
+}
+
+export function createMockQueryResult<TData, TError = unknown>(
+  data: TData,
+  overrides?: Partial<QueryObserverResult<TData, TError>>
+) {
+  const defaultResult = {
+    data,
+    dataUpdatedAt: 0,
+    error: null,
+    errorUpdatedAt: 0,
+    failureCount: 0,
+    errorUpdateCount: 0,
+    failureReason: null,
+    isError: false,
+    isFetched: true,
+    isFetchedAfterMount: true,
+    isFetching: false,
+    isInitialLoading: false,
+    isLoading: false,
+    isLoadingError: false,
+    isPaused: false,
+    isPlaceholderData: false,
+    isPreviousData: false,
+    isRefetchError: false,
+    isRefetching: false,
+    isStale: false,
+    isSuccess: true,
+    refetch: async () => defaultResult,
+    remove: () => {},
+    status: 'success',
+    fetchStatus: 'idle',
+  };
+
+  return { ...defaultResult, ...overrides };
 }

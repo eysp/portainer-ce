@@ -53,11 +53,11 @@ export function CustomTemplatesList({
       <DatatableHeader
         onSearchChange={listState.setSearch}
         searchValue={listState.search}
-        title="自定义模板"
+        title="Custom Templates"
         titleIcon={Edit}
         renderTableActions={() => (
           <AddButton data-cy="add-custom-template-button">
-            添加自定义模板
+            Add Custom Template
           </AddButton>
         )}
         data-cy="custom-templates-datatable-header"
@@ -73,9 +73,9 @@ export function CustomTemplatesList({
             linkParams={templateLinkParams?.(template)}
           />
         ))}
-        {!templates && <div className="text-muted text-center">加载中...</div>}
+        {!templates && <div className="text-muted text-center">Loading...</div>}
         {filteredTemplates.length === 0 && (
-          <div className="text-muted text-center">暂无可用模板。</div>
+          <div className="text-muted text-center">No templates available.</div>
         )}
       </div>
 

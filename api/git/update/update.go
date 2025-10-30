@@ -29,7 +29,14 @@ func UpdateGitObject(gitService portainer.GitService, objId string, gitConfig *g
 		return false, "", errors.WithMessagef(err, "failed to get credentials for %v", objId)
 	}
 
-	newHash, err := gitService.LatestCommitID(gitConfig.URL, gitConfig.ReferenceName, username, password, gitConfig.TLSSkipVerify)
+	newHash, err := gitService.LatestCommitID(
+		gitConfig.URL,
+		gitConfig.ReferenceName,
+		username,
+		password,
+		gittypes.GitCredentialAuthType_Basic,
+		gitConfig.TLSSkipVerify,
+	)
 	if err != nil {
 		return false, "", errors.WithMessagef(err, "failed to fetch latest commit id of %v", objId)
 	}
@@ -62,6 +69,7 @@ func UpdateGitObject(gitService portainer.GitService, objId string, gitConfig *g
 		cloneParams.auth = &gitAuth{
 			username: username,
 			password: password,
+			authType: gitConfig.Authentication.AuthorizationType,
 		}
 	}
 
@@ -89,14 +97,31 @@ type cloneRepositoryParameters struct {
 }
 
 type gitAuth struct {
+	authType gittypes.GitCredentialAuthType
 	username string
 	password string
 }
 
 func cloneGitRepository(gitService portainer.GitService, cloneParams *cloneRepositoryParameters) error {
 	if cloneParams.auth != nil {
-		return gitService.CloneRepository(cloneParams.toDir, cloneParams.url, cloneParams.ref, cloneParams.auth.username, cloneParams.auth.password, cloneParams.tlsSkipVerify)
+		return gitService.CloneRepository(
+			cloneParams.toDir,
+			cloneParams.url,
+			cloneParams.ref,
+			cloneParams.auth.username,
+			cloneParams.auth.password,
+			cloneParams.auth.authType,
+			cloneParams.tlsSkipVerify,
+		)
 	}
 
-	return gitService.CloneRepository(cloneParams.toDir, cloneParams.url, cloneParams.ref, "", "", cloneParams.tlsSkipVerify)
+	return gitService.CloneRepository(
+		cloneParams.toDir,
+		cloneParams.url,
+		cloneParams.ref,
+		"",
+		"",
+		gittypes.GitCredentialAuthType_Basic,
+		cloneParams.tlsSkipVerify,
+	)
 }

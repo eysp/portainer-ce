@@ -5,7 +5,7 @@ import { Link } from '@@/Link';
 import { columnHelper } from './helper';
 
 export const name = columnHelper.accessor('Name', {
-  header: '名称',
+  header: 'Name',
   cell: ({ getValue, row: { original: environment } }) => {
     const name = getValue();
     if (environment.Status === EnvironmentStatus.Provisioning) {

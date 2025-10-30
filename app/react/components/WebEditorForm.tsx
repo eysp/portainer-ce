@@ -1,61 +1,21 @@
 import {
+  ReactNode,
   ComponentProps,
   PropsWithChildren,
-  ReactNode,
-  useEffect,
   useMemo,
+  useEffect,
 } from 'react';
 import { useTransitionHook } from '@uirouter/react';
-
-import { BROWSER_OS_PLATFORM } from '@/react/constants';
+import { JSONSchema7 } from 'json-schema';
 
 import { CodeEditor } from '@@/CodeEditor';
-import { Tooltip } from '@@/Tip/Tooltip';
 
 import { FormSectionTitle } from './form-components/FormSectionTitle';
 import { FormError } from './form-components/FormError';
 import { confirm } from './modals/confirm';
 import { ModalType } from './modals';
 import { buildConfirmButton } from './modals/utils';
-
-const otherEditorConfig = {
-  tooltip: (
-    <>
-      <div>Ctrl+F - 开始搜索</div>
-      <div>Ctrl+G - 查找下一个</div>
-      <div>Ctrl+Shift+G - 查找上一个</div>
-      <div>Ctrl+Shift+F - 替换</div>
-      <div>Ctrl+Shift+R - 全部替换</div>
-      <div>Alt+G - 跳转到行</div>
-      <div>持久搜索：</div>
-      <div className="ml-5">Enter - 查找下一个</div>
-      <div className="ml-5">Shift+Enter - 查找上一个</div>
-    </>
-  ),
-  searchCmdLabel: 'Ctrl+F 搜索',
-} as const;
-
-export const editorConfig = {
-  mac: {
-    tooltip: (
-      <>
-        <div>Cmd+F - 开始搜索</div>
-        <div>Cmd+G - 查找下一个</div>
-        <div>Cmd+Shift+G - 查找上一个</div>
-        <div>Cmd+Option+F - 替换</div>
-        <div>Cmd+Option+R - 全部替换</div>
-        <div>Option+G - 跳转到行</div>
-        <div>持久搜索：</div>
-        <div className="ml-5">Enter - 查找下一个</div>
-        <div className="ml-5">Shift+Enter - 查找上一个</div>
-      </>
-    ),
-    searchCmdLabel: 'Cmd+F 搜索',
-  },
-
-  lin: otherEditorConfig,
-  win: otherEditorConfig,
-} as const;
+import { ShortcutsTooltip } from './CodeEditor/ShortcutsTooltip';
 
 type CodeEditorProps = ComponentProps<typeof CodeEditor>;
 
@@ -63,24 +23,24 @@ interface Props extends CodeEditorProps {
   titleContent?: ReactNode;
   hideTitle?: boolean;
   error?: string;
+  schema?: JSONSchema7;
 }
 
 export function WebEditorForm({
   id,
-  titleContent = '',
+  titleContent = 'Web editor',
   hideTitle,
   children,
   error,
+  schema,
+  textTip,
   ...props
 }: PropsWithChildren<Props>) {
   return (
     <div>
       <div className="web-editor overflow-x-hidden">
         {!hideTitle && (
-          <>
-            <DefaultTitle id={id} />
-            {titleContent ?? null}
-          </>
+          <DefaultTitle id={id}>{titleContent ?? null}</DefaultTitle>
         )}
         {children && (
           <div className="form-group text-muted small">
@@ -94,6 +54,9 @@ export function WebEditorForm({
           <div className="col-sm-12 col-lg-12">
             <CodeEditor
               id={id}
+              type="yaml"
+              schema={schema as JSONSchema7}
+              textTip={textTip}
               // eslint-disable-next-line react/jsx-props-no-spreading
               {...props}
             />
@@ -104,15 +67,11 @@ export function WebEditorForm({
   );
 }
 
-function DefaultTitle({ id }: { id: string }) {
+function DefaultTitle({ id, children }: { id: string; children?: ReactNode }) {
   return (
     <FormSectionTitle htmlFor={id}>
-      网页编辑器
-      <div className="text-muted small vertical-center ml-auto">
-        {editorConfig[BROWSER_OS_PLATFORM].searchCmdLabel}
-
-        <Tooltip message={editorConfig[BROWSER_OS_PLATFORM].tooltip} />
-      </div>
+      {children}
+      <ShortcutsTooltip />
     </FormSectionTitle>
   );
 }
@@ -136,10 +95,10 @@ export function usePreventExit(
     }
     const confirmed = await confirm({
       modalType: ModalType.Warn,
-      title: '您确定吗？',
+      title: 'Are you sure?',
       message:
-        '您当前在文本编辑器中有未保存的更改。您确定要离开吗？',
-      confirmButton: buildConfirmButton('是的', 'danger'),
+        'You currently have unsaved changes in the text editor. Are you sure you want to leave?',
+      confirmButton: buildConfirmButton('Yes', 'danger'),
     });
     return confirmed;
   });

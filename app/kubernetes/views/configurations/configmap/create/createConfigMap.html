@@ -61,7 +61,7 @@
                 <div ng-show="kubernetesConfigurationCreationForm.configuration_name.$invalid || ctrl.state.alreadyExist">
                   <div class="help-block small text-warning">
                     <div ng-messages="kubernetesConfigurationCreationForm.configuration_name.$error">
-                      <p ng-message="required" class="vertical-center"><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 此字段为必填项。</p>
+                      <p ng-message="required" class="vertical-center"><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> This field is required.</p>
                       <p ng-message="pattern" class="vertical-center"
                         ><pr-icon icon="'alert-triangle'" mode="'warning'" class="vertical-center"></pr-icon> This field must consist of lower case alphanumeric characters, '-' or
                         '.', and contain at most 63 characters, and must start and end with an alphanumeric character.</p

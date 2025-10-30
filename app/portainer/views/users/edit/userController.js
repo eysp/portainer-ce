@@ -30,7 +30,7 @@ angular.module('portainer.app').controller('UserController', [
     };
 
     $scope.deleteUser = function () {
-      confirmDelete('你确定要删除这个用户吗？该用户将无法再登录Portainer。').then((confirmed) => {
+      confirmDelete('Do you want to remove this user? This user will not be able to login into Portainer anymore.').then((confirmed) => {
         if (!confirmed) {
           return;
         }
@@ -45,10 +45,10 @@ angular.module('portainer.app').controller('UserController', [
 
       if (username != oldUsername) {
         const confirmed = await confirm({
-          title: '你确定吗？',
+          title: 'Are you sure?',
           modalType: ModalType.Warn,
-          message: `你确定要将用户 ${oldUsername} 重命名为 ${username} 吗？`,
-          confirmButton: buildConfirmButton('更新'),
+          message: `Are you sure you want to rename the user ${oldUsername} to ${username}?`,
+          confirmButton: buildConfirmButton('Update'),
         });
 
         if (!confirmed) {
@@ -58,11 +58,11 @@ angular.module('portainer.app').controller('UserController', [
 
       UserService.updateUser($scope.user.Id, { role, username })
         .then(function success() {
-          Notifications.success('成功', '用户更新成功');
+          Notifications.success('Success', 'User successfully updated');
           $state.reload();
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法更新用户权限');
+          Notifications.error('Failure', err, 'Unable to update user permissions');
         });
     };
 
@@ -74,7 +74,7 @@ angular.module('portainer.app').controller('UserController', [
       }
       UserService.updateUser($scope.user.Id, { newPassword: $scope.formValues.newPassword })
         .then(function success() {
-          Notifications.success('成功', '密码更新成功');
+          Notifications.success('Success', 'Password successfully updated');
 
           if (isCurrentUser) {
             $state.go('portainer.logout');
@@ -83,18 +83,18 @@ angular.module('portainer.app').controller('UserController', [
           }
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法更新用户密码');
+          Notifications.error('Failure', err, 'Unable to update user password');
         });
     };
 
     function deleteUser() {
       UserService.deleteUser($scope.user.Id)
         .then(function success() {
-          Notifications.success('用户删除成功', $scope.user.Username);
+          Notifications.success('User successfully deleted', $scope.user.Username);
           $state.go('portainer.users');
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法删除用户');
+          Notifications.error('Failure', err, 'Unable to remove user');
         });
     }
 
@@ -126,7 +126,7 @@ angular.module('portainer.app').controller('UserController', [
           $scope.requiredPasswordLength = data.settings.RequiredPasswordLength;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法获取用户信息');
+          Notifications.error('Failure', err, 'Unable to retrieve user information');
         });
     }
 

@@ -1,4 +1,7 @@
-import { EnvironmentId } from '@/react/portainer/environments/types';
+import {
+  EdgeGroupId,
+  EnvironmentId,
+} from '@/react/portainer/environments/types';
 
 import { EdgeUpdateSchedule } from '../types';
 
@@ -11,5 +14,6 @@ export const queryKeys = {
     [...queryKeys.base(), 'active', { environmentIds }] as const,
   supportedAgentVersions: () =>
     [...queryKeys.base(), 'agent_versions'] as const,
-  previousVersions: () => [...queryKeys.base(), 'previous_versions'] as const,
+  previousVersions: (edgeGroupIds?: EdgeGroupId[]) =>
+    [...queryKeys.base(), 'previous_versions', { edgeGroupIds }] as const,
 };

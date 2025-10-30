@@ -25,7 +25,7 @@ export function CommonFields({
   return (
     <>
       <FormControl
-        label="标题"
+        label="Title"
         required
         inputId="template-title"
         errors={errors?.Title}
@@ -33,7 +33,7 @@ export function CommonFields({
         <Input
           name="title"
           data-cy="custom-templates-title-input"
-          placeholder="例如 mytemplate"
+          placeholder="e.g. mytemplate"
           id="template-title"
           required
           value={values.Title}
@@ -44,7 +44,7 @@ export function CommonFields({
       </FormControl>
 
       <FormControl
-        label="描述"
+        label="Description"
         required
         inputId="template-description"
         errors={errors?.Description}
@@ -61,7 +61,7 @@ export function CommonFields({
         />
       </FormControl>
 
-      <FormControl label="备注" inputId="template-note" errors={errors?.Note}>
+      <FormControl label="Note" inputId="template-note" errors={errors?.Note}>
         <Input
           name="note"
           data-cy="custom-templates-note-input"
@@ -101,10 +101,10 @@ export function validation({
 } = {}): SchemaOf<Values> {
   return object({
     Title: string()
-      .required('标题是必填项。')
+      .required('Title is required.')
       .test(
         'is-unique',
-        '标题必须唯一',
+        'Title must be unique',
         (value) =>
           !value ||
           !templates.some(
@@ -114,9 +114,9 @@ export function validation({
       )
       .max(
         200,
-        '自定义模板标题必须小于或等于200个字符'
+        'Custom template title must be less than or equal to 200 characters'
       ),
-    Description: string().required('描述是必填项。'),
+    Description: string().required('Description is required.'),
     Note: string().default(''),
     Logo: string().default(''),
   });

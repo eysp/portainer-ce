@@ -12,13 +12,13 @@ import { multiple } from '@@/datatables/filter-types';
 import { columnHelper } from './helper';
 
 export const state = columnHelper.accessor('Status', {
-  header: '状态',
+  header: 'State',
   id: 'state',
   cell: StatusCell,
   enableColumnFilter: true,
   filterFn: multiple,
   meta: {
-    filter: filterHOC('按状态筛选'),
+    filter: filterHOC('Filter by state'),
   },
 });
 
@@ -48,7 +48,7 @@ function StatusCell({
       className={clsx('label', `label-${statusClassName}`, {
         interactive: hasHealthCheck,
       })}
-      title={hasHealthCheck ? '该容器有健康检查' : ''}
+      title={hasHealthCheck ? 'This container has a health check' : ''}
     >
       {transformedStatus}
     </span>

@@ -25,7 +25,7 @@ test('CopyButton should copy text to clipboard', async () => {
   });
 
   const children = 'button';
-  const copyText = '文本已成功复制到剪贴板';
+  const copyText = 'text successfully copied to clipboard';
   const { findByText } = render(
     <CopyButton copyText={copyText} data-cy="copy-button">
       {children}

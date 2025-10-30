@@ -1,10 +1,4 @@
-import { Environment } from '@/react/portainer/environments/types';
-
-import { EdgeJob, JobResult } from '../../types';
-
-export interface DecoratedJobResult extends JobResult {
-  Endpoint?: Environment;
-}
+import { EdgeJob } from '../../types';
 
 interface TableMeta {
   table: 'edge-job-results';

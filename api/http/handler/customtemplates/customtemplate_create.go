@@ -16,8 +16,8 @@ import (
 	httperror "github.com/portainer/portainer/pkg/libhttp/error"
 	"github.com/portainer/portainer/pkg/libhttp/request"
 	"github.com/portainer/portainer/pkg/libhttp/response"
+	"github.com/portainer/portainer/pkg/validate"
 
-	"github.com/asaskevich/govalidator"
 	"github.com/rs/zerolog/log"
 	"github.com/segmentio/encoding/json"
 )
@@ -228,7 +228,7 @@ func (payload *customTemplateFromGitRepositoryPayload) Validate(r *http.Request)
 	if len(payload.Description) == 0 {
 		return errors.New("Invalid custom template description")
 	}
-	if len(payload.RepositoryURL) == 0 || !govalidator.IsURL(payload.RepositoryURL) {
+	if len(payload.RepositoryURL) == 0 || !validate.IsURL(payload.RepositoryURL) {
 		return errors.New("Invalid repository URL. Must correspond to a valid URL format")
 	}
 	if payload.RepositoryAuthentication && (len(payload.RepositoryUsername) == 0 || len(payload.RepositoryPassword) == 0) {

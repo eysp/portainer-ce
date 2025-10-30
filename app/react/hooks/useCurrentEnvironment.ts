@@ -4,5 +4,5 @@ import { useEnvironmentId } from './useEnvironmentId';
 
 export function useCurrentEnvironment(force = true) {
   const id = useEnvironmentId(force);
-  return useEnvironment(id);
+  return useEnvironment(id, undefined, { excludeSnapshot: false });
 }

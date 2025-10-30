@@ -16,7 +16,8 @@ export function SocketTab({ onCreate }: Props) {
   return (
     <>
       <TextTip color="orange" className="mb-2" inline={false}>
-        若要通过 socket 连接，Portainer 服务器必须运行在 Podman 容器中。
+        To connect via socket, Portainer server must be running in a Podman
+        container.
       </TextTip>
 
       <DeploymentScripts />

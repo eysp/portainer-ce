@@ -50,7 +50,7 @@ func (factory *ProxyFactory) newDockerHTTPProxy(endpoint *portainer.Endpoint) (h
 	httpTransport := &http.Transport{}
 
 	if endpoint.TLSConfig.TLS || endpoint.TLSConfig.TLSSkipVerify {
-		config, err := crypto.CreateTLSConfigurationFromDisk(endpoint.TLSConfig.TLSCACertPath, endpoint.TLSConfig.TLSCertPath, endpoint.TLSConfig.TLSKeyPath, endpoint.TLSConfig.TLSSkipVerify)
+		config, err := crypto.CreateTLSConfigurationFromDisk(endpoint.TLSConfig)
 		if err != nil {
 			return nil, err
 		}
@@ -72,7 +72,7 @@ func (factory *ProxyFactory) newDockerHTTPProxy(endpoint *portainer.Endpoint) (h
 		return nil, err
 	}
 
-	proxy := newSingleHostReverseProxyWithHostHeader(endpointURL)
+	proxy := NewSingleHostReverseProxyWithHostHeader(endpointURL)
 	proxy.Transport = dockerTransport
 	return proxy, nil
 }

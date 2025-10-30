@@ -3,7 +3,7 @@ import _ from 'lodash';
 import { columnHelper } from './helper';
 
 export const type = columnHelper.accessor('type', {
-  header: '类型',
+  header: 'Type',
   id: 'type',
   cell: ({ getValue }) => {
     const value = getValue();

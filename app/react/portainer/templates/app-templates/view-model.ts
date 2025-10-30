@@ -88,10 +88,8 @@ function setTemplatesV3(this: TemplateViewModel, template: AppTemplate) {
   this.Id = template.id;
 }
 
-let templateV2ID = 0;
-
 function setTemplatesV2(this: TemplateViewModel, template: AppTemplate) {
-  this.Id = templateV2ID++;
+  this.Id = template.id;
   this.Title = template.title;
   this.Type = template.type;
   this.Description = template.description;

@@ -1,62 +1,56 @@
-import { Edit } from 'lucide-react';
-
-import Docker from '@/assets/ico/vendor/docker.svg?c';
-import Ecr from '@/assets/ico/vendor/ecr.svg?c';
-import Quay from '@/assets/ico/vendor/quay.svg?c';
-import Proget from '@/assets/ico/vendor/proget.svg?c';
-import Azure from '@/assets/ico/vendor/azure.svg?c';
-import Gitlab from '@/assets/ico/vendor/gitlab.svg?c';
-
 import { BadgeIcon } from '@@/BadgeIcon';
+
+import { RegistryTypes } from '../types/registry';
+import { registryIconMap, registryLabelMap } from '../utils/constants';
 
 export const options = [
   {
     id: 'registry_dockerhub',
-    icon: Docker,
-    label: 'DockerHub',
-    description: 'DockerHub 已认证账户',
-    value: '6',
+    icon: registryIconMap[RegistryTypes.DOCKERHUB],
+    label: registryLabelMap[RegistryTypes.DOCKERHUB],
+    description: 'DockerHub authenticated account',
+    value: String(RegistryTypes.DOCKERHUB),
   },
   {
     id: 'registry_aws_ecr',
-    icon: Ecr,
-    label: 'AWS ECR',
-    description: 'Amazon 弹性容器镜像仓库',
-    value: '7',
+    icon: registryIconMap[RegistryTypes.ECR],
+    label: registryLabelMap[RegistryTypes.ECR],
+    description: 'Amazon elastic container registry',
+    value: String(RegistryTypes.ECR),
   },
   {
     id: 'registry_quay',
-    icon: Quay,
-    label: 'Quay.io',
-    description: 'Quay 容器镜像仓库',
-    value: '1',
+    icon: registryIconMap[RegistryTypes.QUAY],
+    label: registryLabelMap[RegistryTypes.QUAY],
+    description: 'Quay container registry',
+    value: String(RegistryTypes.QUAY),
   },
   {
     id: 'registry_proget',
-    icon: Proget,
-    label: 'ProGet',
-    description: 'ProGet 容器镜像仓库',
-    value: '5',
+    icon: registryIconMap[RegistryTypes.PROGET],
+    label: registryLabelMap[RegistryTypes.PROGET],
+    description: 'ProGet container registry',
+    value: String(RegistryTypes.PROGET),
   },
   {
     id: 'registry_azure',
-    icon: Azure,
-    label: 'Azure',
-    description: 'Azure 容器镜像仓库',
-    value: '2',
+    icon: registryIconMap[RegistryTypes.AZURE],
+    label: registryLabelMap[RegistryTypes.AZURE],
+    description: 'Azure container registry',
+    value: String(RegistryTypes.AZURE),
   },
   {
     id: 'registry_gitlab',
-    icon: Gitlab,
-    label: 'GitLab',
-    description: 'GitLab 容器镜像仓库',
-    value: '4',
+    icon: registryIconMap[RegistryTypes.GITLAB],
+    label: registryLabelMap[RegistryTypes.GITLAB],
+    description: 'GitLab container registry',
+    value: String(RegistryTypes.GITLAB),
   },
   {
     id: 'registry_custom',
-    icon: <BadgeIcon icon={Edit} />,
-    label: '自定义镜像仓库',
-    description: '定义你自己的镜像仓库',
-    value: '3',
+    icon: <BadgeIcon icon={registryIconMap[RegistryTypes.CUSTOM]} />,
+    label: registryLabelMap[RegistryTypes.CUSTOM],
+    description: 'Define your own registry',
+    value: String(RegistryTypes.CUSTOM),
   },
 ];

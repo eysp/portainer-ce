@@ -36,6 +36,7 @@ func Test_getSystemVersion(t *testing.T) {
 	// setup services
 	jwtService, err := jwt.NewService("1h", store)
 	is.NoError(err, "Error initiating jwt service")
+
 	apiKeyService := apikey.NewAPIKeyService(store.APIKeyRepository(), store.User())
 	requestBouncer := security.NewRequestBouncer(store, jwtService, apiKeyService)
 
@@ -45,7 +46,6 @@ func Test_getSystemVersion(t *testing.T) {
 	jwt, _, _ := jwtService.GenerateToken(&portainer.TokenData{ID: adminUser.ID, Username: adminUser.Username, Role: adminUser.Role})
 
 	t.Run("Display Edition", func(t *testing.T) {
-
 		req := httptest.NewRequest(http.MethodGet, "/system/version", nil)
 		testhelpers.AddTestSecurityCookie(req, jwt)
 

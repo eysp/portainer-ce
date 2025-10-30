@@ -13,7 +13,7 @@ export function EnableTelemetryField() {
         <SwitchField
           labelClass="col-sm-3 col-lg-2"
           data-cy="settings-enable-telemetry-switch"
-          label="允许收集匿名统计数据"
+          label="Allow the collection of anonymous statistics"
           checked={value}
           name="toggle_enableTelemetry"
           onChange={(checked) => setValue(checked)}
@@ -21,11 +21,11 @@ export function EnableTelemetryField() {
       </div>
 
       <div className="col-sm-12 text-muted small mt-2">
-        你可以在我们的{' '}
+        You can find more information about this in our{' '}
         <a href={privacyPolicy} target="_blank" rel="noreferrer">
-          隐私政策
+          privacy policy
         </a>
-        中找到更多信息。
+        .
       </div>
     </div>
   );

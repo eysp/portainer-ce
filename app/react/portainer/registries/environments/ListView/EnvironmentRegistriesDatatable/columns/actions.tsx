@@ -12,7 +12,7 @@ import { Button } from '@@/buttons';
 import { Link } from '@@/Link';
 
 export const actions = columnHelper.display({
-  header: '操作',
+  header: 'Actions',
   cell: Cell,
 });
 
@@ -46,7 +46,7 @@ function Cell({
             }}
             data-cy={`registry-manage-access-button-${item.Name}`}
           >
-            管理访问
+            Manage access
           </Button>
         </Authorized>
       )}

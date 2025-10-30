@@ -27,8 +27,8 @@ export function EditView() {
   return (
     <div>
       <PageHeader
-        title="编辑自定义模板"
-        breadcrumbs={[{ label: '自定义模板', link: '^' }, template.Title]}
+        title="Edit Custom template"
+        breadcrumbs={[{ label: 'Custom Templates', link: '^' }, template.Title]}
       />
 
       <div className="row">

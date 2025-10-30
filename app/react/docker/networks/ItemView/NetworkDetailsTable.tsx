@@ -30,10 +30,10 @@ export function NetworkDetailsTable({
 
   return (
     <TableContainer>
-      <TableTitle label="网络详情" icon={Network} />
+      <TableTitle label="Network details" icon={Network} />
       <DetailsTable dataCy="networkDetails-detailsTable">
         {/* networkRowContent */}
-        <DetailsTable.Row label="名称">{network.Name}</DetailsTable.Row>
+        <DetailsTable.Row label="Name">{network.Name}</DetailsTable.Row>
         <DetailsTable.Row label="Id">
           {network.Id}
           {allowRemoveNetwork && (
@@ -43,20 +43,20 @@ export function NetworkDetailsTable({
                   data-cy="networkDetails-deleteNetwork"
                   size="xsmall"
                   onConfirmed={onRemoveNetworkClicked}
-                  confirmMessage="您确定要删除该网络吗？"
+                  confirmMessage="Do you want to delete the network?"
                 >
-                  删除此网络
+                  Delete this network
                 </DeleteButton>
               </Authorized>
             </span>
           )}
         </DetailsTable.Row>
-        <DetailsTable.Row label="驱动">{network.Driver}</DetailsTable.Row>
-        <DetailsTable.Row label="作用域">{network.Scope}</DetailsTable.Row>
-        <DetailsTable.Row label="可附加">
+        <DetailsTable.Row label="Driver">{network.Driver}</DetailsTable.Row>
+        <DetailsTable.Row label="Scope">{network.Scope}</DetailsTable.Row>
+        <DetailsTable.Row label="Attachable">
           {String(network.Attachable)}
         </DetailsTable.Row>
-        <DetailsTable.Row label="内部">
+        <DetailsTable.Row label="Internal">
           {String(network.Internal)}
         </DetailsTable.Row>
 
@@ -64,14 +64,14 @@ export function NetworkDetailsTable({
         {ipv4Configs.map((config) => (
           <Fragment key={config.Subnet}>
             <DetailsTable.Row
-              label={`IPV4 子网${getConfigDetails(config.Subnet)}`}
+              label={`IPV4 Subnet${getConfigDetails(config.Subnet)}`}
             >
-              {`IPV4 网关${getConfigDetails(config.Gateway)}`}
+              {`IPV4 Gateway${getConfigDetails(config.Gateway)}`}
             </DetailsTable.Row>
             <DetailsTable.Row
-              label={`IPV4 IP 范围${getConfigDetails(config.IPRange)}`}
+              label={`IPV4 IP Range${getConfigDetails(config.IPRange)}`}
             >
-              {`IPV4 排除的 IP${getAuxiliaryAddresses(
+              {`IPV4 Excluded IPs${getAuxiliaryAddresses(
                 config.AuxiliaryAddresses
               )}`}
             </DetailsTable.Row>
@@ -82,14 +82,14 @@ export function NetworkDetailsTable({
         {ipv6Configs.map((config) => (
           <Fragment key={config.Subnet}>
             <DetailsTable.Row
-              label={`IPV6 子网${getConfigDetails(config.Subnet)}`}
+              label={`IPV6 Subnet${getConfigDetails(config.Subnet)}`}
             >
-              {`IPV6 网关${getConfigDetails(config.Gateway)}`}
+              {`IPV6 Gateway${getConfigDetails(config.Gateway)}`}
             </DetailsTable.Row>
             <DetailsTable.Row
-              label={`IPV6 IP 范围${getConfigDetails(config.IPRange)}`}
+              label={`IPV6 IP Range${getConfigDetails(config.IPRange)}`}
             >
-              {`IPV6 排除的 IP${getAuxiliaryAddresses(
+              {`IPV6 Excluded IPs${getAuxiliaryAddresses(
                 config.AuxiliaryAddresses
               )}`}
             </DetailsTable.Row>

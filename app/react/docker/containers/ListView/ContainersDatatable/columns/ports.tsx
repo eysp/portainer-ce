@@ -14,7 +14,7 @@ export const ports = columnHelper.accessor(
       .map((port) => `${port.public}:${port.private}`)
       .join(','),
   {
-    header: '发布端口',
+    header: 'Published Ports',
     id: 'ports',
     cell: Cell,
   }

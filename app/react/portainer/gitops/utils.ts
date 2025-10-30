@@ -27,8 +27,8 @@ export function getAuthentication(
 
 export function confirmEnableTLSVerify() {
   return confirm({
-    title: '启用 TLS 验证？',
+    title: 'Enable TLS Verification?',
     message:
-      '启用 TLS 证书验证，但未确保自签名证书的证书颁发机构（CA）配置正确，可能导致部署失败。',
+      'Enabling the verification of TLS certificates without ensuring the correct configuration of your Certificate Authority (CA) for self-signed certificates can result in deployment failures.',
   });
 }

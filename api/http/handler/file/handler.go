@@ -17,12 +17,12 @@ type Handler struct {
 }
 
 // NewHandler creates a handler to serve static files.
-func NewHandler(assetPublicPath string, wasInstanceDisabled func() bool) *Handler {
+func NewHandler(assetPublicPath string, csp bool, wasInstanceDisabled func() bool) *Handler {
 	h := &Handler{
 		Handler: security.MWSecureHeaders(
 			gzhttp.GzipHandler(http.FileServer(http.Dir(assetPublicPath))),
 			featureflags.IsEnabled("hsts"),
-			featureflags.IsEnabled("csp"),
+			csp,
 		),
 		wasInstanceDisabled: wasInstanceDisabled,
 	}
@@ -36,6 +36,7 @@ func isHTML(acceptContent []string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -43,13 +44,19 @@ func (handler *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if handler.wasInstanceDisabled() {
 		if r.RequestURI == "/" || r.RequestURI == "/index.html" {
 			http.Redirect(w, r, "/timeout.html", http.StatusTemporaryRedirect)
+
 			return
 		}
 	} else {
 		if strings.HasPrefix(r.RequestURI, "/timeout.html") {
 			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+
 			return
 		}
+	}
+
+	if r.RequestURI == "/" || strings.HasSuffix(r.RequestURI, ".html") {
+		w.Header().Set("Permissions-Policy", strings.Join(permissions, ","))
 	}
 
 	if !isHTML(r.Header["Accept"]) {

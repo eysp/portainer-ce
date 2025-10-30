@@ -37,7 +37,7 @@ export function KubernetesForm({
         value={values.content}
         type="yaml"
         id="kube-manifest-editor"
-        placeholder="Define or paste the content of your manifest here"
+        textTip="Define or paste the content of your manifest here"
         onChange={(value) =>
           handleContentChange(DeploymentType.Kubernetes, value)
         }

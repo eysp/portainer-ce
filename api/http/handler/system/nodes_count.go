@@ -33,7 +33,7 @@ func (handler *Handler) systemNodesCount(w http.ResponseWriter, r *http.Request)
 	var nodes int
 
 	for _, endpoint := range endpoints {
-		if err := snapshot.FillSnapshotData(handler.dataStore, &endpoint); err != nil {
+		if err := snapshot.FillSnapshotData(handler.dataStore, &endpoint, false); err != nil {
 			return httperror.InternalServerError("Unable to add snapshot data", err)
 		}
 

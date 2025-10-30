@@ -20,33 +20,34 @@ export function HomeView() {
   return (
     <>
       <PageHeader
-        title="快速设置"
-        breadcrumbs={[{ label: '环境向导' }]}
+        title="Quick Setup"
+        breadcrumbs={[{ label: 'Environment Wizard' }]}
         reload
       />
 
       <div className="row">
         <div className="col-sm-12">
           <Widget>
-            <WidgetTitle title="环境向导" icon={Wand2} />
+            <WidgetTitle title="Environment Wizard" icon={Wand2} />
             <WidgetBody>
               <div className="row">
                 <div className="col-sm-12 form-section-title">
-                  欢迎使用 Portainer
+                  Welcome to Portainer
                 </div>
                 <div className="text-muted small">
                   {localEnvironmentAdded.status === 'success' && (
                     <p>
-                      我们已将您的本地环境{' '}
-                      {getTypeLabel(localEnvironmentAdded.type)} 连接到 Portainer。
+                      We have connected your local environment of{' '}
+                      {getTypeLabel(localEnvironmentAdded.type)} to Portainer.
                     </p>
                   )}
 
                   {localEnvironmentAdded.status === 'error' && (
                     <p>
-                      我们无法将您的本地环境连接到 Portainer。
+                      We could not connect your local environment to Portainer.
                       <br />
-                      请确保您的环境已正确暴露。如需安装帮助，请访问{' '}
+                      Please ensure your environment is correctly exposed. For
+                      help with installation visit{' '}
                       <a
                         href="https://documentation.portainer.io/quickstart/"
                         target="_blank"
@@ -58,7 +59,8 @@ export function HomeView() {
                   )}
 
                   <p>
-                    可继续使用本地 Portainer 开始使用，或连接更多容器环境。
+                    Get started below with your local portainer or connect more
+                    container environments.
                   </p>
                 </div>
 
@@ -75,8 +77,8 @@ export function HomeView() {
                             ? DockerIcon
                             : Kube
                         }
-                        title="开始使用"
-                        description="使用 Portainer 运行所在的本地环境继续操作"
+                        title="Get Started"
+                        description="Proceed using the local environment which Portainer is running in"
                         onClick={() => trackLocalEnvironmentAnalytics()}
                       />
                     </Link>
@@ -87,9 +89,9 @@ export function HomeView() {
                     data-cy="wizard-add-environments-link"
                   >
                     <Option
-                      title="添加环境"
+                      title="Add Environments"
                       icon={Plug2}
-                      description="连接其他环境"
+                      description="Connect to other environments"
                     />
                   </Link>
                 </div>

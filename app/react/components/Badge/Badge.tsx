@@ -1,6 +1,8 @@
 import clsx from 'clsx';
 import { PropsWithChildren } from 'react';
 
+import { AutomationTestingProps } from '@/types';
+
 export type BadgeType =
   | 'success'
   | 'danger'
@@ -9,7 +11,8 @@ export type BadgeType =
   | 'successSecondary'
   | 'dangerSecondary'
   | 'warnSecondary'
-  | 'infoSecondary';
+  | 'infoSecondary'
+  | 'muted';
 
 // the classes are typed in full because tailwind doesn't render the interpolated classes
 const typeClasses: Record<BadgeType, string> = {
@@ -54,6 +57,11 @@ const typeClasses: Record<BadgeType, string> = {
     'th-dark:text-blue-3 th-dark:bg-blue-9',
     'th-highcontrast:text-blue-3 th-highcontrast:bg-blue-9'
   ),
+  muted: clsx(
+    'text-gray-9 bg-gray-3',
+    'th-dark:text-gray-3 th-dark:bg-gray-9',
+    'th-highcontrast:text-gray-3 th-highcontrast:bg-gray-9'
+  ),
 };
 
 export interface Props {
@@ -67,7 +75,8 @@ export function Badge({
   type = 'info',
   className,
   children,
-}: PropsWithChildren<Props>) {
+  'data-cy': dataCy,
+}: PropsWithChildren<Props> & Partial<AutomationTestingProps>) {
   const baseClasses =
     'inline-flex w-fit items-center !text-xs font-medium rounded-full px-2 py-0.5';
 
@@ -75,6 +84,7 @@ export function Badge({
     <span
       className={clsx(baseClasses, typeClasses[type], className)}
       role="status"
+      data-cy={dataCy}
     >
       {children}
     </span>

@@ -13,21 +13,21 @@ export type Props = {
 };
 
 const sizeStyles: Record<Size, string> = {
-  xs: 'text-xs',
-  sm: 'text-sm',
-  md: 'text-md',
+  xs: 'text-xs gap-1',
+  sm: 'text-sm gap-2',
+  md: 'text-md gap-2',
 };
 
 export function InlineLoader({ children, className, size = 'sm' }: Props) {
   return (
     <div
       className={clsx(
-        'text-muted flex items-center gap-2',
+        'text-muted flex items-center',
         className,
         sizeStyles[size]
       )}
     >
-      <Icon icon={Loader2} className="animate-spin-slow" />
+      <Icon icon={Loader2} className="animate-spin-slow flex-none" />
       {children}
     </div>
   );

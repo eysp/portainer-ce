@@ -7,6 +7,7 @@ import (
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/internal/endpointutils"
+	"github.com/portainer/portainer/api/roar"
 	httperror "github.com/portainer/portainer/pkg/libhttp/error"
 	"github.com/portainer/portainer/pkg/libhttp/request"
 )
@@ -52,6 +53,7 @@ func calculateEndpointsOrTags(tx dataservices.DataStoreTx, edgeGroup *portainer.
 	}
 
 	edgeGroup.Endpoints = endpointIDs
+	edgeGroup.EndpointIDs = roar.FromSlice(endpointIDs)
 
 	return nil
 }
@@ -94,6 +96,7 @@ func (handler *Handler) edgeGroupCreate(w http.ResponseWriter, r *http.Request) 
 			Dynamic:      payload.Dynamic,
 			TagIDs:       []portainer.TagID{},
 			Endpoints:    []portainer.EndpointID{},
+			EndpointIDs:  roar.Roar[portainer.EndpointID]{},
 			PartialMatch: payload.PartialMatch,
 		}
 
@@ -108,5 +111,5 @@ func (handler *Handler) edgeGroupCreate(w http.ResponseWriter, r *http.Request) 
 		return nil
 	})
 
-	return txResponse(w, edgeGroup, err)
+	return txResponse(w, shadowedEdgeGroup{EdgeGroup: *edgeGroup}, err)
 }

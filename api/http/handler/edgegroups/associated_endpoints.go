@@ -4,6 +4,7 @@ import (
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/internal/endpointutils"
+	"github.com/portainer/portainer/api/roar"
 )
 
 type endpointSetType map[portainer.EndpointID]bool
@@ -49,22 +50,29 @@ func GetEndpointsByTags(tx dataservices.DataStoreTx, tagIDs []portainer.TagID, p
 	return results, nil
 }
 
-func getTrustedEndpoints(tx dataservices.DataStoreTx, endpointIDs []portainer.EndpointID) ([]portainer.EndpointID, error) {
+func getTrustedEndpoints(tx dataservices.DataStoreTx, endpointIDs roar.Roar[portainer.EndpointID]) ([]portainer.EndpointID, error) {
+	var innerErr error
+
 	results := []portainer.EndpointID{}
-	for _, endpointID := range endpointIDs {
+
+	endpointIDs.Iterate(func(endpointID portainer.EndpointID) bool {
 		endpoint, err := tx.Endpoint().Endpoint(endpointID)
 		if err != nil {
-			return nil, err
+			innerErr = err
+
+			return false
 		}
 
 		if !endpoint.UserTrusted {
-			continue
+			return true
 		}
 
 		results = append(results, endpoint.ID)
-	}
 
-	return results, nil
+		return true
+	})
+
+	return results, innerErr
 }
 
 func mapEndpointGroupToEndpoints(endpoints []portainer.Endpoint) map[portainer.EndpointGroupID]endpointSetType {

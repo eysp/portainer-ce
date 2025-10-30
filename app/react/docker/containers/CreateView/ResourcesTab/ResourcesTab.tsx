@@ -88,7 +88,7 @@ export function ResourcesTab({
         />
       )}
 
-      <FormControl label="共享内存大小" inputId="shm-size">
+      <FormControl label="Shared memory size" inputId="shm-size">
         <div className="flex items-center gap-4">
           <Input
             id="shm-size"
@@ -102,7 +102,7 @@ export function ResourcesTab({
             data-cy="shared-memory-size"
           />
           <div className="small text-muted">
-            /dev/shm 的大小 (<b>MB</b>)
+            Size of /dev/shm (<b>MB</b>)
           </div>
         </div>
       </FormControl>

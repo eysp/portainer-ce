@@ -42,8 +42,8 @@ export function DashboardView() {
   return (
     <>
       <PageHeader
-        title="仪表盘"
-        breadcrumbs={[{ label: '环境概览' }]}
+        title="Dashboard"
+        breadcrumbs={[{ label: 'Environment summary' }]}
         reload
         onReload={() =>
           queryClient.invalidateQueries(['environments', environmentId])

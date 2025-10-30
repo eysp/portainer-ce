@@ -2,12 +2,13 @@ import { ChevronsLeft, ChevronsRight } from 'lucide-react';
 import clsx from 'clsx';
 
 import { isBE } from '@/react/portainer/feature-flags/feature-flags.service';
-import smallLogo from '@/assets/ico/logomark.svg';
 
 import { Link } from '@@/Link';
 
 import fullLogoBE from './portainer_logo-BE.svg';
 import fullLogoCE from './portainer_logo-CE.svg';
+import smallLogoBE from './logomark-BE.svg';
+import smallLogoCE from './logomark-CE.svg';
 import { useSidebarState } from './useSidebarState';
 import styles from './Header.module.css';
 
@@ -20,7 +21,11 @@ export function Header({ logo: customLogo }: Props) {
 
   return (
     <div className="flex">
-      <div>
+      <div
+        className={clsx('pr-5 w-full flex flex-wrap', {
+          'justify-center': !isOpen,
+        })}
+      >
         <Link
           to="portainer.home"
           data-cy="portainerSidebar-homeImage"
@@ -64,9 +69,8 @@ export function Header({ logo: customLogo }: Props) {
           styles.collapseBtn,
           'flex h-6 w-6 items-center justify-center rounded border-0',
           'transition-all duration-200',
-          'text-sm text-gray-4 hover:text-white be:text-gray-5 be:hover:text-white',
-          'bg-blue-11 be:bg-gray-10',
-          'th-dark:bg-gray-warm-11',
+          'text-sm text-gray-4',
+          'bg-graphite-900 hover:bg-graphite-500',
           'absolute',
           { '-right-[10px]': !isOpen, 'right-6': isOpen }
         )}
@@ -85,7 +89,7 @@ function getLogo(isOpen: boolean, customLogo?: string) {
   }
 
   if (!isOpen) {
-    return smallLogo;
+    return isBE ? smallLogoBE : smallLogoCE;
   }
 
   return isBE ? fullLogoBE : fullLogoCE;
@@ -103,7 +107,9 @@ function Logo({
   return (
     <img
       src={logo}
-      className={clsx('img-responsive', styles.logo)}
+      className={clsx('img-responsive', styles.logo, {
+        '!max-h-[27px]': !isOpen,
+      })}
       alt="Logo"
     />
   );

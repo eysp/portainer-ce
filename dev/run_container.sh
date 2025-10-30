@@ -16,6 +16,7 @@ docker run -d \
   -v /var/run/docker.sock:/var/run/docker.sock:z \
   -v /var/run/docker.sock:/var/run/alternative.sock:z \
   -v /tmp:/tmp \
+  -e CSP=false \
   --name portainer \
   portainer/base \
   /app/portainer $PORTAINER_FLAGS

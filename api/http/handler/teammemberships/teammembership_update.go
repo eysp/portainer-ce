@@ -58,8 +58,7 @@ func (handler *Handler) teamMembershipUpdate(w http.ResponseWriter, r *http.Requ
 	}
 
 	var payload teamMembershipUpdatePayload
-	err = request.DecodeAndValidateJSONPayload(r, &payload)
-	if err != nil {
+	if err := request.DecodeAndValidateJSONPayload(r, &payload); err != nil {
 		return httperror.BadRequest("Invalid request payload", err)
 	}
 
@@ -77,7 +76,7 @@ func (handler *Handler) teamMembershipUpdate(w http.ResponseWriter, r *http.Requ
 
 	isLeadingBothTeam := security.AuthorizedTeamManagement(portainer.TeamID(payload.TeamID), securityContext) &&
 		security.AuthorizedTeamManagement(membership.TeamID, securityContext)
-	if !(securityContext.IsAdmin || isLeadingBothTeam) {
+	if !securityContext.IsAdmin && !isLeadingBothTeam {
 		return httperror.Forbidden("Permission denied to update the membership", httperrors.ErrResourceAccessDenied)
 	}
 
@@ -85,8 +84,7 @@ func (handler *Handler) teamMembershipUpdate(w http.ResponseWriter, r *http.Requ
 	membership.TeamID = portainer.TeamID(payload.TeamID)
 	membership.Role = portainer.MembershipRole(payload.Role)
 
-	err = handler.DataStore.TeamMembership().Update(membership.ID, membership)
-	if err != nil {
+	if err := handler.DataStore.TeamMembership().Update(membership.ID, membership); err != nil {
 		return httperror.InternalServerError("Unable to persist membership changes inside the database", err)
 	}
 

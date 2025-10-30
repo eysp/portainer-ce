@@ -16,8 +16,8 @@ interface Props extends AutomationTestingProps {
 }
 
 export function FormActions({
-  submitLabel = '保存',
-  loadingText = '正在保存',
+  submitLabel = 'Save',
+  loadingText = 'Saving',
   isLoading,
   children,
   isValid,
@@ -26,7 +26,7 @@ export function FormActions({
   'data-cy': dataCy,
 }: PropsWithChildren<Props>) {
   return (
-    <FormSection title="操作">
+    <FormSection title="Actions">
       <div className="form-group">
         <div className="col-sm-12">
           <div className="flex item-center gap-3">

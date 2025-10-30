@@ -1,6 +1,6 @@
 package randomstring
 
-import "math/rand"
+import "github.com/portainer/portainer/pkg/librand"
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyz0123456789"
 
@@ -8,7 +8,7 @@ const letterBytes = "abcdefghijklmnopqrstuvwxyz0123456789"
 func RandomString(n int) string {
 	b := make([]byte, n)
 	for i := range b {
-		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+		b[i] = letterBytes[librand.Intn(len(letterBytes))]
 	}
 	return string(b)
 }

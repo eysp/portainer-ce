@@ -23,10 +23,10 @@ interface Props {
 export function HealthStatus({ health }: Props) {
   return (
     <TableContainer>
-      <TableTitle label="容器健康状态" icon={Server} />
+      <TableTitle label="Container health" icon={Server} />
 
       <DetailsTable dataCy="health-status-table">
-        <DetailsTable.Row label="状态">
+        <DetailsTable.Row label="Status">
           <div className="vertical-center">
             <Icon
               icon={HeartPulse}
@@ -37,11 +37,11 @@ export function HealthStatus({ health }: Props) {
           </div>
         </DetailsTable.Row>
 
-        <DetailsTable.Row label="失败次数">
+        <DetailsTable.Row label="Failure count">
           <div className="vertical-center">{health.FailingStreak}</div>
         </DetailsTable.Row>
 
-        <DetailsTable.Row label="最新输出">
+        <DetailsTable.Row label="Last output">
           {health.Log[health.Log.length - 1].Output}
         </DetailsTable.Row>
       </DetailsTable>

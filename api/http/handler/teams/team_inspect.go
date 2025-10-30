@@ -21,7 +21,6 @@ import (
 // @produce json
 // @param id path int true "Team identifier"
 // @success 200 {object} portainer.Team "Success"
-// @success 204 "Success"
 // @failure 400 "Invalid request"
 // @failure 403 "Permission denied"
 // @failure 404 "Team not found"

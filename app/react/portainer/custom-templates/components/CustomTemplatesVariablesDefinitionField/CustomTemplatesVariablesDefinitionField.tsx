@@ -29,7 +29,7 @@ export function CustomTemplatesVariablesDefinitionField({
 }: Props) {
   return (
     <InputList
-      label="变量定义"
+      label="Variables definition"
       onChange={onChange}
       value={value}
       renderItem={(item, onChange, index, error) => (
@@ -48,7 +48,7 @@ export function CustomTemplatesVariablesDefinitionField({
         description: '',
       })}
       errors={errors}
-      textTip="该列表应映射模板文件中的 mustache 变量，如果默认值为空，则该变量为必填。"
+      textTip="List should map the mustache variables in the template file, if default value is empty, the variable will be required."
       isAddButtonHidden={isVariablesNamesFromParent}
       data-cy="custom-templates-variables-field"
     />
@@ -75,7 +75,7 @@ function Item({
           value={item.name}
           name="name"
           onChange={handleChange}
-          placeholder="名称(例如 var_name)"
+          placeholder="Name (e.g var_name)"
           readOnly={isNameReadonly}
           data-cy={`custom-templates-item-name-field_${index}`}
         />
@@ -85,7 +85,7 @@ function Item({
         <Input
           value={item.label}
           onChange={handleChange}
-          placeholder="标签"
+          placeholder="Label"
           name="label"
           data-cy={`custom-templates-item-label-field_${index}`}
         />
@@ -96,7 +96,7 @@ function Item({
           name="description"
           value={item.description}
           onChange={handleChange}
-          placeholder="描述"
+          placeholder="Description"
           data-cy={`custom-templates-item-description-field_${index}`}
         />
         {errorObj?.description && <FormError>{errorObj.description}</FormError>}
@@ -105,7 +105,7 @@ function Item({
         <Input
           value={item.defaultValue}
           onChange={handleChange}
-          placeholder="默认值"
+          placeholder="Default Value"
           name="defaultValue"
           data-cy={`custom-templates-item-default-value-field_${index}`}
         />
@@ -123,8 +123,8 @@ function Item({
 
 function itemValidation(): SchemaOf<VariableDefinition> {
   return object().shape({
-    name: string().required('名称是必填项'),
-    label: string().required('标签是必填项'),
+    name: string().required('Name is required'),
+    label: string().required('Label is required'),
     defaultValue: string().default(''),
     description: string().default(''),
   });

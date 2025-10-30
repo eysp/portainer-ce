@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"sort"
 	"strconv"
 	"time"
 
@@ -39,9 +40,10 @@ func defaultSystemNamespaces() map[string]struct{} {
 // if the user is an admin, all namespaces in the current k8s environment(endpoint) are fetched using the fetchNamespaces function.
 // otherwise, namespaces the non-admin user has access to will be used to filter the namespaces based on the allowed namespaces.
 func (kcl *KubeClient) GetNamespaces() (map[string]portainer.K8sNamespaceInfo, error) {
-	if kcl.IsKubeAdmin {
+	if kcl.GetIsKubeAdmin() {
 		return kcl.fetchNamespaces()
 	}
+
 	return kcl.fetchNamespacesForNonAdmin()
 }
 
@@ -51,7 +53,7 @@ func (kcl *KubeClient) fetchNamespacesForNonAdmin() (map[string]portainer.K8sNam
 		Str("context", "fetchNamespacesForNonAdmin").
 		Msg("Fetching namespaces for non-admin user")
 
-	if len(kcl.NonAdminNamespaces) == 0 {
+	if len(kcl.GetClientNonAdminNamespaces()) == 0 {
 		return nil, nil
 	}
 
@@ -141,6 +143,7 @@ func (kcl *KubeClient) CreateNamespace(info models.K8sNamespaceDetails) (*corev1
 			Str("context", "CreateNamespace").
 			Str("Namespace", info.Name).
 			Msg("Failed to create the namespace")
+
 		return nil, err
 	}
 
@@ -156,7 +159,7 @@ func (kcl *KubeClient) CreateNamespace(info models.K8sNamespaceDetails) (*corev1
 	return namespace, nil
 }
 
-// UpdateIngress updates an ingress in a given namespace in a k8s endpoint.
+// UpdateNamespace updates a namespace in a k8s endpoint.
 func (kcl *KubeClient) UpdateNamespace(info models.K8sNamespaceDetails) (*corev1.Namespace, error) {
 	portainerLabels := map[string]string{
 		namespaceNameLabel:  stackutils.SanitizeLabel(info.Name),
@@ -265,9 +268,12 @@ func isSystemNamespace(namespace *corev1.Namespace) bool {
 		return systemLabelValue == "true"
 	}
 
-	systemNamespaces := defaultSystemNamespaces()
+	return isSystemDefaultNamespace(namespace.Name)
+}
 
-	_, isSystem := systemNamespaces[namespace.Name]
+func isSystemDefaultNamespace(namespace string) bool {
+	systemNamespaces := defaultSystemNamespaces()
+	_, isSystem := systemNamespaces[namespace]
 	return isSystem
 }
 
@@ -348,6 +354,34 @@ func (kcl *KubeClient) DeleteNamespace(namespaceName string) (*corev1.Namespace,
 	return namespace, nil
 }
 
+// CombineNamespacesWithUnhealthyEvents combines namespaces with unhealthy events across all namespaces
+func (kcl *KubeClient) CombineNamespacesWithUnhealthyEvents(namespaces map[string]portainer.K8sNamespaceInfo) (map[string]portainer.K8sNamespaceInfo, error) {
+	allEvents, err := kcl.GetEvents("", "")
+	if err != nil && !k8serrors.IsNotFound(err) {
+		log.Error().
+			Str("context", "CombineNamespacesWithUnhealthyEvents").
+			Err(err).
+			Msg("unable to retrieve unhealthy events from the Kubernetes for an admin user")
+		return nil, err
+	}
+
+	unhealthyEventCounts := make(map[string]int)
+	for _, event := range allEvents {
+		if event.Type == "Warning" {
+			unhealthyEventCounts[event.Namespace]++
+		}
+	}
+
+	for namespaceName, namespace := range namespaces {
+		if count, exists := unhealthyEventCounts[namespaceName]; exists {
+			namespace.UnhealthyEventCount = count
+			namespaces[namespaceName] = namespace
+		}
+	}
+
+	return namespaces, nil
+}
+
 // CombineNamespacesWithResourceQuotas combines namespaces with resource quotas where matching is based on "portainer-rq-"+namespace.Name
 func (kcl *KubeClient) CombineNamespacesWithResourceQuotas(namespaces map[string]portainer.K8sNamespaceInfo, w http.ResponseWriter) *httperror.HandlerError {
 	resourceQuotas, err := kcl.GetResourceQuotas("")
@@ -388,9 +422,13 @@ func (kcl *KubeClient) CombineNamespaceWithResourceQuota(namespace portainer.K8s
 // buildNonAdminNamespacesMap builds a map of non-admin namespaces.
 // the map is used to filter the namespaces based on the allowed namespaces.
 func (kcl *KubeClient) buildNonAdminNamespacesMap() map[string]struct{} {
-	nonAdminNamespaceSet := make(map[string]struct{}, len(kcl.NonAdminNamespaces))
-	for _, namespace := range kcl.NonAdminNamespaces {
-		nonAdminNamespaceSet[namespace] = struct{}{}
+	nonAdminNamespaces := kcl.GetClientNonAdminNamespaces()
+	nonAdminNamespaceSet := make(map[string]struct{}, len(nonAdminNamespaces))
+
+	for _, namespace := range nonAdminNamespaces {
+		if !isSystemDefaultNamespace(namespace) {
+			nonAdminNamespaceSet[namespace] = struct{}{}
+		}
 	}
 
 	return nonAdminNamespaceSet
@@ -403,6 +441,11 @@ func (kcl *KubeClient) ConvertNamespaceMapToSlice(namespaces map[string]portaine
 	for _, namespace := range namespaces {
 		namespaceSlice = append(namespaceSlice, namespace)
 	}
+
+	// Sort namespaces by name
+	sort.Slice(namespaceSlice, func(i, j int) bool {
+		return namespaceSlice[i].Name < namespaceSlice[j].Name
+	})
 
 	return namespaceSlice
 }

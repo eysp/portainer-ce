@@ -8,16 +8,16 @@ import (
 	"net/url"
 	"testing"
 
-	helper "github.com/portainer/portainer/api/internal/testhelpers"
-	"github.com/portainer/portainer/pkg/libhelm/binary/test"
+	"github.com/portainer/portainer/api/internal/testhelpers"
+	"github.com/portainer/portainer/pkg/libhelm/test"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_helmShow(t *testing.T) {
 	is := assert.New(t)
 
-	helmPackageManager := test.NewMockHelmBinaryPackageManager("")
-	h := NewTemplateHandler(helper.NewTestRequestBouncer(), helmPackageManager)
+	helmPackageManager := test.NewMockHelmPackageManager()
+	h := NewTemplateHandler(testhelpers.NewTestRequestBouncer(), helmPackageManager)
 
 	is.NotNil(h, "Handler should not fail")
 
@@ -31,7 +31,7 @@ func Test_helmShow(t *testing.T) {
 		t.Run(cmd, func(t *testing.T) {
 			is.NotNil(h, "Handler should not fail")
 
-			repoUrlEncoded := url.QueryEscape("https://kubernetes.github.io/ingress-nginx")
+			repoUrlEncoded := url.QueryEscape("https://charts.bitnami.com/bitnami")
 			chart := "nginx"
 			req := httptest.NewRequest("GET", fmt.Sprintf("/templates/helm/%s?repo=%s&chart=%s", cmd, repoUrlEncoded, chart), nil)
 			rr := httptest.NewRecorder()

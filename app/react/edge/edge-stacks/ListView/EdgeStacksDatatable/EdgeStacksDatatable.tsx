@@ -5,7 +5,6 @@ import { useTableState } from '@@/datatables/useTableState';
 import { getColumnVisibilityState } from '@@/datatables/ColumnVisibilityMenu';
 
 import { useEdgeStacks } from '../../queries/useEdgeStacks';
-import { EdgeStack, StatusType } from '../../types';
 
 import { createStore } from './store';
 import { columns } from './columns';
@@ -20,11 +19,7 @@ const settingsStore = createStore(tableKey);
 export function EdgeStacksDatatable() {
   const tableState = useTableState(settingsStore, tableKey);
   const edgeStacksQuery = useEdgeStacks<Array<DecoratedEdgeStack>>({
-    select: (edgeStacks) =>
-      edgeStacks.map((edgeStack) => ({
-        ...edgeStack,
-        aggregatedStatus: aggregateStackStatus(edgeStack.Status),
-      })),
+    params: { summarizeStatuses: true },
     refetchInterval: tableState.autoRefreshRate * 1000,
   });
 
@@ -48,18 +43,5 @@ export function EdgeStacksDatatable() {
       )}
       data-cy="edge-stacks-datatable"
     />
-  );
-}
-
-function aggregateStackStatus(stackStatus: EdgeStack['Status']) {
-  const aggregateStatus: Partial<Record<StatusType, number>> = {};
-  return Object.values(stackStatus).reduce(
-    (acc, envStatus) =>
-      envStatus.Status.reduce((acc, status) => {
-        const { Type } = status;
-        acc[Type] = (acc[Type] || 0) + 1;
-        return acc;
-      }, acc),
-    aggregateStatus
   );
 }

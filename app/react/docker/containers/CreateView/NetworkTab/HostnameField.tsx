@@ -13,11 +13,11 @@ export function HostnameField({
   onChange: (value: string) => void;
 }) {
   return (
-    <FormControl label="主机名" errors={error}>
+    <FormControl label="Hostname" errors={error}>
       <Input
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="例如 web01"
+        placeholder="e.g. web01"
         data-cy="docker-container-hostname-input"
       />
     </FormControl>

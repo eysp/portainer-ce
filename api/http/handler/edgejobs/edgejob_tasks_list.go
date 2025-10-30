@@ -1,21 +1,25 @@
 package edgejobs
 
 import (
+	"errors"
 	"fmt"
 	"maps"
 	"net/http"
+	"strings"
 
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/dataservices"
+	"github.com/portainer/portainer/api/http/utils/filters"
 	"github.com/portainer/portainer/api/internal/edge"
 	httperror "github.com/portainer/portainer/pkg/libhttp/error"
 	"github.com/portainer/portainer/pkg/libhttp/request"
 )
 
 type taskContainer struct {
-	ID         string                      `json:"Id"`
-	EndpointID portainer.EndpointID        `json:"EndpointId"`
-	LogsStatus portainer.EdgeJobLogsStatus `json:"LogsStatus"`
+	ID           string                      `json:"Id"`
+	EndpointID   portainer.EndpointID        `json:"EndpointId"`
+	EndpointName string                      `json:"EndpointName"`
+	LogsStatus   portainer.EdgeJobLogsStatus `json:"LogsStatus"`
 }
 
 // @id EdgeJobTasksList
@@ -37,16 +41,42 @@ func (handler *Handler) edgeJobTasksList(w http.ResponseWriter, r *http.Request)
 		return httperror.BadRequest("Invalid Edge job identifier route variable", err)
 	}
 
-	var tasks []taskContainer
-	err = handler.DataStore.UpdateTx(func(tx dataservices.DataStoreTx) error {
+	params := filters.ExtractListModifiersQueryParams(r)
+
+	var tasks []*taskContainer
+	err = handler.DataStore.ViewTx(func(tx dataservices.DataStoreTx) error {
 		tasks, err = listEdgeJobTasks(tx, portainer.EdgeJobID(edgeJobID))
 		return err
 	})
 
-	return txResponse(w, tasks, err)
+	results := filters.SearchOrderAndPaginate(tasks, params, filters.Config[*taskContainer]{
+		SearchAccessors: []filters.SearchAccessor[*taskContainer]{
+			func(tc *taskContainer) (string, error) {
+				switch tc.LogsStatus {
+				case portainer.EdgeJobLogsStatusPending:
+					return "pending", nil
+				case 0, portainer.EdgeJobLogsStatusIdle:
+					return "idle", nil
+				case portainer.EdgeJobLogsStatusCollected:
+					return "collected", nil
+				}
+				return "", errors.New("unknown state")
+			},
+			func(tc *taskContainer) (string, error) {
+				return tc.EndpointName, nil
+			},
+		},
+		SortBindings: []filters.SortBinding[*taskContainer]{
+			{Key: "EndpointName", Fn: func(a, b *taskContainer) int { return strings.Compare(a.EndpointName, b.EndpointName) }},
+		},
+	})
+
+	filters.ApplyFilterResultsHeaders(&w, results)
+
+	return txResponse(w, results.Items, err)
 }
 
-func listEdgeJobTasks(tx dataservices.DataStoreTx, edgeJobID portainer.EdgeJobID) ([]taskContainer, error) {
+func listEdgeJobTasks(tx dataservices.DataStoreTx, edgeJobID portainer.EdgeJobID) ([]*taskContainer, error) {
 	edgeJob, err := tx.EdgeJob().Read(edgeJobID)
 	if tx.IsErrObjectNotFound(err) {
 		return nil, httperror.NotFound("Unable to find an Edge job with the specified identifier inside the database", err)
@@ -54,7 +84,12 @@ func listEdgeJobTasks(tx dataservices.DataStoreTx, edgeJobID portainer.EdgeJobID
 		return nil, httperror.InternalServerError("Unable to find an Edge job with the specified identifier inside the database", err)
 	}
 
-	tasks := make([]taskContainer, 0)
+	endpoints, err := tx.Endpoint().Endpoints()
+	if err != nil {
+		return nil, err
+	}
+
+	tasks := make([]*taskContainer, 0)
 
 	endpointsMap := map[portainer.EndpointID]portainer.EdgeJobEndpointMeta{}
 	if len(edgeJob.EdgeGroups) > 0 {
@@ -70,10 +105,19 @@ func listEdgeJobTasks(tx dataservices.DataStoreTx, edgeJobID portainer.EdgeJobID
 	maps.Copy(endpointsMap, edgeJob.Endpoints)
 
 	for endpointID, meta := range endpointsMap {
-		tasks = append(tasks, taskContainer{
-			ID:         fmt.Sprintf("edgejob_task_%d_%d", edgeJob.ID, endpointID),
-			EndpointID: endpointID,
-			LogsStatus: meta.LogsStatus,
+
+		endpointName := ""
+		for idx := range endpoints {
+			if endpoints[idx].ID == endpointID {
+				endpointName = endpoints[idx].Name
+			}
+		}
+
+		tasks = append(tasks, &taskContainer{
+			ID:           fmt.Sprintf("edgejob_task_%d_%d", edgeJob.ID, endpointID),
+			EndpointID:   endpointID,
+			EndpointName: endpointName,
+			LogsStatus:   meta.LogsStatus,
 		})
 	}
 

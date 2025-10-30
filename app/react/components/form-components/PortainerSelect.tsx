@@ -5,15 +5,25 @@ import {
 } from 'react-select';
 import _ from 'lodash';
 import { AriaAttributes } from 'react';
+import { FilterOptionOption } from 'react-select/dist/declarations/src/filters';
 
 import { AutomationTestingProps } from '@/types';
 
-import { Select as ReactSelect } from '@@/form-components/ReactSelect';
+import {
+  Creatable,
+  Select as ReactSelect,
+} from '@@/form-components/ReactSelect';
 
 export interface Option<TValue> {
   value: TValue;
   label: string;
   disabled?: boolean;
+  [key: string]: unknown;
+}
+
+export interface GroupOption<TValue> {
+  label: string;
+  options: Option<TValue>[];
 }
 
 type Options<TValue> = OptionsOrGroups<
@@ -21,7 +31,7 @@ type Options<TValue> = OptionsOrGroups<
   GroupBase<Option<TValue>>
 >;
 
-interface SharedProps
+interface SharedProps<TValue>
   extends AutomationTestingProps,
     Pick<AriaAttributes, 'aria-label'> {
   name?: string;
@@ -32,9 +42,14 @@ interface SharedProps
   bindToBody?: boolean;
   isLoading?: boolean;
   noOptionsMessage?: () => string;
+  loadingMessage?: () => string;
+  filterOption?: (
+    option: FilterOptionOption<Option<TValue>>,
+    rawInput: string
+  ) => boolean;
 }
 
-interface MultiProps<TValue> extends SharedProps {
+interface MultiProps<TValue> extends SharedProps<TValue> {
   value: readonly TValue[];
   onChange(value: TValue[]): void;
   options: Options<TValue>;
@@ -44,9 +59,12 @@ interface MultiProps<TValue> extends SharedProps {
     true,
     GroupBase<Option<TValue>>
   >;
+  formatCreateLabel?: (input: string) => string;
+  onCreateOption?: (input: string) => void;
+  isCreatable?: boolean;
 }
 
-interface SingleProps<TValue> extends SharedProps {
+interface SingleProps<TValue> extends SharedProps<TValue> {
   value: TValue;
   onChange(value: TValue | null): void;
   options: Options<TValue>;
@@ -58,9 +76,13 @@ interface SingleProps<TValue> extends SharedProps {
   >;
 }
 
-type Props<TValue> = MultiProps<TValue> | SingleProps<TValue>;
+export type PortainerSelectProps<TValue> =
+  | MultiProps<TValue>
+  | SingleProps<TValue>;
 
-export function PortainerSelect<TValue = string>(props: Props<TValue>) {
+export function PortainerSelect<TValue = string>(
+  props: PortainerSelectProps<TValue>
+) {
   return isMultiProps(props) ? (
     // eslint-disable-next-line react/jsx-props-no-spreading
     <MultiSelect {...props} />
@@ -71,7 +93,7 @@ export function PortainerSelect<TValue = string>(props: Props<TValue>) {
 }
 
 function isMultiProps<TValue>(
-  props: Props<TValue>
+  props: PortainerSelectProps<TValue>
 ): props is MultiProps<TValue> {
   return 'isMulti' in props && !!props.isMulti;
 }
@@ -87,9 +109,11 @@ export function SingleSelect<TValue = string>({
   placeholder,
   isClearable,
   bindToBody,
+  filterOption,
   components,
   isLoading,
   noOptionsMessage,
+  loadingMessage,
   isMulti,
   ...aria
 }: SingleProps<TValue>) {
@@ -116,9 +140,11 @@ export function SingleSelect<TValue = string>({
       placeholder={placeholder}
       isDisabled={disabled}
       menuPortalTarget={bindToBody ? document.body : undefined}
+      filterOption={filterOption}
       components={components}
       isLoading={isLoading}
       noOptionsMessage={noOptionsMessage}
+      loadingMessage={loadingMessage}
       // eslint-disable-next-line react/jsx-props-no-spreading
       {...aria}
     />
@@ -159,14 +185,20 @@ export function MultiSelect<TValue = string>({
   disabled,
   isClearable,
   bindToBody,
+  filterOption,
   components,
   isLoading,
   noOptionsMessage,
+  loadingMessage,
+  formatCreateLabel,
+  onCreateOption,
+  isCreatable,
   ...aria
 }: Omit<MultiProps<TValue>, 'isMulti'>) {
   const selectedOptions = findSelectedOptions(options, value);
+  const SelectComponent = isCreatable ? Creatable : ReactSelect;
   return (
-    <ReactSelect
+    <SelectComponent
       name={name}
       isMulti
       isClearable={isClearable}
@@ -183,9 +215,13 @@ export function MultiSelect<TValue = string>({
       placeholder={placeholder}
       isDisabled={disabled}
       menuPortalTarget={bindToBody ? document.body : undefined}
+      filterOption={filterOption}
       components={components}
       isLoading={isLoading}
       noOptionsMessage={noOptionsMessage}
+      loadingMessage={loadingMessage}
+      formatCreateLabel={formatCreateLabel}
+      onCreateOption={onCreateOption}
       // eslint-disable-next-line react/jsx-props-no-spreading
       {...aria}
     />

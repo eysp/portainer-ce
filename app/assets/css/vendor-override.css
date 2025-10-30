@@ -201,8 +201,18 @@ pre {
   background-color: var(--bg-progress-color);
 }
 
-.motd-body {
-  background-color: var(--bg-motd-body-color) !important;
+.widget-body.motd-body {
+  border: 1px solid var(--border-motd-body-color);
+  color: var(--text-motd-body-color);
+  background: var(--bg-motd-body-color) url(../images/purple-gradient.svg) top right / 40% no-repeat;
+}
+
+.widget-body.motd-body .btn.btn-link,
+.widget-body.motd-body .btn.btn-link:hover {
+  padding: 0 5px 0 4px;
+  border-radius: 4px;
+  background-color: var(--bg-motd-btn-color);
+  color: var(--text-motd-btn-color);
 }
 
 .panel-body {
@@ -408,12 +418,8 @@ input:-webkit-autofill {
 }
 
 .sidebar.tippy-box[data-placement^='right'] > .tippy-arrow:before {
-  border-right: 8px solid var(--ui-blue-9);
+  border-right: 8px solid var(--graphite-600);
   border-width: 6px 8px 6px 0;
-}
-
-[theme='dark'] .sidebar.tippy-box[data-placement^='right'] > .tippy-arrow:before {
-  border-right: 8px solid var(--ui-gray-true-9);
 }
 
 [theme='highcontrast'] .sidebar.tippy-box[data-placement^='right'] > .tippy-arrow:before {

@@ -36,9 +36,10 @@ export const name = columnHelper.accessor(
           <Authorized authorizations="K8sServiceW" childrenUnauthorized={name}>
             {name}
 
-            {row.original.IsSystem && <SystemBadge />}
-
-            {isExternal && !row.original.IsSystem && <ExternalBadge />}
+            <div className="ml-auto flex gap-2">
+              {row.original.IsSystem && <SystemBadge />}
+              {isExternal && !row.original.IsSystem && <ExternalBadge />}
+            </div>
           </Authorized>
         </div>
       );

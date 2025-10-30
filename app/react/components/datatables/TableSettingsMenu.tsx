@@ -20,7 +20,7 @@ export function TableSettingsMenu({
               'setting-active': isExpanded,
             })}
             aria-label="Settings"
-            title="设置"
+            title="Settings"
           >
             <MoreVertical
               size="13"
@@ -31,11 +31,11 @@ export function TableSettingsMenu({
           </MenuButton>
           <MenuList>
             <div className="tableMenu">
-              <div className="menuHeader">表格设置</div>
+              <div className="menuHeader">Table settings</div>
               <div className="menuContent">{children}</div>
               {quickActions && (
                 <div>
-                  <div className="menuHeader">快速操作</div>
+                  <div className="menuHeader">Quick actions</div>
                   <div className="menuContent">{quickActions}</div>
                 </div>
               )}

@@ -20,6 +20,6 @@ export async function getFilePreview(payload: PreviewPayload) {
     } = await axios.post<PreviewResponse>('/gitops/repo/file/preview', payload);
     return FileContent;
   } catch (e) {
-    throw parseAxiosError(e as Error, '无法从 git 获取文件');
+    throw parseAxiosError(e as Error, 'Unable to fetch file from git');
   }
 }

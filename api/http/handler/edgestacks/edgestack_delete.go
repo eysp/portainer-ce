@@ -30,10 +30,9 @@ func (handler *Handler) edgeStackDelete(w http.ResponseWriter, r *http.Request) 
 		return httperror.BadRequest("Invalid edge stack identifier route variable", err)
 	}
 
-	err = handler.DataStore.UpdateTx(func(tx dataservices.DataStoreTx) error {
+	if err := handler.DataStore.UpdateTx(func(tx dataservices.DataStoreTx) error {
 		return handler.deleteEdgeStack(tx, portainer.EdgeStackID(edgeStackID))
-	})
-	if err != nil {
+	}); err != nil {
 		var httpErr *httperror.HandlerError
 		if errors.As(err, &httpErr) {
 			return httpErr

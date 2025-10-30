@@ -13,7 +13,7 @@ func newGitlabProxy(uri string) (http.Handler, error) {
 		return nil, err
 	}
 
-	proxy := newSingleHostReverseProxyWithHostHeader(url)
+	proxy := NewSingleHostReverseProxyWithHostHeader(url)
 	proxy.Transport = gitlab.NewTransport()
 	return proxy, nil
 }

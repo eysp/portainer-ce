@@ -15,14 +15,16 @@ export function AssociatedEnvironmentsSelector({
   return (
     <>
       <div className="col-sm-12 small text-muted">
-        您可以通过将环境移动到“关联环境”表中来选择哪些环境应属于此分组。只需点击任意环境条目即可在两个表之间移动它。
+        You can select which environment should be part of this group by moving
+        them to the associated environments table. Simply click on any
+        environment entry to move it from one table to the other.
       </div>
 
       <div className="col-sm-12 mt-4">
         <div className="flex">
           <div className="w-1/2">
             <GroupAssociationTable
-              title="可用环境"
+              title="Available environments"
               query={{
                 groupIds: [1],
                 excludeIds: value,
@@ -37,7 +39,7 @@ export function AssociatedEnvironmentsSelector({
           </div>
           <div className="w-1/2">
             <GroupAssociationTable
-              title="关联的环境"
+              title="Associated environments"
               query={{
                 endpointIds: value,
               }}

@@ -1,4 +1,7 @@
-import { EnvironmentId } from '@/react/portainer/environments/types';
+import {
+  Environment,
+  EnvironmentId,
+} from '@/react/portainer/environments/types';
 
 export interface EdgeJob {
   Id: number;
@@ -28,5 +31,6 @@ interface EndpointMeta {
 export interface JobResult {
   Id: string;
   EndpointId: EnvironmentId;
+  EndpointName: Environment['Name'];
   LogsStatus: LogsStatus;
 }

@@ -2,10 +2,12 @@ package crypto
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestService_Hash(t *testing.T) {
-	var s = &Service{}
+	var s = Service{}
 
 	type args struct {
 		hash string
@@ -50,4 +52,12 @@ func TestService_Hash(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestHash(t *testing.T) {
+	s := Service{}
+
+	hash, err := s.Hash("Passw0rd!")
+	require.NoError(t, err)
+	require.NotEmpty(t, hash)
 }

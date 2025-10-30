@@ -9,7 +9,7 @@ import (
 
 	"github.com/containers/image/v5/docker"
 	imagetypes "github.com/containers/image/v5/types"
-	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/image"
 	"github.com/opencontainers/go-digest"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
@@ -38,10 +38,10 @@ func NewClientWithRegistry(registryClient *RegistryClient, clientFactory *docker
 func (c *DigestClient) RemoteDigest(image Image) (digest.Digest, error) {
 	ctx, cancel := c.timeoutContext()
 	defer cancel()
+
 	// Docker references with both a tag and digest are currently not supported
 	if image.Tag != "" && image.Digest != "" {
-		err := image.trimDigest()
-		if err != nil {
+		if err := image.TrimDigest(); err != nil {
 			return "", err
 		}
 	}
@@ -69,7 +69,7 @@ func (c *DigestClient) RemoteDigest(image Image) (digest.Digest, error) {
 	// Retrieve remote digest through HEAD request
 	rmDigest, err := docker.GetDigest(ctx, sysCtx, rmRef)
 	if err != nil {
-		// fallback to public registry for hub
+		// Fallback to public registry for hub
 		if image.HubLink != "" {
 			rmDigest, err = docker.GetDigest(ctx, c.sysCtx, rmRef)
 			if err == nil {
@@ -85,7 +85,7 @@ func (c *DigestClient) RemoteDigest(image Image) (digest.Digest, error) {
 	return rmDigest, nil
 }
 
-func ParseLocalImage(inspect types.ImageInspect) (*Image, error) {
+func ParseLocalImage(inspect image.InspectResponse) (*Image, error) {
 	if IsLocalImage(inspect) || IsDanglingImage(inspect) {
 		return nil, errors.New("the image is not regular")
 	}
@@ -131,8 +131,7 @@ func ParseRepoDigests(repoDigests []string) []digest.Digest {
 func ParseRepoTags(repoTags []string) []*Image {
 	images := make([]*Image, 0)
 	for _, repoTag := range repoTags {
-		image := ParseRepoTag(repoTag)
-		if image != nil {
+		if image := ParseRepoTag(repoTag); image != nil {
 			images = append(images, image)
 		}
 	}
@@ -147,7 +146,7 @@ func ParseRepoDigest(repoDigest string) digest.Digest {
 
 	d, err := digest.Parse(strings.Split(repoDigest, "@")[1])
 	if err != nil {
-		log.Warn().Msgf("Skip invalid repo digest item: %s [error: %v]", repoDigest, err)
+		log.Warn().Err(err).Str("digest", repoDigest).Msg("skip invalid repo item")
 
 		return ""
 	}

@@ -32,10 +32,10 @@ export function CreateView() {
   return (
     <>
       <PageHeader
-        title="创建容器"
+        title="Create container"
         breadcrumbs={[
-          { label: '容器', link: 'docker.containers' },
-          '添加容器',
+          { label: 'Containers', link: 'docker.containers' },
+          'Add container',
         ]}
         reload
       />
@@ -103,14 +103,15 @@ function CreateForm() {
       {isDuplicating && (
         <div className="row">
           <div className="col-sm-12">
-            <InformationPanel title-text="注意">
+            <InformationPanel title-text="Caution">
               <TextTip>
-                如果镜像被更改，并且新容器与之前容器的设置不兼容，则可能导致新容器启动失败。
-                常见原因包括 entrypoint、cmd 或由镜像设置的{' '}
+                The new container may fail to start if the image is changed, and
+                settings from the previous container aren&apos;t compatible.
+                Common causes include entrypoint, cmd or{' '}
                 <HelpLink docLink="/user/docker/containers/advanced">
-                  其他设置
+                  other settings
                 </HelpLink>{' '}
-                。
+                set by an image.
               </TextTip>
             </InformationPanel>
           </div>
@@ -137,10 +138,10 @@ function CreateForm() {
   async function handleSubmit(values: Values) {
     if (oldContainer) {
       const confirmed = await confirmDestructive({
-        title: '你确定吗？',
+        title: 'Are you sure?',
         message:
-          '已存在同名容器。Portainer 可以自动将其删除并重新创建一个。你想要替换它吗？',
-        confirmButton: buildConfirmButton('替换', 'danger'),
+          'A container with the same name already exists. Portainer can automatically remove it and re-create one. Do you want to replace it?',
+        confirmButton: buildConfirmButton('Replace', 'danger'),
       });
 
       if (!confirmed) {
@@ -170,7 +171,7 @@ function CreateForm() {
       {
         onSuccess() {
           sendAnalytics(values, registry);
-          notifySuccess('成功', '容器创建成功');
+          notifySuccess('Success', 'Container successfully created');
           router.stateService.go('docker.containers');
         },
       }

@@ -19,7 +19,7 @@ import (
 // If the user is a kube admin, it returns all jobs in the namespace
 // Otherwise, it returns only the jobs in the non-admin namespaces
 func (kcl *KubeClient) GetJobs(namespace string, includeCronJobChildren bool) ([]models.K8sJob, error) {
-	if kcl.IsKubeAdmin {
+	if kcl.GetIsKubeAdmin() {
 		return kcl.fetchJobs(namespace, includeCronJobChildren)
 	}
 
@@ -119,14 +119,17 @@ func parseJobTimes(job batchv1.Job) jobTimes {
 		duration: "N/A",
 	}
 
-	if st := job.Status.StartTime; st != nil {
-		times.start = st.Time.Format(time.RFC3339)
-		times.duration = time.Since(st.Time).Truncate(time.Minute).String()
+	st := job.Status.StartTime
+	if st == nil {
+		return times
+	}
 
-		if ct := job.Status.CompletionTime; ct != nil {
-			times.finish = ct.Time.Format(time.RFC3339)
-			times.duration = ct.Time.Sub(st.Time).String()
-		}
+	times.start = st.Format(time.RFC3339)
+	times.duration = time.Since(st.Time).Truncate(time.Minute).String()
+
+	if ct := job.Status.CompletionTime; ct != nil {
+		times.finish = ct.Format(time.RFC3339)
+		times.duration = ct.Time.Sub(st.Time).String()
 	}
 
 	return times

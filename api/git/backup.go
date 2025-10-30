@@ -19,6 +19,7 @@ type CloneOptions struct {
 	ReferenceName string
 	Username      string
 	Password      string
+	AuthType      gittypes.GitCredentialAuthType
 	// TLSSkipVerify skips SSL verification when cloning the Git repository
 	TLSSkipVerify bool `example:"false"`
 }
@@ -42,7 +43,15 @@ func CloneWithBackup(gitService portainer.GitService, fileService portainer.File
 
 	cleanUp = true
 
-	if err := gitService.CloneRepository(options.ProjectPath, options.URL, options.ReferenceName, options.Username, options.Password, options.TLSSkipVerify); err != nil {
+	if err := gitService.CloneRepository(
+		options.ProjectPath,
+		options.URL,
+		options.ReferenceName,
+		options.Username,
+		options.Password,
+		options.AuthType,
+		options.TLSSkipVerify,
+	); err != nil {
 		cleanUp = false
 		if err := filesystem.MoveDirectory(backupProjectPath, options.ProjectPath, false); err != nil {
 			log.Warn().Err(err).Msg("failed restoring backup folder")

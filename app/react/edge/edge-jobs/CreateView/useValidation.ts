@@ -37,13 +37,13 @@ export function useValidation(): SchemaOf<FormValues> {
           .default('editor'),
         file: file().when('method', {
           is: 'upload',
-          then: object().required('此字段为必填项。'),
+          then: object().required('This field is required.'),
         }),
         fileContent: string()
           .default('')
           .when('method', {
             is: 'editor',
-            then: (schema) => schema.required('此字段为必填项。'),
+            then: (schema) => schema.required('This field is required.'),
           }),
 
         cronMethod: mixed<'basic' | 'advanced'>()
@@ -54,14 +54,14 @@ export function useValidation(): SchemaOf<FormValues> {
           .when(['recurring', 'cronMethod'], {
             is: (recurring: boolean, cronMethod: 'basic' | 'advanced') =>
               !recurring && cronMethod === 'basic',
-            then: (schema) => schema.required('此字段为必填项。'),
+            then: (schema) => schema.required('This field is required.'),
           }),
         recurringOption: mixed()
           .oneOf(timeOptions.map((o) => o.value))
           .when(['recurring', 'cronMethod'], {
             is: (recurring: boolean, cronMethod: 'basic' | 'advanced') =>
               recurring && cronMethod === 'basic',
-            then: (schema) => schema.required('此字段为必填项。'),
+            then: (schema) => schema.required('This field is required.'),
           }),
       }),
     [nameValidation]

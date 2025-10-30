@@ -8,6 +8,7 @@ import (
 	"time"
 
 	lru "github.com/hashicorp/golang-lru"
+	gittypes "github.com/portainer/portainer/api/git/types"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/singleflight"
 )
@@ -22,6 +23,7 @@ type baseOption struct {
 	repositoryUrl string
 	username      string
 	password      string
+	authType      gittypes.GitCredentialAuthType
 	tlsSkipVerify bool
 }
 
@@ -123,13 +125,22 @@ func (service *Service) timerHasStopped() bool {
 
 // CloneRepository clones a git repository using the specified URL in the specified
 // destination folder.
-func (service *Service) CloneRepository(destination, repositoryURL, referenceName, username, password string, tlsSkipVerify bool) error {
+func (service *Service) CloneRepository(
+	destination,
+	repositoryURL,
+	referenceName,
+	username,
+	password string,
+	authType gittypes.GitCredentialAuthType,
+	tlsSkipVerify bool,
+) error {
 	options := cloneOption{
 		fetchOption: fetchOption{
 			baseOption: baseOption{
 				repositoryUrl: repositoryURL,
 				username:      username,
 				password:      password,
+				authType:      authType,
 				tlsSkipVerify: tlsSkipVerify,
 			},
 			referenceName: referenceName,
@@ -155,12 +166,20 @@ func (service *Service) cloneRepository(destination string, options cloneOption)
 }
 
 // LatestCommitID returns SHA1 of the latest commit of the specified reference
-func (service *Service) LatestCommitID(repositoryURL, referenceName, username, password string, tlsSkipVerify bool) (string, error) {
+func (service *Service) LatestCommitID(
+	repositoryURL,
+	referenceName,
+	username,
+	password string,
+	authType gittypes.GitCredentialAuthType,
+	tlsSkipVerify bool,
+) (string, error) {
 	options := fetchOption{
 		baseOption: baseOption{
 			repositoryUrl: repositoryURL,
 			username:      username,
 			password:      password,
+			authType:      authType,
 			tlsSkipVerify: tlsSkipVerify,
 		},
 		referenceName: referenceName,
@@ -170,7 +189,14 @@ func (service *Service) LatestCommitID(repositoryURL, referenceName, username, p
 }
 
 // ListRefs will list target repository's references without cloning the repository
-func (service *Service) ListRefs(repositoryURL, username, password string, hardRefresh bool, tlsSkipVerify bool) ([]string, error) {
+func (service *Service) ListRefs(
+	repositoryURL,
+	username,
+	password string,
+	authType gittypes.GitCredentialAuthType,
+	hardRefresh bool,
+	tlsSkipVerify bool,
+) ([]string, error) {
 	refCacheKey := generateCacheKey(repositoryURL, username, password, strconv.FormatBool(tlsSkipVerify))
 	if service.cacheEnabled && hardRefresh {
 		// Should remove the cache explicitly, so that the following normal list can show the correct result
@@ -196,6 +222,7 @@ func (service *Service) ListRefs(repositoryURL, username, password string, hardR
 		repositoryUrl: repositoryURL,
 		username:      username,
 		password:      password,
+		authType:      authType,
 		tlsSkipVerify: tlsSkipVerify,
 	}
 
@@ -215,18 +242,62 @@ var singleflightGroup = &singleflight.Group{}
 
 // ListFiles will list all the files of the target repository with specific extensions.
 // If extension is not provided, it will list all the files under the target repository
-func (service *Service) ListFiles(repositoryURL, referenceName, username, password string, dirOnly, hardRefresh bool, includedExts []string, tlsSkipVerify bool) ([]string, error) {
-	repoKey := generateCacheKey(repositoryURL, referenceName, username, password, strconv.FormatBool(tlsSkipVerify), strconv.FormatBool(dirOnly))
+func (service *Service) ListFiles(
+	repositoryURL,
+	referenceName,
+	username,
+	password string,
+	authType gittypes.GitCredentialAuthType,
+	dirOnly,
+	hardRefresh bool,
+	includedExts []string,
+	tlsSkipVerify bool,
+) ([]string, error) {
+	repoKey := generateCacheKey(
+		repositoryURL,
+		referenceName,
+		username,
+		password,
+		strconv.FormatBool(tlsSkipVerify),
+		strconv.Itoa(int(authType)),
+		strconv.FormatBool(dirOnly),
+	)
 
 	fs, err, _ := singleflightGroup.Do(repoKey, func() (any, error) {
-		return service.listFiles(repositoryURL, referenceName, username, password, dirOnly, hardRefresh, tlsSkipVerify)
+		return service.listFiles(
+			repositoryURL,
+			referenceName,
+			username,
+			password,
+			authType,
+			dirOnly,
+			hardRefresh,
+			tlsSkipVerify,
+		)
 	})
 
 	return filterFiles(fs.([]string), includedExts), err
 }
 
-func (service *Service) listFiles(repositoryURL, referenceName, username, password string, dirOnly, hardRefresh bool, tlsSkipVerify bool) ([]string, error) {
-	repoKey := generateCacheKey(repositoryURL, referenceName, username, password, strconv.FormatBool(tlsSkipVerify), strconv.FormatBool(dirOnly))
+func (service *Service) listFiles(
+	repositoryURL,
+	referenceName,
+	username,
+	password string,
+	authType gittypes.GitCredentialAuthType,
+	dirOnly,
+	hardRefresh bool,
+	tlsSkipVerify bool,
+) ([]string, error) {
+	repoKey := generateCacheKey(
+		repositoryURL,
+		referenceName,
+		username,
+		password,
+		strconv.FormatBool(tlsSkipVerify),
+		strconv.Itoa(int(authType)),
+		strconv.FormatBool(dirOnly),
+	)
 
 	if service.cacheEnabled && hardRefresh {
 		// Should remove the cache explicitly, so that the following normal list can show the correct result
@@ -247,6 +318,7 @@ func (service *Service) listFiles(repositoryURL, referenceName, username, passwo
 			repositoryUrl: repositoryURL,
 			username:      username,
 			password:      password,
+			authType:      authType,
 			tlsSkipVerify: tlsSkipVerify,
 		},
 		referenceName: referenceName,

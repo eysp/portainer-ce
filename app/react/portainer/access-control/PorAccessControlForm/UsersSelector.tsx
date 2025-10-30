@@ -28,7 +28,7 @@ export function PorAccessControlFormUserSelector({
       data-cy="portainer-selectUserAccess"
       id="portainer-selectUserAccess"
       inputId={inputId}
-      placeholder="选择一个或多个用户"
+      placeholder="Select one or more users"
     />
   );
 }

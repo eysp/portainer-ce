@@ -25,19 +25,20 @@ export function TemplateLoadError({
     <FormError>
       {isAdminOrWriter ? (
         <>
-          自定义模板无法加载，请{' '}
+          Custom template could not be loaded, please{' '}
           <Link
             to=".edit"
             params={{ id: templateId }}
             data-cy="edit-custom-template-link"
           >
-            点击这里
+            click here
           </Link>{' '}
-          进行配置
+          for configuration
         </>
       ) : (
         <>
-          自定义模板无法加载，请联系您的管理员。
+          Custom template could not be loaded, please contact your
+          administrator.
         </>
       )}
     </FormError>

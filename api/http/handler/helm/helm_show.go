@@ -20,6 +20,7 @@ import (
 // @tags helm
 // @param repo query string true "Helm repository URL"
 // @param chart query string true "Chart name"
+// @param version query string true "Chart version"
 // @param command path string true "chart/values/readme"
 // @security ApiKeyAuth
 // @security jwt
@@ -45,6 +46,11 @@ func (handler *Handler) helmShow(w http.ResponseWriter, r *http.Request) *httper
 		return httperror.BadRequest("Bad request", errors.New("missing `chart` query parameter"))
 	}
 
+	version, err := request.RetrieveQueryParameter(r, "version", true)
+	if err != nil {
+		return httperror.BadRequest("Bad request", errors.Wrap(err, fmt.Sprintf("provided version %q is not valid", version)))
+	}
+
 	cmd, err := request.RetrieveRouteVariableValue(r, "command")
 	if err != nil {
 		cmd = "all"
@@ -55,6 +61,7 @@ func (handler *Handler) helmShow(w http.ResponseWriter, r *http.Request) *httper
 		OutputFormat: options.ShowOutputFormat(cmd),
 		Chart:        chart,
 		Repo:         repo,
+		Version:      version,
 	}
 	result, err := handler.helmPackageManager.Show(showOptions)
 	if err != nil {

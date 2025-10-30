@@ -8,8 +8,10 @@ import (
 	"testing"
 
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/roar"
 
 	"github.com/segmentio/encoding/json"
+	"github.com/stretchr/testify/require"
 )
 
 // Create
@@ -23,14 +25,12 @@ func TestCreateAndInspect(t *testing.T) {
 		Name:         "EdgeGroup 1",
 		Dynamic:      false,
 		TagIDs:       nil,
-		Endpoints:    []portainer.EndpointID{endpoint.ID},
+		EndpointIDs:  roar.FromSlice([]portainer.EndpointID{endpoint.ID}),
 		PartialMatch: false,
 	}
 
 	err := handler.DataStore.EdgeGroup().Create(&edgeGroup)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	endpointRelation := portainer.EndpointRelation{
 		EndpointID: endpoint.ID,
@@ -38,9 +38,7 @@ func TestCreateAndInspect(t *testing.T) {
 	}
 
 	err = handler.DataStore.EndpointRelation().Create(&endpointRelation)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	payload := edgeStackFromStringPayload{
 		Name:             "test-stack",
@@ -50,16 +48,14 @@ func TestCreateAndInspect(t *testing.T) {
 	}
 
 	jsonPayload, err := json.Marshal(payload)
-	if err != nil {
-		t.Fatal("JSON marshal error:", err)
-	}
+	require.NoError(t, err)
+
 	r := bytes.NewBuffer(jsonPayload)
 
 	// Create EdgeStack
 	req, err := http.NewRequest(http.MethodPost, "/edge_stacks/create/string", r)
-	if err != nil {
-		t.Fatal("request error:", err)
-	}
+	require.NoError(t, err)
+
 	req.Header.Add("x-api-key", rawAPIKey)
 	rec := httptest.NewRecorder()
 	handler.ServeHTTP(rec, req)
@@ -70,15 +66,11 @@ func TestCreateAndInspect(t *testing.T) {
 
 	data := portainer.EdgeStack{}
 	err = json.NewDecoder(rec.Body).Decode(&data)
-	if err != nil {
-		t.Fatal("error decoding response:", err)
-	}
+	require.NoError(t, err)
 
 	// Inspect
 	req, err = http.NewRequest(http.MethodGet, fmt.Sprintf("/edge_stacks/%d", data.ID), nil)
-	if err != nil {
-		t.Fatal("request error:", err)
-	}
+	require.NoError(t, err)
 
 	req.Header.Add("x-api-key", rawAPIKey)
 	rec = httptest.NewRecorder()
@@ -90,9 +82,7 @@ func TestCreateAndInspect(t *testing.T) {
 
 	data = portainer.EdgeStack{}
 	err = json.NewDecoder(rec.Body).Decode(&data)
-	if err != nil {
-		t.Fatal("error decoding response:", err)
-	}
+	require.NoError(t, err)
 
 	if payload.Name != data.Name {
 		t.Fatalf("expected EdgeStack Name %s, found %s", payload.Name, data.Name)

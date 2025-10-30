@@ -7,6 +7,7 @@ import (
 
 	"github.com/portainer/portainer/pkg/libhelm/options"
 	httperror "github.com/portainer/portainer/pkg/libhttp/error"
+	"github.com/portainer/portainer/pkg/libhttp/request"
 
 	"github.com/pkg/errors"
 )
@@ -17,6 +18,8 @@ import (
 // @description **Access policy**: authenticated
 // @tags helm
 // @param repo query string true "Helm repository URL"
+// @param chart query string false "Helm chart name"
+// @param useCache query string false "If true will use cache to search"
 // @security ApiKeyAuth
 // @security jwt
 // @produce json
@@ -32,13 +35,19 @@ func (handler *Handler) helmRepoSearch(w http.ResponseWriter, r *http.Request) *
 		return httperror.BadRequest("Bad request", errors.New("missing `repo` query parameter"))
 	}
 
+	chart, _ := request.RetrieveQueryParameter(r, "chart", false)
+	// If true will useCache to search, will always add to cache after
+	useCache, _ := request.RetrieveBooleanQueryParameter(r, "useCache", false)
+
 	_, err := url.ParseRequestURI(repo)
 	if err != nil {
 		return httperror.BadRequest("Bad request", errors.Wrap(err, fmt.Sprintf("provided URL %q is not valid", repo)))
 	}
 
 	searchOpts := options.SearchRepoOptions{
-		Repo: repo,
+		Repo:     repo,
+		Chart:    chart,
+		UseCache: useCache,
 	}
 
 	result, err := handler.helmPackageManager.SearchRepo(searchOpts)

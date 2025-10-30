@@ -44,7 +44,7 @@ export function IntervalField({
 export function intervalValidation() {
   return (
     string()
-      .required('此字段为必填项。')
+      .required('This field is required.')
       // TODO: find a regex that validates time.Duration
       // .matches(
       //   // validate golang time.Duration format

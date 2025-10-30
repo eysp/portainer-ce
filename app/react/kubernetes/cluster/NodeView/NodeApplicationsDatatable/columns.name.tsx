@@ -2,11 +2,11 @@ import { CellContext } from '@tanstack/react-table';
 
 import { isExternalApplication } from '@/react/kubernetes/applications/utils';
 import { useIsSystemNamespace } from '@/react/kubernetes/namespaces/queries/useIsSystemNamespace';
-import { ExternalBadge } from '@/react/kubernetes/components/ExternalBadge';
-import { SystemBadge } from '@/react/kubernetes/components/SystemBadge';
 import { Application } from '@/react/kubernetes/applications/ListView/ApplicationsDatatable/types';
 
 import { Link } from '@@/Link';
+import { SystemBadge } from '@@/Badge/SystemBadge';
+import { ExternalBadge } from '@@/Badge/ExternalBadge';
 
 import { helper } from './columns.helper';
 
@@ -28,9 +28,11 @@ function Cell({ row: { original: item } }: CellContext<Application, string>) {
       </Link>
 
       {isSystem ? (
-        <SystemBadge />
+        <SystemBadge className="ml-auto" />
       ) : (
-        isExternalApplication({ metadata: item.Metadata }) && <ExternalBadge />
+        isExternalApplication({ metadata: item.Metadata }) && (
+          <ExternalBadge className="ml-auto" />
+        )
       )}
     </div>
   );

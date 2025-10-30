@@ -121,9 +121,18 @@ export function fullURIIntoRepoAndTag(fullURI: string) {
   // - registry/image-repo:tag
   // - image-repo:tag
   // - registry:port/image-repo:tag
+  // - localhost:5000/nginx
   // buildImageFullURIFromModel always gives a tag (defaulting to 'latest'), so the tag is always present after the last ':'
   const parts = fullURI.split(':');
   const tag = parts.pop() || 'latest';
+
+  // handle the case of a repo with a non standard port
+  if (tag.includes('/')) {
+    return {
+      repo: fullURI,
+      tag: 'latest',
+    };
+  }
   const repo = parts.join(':');
   return {
     repo,

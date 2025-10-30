@@ -1,6 +1,6 @@
-import { EventList } from 'kubernetes-types/core/v1';
 import { useQuery } from '@tanstack/react-query';
 
+import { Event } from '@/react/kubernetes/queries/types';
 import { EnvironmentId } from '@/react/portainer/environments/types';
 import axios from '@/portainer/services/axios';
 import { withGlobalError } from '@/react-tools/react-query';
@@ -13,10 +13,7 @@ type RequestOptions = {
   /** if undefined, events are fetched at the cluster scope */
   namespace?: string;
   params?: {
-    /** https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors */
-    labelSelector?: string;
-    /** https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors */
-    fieldSelector?: string;
+    resourceId?: string;
   };
 };
 
@@ -41,30 +38,31 @@ const queryKeys = {
 async function getEvents(
   environmentId: EnvironmentId,
   options?: RequestOptions
-) {
+): Promise<Event[]> {
   const { namespace, params } = options ?? {};
   try {
-    const { data } = await axios.get<EventList>(
+    const { data } = await axios.get<Event[]>(
       buildUrl(environmentId, namespace),
       {
         params,
       }
     );
-    return data.items;
+    return data;
   } catch (e) {
     throw parseKubernetesAxiosError(e, 'Unable to retrieve events');
   }
 }
 
-type QueryOptions = {
+type QueryOptions<T> = {
   queryOptions?: {
     autoRefreshRate?: number;
+    select?: (data: Event[]) => T;
   };
 } & RequestOptions;
 
-export function useEvents(
+export function useEvents<T = Event[]>(
   environmentId: EnvironmentId,
-  options?: QueryOptions
+  options?: QueryOptions<T>
 ) {
   const { queryOptions, params, namespace } = options ?? {};
   return useQuery(
@@ -75,6 +73,7 @@ export function useEvents(
       refetchInterval() {
         return queryOptions?.autoRefreshRate ?? false;
       },
+      select: queryOptions?.select,
     }
   );
 }
@@ -83,15 +82,17 @@ export function useEventWarningsCount(
   environmentId: EnvironmentId,
   namespace?: string
 ) {
-  const resourceEventsQuery = useEvents(environmentId, {
+  const resourceEventsQuery = useEvents<number>(environmentId, {
     namespace,
+    queryOptions: {
+      select: (data) => data.filter((e) => e.type === 'Warning').length,
+    },
   });
-  const events = resourceEventsQuery.data || [];
-  return events.filter((e) => e.type === 'Warning').length;
+  return resourceEventsQuery.data || 0;
 }
 
 function buildUrl(environmentId: EnvironmentId, namespace?: string) {
   return namespace
-    ? `/endpoints/${environmentId}/kubernetes/api/v1/namespaces/${namespace}/events`
-    : `/endpoints/${environmentId}/kubernetes/api/v1/events`;
+    ? `/kubernetes/${environmentId}/namespaces/${namespace}/events`
+    : `/kubernetes/${environmentId}/events`;
 }

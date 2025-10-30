@@ -32,6 +32,10 @@ body {
   color: var(--text-body-color) !important;
 }
 
+.bg-widget-color {
+  background: var(--bg-widget-color);
+}
+
 html,
 body,
 #page-wrapper,
@@ -224,7 +228,7 @@ input[type='checkbox'] {
 
 .blocklist-item--selected {
   background-color: var(--bg-blocklist-item-selected-color);
-  border: 2px solid var(--border-blocklist-item-selected-color);
+  border-color: var(--border-blocklist-item-selected-color);
   color: var(--text-blocklist-item-selected-color);
 }
 

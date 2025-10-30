@@ -17,6 +17,7 @@ import { PageHeader } from '@@/PageHeader';
 import { Button } from '@@/buttons';
 import { FormSection } from '@@/form-components/FormSection';
 import { Icon } from '@@/Icon';
+import { Alert } from '@@/Alert';
 
 import {
   EnvironmentOptionValue,
@@ -71,19 +72,32 @@ export function EnvironmentCreationView() {
   return (
     <>
       <PageHeader
-        title="快速设置"
-        breadcrumbs={[{ label: '环境向导' }]}
+        title="Quick Setup"
+        breadcrumbs={[{ label: 'Environment Wizard' }]}
         reload
       />
 
       <div className={styles.wizardWrapper}>
         <Widget>
-          <WidgetTitle icon={Wand2} title="环境向导" />
+          <WidgetTitle icon={Wand2} title="Environment Wizard" />
           <WidgetBody>
             <Stepper steps={steps} currentStep={currentStepIndex + 1} />
 
             <div className="mt-12">
               <FormSection title={formTitles[currentStep.id]}>
+                {currentStep.id === 'kaas' && (
+                  <Alert
+                    color="warn"
+                    title="Deprecated Feature"
+                    className="mb-2"
+                  >
+                    Provisioning a KaaS environment from Portainer is deprecated
+                    and will be removed in a future release. You will still be
+                    able to use any Kubernetes clusters provisioned using this
+                    method but will no longer have access to any of the
+                    KaaS-specific management functionality.
+                  </Alert>
+                )}
                 <Component
                   onCreate={handleCreateEnvironment}
                   isDockerStandalone={isDockerStandalone}
@@ -100,13 +114,13 @@ export function EnvironmentCreationView() {
                     onClick={onPreviousClick}
                     data-cy="environment-wizard-previous-button"
                   >
-                    <Icon icon={ArrowLeft} /> 上一步
+                    <Icon icon={ArrowLeft} /> Previous
                   </Button>
                   <Button
                     onClick={onNextClick}
                     data-cy="environment-wizard-next-button"
                   >
-                    {isLastStep ? '关闭' : '下一步'}
+                    {isLastStep ? 'Close' : 'Next'}
                     <Icon icon={ArrowRight} />
                   </Button>
                 </div>
@@ -154,7 +168,7 @@ function useParamEnvironmentTypes(): EnvironmentOptionValue[] {
   const router = useRouter();
 
   if (!envType) {
-    notifyError('未提供环境类型');
+    notifyError('No environment type provided');
     router.stateService.go('portainer.wizard.endpoints');
     return [];
   }
@@ -206,7 +220,7 @@ function useStepper(
       case 'kubernetes':
         return WizardKubernetes;
       default:
-        throw new Error(`未知的环境类型 ${id}`);
+        throw new Error(`Unknown environment type ${id}`);
     }
   }
 }

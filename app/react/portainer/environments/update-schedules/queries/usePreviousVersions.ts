@@ -1,7 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 
 import axios, { parseAxiosError } from '@/portainer/services/axios';
-import { EnvironmentId } from '@/react/portainer/environments/types';
+import {
+  EdgeGroupId,
+  EnvironmentId,
+} from '@/react/portainer/environments/types';
 
 import { queryKeys } from './query-keys';
 import { buildUrl } from './urls';
@@ -12,22 +15,27 @@ interface Options<T> {
   enabled?: boolean;
 }
 
-export function usePreviousVersions<T = Record<EnvironmentId, string>>({
-  select,
-  onSuccess,
-  enabled,
-}: Options<T> = {}) {
-  return useQuery(queryKeys.previousVersions(), getPreviousVersions, {
-    select,
-    onSuccess,
-    enabled,
-  });
+export function usePreviousVersions<T = Record<EdgeGroupId, string>>(
+  edgeGroupIds: EdgeGroupId[],
+  { select, enabled }: Options<T> = {}
+) {
+  return useQuery(
+    queryKeys.previousVersions(edgeGroupIds),
+    () => getPreviousVersions(edgeGroupIds),
+    {
+      select,
+      enabled: enabled && edgeGroupIds.length > 0,
+    }
+  );
 }
 
-async function getPreviousVersions() {
+async function getPreviousVersions(edgeGroupIds: EdgeGroupId[]) {
   try {
-    const { data } = await axios.get<Record<EnvironmentId, string>>(
-      buildUrl(undefined, 'previous_versions')
+    const { data } = await axios.get<Record<EdgeGroupId, string>>(
+      buildUrl(undefined, 'previous_versions'),
+      {
+        params: { edgeGroupIds },
+      }
     );
     return data;
   } catch (err) {

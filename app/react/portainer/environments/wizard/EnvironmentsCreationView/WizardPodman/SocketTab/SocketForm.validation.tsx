@@ -15,7 +15,7 @@ export function useValidation(): SchemaOf<FormValues> {
       .when('overridePath', (overridePath, schema) =>
         overridePath
           ? schema.required(
-              '启用覆盖路径时必须填写 Socket 路径'
+              'Socket Path is required when override path is enabled'
             )
           : schema
       ),

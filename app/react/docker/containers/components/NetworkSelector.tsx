@@ -52,7 +52,7 @@ export function NetworkSelector({
       options={options}
       isLoading={networksQuery.isLoading}
       bindToBody
-      placeholder="选择一个网络"
+      placeholder="Select a network"
       data-cy="docker-network-selector"
     />
   );

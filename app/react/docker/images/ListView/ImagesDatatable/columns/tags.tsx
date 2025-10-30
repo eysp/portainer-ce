@@ -8,7 +8,7 @@ import { columnHelper } from './helper';
 
 export const tags = columnHelper.accessor((item) => item.tags?.join(','), {
   id: 'tags',
-  header: '标签',
+  header: 'Tags',
   cell: Cell,
 });
 

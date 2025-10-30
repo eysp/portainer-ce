@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { humanize } from '@/portainer/filters/filters';
 import { trimSHA } from '@/docker/filters/utils';
 
-import { buildNameColumn } from '@@/datatables/buildNameColumn';
+import { buildNameColumnFromObject } from '@@/datatables/buildNameColumn';
 
 import { Tag } from '../types';
 
@@ -13,13 +13,13 @@ import { buildCell } from './buildCell';
 import { actions } from './actions';
 
 const columns = [
-  buildNameColumn<Tag>(
-    'Name',
-    'portainer.registries.registry.repository.tag',
-    'tag',
-    'registry-tag-name',
-    (item) => item.Name
-  ),
+  buildNameColumnFromObject<Tag>({
+    nameKey: 'Name',
+    path: 'portainer.registries.registry.repository.tag',
+    dataCy: 'registry-tag-name',
+    idParam: 'tag',
+    idGetter: (item) => item.Name,
+  }),
   helper.display({
     header: 'OS/Architecture',
     cell: buildCell((model) => `${model.Os}/${model.Architecture}`),

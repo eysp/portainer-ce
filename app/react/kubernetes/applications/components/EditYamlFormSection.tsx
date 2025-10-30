@@ -35,7 +35,7 @@ export function EditYamlFormSection({
         titleContent={<TitleContent isComposeFormat={isComposeFormat} />}
         onChange={(values) => onChange(values)}
         id={formId}
-        placeholder="Define or paste the content of your manifest file here"
+        textTip="Define or paste the content of your manifest file here"
         type="yaml"
       />
     </div>

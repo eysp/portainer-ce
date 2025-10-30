@@ -22,7 +22,7 @@ export function FilterBar({
           <DateRangePicker value={value} onChange={onChange} />
 
           <TextTip color="blue">
-            Portainer 用户活动日志的最大保留期限为7天。
+            Portainer user activity logs have a maximum retention of 7 days.
           </TextTip>
 
           <div className="mt-4">
@@ -33,7 +33,7 @@ export function FilterBar({
               className="!ml-0"
               data-cy="activity-logs-export-csv-button"
             >
-              导出为 CSV
+              Export as CSV
             </Button>
           </div>
         </form>

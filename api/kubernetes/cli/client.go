@@ -42,17 +42,10 @@ type (
 		cli                kubernetes.Interface
 		instanceID         string
 		mu                 sync.Mutex
-		IsKubeAdmin        bool
-		NonAdminNamespaces []string
+		isKubeAdmin        bool
+		nonAdminNamespaces []string
 	}
 )
-
-func NewKubeClientFromClientset(cli *kubernetes.Clientset) *KubeClient {
-	return &KubeClient{
-		cli:        cli,
-		instanceID: "",
-	}
-}
 
 // NewClientFactory returns a new instance of a ClientFactory
 func NewClientFactory(signatureService portainer.DigitalSignatureService, reverseTunnelService portainer.ReverseTunnelService, dataStore dataservices.DataStore, instanceID, addrHTTPS, userSessionTimeout string) (*ClientFactory, error) {
@@ -84,15 +77,54 @@ func (factory *ClientFactory) ClearClientCache() {
 	factory.endpointProxyClients.Flush()
 }
 
+// ClearClientCache removes all cached kube clients for a userId
+func (factory *ClientFactory) ClearUserClientCache(userID string) {
+	for key := range factory.endpointProxyClients.Items() {
+		if strings.HasSuffix(key, "."+userID) {
+			factory.endpointProxyClients.Delete(key)
+		}
+	}
+}
+
 // Remove the cached kube client so a new one can be created
 func (factory *ClientFactory) RemoveKubeClient(endpointID portainer.EndpointID) {
 	factory.endpointProxyClients.Delete(strconv.Itoa(int(endpointID)))
+
+	endpointPrefix := strconv.Itoa(int(endpointID)) + "."
+
+	for key := range factory.endpointProxyClients.Items() {
+		if strings.HasPrefix(key, endpointPrefix) {
+			factory.endpointProxyClients.Delete(key)
+		}
+	}
+}
+
+func (factory *ClientFactory) GetAddrHTTPS() string {
+	return factory.AddrHTTPS
 }
 
 // GetPrivilegedKubeClient checks if an existing client is already registered for the environment(endpoint) and returns it if one is found.
 // If no client is registered, it will create a new client, register it, and returns it.
 func (factory *ClientFactory) GetPrivilegedKubeClient(endpoint *portainer.Endpoint) (*KubeClient, error) {
 	key := strconv.Itoa(int(endpoint.ID))
+	pcl, ok := factory.endpointProxyClients.Get(key)
+	if ok {
+		return pcl.(*KubeClient), nil
+	}
+
+	kcl, err := factory.createCachedPrivilegedKubeClient(endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	factory.endpointProxyClients.Set(key, kcl, cache.DefaultExpiration)
+	return kcl, nil
+}
+
+// GetPrivilegedUserKubeClient checks if an existing admin client is already registered for the environment(endpoint) and user and returns it if one is found.
+// If no client is registered, it will create a new client, register it, and returns it.
+func (factory *ClientFactory) GetPrivilegedUserKubeClient(endpoint *portainer.Endpoint, userID string) (*KubeClient, error) {
+	key := strconv.Itoa(int(endpoint.ID)) + ".admin." + userID
 	pcl, ok := factory.endpointProxyClients.Get(key)
 	if ok {
 		return pcl.(*KubeClient), nil
@@ -115,6 +147,7 @@ func (factory *ClientFactory) GetProxyKubeClient(endpointID, userID string) (*Ku
 	if ok {
 		return client.(*KubeClient), true
 	}
+
 	return nil, false
 }
 
@@ -147,8 +180,8 @@ func (factory *ClientFactory) CreateKubeClientFromKubeConfig(clusterID string, k
 	return &KubeClient{
 		cli:                cli,
 		instanceID:         factory.instanceID,
-		IsKubeAdmin:        IsKubeAdmin,
-		NonAdminNamespaces: NonAdminNamespaces,
+		isKubeAdmin:        IsKubeAdmin,
+		nonAdminNamespaces: NonAdminNamespaces,
 	}, nil
 }
 
@@ -159,8 +192,9 @@ func (factory *ClientFactory) createCachedPrivilegedKubeClient(endpoint *portain
 	}
 
 	return &KubeClient{
-		cli:        cli,
-		instanceID: factory.instanceID,
+		cli:         cli,
+		instanceID:  factory.instanceID,
+		isKubeAdmin: true,
 	}, nil
 }
 
@@ -338,6 +372,7 @@ func (factory *ClientFactory) MigrateEndpointIngresses(e *portainer.Endpoint, da
 				log.Error().Err(err).Msgf("Error getting ingresses in environment %d", environment.ID)
 				return err
 			}
+
 			for _, ingress := range ingresses {
 				oldController, ok := ingress.Annotations["ingress.portainer.io/ingress-type"]
 				if !ok {

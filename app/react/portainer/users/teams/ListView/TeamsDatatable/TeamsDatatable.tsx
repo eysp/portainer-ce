@@ -36,14 +36,14 @@ export function TeamsDatatable({ teams, isAdmin }: Props) {
       dataset={teams}
       columns={columns}
       settingsManager={tableState}
-      title="团队"
+      title="Teams"
       titleIcon={Users}
       renderTableActions={(selectedRows) =>
         isAdmin && (
           <DeleteButton
             onConfirmed={() => handleRemoveClick(selectedRows)}
             disabled={selectedRows.length === 0}
-            confirmMessage="您确定要删除选中的团队吗？"
+            confirmMessage="Are you sure you want to remove the selected teams?"
             data-cy="remove-teams-button"
           />
         )

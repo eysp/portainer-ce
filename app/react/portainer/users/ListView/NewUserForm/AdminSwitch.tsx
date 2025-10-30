@@ -12,8 +12,8 @@ export function AdminSwitch() {
       <div className="col-sm-12">
         <SwitchField
           data-cy="user-adminSwitch"
-          label="管理员"
-          tooltip="管理员可以访问 Portainer 设置管理，并且对所有定义的环境及其资源拥有完全控制权限。'"
+          label="Administrator"
+          tooltip="Administrators have access to Portainer settings management as well as full control over all defined environments and their resources.'"
           checked={value}
           onChange={(checked) => setValue(checked)}
           name={name}

@@ -89,7 +89,7 @@ export function InputList<T = DefaultType>({
   renderItem = renderDefaultItem as unknown as RenderItemFunction<T>,
   item: Item,
   tooltip,
-  addLabel = '添加项',
+  addLabel = 'Add item',
   itemKeyGetter = (item: T, index: number) => index,
   movable,
   canUndoDelete = false,

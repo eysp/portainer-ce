@@ -19,7 +19,7 @@ export function LDAPGroupsTable({ dataset }: { dataset?: Value[] }) {
       columns={columns}
       dataset={dataset || []}
       isLoading={!dataset}
-      title="分组"
+      title="Groups"
       titleIcon={Users}
       settingsManager={tableState}
       disableSelect
@@ -34,7 +34,7 @@ function getColumns() {
   return [
     helper.accessor('Name', {}),
     helper.accessor((item) => item.Groups.join(','), {
-      header: '分组',
+      header: 'Groups',
       cell: ({ row: { original: item } }) => (
         <>
           {item.Groups.map((g) => (

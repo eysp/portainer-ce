@@ -60,7 +60,7 @@ export function AccessControlPanel({
 
   return (
     <TableContainer>
-      <TableTitle label="访问控制" icon={Eye} />
+      <TableTitle label="Access control" icon={Eye} />
       <AccessControlPanelDetails
         resourceType={resourceType}
         resourceControl={resourceControl}
@@ -76,7 +76,7 @@ export function AccessControlPanel({
               data-cy="change-ownership-button"
             >
               <Icon icon={Edit} className="space-right" />
-              更改所有权
+              Change ownership
             </Button>
           </div>
         </div>

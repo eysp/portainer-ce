@@ -7,7 +7,7 @@ import { gitFormRefField } from './git-form-ref-field';
 
 export const gitFormModule = angular
   .module('portainer.app.components.git-form', [])
-  .component('gitForm', gitForm)
+  .component('gitForm', gitForm) // kube deploy + docker stack create
   .component('gitFormAuthFieldset', gitFormAuthFieldset)
   .component('gitFormAutoUpdateFieldset', gitFormAutoUpdate)
   .component('gitFormRefField', gitFormRefField).name;

@@ -146,13 +146,11 @@ func (handler *Handler) getAllKubernetesConfigMaps(r *http.Request) ([]models.K8
 	}
 
 	if isUsed {
-		configMapsWithApplications, err := cli.CombineConfigMapsWithApplications(configMaps)
+		err = cli.SetConfigMapsIsUsed(&configMaps)
 		if err != nil {
 			log.Error().Err(err).Str("context", "getAllKubernetesConfigMaps").Msg("Unable to combine configMaps with associated applications")
 			return nil, httperror.InternalServerError("Unable to combine configMaps with associated applications", err)
 		}
-
-		return configMapsWithApplications, nil
 	}
 
 	return configMaps, nil

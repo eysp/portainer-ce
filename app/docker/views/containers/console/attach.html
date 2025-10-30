@@ -1,38 +1,38 @@
 <page-header
-  title="'容器终端'"
+  title="'Container console'"
   breadcrumbs="[
-    { label:'容器', link:'docker.containers' },
+    { label:'Containers', link:'docker.containers' },
     {
       label:(container.Name | trimcontainername),
       link: 'docker.containers.container',
       linkParams: { id: container.Id },
-    }, '终端']"
+    }, 'Console']"
 >
 </page-header>
 
 <div class="row" ng-init="autoconnectAttachView()" ng-show="loaded">
   <div class="col-lg-12 col-md-12 col-xs-12">
     <rd-widget>
-      <rd-widget-header icon="terminal" title-text="连接终端"></rd-widget-header>
+      <rd-widget-header icon="terminal" title-text="Attach"></rd-widget-header>
       <rd-widget-body>
         <div class="small text-warning" ng-if="!container.Config.OpenStdin">
           <p>
             <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
-            未设置交互标志。您可能无法正常使用终端。
+            The interactive-flag is not set. You might not be able to use the console properly.
           </p>
         </div>
 
         <div class="small text-warning" ng-if="!container.Config.Tty">
           <p>
             <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
-            未设置 TTY 标志。您可能无法正常使用终端。
+            The TTY-flag is not set. You might not be able to use the console properly.
           </p>
         </div>
 
         <div class="small text-warning" ng-hide="container.State.Running">
           <p>
             <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
-            容器未运行。
+            The container is not running.
           </p>
         </div>
 
@@ -42,9 +42,9 @@
           ng-disabled="state === states.connecting || !container.State.Running"
           ng-click="state == states.disconnected ? connectAttach() : disconnect()"
         >
-          <span ng-show="state === states.disconnected">连接容器终端</span>
-          <span ng-show="state === states.connected">断开连接</span>
-          <span ng-show="state === states.connecting">正在连接...</span>
+          <span ng-show="state === states.disconnected">Attach to Container</span>
+          <span ng-show="state === states.connected">Detach</span>
+          <span ng-show="state === states.connecting">Attaching...</span>
         </button>
       </rd-widget-body>
     </rd-widget>

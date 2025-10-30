@@ -1,4 +1,4 @@
-<page-header title="'环境分组详情'" breadcrumbs="[{label:'分组', link:'portainer.groups'}, group.Name]" reload="true"> </page-header>
+<page-header title="'Environment group details'" breadcrumbs="[{label:'Groups', link:'portainer.groups'}, group.Name]" reload="true"> </page-header>
 
 <div class="row">
   <div class="col-sm-12">
@@ -9,7 +9,7 @@
           model="group"
           associated-endpoints="associatedEndpoints"
           form-action="update"
-          form-action-label="更新分组"
+          form-action-label="Update the group"
           action-in-progress="state.actionInProgress"
           on-change-environments="(onChangeEnvironments)"
         ></group-form>

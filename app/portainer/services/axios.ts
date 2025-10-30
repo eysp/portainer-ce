@@ -12,6 +12,7 @@ import {
 } from 'axios-cache-interceptor';
 import { loadProgressBar } from 'axios-progress-bar';
 import 'axios-progress-bar/dist/nprogress.css';
+import qs from 'qs';
 
 import PortainerError from '@/portainer/error';
 
@@ -53,6 +54,9 @@ function headerInterpreter(
 const axios = Axios.create({
   baseURL: 'api',
   maxDockerAPIVersion: MAX_DOCKER_API_VERSION,
+  paramsSerializer: {
+    serialize: (params) => qs.stringify(params, { arrayFormat: 'brackets' }),
+  },
 });
 axios.interceptors.request.use((req) => {
   dispatchCacheRefreshEventIfNeeded(req);

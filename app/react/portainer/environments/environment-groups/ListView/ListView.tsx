@@ -6,8 +6,8 @@ export function ListView() {
   return (
     <>
       <PageHeader
-        title="环境分组"
-        breadcrumbs="环境分组管理"
+        title="Environment Groups"
+        breadcrumbs="Environment group management"
         reload
       />
 

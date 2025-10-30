@@ -1,22 +1,22 @@
 <div ng-if="service.ServiceMounts" id="service-mounts">
   <rd-widget>
-    <rd-widget-header icon="list" title-text="挂载点">
+    <rd-widget-header icon="list" title-text="Mounts">
       <div class="nopadding" authorization="DockerServiceUpdate">
-        <a class="btn btn-secondary btn-sm pull-right" ng-click="isUpdating ||addMount(service)" ng-disabled="isUpdating"> <pr-icon icon="'plus'"></pr-icon> 挂载点 </a>
+        <a class="btn btn-secondary btn-sm pull-right" ng-click="isUpdating ||addMount(service)" ng-disabled="isUpdating"> <pr-icon icon="'plus'"></pr-icon> mount </a>
       </div>
     </rd-widget-header>
     <rd-widget-body ng-if="service.ServiceMounts.length === 0">
-      <p>该服务没有挂载点。</p>
+      <p>There are no mounts for this service.</p>
     </rd-widget-body>
     <rd-widget-body ng-if="service.ServiceMounts.length > 0" classes="no-padding">
       <table class="mb-0 table">
         <thead>
           <tr>
-            <th ng-if="isAdmin || allowBindMounts">类型</th>
-            <th>源</th>
-            <th>目标</th>
-            <th authorization="DockerServiceUpdate">只读</th>
-            <th authorization="DockerServiceUpdate">操作</th>
+            <th ng-if="isAdmin || allowBindMounts">Type</th>
+            <th>Source</th>
+            <th>Target</th>
+            <th authorization="DockerServiceUpdate">Read only</th>
+            <th authorization="DockerServiceUpdate">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -31,8 +31,8 @@
                 ng-disabled="isUpdating"
                 disable-authorization="DockerServiceUpdate"
               >
-                <option value="volume">卷</option>
-                <option value="bind">绑定</option>
+                <option value="volume">Volume</option>
+                <option value="bind">Bind</option>
               </select>
             </td>
             <td class="!pb-0 !pt-6 !align-top">
@@ -46,7 +46,7 @@
                   disable-authorization="DockerServiceUpdate"
                   data-cy="volume-selector"
                 >
-                  <option selected disabled hidden value="">选择卷</option>
+                  <option selected disabled hidden value="">Select a volume</option>
                 </select>
                 <input
                   type="text"
@@ -54,14 +54,14 @@
                   class="form-control !h-[30px] !text-[13px]"
                   name=""
                   ng-model="mount.Source"
-                  placeholder="例如 /tmp/portainer/data"
+                  placeholder="e.g. /tmp/portainer/data"
                   ng-change="updateMount(service, mount)"
                   ng-disabled="isUpdating || (!isAdmin && !allowBindMounts && mount.Type === 'bind')"
                   ng-if="mount.Type === 'bind'"
                 />
               </div>
               <div class="small text-warning !-mt-6" ng-show="!mount.Source">
-                <div class="vertical-center"><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 源是必选项。 </div></div
+                <div class="vertical-center"><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> Source is required. </div></div
               >
             </td>
             <td class="!pb-0 !pt-6 !align-top">
@@ -70,13 +70,13 @@
                 data-cy="mount-target-input-{{ index }}"
                 class="form-control mb-6 !h-[30px] !text-[13px]"
                 ng-model="mount.Target"
-                placeholder="例如 /tmp/portainer/data"
+                placeholder="e.g. /tmp/portainer/data"
                 ng-change="updateMount(service, mount)"
                 ng-disabled="isUpdating"
                 disable-authorization="DockerServiceUpdate"
               />
               <div class="small text-warning !-mt-6" ng-show="!mount.Target">
-                <div class="vertical-center"><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> 目标是必需的。 </div></div
+                <div class="vertical-center"><pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> Target is required. </div></div
               >
             </td>
             <td authorization="DockerServiceUpdate">
@@ -97,14 +97,14 @@
       <div class="btn-toolbar" role="toolbar">
         <div class="btn-group" role="group">
           <button type="button" class="btn btn-primary btn-sm" ng-disabled="!mountsAreValid() || !hasChanges(service, ['ServiceMounts'])" ng-click="updateService(service)">
-            应用更改
+            Apply changes
           </button>
           <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <pr-icon icon="'chevron-down'"></pr-icon>
           </button>
           <ul class="dropdown-menu">
-            <li><a ng-click="cancelChanges(service, ['ServiceMounts'])">重置更改</a></li>
-            <li><a ng-click="cancelChanges(service)">重置所有更改</a></li>
+            <li><a ng-click="cancelChanges(service, ['ServiceMounts'])">Reset changes</a></li>
+            <li><a ng-click="cancelChanges(service)">Reset all changes</a></li>
           </ul>
         </div>
       </div>

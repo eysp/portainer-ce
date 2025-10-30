@@ -35,6 +35,7 @@ export function EdgeGroupForm({
               name: group.Name,
               partialMatch: group.PartialMatch,
               tagIds: group.TagIds,
+              edgeGroupId: group.Id,
             }
           : {
               name: '',
@@ -42,6 +43,7 @@ export function EdgeGroupForm({
               environmentIds: [],
               partialMatch: false,
               tagIds: [],
+              edgeGroupId: 0,
             }
       }
       onSubmit={onSubmit}

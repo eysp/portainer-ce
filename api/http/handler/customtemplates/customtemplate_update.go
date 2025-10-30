@@ -15,8 +15,7 @@ import (
 	httperror "github.com/portainer/portainer/pkg/libhttp/error"
 	"github.com/portainer/portainer/pkg/libhttp/request"
 	"github.com/portainer/portainer/pkg/libhttp/response"
-
-	"github.com/asaskevich/govalidator"
+	"github.com/portainer/portainer/pkg/validate"
 )
 
 type customTemplateUpdatePayload struct {
@@ -38,14 +37,16 @@ type customTemplateUpdatePayload struct {
 	RepositoryURL string `example:"https://github.com/openfaas/faas" validate:"required"`
 	// Reference name of a Git repository hosting the Stack file
 	RepositoryReferenceName string `example:"refs/heads/master"`
-	// Use basic authentication to clone the Git repository
+	// Use authentication to clone the Git repository
 	RepositoryAuthentication bool `example:"true"`
 	// Username used in basic authentication. Required when RepositoryAuthentication is true
-	// and RepositoryGitCredentialID is 0
+	// and RepositoryGitCredentialID is 0. Ignored if RepositoryAuthType is token
 	RepositoryUsername string `example:"myGitUsername"`
-	// Password used in basic authentication. Required when RepositoryAuthentication is true
-	// and RepositoryGitCredentialID is 0
+	// Password used in basic authentication or token used in token authentication.
+	// Required when RepositoryAuthentication is true and RepositoryGitCredentialID is 0
 	RepositoryPassword string `example:"myGitPassword"`
+	// RepositoryAuthorizationType is the authorization type to use
+	RepositoryAuthorizationType gittypes.GitCredentialAuthType `example:"0"`
 	// GitCredentialID used to identify the bound git credential. Required when RepositoryAuthentication
 	// is true and RepositoryUsername/RepositoryPassword are not provided
 	RepositoryGitCredentialID int `example:"0"`
@@ -170,7 +171,7 @@ func (handler *Handler) customTemplateUpdate(w http.ResponseWriter, r *http.Requ
 	customTemplate.EdgeTemplate = payload.EdgeTemplate
 
 	if payload.RepositoryURL != "" {
-		if !govalidator.IsURL(payload.RepositoryURL) {
+		if !validate.IsURL(payload.RepositoryURL) {
 			return httperror.BadRequest("Invalid repository URL. Must correspond to a valid URL format", err)
 		}
 
@@ -183,12 +184,15 @@ func (handler *Handler) customTemplateUpdate(w http.ResponseWriter, r *http.Requ
 
 		repositoryUsername := ""
 		repositoryPassword := ""
+		repositoryAuthType := gittypes.GitCredentialAuthType_Basic
 		if payload.RepositoryAuthentication {
 			repositoryUsername = payload.RepositoryUsername
 			repositoryPassword = payload.RepositoryPassword
+			repositoryAuthType = payload.RepositoryAuthorizationType
 			gitConfig.Authentication = &gittypes.GitAuthentication{
-				Username: payload.RepositoryUsername,
-				Password: payload.RepositoryPassword,
+				Username:          payload.RepositoryUsername,
+				Password:          payload.RepositoryPassword,
+				AuthorizationType: payload.RepositoryAuthorizationType,
 			}
 		}
 
@@ -198,6 +202,7 @@ func (handler *Handler) customTemplateUpdate(w http.ResponseWriter, r *http.Requ
 			ReferenceName: gitConfig.ReferenceName,
 			Username:      repositoryUsername,
 			Password:      repositoryPassword,
+			AuthType:      repositoryAuthType,
 			TLSSkipVerify: gitConfig.TLSSkipVerify,
 		})
 		if err != nil {
@@ -206,7 +211,14 @@ func (handler *Handler) customTemplateUpdate(w http.ResponseWriter, r *http.Requ
 
 		defer cleanBackup()
 
-		commitHash, err := handler.GitService.LatestCommitID(gitConfig.URL, gitConfig.ReferenceName, repositoryUsername, repositoryPassword, gitConfig.TLSSkipVerify)
+		commitHash, err := handler.GitService.LatestCommitID(
+			gitConfig.URL,
+			gitConfig.ReferenceName,
+			repositoryUsername,
+			repositoryPassword,
+			repositoryAuthType,
+			gitConfig.TLSSkipVerify,
+		)
 		if err != nil {
 			return httperror.InternalServerError("Unable get latest commit id", fmt.Errorf("failed to fetch latest commit id of the template %v: %w", customTemplate.ID, err))
 		}

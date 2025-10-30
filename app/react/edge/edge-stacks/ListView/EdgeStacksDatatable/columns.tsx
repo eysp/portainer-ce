@@ -5,8 +5,9 @@ import { isoDateFromTimestamp } from '@/portainer/filters/filters';
 import { isBE } from '@/react/portainer/feature-flags/feature-flags.service';
 import { GitCommitLink } from '@/react/portainer/gitops/GitCommitLink';
 
-import { buildNameColumn } from '@@/datatables/buildNameColumn';
+import { buildNameColumnFromObject } from '@@/datatables/buildNameColumn';
 import { Link } from '@@/Link';
+import { Tooltip } from '@@/Tip/Tooltip';
 
 import { StatusType } from '../../types';
 
@@ -17,14 +18,15 @@ import { DeploymentCounter } from './DeploymentCounter';
 const columnHelper = createColumnHelper<DecoratedEdgeStack>();
 
 export const columns = _.compact([
-  buildNameColumn<DecoratedEdgeStack>(
-    'Name',
-    'edge.stacks.edit',
-    'edge-stacks-name',
-    'stackId'
-  ),
+  buildNameColumnFromObject<DecoratedEdgeStack>({
+    nameKey: 'Name',
+    path: 'edge.stacks.edit',
+    dataCy: 'edge-stacks-name',
+    idParam: 'stackId',
+  }),
   columnHelper.accessor(
-    (item) => item.aggregatedStatus[StatusType.Acknowledged] || 0,
+    (item) =>
+      item.StatusSummary?.AggregatedStatus?.[StatusType.Acknowledged] || 0,
     {
       header: 'Acknowledged',
       enableSorting: false,
@@ -43,7 +45,8 @@ export const columns = _.compact([
   ),
   isBE &&
     columnHelper.accessor(
-      (item) => item.aggregatedStatus[StatusType.ImagesPulled] || 0,
+      (item) =>
+        item.StatusSummary?.AggregatedStatus?.[StatusType.ImagesPulled] || 0,
       {
         header: 'Images pre-pulled',
         cell: ({ getValue, row: { original: item } }) => {
@@ -67,7 +70,9 @@ export const columns = _.compact([
       }
     ),
   columnHelper.accessor(
-    (item) => item.aggregatedStatus[StatusType.DeploymentReceived] || 0,
+    (item) =>
+      item.StatusSummary?.AggregatedStatus?.[StatusType.DeploymentReceived] ||
+      0,
     {
       header: 'Deployments received',
       cell: ({ getValue, row }) => (
@@ -85,7 +90,7 @@ export const columns = _.compact([
     }
   ),
   columnHelper.accessor(
-    (item) => item.aggregatedStatus[StatusType.Error] || 0,
+    (item) => item.StatusSummary?.AggregatedStatus?.[StatusType.Error] || 0,
     {
       header: 'Deployments failed',
       cell: ({ getValue, row }) => {
@@ -123,7 +128,7 @@ export const columns = _.compact([
     }
   ),
   columnHelper.accessor('Status', {
-    header: 'Status',
+    header: StatusHeader,
     cell: ({ row }) => (
       <div className="w-full text-center">
         <EdgeStackStatus edgeStack={row.original} />
@@ -167,3 +172,27 @@ export const columns = _.compact([
       }
     ),
 ]);
+
+function StatusHeader() {
+  return (
+    <>
+      Status
+      <Tooltip
+        position="top"
+        message={
+          <>
+            <div>
+              The status feature for the Edge stack is only available for Edge
+              Agent versions 2.19.0 and above.
+            </div>
+            <div>
+              To access the status of your edge stack, it is essential to
+              upgrade your Edge Agent to a corresponding version that is
+              compatible with your Portainer server.
+            </div>
+          </>
+        }
+      />
+    </>
+  );
+}

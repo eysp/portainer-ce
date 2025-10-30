@@ -1,25 +1,27 @@
 import { CellContext, createColumnHelper } from '@tanstack/react-table';
 
+import { sortOptionsFromColumns } from '@/react/common/api/sort.types';
+
 import { Button } from '@@/buttons';
 
-import { LogsStatus } from '../../types';
+import { JobResult, LogsStatus } from '../../types';
 import { useDownloadLogsMutation } from '../../queries/jobResults/useDownloadLogsMutation';
 import { useClearLogsMutation } from '../../queries/jobResults/useClearLogsMutation';
 import { useCollectLogsMutation } from '../../queries/jobResults/useCollectLogsMutation';
 
-import { DecoratedJobResult, getTableMeta } from './types';
+import { getTableMeta } from './types';
 
-const columnHelper = createColumnHelper<DecoratedJobResult>();
+const columnHelper = createColumnHelper<JobResult>();
 
 export const columns = [
-  columnHelper.accessor('Endpoint.Name', {
-    header: '环境',
+  columnHelper.accessor('EndpointName', {
+    header: 'Environment',
     meta: {
       className: 'w-1/2',
     },
   }),
   columnHelper.display({
-    header: '操作',
+    header: 'Actions',
     cell: ActionsCell,
     meta: {
       className: 'w-1/2',
@@ -30,7 +32,7 @@ export const columns = [
 function ActionsCell({
   row: { original: item },
   table,
-}: CellContext<DecoratedJobResult, unknown>) {
+}: CellContext<JobResult, unknown>) {
   const tableMeta = getTableMeta(table.options.meta);
   const id = tableMeta.jobId;
 
@@ -42,7 +44,7 @@ function ActionsCell({
     case LogsStatus.Pending:
       return (
         <>
-          日志已标记为收集中，请等待日志可用。
+          Logs marked for collection, please wait until the logs are available.
         </>
       );
 
@@ -51,15 +53,15 @@ function ActionsCell({
         <>
           <Button
             onClick={() => downloadLogsMutation.mutate(item.EndpointId)}
-            data-cy={`edge-job-download-logs-${item.Endpoint?.Name}`}
+            data-cy={`edge-job-download-logs-${item.EndpointName}`}
           >
-            下载日志
+            Download logs
           </Button>
           <Button
             onClick={() => clearLogsMutations.mutate(item.EndpointId)}
-            data-cy={`edge-job-clear-logs-${item.Endpoint?.Name}`}
+            data-cy={`edge-job-clear-logs-${item.EndpointName}`}
           >
-            清除日志
+            Clear logs
           </Button>
         </>
       );
@@ -68,10 +70,12 @@ function ActionsCell({
       return (
         <Button
           onClick={() => collectLogsMutation.mutate(item.EndpointId)}
-          data-cy={`edge-job-retrieve-logs-${item.Endpoint?.Name}`}
+          data-cy={`edge-job-retrieve-logs-${item.EndpointName}`}
         >
-          获取日志
+          Retrieve logs
         </Button>
       );
   }
 }
+
+export const sortOptions = sortOptionsFromColumns(columns);

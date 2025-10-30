@@ -5,9 +5,9 @@ import { buildConfirmButton } from '@@/modals/utils';
 export async function confirmContainerDeletion(title: string) {
   const result = await openSwitchPrompt(
     title,
-    '自动移删除非持久卷',
+    'Automatically remove non-persistent volumes',
     {
-      confirmButton: buildConfirmButton('删除', 'danger'),
+      confirmButton: buildConfirmButton('Remove', 'danger'),
       modalType: ModalType.Destructive,
       'data-cy': 'confirm-container-delete-button',
     }

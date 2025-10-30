@@ -10,8 +10,8 @@ import (
 type testRequestBouncer struct{}
 
 // NewTestRequestBouncer creates new mock for requestBouncer
-func NewTestRequestBouncer() *testRequestBouncer {
-	return &testRequestBouncer{}
+func NewTestRequestBouncer() testRequestBouncer {
+	return testRequestBouncer{}
 }
 
 func (testRequestBouncer) AuthenticatedAccess(h http.Handler) http.Handler {
@@ -59,6 +59,8 @@ func (testRequestBouncer) JWTAuthLookup(r *http.Request) (*portainer.TokenData, 
 }
 
 func (testRequestBouncer) RevokeJWT(jti string) {}
+
+func (testRequestBouncer) DisableCSP() {}
 
 // AddTestSecurityCookie adds a security cookie to the request
 func AddTestSecurityCookie(r *http.Request, jwt string) {

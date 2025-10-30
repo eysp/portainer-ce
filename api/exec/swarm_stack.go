@@ -127,7 +127,7 @@ func (manager *SwarmStackManager) Remove(stack *portainer.Stack, endpoint *porta
 		return err
 	}
 
-	args = append(args, "stack", "rm", stack.Name)
+	args = append(args, "stack", "rm", "--detach=false", stack.Name)
 
 	return runCommandAndCaptureStdErr(command, args, nil, "")
 }

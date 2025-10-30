@@ -11,8 +11,8 @@ import (
 	httperrors "github.com/portainer/portainer/api/http/errors"
 	"github.com/portainer/portainer/pkg/edge"
 	"github.com/portainer/portainer/pkg/libhttp/request"
+	"github.com/portainer/portainer/pkg/validate"
 
-	"github.com/asaskevich/govalidator"
 	"github.com/pkg/errors"
 )
 
@@ -33,6 +33,8 @@ type edgeStackFromGitRepositoryPayload struct {
 	RepositoryUsername string `example:"myGitUsername"`
 	// Password used in basic authentication. Required when RepositoryAuthentication is true.
 	RepositoryPassword string `example:"myGitPassword"`
+	// RepositoryAuthorizationType is the authorization type to use
+	RepositoryAuthorizationType gittypes.GitCredentialAuthType `example:"0"`
 	// Path to the Stack file inside the Git repository
 	FilePathInRepository string `example:"docker-compose.yml" default:"docker-compose.yml"`
 	// List of identifiers of EdgeGroups
@@ -59,7 +61,7 @@ func (payload *edgeStackFromGitRepositoryPayload) Validate(r *http.Request) erro
 		return httperrors.NewInvalidPayloadError("Invalid stack name. Stack name must only consist of lowercase alpha characters, numbers, hyphens, or underscores as well as start with a lowercase character or number")
 	}
 
-	if len(payload.RepositoryURL) == 0 || !govalidator.IsURL(payload.RepositoryURL) {
+	if len(payload.RepositoryURL) == 0 || !validate.IsURL(payload.RepositoryURL) {
 		return httperrors.NewInvalidPayloadError("Invalid repository URL. Must correspond to a valid URL format")
 	}
 
@@ -103,8 +105,7 @@ func (payload *edgeStackFromGitRepositoryPayload) Validate(r *http.Request) erro
 // @router /edge_stacks/create/repository [post]
 func (handler *Handler) createEdgeStackFromGitRepository(r *http.Request, tx dataservices.DataStoreTx, dryrun bool, userID portainer.UserID) (*portainer.EdgeStack, error) {
 	var payload edgeStackFromGitRepositoryPayload
-	err := request.DecodeAndValidateJSONPayload(r, &payload)
-	if err != nil {
+	if err := request.DecodeAndValidateJSONPayload(r, &payload); err != nil {
 		return nil, err
 	}
 
@@ -126,8 +127,9 @@ func (handler *Handler) createEdgeStackFromGitRepository(r *http.Request, tx dat
 
 	if payload.RepositoryAuthentication {
 		repoConfig.Authentication = &gittypes.GitAuthentication{
-			Username: payload.RepositoryUsername,
-			Password: payload.RepositoryPassword,
+			Username:          payload.RepositoryUsername,
+			Password:          payload.RepositoryPassword,
+			AuthorizationType: payload.RepositoryAuthorizationType,
 		}
 	}
 
@@ -137,24 +139,31 @@ func (handler *Handler) createEdgeStackFromGitRepository(r *http.Request, tx dat
 }
 
 func (handler *Handler) storeManifestFromGitRepository(tx dataservices.DataStoreTx, stackFolder string, relatedEndpointIds []portainer.EndpointID, deploymentType portainer.EdgeStackDeploymentType, currentUserID portainer.UserID, repositoryConfig gittypes.RepoConfig) (composePath, manifestPath, projectPath string, err error) {
-	hasWrongType, err := hasWrongEnvironmentType(tx.Endpoint(), relatedEndpointIds, deploymentType)
-	if err != nil {
+	if hasWrongType, err := hasWrongEnvironmentType(tx.Endpoint(), relatedEndpointIds, deploymentType); err != nil {
 		return "", "", "", fmt.Errorf("unable to check for existence of non fitting environments: %w", err)
-	}
-	if hasWrongType {
+	} else if hasWrongType {
 		return "", "", "", errors.New("edge stack with config do not match the environment type")
 	}
 
 	projectPath = handler.FileService.GetEdgeStackProjectPath(stackFolder)
 	repositoryUsername := ""
 	repositoryPassword := ""
+	repositoryAuthType := gittypes.GitCredentialAuthType_Basic
 	if repositoryConfig.Authentication != nil && repositoryConfig.Authentication.Password != "" {
 		repositoryUsername = repositoryConfig.Authentication.Username
 		repositoryPassword = repositoryConfig.Authentication.Password
+		repositoryAuthType = repositoryConfig.Authentication.AuthorizationType
 	}
 
-	err = handler.GitService.CloneRepository(projectPath, repositoryConfig.URL, repositoryConfig.ReferenceName, repositoryUsername, repositoryPassword, repositoryConfig.TLSSkipVerify)
-	if err != nil {
+	if err := handler.GitService.CloneRepository(
+		projectPath,
+		repositoryConfig.URL,
+		repositoryConfig.ReferenceName,
+		repositoryUsername,
+		repositoryPassword,
+		repositoryAuthType,
+		repositoryConfig.TLSSkipVerify,
+	); err != nil {
 		return "", "", "", err
 	}
 

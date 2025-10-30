@@ -49,7 +49,7 @@ export function useIntervalOptions(
         return [
           {
             value: defaultValue,
-            label: `使用默认间隔 (${label})`,
+            label: `Use default interval (${label})`,
           },
           ...options.slice(1),
         ];

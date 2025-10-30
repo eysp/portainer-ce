@@ -6,7 +6,7 @@ import (
 
 	portainer "github.com/portainer/portainer/api"
 
-	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/network"
 
 	"github.com/docker/docker/client"
 
@@ -20,7 +20,7 @@ const (
 )
 
 func getInheritedResourceControlFromNetworkLabels(dockerClient *client.Client, endpointID portainer.EndpointID, networkID string, resourceControls []portainer.ResourceControl) (*portainer.ResourceControl, error) {
-	network, err := dockerClient.NetworkInspect(context.Background(), networkID, types.NetworkInspectOptions{})
+	network, err := dockerClient.NetworkInspect(context.Background(), networkID, network.InspectOptions{})
 	if err != nil {
 		return nil, err
 	}

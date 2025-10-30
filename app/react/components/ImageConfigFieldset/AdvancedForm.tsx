@@ -20,9 +20,10 @@ export function AdvancedForm({
   return (
     <>
       <TextTip color="blue">
-        当使用高级模式时，镜像和仓库<b>必须</b>为公开可用。
+        When using advanced mode, image and repository <b>must be</b> publicly
+        available.
       </TextTip>
-      <FormControl label="镜像" inputId="image-field" errors={errors?.image}>
+      <FormControl label="Image" inputId="image-field" errors={errors?.image}>
         <Input
           id="image-field"
           value={values.image}
@@ -31,7 +32,7 @@ export function AdvancedForm({
             setFieldValue('image', value);
             setTimeout(() => onChangeImage?.(value), 0);
           }}
-          placeholder="例如 registry:port/my-image:my-tag"
+          placeholder="e.g. registry:port/my-image:my-tag"
           required
           data-cy="image-config-advanced-input"
         />

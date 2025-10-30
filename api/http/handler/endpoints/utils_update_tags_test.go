@@ -10,7 +10,6 @@ import (
 )
 
 func Test_updateTags(t *testing.T) {
-
 	createTags := func(store *datastore.Store, tagNames []string) ([]portainer.Tag, error) {
 		tags := make([]portainer.Tag, len(tagNames))
 		for index, tagName := range tagNames {

@@ -55,9 +55,12 @@ function Cell({ row }: CellContext<ConfigMapRowData, string>) {
         >
           {name}
         </Link>
-        {isSystemConfigMap && <SystemBadge />}
-        {!isSystemToken && !hasConfigurationOwner && <ExternalBadge />}
-        {!row.original.inUse && !isSystemConfigMap && <UnusedBadge />}
+
+        <div className="ml-auto flex gap-2">
+          {isSystemConfigMap && <SystemBadge />}
+          {!isSystemToken && !hasConfigurationOwner && <ExternalBadge />}
+          {!row.original.inUse && !isSystemConfigMap && <UnusedBadge />}
+        </div>
       </div>
     </Authorized>
   );

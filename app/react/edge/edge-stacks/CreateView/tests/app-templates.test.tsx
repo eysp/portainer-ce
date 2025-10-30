@@ -4,8 +4,9 @@ import userEvent from '@testing-library/user-event';
 
 import { http, server } from '@/setup-tests/server';
 import selectEvent from '@/react/test-utils/react-select';
+import { mockCodeMirror } from '@/setup-tests/mock-codemirror';
 
-import { mockCodeMirror, renderCreateForm } from './utils.test';
+import { renderCreateForm } from './utils.test';
 
 // keep mockTemplateId and mockTemplateType in module scope
 let mockTemplateId: number;
@@ -79,10 +80,7 @@ test('The form should submit the correct request body for a given app template',
   // fill in the name and select the docker edge group
   const user = userEvent.setup();
   await user.type(getByRole('textbox', { name: 'Name *' }), 'my-stack');
-  await user.type(
-    getByRole('textbox', { name: 'License key *' }),
-    'license-123'
-  );
+  await user.type(getByRole('textbox', { name: 'License key' }), 'license-123');
   const selectElement = getByLabelText('Edge groups');
   await selectEvent.select(selectElement, 'docker');
 

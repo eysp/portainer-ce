@@ -15,10 +15,10 @@ interface Props {
 export function UsersField({ name, users, value, onChange, errors }: Props) {
   return (
     <FormControl
-      label="授权用户"
+      label="Authorized users"
       tooltip={
         users.length > 0
-          ? '您可以选择允许哪些用户管理此资源。'
+          ? 'You can select which user(s) will be able to manage this resource.'
           : undefined
       }
       inputId="authorized-users-selector"
@@ -35,11 +35,11 @@ export function UsersField({ name, users, value, onChange, errors }: Props) {
         />
       ) : (
         <span className="small text-muted">
-          您还未创建任何用户。请前往{' '}
+          You have not yet created any users. Head over to the{' '}
           <Link to="portainer.users" data-cy="access-control-users-link">
-            用户视图
+            Users view
           </Link>{' '}
-          以管理用户。
+          to manage users.
         </span>
       )}
     </FormControl>

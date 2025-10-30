@@ -9,31 +9,34 @@ import { columnHelper } from './helper';
 
 export function getActions(isServerMetricsEnabled: boolean) {
   return columnHelper.accessor(() => '', {
-    header: '操作',
+    header: 'Actions',
     enableSorting: false,
     cell: ({ row: { original: container } }) => (
       <div className="flex gap-x-2">
-        {container.status === 'Running' && isServerMetricsEnabled && (
+        {container.status.status.includes('Running') &&
+          isServerMetricsEnabled && (
+            <Link
+              className="flex items-center gap-1"
+              to="kubernetes.applications.application.stats"
+              params={{ pod: container.podName, container: container.name }}
+              data-cy={`application-container-stats-${container.name}`}
+            >
+              <Icon icon={BarChart} />
+              Stats
+            </Link>
+          )}
+        {container.status.hasLogs !== false && (
           <Link
             className="flex items-center gap-1"
-            to="kubernetes.applications.application.stats"
+            to="kubernetes.applications.application.logs"
             params={{ pod: container.podName, container: container.name }}
-            data-cy={`application-container-stats-${container.name}`}
+            data-cy={`application-container-logs-${container.name}`}
           >
-            <Icon icon={BarChart} />
-            统计
+            <Icon icon={FileText} />
+            Logs
           </Link>
         )}
-        <Link
-          className="flex items-center gap-1"
-          to="kubernetes.applications.application.logs"
-          params={{ pod: container.podName, container: container.name }}
-          data-cy={`application-container-logs-${container.name}`}
-        >
-          <Icon icon={FileText} />
-          日志
-        </Link>
-        {container.status === 'Running' && (
+        {container.status.status.includes('Running') && (
           <Authorized authorizations="K8sApplicationConsoleRW">
             <Link
               className="flex items-center gap-1"
@@ -42,7 +45,7 @@ export function getActions(isServerMetricsEnabled: boolean) {
               data-cy={`application-container-console-${container.name}`}
             >
               <Icon icon={Terminal} />
-              控制台
+              Console
             </Link>
           </Authorized>
         )}

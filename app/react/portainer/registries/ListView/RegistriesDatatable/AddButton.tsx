@@ -9,7 +9,7 @@ export function AddButton() {
         data-cy="registry-addRegistryButton"
         to="portainer.registries.new"
       >
-        添加镜像仓库
+        Add registry
       </BaseAddButton>
     </Authorized>
   );

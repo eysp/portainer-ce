@@ -32,7 +32,7 @@ export function EdgeSettingsFieldset({
   return (
     <>
       {isGit && (
-        <FormSection title="高级设置">
+        <FormSection title="Advanced settings">
           <RelativePathFieldset
             values={values.RelativePathSettings}
             gitModel={gitConfig}

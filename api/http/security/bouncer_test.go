@@ -19,9 +19,7 @@ import (
 )
 
 // testHandler200 is a simple handler which returns HTTP status 200 OK
-var testHandler200 = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-})
+var testHandler200 = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
 
 func tokenLookupSucceed(dataStore dataservices.DataStore, jwtService portainer.JWTService) tokenLookup {
 	return func(r *http.Request) (*portainer.TokenData, error) {
@@ -344,6 +342,7 @@ func Test_apiKeyLookup(t *testing.T) {
 		req.Header.Add("x-api-key", rawAPIKey)
 
 		token, err := bouncer.apiKeyLookup(req)
+		require.NoError(t, err)
 
 		expectedToken := &portainer.TokenData{ID: user.ID, Username: user.Username, Role: portainer.StandardUserRole}
 		is.Equal(expectedToken, token)
@@ -358,6 +357,7 @@ func Test_apiKeyLookup(t *testing.T) {
 		req.Header.Add("x-api-key", rawAPIKey)
 
 		token, err := bouncer.apiKeyLookup(req)
+		require.NoError(t, err)
 
 		expectedToken := &portainer.TokenData{ID: user.ID, Username: user.Username, Role: portainer.StandardUserRole}
 		is.Equal(expectedToken, token)
@@ -372,6 +372,7 @@ func Test_apiKeyLookup(t *testing.T) {
 		req.Header.Add("x-api-key", rawAPIKey)
 
 		token, err := bouncer.apiKeyLookup(req)
+		require.NoError(t, err)
 
 		expectedToken := &portainer.TokenData{ID: user.ID, Username: user.Username, Role: portainer.StandardUserRole}
 		is.Equal(expectedToken, token)
@@ -526,4 +527,35 @@ func TestJWTRevocation(t *testing.T) {
 	bouncer.cleanUpExpiredJWTPass()
 
 	require.Equal(t, 1, revokeLen())
+}
+
+func TestCSPHeaderDefault(t *testing.T) {
+	b := NewRequestBouncer(nil, nil, nil)
+
+	srv := httptest.NewServer(
+		b.PublicAccess(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})),
+	)
+	defer srv.Close()
+
+	resp, err := http.Get(srv.URL + "/")
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	require.Contains(t, resp.Header, "Content-Security-Policy")
+}
+
+func TestCSPHeaderDisabled(t *testing.T) {
+	b := NewRequestBouncer(nil, nil, nil)
+	b.DisableCSP()
+
+	srv := httptest.NewServer(
+		b.PublicAccess(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})),
+	)
+	defer srv.Close()
+
+	resp, err := http.Get(srv.URL + "/")
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	require.NotContains(t, resp.Header, "Content-Security-Policy")
 }

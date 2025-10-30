@@ -24,6 +24,8 @@ const (
 	dockerClientVersion         = "1.37"
 )
 
+type NodeNamesCtxKey struct{}
+
 // ClientFactory is used to create Docker clients
 type ClientFactory struct {
 	signatureService     portainer.DigitalSignatureService
@@ -69,19 +71,6 @@ func (factory *ClientFactory) CreateClient(endpoint *portainer.Endpoint, nodeNam
 func createLocalClient(endpoint *portainer.Endpoint) (*client.Client, error) {
 	return client.NewClientWithOpts(
 		client.WithHost(endpoint.URL),
-		client.WithAPIVersionNegotiation(),
-	)
-}
-
-func CreateClientFromEnv() (*client.Client, error) {
-	return client.NewClientWithOpts(
-		client.FromEnv,
-		client.WithAPIVersionNegotiation(),
-	)
-}
-
-func CreateSimpleClient() (*client.Client, error) {
-	return client.NewClientWithOpts(
 		client.WithAPIVersionNegotiation(),
 	)
 }
@@ -175,7 +164,7 @@ func (t *NodeNameTransport) RoundTrip(req *http.Request) (*http.Response, error)
 		return resp, nil
 	}
 
-	nodeNames, ok := req.Context().Value("nodeNames").(map[string]string)
+	nodeNames, ok := req.Context().Value(NodeNamesCtxKey{}).(map[string]string)
 	if ok {
 		for idx, r := range rs {
 			// as there is no way to differentiate the same image available in multiple nodes only by their ID
@@ -194,10 +183,11 @@ func httpClient(endpoint *portainer.Endpoint, timeout *time.Duration) (*http.Cli
 	}
 
 	if endpoint.TLSConfig.TLS {
-		tlsConfig, err := crypto.CreateTLSConfigurationFromDisk(endpoint.TLSConfig.TLSCACertPath, endpoint.TLSConfig.TLSCertPath, endpoint.TLSConfig.TLSKeyPath, endpoint.TLSConfig.TLSSkipVerify)
+		tlsConfig, err := crypto.CreateTLSConfigurationFromDisk(endpoint.TLSConfig)
 		if err != nil {
 			return nil, err
 		}
+
 		transport.TLSClientConfig = tlsConfig
 	}
 

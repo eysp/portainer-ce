@@ -11,9 +11,10 @@ import (
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/http/handler/edgegroups"
+	"github.com/portainer/portainer/api/http/security"
 	"github.com/portainer/portainer/api/internal/edge"
 	"github.com/portainer/portainer/api/internal/endpointutils"
-	"github.com/portainer/portainer/api/slicesx"
+	"github.com/portainer/portainer/api/roar"
 	"github.com/portainer/portainer/pkg/libhttp/request"
 
 	"github.com/pkg/errors"
@@ -37,6 +38,8 @@ type EnvironmentsQuery struct {
 	edgeStackId              portainer.EdgeStackID
 	edgeStackStatus          *portainer.EdgeStackStatusType
 	excludeIds               []portainer.EndpointID
+	edgeGroupIds             []portainer.EdgeGroupID
+	excludeEdgeGroupIds      []portainer.EdgeGroupID
 }
 
 func parseQuery(r *http.Request) (EnvironmentsQuery, error) {
@@ -73,6 +76,16 @@ func parseQuery(r *http.Request) (EnvironmentsQuery, error) {
 	}
 
 	excludeIDs, err := getNumberArrayQueryParameter[portainer.EndpointID](r, "excludeIds")
+	if err != nil {
+		return EnvironmentsQuery{}, err
+	}
+
+	edgeGroupIDs, err := getNumberArrayQueryParameter[portainer.EdgeGroupID](r, "edgeGroupIds")
+	if err != nil {
+		return EnvironmentsQuery{}, err
+	}
+
+	excludeEdgeGroupIds, err := getNumberArrayQueryParameter[portainer.EdgeGroupID](r, "excludeEdgeGroupIds")
 	if err != nil {
 		return EnvironmentsQuery{}, err
 	}
@@ -117,6 +130,8 @@ func parseQuery(r *http.Request) (EnvironmentsQuery, error) {
 		edgeCheckInPassedSeconds: edgeCheckInPassedSeconds,
 		edgeStackId:              portainer.EdgeStackID(edgeStackId),
 		edgeStackStatus:          edgeStackStatus,
+		edgeGroupIds:             edgeGroupIDs,
+		excludeEdgeGroupIds:      excludeEdgeGroupIds,
 	}, nil
 }
 
@@ -126,11 +141,14 @@ func (handler *Handler) filterEndpointsByQuery(
 	groups []portainer.EndpointGroup,
 	edgeGroups []portainer.EdgeGroup,
 	settings *portainer.Settings,
+	context *security.RestrictedRequestContext,
 ) ([]portainer.Endpoint, int, error) {
 	totalAvailableEndpoints := len(filteredEndpoints)
 
 	if len(query.endpointIds) > 0 {
-		filteredEndpoints = filteredEndpointsByIds(filteredEndpoints, query.endpointIds)
+		endpointIDs := roar.FromSlice(query.endpointIds)
+
+		filteredEndpoints = filteredEndpointsByIds(filteredEndpoints, endpointIDs)
 	}
 
 	if len(query.excludeIds) > 0 {
@@ -141,6 +159,14 @@ func (handler *Handler) filterEndpointsByQuery(
 
 	if len(query.groupIds) > 0 {
 		filteredEndpoints = filterEndpointsByGroupIDs(filteredEndpoints, query.groupIds)
+	}
+
+	if len(query.edgeGroupIds) > 0 {
+		filteredEndpoints, edgeGroups = filterEndpointsByEdgeGroupIDs(filteredEndpoints, edgeGroups, query.edgeGroupIds)
+	}
+
+	if len(query.excludeEdgeGroupIds) > 0 {
+		filteredEndpoints, edgeGroups = filterEndpointsByExcludeEdgeGroupIDs(filteredEndpoints, edgeGroups, query.excludeEdgeGroupIds)
 	}
 
 	if query.name != "" {
@@ -159,9 +185,14 @@ func (handler *Handler) filterEndpointsByQuery(
 	}
 
 	// filter edge environments by trusted/untrusted
+	// only portainer admins are allowed to see untrusted environments
 	filteredEndpoints = filter(filteredEndpoints, func(endpoint portainer.Endpoint) bool {
 		if !endpointutils.IsEdgeEndpoint(&endpoint) {
 			return true
+		}
+
+		if query.edgeDeviceUntrusted {
+			return !endpoint.UserTrusted && context.IsAdmin
 		}
 
 		return endpoint.UserTrusted == !query.edgeDeviceUntrusted
@@ -225,61 +256,78 @@ func (handler *Handler) filterEndpointsByQuery(
 	return filteredEndpoints, totalAvailableEndpoints, nil
 }
 
-func endpointStatusInStackMatchesFilter(edgeStackStatus map[portainer.EndpointID]portainer.EdgeStackStatus, envId portainer.EndpointID, statusFilter portainer.EdgeStackStatusType) bool {
-	status, ok := edgeStackStatus[envId]
-
+func endpointStatusInStackMatchesFilter(stackStatus *portainer.EdgeStackStatusForEnv, statusFilter portainer.EdgeStackStatusType) bool {
 	// consider that if the env has no status in the stack it is in Pending state
 	if statusFilter == portainer.EdgeStackStatusPending {
-		return !ok || len(status.Status) == 0
+		return stackStatus == nil || len(stackStatus.Status) == 0
 	}
 
-	if !ok {
+	if stackStatus == nil {
 		return false
 	}
 
-	return slices.ContainsFunc(status.Status, func(s portainer.EdgeStackDeploymentStatus) bool {
+	return slices.ContainsFunc(stackStatus.Status, func(s portainer.EdgeStackDeploymentStatus) bool {
 		return s.Type == statusFilter
 	})
 }
 
 func filterEndpointsByEdgeStack(endpoints []portainer.Endpoint, edgeStackId portainer.EdgeStackID, statusFilter *portainer.EdgeStackStatusType, datastore dataservices.DataStore) ([]portainer.Endpoint, error) {
-	stack, err := datastore.EdgeStack().EdgeStack(edgeStackId)
-	if err != nil {
-		return nil, errors.WithMessage(err, "Unable to retrieve edge stack from the database")
-	}
-
-	envIds := make([]portainer.EndpointID, 0)
-	for _, edgeGroupdId := range stack.EdgeGroups {
-		edgeGroup, err := datastore.EdgeGroup().Read(edgeGroupdId)
+	var filteredEndpoints []portainer.Endpoint
+	if err := datastore.ViewTx(func(tx dataservices.DataStoreTx) error {
+		stack, err := tx.EdgeStack().EdgeStack(edgeStackId)
 		if err != nil {
-			return nil, errors.WithMessage(err, "Unable to retrieve edge group from the database")
+			return errors.WithMessage(err, "Unable to retrieve edge stack from the database")
 		}
 
-		if edgeGroup.Dynamic {
-			endpointIDs, err := edgegroups.GetEndpointsByTags(datastore, edgeGroup.TagIDs, edgeGroup.PartialMatch)
+		envIds := roar.Roar[portainer.EndpointID]{}
+		for _, edgeGroupId := range stack.EdgeGroups {
+			edgeGroup, err := tx.EdgeGroup().Read(edgeGroupId)
 			if err != nil {
-				return nil, errors.WithMessage(err, "Unable to retrieve environments and environment groups for Edge group")
+				return errors.WithMessage(err, "Unable to retrieve edge group from the database")
 			}
-			edgeGroup.Endpoints = endpointIDs
+
+			if edgeGroup.Dynamic {
+				endpointIDs, err := edgegroups.GetEndpointsByTags(tx, edgeGroup.TagIDs, edgeGroup.PartialMatch)
+				if err != nil {
+					return errors.WithMessage(err, "Unable to retrieve environments and environment groups for Edge group")
+				}
+				edgeGroup.EndpointIDs = roar.FromSlice(endpointIDs)
+			}
+
+			envIds.Union(edgeGroup.EndpointIDs)
 		}
 
-		envIds = append(envIds, edgeGroup.Endpoints...)
-	}
+		filteredEnvIds := roar.Roar[portainer.EndpointID]{}
+		filteredEnvIds.Union(envIds)
 
-	if statusFilter != nil {
-		n := 0
-		for _, envId := range envIds {
-			if endpointStatusInStackMatchesFilter(stack.Status, envId, *statusFilter) {
-				envIds[n] = envId
-				n++
+		if statusFilter != nil {
+			var innerErr error
+
+			envIds.Iterate(func(envId portainer.EndpointID) bool {
+				edgeStackStatus, err := tx.EdgeStackStatus().Read(edgeStackId, envId)
+				if err != nil && !dataservices.IsErrObjectNotFound(err) {
+					innerErr = errors.WithMessagef(err, "Unable to retrieve edge stack status for environment %d", envId)
+					return false
+				}
+
+				if !endpointStatusInStackMatchesFilter(edgeStackStatus, *statusFilter) {
+					filteredEnvIds.Remove(envId)
+				}
+
+				return true
+			})
+
+			if innerErr != nil {
+				return innerErr
 			}
 		}
-		envIds = envIds[:n]
+
+		filteredEndpoints = filteredEndpointsByIds(endpoints, filteredEnvIds)
+
+		return nil
+	}); err != nil {
+		return nil, err
 	}
-
-	uniqueIds := slicesx.Unique(envIds)
-	filteredEndpoints := filteredEndpointsByIds(endpoints, uniqueIds)
-
 	return filteredEndpoints, nil
 }
 
@@ -293,6 +341,67 @@ func filterEndpointsByGroupIDs(endpoints []portainer.Endpoint, endpointGroupIDs 
 	}
 
 	return endpoints[:n]
+}
+
+func filterEndpointsByEdgeGroupIDs(endpoints []portainer.Endpoint, edgeGroups []portainer.EdgeGroup, edgeGroupIDs []portainer.EdgeGroupID) ([]portainer.Endpoint, []portainer.EdgeGroup) {
+	edgeGroupIDFilterSet := make(map[portainer.EdgeGroupID]struct{}, len(edgeGroupIDs))
+	for _, id := range edgeGroupIDs {
+		edgeGroupIDFilterSet[id] = struct{}{}
+	}
+
+	n := 0
+	for _, edgeGroup := range edgeGroups {
+		if _, exists := edgeGroupIDFilterSet[edgeGroup.ID]; exists {
+			edgeGroups[n] = edgeGroup
+			n++
+		}
+	}
+	edgeGroups = edgeGroups[:n]
+
+	endpointIDSet := roar.Roar[portainer.EndpointID]{}
+	for _, edgeGroup := range edgeGroups {
+		endpointIDSet.Union(edgeGroup.EndpointIDs)
+	}
+
+	n = 0
+	for _, endpoint := range endpoints {
+		if endpointIDSet.Contains(endpoint.ID) {
+			endpoints[n] = endpoint
+			n++
+		}
+	}
+
+	return endpoints[:n], edgeGroups
+}
+
+func filterEndpointsByExcludeEdgeGroupIDs(endpoints []portainer.Endpoint, edgeGroups []portainer.EdgeGroup, excludeEdgeGroupIds []portainer.EdgeGroupID) ([]portainer.Endpoint, []portainer.EdgeGroup) {
+	excludeEdgeGroupIDSet := make(map[portainer.EdgeGroupID]struct{}, len(excludeEdgeGroupIds))
+	for _, id := range excludeEdgeGroupIds {
+		excludeEdgeGroupIDSet[id] = struct{}{}
+	}
+
+	n := 0
+	excludeEndpointIDSet := roar.Roar[portainer.EndpointID]{}
+
+	for _, edgeGroup := range edgeGroups {
+		if _, ok := excludeEdgeGroupIDSet[edgeGroup.ID]; ok {
+			excludeEndpointIDSet.Union(edgeGroup.EndpointIDs)
+		} else {
+			edgeGroups[n] = edgeGroup
+			n++
+		}
+	}
+	edgeGroups = edgeGroups[:n]
+
+	n = 0
+	for _, endpoint := range endpoints {
+		if !excludeEndpointIDSet.Contains(endpoint.ID) {
+			endpoints[n] = endpoint
+			n++
+		}
+	}
+
+	return endpoints[:n], edgeGroups
 }
 
 func filterEndpointsBySearchCriteria(
@@ -511,15 +620,10 @@ func endpointFullMatchTags(endpoint portainer.Endpoint, endpointGroup portainer.
 	return len(missingTags) == 0
 }
 
-func filteredEndpointsByIds(endpoints []portainer.Endpoint, ids []portainer.EndpointID) []portainer.Endpoint {
-	idsSet := make(map[portainer.EndpointID]bool, len(ids))
-	for _, id := range ids {
-		idsSet[id] = true
-	}
-
+func filteredEndpointsByIds(endpoints []portainer.Endpoint, ids roar.Roar[portainer.EndpointID]) []portainer.Endpoint {
 	n := 0
 	for _, endpoint := range endpoints {
-		if idsSet[endpoint.ID] {
+		if ids.Contains(endpoint.ID) {
 			endpoints[n] = endpoint
 			n++
 		}
@@ -626,27 +730,22 @@ func getEdgeStackStatusParam(r *http.Request) (*portainer.EdgeStackStatusType, e
 }
 
 func getShortestAsyncInterval(endpoint *portainer.Endpoint, settings *portainer.Settings) int {
-	var edgeIntervalUseDefault int = -1
+	const edgeIntervalUseDefault = -1
+
 	pingInterval := endpoint.Edge.PingInterval
 	if pingInterval == edgeIntervalUseDefault {
 		pingInterval = settings.Edge.PingInterval
 	}
-	shortestAsyncInterval := pingInterval
 
 	snapshotInterval := endpoint.Edge.SnapshotInterval
 	if snapshotInterval == edgeIntervalUseDefault {
 		snapshotInterval = settings.Edge.SnapshotInterval
-	}
-	if shortestAsyncInterval > snapshotInterval {
-		shortestAsyncInterval = snapshotInterval
 	}
 
 	commandInterval := endpoint.Edge.CommandInterval
 	if commandInterval == edgeIntervalUseDefault {
 		commandInterval = settings.Edge.CommandInterval
 	}
-	if shortestAsyncInterval > commandInterval {
-		shortestAsyncInterval = commandInterval
-	}
-	return shortestAsyncInterval
+
+	return min(pingInterval, snapshotInterval, commandInterval)
 }

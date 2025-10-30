@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/rand"
-	"io"
 
 	"github.com/pkg/errors"
 	"github.com/segmentio/encoding/json"
@@ -65,18 +63,18 @@ func (connection *DbConnection) UnmarshalObject(data []byte, object any) error {
 // https://gist.github.com/atoponce/07d8d4c833873be2f68c34f9afc5a78a#symmetric-encryption
 
 func encrypt(plaintext []byte, passphrase []byte) (encrypted []byte, err error) {
-	block, _ := aes.NewCipher(passphrase)
-	gcm, err := cipher.NewGCM(block)
+	block, err := aes.NewCipher(passphrase)
 	if err != nil {
 		return encrypted, err
 	}
 
-	nonce := make([]byte, gcm.NonceSize())
-	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+	// NewGCMWithRandomNonce in go 1.24 handles setting up the nonce and adding it to the encrypted output
+	gcm, err := cipher.NewGCMWithRandomNonce(block)
+	if err != nil {
 		return encrypted, err
 	}
 
-	return gcm.Seal(nonce, nonce, plaintext, nil), nil
+	return gcm.Seal(nil, nil, plaintext, nil), nil
 }
 
 func decrypt(encrypted []byte, passphrase []byte) (plaintextByte []byte, err error) {
@@ -89,19 +87,17 @@ func decrypt(encrypted []byte, passphrase []byte) (plaintextByte []byte, err err
 		return encrypted, errors.Wrap(err, "Error creating cypher block")
 	}
 
-	gcm, err := cipher.NewGCM(block)
+	// NewGCMWithRandomNonce in go 1.24 handles reading the nonce from the encrypted input for us
+	gcm, err := cipher.NewGCMWithRandomNonce(block)
 	if err != nil {
 		return encrypted, errors.Wrap(err, "Error creating GCM")
 	}
 
-	nonceSize := gcm.NonceSize()
-	if len(encrypted) < nonceSize {
+	if len(encrypted) < gcm.NonceSize() {
 		return encrypted, errEncryptedStringTooShort
 	}
 
-	nonce, ciphertextByteClean := encrypted[:nonceSize], encrypted[nonceSize:]
-
-	plaintextByte, err = gcm.Open(nil, nonce, ciphertextByteClean, nil)
+	plaintextByte, err = gcm.Open(nil, nil, encrypted, nil)
 	if err != nil {
 		return encrypted, errors.Wrap(err, "Error decrypting text")
 	}

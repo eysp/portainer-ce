@@ -731,6 +731,7 @@ angular.module('portainer.docker').controller('ServiceController', [
     };
 
     function initView() {
+      $scope.isLoading = true;
       var apiVersion = $scope.applicationState.endpoint.apiVersion;
       var agentProxy = $scope.applicationState.endpoint.mode.agentProxy;
 
@@ -855,6 +856,9 @@ angular.module('portainer.docker').controller('ServiceController', [
           $scope.secrets = [];
           $scope.configs = [];
           Notifications.error('Failure', err, 'Unable to retrieve service details');
+        })
+        .finally(() => {
+          $scope.isLoading = false;
         });
     }
 

@@ -51,7 +51,7 @@ test('calls onChange when input value changes', async () => {
 
   const inputElement = screen.getByDisplayValue(value.VAR1);
   await user.clear(inputElement);
-  expect(onChange).toHaveBeenCalledWith({ VAR1: '' });
+  expect(onChange).toHaveBeenCalledWith({ VAR1: undefined });
 
   const newValue = 'New Value';
   await user.type(inputElement, newValue);
@@ -107,11 +107,14 @@ test('validates env vars fieldset', () => {
   ]);
 
   const validData = { VAR1: 'Value 1', VAR2: 'Value 2' };
-  const invalidData = { VAR1: '', VAR2: 'Value 2' };
+  const emptyData = { VAR1: '', VAR2: 'Value 2' };
+  const undefinedData = { VAR1: undefined, VAR2: 'Value 2' };
 
   const validResult = schema.isValidSync(validData);
-  const invalidResult = schema.isValidSync(invalidData);
+  const emptyResult = schema.isValidSync(emptyData);
+  const undefinedResult = schema.isValidSync(undefinedData);
 
   expect(validResult).toBe(true);
-  expect(invalidResult).toBe(false);
+  expect(emptyResult).toBe(true);
+  expect(undefinedResult).toBe(true);
 });

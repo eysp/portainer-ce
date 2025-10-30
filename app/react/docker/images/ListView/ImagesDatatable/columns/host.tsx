@@ -1,7 +1,7 @@
 import { columnHelper } from './helper';
 
 export const host = columnHelper.accessor('nodeName', {
-  header: '宿主机',
+  header: 'Host',
   cell: ({ getValue }) => {
     const value = getValue();
     return value || '-';

@@ -12,35 +12,40 @@
 /*
   Extending Calendar.css from react-daterange-picker__calendar
 */
-.react-daterange-picker__calendar .react-calendar {
+.react-calendar {
   background: var(--bg-calendar-color);
   color: var(--text-main-color);
+  @apply th-dark:bg-gray-iron-10;
 }
 
 /* calendar nav buttons */
-.react-daterange-picker__calendar .react-calendar__navigation button:disabled {
+.react-calendar__navigation button:disabled {
   background: var(--bg-calendar-color);
   @apply opacity-60;
   @apply brightness-95 th-dark:brightness-110;
+  @apply th-dark:bg-gray-iron-7;
 }
-.react-daterange-picker__calendar .react-calendar__navigation button:enabled:hover,
-.react-daterange-picker__calendar .react-calendar__navigation button:enabled:focus {
+.react-calendar__navigation button:enabled:hover,
+.react-calendar__navigation button:enabled:focus {
   background: var(--bg-daterangepicker-color);
+  @apply th-dark:bg-gray-iron-7;
 }
 
 /* date tile */
-.react-daterange-picker__calendar .react-calendar__tile:disabled {
-  background: var(--bg-calendar-color);
+.react-calendar__tile:disabled {
   @apply opacity-60;
   @apply brightness-95 th-dark:brightness-110;
+  @apply th-dark:bg-gray-iron-7;
 }
-.react-daterange-picker__calendar .react-calendar__tile:enabled:hover,
-.react-daterange-picker__calendar .react-calendar__tile:enabled:focus {
+
+.react-calendar__tile:enabled:hover,
+.react-calendar__tile:enabled:focus {
   background: var(--bg-daterangepicker-hover);
+  @apply th-dark:bg-gray-iron-7;
 }
 
 /* today's date tile */
-.react-daterange-picker__calendar .react-calendar__tile--now {
+.react-calendar__tile--now {
   @apply th-highcontrast:text-[color:var(--bg-calendar-color)] th-dark:text-[color:var(--bg-calendar-color)];
   border-radius: 0.25rem !important;
 }
@@ -48,23 +53,27 @@
 .react-daterange-picker__calendar .react-calendar__tile--now:enabled:focus {
   background: var(--bg-daterangepicker-hover);
   color: var(--text-daterangepicker-hover);
+  @apply th-dark:bg-gray-iron-7;
 }
 
 /* probably date tile in range */
-.react-daterange-picker__calendar .react-calendar__tile--hasActive {
+.react-calendar__tile--hasActive {
   background: var(--bg-daterangepicker-end-date);
   color: var(--text-daterangepicker-end-date);
+  @apply th-dark:bg-gray-iron-7;
 }
-.react-daterange-picker__calendar .react-calendar__tile--hasActive:enabled:hover,
-.react-daterange-picker__calendar .react-calendar__tile--hasActive:enabled:focus {
+.react-calendar__tile--hasActive:enabled:hover,
+.react-calendar__tile--hasActive:enabled:focus {
   background: var(--bg-daterangepicker-hover);
   color: var(--text-daterangepicker-hover);
+  @apply th-dark:bg-gray-iron-7;
 }
 
-.react-daterange-picker__calendar .react-calendar__tile--active:enabled:hover,
-.react-daterange-picker__calendar .react-calendar__tile--active:enabled:focus {
+.react-calendar__tile--active:enabled:hover,
+.react-calendar__tile--active:enabled:focus {
   background: var(--bg-daterangepicker-hover);
   color: var(--text-daterangepicker-hover);
+  @apply th-dark:bg-gray-iron-7;
 }
 
 .react-daterange-picker__calendar
@@ -75,9 +84,10 @@
 }
 
 /* on range select hover */
-.react-daterange-picker__calendar .react-calendar--selectRange .react-calendar__tile--hover {
+.react-calendar--selectRange .react-calendar__tile--hover {
   background: var(--bg-daterangepicker-in-range);
   color: var(--text-daterangepicker-in-range);
+  @apply th-dark:bg-gray-iron-7;
 }
 
 /*
@@ -111,4 +121,5 @@
 
 .react-calendar__tile--active.react-calendar__month-view__days__day--weekend {
   color: var(--text-daterangepicker-active);
+  @apply th-dark:bg-gray-iron-7;
 }

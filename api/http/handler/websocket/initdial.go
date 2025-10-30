@@ -21,16 +21,14 @@ func initDial(endpoint *portainer.Endpoint) (net.Conn, error) {
 		host = url.Path
 	}
 
-	if endpoint.TLSConfig.TLS {
-		tlsConfig, err := crypto.CreateTLSConfigurationFromDisk(endpoint.TLSConfig.TLSCACertPath, endpoint.TLSConfig.TLSCertPath, endpoint.TLSConfig.TLSKeyPath, endpoint.TLSConfig.TLSSkipVerify)
-		if err != nil {
-			return nil, err
-		}
-
-		return tls.Dial(url.Scheme, host, tlsConfig)
+	if !endpoint.TLSConfig.TLS {
+		return createDial(url.Scheme, host)
 	}
 
-	con, err := createDial(url.Scheme, host)
+	tlsConfig, err := crypto.CreateTLSConfigurationFromDisk(endpoint.TLSConfig)
+	if err != nil {
+		return nil, err
+	}
 
-	return con, err
+	return tls.Dial(url.Scheme, host, tlsConfig)
 }

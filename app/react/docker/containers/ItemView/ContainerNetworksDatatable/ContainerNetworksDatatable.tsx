@@ -42,7 +42,7 @@ export function ContainerNetworksDatatable({
       columns={columns}
       dataset={networks}
       settingsManager={tableState}
-      title="已连接网络"
+      title="Connected Networks"
       titleIcon={Network}
       disableSelect
       getRowCanExpand={(row) => !!row.original.GlobalIPv6Address}

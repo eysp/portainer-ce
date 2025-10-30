@@ -8,6 +8,7 @@ import (
 	"github.com/portainer/portainer/api/http/proxy"
 	"github.com/portainer/portainer/api/http/proxy/factory/kubernetes"
 	"github.com/portainer/portainer/api/http/security"
+	"github.com/portainer/portainer/api/kubernetes/cli"
 	httperror "github.com/portainer/portainer/pkg/libhttp/error"
 
 	"github.com/gorilla/mux"
@@ -23,16 +24,18 @@ type Handler struct {
 	OAuthService                portainer.OAuthService
 	ProxyManager                *proxy.Manager
 	KubernetesTokenCacheManager *kubernetes.TokenCacheManager
+	KubernetesClientFactory     *cli.ClientFactory
 	passwordStrengthChecker     security.PasswordStrengthChecker
 	bouncer                     security.BouncerService
 }
 
 // NewHandler creates a handler to manage authentication operations.
-func NewHandler(bouncer security.BouncerService, rateLimiter *security.RateLimiter, passwordStrengthChecker security.PasswordStrengthChecker) *Handler {
+func NewHandler(bouncer security.BouncerService, rateLimiter *security.RateLimiter, passwordStrengthChecker security.PasswordStrengthChecker, kubernetesClientFactory *cli.ClientFactory) *Handler {
 	h := &Handler{
 		Router:                  mux.NewRouter(),
 		passwordStrengthChecker: passwordStrengthChecker,
 		bouncer:                 bouncer,
+		KubernetesClientFactory: kubernetesClientFactory,
 	}
 
 	h.Handle("/auth/oauth/validate",

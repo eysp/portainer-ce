@@ -26,7 +26,7 @@ export function PageInput({ onChange, totalPages }: Props) {
   return (
     <form className="mx-3" onSubmit={handleSubmit}>
       <label className="small m-0 mr-2 font-normal" htmlFor="go-to-page-input">
-        跳转到页面
+        Go to page
       </label>
       <Input
         id="go-to-page-input"
@@ -45,7 +45,7 @@ export function PageInput({ onChange, totalPages }: Props) {
         disabled={!isValid}
         data-cy="pagination-go-to-page-button"
       >
-        跳转
+        Go
       </Button>
     </form>
   );

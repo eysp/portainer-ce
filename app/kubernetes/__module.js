@@ -83,6 +83,13 @@ angular.module('portainer.kubernetes', ['portainer.app', registriesModule, custo
             });
           }
 
+          // EE-5842: do not redirect shell views when the env is removed
+          const nextTransition = $state.transition && $state.transition.to();
+          const nextTransitionName = nextTransition ? nextTransition.name : '';
+          if (nextTransitionName === 'kubernetes.kubectlshell' && !endpoint) {
+            return;
+          }
+
           const kubeTypes = [
             PortainerEndpointTypes.KubernetesLocalEnvironment,
             PortainerEndpointTypes.AgentOnKubernetesEnvironment,
@@ -120,6 +127,11 @@ angular.module('portainer.kubernetes', ['portainer.app', registriesModule, custo
               EndpointProvider.clean();
               Notifications.error('Failed loading environment', e);
             }
+            // Prevent redirect to home for shell views when environment is unreachable
+            // Show toast error instead (handled above in Notifications.error)
+            if (nextTransitionName === 'kubernetes.kubectlshell') {
+              return;
+            }
             $state.go('portainer.home', params, { reload: true, inherit: false });
             return false;
           }
@@ -145,7 +157,7 @@ angular.module('portainer.kubernetes', ['portainer.app', registriesModule, custo
 
     const helmApplication = {
       name: 'kubernetes.helm',
-      url: '/helm/:namespace/:name',
+      url: '/helm/:namespace/:name?revision&tab',
       views: {
         'content@': {
           component: 'kubernetesHelmApplicationView',
@@ -424,6 +436,17 @@ angular.module('portainer.kubernetes', ['portainer.app', registriesModule, custo
       },
     };
 
+    const kubectlShell = {
+      name: 'kubernetes.kubectlshell',
+      url: '/kubectl-shell',
+      views: {
+        'content@': {
+          component: 'kubectlShellView',
+        },
+        'sidebar@': {},
+      },
+    };
+
     const dashboard = {
       name: 'kubernetes.dashboard',
       url: '/dashboard',
@@ -450,7 +473,7 @@ angular.module('portainer.kubernetes', ['portainer.app', registriesModule, custo
       },
     };
 
-    const resourcePools = {
+    const namespaces = {
       name: 'kubernetes.resourcePools',
       url: '/namespaces',
       views: {
@@ -476,7 +499,7 @@ angular.module('portainer.kubernetes', ['portainer.app', registriesModule, custo
       },
     };
 
-    const resourcePool = {
+    const namespace = {
       name: 'kubernetes.resourcePools.resourcePool',
       url: '/:id?tab',
       views: {
@@ -657,9 +680,10 @@ angular.module('portainer.kubernetes', ['portainer.app', registriesModule, custo
     $stateRegistryProvider.register(deploy);
     $stateRegistryProvider.register(node);
     $stateRegistryProvider.register(nodeStats);
-    $stateRegistryProvider.register(resourcePools);
+    $stateRegistryProvider.register(kubectlShell);
+    $stateRegistryProvider.register(namespaces);
     $stateRegistryProvider.register(namespaceCreation);
-    $stateRegistryProvider.register(resourcePool);
+    $stateRegistryProvider.register(namespace);
     $stateRegistryProvider.register(namespaceAccess);
     $stateRegistryProvider.register(volumes);
     $stateRegistryProvider.register(volume);

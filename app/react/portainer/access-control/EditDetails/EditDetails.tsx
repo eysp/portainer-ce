@@ -80,7 +80,7 @@ export function EditDetails({
               teams={teams}
               overrideTooltip={
                 !isPureAdmin && teams.length > 1
-                  ? '由于您是多个团队的成员，您可以选择允许哪些团队管理此资源。'
+                  ? 'As you are a member of multiple teams, you can select which teams(s) will be able to manage this resource.'
                   : undefined
               }
               onChange={(authorizedTeams) => handleChange({ authorizedTeams })}

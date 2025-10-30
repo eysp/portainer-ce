@@ -8,6 +8,7 @@ import { confirmStackUpdate } from '@/react/common/stacks/common/confirm-stack-u
 import { confirm, confirmDelete, confirmWebEditorDiscard } from '@@/modals/confirm';
 import { ModalType } from '@@/modals';
 import { buildConfirmButton } from '@@/modals/utils';
+import { getDockerComposeSchema } from '@/react/hooks/useDockerComposeSchema/useDockerComposeSchema';
 
 angular.module('portainer.app').controller('StackController', [
   '$async',
@@ -131,11 +132,11 @@ angular.module('portainer.app').controller('StackController', [
     $scope.migrateStack = function (name, endpointId) {
       return $q(async function (resolve) {
         const confirmed = await confirm({
-          title: '您确定吗？',
+          title: 'Are you sure?',
           modalType: ModalType.Warn,
           message:
-            '此操作将在目标环境中部署此堆栈的新实例，请注意，这不会迁移可能附加到此堆栈的任何持久卷的内容。.',
-          confirmButton: buildConfirmButton('迁移', 'danger'),
+            'This action will deploy a new instance of this stack on the target environment, please note that this does NOT relocate the content of any persistent volumes that may be attached to this stack.',
+          confirmButton: buildConfirmButton('Migrate', 'danger'),
         });
 
         if (!confirmed) {
@@ -146,7 +147,7 @@ angular.module('portainer.app').controller('StackController', [
     };
 
     $scope.removeStack = function () {
-      confirmDelete('您确定要删除该堆栈吗？相关服务也将被删除。').then((confirmed) => {
+      confirmDelete('Do you want to remove the stack? Associated services will be removed as well').then((confirmed) => {
         if (!confirmed) {
           return;
         }
@@ -236,7 +237,7 @@ angular.module('portainer.app').controller('StackController', [
     $scope.deployStack = function () {
       const stack = $scope.stack;
       const isSwarmStack = stack.Type === 1;
-      confirmStackUpdate('您想强制更新堆栈吗？', isSwarmStack).then(function (result) {
+      confirmStackUpdate('Do you want to force an update of the stack?', isSwarmStack).then(function (result) {
         if (!result) {
           return;
         }
@@ -282,10 +283,10 @@ angular.module('portainer.app').controller('StackController', [
     }
     async function stopStackAsync() {
       const confirmed = await confirm({
-        title: '您确定吗？',
+        title: 'Are you sure?',
         modalType: ModalType.Warn,
-        message: '您确定要停止此堆栈吗？',
-        confirmButton: buildConfirmButton('停止', 'danger'),
+        message: 'Are you sure you want to stop this stack?',
+        confirmButton: buildConfirmButton('Stop', 'danger'),
       });
       if (!confirmed) {
         return;
@@ -491,6 +492,12 @@ angular.module('portainer.app').controller('StackController', [
       }
 
       $scope.composeSyntaxMaxVersion = endpoint.ComposeSyntaxMaxVersion;
+
+      try {
+        $scope.dockerComposeSchema = await getDockerComposeSchema();
+      } catch (err) {
+        Notifications.error('Failure', err, 'Unable to load schema validation for editor');
+      }
     }
 
     initView();
@@ -500,8 +507,8 @@ angular.module('portainer.app').controller('StackController', [
 function confirmDetachment() {
   return confirm({
     modalType: ModalType.Warn,
-    title: '您确定吗？',
-    message: '您想要将堆栈与 Git 分离吗？',
-    confirmButton: buildConfirmButton('分离', 'danger'),
+    title: 'Are you sure?',
+    message: 'Do you want to detach the stack from Git?',
+    confirmButton: buildConfirmButton('Detach', 'danger'),
   });
 }

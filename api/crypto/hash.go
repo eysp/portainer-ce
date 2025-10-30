@@ -8,15 +8,16 @@ import (
 type Service struct{}
 
 // Hash hashes a string using the bcrypt algorithm
-func (*Service) Hash(data string) (string, error) {
+func (Service) Hash(data string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(data), bcrypt.DefaultCost)
 	if err != nil {
 		return "", err
 	}
+
 	return string(bytes), err
 }
 
 // CompareHashAndData compares a hash to clear data and returns an error if the comparison fails.
-func (*Service) CompareHashAndData(hash string, data string) error {
+func (Service) CompareHashAndData(hash string, data string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(data))
 }

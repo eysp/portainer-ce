@@ -7,7 +7,6 @@ import { UpdateNotification } from './UpdateNotifications';
 import { BuildInfoModalButton } from './BuildInfoModal';
 import '@reach/dialog/styles.css';
 import styles from './Footer.module.css';
-import Logo from './portainer_logo.svg?c';
 
 export function Footer() {
   return isBE ? <BEFooter /> : <CEFooter />;
@@ -19,7 +18,6 @@ function CEFooter() {
       <UpdateNotification />
 
       <FooterContent>
-        <Logo width="90px" height="100%" />
         <span>Community Edition</span>
 
         <BuildInfoModalButton />
@@ -43,7 +41,7 @@ function BEFooter() {
 
 function FooterContent({ children }: PropsWithChildren<unknown>) {
   return (
-    <div className="mx-auto flex items-center justify-center space-x-1 text-[10px] text-gray-5 be:text-gray-6">
+    <div className="mx-auto flex items-baseline justify-center space-x-1 text-[10px] text-gray-5 be:text-gray-6">
       {children}
     </div>
   );

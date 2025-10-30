@@ -1,11 +1,11 @@
 package kubernetes
 
 import (
-	"crypto/tls"
 	"net/http"
 	"strings"
 
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/crypto"
 	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/kubernetes/cli"
 )
@@ -16,7 +16,12 @@ type agentTransport struct {
 }
 
 // NewAgentTransport returns a new transport that can be used to send signed requests to a Portainer agent
-func NewAgentTransport(signatureService portainer.DigitalSignatureService, tlsConfig *tls.Config, tokenManager *tokenManager, endpoint *portainer.Endpoint, k8sClientFactory *cli.ClientFactory, dataStore dataservices.DataStore) *agentTransport {
+func NewAgentTransport(signatureService portainer.DigitalSignatureService, tokenManager *tokenManager, endpoint *portainer.Endpoint, k8sClientFactory *cli.ClientFactory, dataStore dataservices.DataStore, jwtService portainer.JWTService) (*agentTransport, error) {
+	tlsConfig, err := crypto.CreateTLSConfigurationFromDisk(endpoint.TLSConfig)
+	if err != nil {
+		return nil, err
+	}
+
 	transport := &agentTransport{
 		baseTransport: newBaseTransport(
 			&http.Transport{
@@ -26,11 +31,12 @@ func NewAgentTransport(signatureService portainer.DigitalSignatureService, tlsCo
 			endpoint,
 			k8sClientFactory,
 			dataStore,
+			jwtService,
 		),
 		signatureService: signatureService,
 	}
 
-	return transport
+	return transport, nil
 }
 
 // RoundTrip is the implementation of the the http.RoundTripper interface

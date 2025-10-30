@@ -28,7 +28,7 @@ function Example({ userRole }: Args) {
     [userRole]
   );
 
-  const [users] = useState(createMockUsers(20));
+  const [users] = useState(createMockUsers(20, Role.Standard));
   const [roles] = useState(
     Object.fromEntries(
       users.map((user) => [

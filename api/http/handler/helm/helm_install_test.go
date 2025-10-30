@@ -12,12 +12,11 @@ import (
 	"github.com/portainer/portainer/api/exec/exectest"
 	"github.com/portainer/portainer/api/http/security"
 	"github.com/portainer/portainer/api/internal/testhelpers"
-	helper "github.com/portainer/portainer/api/internal/testhelpers"
 	"github.com/portainer/portainer/api/jwt"
 	"github.com/portainer/portainer/api/kubernetes"
-	"github.com/portainer/portainer/pkg/libhelm/binary/test"
 	"github.com/portainer/portainer/pkg/libhelm/options"
 	"github.com/portainer/portainer/pkg/libhelm/release"
+	"github.com/portainer/portainer/pkg/libhelm/test"
 
 	"github.com/segmentio/encoding/json"
 	"github.com/stretchr/testify/assert"
@@ -38,14 +37,14 @@ func Test_helmInstall(t *testing.T) {
 	is.NoError(err, "Error initiating jwt service")
 
 	kubernetesDeployer := exectest.NewKubernetesDeployer()
-	helmPackageManager := test.NewMockHelmBinaryPackageManager("")
+	helmPackageManager := test.NewMockHelmPackageManager()
 	kubeClusterAccessService := kubernetes.NewKubeClusterAccessService("", "", "")
-	h := NewHandler(helper.NewTestRequestBouncer(), store, jwtService, kubernetesDeployer, helmPackageManager, kubeClusterAccessService)
+	h := NewHandler(testhelpers.NewTestRequestBouncer(), store, jwtService, kubernetesDeployer, helmPackageManager, kubeClusterAccessService)
 
 	is.NotNil(h, "Handler should not fail")
 
 	// Install a single chart.  We expect to get these values back
-	options := options.InstallOptions{Name: "nginx-1", Chart: "nginx", Namespace: "default", Repo: "https://kubernetes.github.io/ingress-nginx"}
+	options := options.InstallOptions{Name: "nginx-1", Chart: "nginx", Namespace: "default", Repo: "https://charts.bitnami.com/bitnami"}
 	optdata, err := json.Marshal(options)
 	is.NoError(err)
 

@@ -7,6 +7,7 @@ import {
   EnvironmentStatus,
   EnvironmentGroupId,
   PlatformType,
+  EdgeGroupId,
 } from '@/react/portainer/environments/types';
 import { type TagId } from '@/portainer/tags/types';
 import { UserId } from '@/portainer/users/types';
@@ -41,12 +42,15 @@ export interface BaseEnvironmentsQueryParams {
   edgeAsync?: boolean;
   edgeDeviceUntrusted?: boolean;
   excludeSnapshots?: boolean;
+  excludeSnapshotRaw?: boolean;
   provisioned?: boolean;
   name?: string;
   agentVersions?: string[];
   updateInformation?: boolean;
   edgeCheckInPassedSeconds?: number;
   platformTypes?: PlatformType[];
+  edgeGroupIds?: EdgeGroupId[];
+  excludeEdgeGroupIds?: EdgeGroupId[];
 }
 
 export type EnvironmentsQueryParams = BaseEnvironmentsQueryParams &
@@ -117,9 +121,15 @@ export async function getAgentVersions() {
   }
 }
 
-export async function getEndpoint(id: EnvironmentId) {
+export async function getEndpoint(
+  id: EnvironmentId,
+  excludeSnapshot = true,
+  excludeSnapshotRaw = true
+) {
   try {
-    const { data: endpoint } = await axios.get<Environment>(buildUrl(id));
+    const { data: endpoint } = await axios.get<Environment>(buildUrl(id), {
+      params: { excludeSnapshot, excludeSnapshotRaw },
+    });
     return endpoint;
   } catch (e) {
     throw parseAxiosError(e as Error);

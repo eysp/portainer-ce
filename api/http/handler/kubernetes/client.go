@@ -2,8 +2,10 @@ package kubernetes
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/portainer/portainer/api/http/middlewares"
+	"github.com/portainer/portainer/api/http/security"
 	"github.com/portainer/portainer/api/kubernetes/cli"
 	httperror "github.com/portainer/portainer/pkg/libhttp/error"
 	"github.com/rs/zerolog/log"
@@ -25,13 +27,19 @@ func (handler *Handler) prepareKubeClient(r *http.Request) (*cli.KubeClient, *ht
 		return nil, httperror.NotFound("Unable to find the Kubernetes endpoint associated to the request.", err)
 	}
 
-	pcli, err := handler.KubernetesClientFactory.GetPrivilegedKubeClient(endpoint)
+	tokenData, err := security.RetrieveTokenData(r)
+	if err != nil {
+		log.Error().Err(err).Str("context", "prepareKubeClient").Msg("Unable to retrieve token data associated to the request.")
+		return nil, httperror.InternalServerError("Unable to retrieve token data associated to the request.", err)
+	}
+
+	pcli, err := handler.KubernetesClientFactory.GetPrivilegedUserKubeClient(endpoint, strconv.Itoa(int(tokenData.ID)))
 	if err != nil {
 		log.Error().Err(err).Str("context", "prepareKubeClient").Msg("Unable to get a privileged Kubernetes client for the user.")
 		return nil, httperror.InternalServerError("Unable to get a privileged Kubernetes client for the user.", err)
 	}
-	pcli.IsKubeAdmin = cli.IsKubeAdmin
-	pcli.NonAdminNamespaces = cli.NonAdminNamespaces
+	pcli.SetIsKubeAdmin(cli.GetIsKubeAdmin())
+	pcli.SetClientNonAdminNamespaces(cli.GetClientNonAdminNamespaces())
 
 	return pcli, nil
 }

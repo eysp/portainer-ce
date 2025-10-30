@@ -21,10 +21,10 @@ export function CreateView() {
   return (
     <div>
       <PageHeader
-        title="创建自定义模板"
+        title="Create Custom Template"
         breadcrumbs={[
-          { label: '自定义模板', link: '^' },
-          '创建自定义模板',
+          { label: 'Custom Templates', link: '^' },
+          'Create Custom Template',
         ]}
       />
 

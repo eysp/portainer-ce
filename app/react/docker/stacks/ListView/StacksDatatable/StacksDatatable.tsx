@@ -42,7 +42,7 @@ export function StacksDatatable({
   return (
     <Datatable<DecoratedStack>
       settingsManager={tableState}
-      title="堆栈"
+      title="Stacks"
       titleIcon={Layers}
       renderTableActions={(selectedRows) => (
         <TableActions selectedItems={selectedRows} onRemove={onRemove} />

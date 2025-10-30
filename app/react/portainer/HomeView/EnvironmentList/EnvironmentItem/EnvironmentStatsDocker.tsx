@@ -23,19 +23,19 @@ interface Props {
 
 export function EnvironmentStatsDocker({ snapshot }: Props) {
   if (!snapshot) {
-    return <>无可用快照</>;
+    return <>No snapshot available</>;
   }
 
   return (
     <>
       <StatsItem
-        value={addPlural(snapshot.StackCount, '堆栈')}
+        value={addPlural(snapshot.StackCount, 'stack')}
         icon={Layers}
       />
 
       {!!snapshot.Swarm && (
         <StatsItem
-          value={addPlural(snapshot.ServiceCount, '服务')}
+          value={addPlural(snapshot.ServiceCount, 'service')}
           icon={Shuffle}
         />
       )}
@@ -48,10 +48,10 @@ export function EnvironmentStatsDocker({ snapshot }: Props) {
         unhealthy={snapshot.UnhealthyContainerCount}
       />
       <StatsItem
-        value={addPlural(snapshot.VolumeCount, '卷')}
+        value={addPlural(snapshot.VolumeCount, 'volume')}
         icon={Database}
       />
-      <StatsItem value={addPlural(snapshot.ImageCount, '镜像')} icon={List} />
+      <StatsItem value={addPlural(snapshot.ImageCount, 'image')} icon={List} />
 
       <StatsItem icon={Cpu} value={`${snapshot.TotalCPU} CPU`} />
 
@@ -62,7 +62,7 @@ export function EnvironmentStatsDocker({ snapshot }: Props) {
 
       {snapshot.Swarm && (
         <StatsItem
-          value={addPlural(snapshot.NodeCount, '节点')}
+          value={addPlural(snapshot.NodeCount, 'node')}
           icon={HardDrive}
         />
       )}
@@ -87,7 +87,7 @@ function ContainerStats({
 }: ContainerStatsProps) {
   const actualTotal = total || running + stopped;
   return (
-    <StatsItem value={addPlural(actualTotal, '容器')} icon={Box}>
+    <StatsItem value={addPlural(actualTotal, 'container')} icon={Box}>
       {actualTotal > 0 && (
         <>
           <StatsItem value={running} icon={Power} iconClass="icon-success" />

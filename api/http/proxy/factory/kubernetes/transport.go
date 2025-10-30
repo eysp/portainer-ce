@@ -26,15 +26,17 @@ type baseTransport struct {
 	endpoint         *portainer.Endpoint
 	k8sClientFactory *cli.ClientFactory
 	dataStore        dataservices.DataStore
+	jwtService       portainer.JWTService
 }
 
-func newBaseTransport(httpTransport *http.Transport, tokenManager *tokenManager, endpoint *portainer.Endpoint, k8sClientFactory *cli.ClientFactory, dataStore dataservices.DataStore) *baseTransport {
+func newBaseTransport(httpTransport *http.Transport, tokenManager *tokenManager, endpoint *portainer.Endpoint, k8sClientFactory *cli.ClientFactory, dataStore dataservices.DataStore, jwtService portainer.JWTService) *baseTransport {
 	return &baseTransport{
 		httpTransport:    httpTransport,
 		tokenManager:     tokenManager,
 		endpoint:         endpoint,
 		k8sClientFactory: k8sClientFactory,
 		dataStore:        dataStore,
+		jwtService:       jwtService,
 	}
 }
 
@@ -58,6 +60,7 @@ func (transport *baseTransport) proxyKubernetesRequest(request *http.Request) (*
 
 	switch {
 	case strings.EqualFold(requestPath, "/namespaces/portainer/configmaps/portainer-config") && (request.Method == "PUT" || request.Method == "POST"):
+		transport.k8sClientFactory.ClearClientCache()
 		defer transport.tokenManager.UpdateUserServiceAccountsForEndpoint(portainer.EndpointID(endpointID))
 		return transport.executeKubernetesRequest(request)
 	case strings.EqualFold(requestPath, "/namespaces"):
@@ -81,7 +84,7 @@ func (transport *baseTransport) proxyNamespacedRequest(request *http.Request, fu
 
 	switch {
 	case strings.HasPrefix(requestPath, "pods"):
-		return transport.proxyPodsRequest(request, namespace, requestPath)
+		return transport.proxyPodsRequest(request, namespace)
 	case strings.HasPrefix(requestPath, "deployments"):
 		return transport.proxyDeploymentsRequest(request, namespace, requestPath)
 	case requestPath == "" && request.Method == "DELETE":
@@ -89,6 +92,23 @@ func (transport *baseTransport) proxyNamespacedRequest(request *http.Request, fu
 	default:
 		return transport.executeKubernetesRequest(request)
 	}
+}
+
+// addTokenForExec injects a kubeconfig token into the request header
+// this is only used with kubeconfig for kubectl exec requests
+func (transport *baseTransport) addTokenForExec(request *http.Request) error {
+	tokenData, err := security.RetrieveTokenData(request)
+	if err != nil {
+		return err
+	}
+
+	token, err := transport.jwtService.GenerateTokenForKubeconfig(tokenData)
+	if err != nil {
+		return err
+	}
+
+	request.Header.Set("Authorization", "Bearer "+token)
+	return nil
 }
 
 func (transport *baseTransport) executeKubernetesRequest(request *http.Request) (*http.Response, error) {

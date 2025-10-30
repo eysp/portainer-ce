@@ -25,12 +25,12 @@ type key int
 const contextEndpoint key = 0
 
 func WithEndpoint(endpointService dataservices.EndpointService, endpointIDParam string) mux.MiddlewareFunc {
+	if endpointIDParam == "" {
+		endpointIDParam = "id"
+	}
+
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(rw http.ResponseWriter, request *http.Request) {
-			if endpointIDParam == "" {
-				endpointIDParam = "id"
-			}
-
 			endpointID, err := requesthelpers.RetrieveNumericRouteVariableValue(request, endpointIDParam)
 			if err != nil {
 				httperror.WriteError(rw, http.StatusBadRequest, "Invalid environment identifier route variable", err)
@@ -51,7 +51,6 @@ func WithEndpoint(endpointService dataservices.EndpointService, endpointIDParam 
 			ctx := context.WithValue(request.Context(), contextEndpoint, endpoint)
 
 			next.ServeHTTP(rw, request.WithContext(ctx))
-
 		})
 	}
 }

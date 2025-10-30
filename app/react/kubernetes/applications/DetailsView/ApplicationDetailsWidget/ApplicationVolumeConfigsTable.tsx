@@ -1,14 +1,22 @@
-import { KeyToPath, Pod, Secret } from 'kubernetes-types/core/v1';
+import { KeyToPath, Pod, VolumeMount } from 'kubernetes-types/core/v1';
 import { Asterisk, Plus } from 'lucide-react';
-
-import { useEnvironmentId } from '@/react/hooks/useEnvironmentId';
-import { useK8sSecrets } from '@/react/kubernetes/configs/queries/useK8sSecrets';
 
 import { Icon } from '@@/Icon';
 import { Link } from '@@/Link';
 
 import { Application } from '../../types';
 import { applicationIsKind } from '../../utils';
+
+type VolumeConfigType = 'configMap' | 'secret';
+
+type AppVolumeConfig = {
+  volumeConfigName: string | undefined;
+  containerVolumeMount: VolumeMount | undefined;
+  containerName: string;
+  isInitContainer: boolean;
+  item: KeyToPath;
+  type: VolumeConfigType;
+};
 
 type Props = {
   namespace: string;
@@ -17,8 +25,6 @@ type Props = {
 
 export function ApplicationVolumeConfigsTable({ namespace, app }: Props) {
   const containerVolumeConfigs = getApplicationVolumeConfigs(app);
-
-  const { data: secrets } = useK8sSecrets(useEnvironmentId(), namespace);
 
   if (containerVolumeConfigs.length === 0) {
     return null;
@@ -41,6 +47,7 @@ export function ApplicationVolumeConfigsTable({ namespace, app }: Props) {
               containerName,
               item,
               volumeConfigName,
+              type,
             },
             index
           ) => (
@@ -76,7 +83,7 @@ export function ApplicationVolumeConfigsTable({ namespace, app }: Props) {
                 {!item.key && '-'}
               </td>
               <td>
-                {isVolumeConfigNameFromSecret(secrets, volumeConfigName) ? (
+                {type === 'secret' ? (
                   <Link
                     className="flex items-center"
                     to="kubernetes.secrets.secret"
@@ -107,15 +114,8 @@ export function ApplicationVolumeConfigsTable({ namespace, app }: Props) {
   );
 }
 
-function isVolumeConfigNameFromSecret(
-  secrets?: Secret[],
-  volumeConfigName?: string
-) {
-  return secrets?.some((secret) => secret.metadata?.name === volumeConfigName);
-}
-
 // getApplicationVolumeConfigs returns a list of volume configs / secrets for each container and each item within the matching volume
-function getApplicationVolumeConfigs(app?: Application) {
+function getApplicationVolumeConfigs(app?: Application): AppVolumeConfig[] {
   if (!app) {
     return [];
   }
@@ -142,6 +142,10 @@ function getApplicationVolumeConfigs(app?: Application) {
         const containerVolumeMount = container.volumeMounts?.find(
           (volumeMount) => volumeMount.name === volume.name
         );
+        const type: VolumeConfigType = volume.configMap
+          ? 'configMap'
+          : 'secret';
+
         if (volConfigMapItems.length === 0) {
           return [
             {
@@ -150,6 +154,7 @@ function getApplicationVolumeConfigs(app?: Application) {
               containerName: container.name,
               isInitContainer: appInitContainers.includes(container),
               item: {} as KeyToPath,
+              type,
             },
           ];
         }
@@ -160,6 +165,7 @@ function getApplicationVolumeConfigs(app?: Application) {
           containerName: container.name,
           isInitContainer: appInitContainers.includes(container),
           item,
+          type,
         }));
       })
       // only return the app volumes where the container volumeMounts include the volume name (from map step above)

@@ -17,11 +17,29 @@ func (service ServiceTx) UpdateEdgeGroupFunc(ID portainer.EdgeGroupID, updateFun
 }
 
 func (service ServiceTx) Create(group *portainer.EdgeGroup) error {
-	return service.Tx.CreateObject(
+	es := group.Endpoints
+	group.Endpoints = nil // Clear deprecated field
+
+	err := service.Tx.CreateObject(
 		BucketName,
 		func(id uint64) (int, any) {
 			group.ID = portainer.EdgeGroupID(id)
 			return int(group.ID), group
 		},
 	)
+
+	group.Endpoints = es // Restore endpoints after create
+
+	return err
+}
+
+func (service ServiceTx) Update(ID portainer.EdgeGroupID, group *portainer.EdgeGroup) error {
+	es := group.Endpoints
+	group.Endpoints = nil // Clear deprecated field
+
+	err := service.BaseDataServiceTx.Update(ID, group)
+
+	group.Endpoints = es // Restore endpoints after update
+
+	return err
 }

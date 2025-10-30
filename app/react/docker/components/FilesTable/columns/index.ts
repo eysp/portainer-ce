@@ -14,19 +14,19 @@ import { ActionsCell } from './ActionsCell';
 
 export const columns = [
   columnHelper.accessor('Name', {
-    header: '名称',
+    header: 'Name',
     cell: NameCell,
   }),
   columnHelper.accessor('Size', {
-    header: '大小',
+    header: 'Size',
     cell: hideIfCustom(({ getValue }) => humanize(getValue())),
   }),
   columnHelper.accessor('ModTime', {
-    header: '最后修改时间',
+    header: 'Last modification',
     cell: hideIfCustom(({ getValue }) => isoDateFromTimestamp(getValue())),
   }),
   columnHelper.display({
-    header: '操作',
+    header: 'Actions',
     cell: hideIfCustom(ActionsCell),
   }),
   columnHelper.accessor('Dir', {}), // workaround, to enable sorting by Dir (put directory first)

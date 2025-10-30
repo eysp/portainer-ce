@@ -9,6 +9,7 @@ import { withFormValidation } from '@/react-tools/withFormValidation';
 import { GroupAssociationTable } from '@/react/portainer/environments/environment-groups/components/GroupAssociationTable';
 import { AssociatedEnvironmentsSelector } from '@/react/portainer/environments/environment-groups/components/AssociatedEnvironmentsSelector';
 import { withControlledInput } from '@/react-tools/withControlledInput';
+import { NamespacePortainerSelect } from '@/react/kubernetes/applications/components/NamespaceSelector/NamespaceSelector';
 
 import {
   EnvironmentVariablesFieldset,
@@ -97,7 +98,7 @@ export const ngModule = angular
     r2a(Tooltip, ['message', 'position', 'className', 'setHtmlMessage', 'size'])
   )
   .component('terminalTooltip', r2a(TerminalTooltip, []))
-  .component('badge', r2a(Badge, ['type', 'className']))
+  .component('badge', r2a(Badge, ['type', 'className', 'data-cy']))
   .component('fileUploadField', fileUploadField)
   .component('porSwitchField', switchField)
   .component(
@@ -199,11 +200,22 @@ export const ngModule = angular
       'onChange',
       'options',
       'isMulti',
+      'filterOption',
       'isClearable',
       'components',
       'isLoading',
       'noOptionsMessage',
       'aria-label',
+      'loadingMessage',
+    ])
+  )
+  .component(
+    'namespacePortainerSelect',
+    r2a(NamespacePortainerSelect, [
+      'value',
+      'onChange',
+      'isDisabled',
+      'options',
     ])
   )
   .component(
@@ -223,7 +235,7 @@ export const ngModule = angular
     'reactCodeEditor',
     r2a(CodeEditor, [
       'id',
-      'placeholder',
+      'textTip',
       'type',
       'readonly',
       'onChange',
@@ -232,6 +244,10 @@ export const ngModule = angular
       'data-cy',
       'versions',
       'onVersionChange',
+      'schema',
+      'fileName',
+      'placeholder',
+      'showToolbar',
     ])
   )
   .component(

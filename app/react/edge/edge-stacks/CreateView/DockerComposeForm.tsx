@@ -139,6 +139,7 @@ export function DockerComposeForm({ webhookId, onChangeTemplate }: Props) {
             }
             baseWebhookUrl={baseEdgeStackWebhookUrl()}
             webhookId={webhookId}
+            isAutoUpdateVisible={isBE}
           />
 
           {isBE && (

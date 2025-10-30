@@ -26,30 +26,31 @@ export function EnvironmentTypeSelectView() {
   return (
     <>
       <PageHeader
-        title="快速设置"
-        breadcrumbs={[{ label: '环境向导' }]}
+        title="Quick Setup"
+        breadcrumbs={[{ label: 'Environment Wizard' }]}
         reload
       />
 
       <div className="row">
         <div className="col-sm-12">
           <Widget>
-            <WidgetTitle icon={Wand2} title="环境向导" />
+            <WidgetTitle icon={Wand2} title="Environment Wizard" />
             <WidgetBody>
               <div className="form-horizontal">
-                <FormSection title="选择你的环境">
+                <FormSection title="Select your environment(s)">
                   <p className="text-muted small">
-                    你可以接入不同类型的环境，请选择所有适用项。
+                    You can onboard different types of environments, select all
+                    that apply.
                   </p>
                   <p className="control-label !mb-2">
-                    连接到现有环境
+                    Connect to existing environments
                   </p>
                   <EnvironmentSelector
                     value={types}
                     onChange={setTypes}
                     options={existingEnvironmentTypes}
                   />
-                  <p className="control-label !mb-2">设置新环境</p>
+                  <p className="control-label !mb-2">Set up new environments</p>
                   <EnvironmentSelector
                     value={types}
                     onChange={setTypes}
@@ -67,7 +68,7 @@ export function EnvironmentTypeSelectView() {
                 onClick={() => startWizard()}
                 className="!ml-0"
               >
-                启动向导
+                Start Wizard
               </Button>
             </WidgetBody>
           </Widget>

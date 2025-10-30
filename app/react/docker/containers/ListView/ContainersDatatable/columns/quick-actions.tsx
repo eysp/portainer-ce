@@ -11,7 +11,7 @@ import { TableSettings } from '../types';
 import { columnHelper } from './helper';
 
 export const quickActions = columnHelper.display({
-  header: '快速操作',
+  header: 'Quick Actions',
   id: 'actions',
   cell: QuickActionsCell,
 });

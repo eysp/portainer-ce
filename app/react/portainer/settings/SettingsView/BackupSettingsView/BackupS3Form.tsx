@@ -13,7 +13,7 @@ import { FormControl } from '@@/form-components/FormControl';
 import { LoadingButton } from '@@/buttons/LoadingButton';
 import { Input } from '@@/form-components/Input';
 import { SwitchField } from '@@/form-components/SwitchField';
-
+import { BEOverlay } from '@@/BEFeatureIndicator/BEOverlay';
 
 import {
   useBackupS3Settings,
@@ -58,7 +58,10 @@ export function BackupS3Form() {
       validateOnMount
     >
       {({ values, errors, isSubmitting, setFieldValue, isValid }) => (
-        
+        <BEOverlay
+          featureId={FeatureId.S3_BACKUP_SETTING}
+          variant="form-section"
+        >
           <Form className="form-horizontal">
             <div className="form-group">
               <div className="col-sm-12">
@@ -66,7 +69,7 @@ export function BackupS3Form() {
                   name="schedule-automatic-backup"
                   data-cy="settings-scheduleAutomaticBackupSwitch"
                   labelClass="col-sm-3 col-lg-2"
-                  label="安排自动备份"
+                  label="Schedule automatic backups"
                   checked={values.scheduleAutomaticBackup}
                   onChange={(e) => setFieldValue('scheduleAutomaticBackup', e)}
                 />
@@ -76,7 +79,7 @@ export function BackupS3Form() {
             {values.scheduleAutomaticBackup && (
               <FormControl
                 inputId="cron_rule"
-                label="Cron 规则"
+                label="Cron rule"
                 size="small"
                 errors={errors.cronRule}
                 required
@@ -88,14 +91,14 @@ export function BackupS3Form() {
                   as={Input}
                   placeholder="0 2 * * *"
                   data-cy="settings-backupCronRuleInput"
-                  
-                  
+                  className={clsx({ 'limited-be': limitedToBE })}
+                  disabled={limitedToBE}
                 />
               </FormControl>
             )}
 
             <FormControl
-              label="访问密钥 ID"
+              label="Access key ID"
               inputId="access_key_id"
               errors={errors.accessKeyID}
             >
@@ -105,13 +108,13 @@ export function BackupS3Form() {
                 type="text"
                 as={Input}
                 data-cy="settings-accessKeyIdInput"
-                
-                
+                className={clsx({ 'limited-be': limitedToBE })}
+                disabled={limitedToBE}
               />
             </FormControl>
 
             <FormControl
-              label="访问密钥"
+              label="Secret access key"
               inputId="secret_access_key"
               errors={errors.secretAccessKey}
             >
@@ -121,21 +124,21 @@ export function BackupS3Form() {
                 type="password"
                 as={Input}
                 data-cy="settings-secretAccessKeyInput"
-                
-                
+                className={clsx({ 'limited-be': limitedToBE })}
+                disabled={limitedToBE}
               />
             </FormControl>
 
-            <FormControl label="区域" inputId="region" errors={errors.region}>
+            <FormControl label="Region" inputId="region" errors={errors.region}>
               <Field
                 id="region"
                 name="region"
                 type="text"
                 as={Input}
-                placeholder="为空时默认为 us-east-1 区域"
+                placeholder="default region is us-east-1 if left empty"
                 data-cy="settings-backupRegionInput"
-                
-                
+                className={clsx({ 'limited-be': limitedToBE })}
+                disabled={limitedToBE}
               />
             </FormControl>
 
@@ -150,8 +153,8 @@ export function BackupS3Form() {
                 type="text"
                 as={Input}
                 data-cy="settings-backupBucketNameInput"
-                
-                
+                className={clsx({ 'limited-be': limitedToBE })}
+                disabled={limitedToBE}
               />
             </FormControl>
 
@@ -168,15 +171,15 @@ export function BackupS3Form() {
                 as={Input}
                 placeholder="leave empty for AWS S3"
                 data-cy="settings-backupS3CompatibleHostInput"
-                
-                
+                className={clsx({ 'limited-be': limitedToBE })}
+                disabled={limitedToBE}
               />
             </FormControl>
 
             <SecurityFieldset
               switchDataCy="settings-passwordProtectToggleS3"
               inputDataCy="settings-backups3pw"
-              
+              disabled={limitedToBE}
             />
 
             <div className="form-group">
@@ -185,33 +188,33 @@ export function BackupS3Form() {
                   type="button"
                   loadingText="Exporting..."
                   isLoading={isSubmitting}
-                  
-                  
+                  className={clsx('!ml-0', { 'limited-be': limitedToBE })}
+                  disabled={!isValid || limitedToBE}
                   data-cy="settings-exportBackupS3Button"
                   icon={Upload}
                   onClick={() => {
                     handleExport(values);
                   }}
                 >
-                  导出备份
+                  Export backup
                 </LoadingButton>
               </div>
             </div>
             <div className="form-group">
               <div className="col-sm-12">
                 <LoadingButton
-                  loadingText="设置保存中..."
+                  loadingText="Saving settings..."
                   isLoading={isSubmitting}
-                  
-                  
+                  className={clsx('!ml-0', { 'limited-be': limitedToBE })}
+                  disabled={!isValid || limitedToBE}
                   data-cy="settings-saveBackupSettingsButton"
                 >
-                  保存备份设置
+                  Save backup settings
                 </LoadingButton>
               </div>
             </div>
           </Form>
-        
+        </BEOverlay>
       )}
     </Formik>
   );

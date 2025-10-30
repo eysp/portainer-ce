@@ -1,12 +1,11 @@
 package endpoints
 
 import (
-	"slices"
-
-	"github.com/pkg/errors"
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/set"
+
+	"github.com/pkg/errors"
 )
 
 func updateEnvironmentEdgeGroups(tx dataservices.DataStoreTx, newEdgeGroups []portainer.EdgeGroupID, environmentID portainer.EndpointID) (bool, error) {
@@ -19,10 +18,8 @@ func updateEnvironmentEdgeGroups(tx dataservices.DataStoreTx, newEdgeGroups []po
 
 	environmentEdgeGroupsSet := set.Set[portainer.EdgeGroupID]{}
 	for _, edgeGroup := range edgeGroups {
-		for _, eID := range edgeGroup.Endpoints {
-			if eID == environmentID {
-				environmentEdgeGroupsSet[edgeGroup.ID] = true
-			}
+		if edgeGroup.EndpointIDs.Contains(environmentID) {
+			environmentEdgeGroupsSet[edgeGroup.ID] = true
 		}
 	}
 
@@ -52,20 +49,16 @@ func updateEnvironmentEdgeGroups(tx dataservices.DataStoreTx, newEdgeGroups []po
 	}
 
 	removeEdgeGroups := environmentEdgeGroupsSet.Difference(newEdgeGroupsSet)
-	err = updateSet(removeEdgeGroups, func(edgeGroup *portainer.EdgeGroup) {
-		edgeGroup.Endpoints = slices.DeleteFunc(edgeGroup.Endpoints, func(eID portainer.EndpointID) bool {
-			return eID == environmentID
-		})
-	})
-	if err != nil {
+	if err := updateSet(removeEdgeGroups, func(edgeGroup *portainer.EdgeGroup) {
+		edgeGroup.EndpointIDs.Remove(environmentID)
+	}); err != nil {
 		return false, err
 	}
 
 	addToEdgeGroups := newEdgeGroupsSet.Difference(environmentEdgeGroupsSet)
-	err = updateSet(addToEdgeGroups, func(edgeGroup *portainer.EdgeGroup) {
-		edgeGroup.Endpoints = append(edgeGroup.Endpoints, environmentID)
-	})
-	if err != nil {
+	if err := updateSet(addToEdgeGroups, func(edgeGroup *portainer.EdgeGroup) {
+		edgeGroup.EndpointIDs.Add(environmentID)
+	}); err != nil {
 		return false, err
 	}
 

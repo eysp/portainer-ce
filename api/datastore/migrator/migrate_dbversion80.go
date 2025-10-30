@@ -75,6 +75,10 @@ func (m *Migrator) updateEdgeStackStatusForDB80() error {
 
 	for _, edgeStack := range edgeStacks {
 		for endpointId, status := range edgeStack.Status {
+			if status.Details == nil {
+				status.Details = &portainer.EdgeStackStatusDetails{}
+			}
+
 			switch status.Type {
 			case portainer.EdgeStackStatusPending:
 				status.Details.Pending = true
@@ -93,10 +97,10 @@ func (m *Migrator) updateEdgeStackStatusForDB80() error {
 			edgeStack.Status[endpointId] = status
 		}
 
-		err = m.edgeStackService.UpdateEdgeStack(edgeStack.ID, &edgeStack)
-		if err != nil {
+		if err := m.edgeStackService.UpdateEdgeStack(edgeStack.ID, &edgeStack); err != nil {
 			return err
 		}
 	}
+
 	return nil
 }

@@ -58,7 +58,7 @@ export interface Props<D extends DefaultType> extends AutomationTestingProps {
   getRowId?(row: D): string;
   isRowSelectable?(row: Row<D>): boolean;
   emptyContentLabel?: string;
-  title?: string;
+  title?: React.ReactNode;
   titleIcon?: IconProps['icon'];
   titleId?: string;
   initialTableState?: Partial<TableState>;
@@ -70,6 +70,10 @@ export interface Props<D extends DefaultType> extends AutomationTestingProps {
   getRowCanExpand?(row: Row<D>): boolean;
   noWidget?: boolean;
   extendTableOptions?: (options: TableOptions<D>) => TableOptions<D>;
+  onSearchChange?: (search: string) => void;
+  includeSearch?: boolean;
+  ariaLabel?: string;
+  id?: string;
 }
 
 export function Datatable<D extends DefaultType>({
@@ -94,10 +98,14 @@ export function Datatable<D extends DefaultType>({
   getRowCanExpand,
   'data-cy': dataCy,
   onPageChange = () => {},
+  onSearchChange = () => {},
   page,
   totalCount = dataset.length,
   isServerSidePagination = false,
   extendTableOptions = (value) => value,
+  includeSearch,
+  ariaLabel,
+  id,
 }: Props<D> & PaginationProps) {
   const pageCount = useMemo(
     () => Math.ceil(totalCount / settings.pageSize),
@@ -152,7 +160,12 @@ export function Datatable<D extends DefaultType>({
       getRowCanExpand,
       getColumnCanGlobalFilter,
       ...(isServerSidePagination
-        ? { manualPagination: true, pageCount }
+        ? {
+            pageCount,
+            manualPagination: true,
+            manualFiltering: true,
+            manualSorting: true,
+          }
         : {
             getSortedRowModel: getSortedRowModel(),
           }),
@@ -179,9 +192,14 @@ export function Datatable<D extends DefaultType>({
     () => _.difference(selectedItems, filteredItems),
     [selectedItems, filteredItems]
   );
+  const { titleAriaLabel, contentAriaLabel } = getAriaLabels(
+    ariaLabel,
+    title,
+    titleId
+  );
 
   return (
-    <Table.Container noWidget={noWidget} aria-label={title}>
+    <Table.Container noWidget={noWidget} aria-label={titleAriaLabel} id={id}>
       <DatatableHeader
         onSearchChange={handleSearchBarChange}
         searchValue={settings.search}
@@ -192,6 +210,7 @@ export function Datatable<D extends DefaultType>({
         renderTableActions={() => renderTableActions(selectedItems)}
         renderTableSettings={() => renderTableSettings(tableInstance)}
         data-cy={`${dataCy}-header`}
+        includeSearch={includeSearch}
       />
 
       <DatatableContent<D>
@@ -201,7 +220,7 @@ export function Datatable<D extends DefaultType>({
         isLoading={isLoading}
         onSortChange={handleSortChange}
         data-cy={dataCy}
-        aria-label={`${title} table`}
+        aria-label={contentAriaLabel}
       />
 
       <DatatableFooter
@@ -219,6 +238,7 @@ export function Datatable<D extends DefaultType>({
   function handleSearchBarChange(search: string) {
     tableInstance.setGlobalFilter({ search });
     settings.setSearch(search);
+    onSearchChange(search);
   }
 
   function handlePageChange(page: number) {
@@ -234,6 +254,23 @@ export function Datatable<D extends DefaultType>({
     tableInstance.setPageSize(pageSize);
     settings.setPageSize(pageSize);
   }
+}
+
+function getAriaLabels(
+  titleAriaLabel?: string,
+  title?: ReactNode,
+  titleId?: string
+) {
+  if (titleAriaLabel) {
+    return { titleAriaLabel, contentAriaLabel: `${titleAriaLabel} table` };
+  }
+  if (typeof title === 'string') {
+    return { titleAriaLabel: title, contentAriaLabel: `${title} table` };
+  }
+  if (titleId) {
+    return { titleAriaLabel: titleId, contentAriaLabel: `${titleId} table` };
+  }
+  return { titleAriaLabel: 'table', contentAriaLabel: 'table' };
 }
 
 function defaultRenderRow<D extends DefaultType>(

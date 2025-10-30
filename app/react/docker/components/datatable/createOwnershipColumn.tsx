@@ -17,7 +17,7 @@ export function createOwnershipColumn<D extends IResource>(
   return {
     accessorFn: (row) =>
       row.ResourceControl?.Ownership || ResourceControlOwnership.ADMINISTRATORS,
-    header: '所有权',
+    header: 'Ownership',
     id: 'ownership',
     cell: OwnershipCell,
     enableHiding,

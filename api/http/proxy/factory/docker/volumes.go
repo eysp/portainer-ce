@@ -224,7 +224,7 @@ func (transport *Transport) getDockerID() (string, error) {
 	if transport.snapshotService != nil {
 		endpoint := portainer.Endpoint{ID: transport.endpoint.ID}
 
-		if err := transport.snapshotService.FillSnapshotData(&endpoint); err == nil && len(endpoint.Snapshots) > 0 {
+		if err := transport.snapshotService.FillSnapshotData(&endpoint, true); err == nil && len(endpoint.Snapshots) > 0 {
 			if dockerID, err := snapshot.FetchDockerID(endpoint.Snapshots[0]); err == nil {
 				transport.dockerID = dockerID
 				return dockerID, nil

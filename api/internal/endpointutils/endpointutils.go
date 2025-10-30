@@ -249,3 +249,19 @@ func getEndpointCheckinInterval(endpoint *portainer.Endpoint, settings *portaine
 
 	return defaultInterval
 }
+
+func InitializeEdgeEndpointRelation(endpoint *portainer.Endpoint, tx dataservices.DataStoreTx) error {
+	if !IsEdgeEndpoint(endpoint) {
+		return nil
+	}
+
+	relation := &portainer.EndpointRelation{
+		EndpointID: endpoint.ID,
+		EdgeStacks: make(map[portainer.EdgeStackID]bool),
+	}
+
+	if err := tx.EndpointRelation().Create(relation); err != nil {
+		return err
+	}
+	return nil
+}

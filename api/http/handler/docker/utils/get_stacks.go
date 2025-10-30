@@ -6,14 +6,13 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/swarm"
 	portainer "github.com/portainer/portainer/api"
-	portaineree "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/dataservices"
 	dockerconsts "github.com/portainer/portainer/api/docker/consts"
 	"github.com/portainer/portainer/api/http/security"
 )
 
 type StackViewModel struct {
-	InternalStack *portaineree.Stack
+	InternalStack *portainer.Stack
 
 	ID         portainer.StackID
 	Name       string
@@ -23,7 +22,6 @@ type StackViewModel struct {
 
 // GetDockerStacks retrieves all the stacks associated to a specific environment filtered by the user's access.
 func GetDockerStacks(tx dataservices.DataStoreTx, securityContext *security.RestrictedRequestContext, environmentID portainer.EndpointID, containers []types.Container, services []swarm.Service) ([]StackViewModel, error) {
-
 	stacks, err := tx.Stack().ReadAll()
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve stacks: %w", err)

@@ -8,6 +8,7 @@
     }
   ],
   "edge_stack": null,
+  "edge_stack_status": null,
   "edgegroups": null,
   "edgejobs": null,
   "endpoint_groups": [
@@ -119,6 +120,10 @@
       "BaseURL": "",
       "Ecr": {
         "Region": ""
+      },
+      "Github": {
+        "OrganisationName": "",
+        "UseOrganisation": false
       },
       "Gitlab": {
         "InstanceURL": "",
@@ -605,12 +610,12 @@
     "GlobalDeploymentOptions": {
       "hideStacksFunctionality": false
     },
-    "HelmRepositoryURL": "",
+    "HelmRepositoryURL": "https://charts.bitnami.com/bitnami",
     "InternalAuthSettings": {
       "RequiredPasswordLength": 12
     },
     "KubeconfigExpiry": "0",
-    "KubectlShellImage": "portainer/kubectl-shell:2.27.6",
+    "KubectlShellImage": "portainer/kubectl-shell:2.33.3",
     "LDAPSettings": {
       "AnonymousMode": true,
       "AutoCreateUsers": true,
@@ -678,14 +683,11 @@
           "Images": null,
           "Info": {
             "Architecture": "",
-            "BridgeNfIp6tables": false,
-            "BridgeNfIptables": false,
             "CDISpecDirs": null,
             "CPUSet": false,
             "CPUShares": false,
             "CgroupDriver": "",
             "ContainerdCommit": {
-              "Expected": "",
               "ID": ""
             },
             "Containers": 0,
@@ -709,7 +711,6 @@
             "IndexServerAddress": "",
             "InitBinary": "",
             "InitCommit": {
-              "Expected": "",
               "ID": ""
             },
             "Isolation": "",
@@ -738,7 +739,6 @@
             },
             "RegistryConfig": null,
             "RuncCommit": {
-              "Expected": "",
               "ID": ""
             },
             "Runtimes": null,
@@ -780,6 +780,7 @@
         "ImageCount": 9,
         "IsPodman": false,
         "NodeCount": 0,
+        "PerformanceMetrics": null,
         "RunningContainerCount": 5,
         "ServiceCount": 0,
         "StackCount": 2,
@@ -943,7 +944,7 @@
     }
   ],
   "version": {
-    "VERSION": "{\"SchemaVersion\":\"2.27.6\",\"MigratorCount\":0,\"Edition\":1,\"InstanceID\":\"463d5c47-0ea5-4aca-85b1-405ceefee254\"}"
+    "VERSION": "{\"SchemaVersion\":\"2.33.3\",\"MigratorCount\":0,\"Edition\":1,\"InstanceID\":\"463d5c47-0ea5-4aca-85b1-405ceefee254\"}"
   },
   "webhooks": null
 }

@@ -80,7 +80,7 @@ func (handler *Handler) webhookCreate(w http.ResponseWriter, r *http.Request) *h
 			return httperror.InternalServerError("Unable to retrieve user authentication token", err)
 		}
 
-		_, err = access.GetAccessibleRegistry(handler.DataStore, tokenData.ID, endpointID, payload.RegistryID)
+		_, err = access.GetAccessibleRegistry(handler.DataStore, nil, tokenData.ID, endpointID, payload.RegistryID)
 		if err != nil {
 			return httperror.Forbidden("Permission deny to access registry", err)
 		}

@@ -20,8 +20,8 @@ export function PortainerTunnelAddrField({
 
   return (
     <FormControl
-      label="Portainer 隧道服务器地址"
-      tooltip="Edge 代理将使用此 Portainer 实例的地址建立反向隧道连接。"
+      label="Portainer tunnel server address"
+      tooltip="Address of this Portainer instance that will be used by Edge agents to establish a reverse tunnel."
       required
       errors={metaProps.error}
       inputId={id}
@@ -40,10 +40,10 @@ export function PortainerTunnelAddrField({
 
 export function validation() {
   return string()
-    .required('隧道服务器地址是必填项')
+    .required('Tunnel server address is required')
     .test(
       'valid tunnel server URL',
-      '隧道服务器地址必须是有效地址（不能使用 localhost）',
+      'The tunnel server address must be a valid address (localhost cannot be used)',
       (value) => {
         if (!value) {
           return false;

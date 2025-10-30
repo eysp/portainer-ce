@@ -6,13 +6,14 @@ export const webEditorForm = {
 
   bindings: {
     identifier: '@',
-    placeholder: '@',
+    textTip: '@',
     yml: '<',
     value: '<',
     readOnly: '<',
     onChange: '<',
     hideTitle: '<',
     height: '@',
+    schema: '<',
   },
 
   transclude: {

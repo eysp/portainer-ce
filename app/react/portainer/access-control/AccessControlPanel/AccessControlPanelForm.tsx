@@ -56,7 +56,7 @@ export function AccessControlPanelForm({
       ),
     {
       meta: {
-        error: { title: '失败', message: '无法更新访问控制' },
+        error: { title: 'Failure', message: 'Unable to update access control' },
       },
       onSuccess() {
         return onUpdateSuccess();
@@ -108,7 +108,7 @@ export function AccessControlPanelForm({
                 onClick={onCancelClick}
                 data-cy="cancel-access-control-update-button"
               >
-                取消
+                Cancel
               </Button>
               <LoadingButton
                 size="small"
@@ -119,7 +119,7 @@ export function AccessControlPanelForm({
                 disabled={!isValid}
                 loadingText="Updating Ownership"
               >
-                更新所有权
+                Update Ownership
               </LoadingButton>
             </div>
           </div>
@@ -140,7 +140,7 @@ export function AccessControlPanelForm({
 
     updateAccess.mutate(accessControl, {
       onSuccess() {
-        notifySuccess('成功', '访问控制已成功更新');
+        notifySuccess('Success', 'Access control successfully updated');
       },
     });
   }
@@ -149,9 +149,9 @@ export function AccessControlPanelForm({
 function confirmAccessControlUpdate() {
   return confirm({
     modalType: ModalType.Warn,
-    title: '你确定吗？',
+    title: 'Are you sure?',
     message:
-      '更改此资源的所有权可能会限制部分用户对其的管理权限。',
-    confirmButton: buildConfirmButton('更改所有权'),
+      'Changing the ownership of this resource will potentially restrict its management to some users.',
+    confirmButton: buildConfirmButton('Change ownership'),
   });
 }

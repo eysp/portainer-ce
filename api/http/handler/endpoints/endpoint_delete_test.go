@@ -11,6 +11,7 @@ import (
 	"github.com/portainer/portainer/api/datastore"
 	"github.com/portainer/portainer/api/http/proxy"
 	"github.com/portainer/portainer/api/internal/testhelpers"
+	"github.com/portainer/portainer/api/roar"
 )
 
 func TestEndpointDeleteEdgeGroupsConcurrently(t *testing.T) {
@@ -21,7 +22,7 @@ func TestEndpointDeleteEdgeGroupsConcurrently(t *testing.T) {
 	handler := NewHandler(testhelpers.NewTestRequestBouncer())
 	handler.DataStore = store
 	handler.ProxyManager = proxy.NewManager(nil)
-	handler.ProxyManager.NewProxyFactory(nil, nil, nil, nil, nil, nil, nil, nil)
+	handler.ProxyManager.NewProxyFactory(nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	// Create all the environments and add them to the same edge group
 
@@ -42,9 +43,9 @@ func TestEndpointDeleteEdgeGroupsConcurrently(t *testing.T) {
 	}
 
 	if err := store.EdgeGroup().Create(&portainer.EdgeGroup{
-		ID:        1,
-		Name:      "edgegroup-1",
-		Endpoints: endpointIDs,
+		ID:          1,
+		Name:        "edgegroup-1",
+		EndpointIDs: roar.FromSlice(endpointIDs),
 	}); err != nil {
 		t.Fatal("could not create edge group:", err)
 	}
@@ -78,7 +79,7 @@ func TestEndpointDeleteEdgeGroupsConcurrently(t *testing.T) {
 		t.Fatal("could not retrieve the edge group:", err)
 	}
 
-	if len(edgeGroup.Endpoints) > 0 {
+	if edgeGroup.EndpointIDs.Len() > 0 {
 		t.Fatal("the edge group is not consistent")
 	}
 }

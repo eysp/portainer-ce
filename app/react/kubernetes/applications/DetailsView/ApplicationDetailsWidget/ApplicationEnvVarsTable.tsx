@@ -20,21 +20,22 @@ export function ApplicationEnvVarsTable({ namespace, app }: Props) {
     <>
       <div className="text-muted mb-4 mt-6 flex items-center">
         <Icon icon={File} className="!mr-2" />
-        环境变量、ConfigMap 或 Secret
+        Environment variables, ConfigMaps or Secrets
       </div>
       {appEnvVars.length === 0 && (
         <TextTip color="blue">
-          此应用未使用任何环境变量、ConfigMap 或 Secret。
+          This application is not using any environment variable, ConfigMap or
+          Secret.
         </TextTip>
       )}
       {appEnvVars.length > 0 && (
         <table className="table">
           <tbody>
             <tr className="text-muted">
-              <td className="w-1/4">容器</td>
-              <td className="w-1/4">环境变量</td>
+              <td className="w-1/4">Container</td>
+              <td className="w-1/4">Environment variable</td>
               <td className="w-1/4">Value</td>
-              <td className="w-1/4">配置</td>
+              <td className="w-1/4">Configuration</td>
             </tr>
             {appEnvVars.map((envVar, index) => (
               <tr key={index}>
@@ -49,7 +50,7 @@ export function ApplicationEnvVarsTable({ namespace, app }: Props) {
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        初始化容器
+                        init container
                       </a>
                       )
                     </span>
@@ -83,8 +84,8 @@ export function ApplicationEnvVarsTable({ namespace, app }: Props) {
                     ))}
                 </td>
                 <td data-cy="k8sAppDetail-configName">
-                  {!envVar.resourseName && <span>-</span>}
-                  {envVar.resourseName && (
+                  {!envVar.resourceName && <span>-</span>}
+                  {envVar.resourceName && (
                     <span>
                       <Link
                         to={
@@ -93,17 +94,17 @@ export function ApplicationEnvVarsTable({ namespace, app }: Props) {
                             : 'kubernetes.secrets.secret'
                         }
                         params={{
-                          name: envVar.resourseName,
+                          name: envVar.resourceName,
                           namespace,
                         }}
                         className="flex items-center"
-                        data-cy={`configmap-link-${envVar.resourseName}`}
+                        data-cy={`configmap-link-${envVar.resourceName}`}
                       >
                         <Icon
                           icon={envVar.type === 'configMap' ? FileCode : Lock}
                           className="!mr-1"
                         />
-                        {envVar.resourseName}
+                        {envVar.resourceName}
                       </Link>
                     </span>
                   )}
@@ -125,7 +126,7 @@ interface ContainerEnvVar {
   containerName: string;
   isInitContainer: boolean;
   type: EnvVarType;
-  resourseName: string;
+  resourceName: string;
 }
 
 function getApplicationEnvironmentVariables(
@@ -158,7 +159,7 @@ function getApplicationEnvironmentVariables(
             containerName: container.name,
             isInitContainer: false,
             type: envtype,
-            resourseName:
+            resourceName:
               envVar?.valueFrom?.configMapKeyRef?.name ||
               envVar?.valueFrom?.secretKeyRef?.name ||
               '',
@@ -169,7 +170,7 @@ function getApplicationEnvironmentVariables(
       const containerEnvFroms: ContainerEnvVar[] =
         container?.envFrom?.map((envFrom) => ({
           name: '',
-          resourseName:
+          resourceName:
             envFrom?.configMapRef?.name || envFrom?.secretRef?.name || '',
           containerName: container.name,
           isInitContainer: false,
@@ -195,7 +196,7 @@ function getApplicationEnvironmentVariables(
             containerName: container.name,
             isInitContainer: true,
             type: envtype,
-            resourseName:
+            resourceName:
               envVar?.valueFrom?.configMapKeyRef?.name ||
               envVar?.valueFrom?.secretKeyRef?.name ||
               '',
@@ -206,7 +207,7 @@ function getApplicationEnvironmentVariables(
       const containerEnvFroms: ContainerEnvVar[] =
         container?.envFrom?.map((envFrom) => ({
           name: '',
-          resourseName:
+          resourceName:
             envFrom?.configMapRef?.name || envFrom?.secretRef?.name || '',
           containerName: container.name,
           isInitContainer: true,

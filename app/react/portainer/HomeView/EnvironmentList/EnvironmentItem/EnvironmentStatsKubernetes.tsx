@@ -13,7 +13,7 @@ interface Props {
 
 export function EnvironmentStatsKubernetes({ snapshot }: Props) {
   if (!snapshot) {
-    return <>无可用快照</>;
+    return <>No snapshot available</>;
   }
 
   return (

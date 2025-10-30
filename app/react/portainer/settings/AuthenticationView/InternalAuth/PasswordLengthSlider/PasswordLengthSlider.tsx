@@ -26,24 +26,24 @@ const sliderProperties: Record<
   { strength: string; color: string; text: string }
 > = {
   weak: {
-    strength: '弱',
+    strength: 'weak',
     color: '#F04438',
-    text: '弱密码',
+    text: 'Weak password',
   },
   good: {
-    strength: '良好',
+    strength: 'good',
     color: '#F79009',
-    text: '良好密码',
+    text: 'Good password',
   },
   strong: {
-    strength: '强',
+    strength: 'strong',
     color: '#12B76A',
-    text: '强密码',
+    text: 'Strong password',
   },
   veryStrong: {
-    strength: '非常强',
+    strength: 'veryStrong',
     color: '#0BA5EC',
-    text: '非常强密码',
+    text: 'Very strong password',
   },
 };
 
@@ -93,7 +93,7 @@ export function PasswordLengthSlider({
   const sliderTooltip = useCallback(
     (node, handleProps) => (
       <SliderTooltip
-        value={`${handleProps.value} 个字符`}
+        value={`${handleProps.value} characters`}
         child={node}
         delay={800}
       />

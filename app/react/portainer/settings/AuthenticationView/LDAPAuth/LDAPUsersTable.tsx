@@ -18,7 +18,7 @@ export function LDAPUsersTable({ dataset }: { dataset?: string[] }) {
       columns={columns}
       dataset={items || []}
       isLoading={!items}
-      title="用户"
+      title="Users"
       titleIcon={Users}
       settingsManager={tableState}
       disableSelect
@@ -30,7 +30,7 @@ export function LDAPUsersTable({ dataset }: { dataset?: string[] }) {
 function getColumns() {
   return [
     {
-      header: '名称',
+      header: 'Name',
       accessorFn: ({ value }: Value) => value,
     },
   ];

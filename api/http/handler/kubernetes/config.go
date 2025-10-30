@@ -1,9 +1,14 @@
 package kubernetes
 
 import (
+	"crypto/x509"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
+	"os"
+	"strings"
 
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/http/security"
@@ -162,11 +167,48 @@ func (handler *Handler) buildConfig(r *http.Request, tokenData *portainer.TokenD
 func (handler *Handler) buildCluster(r *http.Request, endpoint portainer.Endpoint, isInternal bool) clientV1.NamedCluster {
 	kubeConfigInternal := handler.kubeClusterAccessService.GetClusterDetails(r.Host, endpoint.ID, isInternal)
 
+	if isInternal {
+		return clientV1.NamedCluster{
+			Name: buildClusterName(endpoint.Name),
+			Cluster: clientV1.Cluster{
+				Server:                kubeConfigInternal.ClusterServerURL,
+				InsecureSkipTLSVerify: true,
+			},
+		}
+	}
+
+	selfSignedCert := false
+	serverUrl, err := url.Parse(kubeConfigInternal.ClusterServerURL)
+	if err != nil {
+		log.Warn().Err(err).Msg("Failed to parse server URL")
+	}
+
+	if strings.EqualFold(serverUrl.Scheme, "https") {
+		var certPem []byte
+		var err error
+
+		if kubeConfigInternal.CertificateAuthorityData != "" {
+			certPem = []byte(kubeConfigInternal.CertificateAuthorityData)
+		} else if kubeConfigInternal.CertificateAuthorityFile != "" {
+			certPem, err = os.ReadFile(kubeConfigInternal.CertificateAuthorityFile)
+			if err != nil {
+				log.Warn().Err(err).Msg("Failed to open certificate file")
+			}
+		}
+
+		if certPem != nil {
+			selfSignedCert, err = IsSelfSignedCertificate(certPem)
+			if err != nil {
+				log.Warn().Err(err).Msg("Failed to verify if certificate is self-signed")
+			}
+		}
+	}
+
 	return clientV1.NamedCluster{
 		Name: buildClusterName(endpoint.Name),
 		Cluster: clientV1.Cluster{
 			Server:                kubeConfigInternal.ClusterServerURL,
-			InsecureSkipTLSVerify: true,
+			InsecureSkipTLSVerify: selfSignedCert,
 		},
 	}
 }
@@ -214,4 +256,39 @@ func writeFileContent(w http.ResponseWriter, r *http.Request, endpoints []portai
 
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; %s.json", filenameBase))
 	return response.JSON(w, config)
+}
+
+func IsSelfSignedCertificate(certPem []byte) (bool, error) {
+	if certPem == nil {
+		return false, errors.New("certificate data is empty")
+	}
+
+	if !strings.Contains(string(certPem), "BEGIN CERTIFICATE") {
+		certPem = []byte(fmt.Sprintf("-----BEGIN CERTIFICATE-----\n%s\n-----END CERTIFICATE-----", string(certPem)))
+	}
+
+	block, _ := pem.Decode(certPem)
+	if block == nil {
+		return false, errors.New("failed to decode certificate")
+	}
+
+	cert, err := x509.ParseCertificate(block.Bytes)
+	if err != nil {
+		return false, err
+	}
+
+	if cert.Issuer.String() != cert.Subject.String() {
+		return false, nil
+	}
+
+	roots := x509.NewCertPool()
+	roots.AddCert(cert)
+
+	opts := x509.VerifyOptions{
+		Roots:       roots,
+		CurrentTime: cert.NotBefore,
+	}
+
+	_, err = cert.Verify(opts)
+	return err == nil, err
 }

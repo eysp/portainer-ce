@@ -9,7 +9,7 @@ import { DecoratedTask } from '../types';
 import { columnHelper } from './helper';
 
 export const node = columnHelper.accessor('NodeId', {
-  header: '节点',
+  header: 'Node',
   cell: Cell,
 });
 

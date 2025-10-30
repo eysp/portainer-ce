@@ -10,9 +10,11 @@ import (
 	"testing"
 
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/crypto"
 	"github.com/portainer/portainer/api/datastore"
 	gittypes "github.com/portainer/portainer/api/git/types"
 	"github.com/portainer/portainer/api/internal/testhelpers"
+	"github.com/portainer/portainer/pkg/fips"
 	"github.com/portainer/portainer/pkg/libhttp/response"
 
 	"github.com/stretchr/testify/assert"
@@ -76,41 +78,41 @@ vJUUCFYm8+9p6gTVOcoMit+eGSwa81PCPEs1TnU1PV/PaDFeUhn/mg==
 type noopDeployer struct{}
 
 // without unpacker
-func (s *noopDeployer) DeploySwarmStack(stack *portainer.Stack, endpoint *portainer.Endpoint, registries []portainer.Registry, prune, pullImage bool) error {
+func (s noopDeployer) DeploySwarmStack(stack *portainer.Stack, endpoint *portainer.Endpoint, registries []portainer.Registry, prune, pullImage bool) error {
 	return nil
 }
 
-func (s *noopDeployer) DeployComposeStack(stack *portainer.Stack, endpoint *portainer.Endpoint, registries []portainer.Registry, forcePullImage, forceRecreate bool) error {
+func (s noopDeployer) DeployComposeStack(stack *portainer.Stack, endpoint *portainer.Endpoint, registries []portainer.Registry, forcePullImage, forceRecreate bool) error {
 	return nil
 }
 
-func (s *noopDeployer) DeployKubernetesStack(stack *portainer.Stack, endpoint *portainer.Endpoint, user *portainer.User) error {
+func (s noopDeployer) DeployKubernetesStack(stack *portainer.Stack, endpoint *portainer.Endpoint, user *portainer.User) error {
 	return nil
 }
 
 // with unpacker
-func (s *noopDeployer) DeployRemoteComposeStack(stack *portainer.Stack, endpoint *portainer.Endpoint, registries []portainer.Registry, forcePullImage, forceRecreate bool) error {
+func (s noopDeployer) DeployRemoteComposeStack(stack *portainer.Stack, endpoint *portainer.Endpoint, registries []portainer.Registry, forcePullImage, forceRecreate bool) error {
 	return nil
 }
-func (s *noopDeployer) UndeployRemoteComposeStack(stack *portainer.Stack, endpoint *portainer.Endpoint) error {
+func (s noopDeployer) UndeployRemoteComposeStack(stack *portainer.Stack, endpoint *portainer.Endpoint) error {
 	return nil
 }
-func (s *noopDeployer) StartRemoteComposeStack(stack *portainer.Stack, endpoint *portainer.Endpoint, registries []portainer.Registry) error {
+func (s noopDeployer) StartRemoteComposeStack(stack *portainer.Stack, endpoint *portainer.Endpoint, registries []portainer.Registry) error {
 	return nil
 }
-func (s *noopDeployer) StopRemoteComposeStack(stack *portainer.Stack, endpoint *portainer.Endpoint) error {
+func (s noopDeployer) StopRemoteComposeStack(stack *portainer.Stack, endpoint *portainer.Endpoint) error {
 	return nil
 }
-func (s *noopDeployer) DeployRemoteSwarmStack(stack *portainer.Stack, endpoint *portainer.Endpoint, registries []portainer.Registry, prune, pullImage bool) error {
+func (s noopDeployer) DeployRemoteSwarmStack(stack *portainer.Stack, endpoint *portainer.Endpoint, registries []portainer.Registry, prune, pullImage bool) error {
 	return nil
 }
-func (s *noopDeployer) UndeployRemoteSwarmStack(stack *portainer.Stack, endpoint *portainer.Endpoint) error {
+func (s noopDeployer) UndeployRemoteSwarmStack(stack *portainer.Stack, endpoint *portainer.Endpoint) error {
 	return nil
 }
-func (s *noopDeployer) StartRemoteSwarmStack(stack *portainer.Stack, endpoint *portainer.Endpoint, registries []portainer.Registry) error {
+func (s noopDeployer) StartRemoteSwarmStack(stack *portainer.Stack, endpoint *portainer.Endpoint, registries []portainer.Registry) error {
 	return nil
 }
-func (s *noopDeployer) StopRemoteSwarmStack(stack *portainer.Stack, endpoint *portainer.Endpoint) error {
+func (s noopDeployer) StopRemoteSwarmStack(stack *portainer.Stack, endpoint *portainer.Endpoint) error {
 	return nil
 }
 
@@ -127,9 +129,8 @@ func agentServer(t *testing.T) string {
 	cert, err := tls.X509KeyPair([]byte(localhostCert), []byte(localhostKey))
 	require.NoError(t, err)
 
-	tlsConfig := &tls.Config{
-		Certificates: []tls.Certificate{cert},
-	}
+	tlsConfig := crypto.CreateTLSConfiguration(false)
+	tlsConfig.Certificates = []tls.Certificate{cert}
 
 	l, err := tls.Listen("tcp", "127.0.0.1:0", tlsConfig)
 	require.NoError(t, err)
@@ -203,6 +204,8 @@ func Test_redeployWhenChanged_DoesNothingWhenNoGitChanges(t *testing.T) {
 }
 
 func Test_redeployWhenChanged_FailsWhenCannotClone(t *testing.T) {
+	fips.InitFIPS(false)
+
 	cloneErr := errors.New("failed to clone")
 	_, store := datastore.MustNewTestStore(t, true, true)
 
@@ -266,7 +269,7 @@ func Test_redeployWhenChanged(t *testing.T) {
 		stack.Type = portainer.DockerComposeStack
 		store.Stack().Update(stack.ID, &stack)
 
-		err = RedeployWhenChanged(1, &noopDeployer{}, store, testhelpers.NewGitService(nil, "newHash"))
+		err = RedeployWhenChanged(1, noopDeployer{}, store, testhelpers.NewGitService(nil, "newHash"))
 		assert.NoError(t, err)
 	})
 
@@ -274,7 +277,7 @@ func Test_redeployWhenChanged(t *testing.T) {
 		stack.Type = portainer.DockerSwarmStack
 		store.Stack().Update(stack.ID, &stack)
 
-		err = RedeployWhenChanged(1, &noopDeployer{}, store, testhelpers.NewGitService(nil, "newHash"))
+		err = RedeployWhenChanged(1, noopDeployer{}, store, testhelpers.NewGitService(nil, "newHash"))
 		assert.NoError(t, err)
 	})
 
@@ -282,7 +285,7 @@ func Test_redeployWhenChanged(t *testing.T) {
 		stack.Type = portainer.KubernetesStack
 		store.Stack().Update(stack.ID, &stack)
 
-		err = RedeployWhenChanged(1, &noopDeployer{}, store, testhelpers.NewGitService(nil, "newHash"))
+		err = RedeployWhenChanged(1, noopDeployer{}, store, testhelpers.NewGitService(nil, "newHash"))
 		assert.NoError(t, err)
 	})
 }

@@ -5,11 +5,15 @@ import (
 	"testing"
 
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/datastore"
+	"github.com/portainer/portainer/api/http/security"
 	"github.com/portainer/portainer/api/internal/testhelpers"
+	"github.com/portainer/portainer/api/roar"
 	"github.com/portainer/portainer/api/slicesx"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type filterTest struct {
@@ -19,7 +23,6 @@ type filterTest struct {
 }
 
 func Test_Filter_AgentVersion(t *testing.T) {
-
 	version1Endpoint := portainer.Endpoint{ID: 1, GroupID: 1,
 		Type: portainer.AgentOnDockerEnvironment,
 		Agent: struct {
@@ -75,7 +78,6 @@ func Test_Filter_AgentVersion(t *testing.T) {
 }
 
 func Test_Filter_edgeFilter(t *testing.T) {
-
 	trustedEdgeAsync := portainer.Endpoint{ID: 1, UserTrusted: true, Edge: portainer.EnvironmentEdgeSettings{AsyncMode: true}, GroupID: 1, Type: portainer.EdgeAgentOnDockerEnvironment}
 	untrustedEdgeAsync := portainer.Endpoint{ID: 2, UserTrusted: false, Edge: portainer.EnvironmentEdgeSettings{AsyncMode: true}, GroupID: 1, Type: portainer.EdgeAgentOnDockerEnvironment}
 	regularUntrustedEdgeStandard := portainer.Endpoint{ID: 3, UserTrusted: false, Edge: portainer.EnvironmentEdgeSettings{AsyncMode: false}, GroupID: 1, Type: portainer.EdgeAgentOnDockerEnvironment}
@@ -174,7 +176,7 @@ func BenchmarkFilterEndpointsBySearchCriteria_PartialMatch(b *testing.B) {
 		edgeGroups = append(edgeGroups, portainer.EdgeGroup{
 			ID:           portainer.EdgeGroupID(i + 1),
 			Name:         "edge-group-" + strconv.Itoa(i+1),
-			Endpoints:    append([]portainer.EndpointID{}, endpointIDs...),
+			EndpointIDs:  roar.FromSlice(endpointIDs),
 			Dynamic:      true,
 			TagIDs:       []portainer.TagID{1, 2, 3},
 			PartialMatch: true,
@@ -221,11 +223,11 @@ func BenchmarkFilterEndpointsBySearchCriteria_FullMatch(b *testing.B) {
 	edgeGroups := []portainer.EdgeGroup{}
 	for i := range 1000 {
 		edgeGroups = append(edgeGroups, portainer.EdgeGroup{
-			ID:        portainer.EdgeGroupID(i + 1),
-			Name:      "edge-group-" + strconv.Itoa(i+1),
-			Endpoints: append([]portainer.EndpointID{}, endpointIDs...),
-			Dynamic:   true,
-			TagIDs:    []portainer.TagID{1},
+			ID:          portainer.EdgeGroupID(i + 1),
+			Name:        "edge-group-" + strconv.Itoa(i+1),
+			EndpointIDs: roar.FromSlice(endpointIDs),
+			Dynamic:     true,
+			TagIDs:      []portainer.TagID{1},
 		})
 	}
 
@@ -263,6 +265,7 @@ func runTest(t *testing.T, test filterTest, handler *Handler, endpoints []portai
 		[]portainer.EndpointGroup{},
 		[]portainer.EdgeGroup{},
 		&portainer.Settings{},
+		&security.RestrictedRequestContext{IsAdmin: true},
 	)
 
 	is.NoError(err)
@@ -276,7 +279,6 @@ func runTest(t *testing.T, test filterTest, handler *Handler, endpoints []portai
 	}
 
 	is.ElementsMatch(test.expected, respIds)
-
 }
 
 func setupFilterTest(t *testing.T, endpoints []portainer.Endpoint) *Handler {
@@ -297,4 +299,211 @@ func setupFilterTest(t *testing.T, endpoints []portainer.Endpoint) *Handler {
 	handler.ComposeStackManager = testhelpers.NewComposeStackManager()
 
 	return handler
+}
+
+func TestFilterEndpointsByEdgeStack(t *testing.T) {
+	_, store := datastore.MustNewTestStore(t, false, false)
+
+	endpoints := []portainer.Endpoint{
+		{ID: 1, Name: "Endpoint 1", Type: portainer.EdgeAgentOnDockerEnvironment, UserTrusted: true},
+		{ID: 2, Name: "Endpoint 2", TagIDs: []portainer.TagID{1}, Type: portainer.EdgeAgentOnDockerEnvironment, UserTrusted: true},
+		{ID: 3, Name: "Endpoint 3", TagIDs: []portainer.TagID{1}, Type: portainer.EdgeAgentOnDockerEnvironment, UserTrusted: true},
+		{ID: 4, Name: "Endpoint 4"},
+	}
+
+	edgeStackId := portainer.EdgeStackID(1)
+	require.NoError(t, store.UpdateTx(func(tx dataservices.DataStoreTx) error {
+		require.NoError(t, tx.Tag().Create(&portainer.Tag{ID: 1, Name: "tag", Endpoints: map[portainer.EndpointID]bool{2: true, 3: true}}))
+
+		for i := range endpoints {
+			require.NoError(t, tx.Endpoint().Create(&endpoints[i]))
+		}
+
+		require.NoError(t, tx.EdgeStack().Create(edgeStackId, &portainer.EdgeStack{
+			ID:         edgeStackId,
+			Name:       "Test Edge Stack",
+			EdgeGroups: []portainer.EdgeGroupID{1, 2},
+		}))
+
+		require.NoError(t, tx.EdgeGroup().Create(&portainer.EdgeGroup{
+			ID:          1,
+			Name:        "Edge Group 1",
+			EndpointIDs: roar.FromSlice([]portainer.EndpointID{1}),
+		}))
+
+		require.NoError(t, tx.EdgeGroup().Create(&portainer.EdgeGroup{
+			ID:      2,
+			Name:    "Edge Group 2",
+			Dynamic: true,
+			TagIDs:  []portainer.TagID{1},
+		}))
+
+		require.NoError(t, tx.EdgeStackStatus().Create(edgeStackId, endpoints[0].ID, &portainer.EdgeStackStatusForEnv{
+			Status: []portainer.EdgeStackDeploymentStatus{{Type: portainer.EdgeStackStatusAcknowledged}}}))
+
+		return nil
+	}))
+
+	test := func(status *portainer.EdgeStackStatusType, expected []portainer.Endpoint) {
+		tmp := make([]portainer.Endpoint, len(endpoints))
+		require.Equal(t, 4, copy(tmp, endpoints))
+		es, err := filterEndpointsByEdgeStack(tmp, edgeStackId, status, store)
+		require.NoError(t, err)
+		// validate that the len is the same
+		require.Len(t, es, len(expected))
+		// and that all items are the expected ones
+		for i := range expected {
+			require.Contains(t, es, expected[i])
+		}
+	}
+
+	test(nil, []portainer.Endpoint{endpoints[0], endpoints[1], endpoints[2]})
+
+	status := portainer.EdgeStackStatusPending
+	test(&status, []portainer.Endpoint{endpoints[1], endpoints[2]})
+
+	status = portainer.EdgeStackStatusCompleted
+	test(&status, []portainer.Endpoint{})
+
+	status = portainer.EdgeStackStatusAcknowledged
+	test(&status, []portainer.Endpoint{endpoints[0]}) // that's the only one with an edge stack status in DB
+}
+
+func TestErrorsFilterEndpointsByEdgeStack(t *testing.T) {
+	t.Run("must error by edge stack not found", func(t *testing.T) {
+		_, store := datastore.MustNewTestStore(t, false, false)
+		require.NotNil(t, store)
+
+		_, err := filterEndpointsByEdgeStack([]portainer.Endpoint{}, 1, nil, store)
+		require.Error(t, err)
+	})
+
+	t.Run("must error by edge group not found", func(t *testing.T) {
+		_, store := datastore.MustNewTestStore(t, false, false)
+		require.NotNil(t, store)
+
+		require.NoError(t, store.UpdateTx(func(tx dataservices.DataStoreTx) error {
+			require.NoError(t, tx.EdgeStack().Create(1, &portainer.EdgeStack{ID: 1, Name: "1", EdgeGroups: []portainer.EdgeGroupID{1}}))
+			return nil
+		}))
+		_, err := filterEndpointsByEdgeStack([]portainer.Endpoint{}, 1, nil, store)
+		require.Error(t, err)
+	})
+
+	t.Run("must error by env tag not found", func(t *testing.T) {
+		_, store := datastore.MustNewTestStore(t, false, false)
+		require.NotNil(t, store)
+
+		require.NoError(t, store.UpdateTx(func(tx dataservices.DataStoreTx) error {
+			require.NoError(t, tx.EdgeStack().Create(1, &portainer.EdgeStack{ID: 1, Name: "1", EdgeGroups: []portainer.EdgeGroupID{1}}))
+			require.NoError(t, tx.EdgeGroup().Create(&portainer.EdgeGroup{ID: 1, Name: "edge group", Dynamic: true, TagIDs: []portainer.TagID{1}}))
+			return nil
+		}))
+		_, err := filterEndpointsByEdgeStack([]portainer.Endpoint{}, 1, nil, store)
+		require.Error(t, err)
+	})
+}
+
+func TestFilterEndpointsByEdgeGroup(t *testing.T) {
+	_, store := datastore.MustNewTestStore(t, false, false)
+
+	endpoints := []portainer.Endpoint{
+		{ID: 1, Name: "Endpoint 1"},
+		{ID: 2, Name: "Endpoint 2"},
+		{ID: 3, Name: "Endpoint 3"},
+		{ID: 4, Name: "Endpoint 4"},
+	}
+
+	err := store.EdgeGroup().Create(&portainer.EdgeGroup{
+		ID:          1,
+		Name:        "Edge Group 1",
+		EndpointIDs: roar.FromSlice([]portainer.EndpointID{1}),
+	})
+	require.NoError(t, err)
+
+	err = store.EdgeGroup().Create(&portainer.EdgeGroup{
+		ID:          2,
+		Name:        "Edge Group 2",
+		EndpointIDs: roar.FromSlice([]portainer.EndpointID{2, 3}),
+	})
+	require.NoError(t, err)
+
+	edgeGroups, err := store.EdgeGroup().ReadAll()
+	require.NoError(t, err)
+
+	es, egs := filterEndpointsByEdgeGroupIDs(endpoints, edgeGroups, []portainer.EdgeGroupID{1, 2})
+	require.NoError(t, err)
+
+	require.Len(t, es, 3)
+	require.Contains(t, es, endpoints[0])    // Endpoint 1
+	require.Contains(t, es, endpoints[1])    // Endpoint 2
+	require.Contains(t, es, endpoints[2])    // Endpoint 3
+	require.NotContains(t, es, endpoints[3]) // Endpoint 4
+
+	require.Len(t, egs, 2)
+	require.Equal(t, egs[0].ID, portainer.EdgeGroupID(1))
+	require.Equal(t, egs[1].ID, portainer.EdgeGroupID(2))
+}
+
+func TestFilterEndpointsByExcludeEdgeGroupIDs(t *testing.T) {
+	_, store := datastore.MustNewTestStore(t, false, false)
+
+	endpoints := []portainer.Endpoint{
+		{ID: 1, Name: "Endpoint 1"},
+		{ID: 2, Name: "Endpoint 2"},
+		{ID: 3, Name: "Endpoint 3"},
+		{ID: 4, Name: "Endpoint 4"},
+	}
+
+	err := store.EdgeGroup().Create(&portainer.EdgeGroup{
+		ID:          1,
+		Name:        "Edge Group 1",
+		EndpointIDs: roar.FromSlice([]portainer.EndpointID{1}),
+	})
+	require.NoError(t, err)
+
+	err = store.EdgeGroup().Create(&portainer.EdgeGroup{
+		ID:          2,
+		Name:        "Edge Group 2",
+		EndpointIDs: roar.FromSlice([]portainer.EndpointID{2, 3}),
+	})
+	require.NoError(t, err)
+
+	edgeGroups, err := store.EdgeGroup().ReadAll()
+	require.NoError(t, err)
+
+	es, egs := filterEndpointsByExcludeEdgeGroupIDs(endpoints, edgeGroups, []portainer.EdgeGroupID{1})
+	require.NoError(t, err)
+
+	require.Len(t, es, 3)
+	require.Equal(t, es, []portainer.Endpoint{
+		{ID: 2, Name: "Endpoint 2"},
+		{ID: 3, Name: "Endpoint 3"},
+		{ID: 4, Name: "Endpoint 4"},
+	})
+
+	require.Len(t, egs, 1)
+	require.Equal(t, egs[0].ID, portainer.EdgeGroupID(2))
+}
+
+func TestGetShortestAsyncInterval(t *testing.T) {
+	endpoint := &portainer.Endpoint{
+		ID:   1,
+		Name: "Test Endpoint",
+		Edge: portainer.EnvironmentEdgeSettings{
+			PingInterval:     -1,
+			SnapshotInterval: -1,
+			CommandInterval:  -1,
+		},
+	}
+
+	settings := &portainer.Settings{
+		Edge: portainer.Edge{
+			PingInterval:     10,
+			SnapshotInterval: 20,
+			CommandInterval:  30,
+		},
+	}
+
+	require.Equal(t, 10, getShortestAsyncInterval(endpoint, settings))
 }

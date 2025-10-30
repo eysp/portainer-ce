@@ -16,6 +16,7 @@ sudo podman run -d \
   -v "$PORTAINER_DATA:/data" \
   -v /run/podman/podman.sock:/var/run/docker.sock \
   -v /tmp:/tmp \
+  -e CSP=false \
   --privileged \
   --name portainer \
   portainer/base \

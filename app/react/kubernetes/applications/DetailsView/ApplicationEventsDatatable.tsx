@@ -1,5 +1,6 @@
 import { useCurrentStateAndParams } from '@uirouter/react';
 import { useMemo } from 'react';
+import { compact } from 'lodash';
 
 import { createStore } from '@/react/kubernetes/datatables/default-kube-datatable-store';
 import { EnvironmentId } from '@/react/portainer/environments/types';
@@ -74,30 +75,26 @@ export function useApplicationEvents(
     application
   );
 
+  // related events are events that have the application id, or the id of a service or pod from the application
+  const relatedUids = useMemo(() => {
+    const serviceIds = compact(
+      servicesQuery.data?.map((service) => service?.metadata?.uid)
+    );
+    const podIds = compact(podsQuery.data?.map((pod) => pod?.metadata?.uid));
+    return [application?.metadata?.uid, ...serviceIds, ...podIds];
+  }, [application?.metadata?.uid, podsQuery.data, servicesQuery.data]);
+
+  const relatedUidsSet = useMemo(() => new Set(relatedUids), [relatedUids]);
   const { data: events, ...eventsQuery } = useEvents(environmentId, {
     namespace,
     queryOptions: {
       autoRefreshRate: options?.autoRefreshRate
         ? options.autoRefreshRate * 1000
         : undefined,
+      select: (data) =>
+        data.filter((event) => relatedUidsSet.has(event.involvedObject.uid)),
     },
   });
-
-  // related events are events that have the application id, or the id of a service or pod from the application
-  const relatedEvents = useMemo(() => {
-    const serviceIds = servicesQuery.data?.map(
-      (service) => service?.metadata?.uid
-    );
-    const podIds = podsQuery.data?.map((pod) => pod?.metadata?.uid);
-    return (
-      events?.filter(
-        (event) =>
-          event.involvedObject.uid === application?.metadata?.uid ||
-          serviceIds?.includes(event.involvedObject.uid) ||
-          podIds?.includes(event.involvedObject.uid)
-      ) || []
-    );
-  }, [application?.metadata?.uid, events, podsQuery.data, servicesQuery.data]);
 
   const isInitialLoading =
     applicationQuery.isInitialLoading ||
@@ -105,5 +102,5 @@ export function useApplicationEvents(
     podsQuery.isInitialLoading ||
     eventsQuery.isInitialLoading;
 
-  return { relatedEvents, isInitialLoading };
+  return { relatedEvents: events || [], isInitialLoading };
 }
