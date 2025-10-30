@@ -174,7 +174,7 @@ describe('Datatable', () => {
     fireEvent.click(selectAllCheckbox);
 
     // Check if all rows on the page are selected
-    expect(screen.getByText('2 items selected')).toBeInTheDocument();
+    expect(screen.getByText('2 项已选择')).toBeInTheDocument();
 
     // Deselect
     fireEvent.click(selectAllCheckbox);
@@ -196,7 +196,7 @@ describe('Datatable', () => {
     fireEvent.click(selectAllCheckbox, { shiftKey: true });
 
     // Check if all rows on the page are selected
-    expect(screen.getByText('3 items selected')).toBeInTheDocument();
+    expect(screen.getByText('3 项已选择')).toBeInTheDocument();
 
     // Deselect
     fireEvent.click(selectAllCheckbox, { shiftKey: true });

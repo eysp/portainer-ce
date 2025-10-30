@@ -146,7 +146,7 @@ function Title({ environment, onClear }: TitleProps) {
       </span>
 
       <button
-        title="Clear environment"
+        title="清除环境"
         type="button"
         onClick={onClear}
         className={clsx(
