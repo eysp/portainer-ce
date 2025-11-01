@@ -57,10 +57,7 @@ function UpgradeBEBanner() {
     agents: systemInfo.agents,
   };
 
-  if (
-    !enabledPlatforms.includes(systemInfo.platform) &&
-    process.env.FORCE_SHOW_UPGRADE_BANNER !== ''
-  ) {
+   {
     return null;
   }
 
