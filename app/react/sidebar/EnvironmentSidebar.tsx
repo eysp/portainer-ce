@@ -42,9 +42,9 @@ export function EnvironmentSidebar() {
       ) : (
         <SidebarSectionTitle>
           <div className="flex items-center gap-1">
-            <span>Environment:</span>
+            <span>环境：</span>
             <Icon icon={Slash} className="text-xl !text-gray-6" />
-            <span className="text-sm text-gray-6">None selected</span>
+            <span className="text-sm text-gray-6">未选择</span>
           </div>
         </SidebarSectionTitle>
       )}
@@ -146,7 +146,7 @@ function Title({ environment, onClear }: TitleProps) {
       </span>
 
       <button
-        title="Clear environment"
+        title="清除环境"
         type="button"
         onClick={onClear}
         className={clsx(

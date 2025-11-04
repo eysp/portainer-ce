@@ -61,7 +61,7 @@ export function VolumesDatatable() {
       dataset={volumes}
       columns={columns}
       settingsManager={tableState}
-      title="Volumes"
+      title="卷"
       titleIcon={Database}
       getRowId={(row) =>
         `${row.PersistentVolumeClaim.Name}-${row.ResourcePool.Namespace.Name}`
@@ -74,7 +74,7 @@ export function VolumesDatatable() {
       renderTableActions={(selectedItems) => (
         <Authorized authorizations="K8sVolumesW">
           <DeleteButton
-            confirmMessage="Do you want to remove the selected volume(s)?"
+            confirmMessage="您确定要移除选定的卷吗？"
             onConfirmed={() => deleteVolumesMutation.mutate(selectedItems)}
             disabled={selectedItems.length === 0}
             isLoading={deleteVolumesMutation.isLoading}

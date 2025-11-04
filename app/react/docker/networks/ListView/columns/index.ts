@@ -17,44 +17,44 @@ export function useColumns(isHostColumnVisible?: boolean) {
         buildExpandColumn<DecoratedNetwork>(),
         name,
         columnHelper.accessor((item) => item.StackName || '-', {
-          header: 'Stack',
+          header: '堆栈',
         }),
         columnHelper.accessor('Driver', {
-          header: 'Driver',
+          header: '驱动程序',
         }),
         columnHelper.accessor('Attachable', {
-          header: 'Attachable',
+          header: '可附加',
         }),
         columnHelper.accessor('IPAM.Driver', {
-          header: 'IPAM Driver',
+          header: 'IPAM 驱动程序',
         }),
         columnHelper.accessor(
           (item) => item.IPAM?.IPV4Configs?.[0]?.Subnet ?? '-',
           {
-            header: 'IPV4 IPAM Subnet',
+            header: 'IPv4 IPAM 子网',
           }
         ),
         columnHelper.accessor(
           (item) => item.IPAM?.IPV4Configs?.[0]?.Gateway ?? '-',
           {
-            header: 'IPV4 IPAM Gateway',
+            header: 'IPv4 IPAM 网关',
           }
         ),
         columnHelper.accessor(
           (item) => item.IPAM?.IPV6Configs?.[0]?.Subnet ?? '-',
           {
-            header: 'IPV6 IPAM Subnet',
+            header: 'IPv6 IPAM 子网',
           }
         ),
         columnHelper.accessor(
           (item) => item.IPAM?.IPV6Configs?.[0]?.Gateway ?? '-',
           {
-            header: 'IPV6 IPAM Gateway',
+            header: 'IPv6 IPAM 网关',
           }
         ),
         isHostColumnVisible &&
           columnHelper.accessor('NodeName', {
-            header: 'Node',
+            header: '节点',
           }),
         createOwnershipColumn<DecoratedNetwork>(),
       ]),

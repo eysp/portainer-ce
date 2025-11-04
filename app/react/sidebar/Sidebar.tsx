@@ -64,7 +64,7 @@ function InnerSidebar() {
             <SidebarItem
               to="portainer.home"
               icon={Home}
-              label="Home"
+              label="主页"
               data-cy="portainerSidebar-home"
             />
             <EnvironmentSidebar />

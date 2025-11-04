@@ -27,7 +27,7 @@ export function NetworkTab({
   const additionalOptions = getAdditionalOptions(isPodman);
   return (
     <div className="mt-3">
-      <FormControl label="Network" errors={errors?.networkMode}>
+      <FormControl label="网络" errors={errors?.networkMode}>
         <NetworkSelector
           value={values.networkMode}
           additionalOptions={additionalOptions}
@@ -36,7 +36,7 @@ export function NetworkTab({
       </FormControl>
 
       {values.networkMode === CONTAINER_MODE && (
-        <FormControl label="Container" errors={errors?.container}>
+        <FormControl label="容器" errors={errors?.container}>
           <ContainerSelector
             value={values.container}
             onChange={(container) => setFieldValue('container', container)}
@@ -49,7 +49,7 @@ export function NetworkTab({
         onChange={(value) => setFieldValue('hostname', value)}
       />
 
-      <FormControl label="Domain Name" errors={errors?.domain}>
+      <FormControl label="域名" errors={errors?.domain}>
         <Input
           value={values.domain}
           onChange={(e) => setFieldValue('domain', e.target.value)}
@@ -58,7 +58,7 @@ export function NetworkTab({
         />
       </FormControl>
 
-      <FormControl label="MAC Address" errors={errors?.macAddress}>
+      <FormControl label="MAC 地址" errors={errors?.macAddress}>
         <Input
           value={values.macAddress}
           onChange={(e) => setFieldValue('macAddress', e.target.value)}
@@ -67,7 +67,7 @@ export function NetworkTab({
         />
       </FormControl>
 
-      <FormControl label="IPv4 Address" errors={errors?.ipv4Address}>
+      <FormControl label="IPv4 地址" errors={errors?.ipv4Address}>
         <Input
           value={values.ipv4Address}
           onChange={(e) => setFieldValue('ipv4Address', e.target.value)}
@@ -76,7 +76,7 @@ export function NetworkTab({
         />
       </FormControl>
 
-      <FormControl label="IPv6 Address" errors={errors?.ipv6Address}>
+      <FormControl label="IPv6 地址" errors={errors?.ipv6Address}>
         <Input
           value={values.ipv6Address}
           onChange={(e) => setFieldValue('ipv6Address', e.target.value)}
@@ -85,7 +85,7 @@ export function NetworkTab({
         />
       </FormControl>
 
-      <FormControl label="Primary DNS Server" errors={errors?.primaryDns}>
+      <FormControl label="主 DNS 服务器" errors={errors?.primaryDns}>
         <Input
           value={values.primaryDns}
           onChange={(e) => setFieldValue('primaryDns', e.target.value)}
@@ -94,7 +94,7 @@ export function NetworkTab({
         />
       </FormControl>
 
-      <FormControl label="Secondary DNS Server" errors={errors?.secondaryDns}>
+      <FormControl label="辅助 DNS 服务器" errors={errors?.secondaryDns}>
         <Input
           value={values.secondaryDns}
           onChange={(e) => setFieldValue('secondaryDns', e.target.value)}

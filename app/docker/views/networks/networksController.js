@@ -17,12 +17,12 @@ angular.module('portainer.docker').controller('NetworksController', [
         HttpRequestHelper.setPortainerAgentTargetHeader(network.NodeName);
         return NetworkService.remove(network.Id)
           .then(function success() {
-            Notifications.success('Network successfully removed', network.Name);
+            Notifications.success('网络已成功移除', network.Name);
             var index = $scope.networks.indexOf(network);
             $scope.networks.splice(index, 1);
           })
           .catch(function error(err) {
-            Notifications.error('Failure', err, 'Unable to remove network');
+            Notifications.error('失败', err, '无法移除网络');
           });
       }
 

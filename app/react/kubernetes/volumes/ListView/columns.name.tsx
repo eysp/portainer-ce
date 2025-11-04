@@ -14,7 +14,7 @@ import { VolumeViewModel } from './types';
 import { helper } from './columns.helper';
 
 export const name = helper.accessor('PersistentVolumeClaim.Name', {
-  header: 'Name',
+  header: '名称',
   id: 'Name',
   cell: NameCell,
 });

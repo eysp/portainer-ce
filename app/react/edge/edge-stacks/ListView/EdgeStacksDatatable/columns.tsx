@@ -28,7 +28,7 @@ export const columns = _.compact([
     (item) =>
       item.StatusSummary?.AggregatedStatus?.[StatusType.Acknowledged] || 0,
     {
-      header: 'Acknowledged',
+      header: '已确认',
       enableSorting: false,
       enableHiding: false,
       cell: ({ getValue, row }) => (
@@ -48,7 +48,7 @@ export const columns = _.compact([
       (item) =>
         item.StatusSummary?.AggregatedStatus?.[StatusType.ImagesPulled] || 0,
       {
-        header: 'Images pre-pulled',
+        header: '镜像预拉取',
         cell: ({ getValue, row: { original: item } }) => {
           if (!item.PrePullImage) {
             return <div className="text-center">-</div>;
@@ -74,7 +74,7 @@ export const columns = _.compact([
       item.StatusSummary?.AggregatedStatus?.[StatusType.DeploymentReceived] ||
       0,
     {
-      header: 'Deployments received',
+      header: '已接收部署',
       cell: ({ getValue, row }) => (
         <DeploymentCounter
           count={getValue()}
@@ -92,7 +92,7 @@ export const columns = _.compact([
   columnHelper.accessor(
     (item) => item.StatusSummary?.AggregatedStatus?.[StatusType.Error] || 0,
     {
-      header: 'Deployments failed',
+      header: '部署失败',
       cell: ({ getValue, row }) => {
         const count = getValue();
 
@@ -141,7 +141,7 @@ export const columns = _.compact([
     },
   }),
   columnHelper.accessor('CreationDate', {
-    header: 'Creation Date',
+    header: '创建日期',
     cell: ({ getValue }) => isoDateFromTimestamp(getValue()),
     enableHiding: false,
   }),
@@ -150,7 +150,7 @@ export const columns = _.compact([
       (item) =>
         item.GitConfig ? item.GitConfig.ConfigHash : item.StackFileVersion,
       {
-        header: 'Target Version',
+        header: '目标版本',
         enableSorting: false,
         cell: ({ row: { original: item } }) => {
           if (item.GitConfig) {
@@ -176,19 +176,16 @@ export const columns = _.compact([
 function StatusHeader() {
   return (
     <>
-      Status
+      状态
       <Tooltip
         position="top"
         message={
           <>
             <div>
-              The status feature for the Edge stack is only available for Edge
-              Agent versions 2.19.0 and above.
+              边缘堆栈的状态功能仅适用于边缘代理 2.19.0 及以上版本。
             </div>
             <div>
-              To access the status of your edge stack, it is essential to
-              upgrade your Edge Agent to a corresponding version that is
-              compatible with your Portainer server.
+              要访问边缘堆栈的状态，必须将边缘代理升级到与 Portainer 服务器兼容的相应版本。
             </div>
           </>
         }

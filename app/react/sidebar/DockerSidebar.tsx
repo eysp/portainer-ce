@@ -54,7 +54,7 @@ export function DockerSidebar({ environmentId, environment }: Props) {
         dataCy: 'portainerSidebar-swarm',
       }
     : {
-        label: 'Host',
+        label: '主机',
         icon: Trello,
         to: 'docker.host',
         dataCy: 'portainerSidebar-host',
@@ -76,14 +76,14 @@ export function DockerSidebar({ environmentId, environment }: Props) {
       />
       <SidebarParent
         icon={Edit}
-        label="Templates"
+        label="模板"
         to="docker.templates"
         params={{ endpointId: environmentId }}
         data-cy="portainerSidebar-templates"
         listId="dockerSidebar-templates"
       >
         <SidebarItem
-          label="Application"
+          label="应用"
           to="docker.templates"
           ignorePaths={['docker.templates.custom']}
           params={{ endpointId: environmentId }}
@@ -91,7 +91,7 @@ export function DockerSidebar({ environmentId, environment }: Props) {
           data-cy="portainerSidebar-appTemplates"
         />
         <SidebarItem
-          label="Custom"
+          label="自定义"
           to="docker.templates.custom"
           params={{ endpointId: environmentId }}
           isSubMenu
@@ -104,7 +104,7 @@ export function DockerSidebar({ environmentId, environment }: Props) {
           to="docker.stacks"
           params={{ endpointId: environmentId }}
           icon={Layers}
-          label="Stacks"
+          label="堆栈"
           data-cy="dockerSidebar-stacks"
         />
       )}
@@ -114,7 +114,7 @@ export function DockerSidebar({ environmentId, environment }: Props) {
           to="docker.services"
           params={{ endpointId: environmentId }}
           icon={Shuffle}
-          label="Services"
+          label="服务"
           data-cy="dockerSidebar-services"
         />
       )}
@@ -123,7 +123,7 @@ export function DockerSidebar({ environmentId, environment }: Props) {
         to="docker.containers"
         params={{ endpointId: environmentId }}
         icon={Box}
-        label="Containers"
+          label="容器"
         data-cy="dockerSidebar-containers"
       />
 
@@ -131,7 +131,7 @@ export function DockerSidebar({ environmentId, environment }: Props) {
         to="docker.images"
         params={{ endpointId: environmentId }}
         icon={List}
-        label="Images"
+          label="镜像"
         data-cy="dockerSidebar-images"
       />
 
@@ -139,7 +139,7 @@ export function DockerSidebar({ environmentId, environment }: Props) {
         to="docker.networks"
         params={{ endpointId: environmentId }}
         icon={Network}
-        label="Networks"
+          label="网络"
         data-cy="dockerSidebar-networks"
       />
 
@@ -154,7 +154,7 @@ export function DockerSidebar({ environmentId, environment }: Props) {
           to="docker.configs"
           params={{ endpointId: environmentId }}
           icon={Clipboard}
-          label="Configs"
+          label="配置"
           data-cy="dockerSidebar-configs"
         />
       )}
@@ -164,7 +164,7 @@ export function DockerSidebar({ environmentId, environment }: Props) {
           to="docker.secrets"
           params={{ endpointId: environmentId }}
           icon={Lock}
-          label="Secrets"
+          label="密钥"
           data-cy="dockerSidebar-secrets"
         />
       )}
@@ -174,7 +174,7 @@ export function DockerSidebar({ environmentId, environment }: Props) {
           to="docker.events"
           params={{ endpointId: environmentId }}
           icon={Clock}
-          label="Events"
+          label="事件"
           data-cy="dockerSidebar-events"
         />
       )}
@@ -188,7 +188,7 @@ export function DockerSidebar({ environmentId, environment }: Props) {
         listId="portainerSidebar-host-area"
       >
         <SidebarItem
-          label="Details"
+          label="详情"
           isSubMenu
           to={setupSubMenuProps.to}
           params={{ endpointId: environmentId }}
@@ -202,7 +202,7 @@ export function DockerSidebar({ environmentId, environment }: Props) {
           environmentId={environmentId}
         >
           <SidebarItem
-            label="Setup"
+            label="设置"
             isSubMenu
             to={featSubMenuTo}
             params={{ endpointId: environmentId }}
@@ -211,7 +211,7 @@ export function DockerSidebar({ environmentId, environment }: Props) {
         </Authorized>
 
         <SidebarItem
-          label="Registries"
+          label="注册表"
           isSubMenu
           to={registrySubMenuTo}
           params={{ endpointId: environmentId }}

@@ -67,7 +67,7 @@ export function StackDeployForm({
     return (
       <div className="form-group">
         <TextTip>
-          This template type cannot be deployed on this environment.
+          此模板类型无法在此环境中部署。
         </TextTip>
       </div>
     );
@@ -82,7 +82,7 @@ export function StackDeployForm({
     >
       {({ values, errors, setFieldValue, isValid }) => (
         <Form className="form-horizontal">
-          <FormSection title="Configuration">
+          <FormSection title="配置">
             <NameField
               value={values.name}
               onChange={(v) => setFieldValue('name', v)}
@@ -108,8 +108,8 @@ export function StackDeployForm({
           <FormActions
             isLoading={mutation.isLoading}
             isValid={isValid}
-            loadingText="Deployment in progress..."
-            submitLabel="Deploy the stack"
+            loadingText="正在部署..."
+            submitLabel="部署堆栈"
             data-cy="deploy-stack-button"
           >
             <Button
@@ -118,7 +118,7 @@ export function StackDeployForm({
               color="default"
               data-cy="cancel-deploy-stack-button"
             >
-              Hide
+              隐藏
             </Button>
           </FormActions>
         </Form>
@@ -154,7 +154,7 @@ export function StackDeployForm({
       },
       {
         onSuccess() {
-          notifySuccess('Success', 'Stack created');
+          notifySuccess('成功', '堆栈已创建');
           router.stateService.go('docker.stacks');
         },
       }

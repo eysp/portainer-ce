@@ -15,13 +15,13 @@ const columnHelper = createColumnHelper<JobResult>();
 
 export const columns = [
   columnHelper.accessor('EndpointName', {
-    header: 'Environment',
+    header: '环境',
     meta: {
       className: 'w-1/2',
     },
   }),
   columnHelper.display({
-    header: 'Actions',
+    header: '操作',
     cell: ActionsCell,
     meta: {
       className: 'w-1/2',
@@ -44,7 +44,7 @@ function ActionsCell({
     case LogsStatus.Pending:
       return (
         <>
-          Logs marked for collection, please wait until the logs are available.
+          日志已标记为收集，请等待日志可用。
         </>
       );
 
@@ -55,13 +55,13 @@ function ActionsCell({
             onClick={() => downloadLogsMutation.mutate(item.EndpointId)}
             data-cy={`edge-job-download-logs-${item.EndpointName}`}
           >
-            Download logs
+            下载日志
           </Button>
           <Button
             onClick={() => clearLogsMutations.mutate(item.EndpointId)}
             data-cy={`edge-job-clear-logs-${item.EndpointName}`}
           >
-            Clear logs
+            清除日志
           </Button>
         </>
       );
@@ -72,7 +72,7 @@ function ActionsCell({
           onClick={() => collectLogsMutation.mutate(item.EndpointId)}
           data-cy={`edge-job-retrieve-logs-${item.EndpointName}`}
         >
-          Retrieve logs
+          检索日志
         </Button>
       );
   }

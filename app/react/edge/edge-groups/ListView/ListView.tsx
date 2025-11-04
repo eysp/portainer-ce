@@ -5,7 +5,7 @@ import { EdgeGroupsDatatable } from './EdgeGroupsDatatable';
 export function ListView() {
   return (
     <>
-      <PageHeader title="Edge Groups" breadcrumbs="Edge Groups" reload />
+      <PageHeader title="边缘分组" breadcrumbs="边缘分组" reload />
       <EdgeGroupsDatatable />
     </>
   );

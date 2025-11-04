@@ -30,7 +30,7 @@ export function EnvironmentRegistriesDatatable() {
       dataset={query.data || []}
       isLoading={query.isLoading}
       settingsManager={tableState}
-      title="Registries"
+      title="镜像仓库"
       titleIcon={Radio}
       renderTableActions={() => <AddButton />}
       disableSelect

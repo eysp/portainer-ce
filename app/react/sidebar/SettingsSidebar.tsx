@@ -31,10 +31,10 @@ export function SettingsSidebar({ isPureAdmin, isAdmin, isTeamLeader }: Props) {
   const showUsersSection = !window.ddExtension && isPureAdminOrTeamLeader;
 
   return (
-    <SidebarSection title="Administration">
+    <SidebarSection title="管理">
       {showUsersSection && (
         <SidebarParent
-          label="User-related"
+          label="用户相关"
           icon={Users}
           to="portainer.users"
           pathOptions={{ includePaths: ['portainer.teams', 'portainer.roles'] }}
@@ -43,13 +43,13 @@ export function SettingsSidebar({ isPureAdmin, isAdmin, isTeamLeader }: Props) {
         >
           <SidebarItem
             to="portainer.users"
-            label="Users"
+            label="用户"
             isSubMenu
             data-cy="portainerSidebar-users"
           />
           <SidebarItem
             to="portainer.teams"
-            label="Teams"
+            label="团队"
             isSubMenu
             data-cy="portainerSidebar-teams"
           />
@@ -57,7 +57,7 @@ export function SettingsSidebar({ isPureAdmin, isAdmin, isTeamLeader }: Props) {
           {isPureAdmin && (
             <SidebarItem
               to="portainer.roles"
-              label="Roles"
+              label="角色"
               isSubMenu
               data-cy="portainerSidebar-roles"
             />
@@ -67,7 +67,7 @@ export function SettingsSidebar({ isPureAdmin, isAdmin, isTeamLeader }: Props) {
       {isPureAdmin && (
         <>
           <SidebarParent
-            label="Environment-related"
+            label="环境相关"
             icon={HardDrive}
             to="portainer.endpoints"
             pathOptions={{
@@ -81,7 +81,7 @@ export function SettingsSidebar({ isPureAdmin, isAdmin, isTeamLeader }: Props) {
             listId="portainer-environments"
           >
             <SidebarItem
-              label="Environments"
+              label="环境"
               to="portainer.endpoints"
               ignorePaths={['portainer.endpoints.updateSchedules']}
               includePaths={['portainer.wizard.endpoints']}
@@ -90,13 +90,13 @@ export function SettingsSidebar({ isPureAdmin, isAdmin, isTeamLeader }: Props) {
             />
             <SidebarItem
               to="portainer.groups"
-              label="Groups"
+              label="分组"
               isSubMenu
               data-cy="portainerSidebar-environmentGroups"
             />
             <SidebarItem
               to="portainer.tags"
-              label="Tags"
+              label="标签"
               isSubMenu
               data-cy="portainerSidebar-environmentTags"
             />
@@ -104,7 +104,7 @@ export function SettingsSidebar({ isPureAdmin, isAdmin, isTeamLeader }: Props) {
           </SidebarParent>
 
           <SidebarItem
-            label="Registries"
+            label="注册表"
             to="portainer.registries"
             icon={Radio}
             data-cy="portainerSidebar-registries"
@@ -113,14 +113,14 @@ export function SettingsSidebar({ isPureAdmin, isAdmin, isTeamLeader }: Props) {
           {isBE && (
             <SidebarItem
               to="portainer.licenses"
-              label="Licenses"
+              label="许可证"
               icon={Award}
               data-cy="portainerSidebar-licenses"
             />
           )}
 
           <SidebarParent
-            label="Logs"
+            label="日志"
             to="portainer.authLogs"
             icon={FileText}
             pathOptions={{
@@ -130,14 +130,14 @@ export function SettingsSidebar({ isPureAdmin, isAdmin, isTeamLeader }: Props) {
             listId="k8sSidebar-logs"
           >
             <SidebarItem
-              label="Authentication"
+              label="认证"
               to="portainer.authLogs"
               isSubMenu
               data-cy="portainerSidebar-authLogs"
             />
             <SidebarItem
               to="portainer.activityLogs"
-              label="Activity"
+              label="活动"
               isSubMenu
               data-cy="portainerSidebar-activityLogs"
             />
@@ -146,7 +146,7 @@ export function SettingsSidebar({ isPureAdmin, isAdmin, isTeamLeader }: Props) {
       )}
       {isBE && !isPureAdmin && isAdmin && (
         <SidebarParent
-          label="Environment-related"
+          label="环境相关"
           icon={HardDrive}
           to="portainer.endpoints.updateSchedules"
           data-cy="portainerSidebar-environments-area"
@@ -159,20 +159,20 @@ export function SettingsSidebar({ isPureAdmin, isAdmin, isTeamLeader }: Props) {
       <SidebarItem
         to="portainer.notifications"
         icon={Bell}
-        label="Notifications"
+        label="通知"
         data-cy="portainerSidebar-notifications"
       />
       {isPureAdmin && (
         <SidebarParent
           to="portainer.settings"
-          label="Settings"
+          label="设置"
           icon={Settings}
           data-cy="portainerSidebar-settings"
           listId="portainer-settings"
         >
           <SidebarItem
             to="portainer.settings"
-            label="General"
+            label="常规"
             isSubMenu
             ignorePaths={[
               'portainer.settings.authentication',
@@ -184,7 +184,7 @@ export function SettingsSidebar({ isPureAdmin, isAdmin, isTeamLeader }: Props) {
           {!window.ddExtension && (
             <SidebarItem
               to="portainer.settings.authentication"
-              label="Authentication"
+              label="认证"
               isSubMenu
               data-cy="portainerSidebar-authentication"
             />
@@ -192,7 +192,7 @@ export function SettingsSidebar({ isPureAdmin, isAdmin, isTeamLeader }: Props) {
           {isBE && (
             <SidebarItem
               to="portainer.settings.sharedcredentials"
-              label="Shared Credentials"
+              label="共享凭据"
               isSubMenu
               data-cy="portainerSidebar-cloud"
             />
@@ -200,12 +200,12 @@ export function SettingsSidebar({ isPureAdmin, isAdmin, isTeamLeader }: Props) {
 
           <SidebarItem
             to="portainer.settings.edgeCompute"
-            label="Edge Compute"
+            label="边缘计算"
             isSubMenu
             data-cy="portainerSidebar-edgeCompute"
           />
 
-          <SidebarItem.Wrapper label="Get Help">
+            <SidebarItem.Wrapper label="获取帮助">
             <a
               href={
                 process.env.PORTAINER_EDITION === 'CE'
@@ -216,7 +216,7 @@ export function SettingsSidebar({ isPureAdmin, isAdmin, isTeamLeader }: Props) {
               rel="noreferrer"
               className="hover:!underline focus:no-underline text-sm flex h-8 w-full items-center rounded px-3 transition-colors duration-200 hover:bg-blue-5/20 be:hover:bg-gray-5/20 th-dark:hover:bg-gray-true-5/20"
             >
-              Get Help
+              获取帮助
             </a>
           </SidebarItem.Wrapper>
         </SidebarParent>
@@ -235,7 +235,7 @@ function EdgeUpdatesSidebarItem() {
   return (
     <SidebarItem
       to="portainer.endpoints.updateSchedules"
-      label="Update & Rollback"
+      label="更新和回滚"
       isSubMenu
       data-cy="portainerSidebar-updateSchedules"
     />

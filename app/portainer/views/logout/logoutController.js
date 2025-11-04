@@ -55,7 +55,7 @@ class LogoutController {
     try {
       await this.logout();
     } catch (err) {
-      this.Notifications.error('Failure', err, 'An error occurred during logout');
+      this.Notifications.error('失败', err, '注销过程中发生错误');
     }
   }
 

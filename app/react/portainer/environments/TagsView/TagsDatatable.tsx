@@ -12,7 +12,7 @@ const columnHelper = createColumnHelper<Tag>();
 
 const columns = [
   columnHelper.accessor('Name', {
-    header: 'Name',
+    header: '名称',
   }),
 ];
 
@@ -31,7 +31,7 @@ export function TagsDatatable({
 
   return (
     <Datatable
-      title="Tags"
+      title="标签"
       titleIcon={TagIcon}
       dataset={dataset || []}
       columns={columns}
@@ -40,7 +40,7 @@ export function TagsDatatable({
       renderTableActions={(selectedItems) => (
         <DeleteButton
           disabled={selectedItems.length === 0}
-          confirmMessage="Are you sure you want to remove the selected tag(s)?"
+          confirmMessage="您确定要移除选定的标签吗？"
           onConfirmed={() => onRemove(selectedItems)}
           data-cy="remove-tag-button"
         />

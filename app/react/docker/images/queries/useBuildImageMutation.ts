@@ -121,7 +121,7 @@ async function buildImage(
     );
     return data;
   } catch (err) {
-    throw parseAxiosError(err, 'Unable to build image');
+    throw parseAxiosError(err, '无法构建镜像');
   }
 }
 

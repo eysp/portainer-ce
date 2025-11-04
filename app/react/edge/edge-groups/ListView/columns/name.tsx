@@ -8,7 +8,7 @@ import { EdgeGroupListItemResponse } from '../../queries/useEdgeGroups';
 import { columnHelper } from './helper';
 
 export const name = columnHelper.accessor('Name', {
-  header: 'Name',
+  header: '名称',
   cell: NameCell,
 });
 
@@ -34,7 +34,7 @@ function NameCell({
       </Link>
       {(item.HasEdgeJob || item.HasEdgeStack) && (
         <Badge type="info" className="ml-1">
-          in use
+          使用中
         </Badge>
       )}
     </>

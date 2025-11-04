@@ -40,7 +40,7 @@ export function KubernetesSidebar({ environmentId }: Props) {
         to="kubernetes.templates.custom"
         params={{ endpointId: environmentId }}
         icon={Edit}
-        label="Custom Templates"
+        label="自定义模板"
         data-cy="k8sSidebar-customTemplates"
       />
 
@@ -48,7 +48,7 @@ export function KubernetesSidebar({ environmentId }: Props) {
         to="kubernetes.resourcePools"
         params={{ endpointId: environmentId }}
         icon={Layers}
-        label="Namespaces"
+        label="命名空间"
         data-cy="k8sSidebar-namespaces"
       />
 
@@ -56,12 +56,12 @@ export function KubernetesSidebar({ environmentId }: Props) {
         to="kubernetes.applications"
         params={{ endpointId: environmentId }}
         icon={Box}
-        label="Applications"
+        label="应用"
         data-cy="k8sSidebar-applications"
       />
 
       <SidebarParent
-        label="Networking"
+        label="网络"
         icon={Network}
         to="kubernetes.services"
         params={{ endpointId: environmentId }}
@@ -72,7 +72,7 @@ export function KubernetesSidebar({ environmentId }: Props) {
         <SidebarItem
           to="kubernetes.services"
           params={{ endpointId: environmentId }}
-          label="Services"
+          label="服务"
           isSubMenu
           data-cy="k8sSidebar-services"
         />
@@ -80,7 +80,7 @@ export function KubernetesSidebar({ environmentId }: Props) {
         <SidebarItem
           to="kubernetes.ingresses"
           params={{ endpointId: environmentId }}
-          label="Ingresses"
+          label="入口"
           isSubMenu
           data-cy="k8sSidebar-ingresses"
         />
@@ -90,7 +90,7 @@ export function KubernetesSidebar({ environmentId }: Props) {
         to="kubernetes.configurations"
         params={{ endpointId: environmentId }}
         icon={Lock}
-        label="ConfigMaps & Secrets"
+        label="ConfigMaps 和 Secrets"
         data-cy="k8sSidebar-configurations"
       />
 
@@ -101,7 +101,7 @@ export function KubernetesSidebar({ environmentId }: Props) {
       />
 
       <SidebarParent
-        label="More Resources"
+        label="更多资源"
         to="kubernetes.moreResources.jobs"
         pathOptions={{
           includePaths: [
@@ -118,7 +118,7 @@ export function KubernetesSidebar({ environmentId }: Props) {
         <SidebarItem
           to="kubernetes.moreResources.jobs"
           params={{ endpointId: environmentId }}
-          label="Cron Jobs & Jobs"
+            label="Cron 作业和作业"
           data-cy="k8sSidebar-jobs"
           isSubMenu
         />
@@ -130,21 +130,21 @@ export function KubernetesSidebar({ environmentId }: Props) {
           <SidebarItem
             to="kubernetes.moreResources.serviceAccounts"
             params={{ endpointId: environmentId }}
-            label="Service Accounts"
+            label="服务账户"
             data-cy="k8sSidebar-serviceAccounts"
             isSubMenu
           />
           <SidebarItem
             to="kubernetes.moreResources.clusterRoles"
             params={{ endpointId: environmentId }}
-            label="Cluster Roles"
+            label="集群角色"
             data-cy="k8sSidebar-clusterRoles"
             isSubMenu
           />
           <SidebarItem
             to="kubernetes.moreResources.roles"
             params={{ endpointId: environmentId }}
-            label="Roles"
+            label="角色"
             data-cy="k8sSidebar-Roles"
             isSubMenu
           />
@@ -152,7 +152,7 @@ export function KubernetesSidebar({ environmentId }: Props) {
       </SidebarParent>
 
       <SidebarParent
-        label="Cluster"
+        label="集群"
         icon={Server}
         to="kubernetes.cluster"
         params={{ endpointId: environmentId }}
@@ -161,7 +161,7 @@ export function KubernetesSidebar({ environmentId }: Props) {
         listId="k8sSidebar-cluster-area"
       >
         <SidebarItem
-          label="Details"
+          label="详情"
           to="kubernetes.cluster"
           ignorePaths={[
             'kubernetes.cluster.setup',
@@ -179,7 +179,7 @@ export function KubernetesSidebar({ environmentId }: Props) {
           <SidebarItem
             to="kubernetes.cluster.setup"
             params={{ endpointId: environmentId }}
-            label="Setup"
+            label="设置"
             isSubMenu
             data-cy="k8sSidebar-setup"
           />
@@ -193,7 +193,7 @@ export function KubernetesSidebar({ environmentId }: Props) {
           <SidebarItem
             to="kubernetes.cluster.securityConstraint"
             params={{ endpointId: environmentId }}
-            label="Security constraints"
+            label="安全约束"
             isSubMenu
             data-cy="k8sSidebar-securityConstraints"
           />
@@ -208,7 +208,7 @@ export function KubernetesSidebar({ environmentId }: Props) {
             <SidebarItem
               to="kubernetes.cluster.securityConstraint"
               params={{ endpointId: environmentId }}
-              label="Security Constraints"
+              label="安全约束"
               isSubMenu
               data-cy="k8sSidebar-securityConstraints"
             />
@@ -218,7 +218,7 @@ export function KubernetesSidebar({ environmentId }: Props) {
         <SidebarItem
           to="kubernetes.registries"
           params={{ endpointId: environmentId }}
-          label="Registries"
+          label="注册表"
           isSubMenu
           data-cy="k8sSidebar-registries"
         />

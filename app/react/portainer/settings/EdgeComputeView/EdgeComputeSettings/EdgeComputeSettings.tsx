@@ -37,7 +37,7 @@ export function EdgeComputeSettings({ settings, onSubmit }: Props) {
   return (
     <div className="row">
       <Widget>
-        <WidgetTitle icon={Laptop} title="Edge Compute settings" />
+        <WidgetTitle icon={Laptop} title="边缘计算设置" />
 
         <WidgetBody>
           <Formik
@@ -63,7 +63,7 @@ export function EdgeComputeSettings({ settings, onSubmit }: Props) {
               >
                 <FormControl
                   inputId="edge_enable"
-                  label="Enable Edge Compute features"
+                  label="启用边缘计算功能"
                   size="small"
                   errors={errors.EnableEdgeComputeFeatures}
                 >
@@ -80,15 +80,14 @@ export function EdgeComputeSettings({ settings, onSubmit }: Props) {
                 </FormControl>
 
                 <TextTip color="blue" className="mb-2">
-                  Enable this setting to use Portainer Edge Compute
-                  capabilities.
+                  启用此设置以使用 Portainer 边缘计算功能。
                 </TextTip>
 
                 {isBE && values.EnableEdgeComputeFeatures && (
                   <>
                     <PortainerUrlField
                       fieldName="EdgePortainerUrl"
-                      tooltip="URL of this Portainer instance that will be used by Edge agents to initiate the communications."
+                      tooltip="此 Portainer 实例的 URL，边缘代理将使用它来启动通信。"
                     />
 
                     <PortainerTunnelAddrField fieldName="Edge.TunnelServerAddress" />
@@ -97,9 +96,9 @@ export function EdgeComputeSettings({ settings, onSubmit }: Props) {
 
                 <FormControl
                   inputId="edge_enforce_id"
-                  label="Enforce use of Portainer generated Edge ID"
+                  label="强制使用 Portainer 生成的边缘 ID"
                   size="small"
-                  tooltip="This setting only applies to manually created environments."
+                  tooltip="此设置仅适用于手动创建的环境。"
                   errors={errors.EnforceEdgeID}
                 >
                   <Switch
@@ -120,9 +119,9 @@ export function EdgeComputeSettings({ settings, onSubmit }: Props) {
                       disabled={!isValid || !dirty}
                       data-cy="settings-edgeComputeButton"
                       isLoading={isSubmitting}
-                      loadingText="Saving settings..."
+                      loadingText="正在保存设置..."
                     >
-                      Save settings
+                      保存设置
                     </LoadingButton>
                   </div>
                 </div>

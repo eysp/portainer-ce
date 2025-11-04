@@ -15,7 +15,7 @@ import { columnHelper } from './helper';
 import { DefaultRegistryAction } from './DefaultRegistryAction';
 
 export const actions = columnHelper.display({
-  header: 'Actions',
+  header: '操作',
   cell: Cell,
 });
 
@@ -62,7 +62,7 @@ export function BrowseButton({
           icon={Search}
           data-cy={`browse-registry-button-${registry.Name}`}
         >
-          Browse
+          浏览
         </Button>
       )}
     </BEFeatureIndicator>

@@ -13,7 +13,7 @@ import { columnHelper } from './helper';
 
 export function buildActions({ nodeName }: { nodeName?: string } = {}) {
   return columnHelper.display({
-    header: 'Actions',
+    header: '操作',
     cell: Cell,
   });
 
@@ -38,11 +38,11 @@ export function buildActions({ nodeName }: { nodeName?: string } = {}) {
           color="dangerlight"
           data-cy="disconnect-network-button"
           isLoading={disconnectMutation.isLoading}
-          loadingText="Leaving network..."
+          loadingText="正在离开网络..."
           type="button"
           onClick={handleSubmit}
         >
-          Leave network
+          离开网络
         </LoadingButton>
       </Authorized>
     );
@@ -59,7 +59,7 @@ export function buildActions({ nodeName }: { nodeName?: string } = {}) {
         },
         {
           onSuccess() {
-            notifySuccess('Container successfully disconnected', networkId);
+            notifySuccess('容器已成功断开连接', networkId);
             router.stateService.reload();
           },
         }

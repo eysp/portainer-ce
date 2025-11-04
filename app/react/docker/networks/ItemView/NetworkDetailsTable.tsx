@@ -30,7 +30,7 @@ export function NetworkDetailsTable({
 
   return (
     <TableContainer>
-      <TableTitle label="Network details" icon={Network} />
+      <TableTitle label="网络详情" icon={Network} />
       <DetailsTable dataCy="networkDetails-detailsTable">
         {/* networkRowContent */}
         <DetailsTable.Row label="Name">{network.Name}</DetailsTable.Row>
@@ -43,9 +43,9 @@ export function NetworkDetailsTable({
                   data-cy="networkDetails-deleteNetwork"
                   size="xsmall"
                   onConfirmed={onRemoveNetworkClicked}
-                  confirmMessage="Do you want to delete the network?"
+                  confirmMessage="您确定要删除此网络吗？"
                 >
-                  Delete this network
+                  删除此网络
                 </DeleteButton>
               </Authorized>
             </span>

@@ -166,10 +166,10 @@ angular.module('portainer.docker').controller('ImageController', [
         .then(function success(data) {
           var downloadData = new Blob([data], { type: 'application/x-tar' });
           FileSaver.saveAs(downloadData, 'images.tar');
-          Notifications.success('Success', 'Image successfully downloaded');
+          Notifications.success('成功', '镜像下载成功');
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to download image');
+          Notifications.error('失败', err, '无法下载镜像');
         })
         .finally(function final() {
           $scope.state.exportInProgress = false;
@@ -178,7 +178,7 @@ angular.module('portainer.docker').controller('ImageController', [
 
     $scope.exportImage = function (image) {
       if (image.RepoTags.length === 0 || _.includes(image.RepoTags, '<none>')) {
-        Notifications.warning('', 'Cannot download a untagged image');
+        Notifications.warning('', '无法下载未标记的镜像');
         return;
       }
 

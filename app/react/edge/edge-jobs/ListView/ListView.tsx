@@ -6,14 +6,13 @@ import { EdgeJobsDatatable } from './EdgeJobsDatatable';
 export function ListView() {
   return (
     <>
-      <PageHeader title="Edge Jobs" breadcrumbs="Edge Jobs" reload />
+      <PageHeader title="边缘作业" breadcrumbs="边缘作业" reload />
 
       <div className="row">
         <div className="col-sm-12">
-          <InformationPanel title="Information">
+          <InformationPanel title="信息">
             <p className="small text-muted">
-              Edge Jobs requires Docker Standalone and a cron implementation
-              that reads jobs from <code>/etc/cron.d</code>
+              边缘作业需要 Docker Standalone 和从 <code>/etc/cron.d</code> 读取作业的 cron 实现
             </p>
           </InformationPanel>
         </div>

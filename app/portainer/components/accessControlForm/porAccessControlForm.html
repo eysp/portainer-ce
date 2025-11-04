@@ -1,13 +1,13 @@
 <div>
-  <div ng-if="!$ctrl.hideTitle" class="col-sm-12 form-section-title"> Access control </div>
+  <div ng-if="!$ctrl.hideTitle" class="col-sm-12 form-section-title"> 访问控制 </div>
   <!-- access-control-switch -->
   <div class="form-group">
     <div class="col-sm-12">
       <por-switch-field
         label-class="'col-sm-2'"
         checked="$ctrl.formData.AccessControlEnabled"
-        label="'Enable access control'"
-        tooltip="'When enabled, you can restrict the access and management of this resource.'"
+        label="'启用访问控制'"
+        tooltip="'启用后，您可以限制此资源的访问和管理。'"
         on-change="($ctrl.onChangeEnablement)"
         data-cy="portainer-accessMgmtToggle"
       ></por-switch-field>
@@ -33,19 +33,19 @@
   >
     <div class="vertical-center w-full">
       <label for="teams-selector" class="control-label col-sm-3 col-lg-2 !pt-0 text-left">
-        Authorized teams
+        授权团队
         <portainer-tooltip
           ng-if="$ctrl.isAdmin && $ctrl.availableTeams.length > 0"
-          message="'You can select which teams(s) will be able to manage this resource.'"
+          message="'您可以选择哪些团队能够管理此资源。'"
         ></portainer-tooltip>
         <portainer-tooltip
           ng-if="!$ctrl.isAdmin && $ctrl.availableTeams.length > 1"
-          message="'As you are a member of multiple teams, you can select which teams(s) will be able to manage this resource.'"
+          message="'由于您是多个团队的成员，您可以选择哪些团队能够管理此资源。'"
         ></portainer-tooltip>
       </label>
       <div class="col-sm-9 col-lg-10">
         <span ng-if="$ctrl.isAdmin && $ctrl.availableTeams.length === 0" class="small text-muted">
-          You have not yet created any teams. Head over to the <a ui-sref="portainer.teams">Teams view</a> to manage teams.
+          您尚未创建任何团队。前往 <a ui-sref="portainer.teams">团队视图</a> 管理团队。
         </span>
 
         <por-access-control-form-team-selector
@@ -64,15 +64,15 @@
   <div class="form-group" ng-if="$ctrl.formData.AccessControlEnabled && $ctrl.formData.Ownership === $ctrl.RCO.RESTRICTED && $ctrl.isAdmin">
     <div class="vertical-center w-full">
       <label for="users-selector" class="control-label col-sm-3 col-lg-2 !pt-0 text-left">
-        Authorized users
+        授权用户
         <portainer-tooltip
           ng-if="$ctrl.isAdmin && $ctrl.availableUsers.length > 0"
-          message="'You can select which user(s) will be able to manage this resource.'"
+          message="'您可以选择哪些用户能够管理此资源。'"
         ></portainer-tooltip>
       </label>
       <div class="col-sm-9 col-lg-10">
         <span ng-if="$ctrl.availableUsers.length === 0" class="small text-muted">
-          You have not yet created any users. Head over to the <a ui-sref="portainer.users">Users view</a> to manage users.
+          您尚未创建任何用户。前往 <a ui-sref="portainer.users">用户视图</a> 管理用户。
         </span>
 
         <por-access-control-form-user-selector

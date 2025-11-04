@@ -22,7 +22,7 @@ export function useDeleteNetwork(environmentId: EnvironmentId) {
       deleteNetwork(environmentId, networkId, { nodeName }),
     mutationOptions(
       withInvalidate(queryClient, [queryKeys.base(environmentId)]),
-      withError('Unable to remove network')
+      withError('无法移除网络')
     )
   );
 }
@@ -47,6 +47,6 @@ export async function deleteNetwork(
     );
     return networkId;
   } catch (err) {
-    throw parseAxiosError(err, 'Unable to remove network');
+    throw parseAxiosError(err, '无法移除网络');
   }
 }

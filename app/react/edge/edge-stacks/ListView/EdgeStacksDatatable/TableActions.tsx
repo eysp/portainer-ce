@@ -18,11 +18,11 @@ export function TableActions({
       <DeleteButton
         disabled={selectedItems.length === 0}
         onConfirmed={() => handleRemove(selectedItems)}
-        confirmMessage="Are you sure you want to remove the selected Edge stack(s)?"
+        confirmMessage="您确定要移除选定的边缘堆栈吗？"
         data-cy="edgeStack-removeStackButton"
       />
 
-      <AddButton data-cy="edgeStack-addStackButton">Add stack</AddButton>
+      <AddButton data-cy="edgeStack-addStackButton">添加堆栈</AddButton>
     </div>
   );
 
@@ -30,7 +30,7 @@ export function TableActions({
     const ids = selectedItems.map((item) => item.Id);
     removeMutation.mutate(ids, {
       onSuccess: () => {
-        notifySuccess('Success', 'Edge stack(s) removed');
+        notifySuccess('成功', '边缘堆栈已移除');
       },
     });
   }

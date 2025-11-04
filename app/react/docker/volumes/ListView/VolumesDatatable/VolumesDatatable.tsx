@@ -53,7 +53,7 @@ export function VolumesDatatable({
 
   return (
     <Datatable
-      title="Volumes"
+      title="卷"
       titleIcon={Database}
       columns={columns}
       dataset={dataset || []}

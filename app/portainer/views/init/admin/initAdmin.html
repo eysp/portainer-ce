@@ -21,7 +21,7 @@
                 <pr-icon icon="'chevron-down'" ng-if="state.showInitPassword" size="'lg'" class-name="'icon-primary'"></pr-icon>
                 <pr-icon icon="'chevron-right'" ng-if="!state.showInitPassword" size="'lg'" class-name="'icon-primary'"></pr-icon>
               </span>
-              <span class="form-section-title">New Portainer installation</span>
+              <span class="form-section-title">新的 Portainer 安装</span>
             </a>
           </div>
           <!-- !toggle -->
@@ -31,13 +31,13 @@
             <!-- note -->
             <div class="form-group">
               <div class="col-sm-12">
-                <span class="small text-muted"> Please create the initial administrator user. </span>
+                <span class="small text-muted"> 请创建初始管理员用户。 </span>
               </div>
             </div>
             <!-- !note -->
             <!-- username-input -->
             <div class="form-group">
-              <label for="username" class="col-sm-4 control-label text-left"> Username </label>
+              <label for="username" class="col-sm-4 control-label text-left"> 用户名 </label>
               <div class="col-sm-8">
                 <input type="text" class="form-control" id="username" ng-model="formValues.Username" placeholder="e.g. admin" data-cy="init-username" />
               </div>
@@ -45,7 +45,7 @@
             <!-- !username-input -->
             <!-- new-password-input -->
             <div class="form-group">
-              <label for="password" class="col-sm-4 control-label text-left">Password</label>
+              <label for="password" class="col-sm-4 control-label text-left">密码</label>
               <div class="col-sm-8">
                 <input type="password" class="form-control" ng-model="formValues.Password" id="password" name="password" ng-minlength="requiredPasswordLength" auto-focus />
               </div>
@@ -53,7 +53,7 @@
             <!-- !new-password-input -->
             <!-- confirm-password-input -->
             <div class="form-group">
-              <label for="confirm_password" class="col-sm-4 control-label text-left">Confirm password</label>
+              <label for="confirm_password" class="col-sm-4 control-label text-left">确认密码</label>
               <div class="col-sm-8">
                 <div class="input-group">
                   <input type="password" class="form-control" ng-model="formValues.ConfirmPassword" id="confirm_password" />
@@ -70,7 +70,7 @@
               <div class="col-sm-12 text-warning">
                 <p class="vertical-center">
                   <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
-                  <span>The password must be at least {{ requiredPasswordLength }} characters long.</span>
+                  <span>密码必须至少包含 {{ requiredPasswordLength }} 个字符。</span>
                   <pr-icon mode="'success'" icon="'check'" ng-if="form.password.$valid && formValues.Password"></pr-icon>
                 </p>
               </div>
@@ -86,8 +86,8 @@
                   ng-click="createAdminUser()"
                   button-spinner="state.actionInProgress"
                 >
-                  <span ng-hide="state.actionInProgress">Create user</span>
-                  <span ng-show="state.actionInProgress">Creating user...</span>
+                  <span ng-hide="state.actionInProgress">创建用户</span>
+                  <span ng-show="state.actionInProgress">正在创建用户...</span>
                 </button>
               </div>
             </div>
@@ -97,8 +97,8 @@
               <div class="col-sm-12 vertical-center">
                 <input type="checkbox" name="toggle_enableTelemetry" ng-model="formValues.enableTelemetry" data-cy="init-enableTelemetry" />
                 <span class="text-muted small"
-                  >Allow collection of anonymous statistics. You can find more information about this in our
-                  <a class="hyperlink" href="https://www.portainer.io/documentation/in-app-analytics-and-privacy-policy/" target="_blank">privacy policy</a>.</span
+                  >允许收集匿名统计信息。您可以在我们的
+                  <a class="hyperlink" href="https://www.portainer.io/documentation/in-app-analytics-and-privacy-policy/" target="_blank">隐私政策</a>中找到更多相关信息。</span
                 >
               </div>
             </div>
@@ -119,7 +119,7 @@
                 ><pr-icon icon="'chevron-down'" ng-if="state.showRestorePortainer" size="'lg'" class-name="'icon-primary'"></pr-icon>
                 <pr-icon icon="'chevron-right'" ng-if="!state.showRestorePortainer" size="'lg'" class-name="'icon-primary'"></pr-icon
               ></span>
-              <span class="form-section-title">Restore Portainer from backup</span>
+              <span class="form-section-title">从备份恢复 Portainer</span>
             </a>
           </div>
           <!-- !toggle -->
@@ -130,7 +130,7 @@
             <div class="form-group">
               <div class="col-sm-9">
                 <span class="small text-muted">
-                  This will restore the Portainer metadata which contains information about the environments, stacks and applications, as well as the configured users.
+                  这将恢复 Portainer 元数据，其中包含有关环境、堆栈和应用程序的信息，以及已配置的用户。
                 </span>
               </div>
             </div>
@@ -142,7 +142,7 @@
               <!-- note -->
               <div class="form-group">
                 <div class="col-sm-12">
-                  <span class="small text-muted"> You can upload a backup file from your computer. </span>
+                  <span class="small text-muted"> 您可以从计算机上传备份文件。 </span>
                 </div>
               </div>
               <!-- !note -->
@@ -157,7 +157,7 @@
                     ng-model="formValues.BackupFile"
                     auto-focus
                     data-cy="init-selectBackupFileButton"
-                    >Select file</button
+                    >选择文件</button
                   >
                   <span class="space-left vertical-center">
                     {{ formValues.BackupFile.name }}
@@ -168,9 +168,9 @@
               <!-- password-input -->
               <div class="form-group">
                 <label for="password" class="col-sm-3 control-label text-left">
-                  Password
+                  密码
                   <portainer-tooltip
-                    message="'If the backup is password protected, provide the password in order to extract the backup file, otherwise this field can be left empty.'"
+                    message="'如果备份受密码保护，请提供密码以解压备份文件，否则此字段可以留空。'"
                   ></portainer-tooltip>
                 </label>
                 <div class="col-sm-4">
@@ -183,7 +183,7 @@
             <div class="limited-be-content" ng-if="formValues.restoreFormType === RESTORE_FORM_TYPES.S3">
               <!-- Access key id  -->
               <div class="form-group">
-                <label for="access_key_id" class="col-sm-3 control-label text-left">Access key ID</label>
+                <label for="access_key_id" class="col-sm-3 control-label text-left">访问密钥 ID</label>
                 <div class="col-sm-9">
                   <input type="text" class="form-control" id="access_key_id" name="access_key_id" ng-model="formValues.AccessKeyId" required data-cy="init-accessKeyIdInput" />
                 </div>
@@ -191,7 +191,7 @@
               <!-- !Access key id  -->
               <!-- Secret access key -->
               <div class="form-group">
-                <label for="secret_access_key" class="col-sm-3 control-label text-left">Secret access key</label>
+                <label for="secret_access_key" class="col-sm-3 control-label text-left">秘密访问密钥</label>
                 <div class="col-sm-9">
                   <input
                     type="password"
@@ -207,13 +207,13 @@
               <!-- !Secret access key -->
               <!-- Region -->
               <div class="form-group">
-                <label for="backup-s3-region" class="col-sm-3 control-label text-left">Region</label>
+                <label for="backup-s3-region" class="col-sm-3 control-label text-left">区域</label>
                 <div class="col-sm-9">
                   <input
                     type="text"
                     data-cy="init-s3RegionInput"
                     class="form-control"
-                    placeholder="default region is us-east-1 if left empty"
+                    placeholder="如果留空，默认区域为 us-east-1"
                     id="backup-s3-region"
                     name="backup-s3-region"
                     ng-model="formValues.Region"
@@ -223,7 +223,7 @@
               <!-- !Region -->
               <!-- Bucket name -->
               <div class="form-group">
-                <label for="bucket_name" class="col-sm-3 control-label text-left">Bucket name</label>
+                <label for="bucket_name" class="col-sm-3 control-label text-left">存储桶名称</label>
                 <div class="col-sm-9">
                   <input type="text" class="form-control" id="bucket_name" name="bucket_name" ng-model="formValues.BucketName" required data-cy="init-bucketNameInput" />
                 </div>
@@ -232,8 +232,8 @@
               <!-- S3 Compatible Host -->
               <div class="form-group">
                 <label for="s3-compatible-host" class="col-sm-3 control-label text-left">
-                  S3 Compatible Host
-                  <portainer-tooltip message="'Hostname of a S3 service'"></portainer-tooltip>
+                  S3 兼容主机
+                  <portainer-tooltip message="'S3 服务的主机名'"></portainer-tooltip>
                 </label>
                 <div class="col-sm-9">
                   <input
@@ -243,14 +243,14 @@
                     id="s3-compatible-host"
                     name="s3-compatible-host"
                     ng-model="formValues.S3CompatibleHost"
-                    placeholder="leave empty for AWS S3"
+                    placeholder="对于 AWS S3 留空"
                   />
                 </div>
               </div>
               <!-- !S3 Compatible Host -->
               <!-- Filename -->
               <div class="form-group">
-                <label for="backup-s3-filename" class="col-sm-3 control-label text-left">Filename</label>
+                <label for="backup-s3-filename" class="col-sm-3 control-label text-left">文件名</label>
                 <div class="col-sm-9">
                   <input
                     type="text"
@@ -267,9 +267,9 @@
               <!-- password-input -->
               <div class="form-group">
                 <label for="password" class="col-sm-3 control-label text-left">
-                  Password
+                  密码
                   <portainer-tooltip
-                    message="'If the backup is password protected, provide the password in order to extract the backup file, otherwise this field can be left empty.'"
+                    message="'如果备份受密码保护，请提供密码以解压备份文件，否则此字段可以留空。'"
                   ></portainer-tooltip>
                 </label>
                 <div class="col-sm-4">
@@ -281,10 +281,10 @@
             <!-- note -->
             <div class="form-group">
               <div class="col-sm-12">
-                <span class="small text-muted"> You are about to restore Portainer from this backup. </span>
+                <span class="small text-muted"> 您即将从该备份恢复 Portainer。 </span>
               </div>
               <div class="col-sm-12">
-                <span class="small text-muted"> After restoring has completed, please log in as a user that was known by the Portainer that was restored. </span>
+                <span class="small text-muted"> 恢复完成后，请使用已恢复的 Portainer 中已知的用户登录。 </span>
               </div>
             </div>
             <!-- !note -->
@@ -299,8 +299,8 @@
                   button-spinner="state.backupInProgress"
                   data-cy="init-restorePortainerButton"
                 >
-                  <span ng-hide="state.backupInProgress">Restore Portainer</span>
-                  <span ng-show="state.backupInProgress">Restoring Portainer...</span>
+                  <span ng-hide="state.backupInProgress">恢复 Portainer</span>
+                  <span ng-show="state.backupInProgress">正在恢复 Portainer...</span>
                 </button>
               </div>
             </div>

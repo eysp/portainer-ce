@@ -12,23 +12,23 @@ import { columnHelper } from './helper';
 
 export const id = columnHelper.accessor('id', {
   id: 'id',
-  header: 'Id',
+  header: 'ID',
   cell: Cell,
   enableColumnFilter: true,
   filterFn: (
     { original: { used } },
     columnId,
-    filterValue: Array<'Used' | 'Unused'>
+    filterValue: Array<'已使用' | '未使用'>
   ) => {
     if (filterValue.length === 0) {
       return true;
     }
 
-    if (filterValue.includes('Used') && used) {
+    if (filterValue.includes('已使用') && used) {
       return true;
     }
 
-    if (filterValue.includes('Unused') && !used) {
+    if (filterValue.includes('未使用') && !used) {
       return true;
     }
 
@@ -44,7 +44,7 @@ function FilterByUsage<TData extends { Used: boolean }>({
 }: {
   column: Column<TData>;
 }) {
-  const options = ['Used', 'Unused'];
+  const options = ['已使用', '未使用'];
 
   const value = getFilterValue();
 
@@ -56,7 +56,7 @@ function FilterByUsage<TData extends { Used: boolean }>({
       filterKey={id}
       value={valueAsArray}
       onChange={setFilterValue}
-      menuTitle="Filter by usage"
+      menuTitle="按使用情况筛选"
     />
   );
 }

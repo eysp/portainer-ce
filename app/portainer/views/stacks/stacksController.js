@@ -14,12 +14,12 @@ function StacksController($scope, $state, Notifications, StackService, Authentic
     async function doRemove(stack) {
       return StackService.remove(stack, stack.External, endpointId)
         .then(function success() {
-          Notifications.success('Stack successfully removed', stack.Name);
+          Notifications.success('堆栈已成功移除', stack.Name);
           var index = $scope.stacks.indexOf(stack);
           $scope.stacks.splice(index, 1);
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to remove stack ' + stack.Name);
+          Notifications.error('失败', err, '无法移除堆栈 ' + stack.Name);
         });
     }
 

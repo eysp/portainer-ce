@@ -22,7 +22,7 @@ export function CommandsTab({
   return (
     <div className="mt-3">
       <FormControl
-        label="Command"
+        label="命令"
         inputId="command-input"
         size="xsmall"
         errors={errors?.cmd}
@@ -36,10 +36,10 @@ export function CommandsTab({
       </FormControl>
 
       <FormControl
-        label="Entrypoint"
+        label="入口点"
         inputId="entrypoint-input"
         size="xsmall"
-        tooltip="When container entrypoint is entered as part of the Command field, set Entrypoint to Override mode and leave blank, else it will revert to default."
+        tooltip="当容器入口点作为命令字段的一部分输入时，将入口点设置为覆盖模式并留空，否则它将恢复为默认值。"
         errors={errors?.entrypoint}
       >
         <OverridableInput
@@ -52,7 +52,7 @@ export function CommandsTab({
 
       <div className="flex justify-between gap-4">
         <FormControl
-          label="Working Dir"
+          label="工作目录"
           inputId="working-dir-input"
           className="w-1/2"
           errors={errors?.workingDir}
@@ -65,7 +65,7 @@ export function CommandsTab({
           />
         </FormControl>
         <FormControl
-          label="User"
+          label="用户"
           inputId="user-input"
           className="w-1/2"
           errors={errors?.user}

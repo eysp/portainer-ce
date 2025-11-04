@@ -12,7 +12,7 @@ import { Button } from '@@/buttons';
 import { Link } from '@@/Link';
 
 export const actions = columnHelper.display({
-  header: 'Actions',
+  header: '操作',
   cell: Cell,
 });
 

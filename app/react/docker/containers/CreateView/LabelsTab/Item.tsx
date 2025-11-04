@@ -9,7 +9,7 @@ export function Item({ item, onChange, error, index }: ItemProps<Label>) {
     <div className="w-full">
       <div className="flex w-full gap-4">
         <InputGroup className="w-1/2">
-          <InputGroup.Addon>name</InputGroup.Addon>
+          <InputGroup.Addon>名称</InputGroup.Addon>
           <InputGroup.Input
             value={item.name}
             data-cy={`label-name_${index}`}
@@ -18,7 +18,7 @@ export function Item({ item, onChange, error, index }: ItemProps<Label>) {
           />
         </InputGroup>
         <InputGroup className="w-1/2">
-          <InputGroup.Addon>value</InputGroup.Addon>
+          <InputGroup.Addon>值</InputGroup.Addon>
           <InputGroup.Input
             value={item.value}
             data-cy={`label-value${index}`}

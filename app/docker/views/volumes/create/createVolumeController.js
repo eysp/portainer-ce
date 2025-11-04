@@ -133,11 +133,11 @@ angular.module('portainer.docker').controller('CreateVolumeController', [
           return ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl);
         })
         .then(function success() {
-          Notifications.success('Success', 'Volume successfully created');
+          Notifications.success('成功', '卷创建成功');
           $state.go('docker.volumes', {}, { reload: true });
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'An error occurred during volume creation');
+          Notifications.error('失败', err, '创建卷时发生错误');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -152,7 +152,7 @@ angular.module('portainer.docker').controller('CreateVolumeController', [
           $scope.availableVolumeDrivers = data;
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve volume drivers');
+          Notifications.error('失败', err, '无法检索卷驱动程序');
         });
     }
 

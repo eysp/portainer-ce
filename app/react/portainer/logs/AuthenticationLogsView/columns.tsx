@@ -11,49 +11,49 @@ import { ActivityType, AuthLog, AuthMethodType } from './types';
 
 const activityTypesProps = {
   [ActivityType.AuthSuccess]: {
-    label: 'Authentication success',
+    label: '身份验证成功',
     icon: Check,
     mode: 'success',
   },
   [ActivityType.AuthFailure]: {
-    label: 'Authentication failure',
+    label: '身份验证失败',
     icon: X,
     mode: 'danger',
   },
-  [ActivityType.Logout]: { label: 'Logout', icon: undefined, mode: undefined },
+  [ActivityType.Logout]: { label: '注销', icon: undefined, mode: undefined },
 } as const;
 
 const columnHelper = createColumnHelper<AuthLog>();
 
 export const columns = [
   columnHelper.accessor('timestamp', {
-    header: 'Time',
+    header: '时间',
     cell: ({ getValue }) => {
       const value = getValue();
       return value ? isoDateFromTimestamp(value) : '';
     },
   }),
   columnHelper.accessor('origin', {
-    header: 'Origin',
+    header: '来源',
   }),
   columnHelper.accessor(({ context }) => AuthMethodType[context] || '', {
-    header: 'Context',
+    header: '上下文',
     enableColumnFilter: true,
     filterFn: multiple,
     meta: {
-      filter: filterHOC('Filter'),
+      filter: filterHOC('筛选'),
     },
   }),
   columnHelper.accessor('username', {
-    header: 'User',
+    header: '用户',
   }),
 
   columnHelper.accessor((item) => activityTypesProps[item.type].label, {
-    header: 'Result',
+    header: '结果',
     enableColumnFilter: true,
     filterFn: multiple,
     meta: {
-      filter: filterHOC('Filter'),
+      filter: filterHOC('筛选'),
     },
     cell({ row: { original: item } }) {
       const props = activityTypesProps[item.type];

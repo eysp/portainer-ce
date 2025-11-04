@@ -20,7 +20,7 @@ export function HostsFileEntries({
 }) {
   return (
     <InputList
-      label="Hosts file entries"
+      label="Hosts 文件条目"
       value={values}
       onChange={(hostsFileEntries) => onChange(hostsFileEntries)}
       errors={errors}
@@ -42,7 +42,7 @@ function HostsFileEntryItem({
   return (
     <div>
       <InputLabeled
-        label="value"
+        label="值"
         value={item}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}

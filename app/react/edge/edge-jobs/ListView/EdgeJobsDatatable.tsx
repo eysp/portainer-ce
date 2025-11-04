@@ -23,7 +23,7 @@ export function EdgeJobsDatatable() {
       isLoading={jobsQuery.isLoading}
       dataset={jobsQuery.data || []}
       settingsManager={tableState}
-      title="Edge Jobs"
+      title="边缘作业"
       titleIcon={Clock}
       renderTableActions={(selectedItems) => (
         <TableActions selectedItems={selectedItems} />

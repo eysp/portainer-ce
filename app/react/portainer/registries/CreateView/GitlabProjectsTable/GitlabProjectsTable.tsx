@@ -15,7 +15,7 @@ const columns = [
   helper.accessor('Namespace', {}),
   helper.accessor('Name', {}),
   helper.accessor('PathWithNamespace', {
-    header: 'Path with namespace',
+    header: '命名空间路径',
   }),
   helper.accessor('Description', {}),
 ];
@@ -39,7 +39,7 @@ export function GitlabProjectTable({
       columns={columns}
       dataset={dataset}
       settingsManager={tableState}
-      title="Gitlab projects"
+      title="GitLab 项目"
       titleIcon={ListIcon}
       extendTableOptions={mergeOptions(
         withControlledSelected(

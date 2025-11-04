@@ -92,7 +92,7 @@ export function EnvironmentListFilters({
         <HomepageFilter
           filterOptions={platformTypeOptions}
           onChange={setPlatformTypes}
-          placeHolder="Platform"
+          placeHolder="平台"
           value={platformTypes}
         />
       </div>
@@ -100,7 +100,7 @@ export function EnvironmentListFilters({
         <HomepageFilter
           filterOptions={connectionTypeOptions}
           onChange={setConnectionTypes}
-          placeHolder="Connection Type"
+          placeHolder="连接类型"
           value={connectionTypes}
         />
       </div>
@@ -108,7 +108,7 @@ export function EnvironmentListFilters({
         <HomepageFilter
           filterOptions={status}
           onChange={statusOnChange}
-          placeHolder="Status"
+          placeHolder="状态"
           value={statusState}
         />
       </div>
@@ -116,7 +116,7 @@ export function EnvironmentListFilters({
         <HomepageFilter
           filterOptions={uniqueTag}
           onChange={tagOnChange}
-          placeHolder="Tags"
+          placeHolder="标签"
           value={tagState}
         />
       </div>
@@ -124,7 +124,7 @@ export function EnvironmentListFilters({
         <HomepageFilter
           filterOptions={uniqueGroup}
           onChange={groupOnChange}
-          placeHolder="Groups"
+          placeHolder="分组"
           value={groupState}
         />
       </div>
@@ -137,7 +137,7 @@ export function EnvironmentListFilters({
             })) || []
           }
           onChange={setAgentVersions}
-          placeHolder="Agent Version"
+          placeHolder="代理版本"
           value={agentVersions}
         />
       </div>
@@ -146,14 +146,14 @@ export function EnvironmentListFilters({
         className={styles.clearButton}
         onClick={clearFilter}
       >
-        Clear all
+        清除全部
       </button>
 
       <div className={styles.filterRight}>
         <SortbySelector
           onChange={sortOnChange}
           onDescending={sortOnDescending}
-          placeHolder="Sort By"
+          placeHolder="排序方式"
           sortByDescending={sortByDescending}
           sortByButton={sortByButton}
           value={sortByState}

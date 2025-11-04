@@ -10,14 +10,14 @@ export const restoreOptions: ReadonlyArray<BoxSelectorOption<string>> = [
     value: 'file',
     icon: Upload,
     iconType: 'badge',
-    label: 'Upload backup file',
+    label: '上传备份文件',
   },
   {
     id: 'restore_s3',
     value: 's3',
     icon: Download,
     iconType: 'badge',
-    label: 'Retrieve from S3',
+    label: '从 S3 检索',
     feature: FeatureId.S3_RESTORE,
   },
 ] as const;

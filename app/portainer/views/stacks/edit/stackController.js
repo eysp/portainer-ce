@@ -147,7 +147,7 @@ angular.module('portainer.app').controller('StackController', [
     };
 
     $scope.removeStack = function () {
-      confirmDelete('Do you want to remove the stack? Associated services will be removed as well').then((confirmed) => {
+      confirmDelete('您确定要移除此堆栈吗？关联的服务也将被移除。').then((confirmed) => {
         if (!confirmed) {
           return;
         }
@@ -201,11 +201,11 @@ angular.module('portainer.app').controller('StackController', [
 
       StackService.remove(stack, $transition$.params().external, endpointId)
         .then(function success() {
-          Notifications.success('Stack successfully removed', stack.Name);
+          Notifications.success('堆栈已成功移除', stack.Name);
           $state.go('docker.stacks');
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to remove stack ' + stack.Name);
+          Notifications.error('失败', err, '无法移除堆栈 ' + stack.Name);
         });
     }
 

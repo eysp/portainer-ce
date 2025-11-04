@@ -224,9 +224,9 @@ angular.module('portainer.docker').controller('ContainerController', [
 
     $scope.confirmRemove = function () {
       return $async(async () => {
-        var title = 'You are about to remove a container.';
+        var title = '您即将移除一个容器。';
         if ($scope.container.State.Running) {
-          title = 'You are about to remove a running container.';
+          title = '您即将移除一个运行中的容器。';
         }
 
         const result = await confirmContainerDeletion(title);
@@ -243,11 +243,11 @@ angular.module('portainer.docker').controller('ContainerController', [
     function removeContainer(cleanAssociatedVolumes) {
       ContainerService.remove(endpoint.Id, $scope.container.Id, cleanAssociatedVolumes)
         .then(function success() {
-          Notifications.success('Success', 'Container successfully removed');
+          Notifications.success('成功', '容器已成功移除');
           $state.go('docker.containers', {}, { reload: true });
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to remove container');
+          Notifications.error('失败', err, '无法移除容器');
         });
     }
 

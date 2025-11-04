@@ -55,9 +55,9 @@ export function ItemView() {
   return (
     <>
       <PageHeader
-        title="Network details"
+        title="网络详情"
         breadcrumbs={[
-          { link: 'docker.networks', label: 'Networks' },
+          { link: 'docker.networks', label: '网络' },
           {
             link: 'docker.networks.network',
             label: networkQuery.data.Name,
@@ -97,7 +97,7 @@ export function ItemView() {
       { networkId, nodeName },
       {
         onSuccess: () => {
-          notifySuccess('Network successfully removed', networkId);
+          notifySuccess('网络已成功移除', networkId);
           router.stateService.go('docker.networks');
         },
       }

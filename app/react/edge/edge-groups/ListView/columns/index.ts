@@ -4,10 +4,10 @@ import { name } from './name';
 export const columns = [
   name,
   columnHelper.accessor((group) => group.TrustedEndpoints.length, {
-    header: 'Environments Count',
+    header: '环境数量',
   }),
   columnHelper.accessor('Dynamic', {
-    header: 'Group Type',
-    cell: ({ getValue }) => (getValue() ? 'Dynamic' : 'Static'),
+    header: '分组类型',
+    cell: ({ getValue }) => (getValue() ? '动态' : '静态'),
   }),
 ];

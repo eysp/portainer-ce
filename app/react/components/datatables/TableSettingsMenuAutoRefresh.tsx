@@ -22,14 +22,14 @@ export function TableSettingsMenuAutoRefresh({ onChange, value }: Props) {
       <Checkbox
         id="settings-auto-refresh"
         data-cy="settings-auto-refresh"
-        label="Auto refresh"
+        label="自动刷新"
         checked={isEnabled}
         onChange={(e) => onChange(e.target.checked ? 10 : 0)}
       />
 
       {isEnabled && (
         <div>
-          <label htmlFor="settings_refresh_rate">Refresh rate</label>
+          <label htmlFor="settings_refresh_rate">刷新频率</label>
           <select
             data-cy="settings-refresh-rate"
             id="settings_refresh_rate"

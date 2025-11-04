@@ -15,7 +15,7 @@ export function ItemsPerPageSelector({ value, onChange, showAll }: Props) {
         className="space-right text-xs text-[--text-main-color] font-normal"
         htmlFor={id}
       >
-        Items per page
+        每页项目数
       </label>
       <select
         id={id}
@@ -24,7 +24,7 @@ export function ItemsPerPageSelector({ value, onChange, showAll }: Props) {
         onChange={(e) => onChange(Number(e.target.value))}
         data-cy="paginationSelect"
       >
-        {showAll ? <option value={Number.MAX_SAFE_INTEGER}>All</option> : null}
+        {showAll ? <option value={Number.MAX_SAFE_INTEGER}>全部</option> : null}
         {[10, 25, 50, 100].map((v) => (
           <option value={v} key={v}>
             {v}

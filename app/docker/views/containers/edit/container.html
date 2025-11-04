@@ -135,9 +135,9 @@
                 <div class="form-group">
                   <div class="col-sm-12">
                     <por-switch-field
-                      tooltip="'Webhook (or callback URI) used to automate the recreation of this container. Sending a POST request to this callback URI (without requiring any authentication) will pull the most up-to-date version of the associated image and recreate this container.'"
+                      tooltip="'用于自动化此容器重新创建的 Webhook（或回调 URI）。向此回调 URI 发送 POST 请求（无需任何身份验证）将拉取关联镜像的最新版本并重新创建此容器。'"
                       label-class="'col-sm-2'"
-                      label="'Container webhook'"
+                      label="'容器 Webhook'"
                       feature-id="'container-webhook'"
                     ></por-switch-field>
                   </div>
@@ -195,9 +195,8 @@
           <!-- tag-description -->
           <div class="form-group">
             <div class="col-sm-12">
-              <span class="small text-muted">
-                You can create an image from this container, this allows you to backup important data or save helpful configurations. You'll be able to spin up another container
-                based on this image afterward.
+                  <span class="small text-muted">
+                您可以从此容器创建镜像，这允许您备份重要数据或保存有用的配置。之后您将能够基于此镜像启动另一个容器。
               </span>
             </div>
           </div>
@@ -217,7 +216,7 @@
           <!-- tag-note -->
           <div class="form-group">
             <div class="col-sm-12">
-              <span class="small text-muted">Note: if you don't specify the tag in the image name, <span class="label label-default">latest</span> will be used.</span>
+              <span class="small text-muted">注意：如果您不在镜像名称中指定标签，将使用 <span class="label label-default">latest</span>。</span>
             </div>
           </div>
           <!-- !tag-note -->

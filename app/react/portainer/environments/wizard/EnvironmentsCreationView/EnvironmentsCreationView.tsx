@@ -72,14 +72,14 @@ export function EnvironmentCreationView() {
   return (
     <>
       <PageHeader
-        title="Quick Setup"
-        breadcrumbs={[{ label: 'Environment Wizard' }]}
+        title="快速设置"
+        breadcrumbs={[{ label: '环境向导' }]}
         reload
       />
 
       <div className={styles.wizardWrapper}>
         <Widget>
-          <WidgetTitle icon={Wand2} title="Environment Wizard" />
+          <WidgetTitle icon={Wand2} title="环境向导" />
           <WidgetBody>
             <Stepper steps={steps} currentStep={currentStepIndex + 1} />
 
@@ -88,14 +88,10 @@ export function EnvironmentCreationView() {
                 {currentStep.id === 'kaas' && (
                   <Alert
                     color="warn"
-                    title="Deprecated Feature"
+                    title="已弃用的功能"
                     className="mb-2"
                   >
-                    Provisioning a KaaS environment from Portainer is deprecated
-                    and will be removed in a future release. You will still be
-                    able to use any Kubernetes clusters provisioned using this
-                    method but will no longer have access to any of the
-                    KaaS-specific management functionality.
+                    从 Portainer 配置 KaaS 环境已被弃用，并将在未来版本中移除。您仍可以使用通过此方法配置的任何 Kubernetes 集群，但将无法再访问任何 KaaS 特定的管理功能。
                   </Alert>
                 )}
                 <Component
@@ -114,13 +110,13 @@ export function EnvironmentCreationView() {
                     onClick={onPreviousClick}
                     data-cy="environment-wizard-previous-button"
                   >
-                    <Icon icon={ArrowLeft} /> Previous
+                    <Icon icon={ArrowLeft} /> 上一步
                   </Button>
                   <Button
                     onClick={onNextClick}
                     data-cy="environment-wizard-next-button"
                   >
-                    {isLastStep ? 'Close' : 'Next'}
+                    {isLastStep ? '关闭' : '下一步'}
                     <Icon icon={ArrowRight} />
                   </Button>
                 </div>
@@ -168,7 +164,7 @@ function useParamEnvironmentTypes(): EnvironmentOptionValue[] {
   const router = useRouter();
 
   if (!envType) {
-    notifyError('No environment type provided');
+    notifyError('未提供环境类型');
     router.stateService.go('portainer.wizard.endpoints');
     return [];
   }

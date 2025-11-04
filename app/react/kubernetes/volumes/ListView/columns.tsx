@@ -8,7 +8,7 @@ import { helper } from './columns.helper';
 export const columns = [
   name,
   helper.accessor('ResourcePool.Namespace.Name', {
-    header: 'Namespace',
+    header: '命名空间',
     cell: ({ getValue }) => {
       const namespace = getValue();
 
@@ -24,7 +24,7 @@ export const columns = [
     },
   }),
   helper.accessor((item) => item.Applications[0]?.Name, {
-    header: 'Used by',
+    header: '使用方',
     cell: ({ row: { original: item } }) => {
       if (!item.Applications.length) {
         return '-';
@@ -50,18 +50,18 @@ export const columns = [
     },
   }),
   helper.accessor('PersistentVolumeClaim.storageClass.Name', {
-    header: 'Storage',
+    header: '存储',
   }),
   helper.accessor('PersistentVolumeClaim.Storage', {
-    header: 'Size',
+    header: '大小',
   }),
   helper.accessor('PersistentVolumeClaim.CreationDate', {
-    header: 'Created',
+    header: '创建时间',
     cell: ({ row: { original: item } }) => (
       <>
         {isoDate(item.PersistentVolumeClaim.CreationDate)}
         {item.PersistentVolumeClaim.ApplicationOwner
-          ? ` by ${item.PersistentVolumeClaim.ApplicationOwner}`
+          ? ` 由 ${item.PersistentVolumeClaim.ApplicationOwner}`
           : ''}
       </>
     ),

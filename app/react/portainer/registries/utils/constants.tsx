@@ -10,14 +10,14 @@ import Gitlab from '@/assets/ico/vendor/gitlab.svg?c';
 import { RegistryTypes } from '../types/registry';
 
 export const registryLabelMap: Record<RegistryTypes, string> = {
-  [RegistryTypes.ANONYMOUS]: 'Anonymous',
+  [RegistryTypes.ANONYMOUS]: '匿名',
   [RegistryTypes.DOCKERHUB]: 'DockerHub',
   [RegistryTypes.ECR]: 'AWS ECR',
   [RegistryTypes.QUAY]: 'Quay.io',
   [RegistryTypes.PROGET]: 'ProGet',
   [RegistryTypes.AZURE]: 'Azure',
   [RegistryTypes.GITLAB]: 'GitLab',
-  [RegistryTypes.CUSTOM]: 'Custom registry',
+  [RegistryTypes.CUSTOM]: '自定义镜像仓库',
   [RegistryTypes.GITHUB]: 'GitHub',
 };
 
