@@ -6,7 +6,7 @@ import { UsersDatatable } from './UsersDatatable/UsersDatatable';
 export function ListView() {
   return (
     <>
-      <PageHeader title="Users" breadcrumbs="User management" reload />
+      <PageHeader title="用户" breadcrumbs="用户管理" reload />
 
       <NewUserForm />
 

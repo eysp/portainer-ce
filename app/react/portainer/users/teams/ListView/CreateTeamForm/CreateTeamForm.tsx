@@ -42,7 +42,7 @@ export function CreateTeamForm({ users, teams }: Props) {
         <Widget>
           <Widget.Title
             icon={Plus}
-            title="Add a new team"
+            title="添加新团队"
             className="vertical-center"
           />
           <Widget.Body>
@@ -68,7 +68,7 @@ export function CreateTeamForm({ users, teams }: Props) {
                 >
                   <FormControl
                     inputId="team_name"
-                    label="Name"
+                    label="名称"
                     errors={errors.name}
                     required
                   >
@@ -85,8 +85,8 @@ export function CreateTeamForm({ users, teams }: Props) {
                   {users.length > 0 && (
                     <FormControl
                       inputId="users-input"
-                      label="Select team leader(s)"
-                      tooltip="You can assign one or more leaders to this team. Team leaders can manage their teams users and resources."
+                      label="选择团队负责人"
+                      tooltip="您可以为该团队分配一个或多个负责人。团队负责人可以管理其团队的用户和资源。"
                       errors={errors.leaders}
                     >
                       <UsersSelector
@@ -97,7 +97,7 @@ export function CreateTeamForm({ users, teams }: Props) {
                         users={users}
                         dataCy="team-teamLeaderSelect"
                         inputId="users-input"
-                        placeholder="Select one or more team leaders"
+                        placeholder="选择一个或多个团队负责人"
                         disabled={teamSyncQuery.data}
                       />
                     </FormControl>
@@ -107,8 +107,7 @@ export function CreateTeamForm({ users, teams }: Props) {
                     <div className="form-group">
                       <div className="col-sm-12">
                         <TextTip color="orange">
-                          The team leader feature is disabled as external
-                          authentication is currently enabled with team sync.
+                          由于当前启用了外部身份验证和团队同步，团队负责人功能已被禁用。
                         </TextTip>
                       </div>
                     </div>
@@ -120,11 +119,11 @@ export function CreateTeamForm({ users, teams }: Props) {
                         disabled={!isValid}
                         data-cy="team-createTeamButton"
                         isLoading={isSubmitting || addTeamMutation.isLoading}
-                        loadingText="Creating team..."
+                        loadingText="正在创建团队..."
                         icon={Plus}
                         className="!ml-0"
                       >
-                        Create team
+                        创建团队
                       </LoadingButton>
                     </div>
                   </div>
@@ -141,7 +140,7 @@ export function CreateTeamForm({ users, teams }: Props) {
     addTeamMutation.mutate(values, {
       onSuccess() {
         incFormKey();
-        notifySuccess('Team successfully added', '');
+        notifySuccess('团队添加成功', '');
       },
     });
   }

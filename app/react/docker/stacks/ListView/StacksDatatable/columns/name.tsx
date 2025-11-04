@@ -16,12 +16,12 @@ import { DecoratedStack } from '../types';
 
 import { columnHelper } from './helper';
 
-const filterOptions = ['Active Stacks', 'Inactive Stacks'] as const;
+const filterOptions = ['活动堆栈', '非活动堆栈'] as const;
 
 type FilterOption = (typeof filterOptions)[number];
 
 export const name = columnHelper.accessor('Name', {
-  header: 'Name',
+  header: '名称',
   id: 'name',
   cell: NameCell,
   enableHiding: false,
@@ -41,9 +41,9 @@ export const name = columnHelper.accessor('Name', {
 
     return (
       (stack.Status === StackStatus.Active &&
-        filterValue.includes('Active Stacks')) ||
+        filterValue.includes('活动堆栈')) ||
       (stack.Status === StackStatus.Inactive &&
-        filterValue.includes('Inactive Stacks'))
+        filterValue.includes('非活动堆栈'))
     );
   },
   meta: {
@@ -59,7 +59,7 @@ function NameCell({
       <NameLink item={item} />
       {isRegularStack(item) && item.Status === 2 && (
         <span className="label label-warning image-tag space-left ml-2">
-          Inactive
+          非活动
         </span>
       )}
     </>
@@ -126,7 +126,7 @@ function Filter<TData extends { Used: boolean }>({
       filterKey={id}
       value={valueAsArray}
       onChange={setFilterValue}
-      menuTitle="Filter by activity"
+      menuTitle="按活动状态筛选"
     />
   );
 }

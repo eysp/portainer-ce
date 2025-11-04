@@ -45,8 +45,7 @@ function TeamSyncMessage() {
     <div className="form-group">
       <div className="col-sm-12">
         <TextTip color="orange">
-          The team leader feature is disabled as external authentication is
-          currently enabled with team sync.
+          由于当前启用了外部身份验证和团队同步，团队负责人功能已被禁用。
         </TextTip>
       </div>
     </div>
@@ -58,12 +57,11 @@ function NoTeamSelected() {
     <div className="form-group">
       <div className="col-sm-12">
         <TextTip color="blue">
-          Note: non-administrator users who aren&apos;t in a team don&apos;t
-          have access to any environments by default. Head over to the{' '}
+          注意：默认情况下，不在团队中的非管理员用户无法访问任何环境。请前往{' '}
           <Link to="portainer.endpoints" data-cy="env-link">
-            Environments view
+            环境视图
           </Link>{' '}
-          to manage their accesses.
+          来管理他们的访问权限。
         </TextTip>
       </div>
     </div>

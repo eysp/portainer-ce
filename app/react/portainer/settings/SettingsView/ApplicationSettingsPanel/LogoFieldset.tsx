@@ -16,7 +16,7 @@ export function LogoFieldset() {
       <div className="form-group">
         <div className="col-sm-12">
           <SwitchField
-            label="Use custom logo"
+            label="使用自定义 Logo"
             data-cy="custom-logo-switch"
             checked={isEnabled}
             name="toggle_logo"
@@ -30,8 +30,7 @@ export function LogoFieldset() {
         <div>
           <div className="form-group">
             <span className="col-sm-12 text-muted small">
-              You can specify the URL to your logo here. For an optimal display,
-              logo dimensions should be 155px by 55px.
+              您可以在此指定 Logo 的 URL。为了获得最佳显示效果，Logo 尺寸应为 155px × 55px。
             </span>
           </div>
           <FormControl label="URL" inputId="logo_url" errors={error} required>

@@ -26,7 +26,7 @@ export function DeleteButton({ selectedItems }: { selectedItems: Registry[] }) {
       selectedItems.map((item) => item.Id),
       {
         onSuccess() {
-          notifySuccess('Success', 'Registries removed');
+          notifySuccess('成功', '注册表已移除');
         },
       }
     );
@@ -34,7 +34,6 @@ export function DeleteButton({ selectedItems }: { selectedItems: Registry[] }) {
 }
 
 function getMessage(selectedCount: number) {
-  const regAttrMsg = selectedCount > 1 ? 'hese' : 'his';
-  const registriesMsg = pluralize(selectedCount, 'registry', 'registries');
-  return `T${regAttrMsg} ${registriesMsg} might be used by applications inside one or more environments. Removing the ${registriesMsg} could lead to a service interruption for the applications using t${regAttrMsg} ${registriesMsg}. Do you want to remove the selected ${registriesMsg}?`;
+  const registriesMsg = selectedCount > 1 ? '注册表' : '注册表';
+  return `这些${registriesMsg}可能被一个或多个环境中的应用程序使用。移除${registriesMsg}可能会导致使用这些${registriesMsg}的应用程序服务中断。您要移除选定的${registriesMsg}吗？`;
 }

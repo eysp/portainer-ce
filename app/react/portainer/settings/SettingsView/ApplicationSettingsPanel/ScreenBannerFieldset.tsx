@@ -19,7 +19,7 @@ export function ScreenBannerFieldset() {
           <SwitchField
             labelClass="col-sm-3 col-lg-2"
             data-cy="logo-banner-switch"
-            label="Login screen banner"
+            label="登录屏幕横幅"
             checked={isEnabled}
             name="toggle_login_banner"
             onChange={(checked) => setIsEnabled(checked)}
@@ -28,14 +28,13 @@ export function ScreenBannerFieldset() {
         </div>
 
         <div className="col-sm-12 text-muted small mt-2">
-          You can set a custom banner that will be shown to all users during
-          login.
+          您可以设置一个自定义横幅，该横幅将在所有用户登录时显示。
         </div>
       </div>
 
       {isEnabled && (
         <FormControl
-          label="Details"
+          label="详情"
           inputId="custom_login_banner"
           errors={error}
           required
@@ -45,7 +44,7 @@ export function ScreenBannerFieldset() {
             name={name}
             rows="5"
             id="custom_login_banner"
-            placeholder="Banner details"
+            placeholder="横幅详情"
           />
         </FormControl>
       )}

@@ -5,7 +5,7 @@ import { Button } from '@@/buttons';
 import { ButtonOptions } from './types';
 
 export function buildConfirmButton(
-  label = 'Confirm',
+  label = '确认',
   color: ComponentProps<typeof Button>['color'] = 'primary',
   timeout = 0,
   dataCy = 'modal-confirm-button'
@@ -14,7 +14,7 @@ export function buildConfirmButton(
 }
 
 export function buildCancelButton(
-  label = 'Cancel',
+  label = '取消',
   dataCy = 'modal-cancel-button'
 ): ButtonOptions<false> {
   return {

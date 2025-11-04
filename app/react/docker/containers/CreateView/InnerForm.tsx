@@ -140,7 +140,7 @@ export function InnerForm({
                       },
                       {
                         id: 'restart',
-                        label: 'Restart policy',
+                        label: '重启策略',
                         children: (
                           <RestartPolicyTab
                             values={values.restartPolicy}

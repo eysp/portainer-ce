@@ -31,7 +31,7 @@ export function AddLabelForm({
       {({ errors, isValid, dirty }) => (
         <Form className="form-horizontal">
           <div className="flex w-full items-start gap-4">
-            <FormControl label="Name" errors={errors.name} className="flex-1">
+            <FormControl label="名称" errors={errors.name} className="flex-1">
               <Field
                 as={Input}
                 name="name"
@@ -39,7 +39,7 @@ export function AddLabelForm({
               />
             </FormControl>
 
-            <FormControl label="Value" errors={errors.value} className="flex-1">
+            <FormControl label="值" errors={errors.value} className="flex-1">
               <Field as={Input} name="value" placeholder="e.g. bar" />
             </FormControl>
 
@@ -49,7 +49,7 @@ export function AddLabelForm({
               icon={Plus}
               disabled={!dirty || !isValid || isLoading}
             >
-              Add filter
+              添加筛选器
             </Button>
           </div>
         </Form>
@@ -65,7 +65,7 @@ export function AddLabelForm({
 
 function validation(): SchemaOf<{ name: string; value: string }> {
   return object({
-    name: string().required('Name is required'),
+    name: string().required('名称是必填项'),
     value: string().default(''),
   });
 }

@@ -36,14 +36,14 @@ export function TeamsDatatable({ teams, isAdmin }: Props) {
       dataset={teams}
       columns={columns}
       settingsManager={tableState}
-      title="Teams"
+      title="团队"
       titleIcon={Users}
       renderTableActions={(selectedRows) =>
         isAdmin && (
           <DeleteButton
             onConfirmed={() => handleRemoveClick(selectedRows)}
             disabled={selectedRows.length === 0}
-            confirmMessage="Are you sure you want to remove the selected teams?"
+            confirmMessage="您确定要移除选定的团队吗？"
             data-cy="remove-teams-button"
           />
         )
@@ -66,7 +66,7 @@ function useRemoveMutation() {
       promiseSequence(ids.map((id) => () => deleteTeam(id))),
     {
       meta: {
-        error: { title: 'Failure', message: 'Unable to remove team' },
+        error: { title: '失败', message: '无法移除团队' },
       },
       onSuccess() {
         return queryClient.invalidateQueries(['teams']);
@@ -79,7 +79,7 @@ function useRemoveMutation() {
   async function handleRemove(teams: TeamId[]) {
     deleteMutation.mutate(teams, {
       onSuccess: () => {
-        notifySuccess('Teams successfully removed', '');
+        notifySuccess('团队已成功移除', '');
       },
     });
   }

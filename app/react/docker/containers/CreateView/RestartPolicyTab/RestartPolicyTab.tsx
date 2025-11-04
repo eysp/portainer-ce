@@ -11,13 +11,13 @@ export function RestartPolicyTab({
   onChange: (values: RestartPolicy) => void;
 }) {
   return (
-    <FormControl label="Restart Policy">
+    <FormControl label="重启策略">
       <ButtonSelector
         options={[
-          { label: 'Never', value: RestartPolicy.No },
-          { label: 'Always', value: RestartPolicy.Always },
-          { label: 'On failure', value: RestartPolicy.OnFailure },
-          { label: 'Unless stopped', value: RestartPolicy.UnlessStopped },
+          { label: '从不', value: RestartPolicy.No },
+          { label: '总是', value: RestartPolicy.Always },
+          { label: '失败时', value: RestartPolicy.OnFailure },
+          { label: '除非停止', value: RestartPolicy.UnlessStopped },
         ]}
         value={values}
         onChange={onChange}

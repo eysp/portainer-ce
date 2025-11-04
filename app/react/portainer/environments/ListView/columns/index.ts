@@ -9,7 +9,7 @@ export const columns = [
   type,
   url,
   columnHelper.accessor('GroupName', {
-    header: 'Group Name',
+    header: '组名称',
   }),
   actions,
 ];

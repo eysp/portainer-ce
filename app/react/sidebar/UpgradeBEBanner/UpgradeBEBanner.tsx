@@ -57,7 +57,10 @@ function UpgradeBEBanner() {
     agents: systemInfo.agents,
   };
 
-   {
+  if (
+    !enabledPlatforms.includes(systemInfo.platform) &&
+    process.env.FORCE_SHOW_UPGRADE_BANNER !== ''
+  ) {
     return null;
   }
 
@@ -78,7 +81,7 @@ function UpgradeBEBanner() {
             'fill-gray-6 stroke-[#023959] th-dark:stroke-black th-highcontrast:stroke-black'
           )}
         />
-        {isSidebarOpen && <>Upgrade to Business Edition</>}
+        {isSidebarOpen && <>升级到商业版</>}
       </button>
 
       {isOpen && <UpgradeDialog onDismiss={() => setIsOpen(false)} />}

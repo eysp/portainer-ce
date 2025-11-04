@@ -26,7 +26,7 @@ export function DeleteButton({
   size,
   children,
   isLoading,
-  loadingText = 'Removing',
+  loadingText = '正在移除',
   'data-cy': dataCy,
   ...props
 }: PropsWithChildren<
@@ -49,7 +49,7 @@ export function DeleteButton({
         className="!m-0"
         data-cy={dataCy}
       >
-        {children || 'Remove'}
+        {children || '移除'}
       </Button>
     );
   }
@@ -66,7 +66,7 @@ export function DeleteButton({
       isLoading={isLoading}
       loadingText={loadingText}
     >
-      {children || 'Remove'}
+      {children || '移除'}
     </LoadingButton>
   );
 

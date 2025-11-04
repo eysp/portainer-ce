@@ -18,7 +18,7 @@ export function useColumns(isImageNotificationEnabled: boolean) {
       (item) => (item.Type === StackType.DockerCompose ? 'Compose' : 'Swarm'),
       {
         id: 'type',
-        header: 'Type',
+        header: '类型',
         enableHiding: false,
       }
     ),
@@ -26,7 +26,7 @@ export function useColumns(isImageNotificationEnabled: boolean) {
     control,
     columnHelper.accessor('CreationDate', {
       id: 'creationDate',
-      header: 'Created',
+      header: '创建时间',
       enableHiding: false,
       cell: ({ getValue, row: { original: item } }) => {
         const value = getValue();
@@ -34,20 +34,20 @@ export function useColumns(isImageNotificationEnabled: boolean) {
           return '-';
         }
 
-        const by = item.CreatedBy ? `by ${item.CreatedBy}` : '';
+        const by = item.CreatedBy ? `由 ${item.CreatedBy}` : '';
         return `${isoDateFromTimestamp(value)} ${by}`.trim();
       },
     }),
     columnHelper.accessor('UpdateDate', {
       id: 'updateDate',
-      header: 'Updated',
+      header: '更新时间',
       cell: ({ getValue, row: { original: item } }) => {
         const value = getValue();
         if (!value) {
           return '-';
         }
 
-        const by = item.UpdatedBy ? `by ${item.UpdatedBy}` : '';
+        const by = item.UpdatedBy ? `由 ${item.UpdatedBy}` : '';
         return `${isoDateFromTimestamp(value)} ${by}`.trim();
       },
     }),

@@ -55,7 +55,7 @@ function Cell({
                           onClick={handleDismissButton}
                         >
                           <span className="text-muted-light">
-                            Dismiss error (still visible in logs)
+                            忽略错误（日志中仍可见）
                           </span>
                         </Button>
                       </div>
@@ -103,7 +103,7 @@ function Cell({
       },
       {
         onSuccess: () => {
-          notifySuccess('Success', 'Error dismissed successfully');
+          notifySuccess('成功', '错误已成功忽略');
         },
       }
     );

@@ -8,9 +8,9 @@ Portainer consists of a single container that can run on any cluster. It can be 
 
 **Portainer Business Edition** builds on the open-source base and includes a range of advanced features and functions (like RBAC and Support) that are specific to the needs of business users.
 
-- [Compare Portainer CE and Compare Portainer BE](https://portainer.io/products)
+- [Compare Portainer CE and Compare Portainer BE](https://www.portainer.io/features)
 - [Take3 – get 3 free nodes of Portainer Business for as long as you want them](https://www.portainer.io/take-3)
-- [Portainer BE install guide](https://install.portainer.io)
+- [Portainer BE install guide](https://academy.portainer.io/install/)
 
 ## Latest Version
 
@@ -20,22 +20,19 @@ Portainer CE is updated regularly. We aim to do an update release every couple o
 
 ## Getting started
 
-- [Deploy Portainer](https://docs.portainer.io/start/install)
+- [Deploy Portainer](https://docs.portainer.io/start/install-ce)
 - [Documentation](https://docs.portainer.io)
 - [Contribute to the project](https://docs.portainer.io/contribute/contribute)
 
 ## Features & Functions
 
-View [this](https://www.portainer.io/products) table to see all of the Portainer CE functionality and compare to Portainer Business.
-
-- [Portainer CE for Docker / Docker Swarm](https://www.portainer.io/solutions/docker)
-- [Portainer CE for Kubernetes](https://www.portainer.io/solutions/kubernetes-ui)
+View [this](https://www.portainer.io/features) table to see all of the Portainer CE functionality and compare to Portainer Business.
 
 ## Getting help
 
 Portainer CE is an open source project and is supported by the community. You can buy a supported version of Portainer at portainer.io
 
-Learn more about Portainer's community support channels [here.](https://www.portainer.io/get-support-for-portainer)
+Learn more about Portainer's community support channels [here.](https://www.portainer.io/resources/get-help/get-support)
 
 - Issues: https://github.com/portainer/portainer/issues
 - Slack (chat): [https://portainer.io/slack](https://portainer.io/slack)
@@ -53,19 +50,20 @@ You can join the Portainer Community by visiting [https://www.portainer.io/join-
 
 ## Work for us
 
-If you are a developer, and our code in this repo makes sense to you, we would love to hear from you. We are always on the hunt for awesome devs, either freelance or employed. Drop us a line to info@portainer.io with your details and/or visit our [careers page](https://portainer.io/careers).
+If you are a developer, and our code in this repo makes sense to you, we would love to hear from you. We are always on the hunt for awesome devs, either freelance or employed. Drop us a line to success@portainer.io with your details and/or visit our [careers page](https://apply.workable.com/portainer/).
 
 ## Privacy
 
 **To make sure we focus our development effort in the right places we need to know which features get used most often. To give us this information we use [Matomo Analytics](https://matomo.org/), which is hosted in Germany and is fully GDPR compliant.**
 
-When Portainer first starts, you are given the option to DISABLE analytics. If you **don't** choose to disable it, we collect anonymous usage as per [our privacy policy](https://www.portainer.io/privacy-policy). **Please note**, there is no personally identifiable information sent or stored at any time and we only use the data to help us improve Portainer.
+When Portainer first starts, you are given the option to DISABLE analytics. If you **don't** choose to disable it, we collect anonymous usage as per [our privacy policy](https://www.portainer.io/legal/privacy-policy). **Please note**, there is no personally identifiable information sent or stored at any time and we only use the data to help us improve Portainer.
 
 ## Limitations
 
 Portainer supports "Current - 2 docker versions only. Prior versions may operate, however these are not supported.
 
-# Apache [License](./LICENSE) 2.0
+## Licensing
 
-# 赞助声明
-  本项目由 [ZMTO](https://www.zmto.com/)  【开源项目免费VPS计划】 提供算力支持
+Portainer is licensed under the zlib license. See [LICENSE](./LICENSE) for reference.
+
+Portainer also contains code from open source projects. See [ATTRIBUTIONS.md](./ATTRIBUTIONS.md) for a list.

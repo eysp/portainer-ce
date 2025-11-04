@@ -10,14 +10,13 @@ export function NonAdminUpgradeDialog({
   onDismiss: () => void;
 }) {
   return (
-    <Modal aria-label="Upgrade Portainer to Business Edition">
+    <Modal aria-label="升级 Portainer 到商业版">
       <Modal.Header
-        title="Contact your administrator"
+        title="联系您的管理员"
         modalType={ModalType.Warn}
       />
       <Modal.Body>
-        You need to be logged in as an admin to upgrade Portainer to Business
-        Edition.
+        您需要以管理员身份登录才能将 Portainer 升级到商业版。
       </Modal.Body>
       <Modal.Footer>
         <div className="flex w-full gap-2">
@@ -28,7 +27,7 @@ export function NonAdminUpgradeDialog({
             className="w-1/3"
             onClick={() => onDismiss()}
           >
-            Cancel
+            取消
           </Button>
 
           <a
@@ -44,7 +43,7 @@ export function NonAdminUpgradeDialog({
               className="w-full"
               icon={ExternalLink}
             >
-              Learn about Business Edition
+              了解商业版
             </Button>
           </a>
         </div>

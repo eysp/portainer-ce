@@ -7,8 +7,8 @@ export function placementsValidation(): SchemaOf<PlacementsFormValues> {
     placementType: mixed().oneOf(['mandatory', 'preferred']).required(),
     placements: array(
       object({
-        label: string().required('Node label is required.'),
-        value: string().required('Node value is required.'),
+        label: string().required('节点标签是必填项。'),
+        value: string().required('节点值是必填项。'),
         needsDeletion: boolean(),
       }).required()
     ),

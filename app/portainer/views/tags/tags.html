@@ -1,9 +1,9 @@
-<page-header title="'Tags'" breadcrumbs="['Tag management']" reload="true"> </page-header>
+<page-header title="'标签'" breadcrumbs="['标签管理']" reload="true"> </page-header>
 
 <div class="row">
   <div class="col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="plus" title-text="Add a new tag"> </rd-widget-header>
+      <rd-widget-header icon="plus" title-text="添加新标签"> </rd-widget-header>
       <rd-widget-body>
         <form class="form-horizontal" name="tagCreationForm" ng-submit="createTag()">
           <!-- name-input -->
@@ -49,9 +49,9 @@
               >
                 <span ng-hide="state.actionInProgress" class="vertical-center">
                   <pr-icon icon="'plus'"></pr-icon>
-                  Create tag
+                  创建标签
                 </span>
-                <span ng-show="state.actionInProgress">Creating tag...</span>
+                <span ng-show="state.actionInProgress">正在创建标签...</span>
               </button>
             </div>
           </div>

@@ -84,7 +84,7 @@ export function InnerForm({
         </>
       )}
 
-      <FormSection title="Build method">
+      <FormSection title="构建方法">
         <BoxSelector
           slim
           options={buildMethods}
@@ -178,8 +178,8 @@ export function InnerForm({
       <FormActions
         isLoading={isLoading}
         isValid={isValid}
-        loadingText="Creating custom template..."
-        submitLabel="Create custom template"
+        loadingText="正在创建自定义模板..."
+        submitLabel="创建自定义模板"
         data-cy="custom-template-creation-submit-button"
       />
     </Form>

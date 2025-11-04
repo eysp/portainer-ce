@@ -27,7 +27,7 @@ export function ListView() {
 
   return (
     <>
-      <PageHeader title="Custom Templates" breadcrumbs="Custom Templates" />
+      <PageHeader title="自定义模板" breadcrumbs="自定义模板" />
 
       {viewType === ContainerEngine.Docker && !!selectedTemplateId && (
         <StackFromCustomTemplateFormWidget templateId={selectedTemplateId} />
@@ -45,14 +45,14 @@ export function ListView() {
 
   async function handleDelete(templateId: CustomTemplate['Id']) {
     if (
-      !(await confirmDelete('Are you sure you want to delete this template?'))
+      !(await confirmDelete('您确定要删除此模板吗？'))
     ) {
       return;
     }
 
     deleteMutation.mutate(templateId, {
       onSuccess: () => {
-        notifySuccess('Success', 'Template deleted');
+        notifySuccess('成功', '模板已删除');
       },
     });
   }

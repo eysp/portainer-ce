@@ -18,20 +18,19 @@ export function PlacementsTable({ app }: Props) {
     <>
       <div className="text-muted mb-4 mt-6 flex items-center">
         <Icon icon={Minimize2} className="!mr-2" />
-        Placement preferences and constraints
+        放置偏好和约束
       </div>
       {!formPlacements.length && (
         <TextTip color="blue">
-          This application has no pod preference or constraint rules from the
-          application form. See the application YAML for other placement rules.
+          此应用程序在应用程序表单中没有 Pod 偏好或约束规则。查看应用程序 YAML 以了解其他放置规则。
         </TextTip>
       )}
       {formPlacements.length > 0 && (
         <table className="table">
           <thead>
             <tr className="text-muted">
-              <td className="w-1/3">Key</td>
-              <td className="w-2/3">Value(s)</td>
+              <td className="w-1/3">键</td>
+              <td className="w-2/3">值</td>
             </tr>
           </thead>
           <tbody>

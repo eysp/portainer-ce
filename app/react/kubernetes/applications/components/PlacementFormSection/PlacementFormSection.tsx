@@ -35,11 +35,10 @@ export function PlacementFormSection({ values, onChange, errors }: Props) {
 
   return (
     <div className="flex flex-col">
-      <FormSection title="Placement preferences and constraints" titleSize="sm">
+      <FormSection title="放置偏好和约束" titleSize="sm">
         {values.placements?.length > 0 && (
           <TextTip color="blue">
-            Deploy this application on nodes that respect <b>ALL</b> of the
-            following placement rules. Placement rules are based on node labels.
+            在符合以下<b>所有</b>放置规则的节点上部署此应用程序。放置规则基于节点标签。
           </TextTip>
         )}
         <InputList<Placement>
@@ -61,25 +60,25 @@ export function PlacementFormSection({ values, onChange, errors }: Props) {
             needsDeletion: false,
           })}
           errors={errors?.placements}
-          addLabel="Add rule"
+          addLabel="添加规则"
           canUndoDelete
           data-cy="k8sAppCreate-placement"
           disabled={Object.keys(availableNodeLabels).length === 0}
           addButtonError={
             Object.keys(availableNodeLabels).length === 0
-              ? 'There are no node labels available to add.'
+              ? '没有可用的节点标签可添加。'
               : ''
           }
         />
       </FormSection>
       {nonDeletedPlacements.length >= 1 && (
         <FormSection
-          title="Placement policy"
+          title="放置策略"
           titleSize="sm"
           titleClassName="control-label !text-[0.9em]"
         >
           <TextTip color="blue">
-            Specify the policy associated to the placement rules.
+            指定与放置规则关联的策略。
           </TextTip>
           <PlacementTypeBoxSelector
             placementType={values.placementType}

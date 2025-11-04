@@ -10,7 +10,7 @@ import { columnHelper } from './helper';
 import { DefaultRegistryName } from './DefaultRegistryName';
 
 export const name = columnHelper.accessor('Name', {
-  header: 'Name',
+  header: '名称',
   cell: Cell,
 });
 
@@ -48,7 +48,7 @@ export function NameCell({
       )}
       {item.Authentication && (
         <span className="ml-2 label label-info image-tag">
-          authentication-enabled
+          已启用身份验证
         </span>
       )}
     </>

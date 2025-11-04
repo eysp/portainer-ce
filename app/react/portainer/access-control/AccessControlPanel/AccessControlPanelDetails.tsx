@@ -55,25 +55,25 @@ export function AccessControlPanelDetails({
 
   let teamsMessage = teams.data && teams.data.join(', ');
   if (unauthoisedTeams > 0 && teams.isFetched) {
-    teamsMessage += teamsLength > 0 ? ' and' : '';
-    teamsMessage += ` ${unauthoisedTeams} ${pluralize(
+    teamsMessage += teamsLength > 0 ? ' 和' : '';
+    teamsMessage += ` ${unauthoisedTeams} 个您不属于的${pluralize(
       unauthoisedTeams,
-      'team'
-    )} you are not part of`;
+      '团队'
+    )}`;
   }
 
   const userMessage = users.data
     ? users.data.join(', ')
     : `${restrictedToUsers.length} ${pluralize(
         restrictedToUsers.length,
-        'user'
+        '用户'
       )}`;
 
   return (
     <table className="table">
       <tbody>
         <tr data-cy="access-ownership">
-          <td className="w-1/5">Ownership</td>
+          <td className="w-1/5">所有权</td>
           <td>
             <i
               className={clsx(ownershipIcon(ownership), 'space-right')}
@@ -87,13 +87,13 @@ export function AccessControlPanelDetails({
         {inheritanceMessage}
         {restrictedToUsers.length > 0 && (
           <tr data-cy="access-authorisedUsers">
-            <td>Authorized users</td>
+            <td>授权用户</td>
             <td aria-label="authorized-users">{userMessage}</td>
           </tr>
         )}
         {restrictedToTeams.length > 0 && (
           <tr data-cy="access-authorisedTeams">
-            <td>Authorized teams</td>
+            <td>授权团队</td>
             <td aria-label="authorized-teams">{teamsMessage}</td>
           </tr>
         )}
@@ -105,14 +105,14 @@ export function AccessControlPanelDetails({
 function getOwnershipTooltip(ownership: ResourceControlOwnership) {
   switch (ownership) {
     case ResourceControlOwnership.PRIVATE:
-      return 'Management of this resource is restricted to a single user.';
+      return '此资源的管理限制为单个用户。';
     case ResourceControlOwnership.RESTRICTED:
-      return 'This resource can be managed by a restricted set of users and/or teams.';
+      return '此资源可由一组受限的用户和/或团队管理。';
     case ResourceControlOwnership.PUBLIC:
-      return 'This resource can be managed by any user with access to this environment.';
+      return '此资源可由任何有权访问此环境的用户管理。';
     case ResourceControlOwnership.ADMINISTRATORS:
     default:
-      return 'This resource can only be managed by administrators.';
+      return '此资源只能由管理员管理。';
   }
 }
 
@@ -132,8 +132,8 @@ function getInheritanceMessage(
     parentType === ResourceControlType.Service
   ) {
     return (
-      <InheritanceMessage tooltip="Access control applied on a service is also applied on each container of that service.">
-        Access control on this resource is inherited from the following service:
+      <InheritanceMessage tooltip="应用于服务的访问控制也会应用于该服务的每个容器。">
+        此资源的访问控制继承自以下服务：
         <Link
           to="docker.services.service"
           params={{ id: resourceId }}
@@ -150,9 +150,8 @@ function getInheritanceMessage(
     parentType === ResourceControlType.Container
   ) {
     return (
-      <InheritanceMessage tooltip="Access control applied on a container created using a template is also applied on each volume associated to the container.">
-        Access control on this resource is inherited from the following
-        container:
+      <InheritanceMessage tooltip="应用于使用模板创建的容器的访问控制也会应用于与该容器关联的每个卷。">
+        此资源的访问控制继承自以下容器：
         <Link
           to="docker.containers.container"
           params={{ id: resourceId }}
@@ -166,9 +165,9 @@ function getInheritanceMessage(
 
   if (parentType === ResourceControlType.Stack) {
     return (
-      <InheritanceMessage tooltip="Access control applied on a stack is also applied on each resource in the stack.">
+      <InheritanceMessage tooltip="应用于堆栈的访问控制也会应用于堆栈中的每个资源。">
         <span className="space-right">
-          Access control on this resource is inherited from the following stack:
+          此资源的访问控制继承自以下堆栈：
         </span>
         {removeEndpointIdFromStackResourceId(resourceId)}
       </InheritanceMessage>

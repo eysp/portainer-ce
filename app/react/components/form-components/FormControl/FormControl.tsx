@@ -35,7 +35,7 @@ export function FormControl({
   required = false,
   setTooltipHtmlMessage,
   isLoading = false,
-  loadingText = 'Loading...',
+  loadingText = '加载中...',
 }: PropsWithChildren<Props>) {
   return (
     <div
