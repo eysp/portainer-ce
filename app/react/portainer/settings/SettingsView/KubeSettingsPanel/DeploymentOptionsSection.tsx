@@ -28,7 +28,7 @@ export function DeploymentOptionsSection() {
             featureId={FeatureId.ENFORCE_DEPLOYMENT_OPTIONS}
             onChange={(value) => handleToggleAddWithForm(value)}
             labelClass="col-sm-3 col-lg-2"
-            tooltip="隐藏'使用表单添加'按钮，并阻止通过表单添加/编辑资源"
+            tooltip="隐藏‘使用表单添加’按钮，并阻止通过表单添加/编辑资源"
           />
         </div>
       </div>
@@ -94,7 +94,7 @@ export function DeploymentOptionsSection() {
             }
             name="toggle_stacksFunctionality"
             labelClass="col-sm-3 col-lg-2"
-            tooltip="这允许您将应用程序/工作负载分组到单个'堆栈'中，然后查看或删除整个堆栈。如果禁用，堆栈功能将不会在 UI 中显示。"
+            tooltip="这允许您将应用程序/工作负载分组到单个‘堆栈’中，然后查看或删除整个堆栈。如果禁用，堆栈功能将不会在 UI 中显示。"
           />
         </div>
       </div>
