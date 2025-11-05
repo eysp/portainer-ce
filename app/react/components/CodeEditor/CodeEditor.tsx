@@ -117,7 +117,7 @@ export function CodeEditor({
                   className="!pr-0 !text-sm !font-medium hover:no-underline focus:no-underline"
                   indicatorPosition="left"
                 >
-                  Copy
+                  复制
                 </CopyButton>
               </div>
             )}

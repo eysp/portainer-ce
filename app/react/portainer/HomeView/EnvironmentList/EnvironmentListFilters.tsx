@@ -12,8 +12,8 @@ import { ConnectionType } from './types';
 import styles from './EnvironmentList.module.css';
 
 const status = [
-  { value: EnvironmentStatus.Up, label: 'Up' },
-  { value: EnvironmentStatus.Down, label: 'Down' },
+  { value: EnvironmentStatus.Up, label: '运行中' },
+  { value: EnvironmentStatus.Down, label: '离线' },
 ];
 
 export function EnvironmentListFilters({
@@ -188,9 +188,9 @@ function getConnectionTypeOptions(platformTypes: PlatformType[]) {
 
   const connectionTypesDefaultOptions = [
     { value: ConnectionType.API, label: 'API' },
-    { value: ConnectionType.Agent, label: 'Agent' },
-    { value: ConnectionType.EdgeAgentStandard, label: 'Edge Agent Standard' },
-    { value: ConnectionType.EdgeAgentAsync, label: 'Edge Agent Async' },
+    { value: ConnectionType.Agent, label: '代理' },
+    { value: ConnectionType.EdgeAgentStandard, label: 'Edge 代理标准' },
+    { value: ConnectionType.EdgeAgentAsync, label: 'Edge 代理异步' },
   ];
 
   if (platformTypes.length === 0) {

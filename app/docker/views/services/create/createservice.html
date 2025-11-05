@@ -197,22 +197,22 @@
                 </div>
               </div>
               <!-- !workdir-user-input -->
-              <div class="col-sm-12 form-section-title"> Logging </div>
+              <div class="col-sm-12 form-section-title"> 日志记录 </div>
               <!-- logging-driver -->
               <div class="form-group">
-                <label for="log-driver" class="col-sm-2 col-lg-1 control-label text-left">Driver</label>
+                <label for="log-driver" class="col-sm-2 col-lg-1 control-label text-left">驱动</label>
                 <div class="col-sm-4">
                   <select class="form-control" ng-model="formValues.LogDriverName" id="log-driver" data-cy="service-creation-logging-driver">
-                    <option selected value="">Default logging driver</option>
+                    <option selected value="">默认日志驱动</option>
                     <option ng-repeat="driver in availableLoggingDrivers" ng-value="driver">{{ driver }}</option>
                     <option value="none">none</option>
                   </select>
                 </div>
                 <div class="col-sm-5">
                   <p class="small text-muted">
-                    Logging driver for service that will override the default docker daemon driver. Select Default logging driver if you don't want to override it. Supported
-                    logging drivers can be found
-                    <a href="https://docs.docker.com/engine/admin/logging/overview/#supported-logging-drivers" target="_blank">in the Docker documentation</a>.
+                    服务的日志驱动，将覆盖默认的 Docker 守护进程驱动。如果您不想覆盖它，请选择默认日志驱动。支持的
+                    日志驱动可以在
+                    <a href="https://docs.docker.com/engine/admin/logging/overview/#supported-logging-drivers" target="_blank">Docker 文档</a>中找到。
                   </p>
                 </div>
               </div>
@@ -221,10 +221,10 @@
               <div class="form-group">
                 <div class="col-sm-12 mt-1">
                   <label class="control-label text-left">
-                    Options
+                    选项
                     <portainer-tooltip
                       position="'top'"
-                      message="'Add button is disabled unless a driver other than none or default is selected. Options are specific to the selected driver, refer to the driver documentation.'"
+                      message="'除非选择了除 none 或默认之外的驱动，否则添加按钮将被禁用。选项特定于所选驱动，请参考驱动文档。'"
                     ></portainer-tooltip>
                   </label>
                   <span
@@ -232,19 +232,19 @@
                     style="margin-left: 10px"
                     ng-click="!formValues.LogDriverName || formValues.LogDriverName === 'none' || addLogDriverOpt(formValues.LogDriverName)"
                   >
-                    <pr-icon icon="'plus'" mode="'alt'"></pr-icon> add logging driver option
+                    <pr-icon icon="'plus'" mode="'alt'"></pr-icon> 添加日志驱动选项
                   </span>
                 </div>
                 <!-- logging-opts-input-list -->
                 <div class="col-sm-12 form-inline mt-2">
                   <div ng-repeat="opt in formValues.LogDriverOpts" class="mt-1">
                     <div class="input-group col-sm-5 input-group-sm">
-                      <span class="input-group-addon">option</span>
-                      <input type="text" class="form-control" ng-model="opt.name" placeholder="例如 FOO" data-cy="service-creation-logging-driver-option" />
+                      <span class="input-group-addon">选项</span>
+                      <input type="text" class="form-control" ng-model="opt.name" placeholder="例如：FOO" data-cy="service-creation-logging-driver-option" />
                     </div>
                     <div class="input-group col-sm-5 input-group-sm">
-                      <span class="input-group-addon">value</span>
-                      <input type="text" class="form-control" ng-model="opt.value" placeholder="例如 bar" data-cy="service-creation-logging-driver-option-value" />
+                      <span class="input-group-addon">值</span>
+                      <input type="text" class="form-control" ng-model="opt.value" placeholder="例如：bar" data-cy="service-creation-logging-driver-option-value" />
                     </div>
                     <button class="btn btn-dangerlight" type="button" ng-click="removeLogDriverOpt($index)">
                       <pr-icon icon="'trash-2'" size="'md'"></pr-icon>

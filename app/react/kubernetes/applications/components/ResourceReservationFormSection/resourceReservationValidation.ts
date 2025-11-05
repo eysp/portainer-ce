@@ -25,14 +25,14 @@ export function resourceReservationValidation(
   validationData?: ValidationData
 ): SchemaOf<ResourceQuotaFormValues> {
   return object().shape({
-    memoryLimit: nanNumberSchema('Memory limit is required.')
-      .min(0, 'Value must be greater than or equal to 0.')
+    memoryLimit: nanNumberSchema('内存限制是必填项。')
+      .min(0, '值必须大于或等于 0。')
       .test(
         'exhaused',
-        `The memory capacity for this namespace has been exhausted, so you cannot deploy the application.${
+        `此命名空间的内存容量已耗尽，因此无法部署应用程序。${
           validationData?.isEnvironmentAdmin
             ? ''
-            : ' Contact your administrator to expand the memory capacity of the namespace.'
+            : ' 请联系您的管理员扩展命名空间的内存容量。'
         }`,
         () => !!validationData && validationData.maxMemoryLimit > 0
       )
@@ -40,12 +40,12 @@ export function resourceReservationValidation(
         // when the existing reservation is unchanged and exceeds the new limit, show a different error message
         // https://portainer.atlassian.net/browse/EE-5933?focusedCommentId=29308
         validationData?.isExistingMemoryReservationUnchanged
-          ? `Value must be between 0 and ${validationData?.maxMemoryLimit}MB now - the previous value of ${value} exceeds this.`
-          : `Value must be between 0 and ${validationData?.maxMemoryLimit}MB.`
+          ? `值必须在 0 到 ${validationData?.maxMemoryLimit}MB 之间 - 之前的值为 ${value}，超过了此限制。`
+          : `值必须在 0 到 ${validationData?.maxMemoryLimit}MB 之间。`
       )
       .test(
         'hasSuitableNode',
-        `These reservations would exceed the resources currently available in the cluster.`,
+        `这些预留将超过集群中当前可用的资源。`,
         (value: number | undefined, context: TestContext) => {
           if (!validationData || value === undefined) {
             // explicitely check for undefined, since 0 is a valid value
@@ -59,15 +59,15 @@ export function resourceReservationValidation(
           );
         }
       )
-      .required('Memory limit is required.'),
+      .required('内存限制是必填项。'),
     cpuLimit: number()
       .min(0)
       .test(
         'exhaused',
-        `The CPU capacity for this namespace has been exhausted, so you cannot deploy the application.${
+        `此命名空间的 CPU 容量已耗尽，因此无法部署应用程序。${
           validationData?.isEnvironmentAdmin
             ? ''
-            : ' Contact your administrator to expand the CPU capacity of the namespace.'
+            : ' 请联系您的管理员扩展命名空间的 CPU 容量。'
         }`,
         () => !!validationData && validationData.maxCpuLimit > 0
       )
@@ -75,12 +75,12 @@ export function resourceReservationValidation(
         // when the existing reservation is unchanged and exceeds the new limit, show a different error message
         // https://portainer.atlassian.net/browse/EE-5933?focusedCommentId=29308
         validationData?.isExistingCPUReservationUnchanged
-          ? `Value must be between 0 and ${validationData?.maxCpuLimit} now - the previous value of ${value} exceeds this.`
-          : `Value must be between 0 and ${validationData?.maxCpuLimit}.`
+          ? `值必须在 0 到 ${validationData?.maxCpuLimit} 之间 - 之前的值为 ${value}，超过了此限制。`
+          : `值必须在 0 到 ${validationData?.maxCpuLimit} 之间。`
       )
       .test(
         'hasSuitableNode',
-        `These reservations would exceed the resources currently available in the cluster.`,
+        `这些预留将超过集群中当前可用的资源。`,
         (value: number | undefined, context: TestContext) => {
           if (!validationData || value === undefined) {
             // explicitely check for undefined, since 0 is a valid value

@@ -18,25 +18,24 @@ export function HelmValuesInput({
   return (
     <div className="grid grid-cols-2 gap-4">
       <FormControl
-        label="User-defined values"
+        label="用户定义的值"
         inputId="user-values-editor"
         size="vertical"
         className="[&>label]:!mb-1 !mx-0"
         tooltip={
           <>
-            User-defined values will override the default chart values.
+            用户定义的值将覆盖默认的图表值。
             <br />
-            You can get more information about the Helm values file format in
-            the{' '}
+            您可以在{' '}
             <a
               href="https://helm.sh/docs/chart_template_guide/values_files/"
               target="_blank"
               data-cy="helm-values-reference-link"
               rel="noreferrer"
             >
-              official documentation
+              官方文档
             </a>
-            .
+            中了解更多关于 Helm 值文件格式的信息。
           </>
         }
       >
@@ -47,21 +46,21 @@ export function HelmValuesInput({
           height="50vh"
           type="yaml"
           data-cy="helm-user-values-editor"
-          placeholder="Define or paste the content of your values yaml file here"
+          placeholder="在此定义或粘贴您的值 yaml 文件内容"
           showToolbar={false}
         />
       </FormControl>
       <FormControl
         label={
           <div className="flex justify-between w-full">
-            Values reference (read-only)
+            值参考（只读）
             <ShortcutsTooltip />
           </div>
         }
         inputId="values-reference"
         size="vertical"
         isLoading={isValuesRefLoading}
-        loadingText="Loading values..."
+        loadingText="正在加载值..."
         className="[&>label]:w-full [&>label]:!mb-1 !mx-0"
       >
         <CodeEditor
@@ -71,7 +70,7 @@ export function HelmValuesInput({
           type="yaml"
           readonly
           data-cy="helm-values-reference"
-          placeholder="No values reference found"
+          placeholder="未找到值参考"
           showToolbar={false}
         />
       </FormControl>

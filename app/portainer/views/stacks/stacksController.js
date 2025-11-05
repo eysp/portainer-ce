@@ -42,7 +42,7 @@ function StacksController($scope, $state, Notifications, StackService, Authentic
       })
       .catch(function error(err) {
         $scope.stacks = [];
-        Notifications.error('Failure', err, 'Unable to retrieve stacks');
+        Notifications.error('失败', err, '无法检索堆栈');
       });
   }
 

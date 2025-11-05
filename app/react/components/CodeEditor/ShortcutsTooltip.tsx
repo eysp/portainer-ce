@@ -5,36 +5,36 @@ import { Tooltip } from '@@/Tip/Tooltip';
 const otherEditorConfig = {
   tooltip: (
     <>
-      <div>Ctrl+F - Start searching</div>
-      <div>Ctrl+G - Find next</div>
-      <div>Ctrl+Shift+G - Find previous</div>
-      <div>Ctrl+Shift+F - Replace</div>
-      <div>Ctrl+Shift+R - Replace all</div>
-      <div>Alt+G - Jump to line</div>
-      <div>Persistent search:</div>
-      <div className="ml-5">Enter - Find next</div>
-      <div className="ml-5">Shift+Enter - Find previous</div>
+      <div>Ctrl+F - 开始搜索</div>
+      <div>Ctrl+G - 查找下一个</div>
+      <div>Ctrl+Shift+G - 查找上一个</div>
+      <div>Ctrl+Shift+F - 替换</div>
+      <div>Ctrl+Shift+R - 全部替换</div>
+      <div>Alt+G - 跳转到行</div>
+      <div>持久搜索：</div>
+      <div className="ml-5">Enter - 查找下一个</div>
+      <div className="ml-5">Shift+Enter - 查找上一个</div>
     </>
   ),
-  searchCmdLabel: 'Ctrl+F for search',
+  searchCmdLabel: 'Ctrl+F 搜索',
 } as const;
 
 export const editorConfig = {
   mac: {
     tooltip: (
       <>
-        <div>Cmd+F - Start searching</div>
-        <div>Cmd+G - Find next</div>
-        <div>Cmd+Shift+G - Find previous</div>
-        <div>Cmd+Option+F - Replace</div>
-        <div>Cmd+Option+R - Replace all</div>
-        <div>Option+G - Jump to line</div>
-        <div>Persistent search:</div>
-        <div className="ml-5">Enter - Find next</div>
-        <div className="ml-5">Shift+Enter - Find previous</div>
+        <div>Cmd+F - 开始搜索</div>
+        <div>Cmd+G - 查找下一个</div>
+        <div>Cmd+Shift+G - 查找上一个</div>
+        <div>Cmd+Option+F - 替换</div>
+        <div>Cmd+Option+R - 全部替换</div>
+        <div>Option+G - 跳转到行</div>
+        <div>持久搜索：</div>
+        <div className="ml-5">Enter - 查找下一个</div>
+        <div className="ml-5">Shift+Enter - 查找上一个</div>
       </>
     ),
-    searchCmdLabel: 'Cmd+F for search',
+    searchCmdLabel: 'Cmd+F 搜索',
   },
 
   lin: otherEditorConfig,

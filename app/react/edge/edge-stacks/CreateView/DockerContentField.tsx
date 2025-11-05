@@ -19,7 +19,7 @@ export function DockerContentField({
   const dockerComposeSchemaQuery = useDockerComposeSchema();
 
   if (isLoading || dockerComposeSchemaQuery.isInitialLoading) {
-    return <InlineLoader>Loading stack content...</InlineLoader>;
+    return <InlineLoader>正在加载堆栈内容...</InlineLoader>;
   }
 
   return (
@@ -28,21 +28,21 @@ export function DockerContentField({
       value={value}
       onChange={onChange}
       type="yaml"
-      textTip="Define or paste the content of your docker compose file here"
+      textTip="在此定义或粘贴您的 Docker Compose 文件内容"
       error={error}
       readonly={readonly}
       schema={dockerComposeSchemaQuery.data}
       data-cy="stack-creation-editor"
     >
-      You can get more information about Compose file format in the{' '}
+      您可以在{' '}
       <a
         href="https://docs.docker.com/compose/compose-file/"
         target="_blank"
         rel="noreferrer"
       >
-        official documentation
+        官方文档
       </a>
-      .
+      中了解更多关于 Compose 文件格式的信息。
     </WebEditorForm>
   );
 }

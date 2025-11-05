@@ -95,7 +95,7 @@ export function InnerForm({
         type="yaml"
         textTip={
           gitFileContent
-            ? 'Preview of the file from git repository'
+            ? 'Git 仓库中文件的预览'
             : texts.editor.placeholder
         }
         error={errors.FileContent}
@@ -128,13 +128,13 @@ export function InnerForm({
                 onClick={refreshGitFile}
                 data-cy="custom-template-edit-reload-git-file-button"
               >
-                Reload custom template
+                重新加载自定义模板
               </Button>
             </div>
             {gitFileError && (
               <div className="col-sm-12">
                 <FormError>
-                  Custom template could not be loaded, {gitFileError}.
+                  无法加载自定义模板，{gitFileError}。
                 </FormError>
               </div>
             )}
@@ -182,8 +182,8 @@ export function InnerForm({
       <FormActions
         isLoading={isLoading}
         isValid={isValid && dirty}
-        loadingText="Updating custom template..."
-        submitLabel="Update custom template"
+        loadingText="正在更新自定义模板..."
+        submitLabel="更新自定义模板"
         data-cy="custom-template-edit-submit-button"
       />
     </Form>

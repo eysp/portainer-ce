@@ -6,23 +6,22 @@ export function NoEnvironmentsInfoPanel({ isAdmin }: { isAdmin: boolean }) {
   return (
     <div className="row">
       <div className="col-sm-12">
-        <InformationPanel title="Information">
+        <InformationPanel title="信息">
           <TextTip>
             {isAdmin ? (
               <span>
-                No environment available for management. Please head over the{' '}
+                没有可用的环境进行管理。请前往{' '}
                 <Link
                   to="portainer.wizard.endpoints"
                   data-cy="wizard-add-environments-link"
                 >
-                  environment wizard
+                  环境向导
                 </Link>{' '}
-                to add an environment.
+                添加环境。
               </span>
             ) : (
               <span>
-                You do not have access to any environment. Please contact your
-                administrator.
+                您无权访问任何环境。请联系您的管理员。
               </span>
             )}
           </TextTip>

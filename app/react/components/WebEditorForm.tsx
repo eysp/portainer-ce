@@ -28,7 +28,7 @@ interface Props extends CodeEditorProps {
 
 export function WebEditorForm({
   id,
-  titleContent = 'Web editor',
+  titleContent = '网页编辑器',
   hideTitle,
   children,
   error,
@@ -95,10 +95,10 @@ export function usePreventExit(
     }
     const confirmed = await confirm({
       modalType: ModalType.Warn,
-      title: 'Are you sure?',
+      title: '您确定吗？',
       message:
-        'You currently have unsaved changes in the text editor. Are you sure you want to leave?',
-      confirmButton: buildConfirmButton('Yes', 'danger'),
+        '您当前在文本编辑器中有未保存的更改。您确定要离开吗？',
+      confirmButton: buildConfirmButton('是', 'danger'),
     });
     return confirmed;
   });

@@ -152,7 +152,7 @@ class KubernetesApplicationConverter {
     // FIX FOR SFS ONLY ; as far as we know it's not possible to do this with DEPLOYMENTS/DAEMONSETS
     //
     // This may lead to destructing behaviours when we will allow external apps to be edited.
-    // 例如 if we try to generate the formValues and patch the app, SFS reference will be created under
+    // E.G. if we try to generate the formValues and patch the app, SFS reference will be created under
     // spec.template.spec.volumes and not be referenced directly inside spec.template.spec.containers[0].volumeMounts
     // As we preserve original SFS name and try to build around it, it SHOULD be fine, but we definitely need to test this
     // before allowing external apps modification

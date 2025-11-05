@@ -60,6 +60,7 @@ export function ContainersDatatable({
         <Datatable
           titleIcon={Box}
           title="容器"
+          emptyContentLabel="容器列表为空"
           settingsManager={tableState}
           columns={columns}
           renderTableActions={(selectedRows) => (

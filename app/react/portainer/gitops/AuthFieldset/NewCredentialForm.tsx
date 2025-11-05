@@ -24,7 +24,7 @@ export function NewCredentialForm({
             <Checkbox
               id="repository-save-credential"
               data-cy="gitops-save-credential-checkbox"
-              label="save credential"
+              label="保存凭据"
               checked={value.SaveCredential || false}
               className="[&+label]:mb-0"
               onChange={(e) => onChange({ SaveCredential: e.target.checked })}
@@ -33,7 +33,7 @@ export function NewCredentialForm({
               value={value.NewCredentialName || ''}
               data-cy="gitops-new-credential-name-input"
               name="new_credential_name"
-              placeholder="credential name"
+              placeholder="凭据名称"
               className="ml-4 w-48"
               onChange={(e) => onChange({ NewCredentialName: e.target.value })}
               disabled={!value.SaveCredential}
@@ -46,7 +46,7 @@ export function NewCredentialForm({
 
             {value.SaveCredential && (
               <TextTip color="blue">
-                This git credential can be managed through your account page
+                此 Git 凭据可以通过您的账户页面进行管理
               </TextTip>
             )}
           </div>

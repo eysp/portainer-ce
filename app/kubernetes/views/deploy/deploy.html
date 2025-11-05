@@ -116,7 +116,7 @@
                 <!-- !repository -->
 
                 <div ng-show="ctrl.state.BuildMethod === ctrl.BuildMethods.CUSTOM_TEMPLATE">
-                  <div class="col-sm-12 form-section-title !mt-4"> Custom template </div>
+                  <div class="col-sm-12 form-section-title !mt-4"> 自定义模板 </div>
 
                   <custom-template-selector
                     new-template-path="kubernetes.templates.custom.new"
@@ -143,17 +143,17 @@
                     on-change="(ctrl.onChangeFileContent)"
                     ng-required="true"
                     yml="true"
-                    placeholder="Define or paste the content of your manifest file here"
+                    placeholder="在此定义或粘贴您的清单文件内容"
                     read-only="ctrl.state.isEditorReadOnly"
                   >
                     <editor-description>
                       <p class="vertical-center">
                         <pr-icon icon="'info'" mode="'primary'"></pr-icon>
-                        This feature allows you to deploy any kind of Kubernetes resource in this environment (Deployment, Secret, ConfigMap...).
+                        此功能允许您在此环境中部署任何类型的 Kubernetes 资源（Deployment、Secret、ConfigMap...）。
                       </p>
                       <p>
-                        You can get more information about Kubernetes file format in the
-                        <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/" target="_blank">official documentation</a>.
+                        您可以在
+                        <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/" target="_blank">官方文档</a>中了解更多关于 Kubernetes 文件格式的信息。
                       </p>
                     </editor-description>
                   </web-editor-form>

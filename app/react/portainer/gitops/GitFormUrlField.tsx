@@ -69,7 +69,7 @@ export function GitFormUrlField({
     <div className="form-group">
       <div className="col-sm-12">
         <FormControl
-          label="Repository URL"
+          label="仓库 URL"
           inputId="stack_repository_url"
           errors={errorMessage || errors}
           required
@@ -93,7 +93,7 @@ export function GitFormUrlField({
               className="vertical-center"
               color="light"
               icon={RefreshCcw}
-              title="refreshGitRepo"
+              title="刷新 Git 仓库"
               disabled={!model.RepositoryURLValid}
             />
           </span>
@@ -128,7 +128,7 @@ export function useUrlValidation(force: boolean) {
   );
 
   return (string() as StringSchema<string, GitFormModel>)
-    .url('Invalid Url')
-    .required('Repository URL is required')
-    .test('repo-exists', 'Repository does not exist', existenceTest);
+    .url('无效的 URL')
+    .required('仓库 URL 是必需的')
+    .test('repo-exists', '仓库不存在', existenceTest);
 }

@@ -39,7 +39,7 @@ export function useContainers<T = ContainerListViewModel[]>(
     queryKeys.filters(environmentId, params),
     () => getContainers(environmentId, params),
     {
-      ...withGlobalError('Unable to retrieve containers'),
+      ...withGlobalError('无法检索容器'),
       refetchInterval: autoRefreshRate ?? false,
       select,
       enabled,
@@ -67,6 +67,6 @@ export async function getContainers(
     );
     return data.map((c) => toListViewModel(c));
   } catch (error) {
-    throw parseAxiosError(error as Error, 'Unable to retrieve containers');
+    throw parseAxiosError(error as Error, '无法检索容器');
   }
 }

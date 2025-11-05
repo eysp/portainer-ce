@@ -24,12 +24,12 @@ export function CredentialSelector({
     <div className="form-group">
       <div className="col-sm-12">
         <FormControl
-          label="Git Credentials"
+          label="Git 凭据"
           inputId="git-creds-selector"
           errors={error}
         >
           <Select
-            placeholder="select git credential or fill in below"
+            placeholder="选择 Git 凭据或在下方填写"
             value={gitCredentials.find(
               (gitCredential) => gitCredential.id === value
             )}
@@ -38,7 +38,7 @@ export function CredentialSelector({
             getOptionValue={(gitCredential) => gitCredential.id.toString()}
             onChange={onChange}
             isClearable
-            noOptionsMessage={() => 'no saved credentials'}
+            noOptionsMessage={() => '没有保存的凭据'}
             inputId="git-creds-selector"
             data-cy="git-credentials-selector"
             id="git-credentials-selector"

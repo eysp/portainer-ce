@@ -8,7 +8,7 @@ export function ForceDeploymentSwitch({
   checked,
   onChange,
   tooltip = '',
-  label = 'Force redeployment',
+  label = '强制重新部署',
 }: {
   checked: boolean;
   onChange: (value: boolean) => void;

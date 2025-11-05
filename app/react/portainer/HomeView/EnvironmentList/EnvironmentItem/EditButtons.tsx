@@ -38,7 +38,7 @@ export function EditButtons({ environment }: { environment: Environment }) {
         icon={Edit2}
         size="medium"
         className={buttonsClasses}
-        title="Edit"
+        title="编辑"
         data-cy={`edit-environment-link-${environment.Name}`}
       />
 
@@ -50,7 +50,7 @@ export function EditButtons({ environment }: { environment: Environment }) {
         icon={Settings}
         size="medium"
         className={buttonsClasses}
-        title="Configuration"
+        title="配置"
         data-cy={`configure-environment-link-${environment.Name}`}
       />
     </ButtonsGrid>

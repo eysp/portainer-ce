@@ -70,6 +70,7 @@ export function ImagesDatatable({
     <Datatable
       title="镜像"
       titleIcon={List}
+      emptyContentLabel="镜像列表为空"
       data-cy="docker-images-datatable"
       extendTableOptions={mergeOptions(
         withColumnFilters(tableState.columnFilters, tableState.setColumnFilters)

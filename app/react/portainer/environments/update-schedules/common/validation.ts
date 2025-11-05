@@ -49,14 +49,14 @@ export function validation(
       .when('registryId', {
         is: 0,
         then: (schema) => schema.optional(),
-        otherwise: (schema) => schema.required('Agent image is required'),
+        otherwise: (schema) => schema.required('代理镜像是必填项'),
       }),
     updaterImage: string()
       .default('')
       .when('registryId', {
         is: 0,
         then: (schema) => schema.optional(),
-        otherwise: (schema) => schema.required('Updater image is required'),
+        otherwise: (schema) => schema.required('更新器镜像是必填项'),
       }),
   });
 }

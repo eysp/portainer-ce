@@ -44,6 +44,7 @@ export function StacksDatatable({
       settingsManager={tableState}
       title="堆栈"
       titleIcon={Layers}
+      emptyContentLabel="堆栈列表为空"
       renderTableActions={(selectedRows) => (
         <TableActions selectedItems={selectedRows} onRemove={onRemove} />
       )}

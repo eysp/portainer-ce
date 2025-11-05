@@ -56,7 +56,7 @@ export function GitForm({
   const [value, setValue] = useState(initialValue); // TODO: remove this state when form is not inside angularjs
 
   return (
-    <FormSection title="Git repository">
+    <FormSection title="Git 仓库">
       <AuthFieldset
         value={value}
         onChange={handleChange}
@@ -78,12 +78,12 @@ export function GitForm({
       <div className="form-group">
         <div className="col-sm-12">
           <SwitchField
-            label="Skip TLS Verification"
+            label="跳过 TLS 验证"
             data-cy="gitops-skip-tls-verification-switch"
             checked={value.TLSSkipVerify || false}
             onChange={(value) => handleChange({ TLSSkipVerify: value })}
             name="TLSSkipVerify"
-            tooltip="Enabling this will allow skipping TLS validation for any self-signed certificate."
+            tooltip="启用此选项将允许跳过任何自签名证书的 TLS 验证。"
             labelClass="col-sm-3 col-lg-2"
           />
         </div>
@@ -177,14 +177,14 @@ export function buildGitValidationSchema(
           return false;
         }
       })
-      .required('Repository URL is required'),
+      .required('仓库 URL 是必需的'),
     RepositoryReferenceName: refFieldValidation(),
     ComposeFilePathInRepository: string().required(
       deployMethod === 'compose'
-        ? 'Compose file path is required'
-        : 'Manifest file path is required'
+        ? 'Compose 文件路径是必需的'
+        : '清单文件路径是必需的'
     ),
-    AdditionalFiles: array(string().required('Path is required')).default([]),
+    AdditionalFiles: array(string().required('路径是必需的')).default([]),
     RepositoryURLValid: boolean().default(false),
     AutoUpdate: autoUpdateValidation().nullable(),
     TLSSkipVerify: boolean().default(false),

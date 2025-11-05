@@ -62,6 +62,6 @@ export async function getVolumes(
 
     return data.Volumes;
   } catch (error) {
-    throw parseAxiosError(error, 'Unable to retrieve volumes');
+    throw parseAxiosError(error, '无法检索卷');
   }
 }

@@ -792,7 +792,7 @@ class KubernetesCreateApplicationController {
         });
         this.availableVolumes = filteredVolumes;
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to retrieve volumes');
+        this.Notifications.error('失败', err, '无法检索卷');
       }
     });
   }

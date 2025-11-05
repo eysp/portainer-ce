@@ -18,9 +18,9 @@ export function IntervalField({
 
   return (
     <FormControl
-      label="Fetch interval"
+      label="获取间隔"
       inputId="repository_fetch_interval"
-      tooltip="Specify how frequently polling occurs using syntax such as, 5m = 5 minutes, 24h = 24 hours, 6h40m = 6 hours and 40 minutes."
+      tooltip="指定轮询发生的频率，使用语法如：5m = 5 分钟，24h = 24 小时，6h40m = 6 小时 40 分钟。"
       required
       errors={errors}
     >
@@ -44,17 +44,17 @@ export function IntervalField({
 export function intervalValidation() {
   return (
     string()
-      .required('This field is required.')
+      .required('此字段是必需的。')
       // TODO: find a regex that validates time.Duration
       // .matches(
       //   // validate golang time.Duration format
       //   // https://cs.opensource.google/go/go/+/master:src/time/format.go;l=1590
       //   /[-+]?([0-9]*(\.[0-9]*)?[a-z]+)+/g,
-      //   'Please enter a valid time interval.'
+      //   '请输入有效的时间间隔。'
       // )
       .test(
         'minimumInterval',
-        'Minimum interval is 1m',
+        '最小间隔为 1m',
         (value) => !!value && parse(value, 'minute') >= 1
       )
   );

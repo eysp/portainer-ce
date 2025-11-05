@@ -21,6 +21,6 @@ export async function getVolume(
     );
     return data;
   } catch (e) {
-    throw parseAxiosError(e, 'Unable to retrieve volume details');
+    throw parseAxiosError(e, '无法检索卷详细信息');
   }
 }

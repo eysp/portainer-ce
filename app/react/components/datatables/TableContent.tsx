@@ -13,11 +13,11 @@ interface Props<T extends DefaultType = DefaultType> {
 export function TableContent<T extends DefaultType = DefaultType>({
   isLoading = false,
   rows,
-  emptyContent = 'No items available.',
+  emptyContent = '没有可用的项目。',
   renderRow,
 }: Props<T>) {
   if (isLoading) {
-    return <TableContentOneColumn>Loading...</TableContentOneColumn>;
+    return <TableContentOneColumn>加载中...</TableContentOneColumn>;
   }
 
   if (!rows.length) {
