@@ -21,26 +21,7 @@ export function InformationPanel({
   return (
     <Widget className="border-none">
       <WidgetBody className={bodyClassName}>
-        <div style={wrapperStyle}>
-          {title && (
-            <div className="form-section-title">
-              <span>{title}</span>
-              {!!onDismiss && (
-                <span className="small" style={{ float: 'right' }}>
-                  <Button
-                    color="link"
-                    icon={X}
-                    onClick={() => onDismiss()}
-                    data-cy="dismiss-information-panel-button"
-                  >
-                    dismiss
-                  </Button>
-                </span>
-              )}
-            </div>
-          )}
-          <div>{children}</div>
-        </div>
+        
       </WidgetBody>
     </Widget>
   );
