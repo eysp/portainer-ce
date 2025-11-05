@@ -181,7 +181,7 @@ export function gitAuthValidation(
           )
           .matches(
             /^[-_a-z0-9]+$/,
-            "This field must consist of lower case alphanumeric characters, '_' or '-' (e.g. 'my-name', or 'abc-123')."
+            "This field must consist of lower case alphanumeric characters, '_' or '-' (例如 'my-name', or 'abc-123')."
           ),
       }),
   });

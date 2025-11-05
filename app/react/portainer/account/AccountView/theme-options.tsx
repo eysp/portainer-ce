@@ -6,25 +6,25 @@ export const options = [
   {
     id: 'light',
     icon: <BadgeIcon icon={Sun} />,
-    label: 'Light Theme',
+    label: '浅色主题',
     value: 'light',
   },
   {
     id: 'dark',
     icon: <BadgeIcon icon={Moon} />,
-    label: 'Dark Theme',
+    label: '深色主题',
     value: 'dark',
   },
   {
     id: 'highcontrast',
     icon: <BadgeIcon icon={Eye} />,
-    label: 'High Contrast',
+    label: '高对比度',
     value: 'highcontrast',
   },
   {
     id: 'auto',
     icon: <BadgeIcon icon={RefreshCw} />,
-    label: 'System Theme',
+    label: '系统主题',
     value: 'auto',
   },
 ];

@@ -9,7 +9,7 @@ import { DecoratedUser } from '../types';
 import { helper } from './helper';
 
 export const name = helper.accessor('Username', {
-  header: 'Name',
+  header: '名称',
   cell: Cell,
 });
 

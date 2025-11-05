@@ -17,7 +17,7 @@ export function createOwnershipColumn<D extends IResource>(
   return {
     accessorFn: (row) =>
       row.ResourceControl?.Ownership || ResourceControlOwnership.ADMINISTRATORS,
-    header: 'Ownership',
+    header: '所有权',
     id: 'ownership',
     cell: OwnershipCell,
     enableHiding,
@@ -31,9 +31,24 @@ export function createOwnershipColumn<D extends IResource>(
     return (
       <span className="flex items-center gap-2">
         <Icon icon={ownershipIcon(value)} className="space-right" />
-        {value}
+        {ownershipLabel(value)}
       </span>
     );
+  }
+
+  function ownershipLabel(ownership: ResourceControlOwnership): string {
+    switch (ownership) {
+      case ResourceControlOwnership.PUBLIC:
+        return '公开';
+      case ResourceControlOwnership.PRIVATE:
+        return '私有';
+      case ResourceControlOwnership.RESTRICTED:
+        return '受限';
+      case ResourceControlOwnership.ADMINISTRATORS:
+        return '管理员';
+      default:
+        return ownership;
+    }
   }
 }
 

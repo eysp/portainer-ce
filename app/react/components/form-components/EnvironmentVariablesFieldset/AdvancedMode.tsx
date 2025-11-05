@@ -31,19 +31,18 @@ export function AdvancedMode({
         onClick={onSimpleModeClick}
         data-cy="env-simple-mode-button"
       >
-        Simple mode
+        简单模式
       </Button>
 
       <TextTip color="blue" inline={false}>
-        Switch to simple mode to define variables line by line, or load from
-        .env file
+        切换到简单模式以逐行定义变量，或从 .env 文件加载
       </TextTip>
 
       <CodeEditor
         id="environment-variables-editor"
         value={editorValue}
         onChange={handleEditorChange}
-        textTip="e.g. key=value"
+        textTip="例如 key=value"
         data-cy={dataCy}
       />
     </>

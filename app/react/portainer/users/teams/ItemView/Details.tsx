@@ -30,13 +30,13 @@ export function Details({ team, memberships, isAdmin }: Props) {
     <div className="row">
       <div className="col-lg-12 col-md-12 col-xs-12">
         <Widget>
-          <Widget.Title title="Team details" icon={Users} />
+          <Widget.Title title="团队详情" icon={Users} />
 
           <Widget.Body className="no-padding">
             <table className="table">
               <tbody>
                 <tr>
-                  <td>Name</td>
+                  <td>名称</td>
                   <td>
                     <div className="flex gap-2">
                       {!teamSyncQuery.data && team.Name}
@@ -44,21 +44,21 @@ export function Details({ team, memberships, isAdmin }: Props) {
                         <DeleteButton
                           size="xsmall"
                           onConfirmed={handleDeleteClick}
-                          confirmMessage="Do you want to delete this team? Users in this team will not be deleted."
+                          confirmMessage="您确定要删除此团队吗？该团队中的用户不会被删除。"
                           data-cy={`delete-team-${team.Name}`}
                         >
-                          Delete this team
+                          删除此团队
                         </DeleteButton>
                       )}
                     </div>
                   </td>
                 </tr>
                 <tr>
-                  <td>Leaders</td>
+                  <td>负责人</td>
                   <td>{!teamSyncQuery.data && leaderCount}</td>
                 </tr>
                 <tr>
-                  <td>Total users in team</td>
+                  <td>团队中的用户总数</td>
                   <td>{memberships.length}</td>
                 </tr>
               </tbody>

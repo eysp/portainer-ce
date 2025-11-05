@@ -17,13 +17,13 @@ export function GpuInfo({
   const gpuUseList = snapshot.GpuUseList;
   let gpuFreeStr = '';
   if (gpuUseAll) {
-    gpuFreeStr = 'none';
+    gpuFreeStr = '无';
   } else {
     gpuFreeStr = buildGpusStr(gpuUseList, gpus);
   }
 
   return (
-    <DetailsTable.Row label={gpus.length <= 1 ? 'GPU' : 'GPUs'}>
+    <DetailsTable.Row label={gpus.length <= 1 ? 'GPU' : 'GPU'}>
       {gpuFreeStr}
     </DetailsTable.Row>
   );
@@ -33,7 +33,7 @@ export function GpuInfo({
     gpus: Array<{ name: string }> = []
   ) {
     if (!gpus.length) {
-      return 'none';
+      return '无';
     }
 
     const gpuUseSet = new Set(gpuUseList);
@@ -51,7 +51,7 @@ export function GpuInfo({
     const gpusKeys = Object.keys(gpusAvailable);
 
     if (!gpusKeys.length) {
-      return 'none';
+      return '无';
     }
 
     return Object.keys(gpusAvailable)

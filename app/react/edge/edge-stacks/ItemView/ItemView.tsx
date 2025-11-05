@@ -29,9 +29,9 @@ export function ItemView() {
   return (
     <>
       <PageHeader
-        title="Edit Edge stack"
+        title="编辑边缘堆栈"
         breadcrumbs={[
-          { label: 'Edge Stacks', link: 'edge.stacks' },
+          { label: '边缘堆栈', link: 'edge.stacks' },
           stack.Name,
         ]}
         reload
@@ -47,7 +47,7 @@ export function ItemView() {
                 options={[
                   {
                     id: 'stack',
-                    label: 'Stack',
+                    label: '堆栈',
                     icon: LayersIcon,
                     children: (
                       <div className="p-5 pb-10">
@@ -58,7 +58,7 @@ export function ItemView() {
                   {
                     id: 'environments',
                     icon: HardDriveIcon,
-                    label: 'Environments',
+                    label: '环境',
                     children: <EnvironmentsDatatable />,
                   },
                 ]}

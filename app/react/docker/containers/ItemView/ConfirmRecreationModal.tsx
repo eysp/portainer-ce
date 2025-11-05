@@ -19,18 +19,16 @@ function ConfirmRecreationModal({ onSubmit, cannotPullImage }: Props) {
       onDismiss={() => onSubmit()}
       aria-label="confirm recreate container modal"
     >
-      <Modal.Header title="Are you sure?" modalType={ModalType.Destructive} />
+      <Modal.Header title="确定吗？" modalType={ModalType.Destructive} />
 
       <Modal.Body>
         <p>
-          You&apos;re about to recreate this container and any non-persisted
-          data will be lost. This container will be removed and another one will
-          be created using the same configuration.
+          您即将重新创建此容器，所有非持久化数据将丢失。此容器将被删除，并使用相同配置创建另一个容器。
         </p>
         <SwitchField
           name="pullLatest"
           data-cy="recreate-pull-latest-switch"
-          label="Re-pull image"
+          label="重新拉取镜像"
           checked={pullLatest}
           onChange={setPullLatest}
           disabled={cannotPullImage}
@@ -38,8 +36,7 @@ function ConfirmRecreationModal({ onSubmit, cannotPullImage }: Props) {
         {cannotPullImage && (
           <div className="mt-1 text-sm">
             <TextTip color="orange">
-              Cannot re-pull as the image is inaccessible - either it no longer
-              exists or the tag or name is no longer correct.
+              无法重新拉取，因为镜像不可访问 - 镜像可能不再存在，或者标签或名称不再正确。
             </TextTip>
           </div>
         )}
@@ -50,14 +47,14 @@ function ConfirmRecreationModal({ onSubmit, cannotPullImage }: Props) {
           color="default"
           data-cy="cancel-recreate"
         >
-          Cancel
+          取消
         </Button>
         <Button
           onClick={() => onSubmit({ pullLatest })}
           color="danger"
           data-cy="confirm-recreate"
         >
-          Recreate
+          重新创建
         </Button>
       </Modal.Footer>
     </Modal>

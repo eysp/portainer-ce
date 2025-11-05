@@ -26,7 +26,7 @@
           uib-typeahead="image for image in $ctrl.availableImages | filter:$viewValue | limitTo:5"
           ng-model="$ctrl.model.Image"
           name="image_name"
-          placeholder="e.g. my-image:my-tag"
+          placeholder="例如 my-image:my-tag"
           ng-change="$ctrl.onImageChange()"
           required
         />
@@ -57,7 +57,7 @@
           class="form-control"
           ng-model="$ctrl.model.Image"
           name="image_name"
-          placeholder="e.g. registry:port/my-image:my-tag"
+          placeholder="例如 registry:port/my-image:my-tag"
           required
           data-cy="component-imageInput"
         />

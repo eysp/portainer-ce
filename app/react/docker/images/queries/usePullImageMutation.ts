@@ -45,6 +45,6 @@ export async function pullImage({
       return;
     }
 
-    throw parseAxiosError(err, 'Unable to pull image');
+    throw parseAxiosError(err, '无法拉取镜像');
   }
 }

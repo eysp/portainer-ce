@@ -18,7 +18,7 @@ import { useRowContext } from '../RowContext';
 import { columnHelper } from './helper';
 
 export const teamRole = columnHelper.accessor('Id', {
-  header: 'Team Role',
+  header: '团队角色',
   id: 'role',
   cell: RoleCell,
 });
@@ -79,12 +79,12 @@ function LeaderCell({ isAdmin, onClick, disabled, username }: LeaderCellProps) {
         <Button
           color="link"
           className="nopadding"
-          onClick={() => onClick(TeamRole.Member, 'User is now team member')}
+          onClick={() => onClick(TeamRole.Member, '用户现在是团队成员')}
           disabled={disabled}
           icon={UserX}
           data-cy={`remove-leader-${username}`}
         >
-          Member
+          成员
         </Button>
       )}
     </div>
@@ -104,12 +104,12 @@ function MemberCell({ onClick, disabled, username }: MemberCellProps) {
       <Button
         color="link"
         className="nopadding"
-        onClick={() => onClick(TeamRole.Leader, 'User is now team leader')}
+        onClick={() => onClick(TeamRole.Leader, '用户现在是团队负责人')}
         disabled={disabled}
         icon={UserPlus}
         data-cy={`make-leader-${username}`}
       >
-        Leader
+        负责人
       </Button>
     </div>
   );

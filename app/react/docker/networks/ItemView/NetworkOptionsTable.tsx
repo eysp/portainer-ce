@@ -18,7 +18,7 @@ export function NetworkOptionsTable({ options }: Props) {
 
   return (
     <TableContainer>
-      <TableTitle label="Network options" icon={Network} />
+      <TableTitle label="网络选项" icon={Network} />
       <DetailsTable dataCy="networkDetails-networkOptionsTable">
         {networkEntries.map(([key, value]) => (
           <DetailsTable.Row key={key} label={key}>

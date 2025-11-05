@@ -24,14 +24,14 @@ export function RuntimeSection({
   isInitFieldVisible: boolean;
 }) {
   return (
-    <FormSection title="Runtime">
+    <FormSection title="运行时">
       {allowPrivilegedMode && (
         <div className="form-group">
           <div className="col-sm-12">
             <SwitchField
               labelClass="col-sm-2"
               data-cy="docker-privileged-switch"
-              label="Privileged mode"
+              label="特权模式"
               checked={values.privileged}
               onChange={(privileged) => handleChange({ privileged })}
             />
@@ -53,7 +53,7 @@ export function RuntimeSection({
         </div>
       )}
 
-      <FormControl label="Type" inputId="container_runtime" size="xsmall">
+      <FormControl label="类型" inputId="container_runtime" size="xsmall">
         <RuntimeSelector
           value={values.type}
           onChange={(type) => handleChange({ type })}

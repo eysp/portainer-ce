@@ -10,17 +10,17 @@ export function HelmSection() {
   const [{ name }, { error }] = useField<string>('helmRepositoryUrl');
 
   return (
-    <FormSection title="Helm repository">
+    <FormSection title="Helm 仓库">
       <div className="mb-2">
         <TextTip color="blue">
-          You can specify the URL to your own{' '}
+          您可以在此指定您自己的{' '}
           <ExternalLink
             to="https://helm.sh/docs/topics/chart_repository/"
             data-cy="helm-repository-link"
           >
-            Helm repository
+            Helm 仓库
           </ExternalLink>{' '}
-          here.
+          URL。
         </TextTip>
       </div>
 

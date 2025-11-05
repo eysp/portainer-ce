@@ -18,13 +18,13 @@ export function TableActions({
     <>
       <DeleteButton
         disabled={selectedItems.length === 0}
-        confirmMessage="Do you want to remove the selected access token(s)? Any script or application using these tokens will no longer be able to invoke the Portainer API."
+        confirmMessage="您确定要删除选中的访问令牌吗？使用这些令牌的任何脚本或应用程序将无法再调用 Portainer API。"
         onConfirmed={handleRemove}
         data-cy="access-tokens-delete-button"
       />
 
       <AddButton to=".new-access-token" data-cy="access-tokens-add-button">
-        Add access token
+        添加访问令牌
       </AddButton>
     </>
   );
@@ -33,7 +33,7 @@ export function TableActions({
     const ids = selectedItems.map((item) => item.id);
     deleteMutation.mutate(ids, {
       onSuccess() {
-        notifySuccess('Success', 'Access token(s) removed');
+        notifySuccess('成功', '访问令牌已删除');
       },
     });
   }

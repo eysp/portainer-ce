@@ -21,7 +21,7 @@ export function AzureSidebar({ environmentId }: Props) {
         to="azure.containerinstances"
         params={{ endpointId: environmentId }}
         icon={Box}
-        label="Container instances"
+        label="容器实例"
         data-cy="azureSidebar-containerInstances"
       />
     </>

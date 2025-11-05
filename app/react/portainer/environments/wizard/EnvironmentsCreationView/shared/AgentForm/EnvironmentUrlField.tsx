@@ -22,7 +22,7 @@ export function EnvironmentUrlField({
         id="environment-url-field"
         name="environmentUrl"
         as={Input}
-        placeholder={`e.g. 10.0.0.10:${placeholderPort} or tasks.portainer_agent:${placeholderPort}`}
+        placeholder={`例如 10.0.0.10:${placeholderPort} or tasks.portainer_agent:${placeholderPort}`}
         data-cy="endpointCreate-endpointUrlAgentInput"
       />
     </FormControl>

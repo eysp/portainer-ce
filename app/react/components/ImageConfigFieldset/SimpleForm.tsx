@@ -51,7 +51,7 @@ export function SimpleForm({
   return (
     <>
       <FormControl
-        label="Registry"
+        label="镜像仓库"
         inputId="registry-field"
         errors={errors?.registryId}
       >
@@ -62,7 +62,7 @@ export function SimpleForm({
         />
       </FormControl>
 
-      <FormControl label="Image" inputId="image-field" errors={errors?.image}>
+      <FormControl label="镜像" inputId="image-field" errors={errors?.image}>
         <InputGroup>
           <InputGroup.Addon>{registryUrl}</InputGroup.Addon>
 
@@ -81,7 +81,7 @@ export function SimpleForm({
             <InputGroup.ButtonWrapper>
               <Button
                 as="a"
-                title="Search image on Docker Hub"
+                title="在 Docker Hub 上搜索镜像"
                 color="default"
                 props={{
                   href: `https://hub.docker.com/search?type=image&q=${trimVersionTag(
@@ -93,7 +93,7 @@ export function SimpleForm({
                 icon={DockerIcon}
                 data-cy="component-dockerHubSearchButton"
               >
-                Search
+                搜索
               </Button>
             </InputGroup.ButtonWrapper>
           )}
@@ -231,7 +231,7 @@ function ImageFieldAutoComplete({
       value={value}
       onChange={(value) => onChange(value)}
       data-cy="component-imageInput"
-      placeholder="e.g. my-image:my-tag"
+      placeholder="例如 my-image:my-tag"
       options={imageOptions}
       inputId={inputId}
     />

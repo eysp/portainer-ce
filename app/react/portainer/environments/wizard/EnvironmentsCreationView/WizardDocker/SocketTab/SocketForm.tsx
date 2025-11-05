@@ -116,7 +116,7 @@ function OverrideSocketFieldset() {
           <Field
             name="socketPath"
             as={Input}
-            placeholder="e.g. /var/run/docker.sock (on Linux) or //./pipe/docker_engine (on Windows)"
+            placeholder="例如 /var/run/docker.sock (on Linux) or //./pipe/docker_engine (on Windows)"
           />
         </FormControl>
       )}

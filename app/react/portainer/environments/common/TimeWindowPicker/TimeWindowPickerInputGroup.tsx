@@ -13,7 +13,7 @@ import { TimePickerInput } from './TimePickerInput';
 
 type Props = {
   /**
-   * The current start and end time values. in 'HH:mm' format (e.g. '00:00') and in UTC timezone.
+   * The current start and end time values. in 'HH:mm' format (例如 '00:00') and in UTC timezone.
    */
   values: EndpointChangeWindow;
   errors?: FormikErrors<EndpointChangeWindow>;

@@ -114,7 +114,7 @@ export function CreateContainerInstanceForm() {
               name="name"
               as={Input}
               id="name-input"
-              placeholder="e.g. myContainer"
+              placeholder="例如 myContainer"
             />
           </FormControl>
 
@@ -127,7 +127,7 @@ export function CreateContainerInstanceForm() {
               name="image"
               as={Input}
               id="image-input"
-              placeholder="e.g. nginx:alpine"
+              placeholder="例如 nginx:alpine"
             />
           </FormControl>
 

@@ -26,7 +26,7 @@ export function EnvironmentVariableItem({
             disabled={disabled}
             needsDeletion={item.needsDeletion}
             readOnly={readOnly}
-            placeholder="e.g. FOO"
+            placeholder="例如 FOO"
             size="small"
             id={`env-name${index}`}
           />
@@ -47,7 +47,7 @@ export function EnvironmentVariableItem({
           disabled={disabled}
           needsDeletion={item.needsDeletion}
           readOnly={readOnly}
-          placeholder="e.g. bar"
+          placeholder="例如 bar"
           size="small"
           id={`env-value${index}`}
         />

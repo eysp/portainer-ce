@@ -17,7 +17,7 @@ export function EnvVarsTab({
     <div className="form-group">
       <EnvironmentVariablesPanel
         values={values}
-        explanation="These values will be applied to the container when deployed"
+        explanation="这些值将在部署时应用于容器"
         onChange={handleChange}
         errors={errors}
       />

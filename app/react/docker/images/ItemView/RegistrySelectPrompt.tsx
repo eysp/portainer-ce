@@ -13,7 +13,7 @@ interface Props {
 }
 
 function RegistrySelectPrompt({ onSubmit, defaultValue, registries }: Props) {
-  const title = 'Which registry do you want to use?';
+  const title = '您想使用哪个镜像仓库？';
   const [registryId, setRegistryId] = useState(defaultValue);
   const options = registries2Options(registries);
 
@@ -35,14 +35,14 @@ function RegistrySelectPrompt({ onSubmit, defaultValue, registries }: Props) {
           color="default"
           data-cy="registry-select-cancel-button"
         >
-          Cancel
+          取消
         </Button>
         <Button
           onClick={() => onSubmit(registryId)}
           color="primary"
           data-cy="registry-select-update-button"
         >
-          Update
+          更新
         </Button>
       </Modal.Footer>
     </Modal>

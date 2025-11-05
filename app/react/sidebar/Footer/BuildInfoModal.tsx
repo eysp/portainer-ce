@@ -39,7 +39,7 @@ export function BuildInfoModalButton() {
         data-cy="portainerSidebar-versionNumber"
         className="btn-none hover:underline"
         onClick={() => setIsBuildInfoVisible(true)}
-        title="About Portainer"
+        title="关于 Portainer"
       >
         {`${Version} ${VersionSupport}`}
       </button>
@@ -80,13 +80,13 @@ function BuildInfoModal({ closeModal }: { closeModal: () => void }) {
                 <td>
                   <span className="inline-flex items-center flex-wrap">
                     <Server size="13" className="space-right" />
-                    Server Version: {ServerVersion} {VersionSupport}
+                    服务器版本: {ServerVersion} {VersionSupport}
                   </span>
                 </td>
                 <td>
                   <span className="inline-flex items-center flex-wrap">
                     <Database size="13" className="space-right" />
-                    Database Version: {DatabaseVersion}
+                    数据库版本: {DatabaseVersion}
                   </span>
                 </td>
               </tr>
@@ -94,13 +94,13 @@ function BuildInfoModal({ closeModal }: { closeModal: () => void }) {
                 <td>
                   <span className="inline-flex items-center flex-wrap">
                     <Hash size="13" className="space-right" />
-                    CI Build Number: {Build.BuildNumber}
+                    CI 构建编号: {Build.BuildNumber}
                   </span>
                 </td>
                 <td>
                   <span className="inline-flex items-center flex-wrap">
                     <Tag size="13" className="space-right" />
-                    Image Tag: {Build.ImageTag}
+                    镜像标签: {Build.ImageTag}
                   </span>
                 </td>
               </tr>
@@ -108,7 +108,7 @@ function BuildInfoModal({ closeModal }: { closeModal: () => void }) {
                 <td>
                   <span className="inline-flex items-center flex-wrap">
                     <GitCommit size="13" className="space-right" />
-                    Git Commit: {Build.GitCommit}
+                    Git 提交: {Build.GitCommit}
                   </span>
                 </td>
                 <td />
@@ -119,7 +119,7 @@ function BuildInfoModal({ closeModal }: { closeModal: () => void }) {
         <div className={styles.toolsList}>
           <span className="inline-flex items-center">
             <Wrench size="13" className="space-right" />
-            Compilation tools:
+            编译工具:
           </span>
 
           <div className={styles.tools}>
@@ -137,7 +137,7 @@ function BuildInfoModal({ closeModal }: { closeModal: () => void }) {
         <div className={clsx(styles.toolsList, 'mt-3')}>
           <span className="inline-flex items-center">
             <LinkIcon size="13" className="space-right" />
-            Dependencies:
+            依赖项:
           </span>
 
           <div className={styles.tools}>
@@ -160,7 +160,7 @@ function BuildInfoModal({ closeModal }: { closeModal: () => void }) {
           <div className={clsx(styles.toolsList, 'mt-3')}>
             <span className="inline-flex items-center ">
               <Variable size="13" className="space-right" />
-              Environment Variables
+              环境变量
             </span>
 
             <div
@@ -181,7 +181,7 @@ function BuildInfoModal({ closeModal }: { closeModal: () => void }) {
           onClick={closeModal}
           data-cy="portainerBuildInfoModal-CloseButton"
         >
-          Ok
+          确定
         </Button>
       </Modal.Footer>
     </Modal>

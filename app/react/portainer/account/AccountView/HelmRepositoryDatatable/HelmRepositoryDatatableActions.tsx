@@ -21,18 +21,14 @@ export function HelmRepositoryDatatableActions({ selectedItems }: Props) {
       <DeleteButton
         disabled={selectedItems.length === 0}
         onConfirmed={() => onDeleteClick(selectedItems)}
-        confirmMessage={`Are you sure you want to remove the selected Helm ${pluralize(
-          selectedItems.length,
-          'repository',
-          'repositories'
-        )}?`}
+        confirmMessage={`您确定要删除选中的 Helm ${selectedItems.length === 1 ? '仓库' : '仓库'}吗？`}
         data-cy="helmRepository-deleteButton"
       />
       <AddButton
         to="portainer.account.createHelmRepository"
         data-cy="helmRepository-addButton"
       >
-        Add Helm repository
+        添加 Helm 仓库
       </AddButton>
     </>
   );

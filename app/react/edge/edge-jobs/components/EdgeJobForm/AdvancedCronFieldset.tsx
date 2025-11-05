@@ -16,7 +16,7 @@ export function AdvancedCronFieldset() {
         <Input
           data-cy="edge-job-cron-input"
           id="edge_job_cron"
-          placeholder="e.g. 0 2 * * *"
+          placeholder="例如 0 2 * * *"
           required
           value={value}
           onChange={onChange}

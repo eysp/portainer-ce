@@ -77,7 +77,7 @@ export function AutoUpdateSettings({
               checked={value.ForcePullImage || false}
               label="Re-pull image"
               labelClass="col-sm-3 col-lg-2"
-              tooltip="If enabled, then when redeploy is triggered via the webhook or polling, if there's a newer image with the tag that you've specified (e.g. changeable development builds), it's pulled and redeployed. If you haven't specified a tag, or have specified 'latest' as the tag, then the image with the tag 'latest' is pulled and redeployed. With relative path enabled, it also redeploys when mounted files (not just the compose file) change."
+              tooltip="If enabled, then when redeploy is triggered via the webhook or polling, if there's a newer image with the tag that you've specified (例如 changeable development builds), it's pulled and redeployed. If you haven't specified a tag, or have specified 'latest' as the tag, then the image with the tag 'latest' is pulled and redeployed. With relative path enabled, it also redeploys when mounted files (not just the compose file) change."
               onChange={(value) => onChange({ ForcePullImage: value })}
             />
           </div>

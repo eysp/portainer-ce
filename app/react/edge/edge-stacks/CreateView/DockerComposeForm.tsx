@@ -56,7 +56,7 @@ export function DockerComposeForm({ webhookId, onChangeTemplate }: Props) {
 
   return (
     <>
-      <FormSection title="Build Method">
+      <FormSection title="构建方法">
         <BoxSelector
           options={buildMethods}
           onChange={(value) => handleChange({ method: value })}
@@ -118,7 +118,7 @@ export function DockerComposeForm({ webhookId, onChangeTemplate }: Props) {
           value={values.file}
           onChange={(File) => handleChange({ file: File })}
           required
-          description="You can upload a Compose file from your computer."
+          description="您可以从计算机上传 Compose 文件。"
           data-cy="stack-creation-file-upload"
         />
       )}
@@ -143,7 +143,7 @@ export function DockerComposeForm({ webhookId, onChangeTemplate }: Props) {
           />
 
           {isBE && (
-            <FormSection title="Advanced configurations">
+            <FormSection title="高级配置">
               <RelativePathFieldset
                 values={values.relativePath}
                 errors={errors.relativePath}

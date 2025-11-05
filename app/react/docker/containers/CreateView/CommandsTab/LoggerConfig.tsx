@@ -109,7 +109,7 @@ function Item({
           <InputGroup.Input
             value={option}
             onChange={(e) => handleChange({ option: e.target.value })}
-            placeholder="e.g. FOO"
+            placeholder="例如 FOO"
             data-cy={`docker-logging-option_${index}`}
           />
         </InputGroup>

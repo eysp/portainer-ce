@@ -93,7 +93,7 @@
       <div ng-repeat="constraint in formValues.PlacementConstraints" style="margin-top: 2px">
         <div class="input-group col-sm-4 input-group-sm">
           <span class="input-group-addon">name</span>
-          <input type="text" class="form-control" ng-model="constraint.key" placeholder="e.g. node.role" data-cy="docker-services-create-placement-constraint-name-{{ $index }}" />
+          <input type="text" class="form-control" ng-model="constraint.key" placeholder="例如 node.role" data-cy="docker-services-create-placement-constraint-name-{{ $index }}" />
         </div>
         <div class="input-group col-sm-1 input-group-sm">
           <select name="constraintOperator" class="form-control" ng-model="constraint.operator" data-cy="docker-services-create-placement-constraint-operator-">
@@ -103,7 +103,7 @@
         </div>
         <div class="input-group col-sm-5 input-group-sm">
           <span class="input-group-addon">value</span>
-          <input type="text" class="form-control" ng-model="constraint.value" placeholder="e.g. manager" data-cy="docker-services-create-placement-constraint-value-{{ $index }}" />
+          <input type="text" class="form-control" ng-model="constraint.value" placeholder="例如 manager" data-cy="docker-services-create-placement-constraint-value-{{ $index }}" />
         </div>
         <button class="btn btn-dangerlight" type="button" ng-click="removePlacementConstraint($index)">
           <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
@@ -128,7 +128,7 @@
             type="text"
             class="form-control"
             ng-model="preference.strategy"
-            placeholder="e.g. spread"
+            placeholder="例如 spread"
             data-cy="docker-services-create-placement-preference-strategy-{{ $index }}"
           />
         </div>
@@ -138,7 +138,7 @@
             type="text"
             class="form-control"
             ng-model="preference.value"
-            placeholder="e.g. node.labels.datacenter"
+            placeholder="例如 node.labels.datacenter"
             data-cy="docker-services-create-placement-preference-value-{{ $index }}"
           />
         </div>

@@ -24,5 +24,5 @@ export function TagsInfo({ ids }: { ids: number[] }) {
       )
     : '-';
 
-  return <DetailsTable.Row label="Tags">{tagNameList}</DetailsTable.Row>;
+  return <DetailsTable.Row label="标签">{tagNameList}</DetailsTable.Row>;
 }

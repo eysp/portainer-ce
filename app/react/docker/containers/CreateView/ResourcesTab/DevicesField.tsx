@@ -27,8 +27,8 @@ export function DevicesField({
       value={values}
       onChange={onChange}
       item={Item}
-      addLabel="Add device"
-      label="Devices"
+      addLabel="添加设备"
+      label="设备"
       errors={errors}
       itemBuilder={() => ({ pathOnHost: '', pathInContainer: '' })}
       data-cy="docker-container-devices"
@@ -44,8 +44,8 @@ function Item({ item, onChange, error, index }: ItemProps<Device>) {
           value={item.pathOnHost}
           data-cy={`device-path-on-host_${index}`}
           onChange={(e) => onChange({ ...item, pathOnHost: e.target.value })}
-          label="host"
-          placeholder="e.g. /dev/tty0"
+          label="主机"
+          placeholder="例如 /dev/tty0"
           className="w-1/2"
           size="small"
         />
@@ -55,8 +55,8 @@ function Item({ item, onChange, error, index }: ItemProps<Device>) {
           onChange={(e) =>
             onChange({ ...item, pathInContainer: e.target.value })
           }
-          label="container"
-          placeholder="e.g. /dev/tty0"
+          label="容器"
+          placeholder="例如 /dev/tty0"
           className="w-1/2"
           size="small"
         />
@@ -69,8 +69,8 @@ function Item({ item, onChange, error, index }: ItemProps<Device>) {
 export function devicesValidation(): SchemaOf<Values> {
   return array(
     object({
-      pathOnHost: string().required('Host path is required'),
-      pathInContainer: string().required('Container path is required'),
+      pathOnHost: string().required('主机路径为必填项'),
+      pathInContainer: string().required('容器路径为必填项'),
     })
   );
 }

@@ -86,7 +86,7 @@ export function DeployForm({
               value={values.name}
               onChange={(v) => setFieldValue('name', v)}
               errors={errors.name}
-              placeholder="e.g. mystack"
+              placeholder="例如 mystack"
             />
           </FormSection>
 

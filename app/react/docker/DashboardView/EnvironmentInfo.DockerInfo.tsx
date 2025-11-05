@@ -32,7 +32,7 @@ export function DockerInfo({ isAgent }: { isAgent: boolean }) {
           <span>-</span>
           <span className="inline-flex items-center">
             <Icon icon={ZapIcon} />
-            Agent
+            代理
           </span>
         </>
       )}
