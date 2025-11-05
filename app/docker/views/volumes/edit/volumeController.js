@@ -65,7 +65,7 @@ angular.module('portainer.docker').controller('VolumeController', [
           $scope.containersUsingVolume = containers;
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve volume details');
+          Notifications.error('失败', err, '无法检索卷详细信息');
         });
     }
 

@@ -20,9 +20,7 @@ export function InformationPanel({
 }: PropsWithChildren<Props>) {
   return (
     <Widget className="border-none">
-      <WidgetBody className={bodyClassName}>
-        
-      </WidgetBody>
+      
     </Widget>
   );
 }
