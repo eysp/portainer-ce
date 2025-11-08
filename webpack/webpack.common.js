@@ -25,13 +25,6 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js$/,
-        type: 'javascript/auto',
-        enforce: 'pre',
-        exclude: /node_modules/,
-        use: ['source-map-loader'],
-      },
-      {
         test: /\.(js|ts)(x)?$/,
         exclude: /node_modules/,
         use: ['babel-loader', 'auto-ngtemplate-loader'],
