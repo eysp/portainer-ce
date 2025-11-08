@@ -27,7 +27,16 @@ module.exports = {
       {
         test: /\.(js|ts)(x)?$/,
         exclude: /node_modules/,
-        use: ['babel-loader', 'auto-ngtemplate-loader'],
+        use: [
+          {
+            loader: 'babel-loader',
+            options: {
+              cacheDirectory: true,
+              cacheCompression: false,
+            },
+          },
+          'auto-ngtemplate-loader',
+        ],
       },
       {
         test: /\.html$/,
