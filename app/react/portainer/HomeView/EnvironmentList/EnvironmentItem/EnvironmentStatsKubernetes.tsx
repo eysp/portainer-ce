@@ -26,7 +26,7 @@ export function EnvironmentStatsKubernetes({ snapshot }: Props) {
       />
 
       <StatsItem
-        value={addPlural(snapshot.NodeCount, '节点')}
+        value={addPlural(snapshot.NodeCount, '节点', '节点')}
         icon={HardDrive}
       />
     </>

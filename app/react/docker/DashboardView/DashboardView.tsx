@@ -54,7 +54,8 @@ export function DashboardView() {
             <DashboardItem
               to="docker.stacks"
               icon={LayersIcon}
-              type="Stack"
+              type="堆栈"
+              pluralType="堆栈"
               value={dashboardStats.stacks}
               data-cy="stacks"
             />
@@ -64,7 +65,8 @@ export function DashboardView() {
             <DashboardItem
               to="docker.services"
               icon={ShuffleIcon}
-              type="Service"
+              type="服务"
+              pluralType="服务"
               value={dashboardStats.services}
               data-cy="services"
             />
@@ -73,7 +75,8 @@ export function DashboardView() {
           <DashboardItem
             to="docker.containers"
             icon={BoxIcon}
-            type="Container"
+            type="容器"
+            pluralType="容器"
             value={dashboardStats.containers.total}
             data-cy="containers"
           >
@@ -83,7 +86,8 @@ export function DashboardView() {
           <DashboardItem
             to="docker.images"
             icon={ListIcon}
-            type="Image"
+            type="镜像"
+            pluralType="镜像"
             value={dashboardStats.images.total}
             data-cy="images"
           >
@@ -93,7 +97,8 @@ export function DashboardView() {
           <DashboardItem
             to="docker.volumes"
             icon={DatabaseIcon}
-            type="Volume"
+            type="卷"
+            pluralType="卷"
             value={dashboardStats.volumes}
             data-cy="volumes"
           />
@@ -101,7 +106,8 @@ export function DashboardView() {
           <DashboardItem
             to="docker.networks"
             icon={NetworkIcon}
-            type="Network"
+            type="网络"
+            pluralType="网络"
             value={dashboardStats.networks}
             data-cy="networks"
           />
@@ -110,6 +116,7 @@ export function DashboardView() {
             <DashboardItem
               icon={CpuIcon}
               type="GPU"
+              pluralType="GPU"
               value={env.Gpus?.length}
               data-cy="gpus"
             />

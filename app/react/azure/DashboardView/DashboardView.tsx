@@ -38,7 +38,8 @@ export function DashboardView() {
               isLoading={subscriptionsQuery.isLoading}
               isRefetching={subscriptionsQuery.isRefetching}
               icon={Subscription}
-              type="Subscription"
+              type="订阅"
+              pluralType="订阅"
             />
             {!resourceGroupsQuery.isError && !resourceGroupsQuery.isLoading && (
               <DashboardItem
@@ -46,7 +47,8 @@ export function DashboardView() {
                 data-cy="resource-groups-count"
                 isLoading={resourceGroupsQuery.isLoading}
                 icon={Package}
-                type="Resource group"
+                type="资源组"
+                pluralType="资源组"
               />
             )}
           </DashboardGrid>
