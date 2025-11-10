@@ -74,7 +74,7 @@ function Item({
         <InputGroup size="small">
           <InputGroup.Addon>host</InputGroup.Addon>
           <InputGroup.Input
-            placeholder="e.g. 80"
+            placeholder="例如 80"
             value={item.host}
             onChange={(e) =>
               handleChange('host', parseInt(e.target.value || '0', 10))
@@ -93,7 +93,7 @@ function Item({
         <InputGroup size="small">
           <InputGroup.Addon>container</InputGroup.Addon>
           <InputGroup.Input
-            placeholder="e.g. 80"
+            placeholder="例如 80"
             value={item.container}
             onChange={(e) =>
               handleChange('container', parseInt(e.target.value || '0', 10))

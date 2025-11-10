@@ -14,7 +14,7 @@ export function NameField({ errors }: { errors?: FormikErrors<string> }) {
       <Field
         as={Input}
         name="name"
-        placeholder="e.g. mygroup"
+        placeholder="例如 mygroup"
         data-cy="edgeGroupCreate-groupNameInput"
         id="group_name"
       />

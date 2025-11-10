@@ -89,7 +89,7 @@ function InnerForm({ isLoading }: { isLoading: boolean }) {
         <Field
           as={Input}
           id="snapshot_interval"
-          placeholder="e.g. 15m"
+          placeholder="例如 15m"
           name="snapshotInterval"
         />
       </FormControl>

@@ -19,10 +19,10 @@ export function useValidation(): SchemaOf<FormValues> {
 
     const base = object({
       username: string()
-        .required('Username is required')
+        .required('用户名是必填项')
         .test({
           name: 'unique',
-          message: 'Username is already taken',
+          message: '用户名已被占用',
           test: (value) => users.every((u) => u.Username !== value),
         }),
       password: string().default(''),
@@ -44,15 +44,15 @@ export function useValidation(): SchemaOf<FormValues> {
 function passwordValidation(minLength: number | undefined = 12) {
   return object({
     password: string()
-      .required('Password is required')
+      .required('密码为必填项')
       .min(
         minLength,
         ({ value, min }) =>
-          `The password must be at least ${min} characters long. (${value.length}/${min})`
+          `密码长度必须至少为 ${min} 个字符。 (${value.length}/${min})`
       ),
     confirmPassword: string().oneOf(
       [ref('password'), null],
-      'Passwords must match'
+      '密码必须匹配'
     ),
   });
 }

@@ -90,7 +90,7 @@ export function NamespaceInnerForm({
             id="namespace"
             name="name"
             disabled={isEdit}
-            placeholder="e.g. my-namespace"
+            placeholder="例如 my-namespace"
             data-cy="k8sNamespaceCreate-namespaceNameInput"
           />
         )}

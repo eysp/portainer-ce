@@ -17,7 +17,7 @@ export function HostnameField({
       <Input
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="e.g. web01"
+        placeholder="例如 web01"
         data-cy="docker-container-hostname-input"
       />
     </FormControl>

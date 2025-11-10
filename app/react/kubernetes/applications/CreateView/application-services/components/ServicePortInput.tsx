@@ -22,7 +22,7 @@ export function ServicePortInput({
         type="number"
         className="form-control min-w-max"
         name={`service_port_${portIndex}`}
-        placeholder="e.g. 80"
+        placeholder="例如 80"
         min="1"
         max="65535"
         value={value ?? ''}
