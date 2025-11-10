@@ -54,7 +54,7 @@ angular.module('portainer.docker').controller('ContainerLogsController', [
           })
           .catch(function error(err) {
             stopRepeater();
-            Notifications.error('Failure', err, 'Unable to retrieve container logs');
+            Notifications.error('失败', err, '无法获取容器日志');
           });
       }, refreshRate * 1000);
     }
@@ -76,7 +76,7 @@ angular.module('portainer.docker').controller('ContainerLogsController', [
         })
         .catch(function error(err) {
           stopRepeater();
-          Notifications.error('Failure', err, 'Unable to retrieve container logs');
+          Notifications.error('失败', err, '无法获取容器日志');
         });
     }
 
@@ -95,7 +95,7 @@ angular.module('portainer.docker').controller('ContainerLogsController', [
           }
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve container information');
+          Notifications.error('失败', err, '无法获取容器信息');
         });
     }
 

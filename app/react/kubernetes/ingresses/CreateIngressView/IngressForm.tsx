@@ -483,7 +483,7 @@ export function IngressForm({
 
                     <div className="col-sm-12 col-lg-4 flex h-[30px] items-center pl-2">
                       <TextTip color="blue">
-                        You may also use the{' '}
+                        您也可以使用{' '}
                         <Link
                           to="kubernetes.secrets.new"
                           params={{ id: environmentID }}
@@ -491,9 +491,9 @@ export function IngressForm({
                           target="_blank"
                           data-cy={`k8sAppCreate-createSecretLink_${hostIndex}`}
                         >
-                          Create secret
+                          创建密钥
                         </Link>{' '}
-                        function, and reload the dropdown.
+                        功能，并刷新下拉列表。
                       </TextTip>
                     </div>
                   </div>

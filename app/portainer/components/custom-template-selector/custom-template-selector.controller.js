@@ -27,7 +27,7 @@ class CustomTemplateSelectorController {
           this.handleChangeTemplate(this.value);
         }
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to retrieve Custom Templates');
+        this.Notifications.error('失败', err, '无法获取自定义模板');
       }
     });
   }

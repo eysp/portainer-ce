@@ -30,33 +30,33 @@ export function InspectView() {
   return (
     <>
       <PageHeader
-        title="Container inspect"
+        title="容器检查"
         breadcrumbs={[
-          { label: 'Containers', link: 'docker.containers' },
+          { label: '容器', link: 'docker.containers' },
           {
             label: trimContainerName(containerInfo.Name),
             link: '^',
             // linkParams: { id: containerInfo.Id },
           },
-          'Inspect',
+          '检查',
         ]}
       />
 
       <div className="row">
         <div className="col-lg-12 col-md-12 col-xs-12">
           <Widget>
-            <Widget.Title icon={Circle} title="Inspect">
+            <Widget.Title icon={Circle} title="检查">
               <ButtonSelector<'tree' | 'text'>
                 onChange={(value) => setViewType(value)}
                 value={viewType}
                 options={[
                   {
-                    label: 'Tree',
+                    label: '树形',
                     icon: CodeIcon,
                     value: 'tree',
                   },
                   {
-                    label: 'Text',
+                    label: '文本',
                     icon: File,
                     value: 'text',
                   },
