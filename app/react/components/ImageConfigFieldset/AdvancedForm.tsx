@@ -31,7 +31,7 @@ export function AdvancedForm({
             setFieldValue('image', value);
             setTimeout(() => onChangeImage?.(value), 0);
           }}
-          placeholder="e.g. registry:port/my-image:my-tag"
+          placeholder="例如 registry:port/my-image:my-tag"
           required
           data-cy="image-config-advanced-input"
         />

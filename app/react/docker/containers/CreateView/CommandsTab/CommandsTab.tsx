@@ -31,7 +31,7 @@ export function CommandsTab({
           value={values.cmd}
           onChange={(cmd) => setFieldValue('cmd', cmd)}
           id="command-input"
-          placeholder="e.g. '-logtostderr' '--housekeeping_interval=5s' or /usr/bin/nginx -t -c /mynginx.conf"
+          placeholder="例如 '-logtostderr' '--housekeeping_interval=5s' or /usr/bin/nginx -t -c /mynginx.conf"
         />
       </FormControl>
 
@@ -46,7 +46,7 @@ export function CommandsTab({
           value={values.entrypoint}
           onChange={(entrypoint) => setFieldValue('entrypoint', entrypoint)}
           id="entrypoint-input"
-          placeholder="e.g. /bin/sh -c"
+          placeholder="例如 /bin/sh -c"
         />
       </FormControl>
 
@@ -60,7 +60,7 @@ export function CommandsTab({
           <Input
             value={values.workingDir}
             onChange={(e) => setFieldValue('workingDir', e.target.value)}
-            placeholder="e.g. /myapp"
+            placeholder="例如 /myapp"
             data-cy="working-dir-input"
           />
         </FormControl>
@@ -73,7 +73,7 @@ export function CommandsTab({
           <Input
             value={values.user}
             onChange={(e) => setFieldValue('user', e.target.value)}
-            placeholder="e.g. nginx"
+            placeholder="例如 nginx"
             data-cy="user-input"
           />
         </FormControl>

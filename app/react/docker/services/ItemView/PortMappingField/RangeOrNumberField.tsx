@@ -37,7 +37,7 @@ export function RangeOrNumberField({
       ) : (
         <InputLabeled
           size="small"
-          placeholder="e.g. 80"
+          placeholder="例如 80"
           className="w-1/2"
           label={label}
           disabled={disabled}

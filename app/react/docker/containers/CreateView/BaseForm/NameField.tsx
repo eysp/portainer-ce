@@ -20,7 +20,7 @@ export function NameField({
         onChange={(e) => {
           onChange(e.target.value);
         }}
-        placeholder="e.g. myContainer"
+        placeholder="例如 myContainer"
         data-cy="container-name-input"
       />
     </FormControl>

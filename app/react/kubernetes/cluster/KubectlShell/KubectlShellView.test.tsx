@@ -249,7 +249,7 @@ describe('KubectlShellView', () => {
       '#Run kubectl commands inside here'
     );
     expect(mockTerminalInstance.writeln).toHaveBeenCalledWith(
-      '#e.g. kubectl get all'
+      '#例如 kubectl get all'
     );
     expect(mockTerminalInstance.writeln).toHaveBeenCalledWith('');
   });
