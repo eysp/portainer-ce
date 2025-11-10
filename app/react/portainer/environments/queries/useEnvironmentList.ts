@@ -97,7 +97,7 @@ export function useEnvironmentList(
       keepPreviousData: true,
       refetchInterval,
       enabled,
-      ...withError('Failure retrieving environments'),
+      ...withError('无法检索环境'),
     }
   );
 

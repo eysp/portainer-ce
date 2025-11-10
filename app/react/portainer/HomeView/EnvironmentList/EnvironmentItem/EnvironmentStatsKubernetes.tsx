@@ -13,7 +13,7 @@ interface Props {
 
 export function EnvironmentStatsKubernetes({ snapshot }: Props) {
   if (!snapshot) {
-    return <>No snapshot available</>;
+    return <>无可用快照</>;
   }
 
   return (
@@ -26,7 +26,7 @@ export function EnvironmentStatsKubernetes({ snapshot }: Props) {
       />
 
       <StatsItem
-        value={addPlural(snapshot.NodeCount, 'node')}
+        value={addPlural(snapshot.NodeCount, '节点')}
         icon={HardDrive}
       />
     </>

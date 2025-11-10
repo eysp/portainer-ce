@@ -41,7 +41,7 @@ export function AMTButton({
         color="light"
         data-cy="associate-amt-button"
       >
-        Associate with OpenAMT
+        关联到 OpenAMT
       </Button>
       {isOpenDialog && (
         <AssociateAMTDialog

@@ -33,12 +33,12 @@ export function EnvironmentTypeTag({
 function getTypeLabel(environment: Environment) {
   if (isEdgeEnvironment(environment.Type)) {
     return environment.Edge.AsyncMode
-      ? 'Edge Agent Async'
-      : 'Edge Agent Standard';
+      ? 'Edge 代理异步'
+      : 'Edge 代理标准';
   }
 
   if (isLocalEnvironment(environment)) {
-    return 'Local';
+    return '本地';
   }
 
   if (environment.Type === EnvironmentType.Azure) {
@@ -46,7 +46,7 @@ function getTypeLabel(environment: Environment) {
   }
 
   if (isAgentEnvironment(environment.Type)) {
-    return 'Agent';
+    return '代理';
   }
 
   return '';

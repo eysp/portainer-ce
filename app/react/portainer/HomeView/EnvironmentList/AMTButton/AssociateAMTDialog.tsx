@@ -43,18 +43,17 @@ export function AssociateAMTDialog({
     !isLoading && environments.every((env) => selection.includes(env.Id));
 
   return (
-    <Modal onDismiss={onClose} aria-label="Associate with OpenAMT">
-      <Modal.Header title="Associate with OpenAMT" />
+    <Modal onDismiss={onClose} aria-label="关联到 OpenAMT">
+      <Modal.Header title="关联到 OpenAMT" />
       <Modal.Body>
         <span>
-          Select the environments to add to associate to OpenAMT. You may select
-          across multiple pages.
+          选择要关联到 OpenAMT 的环境。您可以选择跨多个页面。
         </span>
         <div className="flex h-8 items-center">
           <Checkbox
             id="settings-container-truncate-name"
             data-cy="select-all-checkbox"
-            label="Select all (in this page)"
+            label="全选（本页）"
             checked={isAllPageSelected}
             onChange={handleSelectAll}
           />
@@ -96,16 +95,16 @@ export function AssociateAMTDialog({
           color="default"
           data-cy="associate-amt-dialog-cancel-button"
         >
-          Cancel
+          取消
         </Button>
         <LoadingButton
           onClick={handleSubmit}
           data-cy="associate-amt-dialog-associate-button"
           disabled={selection.length === 0}
-          loadingText="Associating..."
+          loadingText="正在关联..."
           isLoading={activateDeviceMutation.isLoading}
         >
-          Associate Devices
+          关联设备
         </LoadingButton>
       </Modal.Footer>
     </Modal>
