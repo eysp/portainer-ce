@@ -104,7 +104,7 @@ export function SettingsSidebar({ isPureAdmin, isAdmin, isTeamLeader }: Props) {
           </SidebarParent>
 
           <SidebarItem
-            label="注册表"
+            label="镜像仓库"
             to="portainer.registries"
             icon={Radio}
             data-cy="portainerSidebar-registries"

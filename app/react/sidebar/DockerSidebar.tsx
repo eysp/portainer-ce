@@ -211,7 +211,7 @@ export function DockerSidebar({ environmentId, environment }: Props) {
         </Authorized>
 
         <SidebarItem
-          label="注册表"
+          label="镜像仓库"
           isSubMenu
           to={registrySubMenuTo}
           params={{ endpointId: environmentId }}
