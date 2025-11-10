@@ -14,7 +14,7 @@ export function NameField({ errors }: { errors?: FormikErrors<string> }) {
       <Field
         as={Input}
         name="name"
-        placeholder="例如 backup-app-prod"
+        placeholder="e.g. backup-app-prod"
         data-cy="edgejob-name-input"
         id="edgejob_name"
       />

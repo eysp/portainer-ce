@@ -72,7 +72,7 @@ export interface HelmChart {
   values?: Record<string, unknown>;
   /** Optional JSON schema for imposing structure on Values */
   schema?: unknown;
-  /** Miscellaneous files in a chart archive (例如 README, LICENSE) */
+  /** Miscellaneous files in a chart archive (e.g. README, LICENSE) */
   files?: unknown[];
 }
 

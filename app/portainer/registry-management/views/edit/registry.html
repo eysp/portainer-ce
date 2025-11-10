@@ -24,7 +24,7 @@
                 id="registry_name"
                 name="registry_name"
                 ng-model="$ctrl.registry.Name"
-                placeholder="例如 my-registry"
+                placeholder="e.g. my-registry"
                 ng-change="$ctrl.onChangeName()"
                 required
               />
@@ -65,7 +65,7 @@
                 id="registry_url"
                 name="registry_url"
                 ng-model="$ctrl.registry.URL"
-                placeholder="例如 10.0.0.10:5000 or myregistry.domain.tld"
+                placeholder="e.g. 10.0.0.10:5000 or myregistry.domain.tld"
                 ng-disabled="$ctrl.registry.Type === $ctrl.RegistryTypes.DOCKERHUB || $ctrl.registry.Type === $ctrl.RegistryTypes.QUAY || $ctrl.registry.Type === $ctrl.RegistryTypes.GITLAB"
                 required
               />
@@ -97,7 +97,7 @@
                   id="registry_base_url"
                   name="registry_base_url"
                   ng-model="$ctrl.registry.BaseURL"
-                  placeholder="例如 10.0.0.10:5000 or myregistry.domain.tld"
+                  placeholder="e.g. 10.0.0.10:5000 or myregistry.domain.tld"
                   required
                 />
               </div>

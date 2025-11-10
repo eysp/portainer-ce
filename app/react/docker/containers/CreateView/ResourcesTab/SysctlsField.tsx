@@ -43,7 +43,7 @@ function Item({ item, onChange, error, index }: ItemProps<Sysctls>) {
           value={item.name}
           onChange={(e) => onChange({ ...item, name: e.target.value })}
           label="名称"
-          placeholder="例如 FOO"
+          placeholder="e.g. FOO"
           className="w-1/2"
           size="small"
           data-cy={`docker-container-sysctl-name_${index}`}
@@ -52,7 +52,7 @@ function Item({ item, onChange, error, index }: ItemProps<Sysctls>) {
           value={item.value}
           onChange={(e) => onChange({ ...item, value: e.target.value })}
           label="值"
-          placeholder="例如 bar"
+          placeholder="e.g. bar"
           className="w-1/2"
           size="small"
           data-cy={`docker-container-sysctl-value_${index}`}

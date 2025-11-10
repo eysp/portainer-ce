@@ -56,7 +56,7 @@ function getColumns() {
         id: 'be-indicator',
         cell: ({ row: { original: item } }) =>
           item.Id === RoleTypes.STANDARD ? (
-            <b>Default</b>
+            <b>默认</b>
           ) : (
             <BEFeatureIndicator featureId={FeatureId.RBAC_ROLES} />
           ),

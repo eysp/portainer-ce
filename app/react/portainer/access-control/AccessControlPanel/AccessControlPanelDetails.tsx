@@ -9,7 +9,7 @@ import { TeamId } from '@/react/portainer/users/teams/types';
 import { useTeams } from '@/react/portainer/users/teams/queries';
 import { useUsers } from '@/portainer/users/queries';
 import { pluralize } from '@/portainer/helpers/strings';
-import { ownershipIcon } from '@/react/docker/components/datatable/createOwnershipColumn';
+import { ownershipIcon, getOwnershipLabel } from '@/react/docker/components/datatable/createOwnershipColumn';
 
 import { Link } from '@@/Link';
 import { Tooltip } from '@@/Tip/Tooltip';
@@ -80,7 +80,7 @@ export function AccessControlPanelDetails({
               aria-hidden="true"
               aria-label="ownership-icon"
             />
-            <span aria-label="ownership">{ownership}</span>
+            <span aria-label="ownership">{getOwnershipLabel(ownership)}</span>
             <Tooltip message={getOwnershipTooltip(ownership)} />
           </td>
         </tr>

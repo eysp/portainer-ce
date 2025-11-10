@@ -18,7 +18,7 @@ export function useRbacRoles<T = Array<RbacRole>>({
 
         return data;
       } catch (e) {
-        throw parseAxiosError(e, 'Failed to fetch roles');
+        throw parseAxiosError(e, '获取角色失败');
       }
     },
   });

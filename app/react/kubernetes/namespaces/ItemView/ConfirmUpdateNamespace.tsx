@@ -23,7 +23,7 @@ export function confirmUpdateNamespace(warnings: Warnings) {
       )}
       {warnings.registries && (
         <p>
-          您移除的某些镜像仓库可能被此环境中的一个或多个应用程序使用。移除镜像仓库访问可能导致这些应用程序的服务中断。
+          您移除的某些注册表可能被此环境中的一个或多个应用程序使用。移除注册表访问可能导致这些应用程序的服务中断。
         </p>
       )}
       <p>您确定要继续吗？</p>

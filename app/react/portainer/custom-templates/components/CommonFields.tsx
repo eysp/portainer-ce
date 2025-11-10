@@ -33,7 +33,7 @@ export function CommonFields({
         <Input
           name="title"
           data-cy="custom-templates-title-input"
-          placeholder="例如 mytemplate"
+          placeholder="e.g. mytemplate"
           id="template-title"
           required
           value={values.Title}

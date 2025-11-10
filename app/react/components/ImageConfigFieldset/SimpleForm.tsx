@@ -231,7 +231,7 @@ function ImageFieldAutoComplete({
       value={value}
       onChange={(value) => onChange(value)}
       data-cy="component-imageInput"
-      placeholder="例如 my-image:my-tag"
+      placeholder="e.g. my-image:my-tag"
       options={imageOptions}
       inputId={inputId}
     />

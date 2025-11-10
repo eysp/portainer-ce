@@ -4,7 +4,7 @@ import { CellContext } from '@tanstack/react-table';
 import { ResourceControlOwnership } from '@/react/portainer/access-control/types';
 import { ContainerGroup } from '@/react/azure/types';
 import { determineOwnership } from '@/react/portainer/access-control/models/ResourceControlViewModel';
-import { ownershipIcon } from '@/react/docker/components/datatable/createOwnershipColumn';
+import { ownershipIcon, getOwnershipLabel } from '@/react/docker/components/datatable/createOwnershipColumn';
 
 import { columnHelper } from './helper';
 
@@ -14,7 +14,7 @@ export const ownership = columnHelper.accessor(
       ? determineOwnership(row.Portainer.ResourceControl)
       : ResourceControlOwnership.ADMINISTRATORS,
   {
-    header: 'Ownership',
+    header: '所有权',
     cell: OwnershipCell,
     id: 'ownership',
   }
@@ -31,7 +31,7 @@ function OwnershipCell({
         className={clsx(ownershipIcon(value), 'space-right')}
         aria-hidden="true"
       />
-      {value}
+      {getOwnershipLabel(value)}
     </>
   );
 }

@@ -218,7 +218,7 @@ export function KubernetesSidebar({ environmentId }: Props) {
         <SidebarItem
           to="kubernetes.registries"
           params={{ endpointId: environmentId }}
-          label="镜像仓库"
+          label="注册表"
           isSubMenu
           data-cy="k8sSidebar-registries"
         />

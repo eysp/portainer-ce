@@ -35,12 +35,12 @@ export function AddLabelForm({
               <Field
                 as={Input}
                 name="name"
-                placeholder="例如 com.example.foo"
+                placeholder="e.g. com.example.foo"
               />
             </FormControl>
 
             <FormControl label="值" errors={errors.value} className="flex-1">
-              <Field as={Input} name="value" placeholder="例如 bar" />
+              <Field as={Input} name="value" placeholder="e.g. bar" />
             </FormControl>
 
             <Button

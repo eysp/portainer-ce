@@ -28,7 +28,7 @@ export function NameFormSection({
         value={appName ?? ''}
         onChange={(e) => onChange(e.target.value)}
         autoFocus
-        placeholder="例如 my-app"
+        placeholder="e.g. my-app"
         disabled={isEdit}
         id="application_name"
         data-cy="k8sAppCreate-applicationName"

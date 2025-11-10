@@ -62,7 +62,7 @@ export function KubeConfigTeaserForm() {
               name="name"
               as={Input}
               data-cy="endpointCreate-nameInput"
-              placeholder="例如 docker-prod01 / kubernetes-cluster01"
+              placeholder="e.g. docker-prod01 / kubernetes-cluster01"
               readOnly
             />
           </FormControl>

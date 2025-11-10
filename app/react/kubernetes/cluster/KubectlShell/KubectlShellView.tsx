@@ -39,7 +39,7 @@ export function KubectlShellView() {
     terminal.focus();
     fit(terminal);
     terminal.writeln('#Run kubectl commands inside here');
-    terminal.writeln('#例如 kubectl get all');
+    terminal.writeln('#e.g. kubectl get all');
     terminal.writeln('');
     setShellState('connected');
   }, [terminal]);

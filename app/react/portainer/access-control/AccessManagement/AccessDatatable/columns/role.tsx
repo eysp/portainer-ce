@@ -12,7 +12,7 @@ import { helper } from './helper';
 
 export const role = helper.accessor('Role.Name', {
   cell: RoleCell,
-  header: 'Role',
+  header: '角色',
   meta: {
     width: 320,
   },
@@ -42,7 +42,7 @@ function RoleCell({
           onClick={() => meta.roles.setRolesValue(item.Id, type, item.Role.Id)}
           data-cy="edit-role-button"
         >
-          Edit
+          编辑
         </Button>
       </>
     );
@@ -73,7 +73,7 @@ function RollEdit({
   return (
     <div className="flex items-center gap-3 max-w-xs">
       <Select
-        aria-label="Role"
+        aria-label="角色"
         data-cy="role-select"
         value={value}
         options={rolesQuery.data}

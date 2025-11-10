@@ -12,15 +12,15 @@ const helper = createColumnHelper<AccessViewerPolicyModel>();
 
 export const columns = [
   helper.accessor('EndpointName', {
-    header: 'Environment',
+    header: '环境',
     id: 'Environment',
   }),
   helper.accessor('RoleName', {
-    header: 'Role',
+    header: '角色',
     id: 'Role',
   }),
   helper.display({
-    header: 'Access Origin',
+    header: '访问来源',
     cell: AccessCell,
   }),
 ];
@@ -33,12 +33,12 @@ function AccessCell({
   if (item.RoleId === 0) {
     return (
       <>
-        User access all environments
+        用户可访问所有环境
         <Link
           to="portainer.settings.edgeCompute"
           data-cy={`manage-access-button-${item.RoleName}`}
         >
-          <Icon icon={Users} /> Manage access
+          <Icon icon={Users} /> 管理访问
         </Link>
       </>
     );
@@ -46,7 +46,7 @@ function AccessCell({
 
   return (
     <>
-      {prefix(item.TeamName)} access defined on {item.AccessLocation}{' '}
+      {prefix(item.TeamName)} 访问权限定义于 {item.AccessLocation}{' '}
       {!!item.GroupName && <code>{item.GroupName}</code>}{' '}
       {manageAccess(item, isPureAdmin)}
     </>
@@ -55,11 +55,11 @@ function AccessCell({
 
 function prefix(teamName: string | undefined) {
   if (!teamName) {
-    return 'User';
+    return '用户';
   }
   return (
     <>
-      Team <code>{teamName}</code>
+      团队 <code>{teamName}</code>
     </>
   );
 }

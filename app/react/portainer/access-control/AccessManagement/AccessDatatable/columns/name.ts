@@ -1,3 +1,5 @@
 import { helper } from './helper';
 
-export const name = helper.accessor('Name', {});
+export const name = helper.accessor('Name', {
+  header: '名称',
+});

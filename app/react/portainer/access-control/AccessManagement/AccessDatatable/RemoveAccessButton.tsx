@@ -11,7 +11,7 @@ export function RemoveAccessButton({
 }) {
   return (
     <DeleteButton
-      confirmMessage="Are you sure you want to unauthorized the selected users or teams?"
+      confirmMessage="您确定要取消选定用户或团队的授权吗？"
       onConfirmed={() => onClick(items)}
       disabled={items.length === 0}
       data-cy="remove-access-button"

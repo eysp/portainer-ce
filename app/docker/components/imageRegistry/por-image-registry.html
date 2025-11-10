@@ -1,7 +1,7 @@
 <!-- use registry -->
 <div class="row">
   <div class="form-group" ng-if="$ctrl.model.UseRegistry">
-    <label for="image_registry" class="control-label col-sm-3 col-lg-2 text-left" ng-class="$ctrl.labelClass"> 镜像仓库 </label>
+    <label for="image_registry" class="control-label col-sm-3 col-lg-2 text-left" ng-class="$ctrl.labelClass"> 注册表 </label>
     <div ng-class="$ctrl.inputClass" class="col-sm-8">
       <select
         data-cy="component-registrySelect"
@@ -26,7 +26,7 @@
           uib-typeahead="image for image in $ctrl.availableImages | filter:$viewValue | limitTo:5"
           ng-model="$ctrl.model.Image"
           name="image_name"
-          placeholder="例如 my-image:my-tag"
+          placeholder="e.g. my-image:my-tag"
           ng-change="$ctrl.onImageChange()"
           required
         />
@@ -57,7 +57,7 @@
           class="form-control"
           ng-model="$ctrl.model.Image"
           name="image_name"
-          placeholder="例如 registry:port/my-image:my-tag"
+          placeholder="e.g. registry:port/my-image:my-tag"
           required
           data-cy="component-imageInput"
         />
