@@ -67,7 +67,7 @@ export function APIForm({ onCreate }: Props) {
               as={Input}
               id="url-field"
               name="url"
-              placeholder="例如 10.0.0.10:2375 or mydocker.mydomain.com:2375"
+              placeholder="e.g. 10.0.0.10:2375 or mydocker.mydomain.com:2375"
             />
           </FormControl>
 

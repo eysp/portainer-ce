@@ -41,7 +41,7 @@ type NetworkConfigBase = {
 /**
  * This type definition of NetworkConfig doesnt enforce the usage of only one type of the union
  * and not a mix of fields of the unionised types.
- * 例如 the following is valid for TS while it is not for the Docker API
+ * e.g. the following is valid for TS while it is not for the Docker API
  *
  * const config: NetworkConfig = {
  *   Name: 'my-network', // shared
@@ -86,6 +86,6 @@ export async function createNetwork(
     );
     return data;
   } catch (err) {
-    throw parseAxiosError(err, 'Unable to create network');
+    throw parseAxiosError(err, '无法创建网络');
   }
 }

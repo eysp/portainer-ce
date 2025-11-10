@@ -19,7 +19,7 @@ export function useNetwork(
     [...queryKeys.item(environmentId, networkId), { nodeName }],
     () => getNetwork(environmentId, networkId, { nodeName }),
     {
-      ...withGlobalError('Unable to get network'),
+      ...withGlobalError('无法获取网络'),
     }
   );
 }
@@ -47,6 +47,6 @@ export async function getNetwork(
     );
     return network;
   } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to retrieve network details');
+    throw parseAxiosError(e as Error, '无法检索网络详细信息');
   }
 }

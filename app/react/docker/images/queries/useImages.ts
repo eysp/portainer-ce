@@ -57,6 +57,6 @@ async function getImages(
     );
     return data;
   } catch (err) {
-    throw parseAxiosError(err, 'Unable to retrieve images');
+    throw parseAxiosError(err, '无法检索镜像');
   }
 }

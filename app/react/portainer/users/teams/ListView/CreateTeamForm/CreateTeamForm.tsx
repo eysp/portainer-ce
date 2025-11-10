@@ -77,7 +77,7 @@ export function CreateTeamForm({ users, teams }: Props) {
                       name="name"
                       id="team_name"
                       required
-                      placeholder="例如 development"
+                      placeholder="e.g. development"
                       data-cy="team-teamNameInput"
                     />
                   </FormControl>

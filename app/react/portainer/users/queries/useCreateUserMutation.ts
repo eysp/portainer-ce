@@ -29,7 +29,7 @@ export function useCreateUserMutation() {
       );
     },
     ...withInvalidate(queryClient, [userQueryKeys.base()]),
-    ...withGlobalError('Unable to create user'),
+    ...withGlobalError('无法创建用户'),
   });
 }
 
@@ -38,6 +38,6 @@ async function createUser(payload: CreateUserPayload) {
     const { data } = await axios.post<User>(buildUrl(), payload);
     return data;
   } catch (err) {
-    throw parseAxiosError(err, 'Unable to create user');
+    throw parseAxiosError(err, '无法创建用户');
   }
 }

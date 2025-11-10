@@ -213,7 +213,7 @@ test('The form should render', async () => {
 });
 
 export function renderCreateForm() {
-  // user declaration needs to go at the start for user id related requests (例如 git credentials)
+  // user declaration needs to go at the start for user id related requests (e.g. git credentials)
   const user = new UserViewModel({ Username: 'user' });
   server.use(
     http.get('/api/templates', () =>

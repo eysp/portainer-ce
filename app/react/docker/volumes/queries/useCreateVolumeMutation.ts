@@ -31,6 +31,6 @@ export async function createVolume(
     );
     return data;
   } catch (err) {
-    throw parseAxiosError(err, 'Unable to create volume');
+    throw parseAxiosError(err, '无法创建卷');
   }
 }

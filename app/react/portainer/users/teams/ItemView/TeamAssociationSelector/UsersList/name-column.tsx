@@ -37,7 +37,7 @@ export function NameCell({
         icon={PlusCircle}
         onClick={() => handleAddMember()}
       >
-        Add
+        添加
       </Button>
     </>
   );
@@ -45,7 +45,7 @@ export function NameCell({
   function handleAddMember() {
     addMemberMutation.mutate([user.Id], {
       onSuccess() {
-        notifySuccess('User added to team', name);
+        notifySuccess('用户已添加到团队', name);
       },
     });
   }

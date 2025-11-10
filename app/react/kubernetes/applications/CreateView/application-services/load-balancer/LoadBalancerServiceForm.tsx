@@ -135,7 +135,7 @@ export function LoadBalancerServiceForm({
                           type="number"
                           className="form-control min-w-max"
                           name={`loadbalancer_port_${portIndex}`}
-                          placeholder="例如 80"
+                          placeholder="e.g. 80"
                           min="1"
                           max="65535"
                           value={servicePort.port || ''}

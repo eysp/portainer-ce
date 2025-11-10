@@ -17,7 +17,7 @@ interface Props {
 export function NameField({
   readonly,
   tooltip,
-  placeholder = '例如 docker-prod01 / kubernetes-cluster01',
+  placeholder = 'e.g. docker-prod01 / kubernetes-cluster01',
 }: Props) {
   const [{ value }, meta, { setValue }] = useField('name');
 

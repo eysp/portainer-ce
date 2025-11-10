@@ -23,7 +23,7 @@ angular.module('portainer.app').controller('InitAdminController', [
       Username: 'admin',
       Password: '',
       ConfirmPassword: '',
-      enableTelemetry: process.env.NODE_ENV === 'production',
+      enableTelemetry: false,
       restoreFormType: $scope.RESTORE_FORM_TYPES.FILE,
     };
 

@@ -45,7 +45,7 @@ export function InnerForm({
   const hasMultipleTypes = hasKubeEndpoint && hasDockerEndpoint;
   const multipleTypesError = hasMultipleTypes
     ? `There are no available deployment types when there is more than one
-          type of environment in your edge group selection (例如 Kubernetes and
+          type of environment in your edge group selection (e.g. Kubernetes and
           Docker environments). Please select edge groups that have environments
           of the same type.`
     : undefined;
@@ -56,7 +56,7 @@ export function InnerForm({
         onChange={(value) => setFieldValue('name', value)}
         value={values.name}
         errors={errors.name}
-        placeholder="例如 my-stack"
+        placeholder="e.g. my-stack"
       />
 
       <EdgeGroupsSelector

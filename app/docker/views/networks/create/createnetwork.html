@@ -9,7 +9,7 @@
           <div class="form-group">
             <label for="network_name" class="col-sm-2 col-lg-1 control-label text-left">名称</label>
             <div class="col-sm-10 col-lg-11">
-              <input type="text" class="form-control" ng-model="config.Name" id="network_name" placeholder="例如 myNetwork" data-cy="network-name-input" />
+              <input type="text" class="form-control" ng-model="config.Name" id="network_name" placeholder="e.g. myNetwork" data-cy="network-name-input" />
             </div>
           </div>
           <!-- !name-input -->
@@ -32,7 +32,7 @@
                 class="form-control"
                 ng-model="config.Driver"
                 id="network_driver"
-                placeholder="例如 driverName"
+                placeholder="e.g. driverName"
                 ng-if="availableNetworkDrivers.length === 0"
                 data-cy="network-driver-input"
               />
@@ -56,13 +56,13 @@
                     type="text"
                     class="form-control"
                     ng-model="option.name"
-                    placeholder="例如 com.docker.network.bridge.enable_icc"
+                    placeholder="e.g. com.docker.network.bridge.enable_icc"
                     data-cy="network-driver-option-name-input"
                   />
                 </div>
                 <div class="input-group col-sm-6 input-group-sm">
                   <span class="input-group-addon">value</span>
-                  <input type="text" class="form-control" ng-model="option.value" placeholder="例如 true" data-cy="network-driver-option-value-input" />
+                  <input type="text" class="form-control" ng-model="option.value" placeholder="e.g. true" data-cy="network-driver-option-value-input" />
                   <span class="input-group-btn">
                     <button class="btn btn-dangerlight" type="button" ng-click="removeDriverOption($index)">
                       <pr-icon icon="'trash-2'" size="'md'"></pr-icon>
@@ -89,7 +89,7 @@
                   class="form-control"
                   ng-model="formValues.IPV4.Subnet"
                   id="ipv4_network_subnet"
-                  placeholder="例如 172.20.0.0/16"
+                  placeholder="e.g. 172.20.0.0/16"
                   data-cy="network-ipv4-subnet-input"
                 />
               </div>
@@ -100,7 +100,7 @@
                   class="form-control"
                   ng-model="formValues.IPV4.Gateway"
                   id="ipv4_network_gateway"
-                  placeholder="例如 172.20.10.11"
+                  placeholder="e.g. 172.20.10.11"
                   data-cy="network-ipv4-gateway-input"
                 />
               </div>
@@ -115,7 +115,7 @@
                   class="form-control"
                   ng-model="formValues.IPV4.IPRange"
                   id="ipv4_network_iprange"
-                  placeholder="例如 172.20.10.128/25"
+                  placeholder="e.g. 172.20.10.128/25"
                   data-cy="network-ipv4-iprange-input"
                 />
               </div>
@@ -130,7 +130,7 @@
                   ng-model="formValues.IPV4.AuxiliaryAddresses[$index]"
                   ng-change="checkIPV4AuxiliaryAddress($index)"
                   id="ipv4_network_auxaddr_{{ $index }}"
-                  placeholder="例如 my-router=172.20.10.129"
+                  placeholder="e.g. my-router=172.20.10.129"
                 />
               </div>
               <button class="btn btn-dangerlight" type="button" ng-click="removeIPV4AuxAddress($index)">
@@ -158,7 +158,7 @@
                   class="form-control"
                   ng-model="formValues.IPV6.Subnet"
                   id="ipv6_network_subnet"
-                  placeholder="例如 2001:db8::/48"
+                  placeholder="e.g. 2001:db8::/48"
                   data-cy="network-ipv6-subnet-input"
                 />
               </div>
@@ -169,7 +169,7 @@
                   class="form-control"
                   ng-model="formValues.IPV6.Gateway"
                   id="ipv6_network_gateway"
-                  placeholder="例如 2001:db8::1"
+                  placeholder="e.g. 2001:db8::1"
                   data-cy="network-ipv6-gateway-input"
                 />
               </div>
@@ -184,7 +184,7 @@
                   class="form-control"
                   ng-model="formValues.IPV6.IPRange"
                   id="ipv6_network_iprange"
-                  placeholder="例如 2001:db8::/64"
+                  placeholder="e.g. 2001:db8::/64"
                   data-cy="network-ipv6-iprange-input"
                 />
               </div>
@@ -199,7 +199,7 @@
                   ng-model="formValues.IPV6.AuxiliaryAddresses[$index]"
                   ng-change="checkIPV6AuxiliaryAddress($index)"
                   id="ipv6_network_auxaddr_{{ $index }}"
-                  placeholder="例如 my-router=2001:db8::1"
+                  placeholder="e.g. my-router=2001:db8::1"
                 />
               </div>
               <button class="btn btn-dangerlight" type="button" ng-click="removeIPV6AuxAddress($index)">
@@ -224,11 +224,11 @@
               <div ng-repeat="label in formValues.Labels" class="mt-1">
                 <div class="input-group col-sm-5 input-group-sm">
                   <span class="input-group-addon">name</span>
-                  <input type="text" class="form-control" ng-model="label.key" placeholder="例如 com.example.foo" data-cy="network-label-key-input" />
+                  <input type="text" class="form-control" ng-model="label.key" placeholder="e.g. com.example.foo" data-cy="network-label-key-input" />
                 </div>
                 <div class="input-group col-sm-6 input-group-sm">
                   <span class="input-group-addon">value</span>
-                  <input type="text" class="form-control" ng-model="label.value" placeholder="例如 bar" data-cy="network-label-value-input" />
+                  <input type="text" class="form-control" ng-model="label.value" placeholder="e.g. bar" data-cy="network-label-value-input" />
                   <span class="input-group-btn">
                     <button class="btn btn-dangerlight" type="button" ng-click="removeLabel($index)"> <pr-icon icon="'trash-2'" size="'md'"></pr-icon> </button
                   ></span>

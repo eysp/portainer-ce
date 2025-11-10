@@ -74,7 +74,7 @@ angular.module('portainer.docker').controller('NetworksController', [
         })
         .catch((err) => {
           $scope.networks = [];
-          Notifications.error('Failure', err, 'Unable to retrieve networks');
+          Notifications.error('失败', err, '无法检索网络');
         });
     }
 

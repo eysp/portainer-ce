@@ -83,7 +83,7 @@ export function withControlledInput<T>(
 
   function WrapperComponent(props: T) {
     // map of key = value for all tracked values that will be changed outside of React lifecycle
-    // 例如 save in React state the values that will be changed in AngularJS
+    // e.g. save in React state the values that will be changed in AngularJS
     const [controlledValues, setControlledValues] = useState<KeyRecord<T>>(
       {} as KeyRecord<T>
     );

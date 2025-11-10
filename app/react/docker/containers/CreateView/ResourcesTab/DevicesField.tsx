@@ -45,7 +45,7 @@ function Item({ item, onChange, error, index }: ItemProps<Device>) {
           data-cy={`device-path-on-host_${index}`}
           onChange={(e) => onChange({ ...item, pathOnHost: e.target.value })}
           label="主机"
-          placeholder="例如 /dev/tty0"
+          placeholder="e.g. /dev/tty0"
           className="w-1/2"
           size="small"
         />
@@ -56,7 +56,7 @@ function Item({ item, onChange, error, index }: ItemProps<Device>) {
             onChange({ ...item, pathInContainer: e.target.value })
           }
           label="容器"
-          placeholder="例如 /dev/tty0"
+          placeholder="e.g. /dev/tty0"
           className="w-1/2"
           size="small"
         />

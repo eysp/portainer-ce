@@ -34,7 +34,7 @@ export function useDisconnectContainer({
     }) => disconnectContainer(environmentId, networkId, containerId, nodeName),
     mutationOptions(
       withInvalidate(client, [queryKeys.item(environmentId, networkId)]),
-      withError('Unable to disconnect container from network')
+      withError('无法从网络断开容器连接')
     )
   );
 }
@@ -63,6 +63,6 @@ export async function disconnectContainer(
     );
     return { networkId, environmentId };
   } catch (err) {
-    throw parseAxiosError(err, 'Unable to disconnect container from network');
+    throw parseAxiosError(err, '无法从网络断开容器连接');
   }
 }

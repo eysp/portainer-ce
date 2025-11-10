@@ -25,7 +25,7 @@ export function Item({
       <div className="col-sm-12 form-inline flex gap-1">
         <InputLabeled
           label="容器"
-          placeholder="例如 /path/in/container"
+          placeholder="e.g. /path/in/container"
           value={volume.containerPath}
           onChange={(e) => setValue({ containerPath: e.target.value })}
           size="small"
@@ -71,7 +71,7 @@ export function Item({
             size="small"
             className="flex-1"
             label="主机"
-            placeholder="例如 /path/on/host"
+            placeholder="e.g. /path/on/host"
             value={volume.name}
             onChange={(e) => setValue({ name: e.target.value })}
             id={`host-path-${index}`}

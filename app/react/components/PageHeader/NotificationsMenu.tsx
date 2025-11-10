@@ -43,7 +43,7 @@ export function NotificationsMenu() {
           headerStyles.menuButton
         )}
         data-cy="notificationsMenu-button"
-        aria-label="Notifications menu toggle"
+        aria-label="通知菜单切换"
       >
         <div
           className={clsx(
@@ -64,7 +64,7 @@ export function NotificationsMenu() {
 
       <MenuList
         className={clsx(headerStyles.menuList, notificationStyles.root)}
-        aria-label="Notifications Menu"
+        aria-label="通知菜单"
         data-cy="notificationsMenu"
       >
         <div>
@@ -75,7 +75,7 @@ export function NotificationsMenu() {
             )}
           >
             <div>
-              <h4>Notifications</h4>
+              <h4>通知</h4>
             </div>
             <div className={notificationStyles.itemLast}>
               {reducedNotifications?.length > 0 && (
@@ -88,7 +88,7 @@ export function NotificationsMenu() {
                   }}
                   data-cy="notification-deleteButton"
                 >
-                  Clear all
+                  清除全部
                 </Button>
               )}
             </div>
@@ -114,14 +114,14 @@ export function NotificationsMenu() {
                 to="portainer.notifications"
                 data-cy="notifications-see-all-link"
               >
-                View all notifications
+                查看所有通知
               </Link>
             </div>
           </>
         ) : (
           <div className="flex flex-col items-center">
             <Icon icon={Bell} size="xl" />
-            <p className="my-5">You have no notifications yet.</p>
+            <p className="my-5">您还没有通知。</p>
           </div>
         )}
       </MenuList>
@@ -196,16 +196,16 @@ function formatTime(timeCreated: Date) {
   if (diff <= 86400) {
     let interval = Math.floor(diff / 3600);
     if (interval >= 1) {
-      return `${interval} hours ago`;
+      return `${interval} 小时前`;
     }
     interval = Math.floor(diff / 60);
     if (interval >= 1) {
-      return `${interval} min ago`;
+      return `${interval} 分钟前`;
     }
   }
   if (diff > 86400) {
     const formatDate = Moment(timeCreated).format('YYYY-MM-DD h:mm:ss');
     return formatDate;
   }
-  return 'Just now';
+  return '刚刚';
 }

@@ -103,7 +103,7 @@ function BuildImageController($scope, $async, $window, BuildService, Notificatio
       var buildType = $scope.state.BuildType;
 
       if (buildType === 'editor' && $scope.formValues.DockerFileContent === '') {
-        $scope.state.formValidationError = 'Dockerfile content must not be empty';
+        $scope.state.formValidationError = 'Dockerfile 内容不能为空';
         return;
       }
 

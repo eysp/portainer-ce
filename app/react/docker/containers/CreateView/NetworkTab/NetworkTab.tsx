@@ -53,7 +53,7 @@ export function NetworkTab({
         <Input
           value={values.domain}
           onChange={(e) => setFieldValue('domain', e.target.value)}
-          placeholder="例如 example.com"
+          placeholder="e.g. example.com"
           data-cy="docker-container-domain-input"
         />
       </FormControl>
@@ -62,7 +62,7 @@ export function NetworkTab({
         <Input
           value={values.macAddress}
           onChange={(e) => setFieldValue('macAddress', e.target.value)}
-          placeholder="例如 12-34-56-78-9a-bc"
+          placeholder="e.g. 12-34-56-78-9a-bc"
           data-cy="docker-container-mac-address-input"
         />
       </FormControl>
@@ -71,7 +71,7 @@ export function NetworkTab({
         <Input
           value={values.ipv4Address}
           onChange={(e) => setFieldValue('ipv4Address', e.target.value)}
-          placeholder="例如 172.20.0.7"
+          placeholder="e.g. 172.20.0.7"
           data-cy="docker-container-ipv4-address-input"
         />
       </FormControl>
@@ -80,7 +80,7 @@ export function NetworkTab({
         <Input
           value={values.ipv6Address}
           onChange={(e) => setFieldValue('ipv6Address', e.target.value)}
-          placeholder="例如 a:b:c:d::1234"
+          placeholder="e.g. a:b:c:d::1234"
           data-cy="docker-container-ipv6-address-input"
         />
       </FormControl>
@@ -89,7 +89,7 @@ export function NetworkTab({
         <Input
           value={values.primaryDns}
           onChange={(e) => setFieldValue('primaryDns', e.target.value)}
-          placeholder="例如 1.1.1.1, 2606:4700:4700::1111"
+          placeholder="e.g. 1.1.1.1, 2606:4700:4700::1111"
           data-cy="docker-container-primary-dns-input"
         />
       </FormControl>
@@ -98,7 +98,7 @@ export function NetworkTab({
         <Input
           value={values.secondaryDns}
           onChange={(e) => setFieldValue('secondaryDns', e.target.value)}
-          placeholder="例如 1.0.0.1, 2606:4700:4700::1001"
+          placeholder="e.g. 1.0.0.1, 2606:4700:4700::1001"
           data-cy="docker-container-secondary-dns-input"
         />
       </FormControl>

@@ -37,6 +37,6 @@ export async function pushImage({
       throw new Error(data[data.length - 1].error);
     }
   } catch (err) {
-    throw parseAxiosError(err, 'Unable to push image');
+    throw parseAxiosError(err, '无法推送镜像');
   }
 }
