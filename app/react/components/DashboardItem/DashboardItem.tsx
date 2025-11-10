@@ -47,7 +47,7 @@ export function DashboardItem({
           isRefetching ? 'opacity-100' : 'opacity-0'
         )}
       >
-        Refreshing total
+        正在刷新总计
         <Loader2 className="h-4 animate-spin-slow" />
       </div>
       <div
@@ -56,7 +56,7 @@ export function DashboardItem({
           isLoading ? 'opacity-100' : 'opacity-0'
         )}
       >
-        Loading total
+        正在加载总计
         <Loader2 className="h-4 animate-spin-slow" />
       </div>
       <div className="flex items-center" aria-label={type}>
