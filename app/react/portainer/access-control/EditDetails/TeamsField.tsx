@@ -44,11 +44,11 @@ export function TeamsField({
         />
       ) : (
         <span className="small text-muted">
-          您尚未创建任何团队。请前往{' '}
+          当前没有可用团队。您可以跳过团队授权，或前往{' '}
           <Link to="portainer.teams" data-cy="teams-view-link">
             团队视图
           </Link>{' '}
-          来管理团队。
+          创建并管理团队。
         </span>
       )}
     </FormControl>
