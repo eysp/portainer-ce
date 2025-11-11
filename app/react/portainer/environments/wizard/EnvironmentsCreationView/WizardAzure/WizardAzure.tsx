@@ -80,7 +80,7 @@ export function WizardAzure({ onCreate }: Props) {
             <NameField />
 
             <FormControl
-              label="Application ID"
+            label="应用程序 ID"
               errors={errors.applicationId}
               inputId="applicationId-input"
               required
@@ -94,7 +94,7 @@ export function WizardAzure({ onCreate }: Props) {
             </FormControl>
 
             <FormControl
-              label="Tenant ID"
+            label="租户 ID"
               errors={errors.tenantId}
               inputId="tenantId-input"
               required
@@ -108,7 +108,7 @@ export function WizardAzure({ onCreate }: Props) {
             </FormControl>
 
             <FormControl
-              label="Authentication Key"
+            label="认证密钥"
               errors={errors.authenticationKey}
               inputId="authenticationKey-input"
               required
@@ -174,9 +174,9 @@ export function WizardAzure({ onCreate }: Props) {
 function useValidation(): SchemaOf<FormValues> {
   return object({
     name: useNameValidation(),
-    applicationId: string().required('Application ID is required'),
-    tenantId: string().required('Tenant ID is required'),
-    authenticationKey: string().required('Authentication Key is required'),
+    applicationId: string().required('应用程序 ID 为必填项'),
+    tenantId: string().required('租户 ID 为必填项'),
+    authenticationKey: string().required('认证密钥为必填项'),
     meta: metadataValidation(),
   });
 }

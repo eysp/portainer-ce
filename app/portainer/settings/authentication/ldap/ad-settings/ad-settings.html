@@ -49,7 +49,7 @@
               class="form-control"
               id="ldap_url"
               ng-model="$ctrl.settings.URLs[$index]"
-              placeholder="例如 10.0.0.10:389 or myldap.domain.tld:389"
+              placeholder="例如 10.0.0.10:389 或 myldap.domain.tld:389"
               limited-feature-dir="{{::$ctrl.limitedFeatureId}}"
               limited-feature-tabindex="-1"
             />
@@ -115,7 +115,7 @@
       ></ldap-connectivity-check>
 
       <ldap-settings-security
-        title="AD Connectivity Security"
+        title="AD 连接安全"
         settings="$ctrl.settings"
         tlsca-cert="$ctrl.tlscaCert"
         upload-in-progress="$ctrl.state.uploadInProgress"

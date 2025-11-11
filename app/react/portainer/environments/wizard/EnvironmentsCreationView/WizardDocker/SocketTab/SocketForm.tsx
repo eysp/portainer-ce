@@ -102,15 +102,15 @@ function OverrideSocketFieldset() {
             checked={values.overridePath}
             data-cy="create-docker-env-socket-override-switch"
             onChange={(checked) => setFieldValue('overridePath', checked)}
-            label="Override default socket path"
+            label="覆盖默认 Socket 路径"
             labelClass="col-sm-3 col-lg-2"
           />
         </div>
       </div>
       {values.overridePath && (
         <FormControl
-          label="Socket Path"
-          tooltip="Path to the Docker socket. Remember to bind-mount the socket, see the important notice above for more information."
+          label="Socket 路径"
+          tooltip="Docker Socket 的路径。请确保已正确挂载（bind-mount）该 Socket，更多信息见上方重要说明。"
           errors={errors.socketPath}
         >
           <Field
