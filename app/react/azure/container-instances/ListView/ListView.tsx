@@ -32,8 +32,8 @@ export function ListView() {
   return (
     <>
       <PageHeader
-        title="Container list"
-        breadcrumbs="Container instances"
+        title="容器列表"
+        breadcrumbs="容器实例"
         reload
       />
 
@@ -66,9 +66,9 @@ function useRemoveMutation(environmentId: EnvironmentId) {
       },
       onError(err) {
         notifyError(
-          'Failure',
+          '失败',
           err as Error,
-          'Unable to remove container groups'
+          '无法删除容器组'
         );
       },
     }
@@ -79,7 +79,7 @@ function useRemoveMutation(environmentId: EnvironmentId) {
   async function handleRemove(groupIds: string[]) {
     deleteMutation.mutate(groupIds, {
       onSuccess: () => {
-        notifySuccess('Success', 'Container groups successfully removed');
+        notifySuccess('成功', '容器组已成功删除');
       },
     });
   }

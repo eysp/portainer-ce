@@ -1,15 +1,15 @@
-<div class="col-sm-12 form-section-title" style="float: initial"> Group search configurations </div>
+<div class="col-sm-12 form-section-title" style="float: initial"> 分组搜索配置 </div>
 
 <rd-widget ng-repeat="config in $ctrl.settings | limitTo: (1 - $ctrl.settings)" style="display: block; margin-bottom: 10px">
   <rd-widget-body>
     <div class="form-group" ng-if="$index > 0" style="margin-bottom: 10px">
-      <span class="col-sm-12 text-muted small"> Extra search configuration </span>
+      <span class="col-sm-12 text-muted small"> 额外搜索配置 </span>
     </div>
 
     <div class="form-group">
       <label for="ldap_group_basedn_{{ $index }}" class="col-sm-4 col-md-2 control-label text-left">
-        Group Base DN
-        <portainer-tooltip message="'The distinguished name of the element from which the LDAP server will search for groups.'"></portainer-tooltip>
+        分组基础 DN
+        <portainer-tooltip message="'LDAP 服务器将从中搜索分组的元素的专有名称。'"></portainer-tooltip>
       </label>
       <div class="col-sm-8 col-md-4">
         <input
@@ -23,8 +23,8 @@
       </div>
 
       <label for="ldap_group_att_{{ $index }}" class="col-sm-4 col-md-2 control-label text-left">
-        Group Membership Attribute
-        <portainer-tooltip message="'LDAP attribute which denotes the group membership.'"></portainer-tooltip>
+        分组成员属性
+        <portainer-tooltip message="'表示分组成员身份的 LDAP 属性。'"></portainer-tooltip>
       </label>
       <div class="col-sm-8 col-md-4">
         <input type="text" class="form-control" id="ldap_group_att_{{ $index }}" ng-model="config.GroupAttribute" placeholder="member" data-cy="ldap-group-attribute-input" />
@@ -32,8 +32,8 @@
     </div>
     <div class="form-group">
       <label for="ldap_group_filter_{{ $index }}" class="col-sm-4 col-md-2 control-label text-left">
-        Group Filter
-        <portainer-tooltip message="'The LDAP search filter used to select group elements, optional.'"></portainer-tooltip>
+        分组过滤器
+        <portainer-tooltip message="'用于选择分组元素的 LDAP 搜索过滤器，可选。'"></portainer-tooltip>
       </label>
       <div class="col-sm-8 col-md-10 vertical-center">
         <input
@@ -52,11 +52,11 @@
     <div class="form-group">
       <span class="col-sm-12 small" style="color: #ffa719">
         <pr-icon icon="'briefcase'" class-name="'icon icon-xs vertical-center'"></pr-icon>
-        Users removal synchronize between groups and teams only available in
-        <a href="https://www.portainer.io/features?from=custom-login-banner" target="_blank">business edition.</a>
+        用户移除在分组和团队之间的同步仅在
+        <a href="https://www.portainer.io/features?from=custom-login-banner" target="_blank">商业版</a>中可用。
         <portainer-tooltip
           class="text-muted align-bottom"
-          message="'Groups allows users to automatically be added to Portainer teams. However, automatically removing users from teams to keep it fully in sync is available in the Business Edition.'"
+          message="'分组允许用户自动添加到 Portainer 团队。但是，自动从团队中移除用户以保持完全同步的功能仅在商业版中可用。'"
         ></portainer-tooltip>
       </span>
     </div>
@@ -67,15 +67,15 @@
   <div class="col-sm-12">
     <button class="btn btn-sm btn-light vertical-center !ml-0" ng-click="$ctrl.onAddClick()">
       <pr-icon icon="'plus'"></pr-icon>
-      Add group search configuration
+      添加分组搜索配置
     </button>
   </div>
   <div class="col-sm-12" style="margin-top: 10px">
     <be-teaser-button
       feature-id="$ctrl.limitedFeatureId"
-      heading="'Display User/Group matching'"
-      message="'Show the list of users and groups that match the Portainer search configurations.'"
-      button-text="'Display User/Group matching'"
+      heading="'显示用户/分组匹配'"
+      message="'显示与 Portainer 搜索配置匹配的用户和分组列表。'"
+      button-text="'显示用户/分组匹配'"
       button-class-name="'!ml-0'"
     ></be-teaser-button>
   </div>

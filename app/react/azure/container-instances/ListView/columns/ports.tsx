@@ -10,7 +10,7 @@ import { Icon } from '@@/Icon';
 import { columnHelper } from './helper';
 
 export const ports = columnHelper.accessor(getPorts, {
-  header: 'Published Ports',
+  header: '已发布端口',
   cell: PortsCell,
   id: 'ports',
 });

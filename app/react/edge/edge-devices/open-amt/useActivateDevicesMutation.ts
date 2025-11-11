@@ -9,7 +9,7 @@ export function useActivateDevicesMutation() {
   return useMutation(
     (environmentIds: EnvironmentId[]) =>
       promiseSequence(environmentIds.map((id) => () => activateDevice(id))),
-    mutationOptions(withError('Unable to associate with OpenAMT'))
+    mutationOptions(withError('无法关联到 OpenAMT'))
   );
 }
 
@@ -17,6 +17,6 @@ async function activateDevice(environmentId: EnvironmentId) {
   try {
     await axios.post(`/open_amt/${environmentId}/activate`);
   } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to activate device');
+    throw parseAxiosError(e as Error, '无法激活设备');
   }
 }

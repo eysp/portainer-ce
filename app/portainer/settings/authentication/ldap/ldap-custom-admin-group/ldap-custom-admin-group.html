@@ -1,18 +1,18 @@
 <div class="col-sm-12 form-section-title flex items-center" style="float: initial">
-  Auto-populate team admins <be-feature-indicator feature="$ctrl.limitedFeatureId" class="space-left" ng-if="$ctrl.isLimitedFeatureSelfContained"></be-feature-indicator>
+  自动填充团队管理员 <be-feature-indicator feature="$ctrl.limitedFeatureId" class="space-left" ng-if="$ctrl.isLimitedFeatureSelfContained"></be-feature-indicator>
 </div>
 
 <rd-widget>
   <rd-widget-body>
     <div class="w-full pt-3" ng-repeat="config in $ctrl.settings.AdminGroupSearchSettings | limitTo: (1 - $ctrl.settings.AdminGroupSearchSettings)">
       <div class="form-group mb-3" ng-if="$index > 0">
-        <span class="col-sm-12 text-muted small"> Extra search configuration </span>
+        <span class="col-sm-12 text-muted small"> 额外搜索配置 </span>
       </div>
 
       <div class="form-group">
         <label for="ldap_admin_group_basedn_{{ $index }}" class="col-sm-4 col-md-2 control-label text-left">
-          Group Base DN
-          <portainer-tooltip message="'The distinguished name of the element from which the LDAP server will search for groups.'"></portainer-tooltip>
+          分组基础 DN
+          <portainer-tooltip message="'LDAP 服务器将从中搜索分组的元素的专有名称。'"></portainer-tooltip>
         </label>
         <div class="col-sm-8 col-md-4">
           <input
@@ -30,8 +30,8 @@
         </div>
 
         <label for="ldap_admin_group_att_{{ $index }}" class="col-sm-4 col-md-2 control-label text-left">
-          Group Membership Attribute
-          <portainer-tooltip message="'LDAP attribute which denotes the group membership.'"></portainer-tooltip>
+          分组成员属性
+          <portainer-tooltip message="'表示分组成员身份的 LDAP 属性。'"></portainer-tooltip>
         </label>
         <div class="col-sm-8 col-md-4">
           <input
@@ -50,8 +50,8 @@
       </div>
       <div class="form-group">
         <label for="ldap_admin_group_filter_{{ $index }}" class="col-sm-4 col-md-2 control-label text-left">
-          Group Filter
-          <portainer-tooltip message="'The LDAP search filter used to select group elements, optional.'"></portainer-tooltip>
+          分组过滤器
+          <portainer-tooltip message="'用于选择分组元素的 LDAP 搜索过滤器，可选。'"></portainer-tooltip>
         </label>
         <div class="col-sm-8 col-md-10 vertical-center">
           <input
@@ -77,7 +77,7 @@
       <div class="col-sm-12">
         <button disabled class="btn btn-sm btn-light vertical-center !ml-0" ng-click="$ctrl.onAddClick()">
           <pr-icon icon="'plus'"></pr-icon>
-          Add group search configuration
+          添加分组搜索配置
         </button>
       </div>
       <div class="col-sm-12 vertical-center mt-2">
@@ -90,11 +90,11 @@
           ng-disabled="{{ $ctrl.isLimitedFeatureSelfContained }}"
           limited-feature-tabindex="-1"
         >
-          Fetch Admin Group(s)
+          获取管理员分组
         </button>
         <span ng-if="$ctrl.groups && $ctrl.groups.length === 0" class="vertical-center ml-6">
           <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
-          No groups found
+          未找到分组
         </span>
       </div>
     </div>
@@ -102,7 +102,7 @@
     <div class="form-group">
       <div class="col-sm-12 vertical-center">
         <label for="admin-auto-populate" class="control-label text-muted !pt-0 text-left" ng-class="{ 'text-muted': !$ctrl.enableAssignAdminGroup }">
-          Assign admin rights to group(s)
+          为分组分配管理员权限
         </label>
         <label class="switch my-0 ml-7" ng-class="{ 'business limited': $ctrl.isLimitedFeatureSelfContained }">
           <input
@@ -119,7 +119,7 @@
     </div>
 
     <div class="form-group" ng-if="$ctrl.settings.AdminAutoPopulate && $ctrl.groups">
-      <label for="group-access" class="control-label col-sm-2 text-left"> Select Group(s) </label>
+      <label for="group-access" class="control-label col-sm-2 text-left"> 选择分组 </label>
       <div class="col-sm-8">
         <por-select
           data-cy="'group-access-selector'"
@@ -127,7 +127,7 @@
           value="$ctrl.selectedAdminGroups"
           on-change="($ctrl.onAdminGroupChange)"
           options="$ctrl.groups"
-          placeholder="'Select one or more groups'"
+          placeholder="'选择一个或多个分组'"
           is-multi="true"
         >
         </por-select>

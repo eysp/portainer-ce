@@ -7,7 +7,7 @@ import { Link } from '@@/Link';
 import { columnHelper } from './helper';
 
 export const name = columnHelper.accessor('name', {
-  header: 'Name',
+  header: '名称',
   cell: NameCell,
 });
 

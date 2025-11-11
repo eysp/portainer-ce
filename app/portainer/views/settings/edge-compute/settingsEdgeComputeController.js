@@ -23,10 +23,10 @@ export default function SettingsEdgeComputeController($q, $async, $state, Notifi
   this.onSubmitOpenAMT = async function (formValues) {
     try {
       await configureAMT(formValues);
-      Notifications.success('Success', `OpenAMT successfully ${formValues.enabled ? 'enabled' : 'disabled'}`);
+      Notifications.success('成功', `OpenAMT 已成功${formValues.enabled ? '启用' : '禁用'}`);
       $state.reload();
     } catch (err) {
-      Notifications.error('Failure', err, 'Failed applying changes');
+      Notifications.error('失败', err, '应用更改失败');
     }
   };
 

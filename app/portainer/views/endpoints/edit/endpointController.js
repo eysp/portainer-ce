@@ -353,7 +353,7 @@ function EndpointController(
             clearAMTManagementInfo(amtInfo.RawOutput);
           }
         } catch (err) {
-          clearAMTManagementInfo('Unable to retrieve AMT environment details');
+          clearAMTManagementInfo('无法检索 AMT 环境详细信息');
         }
       }
     });

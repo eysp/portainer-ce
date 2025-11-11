@@ -1,5 +1,5 @@
 <div class="col-sm-12 form-section-title flex items-center" style="float: initial">
-  Test login
+  测试登录
   <be-feature-indicator
     ng-if="$ctrl.showBeIndicatorIfNeeded"
     feature="$ctrl.limitedFeatureId"
@@ -12,7 +12,7 @@
   <rd-widget-body>
     <div class="form-inline">
       <div class="form-group" style="margin: 0">
-        <label for="ldap_test_username" style="font-size: 0.9em; margin-right: 5px"> Username </label>
+        <label for="ldap_test_username" style="font-size: 0.9em; margin-right: 5px"> 用户名 </label>
         <input
           type="text"
           class="form-control"
@@ -27,7 +27,7 @@
       </div>
 
       <div class="form-group no-margin">
-        <label for="ldap_test_password"> Password </label>
+        <label for="ldap_test_password"> 密码 </label>
         <input
           type="password"
           class="form-control"
@@ -52,8 +52,8 @@
             limited-feature-class=" {{ $ctrl.isLimitedFeatureSelfContained && 'limited-be' }}"
             limited-feature-tabindex="-1"
           >
-            <span ng-if="$ctrl.state.testStatus !== $ctrl.TEST_STATUS.LOADING">Test</span>
-            <span ng-if="$ctrl.state.testStatus === $ctrl.TEST_STATUS.LOADING">Testing...</span>
+            <span ng-if="$ctrl.state.testStatus !== $ctrl.TEST_STATUS.LOADING">测试</span>
+            <span ng-if="$ctrl.state.testStatus === $ctrl.TEST_STATUS.LOADING">正在测试...</span>
           </button>
           <pr-icon icon="'check'" class="icon-success" ng-if="$ctrl.state.testStatus === $ctrl.TEST_STATUS.SUCCESS"></pr-icon>
           <pr-icon icon="'x'" class="icon-danger" ng-if="$ctrl.state.testStatus === $ctrl.TEST_STATUS.FAILURE"></pr-icon>

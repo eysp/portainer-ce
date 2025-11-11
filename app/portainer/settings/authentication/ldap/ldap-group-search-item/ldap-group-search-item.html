@@ -1,6 +1,6 @@
 <div class="w-full px-5 pt-3">
   <div ng-if="$ctrl.index > 0" style="margin-bottom: 10px">
-    <span class="text-muted small"> Extra search configuration </span>
+    <span class="text-muted small"> 额外搜索配置 </span>
     <button
       class="btn btn-sm btn-danger"
       type="button"
@@ -13,7 +13,7 @@
   </div>
 
   <ldap-settings-dn-builder
-    label="Group Search Path (optional)"
+    label="分组搜索路径（可选）"
     suffix="{{ $ctrl.domainSuffix }}"
     ng-model="$ctrl.config.GroupBaseDN"
     on-change="($ctrl.onChangeBaseDN)"
@@ -21,16 +21,16 @@
   ></ldap-settings-dn-builder>
 
   <div class="form-group">
-    <label class="col-sm-4 col-md-2 control-label text-left"> Group Base DN </label>
+    <label class="col-sm-4 col-md-2 control-label text-left"> 分组基础 DN </label>
     <div class="col-sm-8 col-md-10"> {{ $ctrl.config.GroupBaseDN }} </div>
   </div>
 
   <div class="form-group">
     <div class="col-sm-12 vertical-center" style="margin-bottom: 5px">
-      <label class="control-label !pt-0 text-left">Groups</label>
+      <label class="control-label !pt-0 text-left">分组</label>
       <span class="label label-default interactive vertical-center" style="margin-left: 10px" ng-click="$ctrl.addGroup()">
         <pr-icon icon="'plus-circle'"></pr-icon>
-        add another group
+        添加其他分组
       </span>
     </div>
     <div class="col-sm-12" ng-if="$ctrl.groups.length">
@@ -45,8 +45,8 @@
               limited-feature-dir="{{::$ctrl.limitedFeatureId}}"
               limited-feature-tabindex="-1"
             >
-              <option value="ou">OU Name</option>
-              <option value="cn">Folder Name</option>
+              <option value="ou">OU 名称</option>
+              <option value="cn">文件夹名称</option>
             </select>
           </div>
           <div class="col-sm-5">
@@ -75,7 +75,7 @@
   </div>
 
   <div class="form-group no-margin-last-child">
-    <label class="col-sm-4 col-md-2 control-label text-left"> Group Filter </label>
+    <label class="col-sm-4 col-md-2 control-label text-left"> 分组过滤器 </label>
     <div class="col-sm-8 col-md-10"> {{ $ctrl.config.GroupFilter }} </div>
   </div>
 </div>

@@ -56,7 +56,7 @@ export function StackContainersDatatable({ environment, stackName }: Props) {
     <RowProvider context={{ environment }}>
       <TableSettingsProvider settings={settingsStore}>
         <Datatable
-          title="Containers"
+          title="容器"
           titleIcon={Box}
           settingsManager={tableState}
           columns={columns}
