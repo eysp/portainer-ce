@@ -23,7 +23,7 @@ export function EdgeKeyDisplay({ edgeKey }: { edgeKey: string }) {
         className="mt-2"
         data-cy="copy-edge-key-button"
       >
-        Copy token
+        复制令牌
       </CopyButton>
     </FormSection>
   );

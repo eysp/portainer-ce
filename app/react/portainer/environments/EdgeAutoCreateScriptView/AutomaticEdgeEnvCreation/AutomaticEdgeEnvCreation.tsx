@@ -156,7 +156,7 @@ function EdgeKeyInfo({
           copyText={edgeKey}
           data-cy="edge-auto-create-copy-token-button"
         >
-          Copy token
+          复制令牌
         </CopyButton>
       </FormSection>
 

@@ -216,7 +216,7 @@ function useStepper(
       case 'kubernetes':
         return WizardKubernetes;
       default:
-        throw new Error(`Unknown environment type ${id}`);
+        throw new Error(`未知的环境类型 ${id}`);
     }
   }
 }

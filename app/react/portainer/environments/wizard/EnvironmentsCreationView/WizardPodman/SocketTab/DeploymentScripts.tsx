@@ -49,7 +49,7 @@ function DeployCode({ code }: DeployCodeProps) {
       <Code>{bindMountCode}</Code>
       <div className="mt-2 mb-4">
         <CopyButton copyText={bindMountCode} data-cy="copy-deployment-command">
-          Copy command
+          复制命令
         </CopyButton>
       </div>
 
@@ -60,7 +60,7 @@ function DeployCode({ code }: DeployCodeProps) {
       <Code>{code}</Code>
       <div className="mt-2">
         <CopyButton copyText={code} data-cy="copy-deployment-command">
-          Copy command
+          复制命令
         </CopyButton>
       </div>
     </>

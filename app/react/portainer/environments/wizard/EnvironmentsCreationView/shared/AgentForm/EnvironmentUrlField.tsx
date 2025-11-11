@@ -12,17 +12,17 @@ export function EnvironmentUrlField({
 
   return (
     <FormControl
-      label="Environment address"
+      label="环境地址"
       errors={meta.error}
       required
       inputId="environment-url-field"
-      tooltip="<HOST>:<PORT> or <IP>:<PORT>"
+      tooltip="<HOST>:<PORT> 或 <IP>:<PORT>"
     >
       <Field
         id="environment-url-field"
         name="environmentUrl"
         as={Input}
-        placeholder={`例如 10.0.0.10:${placeholderPort} or tasks.portainer_agent:${placeholderPort}`}
+        placeholder={`例如 10.0.0.10:${placeholderPort} 或 tasks.portainer_agent:${placeholderPort}`}
         data-cy="endpointCreate-endpointUrlAgentInput"
       />
     </FormControl>

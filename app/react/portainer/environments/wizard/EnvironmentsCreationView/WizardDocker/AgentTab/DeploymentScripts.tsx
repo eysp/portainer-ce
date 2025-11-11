@@ -10,7 +10,7 @@ import { NavContainer } from '@@/NavTabs/NavContainer';
 const deploymentsStandalone = [
   {
     id: 'linux',
-    label: 'Linux & Windows WSL',
+    label: 'Linux 与 Windows WSL',
     command: linuxStandaloneCommand,
   },
   {
@@ -23,7 +23,7 @@ const deploymentsStandalone = [
 const deploymentsSwarm = [
   {
     id: 'linux',
-    label: 'Linux & Windows WSL',
+    label: 'Linux 与 Windows WSL',
     command: linuxSwarmCommand,
   },
   {
@@ -84,7 +84,7 @@ function DeployCode({ code }: DeployCodeProps) {
       </div>
       <div className="mt-2">
         <CopyButton copyText={code} data-cy="copy-deployment-script">
-          Copy command
+          复制命令
         </CopyButton>
       </div>
     </>
