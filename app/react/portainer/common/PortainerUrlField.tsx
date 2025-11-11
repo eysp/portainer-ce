@@ -16,14 +16,14 @@ export function PortainerUrlField({
   fieldName,
   readonly,
   required,
-  tooltip = 'URL of the Portainer instance that the agent will use to initiate the communications.',
+  tooltip = '代理将用于发起通信的 Portainer 实例 URL。',
 }: Props) {
   const [, metaProps] = useField(fieldName);
   const id = `${fieldName}-input`;
 
   return (
     <FormControl
-      label="Portainer API server URL"
+      label="Portainer API 服务器 URL"
       tooltip={tooltip}
       required
       errors={metaProps.error}
@@ -44,10 +44,10 @@ export function PortainerUrlField({
 
 export function validation() {
   return string()
-    .required('API server URL is required')
+    .required('API 服务器 URL 为必填项')
     .test(
       'valid API server URL',
-      'The API server URL must be a valid URL (localhost cannot be used)',
+      'API 服务器 URL 必须是有效的 URL（不能使用 localhost）',
       (value) =>
         isValidUrl(
           value,

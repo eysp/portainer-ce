@@ -116,7 +116,7 @@ function OverrideSocketFieldset() {
           <Field
             name="socketPath"
             as={Input}
-            placeholder="例如 /run/podman/podman.sock (on Linux)"
+            placeholder="例如 /run/podman/podman.sock（Linux 上）"
           />
         </FormControl>
       )}

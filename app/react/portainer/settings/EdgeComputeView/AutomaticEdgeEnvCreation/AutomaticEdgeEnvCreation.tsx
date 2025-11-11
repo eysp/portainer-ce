@@ -17,7 +17,7 @@ export function AutomaticEdgeEnvCreation() {
 
   return (
     <Widget>
-      <WidgetTitle icon={Laptop} title="Automatic Edge Environment Creation" />
+      <WidgetTitle icon={Laptop} title="自动创建 Edge 环境" />
       <WidgetBody>
         <AutoEnvCreationSettingsForm settings={settings} />
       </WidgetBody>

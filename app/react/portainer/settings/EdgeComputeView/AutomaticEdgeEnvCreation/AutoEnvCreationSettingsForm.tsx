@@ -37,8 +37,8 @@ export function AutoEnvCreationSettingsForm({ settings }: Props) {
         {
           onSuccess() {
             notifySuccess(
-              'Success',
-              'Successfully updated Automatic Environment Creation settings'
+              '成功',
+              '自动创建环境设置已成功更新'
             );
           },
         }
@@ -62,13 +62,13 @@ export function AutoEnvCreationSettingsForm({ settings }: Props) {
           <div className="form-group">
             <div className="col-sm-12">
               <LoadingButton
-                loadingText="generating..."
+                loadingText="正在生成..."
                 data-cy="save-auto-env-settings-button"
                 isLoading={mutation.isLoading}
                 disabled={!isValid || !dirty}
                 className="!ml-0"
               >
-                Save settings
+                保存设置
               </LoadingButton>
             </div>
           </div>

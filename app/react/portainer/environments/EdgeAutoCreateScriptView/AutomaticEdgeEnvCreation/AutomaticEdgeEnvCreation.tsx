@@ -31,14 +31,14 @@ const asyncModeOptions = [
   {
     icon: EdgeAgentStandardIcon,
     id: 'standard',
-    label: 'Edge Agent Standard',
+    label: 'Edge Agent 标准模式',
     value: false,
     iconType: 'badge',
   },
   {
     icon: EdgeAgentAsyncIcon,
     id: 'async',
-    label: 'Edge Agent Async',
+    label: 'Edge Agent 异步模式',
     value: true,
     iconType: 'badge',
   },
@@ -70,19 +70,18 @@ export function AutomaticEdgeEnvCreation() {
 
   return (
     <Widget>
-      <WidgetTitle icon={Laptop} title="Automatic Edge Environment Creation" />
+      <WidgetTitle icon={Laptop} title="自动创建 Edge 环境" />
       <WidgetBody className="form-horizontal">
         {!edgeComputeConfigurationOK ? (
           <TextTip color="orange">
-            In order to use this feature, please turn on Edge Compute features{' '}
+            要使用此功能，请先启用 Edge 计算特性，点击
             <Link
               to="portainer.settings.edgeCompute"
               data-cy="edge-disabled-portainer-edge-settings-link"
             >
-              here
-            </Link>{' '}
-            and have Portainer API server URL and tunnel server address properly
-            configured.
+              此处
+            </Link>
+            ，并正确配置 Portainer API 服务器 URL 和隧道服务器地址。
           </TextTip>
         ) : (
           <>
@@ -140,14 +139,14 @@ function EdgeKeyInfo({
   asyncMode: boolean;
 }) {
   if (isLoading || !edgeKey) {
-    return <div>Generating key for {url} ... </div>;
+    return <div>正在为 {url} 生成密钥…</div>;
   }
 
   return (
     <>
       <hr />
 
-      <FormSection title="Edge key">
+      <FormSection title="Edge 密钥">
         <div className="break-words">
           <code>{edgeKey}</code>
         </div>
@@ -168,12 +167,12 @@ function EdgeKeyInfo({
         asyncMode={asyncMode}
         showMetaFields
       >
-        <FormControl label="Portainer API server URL">
+        <FormControl label="Portainer API 服务器 URL">
           <Input value={url} readOnly data-cy="edge-auto-create-url-input" />
         </FormControl>
 
         {!asyncMode && (
-          <FormControl label="Portainer tunnel server address">
+          <FormControl label="Portainer 隧道服务器地址">
             <Input
               value={tunnelUrl}
               readOnly
@@ -183,13 +182,13 @@ function EdgeKeyInfo({
         )}
 
         <TextTip color="blue">
-          Portainer Server URL{' '}
-          {!asyncMode ? 'and tunnel server address are' : 'is'} set{' '}
+          Portainer 服务器 URL
+          {!asyncMode ? ' 与隧道服务器地址已配置在' : ' 已配置在'}
           <Link
             to="portainer.settings.edgeCompute"
             data-cy="server-url-portainer-edge-settings-link"
           >
-            here
+            此处
           </Link>
         </TextTip>
       </EdgeScriptForm>

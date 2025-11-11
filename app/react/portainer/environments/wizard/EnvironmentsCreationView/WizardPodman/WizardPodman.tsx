@@ -31,7 +31,7 @@ const options: BoxSelectorOption<
   {
     id: 'agent',
     icon: <BadgeIcon icon={Zap} size="3xl" />,
-    label: 'Agent',
+    label: '代理',
     description: '',
     value: 'agent',
   },
@@ -45,14 +45,14 @@ const options: BoxSelectorOption<
   {
     id: 'edgeAgentStandard',
     icon: <BadgeIcon icon={EdgeAgentStandardIcon} size="3xl" />,
-    label: 'Edge Agent Standard',
+    label: '边缘代理（标准）',
     description: '',
     value: 'edgeAgentStandard',
   },
   isBE && {
     id: 'edgeAgentAsync',
     icon: <BadgeIcon icon={EdgeAgentAsyncIcon} size="3xl" />,
-    label: 'Edge Agent Async',
+    label: '边缘代理（异步）',
     description: '',
     value: 'edgeAgentAsync',
   },
@@ -74,9 +74,8 @@ export function WizardPodman({ onCreate }: Props) {
         radioName="creation-type"
       />
       <TextTip color="orange" className="mb-2" inline={false}>
-        Currently, Portainer only supports <b>Podman 5</b> running in rootful
-        (privileged) mode on <b>CentOS 9</b> Linux environments. Rootless mode
-        and other Linux distros may work, but aren&apos;t officially supported.
+        目前，Portainer 仅官方支持在 <b>CentOS 9</b> Linux 环境下以 rootful（特权）模式运行的 <b>Podman 5</b>。
+        Rootless 模式和其他 Linux 发行版可能可用，但未获得官方支持。
       </TextTip>
       {tab}
     </div>

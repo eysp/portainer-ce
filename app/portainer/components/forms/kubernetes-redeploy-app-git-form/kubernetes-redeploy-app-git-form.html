@@ -1,8 +1,8 @@
 <form name="$ctrl.redeployGitForm">
-  <div class="col-sm-12 form-section-title"> Redeploy from git repository </div>
+  <div class="col-sm-12 form-section-title"> 从 Git 仓库重新部署 </div>
   <div class="form-group text-muted">
     <div class="col-sm-12">
-      <p> Pull the latest manifest from git and redeploy the application. </p>
+      <p> 从 Git 拉取最新清单并重新部署应用。 </p>
     </div>
   </div>
   <git-form-auto-update-fieldset
@@ -22,7 +22,7 @@
         <a class="small interactive" ng-click="$ctrl.state.showConfig = !$ctrl.state.showConfig">
           <pr-icon ng-if="$ctrl.state.showConfig" icon="'minus'" class-name="'mr-1'"></pr-icon>
           <pr-icon ng-if="!$ctrl.state.showConfig" icon="'plus'" class-name="'mr-1'"></pr-icon>
-          {{ $ctrl.state.showConfig ? 'Hide' : 'Advanced' }} configuration
+          {{ $ctrl.state.showConfig ? '隐藏' : '高级' }} 配置
         </a>
       </p>
     </div>
@@ -49,15 +49,15 @@
       <por-switch-field
         name="TLSSkipVerify"
         checked="$ctrl.formValues.TLSSkipVerify"
-        tooltip="'Enabling this will allow skipping TLS validation for any self-signed certificate.'"
+        tooltip="'启用后将允许跳过对任何自签名证书的 TLS 校验。'"
         label-class="'col-sm-3 col-lg-2'"
-        label="'Skip TLS Verification'"
+        label="'跳过 TLS 验证'"
         on-change="($ctrl.onChangeTLSSkipVerify)"
       ></por-switch-field>
     </div>
   </div>
 
-  <div class="col-sm-12 form-section-title"> Actions </div>
+  <div class="col-sm-12 form-section-title"> 操作 </div>
   <!-- #Git buttons -->
   <button
     class="btn btn-sm btn-primary"
@@ -71,9 +71,9 @@
   >
     <span ng-show="!$ctrl.state.redeployInProgress">
       <pr-icon icon="'refresh-cw'" class="!mr-1"></pr-icon>
-      Pull and update application
+      拉取并更新应用
     </span>
-    <span ng-show="$ctrl.state.redeployInProgress">In progress...</span>
+    <span ng-show="$ctrl.state.redeployInProgress">进行中...</span>
   </button>
 
   <button
@@ -87,7 +87,7 @@
     analytics-event="kubernetes-application-edit"
     analytics-properties="$ctrl.buildAnalyticsProperties()"
   >
-    <span ng-show="!$ctrl.state.saveGitSettingsInProgress"> Save settings </span>
-    <span ng-show="$ctrl.state.saveGitSettingsInProgress">In progress...</span>
+    <span ng-show="!$ctrl.state.saveGitSettingsInProgress"> 保存设置 </span>
+    <span ng-show="$ctrl.state.saveGitSettingsInProgress">进行中...</span>
   </button>
 </form>
