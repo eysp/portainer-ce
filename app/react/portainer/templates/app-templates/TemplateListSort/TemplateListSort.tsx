@@ -6,7 +6,7 @@ import { PortainerSelect } from '@@/form-components/PortainerSelect';
 import styles from './TemplateListSort.module.css';
 
 interface Props {
-  options: ReadonlyArray<string | { label: string; value: string }>;
+  options: ReadonlyArray<{ label: string; value: string }>;
   onChange: (value: { id: string; desc: boolean } | undefined) => void;
   placeholder?: string;
   value: { id: string; desc: boolean } | undefined;
@@ -18,26 +18,15 @@ export function TemplateListSort({
   placeholder,
   value,
 }: Props) {
-  const selectOptions = options.map((option) =>
-    typeof option === 'string' ? { label: option, value: option } : option
-  );
-
-  const getValueForOption = (option: string | { label: string; value: string }) =>
-    typeof option === 'string' ? option : option.value;
-
   return (
     <div className={styles.sortByContainer}>
       <div className={styles.sortByElement}>
         <PortainerSelect
           placeholder={placeholder}
-          options={selectOptions}
-          onChange={(selectedValue) => {
-            const option = options.find(
-              (opt) => getValueForOption(opt) === selectedValue
-            );
-            const id = option ? getValueForOption(option) : undefined;
-            onChange(id ? { id, desc: value?.desc ?? false } : undefined);
-          }}
+          options={options}
+          onChange={(id) =>
+            onChange(id ? { id, desc: value?.desc ?? false } : undefined)
+          }
           bindToBody
           value={value?.id ?? null}
           isClearable

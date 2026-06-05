@@ -76,7 +76,7 @@ export function BoxSelectorItem<T extends Value>({
         </div>
         <ContentBox>
           <div className={styles.header}>{option.label}</div>
-          <p className="mb-0">{option.description}</p>
+          <div className="mb-0">{option.description}</div>
         </ContentBox>
       </div>
     </BoxOption>

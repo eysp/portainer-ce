@@ -37,7 +37,8 @@ export function useHelmRelease<T = HelmRelease>(
         revision,
       }),
     {
-      enabled: !!environmentId && !!name && !!namespace && options.enabled,
+      enabled:
+        !!environmentId && !!name && !!namespace && (options.enabled ?? true),
       ...withGlobalError('Unable to retrieve helm application details'),
       retry: 3,
       // occasionally the application shows before the release is created, take some more time to refetch

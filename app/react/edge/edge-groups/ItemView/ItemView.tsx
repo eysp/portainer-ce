@@ -32,7 +32,7 @@ export function ItemView() {
       <PageHeader
         title="Edit edge group"
         breadcrumbs={[
-          { label: 'Edge groups', link: 'edge.groups' },
+          { label: '边缘组', link: 'edge.groups' },
           group.Name,
         ]}
       />

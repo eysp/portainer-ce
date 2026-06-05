@@ -33,7 +33,7 @@ export function UsernameField({
         <InputGroup.Input
           id="username-field"
           name={name}
-          placeholder="例如 jdoe"
+          placeholder="例如：jdoe"
           data-cy="user-usernameInput"
           value={value}
           onChange={onChange}

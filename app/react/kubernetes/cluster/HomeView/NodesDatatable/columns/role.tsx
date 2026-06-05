@@ -1,8 +1,8 @@
-import { getRole } from '../utils';
+import { getRole } from '../../../nodeUtils';
 
 import { columnHelper } from './helper';
 
 export const role = columnHelper.accessor((row) => getRole(row), {
-  header: 'Role',
+  header: '角色',
   cell: ({ row: { original: node } }) => getRole(node),
 });

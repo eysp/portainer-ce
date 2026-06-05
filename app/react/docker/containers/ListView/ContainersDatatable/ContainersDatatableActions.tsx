@@ -111,7 +111,7 @@ export function ContainersDatatableActions({
             disabled={selectedItemCount === 0 || hasStoppedItemsSelected}
             icon={Slash}
           >
-            强制终止
+            终止
           </Button>
         </Authorized>
 
@@ -159,7 +159,7 @@ export function ContainersDatatableActions({
             disabled={selectedItemCount === 0}
             icon={Trash2}
           >
-            移除
+            删除
           </Button>
         </Authorized>
       </ButtonGroup>
@@ -176,7 +176,7 @@ export function ContainersDatatableActions({
   );
 
   function onStartClick(selectedItems: ContainerListViewModel[]) {
-    const successMessage = '容器已成功启动';
+    const successMessage = '容器启动成功';
     const errorMessage = '无法启动容器';
     executeActionOnContainerList(
       selectedItems,
@@ -187,7 +187,7 @@ export function ContainersDatatableActions({
   }
 
   function onStopClick(selectedItems: ContainerListViewModel[]) {
-    const successMessage = '容器已成功停止';
+    const successMessage = '容器停止成功';
     const errorMessage = '无法停止容器';
     executeActionOnContainerList(
       selectedItems,
@@ -198,7 +198,7 @@ export function ContainersDatatableActions({
   }
 
   function onRestartClick(selectedItems: ContainerListViewModel[]) {
-    const successMessage = '容器已成功重启';
+    const successMessage = '容器重启成功';
     const errorMessage = '无法重启容器';
     executeActionOnContainerList(
       selectedItems,
@@ -209,8 +209,8 @@ export function ContainersDatatableActions({
   }
 
   function onKillClick(selectedItems: ContainerListViewModel[]) {
-    const successMessage = '容器已成功强制终止';
-    const errorMessage = '无法强制终止容器';
+    const successMessage = '容器终止成功';
+    const errorMessage = '无法终止容器';
     executeActionOnContainerList(
       selectedItems,
       killContainer,
@@ -220,7 +220,7 @@ export function ContainersDatatableActions({
   }
 
   function onPauseClick(selectedItems: ContainerListViewModel[]) {
-    const successMessage = '容器已成功暂停';
+    const successMessage = '容器暂停成功';
     const errorMessage = '无法暂停容器';
     executeActionOnContainerList(
       selectedItems,
@@ -231,7 +231,7 @@ export function ContainersDatatableActions({
   }
 
   function onResumeClick(selectedItems: ContainerListViewModel[]) {
-    const successMessage = '容器已成功恢复';
+    const successMessage = '容器恢复成功';
     const errorMessage = '无法恢复容器';
     executeActionOnContainerList(
       selectedItems,
@@ -246,8 +246,8 @@ export function ContainersDatatableActions({
       (container) => container.State === 'running'
     );
 
-    const runningTitle = isOneContainerRunning ? '运行中的' : '';
-    const title = `您即将移除一个或多个${runningTitle}容器。`;
+    const runningTitle = isOneContainerRunning ? '运行中' : '';
+    const title = `您即将删除一个或多个${runningTitle}容器。`;
 
     const result = await confirmContainerDeletion(title);
     if (!result) {
@@ -294,14 +294,14 @@ export function ContainersDatatableActions({
           nodeName: container.NodeName,
         });
         notifications.success(
-          '容器已成功移除',
+          '容器删除成功',
           container.Names[0]
         );
       } catch (err) {
         notifications.error(
           '失败',
           err as Error,
-          '无法移除容器'
+          '无法删除容器'
         );
       }
     }

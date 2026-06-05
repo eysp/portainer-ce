@@ -12,7 +12,7 @@ export function EnabledWaitingRoomSwitch() {
   return (
     <FormControl
       inputId="edge_waiting_room"
-      label="Enable Edge Environment Waiting Room"
+      label="启用边缘环境等候室"
       size="medium"
       errors={meta.error}
     >
@@ -35,7 +35,7 @@ export function EnabledWaitingRoomSwitch() {
 
     const confirmed = await confirm({
       modalType: ModalType.Warn,
-      title: 'Disable Edge Environment Waiting Room',
+      title: '禁用边缘环境等候室',
       message:
         'By disabling the waiting room feature, all devices requesting association will be automatically associated and could pose a security risk. Are you sure?',
       confirmButton: buildConfirmButton('Confirm', 'danger'),

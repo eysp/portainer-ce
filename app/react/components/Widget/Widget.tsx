@@ -1,8 +1,25 @@
 import clsx from 'clsx';
-import { createContext, PropsWithChildren, Ref, useContext } from 'react';
+import {
+  createContext,
+  PropsWithChildren,
+  Ref,
+  useContext,
+  useMemo,
+  useState,
+} from 'react';
 
-const Context = createContext<null | boolean>(null);
+interface WidgetContextValue {
+  titleId: string | undefined;
+}
+
+const Context = createContext<null | WidgetContextValue>(null);
 Context.displayName = 'WidgetContext';
+
+// Simple ID generator for React 17 compatibility
+let idCounter = 0;
+function generateId() {
+  return `widget-title-${++idCounter}`;
+}
 
 export function useWidgetContext() {
   const context = useContext(Context);
@@ -10,6 +27,8 @@ export function useWidgetContext() {
   if (context == null) {
     throw new Error('Should be inside a Widget component');
   }
+
+  return context;
 }
 
 export function Widget({
@@ -24,13 +43,18 @@ export function Widget({
   id?: string;
   'aria-label'?: string;
 }>) {
+  // Only generate titleId once on mount if aria-label is not provided
+  const [titleId] = useState(() => (ariaLabel ? undefined : generateId()));
+  const contextValue = useMemo(() => ({ titleId }), [titleId]);
+
   return (
-    <Context.Provider value>
+    <Context.Provider value={contextValue}>
       <section
         id={id}
         className={clsx('widget', className)}
         ref={mRef}
         aria-label={ariaLabel}
+        aria-labelledby={titleId}
       >
         {children}
       </section>

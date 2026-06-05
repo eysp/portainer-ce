@@ -27,7 +27,7 @@ export function EnvironmentIcon({ type, containerEngine }: Props) {
           <img
             src={podman}
             width="60"
-            alt="Podman 环境"
+            alt="podman environment"
             aria-hidden="true"
           />
         );
@@ -36,7 +36,7 @@ export function EnvironmentIcon({ type, containerEngine }: Props) {
         <img
           src={docker}
           width="60"
-          alt="Docker 环境"
+          alt="docker environment"
           aria-hidden="true"
         />
       );
@@ -45,7 +45,7 @@ export function EnvironmentIcon({ type, containerEngine }: Props) {
         <img
           src={azure}
           width="60"
-          alt="Azure 环境"
+          alt="azure environment"
           aria-hidden="true"
         />
       );
@@ -54,7 +54,7 @@ export function EnvironmentIcon({ type, containerEngine }: Props) {
         return (
           <img
             src={podmanEdge}
-            alt="Podman Edge 环境"
+            alt="podman edge environment"
             aria-hidden="true"
           />
         );
@@ -62,18 +62,18 @@ export function EnvironmentIcon({ type, containerEngine }: Props) {
       return (
         <img
           src={dockerEdge}
-          alt="Docker Edge 环境"
+          alt="docker edge environment"
           aria-hidden="true"
         />
       );
     case EnvironmentType.KubernetesLocal:
     case EnvironmentType.AgentOnKubernetes:
-      return <img src={kube} alt="Kubernetes 环境" aria-hidden="true" />;
+      return <img src={kube} alt="kubernetes environment" aria-hidden="true" />;
     case EnvironmentType.EdgeAgentOnKubernetes:
       return (
         <img
           src={kubeEdge}
-          alt="Kubernetes Edge 环境"
+          alt="kubernetes edge environment"
           aria-hidden="true"
         />
       );

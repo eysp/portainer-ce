@@ -64,7 +64,7 @@ export function DeploymentSyncOptions() {
             {({ setFieldValue, values, isValid, dirty }) => (
               <Form className="form-horizontal">
                 <TextTip color="blue">
-                  在此设置的默认值将作为边缘环境创建的选项供选择
+                  此处设置的默认值将作为创建边缘环境时可选择的选项。
                 </TextTip>
 
                 <FormSection title="签到间隔">
@@ -119,7 +119,7 @@ export function DeploymentSyncOptions() {
       },
       {
         onSuccess() {
-          notifySuccess('成功', '设置已成功更新');
+          notifySuccess('成功', '设置已更新');
           resetForm();
         },
       }

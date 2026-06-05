@@ -46,7 +46,7 @@ export function NameCell({
         disabled={disabled}
         icon={MinusCircle}
       >
-        移除
+        删除
       </Button>
     </>
   );
@@ -54,7 +54,7 @@ export function NameCell({
   function handleRemoveMember(userId: UserId) {
     removeMemberMutation.mutate([userId], {
       onSuccess() {
-        notifySuccess('用户已从团队中移除', name);
+        notifySuccess('用户已从团队中删除', name);
       },
     });
   }

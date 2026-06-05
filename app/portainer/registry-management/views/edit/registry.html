@@ -1,4 +1,4 @@
-<page-header title="'Registry details'" breadcrumbs="[{label:'Registries', link:'portainer.registries'}, $ctrl.registry.Name]" reload="true"> </page-header>
+<page-header title="'镜像仓库详情'" breadcrumbs="[{label:'镜像仓库', link:'portainer.registries'}, $ctrl.registry.Name]" reload="true"> </page-header>
 
 <div class="row" ng-if="!$ctrl.state.loading">
   <div class="col-sm-12">
@@ -15,7 +15,7 @@
 
           <!-- name-input -->
           <div class="form-group">
-            <label for="registry_name" class="col-sm-3 col-lg-2 control-label required text-left">Name</label>
+            <label for="registry_name" class="col-sm-3 col-lg-2 control-label required text-left">名称</label>
             <div class="col-sm-9 col-lg-10">
               <input
                 type="text"
@@ -35,7 +35,7 @@
               <div>
                 <p class="vertical-center">
                   <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
-                  A registry with the same name already exists.
+                  已存在同名的镜像仓库。
                 </p>
               </div>
             </div>
@@ -54,7 +54,7 @@
           <!-- registry-url-input -->
           <div class="form-group">
             <label for="registry_url" class="col-sm-3 col-lg-2 control-label text-left">
-              <span class="required">Registry URL</span>
+              <span class="required">镜像仓库 URL</span>
               <portainer-tooltip message="'URL or IP address of a Docker registry. Any protocol or trailing slash will be stripped if present.'"> </portainer-tooltip>
             </label>
             <div class="col-sm-9 col-lg-10">
@@ -86,7 +86,7 @@
           <div ng-if="$ctrl.registry.Type === $ctrl.RegistryTypes.PROGET">
             <div class="form-group">
               <label for="registry_base_url" class="col-sm-3 col-lg-2 control-label text-left">
-                <span class="required">Base URL</span>
+                <span class="required">基础 URL</span>
                 <portainer-tooltip message="'The base URL of the ProGet registry.'"> </portainer-tooltip>
               </label>
               <div class="col-sm-9 col-lg-10">
@@ -127,7 +127,7 @@
             "
           >
             <label for="registry_auth" class="col-sm-3 col-lg-2 control-label text-left">
-              Authentication
+              身份验证
               <portainer-tooltip message="'Enable this option if you need to specify credentials to connect to this registry.'"> </portainer-tooltip>
             </label>
             <div class="col-sm-9 col-lg-10">
@@ -240,7 +240,7 @@
             <div ng-if="$ctrl.registry.Quay.UseOrganisation">
               <!-- organisation_name -->
               <div class="form-group">
-                <label for="organisation_name" class="col-sm-3 col-lg-2 control-label required text-left">Organization name</label>
+                <label for="organisation_name" class="col-sm-3 col-lg-2 control-label required text-left">组织名称</label>
                 <div class="col-sm-9 col-lg-10">
                   <input
                     type="text"
@@ -279,7 +279,7 @@
                 <span ng-hide="$ctrl.state.actionInProgress">Update registry</span>
                 <span ng-show="$ctrl.state.actionInProgress">Updating registry...</span>
               </button>
-              <a type="button" class="btn btn-default btn-sm" ui-sref="portainer.registries">Cancel</a>
+              <a type="button" class="btn btn-default btn-sm" ui-sref="portainer.registries">取消</a>
             </div>
           </div>
         </form>

@@ -11,6 +11,7 @@ import (
 	"github.com/portainer/portainer/pkg/libhelm/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_helmRepoSearch(t *testing.T) {
@@ -33,7 +34,7 @@ func Test_helmRepoSearch(t *testing.T) {
 			is.Equal(http.StatusOK, rr.Code, "Status should be 200 OK")
 
 			body, err := io.ReadAll(rr.Body)
-			is.NoError(err, "ReadAll should not return error")
+			require.NoError(t, err, "ReadAll should not return error")
 			is.NotEmpty(body, "Body should not be empty")
 		})
 	}

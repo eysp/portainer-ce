@@ -14,7 +14,7 @@ export const options = [
     id: 'ldap_custom',
     icon: Edit,
     iconType: 'badge',
-    label: 'Custom',
+    label: '自定义',
     value: SERVER_TYPES.CUSTOM,
   },
   {

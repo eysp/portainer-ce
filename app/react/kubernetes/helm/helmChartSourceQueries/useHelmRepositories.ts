@@ -48,7 +48,7 @@ export function useHelmRepoOptions() {
         .sort((a, b) => a.label.localeCompare(b.label));
       return [
         {
-          label: 'Helm Repositories',
+          label: 'Helm 仓库',
           options: repoOptions,
         },
         {

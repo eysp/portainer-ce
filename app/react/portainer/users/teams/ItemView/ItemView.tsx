@@ -37,7 +37,10 @@ export function ItemView() {
     <>
       <PageHeader
         title="团队详情"
-        breadcrumbs={[{ label: '团队' }, { label: team.Name }]}
+        breadcrumbs={[
+          { label: '团队', link: 'portainer.teams' },
+          { label: team.Name },
+        ]}
         reload
       />
 
@@ -53,7 +56,8 @@ export function ItemView() {
         <div className="row">
           <div className="col-sm-12">
             <TextTip color="orange">
-              由于当前启用了外部身份验证和团队同步，团队负责人功能已被禁用。
+              The team leader feature is disabled as external authentication is
+              currently enabled with team sync.
             </TextTip>
           </div>
         </div>

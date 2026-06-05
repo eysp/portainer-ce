@@ -47,7 +47,7 @@ export function validation() {
     .required('API 服务器 URL 为必填项')
     .test(
       'valid API server URL',
-      'API 服务器 URL 必须是有效的 URL（不能使用 localhost）',
+      'The API server URL must be a valid URL (localhost cannot be used)',
       (value) =>
         isValidUrl(
           value,

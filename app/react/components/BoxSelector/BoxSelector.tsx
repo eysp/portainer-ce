@@ -1,6 +1,7 @@
+import clsx from 'clsx';
+
 import { FormError } from '@@/form-components/FormError';
 
-import styles from './BoxSelector.module.css';
 import { BoxSelectorItem } from './BoxSelectorItem';
 import { BoxSelectorOption, Value } from './types';
 
@@ -24,6 +25,8 @@ export type Props<T extends Value> = Union<T> & {
   slim?: boolean;
   hiddenSpacingCount?: number;
   error?: string;
+  useGridLayout?: boolean;
+  className?: string;
 };
 
 export function BoxSelector<T extends Value>({
@@ -32,12 +35,21 @@ export function BoxSelector<T extends Value>({
   slim = false,
   hiddenSpacingCount,
   error,
+  useGridLayout,
+  className,
   ...props
 }: Props<T>) {
+  const rootClassName = clsx(
+    useGridLayout
+      ? 'grid gap-2.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+      : 'w-full flex flex-wrap gap-2.5 overflow-hidden mb-1 mt-1',
+    className
+  );
+
   return (
     <div className='form-group after:clear-both after:table after:content-[""]'>
       <div className="col-sm-12">
-        <div className={styles.root} role="radiogroup">
+        <div className={rootClassName} role="radiogroup">
           {options
             .filter((option) => !option.hide)
             .map((option) => (

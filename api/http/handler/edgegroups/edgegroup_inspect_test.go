@@ -105,7 +105,7 @@ func TestEmptyEdgeGroupInspectHandler(t *testing.T) {
 
 	// Make sure the frontend does not get a null value but a [] instead
 	require.NotNil(t, responseGroup.Endpoints)
-	require.Len(t, responseGroup.Endpoints, 0)
+	require.Empty(t, responseGroup.Endpoints)
 }
 
 func TestDynamicEdgeGroupInspectHandler(t *testing.T) {
@@ -173,4 +173,17 @@ func TestDynamicEdgeGroupInspectHandler(t *testing.T) {
 	require.NoError(t, err)
 
 	require.ElementsMatch(t, []portainer.EndpointID{1, 2, 3}, responseGroup.Endpoints)
+}
+
+func TestEdgeGroupInspectPanic(t *testing.T) {
+	_, store := datastore.MustNewTestStore(t, true, true)
+
+	handler := NewHandler(testhelpers.NewTestRequestBouncer())
+	handler.DataStore = store
+
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/edge_groups/1", nil)
+
+	handler.ServeHTTP(rr, req)
+	require.Equal(t, http.StatusNotFound, rr.Result().StatusCode)
 }

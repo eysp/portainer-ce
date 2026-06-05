@@ -10,7 +10,7 @@ angular.module('portainer.docker').controller('LogViewerController', [
   function ($scope, clipboard, Blob, FileSaver) {
     this.state = {
       availableSinceDatetime: [
-        { desc: '过去一天', value: moment().subtract(1, 'days').format() },
+        { desc: '昨天', value: moment().subtract(1, 'days').format() },
         { desc: '过去4小时', value: moment().subtract(4, 'hours').format() },
         { desc: '过去1小时', value: moment().subtract(1, 'hours').format() },
         { desc: '过去10分钟', value: moment().subtract(10, 'minutes').format() },

@@ -8,13 +8,13 @@ import {
   ContainerEngine,
   Environment,
 } from '@/react/portainer/environments/types';
+import { NameField } from '@/react/portainer/environments/common/NameField/NameField';
 
 import { LoadingButton } from '@@/buttons/LoadingButton';
 import { FormControl } from '@@/form-components/FormControl';
 import { Input } from '@@/form-components/Input';
 import { SwitchField } from '@@/form-components/SwitchField';
 
-import { NameField } from '../../shared/NameField';
 import { MoreSettingsSection } from '../../shared/MoreSettingsSection';
 
 import { useValidation } from './SocketForm.validation';
@@ -102,7 +102,7 @@ function OverrideSocketFieldset() {
             checked={values.overridePath}
             data-cy="create-docker-env-socket-override-switch"
             onChange={(checked) => setFieldValue('overridePath', checked)}
-            label="覆盖默认 Socket 路径"
+            label="覆盖默认 socket 路径"
             labelClass="col-sm-3 col-lg-2"
           />
         </div>
@@ -110,13 +110,13 @@ function OverrideSocketFieldset() {
       {values.overridePath && (
         <FormControl
           label="Socket 路径"
-          tooltip="Docker Socket 的路径。请确保已正确挂载（bind-mount）该 Socket，更多信息见上方重要说明。"
+          tooltip="Docker socket 的路径。记得绑定挂载 socket，请参阅上面的重要通知以获取更多信息。"
           errors={errors.socketPath}
         >
           <Field
             name="socketPath"
             as={Input}
-            placeholder="例如 /var/run/docker.sock (on Linux) or //./pipe/docker_engine (on Windows)"
+            placeholder="例如：/var/run/docker.sock (在 Linux 上) 或 //./pipe/docker_engine (在 Windows 上)"
           />
         </FormControl>
       )}

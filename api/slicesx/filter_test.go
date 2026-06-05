@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/portainer/portainer/api/slicesx"
+
+	"github.com/stretchr/testify/require"
 )
 
 func Test_Filter(t *testing.T) {
@@ -60,12 +62,9 @@ func Benchmark_Filter(b *testing.B) {
 		source[i] = i
 	}
 
-	b.ResetTimer()
-	for range b.N {
+	for b.Loop() {
 		e := slicesx.Filter(source, func(x int) bool { return x%2 == 0 })
-		if len(e) != n/2 {
-			b.FailNow()
-		}
+		require.Len(b, e, n/2)
 	}
 }
 
@@ -89,8 +88,6 @@ func Benchmark_FilterInPlace(b *testing.B) {
 	b.ResetTimer()
 	for i := range b.N {
 		e := slicesx.FilterInPlace(copies[i], func(x int) bool { return x%2 == 0 })
-		if len(e) != n/2 {
-			b.FailNow()
-		}
+		require.Len(b, e, n/2)
 	}
 }

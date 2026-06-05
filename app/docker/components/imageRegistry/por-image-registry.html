@@ -1,7 +1,7 @@
 <!-- use registry -->
 <div class="row">
   <div class="form-group" ng-if="$ctrl.model.UseRegistry">
-    <label for="image_registry" class="control-label col-sm-3 col-lg-2 text-left" ng-class="$ctrl.labelClass"> 注册表 </label>
+    <label for="image_registry" class="control-label col-sm-3 col-lg-2 text-left" ng-class="$ctrl.labelClass"> 镜像仓库 </label>
     <div ng-class="$ctrl.inputClass" class="col-sm-8">
       <select
         data-cy="component-registrySelect"
@@ -26,7 +26,7 @@
           uib-typeahead="image for image in $ctrl.availableImages | filter:$viewValue | limitTo:5"
           ng-model="$ctrl.model.Image"
           name="image_name"
-          placeholder="例如 my-image:my-tag"
+          placeholder="例如：my-image:my-tag"
           ng-change="$ctrl.onImageChange()"
           required
         />
@@ -48,7 +48,7 @@
   <div ng-if="!$ctrl.model.UseRegistry">
     <div class="form-group">
       <span class="small">
-        <p class="text-muted ml-4"> 使用高级模式时，镜像和仓库<b>必须</b>公开可用。 </p>
+        <p class="text-muted ml-4"> 使用高级模式时，镜像和仓库<b>必须</b>是公开可用的。 </p>
       </span>
       <label for="image_name" ng-class="$ctrl.labelClass" class="control-label col-sm-3 col-lg-2 required text-left">镜像 </label>
       <div ng-class="$ctrl.inputClass" class="col-sm-8">
@@ -57,7 +57,7 @@
           class="form-control"
           ng-model="$ctrl.model.Image"
           name="image_name"
-          placeholder="例如 registry:port/my-image:my-tag"
+          placeholder="例如：registry:port/my-image:my-tag"
           required
           data-cy="component-imageInput"
         />
@@ -71,8 +71,8 @@
       <div class="col-sm-3 col-lg-2"></div>
       <div class="col-sm-8" ng-messages="$ctrl.form.image_name.$error">
         <p class="text-warning vertical-center" ng-message="required">
-          <pr-icon icon="'alert-triangle'" mode="'warning'" class="vertical-center"></pr-icon> 镜像名称是必填项。
-          <span ng-if="$ctrl.canPull">必须指定标签，否则 Portainer 将拉取与镜像关联的所有标签。</span>
+          <pr-icon icon="'alert-triangle'" mode="'warning'" class="vertical-center"></pr-icon> 镜像名称是必需的。
+          <span ng-if="$ctrl.canPull">必须指定标签，否则 Portainer 将拉取与该镜像关联的所有标签。</span>
         </p>
       </div>
     </div>

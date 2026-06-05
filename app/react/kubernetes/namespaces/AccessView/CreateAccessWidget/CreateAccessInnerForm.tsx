@@ -89,7 +89,7 @@ export function CreateAccessInnerForm({
             icon={Plus}
             className="!ml-0"
           >
-            Create access
+            创建访问权限
           </LoadingButton>
         </div>
       </div>

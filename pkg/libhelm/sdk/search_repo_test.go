@@ -5,7 +5,9 @@ import (
 	"testing"
 
 	"github.com/portainer/portainer/pkg/libhelm/options"
+
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type testCase struct {
@@ -33,9 +35,9 @@ func Test_SearchRepo(t *testing.T) {
 				t.Parallel()
 				response, err := hspm.SearchRepo(options.SearchRepoOptions{Repo: tc.url})
 				if tc.invalid {
-					is.Errorf(err, "error expected: %s", tc.url)
+					require.Error(t, err, "error expected: %s", tc.url)
 				} else {
-					is.NoError(err, "no error expected: %s", tc.url)
+					require.NoError(t, err, "no error expected: %s", tc.url)
 				}
 
 				if err == nil {
@@ -53,14 +55,14 @@ func Test_SearchRepo(t *testing.T) {
 		responseBytes, err := hspm.SearchRepo(searchOpts)
 
 		// The function should not fail by design, even when not running in a k8s environment
-		is.NoError(err, "should not return error when not in k8s environment")
+		require.NoError(t, err, "should not return error when not in k8s environment")
 		is.NotNil(responseBytes, "should return non-nil response")
 		is.NotEmpty(responseBytes, "should return non-empty response")
 
 		// Parse the 	ext response
 		var repoIndex RepoIndex
 		err = json.Unmarshal(responseBytes, &repoIndex)
-		is.NoError(err, "should parse JSON response without error")
+		require.NoError(t, err, "should parse JSON response without error")
 		is.NotEmpty(repoIndex, "should have at least one chart")
 
 		// Verify charts structure apiVersion, entries, generated
@@ -69,7 +71,7 @@ func Test_SearchRepo(t *testing.T) {
 		is.NotEmpty(repoIndex.Generated, "generated should not be empty")
 
 		// there should be at least one chart
-		is.Greater(len(repoIndex.Entries), 0, "should have at least one chart")
+		is.NotEmpty(repoIndex.Entries, "should have at least one chart")
 	})
 
 	t.Run("search repo with empty repo URL", func(t *testing.T) {
@@ -78,6 +80,6 @@ func Test_SearchRepo(t *testing.T) {
 			Repo: "",
 		}
 		_, err := hspm.SearchRepo(searchOpts)
-		is.Error(err, "should return error when repo URL is empty")
+		require.Error(t, err, "should return error when repo URL is empty")
 	})
 }

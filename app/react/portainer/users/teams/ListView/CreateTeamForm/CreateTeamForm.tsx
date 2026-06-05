@@ -107,7 +107,8 @@ export function CreateTeamForm({ users, teams }: Props) {
                     <div className="form-group">
                       <div className="col-sm-12">
                         <TextTip color="orange">
-                          由于当前启用了外部身份验证和团队同步，团队负责人功能已被禁用。
+                          The team leader feature is disabled as external
+                          authentication is currently enabled with team sync.
                         </TextTip>
                       </div>
                     </div>

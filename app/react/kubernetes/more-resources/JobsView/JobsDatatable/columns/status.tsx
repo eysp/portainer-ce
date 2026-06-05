@@ -10,7 +10,7 @@ import { columnHelper } from './helper';
 import styles from './status.module.css';
 
 export const status = columnHelper.accessor((row) => row.Status, {
-  header: 'Status',
+  header: '状态',
   id: 'status',
   cell: Cell,
 });

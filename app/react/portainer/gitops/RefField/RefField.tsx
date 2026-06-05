@@ -40,8 +40,8 @@ export function RefField({
       errors={error}
       tip={
         <>
-          使用以下语法指定仓库的引用：
-          分支使用 <code>refs/heads/branch_name</code> 或标签使用{' '}
+          使用以下语法指定仓库引用：分支使用{' '}
+          <code>refs/heads/branch_name</code>，标签使用{' '}
           <code>refs/tags/tag_name</code>。
         </>
       }
@@ -62,10 +62,10 @@ export function RefField({
       errors={error}
       tip={
         <>
-          使用以下语法指定仓库的引用：
-          分支使用 <code>refs/heads/branch_name</code> 或标签使用{' '}
-          <code>refs/tags/tag_name</code>。如果未指定，将使用默认的 <code>HEAD</code> 引用，通常是 <code>main</code>{' '}
-          分支。
+          使用以下语法指定仓库引用：分支使用{' '}
+          <code>refs/heads/branch_name</code>，标签使用{' '}
+          <code>refs/tags/tag_name</code>。如果未指定，将使用默认的{' '}
+          <code>HEAD</code> 引用，通常是 <code>main</code> 分支。
         </>
       }
     >

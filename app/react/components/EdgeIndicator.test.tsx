@@ -24,15 +24,13 @@ test('given edge id and last checkin is set, should show heartbeat', async () =>
 async function renderComponent(
   edgeId = '',
   lastCheckInDate = 0,
-  checkInInterval = 0,
-  queryDate = 0
+  checkInInterval = 0
 ) {
   const environment = createMockEnvironment();
 
   environment.EdgeID = edgeId;
   environment.LastCheckInDate = lastCheckInDate;
   environment.EdgeCheckinInterval = checkInInterval;
-  environment.QueryDate = queryDate;
 
   const Wrapped = withTestQueryProvider(EdgeIndicator);
 

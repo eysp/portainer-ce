@@ -20,7 +20,7 @@
           <div ng-messages="$ctrl.registryFormAzure.registry_name.$error">
             <p ng-message="required" class="vertical-center">
               <pr-icon icon="'alert-triangle'"></pr-icon>
-              此字段是必填项。
+              This field is required.
             </p>
             <p ng-message="used" class="vertical-center">
               <pr-icon icon="'alert-triangle'"></pr-icon>
@@ -36,7 +36,7 @@
   <div class="form-group">
     <label for="registry_url" class="col-sm-3 col-lg-2 control-label text-left">
       <span class="required">镜像仓库 URL</span>
-      <portainer-tooltip message="'Azure 容器注册表的 URL。将移除任何协议。'"></portainer-tooltip>
+      <portainer-tooltip message="'Azure 容器镜像仓库的 URL。将删除任何协议。'"></portainer-tooltip>
     </label>
     <div class="col-sm-9 col-lg-10">
       <input
@@ -54,7 +54,7 @@
           <div ng-messages="$ctrl.registryFormAzure.registry_url.$error">
             <p ng-message="required" class="vertical-center">
               <pr-icon icon="'alert-triangle'"></pr-icon>
-              此字段是必填项。
+              This field is required.
             </p>
           </div>
         </div>
@@ -72,7 +72,7 @@
           <div ng-messages="$ctrl.registryFormAzure.registry_username.$error">
             <p ng-message="required" class="vertical-center">
               <pr-icon icon="'alert-triangle'"></pr-icon>
-              此字段是必填项。
+              This field is required.
             </p>
           </div>
         </div>
@@ -90,7 +90,7 @@
           <div ng-messages="$ctrl.registryFormAzure.registry_password.$error">
             <p ng-message="required" class="vertical-center">
               <pr-icon icon="'alert-triangle'"></pr-icon>
-              此字段是必填项。
+              This field is required.
             </p>
           </div>
         </div>
@@ -113,7 +113,7 @@
         analytics-properties="{ metadata: { type: 'azure' } }"
       >
         <span ng-hide="$ctrl.actionInProgress">{{ $ctrl.formActionLabel }}</span>
-        <span ng-show="$ctrl.actionInProgress">进行中...</span>
+        <span ng-show="$ctrl.actionInProgress">In progress...</span>
       </button>
     </div>
   </div>

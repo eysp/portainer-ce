@@ -25,7 +25,7 @@ export const name = columnHelper.accessor(
     } ${!row.inUse && !isSystemConfigMap ? 'unused' : ''}`;
   },
   {
-    header: 'Name',
+    header: '名称',
     cell: Cell,
     id: 'name',
   }

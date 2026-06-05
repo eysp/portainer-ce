@@ -10,31 +10,31 @@ func Test_generateRandomKey(t *testing.T) {
 	is := assert.New(t)
 
 	tests := []struct {
-		name      string
-		wantLenth int
+		name       string
+		wantLength int
 	}{
 		{
-			name:      "Generate a random key of length 16",
-			wantLenth: 16,
+			name:       "Generate a random key of length 16",
+			wantLength: 16,
 		},
 		{
-			name:      "Generate a random key of length 32",
-			wantLenth: 32,
+			name:       "Generate a random key of length 32",
+			wantLength: 32,
 		},
 		{
-			name:      "Generate a random key of length 64",
-			wantLenth: 64,
+			name:       "Generate a random key of length 64",
+			wantLength: 64,
 		},
 		{
-			name:      "Generate a random key of length 128",
-			wantLenth: 128,
+			name:       "Generate a random key of length 128",
+			wantLength: 128,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := GenerateRandomKey(tt.wantLenth)
-			is.Equal(tt.wantLenth, len(got))
+			got := GenerateRandomKey(tt.wantLength)
+			is.Len(got, tt.wantLength)
 		})
 	}
 

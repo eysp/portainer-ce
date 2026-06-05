@@ -9,6 +9,7 @@ import {
   CacheAxiosResponse,
   InterpreterResult,
   AxiosCacheInstance,
+  StorageValue,
 } from 'axios-cache-interceptor';
 import { loadProgressBar } from 'axios-progress-bar';
 import 'axios-progress-bar/dist/nprogress.css';
@@ -32,7 +33,7 @@ const storage = buildMemoryStorage();
 export const cache = {
   store: {
     clear: () => {
-      storage.data = {};
+      storage.data = new Map<string, StorageValue>();
     },
   },
 };
@@ -170,6 +171,10 @@ export function parseAxiosError(
   msg = '',
   parseError = defaultErrorParser
 ) {
+  if (err instanceof PortainerError) {
+    return err;
+  }
+
   let resultErr = err;
   let resultMsg = msg;
 
@@ -192,12 +197,21 @@ type DefaultAxiosErrorType = {
 };
 
 export function defaultErrorParser(axiosError: AxiosError<unknown>) {
+  // If we have an "errors" array, just add the first error message (better than showing [Object object])
+  if (isMultipleErrorsResponse(axiosError.response?.data)) {
+    const message = axiosError.response.data.errors[0].message || '';
+    const details = axiosError.response.data.errors[0].details || message;
+    const error = new Error(message);
+    return { error, details };
+  }
+
   if (isDefaultResponse(axiosError.response?.data)) {
     const message = axiosError.response?.data.message || '';
     const details = axiosError.response?.data.details || message;
     const error = new Error(message);
     return { error, details };
   }
+
   if (isArrayResponse(axiosError.response?.data)) {
     const message = axiosError.response?.data[0].message || '';
     const details = axiosError.response?.data[0].details || message;
@@ -219,6 +233,17 @@ function isArrayResponse(data: unknown): data is DefaultAxiosErrorType[] {
     Array.isArray(data) &&
     'message' in data[0] &&
     typeof data[0].message === 'string'
+  );
+}
+
+function isMultipleErrorsResponse(data: unknown): data is {
+  errors: DefaultAxiosErrorType[];
+} {
+  return (
+    !!data &&
+    typeof data === 'object' &&
+    'errors' in data &&
+    Array.isArray(data.errors)
   );
 }
 

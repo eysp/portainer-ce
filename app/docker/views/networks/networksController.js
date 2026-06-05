@@ -17,12 +17,12 @@ angular.module('portainer.docker').controller('NetworksController', [
         HttpRequestHelper.setPortainerAgentTargetHeader(network.NodeName);
         return NetworkService.remove(network.Id)
           .then(function success() {
-            Notifications.success('网络已成功移除', network.Name);
+            Notifications.success('网络删除成功', network.Name);
             var index = $scope.networks.indexOf(network);
             $scope.networks.splice(index, 1);
           })
           .catch(function error(err) {
-            Notifications.error('失败', err, '无法移除网络');
+            Notifications.error('失败', err, '无法删除网络');
           });
       }
 
@@ -74,7 +74,7 @@ angular.module('portainer.docker').controller('NetworksController', [
         })
         .catch((err) => {
           $scope.networks = [];
-          Notifications.error('失败', err, '无法检索网络');
+          Notifications.error('失败', err, '无法获取网络');
         });
     }
 

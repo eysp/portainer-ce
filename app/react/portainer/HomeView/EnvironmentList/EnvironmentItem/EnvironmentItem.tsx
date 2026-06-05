@@ -2,10 +2,8 @@ import _ from 'lodash';
 import { Tag, Activity } from 'lucide-react';
 import clsx from 'clsx';
 
-import {
-  isoDateFromTimestamp,
-  stripProtocol,
-} from '@/portainer/filters/filters';
+import { stripProtocol } from '@/react/common/string-utils';
+import { isoDateFromTimestamp } from '@/portainer/filters/filters';
 import {
   type Environment,
   PlatformType,
@@ -100,7 +98,7 @@ export function EnvironmentItem({
           <div className="small text-muted flex flex-wrap items-center gap-x-4 gap-y-2">
             {groupName && (
               <span className="font-semibold">
-                <span>组：</span>
+                <span>Group: </span>
                 <span>{groupName}</span>
               </span>
             )}
@@ -145,6 +143,7 @@ function useEnvironmentTagNames(tagIds?: TagId[]) {
           .map((tag) => tag?.Name)
       );
     },
+    enabled: !!tagIds && tagIds.length > 0,
   });
 
   const { data: tags, isLoading } = tagsQuery;
@@ -154,10 +153,10 @@ function useEnvironmentTagNames(tagIds?: TagId[]) {
   }
 
   if (isLoading) {
-    return '加载标签中...';
+    return 'Loading tags...';
   }
 
-  return '无标签';
+  return 'No tags';
 }
 
 function getSnapshotTime(environment: Environment) {

@@ -47,6 +47,6 @@ export async function getNetwork(
     );
     return network;
   } catch (e) {
-    throw parseAxiosError(e as Error, '无法检索网络详细信息');
+    throw parseAxiosError(e as Error, '无法获取网络详情');
   }
 }

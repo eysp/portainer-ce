@@ -5,7 +5,7 @@ import { columnHelper } from './helper';
 export const date = columnHelper.accessor(
   (event) => formatDate(event.lastTimestamp || event.eventTime),
   {
-    header: 'Date',
+    header: '日期',
     id: 'Date',
   }
 );

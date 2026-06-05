@@ -45,7 +45,7 @@ export function RuntimeSection({
             <SwitchField
               labelClass="col-sm-2"
               data-cy="docker-init-switch"
-              label="Init"
+              label="初始化"
               checked={values.init}
               onChange={(init) => handleChange({ init })}
             />

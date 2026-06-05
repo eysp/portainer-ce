@@ -6,31 +6,31 @@
       <rd-widget-body>
         <uib-tabset active="state.activeTab">
           <uib-tab index="0">
-            <uib-tab-heading class="vertical-center"> <pr-icon icon="'wrench'" class="leading-none"></pr-icon> 构建器</uib-tab-heading>
+            <uib-tab-heading class="vertical-center"> <pr-icon icon="'wrench'" class="leading-none"></pr-icon> 构建器 </uib-tab-heading>
             <form class="form-horizontal">
-              <div class="col-sm-12 form-section-title">命名</div>
+              <div class="col-sm-12 form-section-title"> 命名 </div>
               <!-- names -->
               <div class="form-group">
-                <span class="col-sm-12 text-muted small">您可以为镜像指定多个名称。</span>
+                <span class="col-sm-12 text-muted small"> 您可以为镜像指定多个名称。 </span>
               </div>
               <div class="form-group">
                 <div class="col-sm-12">
                   <label class="control-label text-left">名称</label>
-                  <span class="label label-default interactive" class="ml-2.5" ng-click="addImageName()"> <pr-icon icon="'plus'" mode="'alt'"></pr-icon> 添加额外名称</span>
+                  <span class="label label-default interactive" class="ml-2.5" ng-click="addImageName()"> <pr-icon icon="'plus'" mode="'alt'"></pr-icon> 添加其他名称 </span>
                 </div>
               </div>
               <!-- !names -->
               <div class="form-group" ng-if="formValues.ImageNames.length === 0">
                 <span class="col-sm-12 text-danger small">
-                  <p class="vertical-center"> <pr-icon icon="'alert-triangle'" mode="'danger'" size="'sm'"></pr-icon> 您必须为镜像指定至少一个名称。</p>
+                  <p class="vertical-center"> <pr-icon icon="'alert-triangle'" mode="'danger'" size="'sm'"></pr-icon> 您必须为镜像指定至少一个名称。 </p>
                 </span>
               </div>
               <!-- name-input-list -->
               <div ng-if="formValues.ImageNames.length > 0">
                 <div class="form-group">
                   <span class="col-sm-12 text-muted small">
-                    名称必须以下列格式之一指定：<code>name:tag</code>、<code>repository/name:tag</code> 或
-                    <code>registry:port/repository/name:tag</code> 格式。如果您省略标签，则默认使用 <b>latest</b> 值。
+                    名称必须采用以下格式之一：<code>name:tag</code>、<code>repository/name:tag</code> 或
+                    <code>registry:port/repository/name:tag</code> 格式。如果省略标签，则默认使用 <b>latest</b> 值。
                   </span>
                 </div>
                 <div class="form-group">
@@ -77,17 +77,16 @@
                 </div>
               </div>
               <!-- !name-input-list -->
-              <div class="col-sm-12 form-section-title">构建方法</div>
+              <div class="col-sm-12 form-section-title"> 构建方法 </div>
               <box-selector options="options" slim="true" value="state.BuildType" on-change="(onChangeBuildType)"></box-selector>
 
               <!-- web-editor -->
               <!-- TODO use web-editor-form component -->
               <div ng-show="state.BuildType === 'editor'">
-                <div class="col-sm-12 form-section-title">Web 编辑器</div>
+                <div class="col-sm-12 form-section-title"> Web 编辑器 </div>
                 <div class="form-group">
                   <span class="col-sm-12 text-muted small">
-                    您可以在
-                    <a href="https://docs.docker.com/engine/reference/builder/" target="_blank">官方文档</a>中了解更多关于 Dockerfile 格式的信息。
+                    您可以在 <a href="https://docs.docker.com/engine/reference/builder/" target="_blank">官方文档</a> 中获取有关 Dockerfile 格式的更多信息。
                   </span>
                 </div>
                 <div class="form-group">
@@ -100,12 +99,12 @@
                     ></code-editor>
                   </div>
                 </div>
-                <div class="col-sm-12 form-section-title">上传</div>
+                <div class="col-sm-12 form-section-title"> 上传 </div>
                 <div class="form-group">
                   <div class="col-sm-12">
                     <div class="form-group">
                       <span class="col-sm-12 text-muted small">
-                        您可以从本地计算机上传文件，以便在 Dockerfile 中引用（使用 ADD filename），这样它们就会包含在构建的镜像中。
+                        您可以从本地计算机上传文件以便在 Dockerfile 中引用（使用 ADD filename），这样它们就会包含在您构建的镜像中。
                       </span>
                     </div>
                     <button class="btn btn-sm btn-primary" ngf-select="selectAdditionalFiles($files)" ngf-multiple="true">选择文件</button>
@@ -116,10 +115,10 @@
               <!-- !web-editor -->
               <!-- upload -->
               <div ng-show="state.BuildType === 'upload'">
-                <div class="col-sm-12 form-section-title">上传</div>
+                <div class="col-sm-12 form-section-title"> 上传 </div>
                 <div class="form-group">
                   <span class="col-sm-12 text-muted small">
-                    您可以从计算机上传 Dockerfile 或包含 Dockerfile 的 tar 归档文件。使用 tar 归档时，根文件夹将用作构建上下文。
+                    您可以从计算机上传 Dockerfile 或包含 Dockerfile 的 tar 压缩包。使用 tarball 时，根文件夹将用作构建上下文。
                   </span>
                 </div>
                 <div class="form-group">
@@ -133,7 +132,7 @@
                 </div>
                 <div ng-if="formValues.UploadFile.type === 'application/gzip' || formValues.UploadFile.type === 'application/x-tar'">
                   <div class="form-group">
-                    <span class="col-sm-12 text-muted small">指定 tar 归档中 Dockerfile 的路径。</span>
+                    <span class="col-sm-12 text-muted small"> 指示 tarball 中 Dockerfile 的路径。 </span>
                   </div>
                   <div class="form-group">
                     <label for="image_path" class="col-sm-2 control-label text-left">Dockerfile 路径</label>
@@ -146,12 +145,12 @@
               <!-- !upload -->
               <!-- url -->
               <div ng-show="state.BuildType === 'url'">
-                <div class="col-sm-12 form-section-title">URL</div>
+                <div class="col-sm-12 form-section-title"> URL </div>
                 <div class="form-group">
                   <span class="col-sm-12 small vertical-center">
                     <pr-icon icon="'info'" mode="'primary'"></pr-icon>
                     <span class="text-muted"
-                      >指定 Dockerfile、tar 归档或公共 Git 仓库的 URL（以 <b>.git</b> 结尾）。使用 Git 仓库 URL 时，可以按照<a href="https://docs.docker.com/engine/reference/commandline/build/#git-repositories">Docker 文档</a>中的说明指定构建上下文。</span
+                      >指定 Dockerfile、tarball 或公共 Git 仓库（后缀为 <b>.git</b>）的 URL。使用 Git 仓库 URL 时，可以按照 <a href="https://docs.docker.com/engine/reference/commandline/build/#git-repositories">Docker 文档</a> 指定构建上下文。</span
                     >
                   </span>
                 </div>
@@ -171,7 +170,7 @@
                 <div class="form-group">
                   <span class="col-sm-12 text-muted small vertical-center">
                     <pr-icon icon="'info'" mode="'primary'"></pr-icon>
-                    指定 tar 归档/仓库中 Dockerfile 的路径（使用 Dockerfile 时忽略）。
+                    指示 tarball/仓库中 Dockerfile 的路径（使用 Dockerfile 时忽略）。
                   </span>
                 </div>
                 <div class="form-group">
@@ -183,13 +182,13 @@
               </div>
               <!-- !url -->
               <div ng-if="applicationState.endpoint.mode.agentProxy && applicationState.endpoint.mode.provider === 'DOCKER_SWARM_MODE'">
-                <div class="col-sm-12 form-section-title">部署</div>
+                <div class="col-sm-12 form-section-title"> 部署 </div>
                 <!-- node-selection -->
                 <node-selector model="formValues.NodeName" endpoint-id="endpoint.Id"> </node-selector>
                 <!-- !node-selection -->
               </div>
               <!-- actions -->
-              <div class="col-sm-12 form-section-title">操作</div>
+              <div class="col-sm-12 form-section-title"> 操作 </div>
               <div class="form-group">
                 <div class="col-sm-12">
                   <button
@@ -213,7 +212,7 @@
             </form>
           </uib-tab>
           <uib-tab index="1" disable="!buildLogs">
-            <uib-tab-heading class="vertical-center"> <pr-icon icon="'file-text'" class="leading-none"></pr-icon> 输出</uib-tab-heading>
+            <uib-tab-heading class="vertical-center"> <pr-icon icon="'file-text'" class="leading-none"></pr-icon> 输出 </uib-tab-heading>
             <pre class="log_viewer" data-cy="logViewer">
               <div ng-repeat="line in buildLogs track by $index" class="line"><p class="inner_line" ng-click="active=!active" ng-class="{'line_selected': active}">{{ line }}</p></div>
               <div ng-if="!buildLogs.length" class="line"><p class="inner_line">没有可用的构建输出。</p></div>

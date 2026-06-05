@@ -98,6 +98,9 @@ func FilterEndpoints(endpoints []portainer.Endpoint, groups []portainer.Endpoint
 	n := 0
 	for _, endpoint := range endpoints {
 		endpointGroup := getAssociatedGroup(&endpoint, groups)
+		if endpointGroup == nil {
+			continue
+		}
 
 		if AuthorizedEndpointAccess(&endpoint, endpointGroup, context.UserID, context.UserMemberships) {
 			endpoint.UserAccessPolicies = nil

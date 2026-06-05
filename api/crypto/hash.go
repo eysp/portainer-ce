@@ -1,7 +1,8 @@
 package crypto
 
 import (
-	"golang.org/x/crypto/bcrypt"
+	// Not allowed in FIPS mode
+	"golang.org/x/crypto/bcrypt" //nolint:depguard
 )
 
 // Service represents a service for encrypting/hashing data.

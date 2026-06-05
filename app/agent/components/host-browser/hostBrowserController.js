@@ -69,7 +69,7 @@ export class HostBrowserController {
     const newFilePath = this.buildPath(this.state.path, newName);
     try {
       await this.HostBrowserService.rename(this.endpointId, filePath, newFilePath);
-      this.Notifications.success('File successfully renamed', this.getRelativePath(newFilePath));
+      this.Notifications.success('文件已成功重命名', this.getRelativePath(newFilePath));
       const files = await this.HostBrowserService.ls(this.endpointId, this.state.path);
       this.files = files;
     } catch (err) {
@@ -110,7 +110,7 @@ export class HostBrowserController {
   async deleteFileAsync(path) {
     try {
       await this.HostBrowserService.delete(this.endpointId, path);
-      this.Notifications.success('File successfully deleted', this.getRelativePath(path));
+      this.Notifications.success('文件已成功删除', this.getRelativePath(path));
       const files = await this.HostBrowserService.ls(this.endpointId, this.state.path);
       this.files = files;
     } catch (err) {

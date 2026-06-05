@@ -47,7 +47,7 @@ func Test_getEndpointTypes(t *testing.T) {
 
 	for _, test := range tests {
 		ans, err := getEndpointTypes(datastore, roar.FromSlice(test.endpointIds))
-		assert.NoError(t, err, "getEndpointTypes shouldn't fail")
+		require.NoError(t, err, "getEndpointTypes shouldn't fail")
 
 		assert.ElementsMatch(t, test.expected, ans, "getEndpointTypes expected to return %b for %v, but returned %b", test.expected, test.endpointIds, ans)
 	}
@@ -57,7 +57,7 @@ func Test_getEndpointTypes_failWhenEndpointDontExist(t *testing.T) {
 	datastore := testhelpers.NewDatastore(testhelpers.WithEndpoints([]portainer.Endpoint{}))
 
 	_, err := getEndpointTypes(datastore, roar.FromSlice([]portainer.EndpointID{1}))
-	assert.Error(t, err, "getEndpointTypes should fail")
+	require.Error(t, err, "getEndpointTypes should fail")
 }
 
 func TestEdgeGroupListHandler(t *testing.T) {
@@ -112,5 +112,5 @@ func TestEdgeGroupListHandler(t *testing.T) {
 
 	require.Len(t, responseGroups, 1)
 	require.ElementsMatch(t, []portainer.EndpointID{1, 2, 3}, responseGroups[0].Endpoints)
-	require.Len(t, responseGroups[0].TrustedEndpoints, 0)
+	require.Empty(t, responseGroups[0].TrustedEndpoints)
 }

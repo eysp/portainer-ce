@@ -62,7 +62,7 @@ function TagsController($scope, $state, $async, TagService, Notifications) {
         $scope.tags = data;
       })
       .catch(function error(err) {
-        Notifications.error('Failure', err, 'Unable to retrieve tags');
+        Notifications.error('Failure', err, '无法获取标签');
         $scope.tags = [];
       });
   }

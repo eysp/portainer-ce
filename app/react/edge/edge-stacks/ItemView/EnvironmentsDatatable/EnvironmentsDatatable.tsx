@@ -87,7 +87,7 @@ export function EnvironmentsDatatable() {
   const envStatusSelectOptions = [
     { value: StatusType.Pending, label: 'Pending' },
     { value: StatusType.Acknowledged, label: 'Acknowledged' },
-    { value: StatusType.ImagesPulled, label: 'Images pre-pulled' },
+    { value: StatusType.ImagesPulled, label: '镜像预拉取' },
     { value: StatusType.Running, label: 'Deployed' },
     { value: StatusType.Error, label: 'Failed' },
   ];
@@ -105,7 +105,7 @@ export function EnvironmentsDatatable() {
       isLoading={environmentsQuery.isLoading}
       dataset={environments}
       settingsManager={tableState}
-      title="Environments Status"
+      title="环境状态"
       titleIcon={HardDrive}
       isServerSidePagination
       page={page}

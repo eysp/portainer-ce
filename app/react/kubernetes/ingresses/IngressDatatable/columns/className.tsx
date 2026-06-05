@@ -1,7 +1,7 @@
 import { columnHelper } from './helper';
 
 export const className = columnHelper.accessor('ClassName', {
-  header: 'Class Name',
+  header: '类名',
   id: 'className',
   cell: ({ row }) => row.original.ClassName || '-',
 });

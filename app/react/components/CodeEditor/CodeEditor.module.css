@@ -81,6 +81,7 @@
   background-color: var(--bg-codemirror-gutters-color);
   border-top-color: transparent;
   color: var(--text-codemirror-color);
+  z-index: inherit;
 }
 
 .root :global(.cm-button) {

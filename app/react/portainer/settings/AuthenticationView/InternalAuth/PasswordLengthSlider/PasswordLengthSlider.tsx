@@ -93,7 +93,7 @@ export function PasswordLengthSlider({
   const sliderTooltip = useCallback(
     (node, handleProps) => (
       <SliderTooltip
-        value={`${handleProps.value} 个字符`}
+        value={`${handleProps.value} 字符`}
         child={node}
         delay={800}
       />

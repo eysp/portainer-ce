@@ -9,12 +9,12 @@ import {
   EnvironmentCreationTypes,
 } from '@/react/portainer/environments/types';
 import { TLSFieldset } from '@/react/components/TLSFieldset/TLSFieldset';
+import { NameField } from '@/react/portainer/environments/common/NameField/NameField';
 
 import { LoadingButton } from '@@/buttons/LoadingButton';
 import { FormControl } from '@@/form-components/FormControl';
 import { Input } from '@@/form-components/Input';
 
-import { NameField } from '../../shared/NameField';
 import { MoreSettingsSection } from '../../shared/MoreSettingsSection';
 
 import { useValidation } from './APIForm.validation';
@@ -61,13 +61,13 @@ export function APIForm({ onCreate }: Props) {
             inputId="url-field"
             label="Docker API 地址"
             required
-            tooltip="Docker 主机的 URL 或 IP 地址。Docker API 必须通过 TCP 端口暴露。请参阅 Docker 文档进行配置。"
+            tooltip="Docker 主机的 URL 或 IP 地址。Docker API 必须通过 TCP 端口暴露。请参考 Docker 文档进行配置。"
           >
             <Field
               as={Input}
               id="url-field"
               name="url"
-              placeholder="例如 10.0.0.10:2375 或 mydocker.mydomain.com:2375"
+              placeholder="例如：10.0.0.10:2375 或 mydocker.mydomain.com:2375"
             />
           </FormControl>
 

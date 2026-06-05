@@ -10,7 +10,7 @@ import { columnHelper } from './helper';
 export const name = columnHelper.accessor(
   (row) => `${row.name.label}/${row.resourceType}`,
   {
-    header: 'Name',
+    header: '名称',
     cell: Cell,
     id: 'name',
   }

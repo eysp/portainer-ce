@@ -9,7 +9,7 @@
           <div ng-messages="endpointGroupForm.group_name.$error">
             <p ng-message="required" class="vertical-center">
               <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
-              此字段是必填项。
+              This field is required.
             </p>
           </div>
         </div>
@@ -32,7 +32,7 @@
     </div>
   </div>
   <!-- !description-input -->
-  <div class="col-sm-12 form-section-title"> 元数据 </div>
+  <div class="col-sm-12 form-section-title"> Metadata </div>
 
   <tag-selector ng-if="$ctrl.model.TagIds" value="$ctrl.model.TagIds" on-change="($ctrl.onChangeTags)" allow-create="$ctrl.state.allowCreateTag"> </tag-selector>
 
@@ -61,7 +61,7 @@
         button-spinner="$ctrl.actionInProgress"
       >
         <span ng-hide="$ctrl.actionInProgress">{{ $ctrl.formActionLabel }}</span>
-        <span ng-show="$ctrl.actionInProgress">处理中...</span>
+        <span ng-show="$ctrl.actionInProgress">In progress...</span>
       </button>
     </div>
   </div>

@@ -70,7 +70,7 @@ angular.module('portainer.app').factory('AccessService', [
           deferred.resolve(accessData);
         })
         .catch(function error(err) {
-          deferred.reject({ msg: '无法获取用户与团队列表', err: err });
+          deferred.reject({ msg: 'Unable to retrieve users and teams', err: err });
         });
 
       return deferred.promise;
@@ -78,7 +78,7 @@ angular.module('portainer.app').factory('AccessService', [
 
     async function accessesAsync(entity, parent) {
       if (!entity) {
-        throw new Error('无法获取访问列表');
+        throw new Error('Unable to retrieve accesses');
       }
       if (!entity.UserAccessPolicies) {
         entity.UserAccessPolicies = {};

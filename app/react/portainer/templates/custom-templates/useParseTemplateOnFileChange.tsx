@@ -34,7 +34,7 @@ export function useParseTemplateOnFileChange(
 
     setFieldError(
       'FileContent',
-      validationError ? `Template invalid: ${validationError}` : undefined
+      validationError ? `模板无效：${validationError}` : undefined
     );
     if (isValid) {
       setFieldValue('Variables', intersectVariables(oldVariables, variables));

@@ -174,7 +174,7 @@ describe('Datatable', () => {
     fireEvent.click(selectAllCheckbox);
 
     // Check if all rows on the page are selected
-    expect(screen.getByText('2 项 已选择')).toBeInTheDocument();
+    expect(screen.getByText('2 items selected')).toBeInTheDocument();
 
     // Deselect
     fireEvent.click(selectAllCheckbox);
@@ -196,7 +196,7 @@ describe('Datatable', () => {
     fireEvent.click(selectAllCheckbox, { shiftKey: true });
 
     // Check if all rows on the page are selected
-    expect(screen.getByText('3 项 已选择')).toBeInTheDocument();
+    expect(screen.getByText('3 items selected')).toBeInTheDocument();
 
     // Deselect
     fireEvent.click(selectAllCheckbox, { shiftKey: true });
@@ -225,7 +225,7 @@ describe('Datatable', () => {
 
     // Check if the footer text is correct
     expect(
-      await screen.findByText('1 项 已选择 (1 项被过滤器隐藏)')
+      await screen.findByText('1 item selected (1 hidden by filters)')
     ).toBeInTheDocument();
 
     // Check if the checkbox is indeterminate
@@ -291,12 +291,12 @@ const mockRow = mockTable.getRow('1');
 
 describe('defaultGlobalFilterFn', () => {
   it('should return true when filterValue is null', () => {
-    const result = defaultGlobalFilterFn(mockRow, 'Name', null);
+    const result = defaultGlobalFilterFn(mockRow, 'name', null);
     expect(result).toBe(true);
   });
 
   it('should return true when filterValue.search is empty', () => {
-    const result = defaultGlobalFilterFn(mockRow, 'Name', {
+    const result = defaultGlobalFilterFn(mockRow, 'name', {
       search: '',
     });
     expect(result).toBe(true);

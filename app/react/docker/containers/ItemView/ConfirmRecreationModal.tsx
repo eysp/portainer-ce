@@ -17,13 +17,13 @@ function ConfirmRecreationModal({ onSubmit, cannotPullImage }: Props) {
   return (
     <Modal
       onDismiss={() => onSubmit()}
-      aria-label="confirm recreate container modal"
+      aria-label="确认重新创建容器弹窗"
     >
-      <Modal.Header title="确定吗？" modalType={ModalType.Destructive} />
+      <Modal.Header title="您确定吗？" modalType={ModalType.Destructive} />
 
       <Modal.Body>
         <p>
-          您即将重新创建此容器，所有非持久化数据将丢失。此容器将被删除，并使用相同配置创建另一个容器。
+          您即将重新创建此容器，所有非持久化数据都将丢失。此容器将被删除，并使用相同配置创建一个新容器。
         </p>
         <SwitchField
           name="pullLatest"
@@ -36,7 +36,7 @@ function ConfirmRecreationModal({ onSubmit, cannotPullImage }: Props) {
         {cannotPullImage && (
           <div className="mt-1 text-sm">
             <TextTip color="orange">
-              无法重新拉取，因为镜像不可访问 - 镜像可能不再存在，或者标签或名称不再正确。
+              无法重新拉取镜像，因为镜像不可访问。它可能已不存在，或标签/名称不再正确。
             </TextTip>
           </div>
         )}

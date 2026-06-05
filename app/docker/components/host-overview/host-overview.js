@@ -10,6 +10,7 @@ angular.module('portainer.docker').component('hostOverview', {
     refreshUrl: '@',
     browseUrl: '@',
     hostFeaturesEnabled: '<',
+    isAdmin: '<',
   },
   transclude: true,
 });

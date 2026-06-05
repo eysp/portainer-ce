@@ -7,7 +7,7 @@ import { ContainerRowData } from '../types';
 import { columnHelper } from './helper';
 
 export const name = columnHelper.accessor('name', {
-  header: 'Name',
+  header: '名称',
   id: 'name',
   cell: ({ row: { original: container } }) => (
     <div className="flex justify-between gap-2">

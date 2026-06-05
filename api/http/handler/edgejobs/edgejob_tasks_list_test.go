@@ -11,6 +11,7 @@ import (
 	"github.com/portainer/portainer/api/datastore"
 	"github.com/portainer/portainer/api/internal/testhelpers"
 	"github.com/portainer/portainer/api/roar"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -68,14 +69,16 @@ func Test_EdgeJobTasksListHandler(t *testing.T) {
 
 		tcStr := rr.Header().Get("x-total-count")
 		assert.NotEmpty(t, tcStr)
+
 		totalCount, err := strconv.Atoi(tcStr)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, expectedCount, totalCount)
 
 		taStr := rr.Header().Get("x-total-available")
 		assert.NotEmpty(t, taStr)
+
 		totalAvailable, err := strconv.Atoi(taStr)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, envCount, totalAvailable)
 
 	}

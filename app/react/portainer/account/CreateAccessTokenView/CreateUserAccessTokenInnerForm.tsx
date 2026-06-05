@@ -23,7 +23,7 @@ export function CreateUserAccessTokenInnerForm({ showAuthentication }: Props) {
       {showAuthentication && (
         <FormControl
           inputId="password"
-          label="Current password"
+          label="当前密码"
           required
           errors={errors.password}
         >
@@ -39,7 +39,7 @@ export function CreateUserAccessTokenInnerForm({ showAuthentication }: Props) {
       )}
       <FormControl
         inputId="description"
-        label="Description"
+        label="描述"
         required
         errors={errors.description}
       >
@@ -54,9 +54,9 @@ export function CreateUserAccessTokenInnerForm({ showAuthentication }: Props) {
         disabled={!isValid || !dirty}
         data-cy="create-access-token-button"
         isLoading={false}
-        loadingText="Adding access token..."
+        loadingText="正在添加访问令牌..."
       >
-        Add access token
+        添加访问令牌
       </LoadingButton>
     </Form>
   );

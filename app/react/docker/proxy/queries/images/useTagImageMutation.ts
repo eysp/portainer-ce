@@ -25,6 +25,6 @@ export async function tagImage(
     );
     return data;
   } catch (e) {
-    throw parseAxiosError(e, 'Unable to tag image');
+    throw parseAxiosError(e, '无法标记镜像');
   }
 }

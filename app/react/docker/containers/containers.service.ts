@@ -24,7 +24,7 @@ export async function startContainer(
       }
     );
   } catch (e) {
-    throw parseAxiosError(e, 'Failed starting container');
+    throw parseAxiosError(e, '启动容器失败');
   }
 }
 
@@ -40,7 +40,7 @@ export async function stopContainer(
       { headers: { ...withAgentTargetHeader(nodeName) } }
     );
   } catch (e) {
-    throw parseAxiosError(e, 'Failed stopping container');
+    throw parseAxiosError(e, '停止容器失败');
   }
 }
 
@@ -59,7 +59,7 @@ export async function recreateContainer(
       { headers: { ...withAgentTargetHeader(nodeName) } }
     );
   } catch (e) {
-    throw parseAxiosError(e, 'Failed recreating container');
+    throw parseAxiosError(e, '重新创建容器失败');
   }
 }
 
@@ -75,7 +75,7 @@ export async function restartContainer(
       { headers: { ...withAgentTargetHeader(nodeName) } }
     );
   } catch (e) {
-    throw parseAxiosError(e, 'Failed restarting container');
+    throw parseAxiosError(e, '重启容器失败');
   }
 }
 
@@ -91,7 +91,7 @@ export async function killContainer(
       { headers: { ...withAgentTargetHeader(nodeName) } }
     );
   } catch (e) {
-    throw parseAxiosError(e, 'Failed killing container');
+    throw parseAxiosError(e, '终止容器失败');
   }
 }
 
@@ -107,7 +107,7 @@ export async function pauseContainer(
       { headers: { ...withAgentTargetHeader(nodeName) } }
     );
   } catch (e) {
-    throw parseAxiosError(e, 'Failed pausing container');
+    throw parseAxiosError(e, '暂停容器失败');
   }
 }
 
@@ -123,7 +123,7 @@ export async function resumeContainer(
       { headers: { ...withAgentTargetHeader(nodeName) } }
     );
   } catch (e) {
-    throw parseAxiosError(e, 'Failed resuming container');
+    throw parseAxiosError(e, '恢复容器失败');
   }
 }
 
@@ -143,7 +143,7 @@ export async function renameContainer(
       }
     );
   } catch (e) {
-    throw parseAxiosError(e, 'Failed renaming container');
+    throw parseAxiosError(e, '重命名容器失败');
   }
 }
 
@@ -168,7 +168,7 @@ export async function removeContainer(
       throw new PortainerError(data.message);
     }
   } catch (e) {
-    throw parseAxiosError(e, 'Unable to remove container');
+    throw parseAxiosError(e, '无法删除容器');
   }
 }
 
@@ -187,6 +187,6 @@ export async function getContainerLogs(
 
     return data;
   } catch (e) {
-    throw parseAxiosError(e, 'Unable to get container logs');
+    throw parseAxiosError(e, '无法获取容器日志');
   }
 }

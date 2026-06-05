@@ -97,7 +97,7 @@ describe('GitFormUrlField', () => {
     it('should render with correct structure', () => {
       renderComponent();
 
-      expect(screen.getByText(/repository url/i)).toBeInTheDocument();
+      expect(screen.getByText(/仓库 URL/)).toBeInTheDocument();
       expect(
         screen.getByPlaceholderText(
           'https://github.com/portainer/portainer-compose'

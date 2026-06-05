@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_AddAppLabels(t *testing.T) {
@@ -39,6 +40,7 @@ metadata:
     io.portainer.kubernetes.application.kind: git
     io.portainer.kubernetes.application.name: best-name
     io.portainer.kubernetes.application.owner: best-owner
+    io.portainer.kubernetes.application.owner.id: ""
     io.portainer.kubernetes.application.stack: best-name
     io.portainer.kubernetes.application.stackid: "123"
   name: busybox
@@ -87,6 +89,7 @@ metadata:
     io.portainer.kubernetes.application.kind: git
     io.portainer.kubernetes.application.name: best-name
     io.portainer.kubernetes.application.owner: best-owner
+    io.portainer.kubernetes.application.owner.id: ""
     io.portainer.kubernetes.application.stack: best-name
     io.portainer.kubernetes.application.stackid: "123"
   name: busybox
@@ -176,6 +179,7 @@ items:
         io.portainer.kubernetes.application.kind: git
         io.portainer.kubernetes.application.name: best-name
         io.portainer.kubernetes.application.owner: best-owner
+        io.portainer.kubernetes.application.owner.id: ""
         io.portainer.kubernetes.application.stack: best-name
         io.portainer.kubernetes.application.stackid: "123"
       name: web
@@ -197,6 +201,7 @@ items:
         io.portainer.kubernetes.application.kind: git
         io.portainer.kubernetes.application.name: best-name
         io.portainer.kubernetes.application.owner: best-owner
+        io.portainer.kubernetes.application.owner.id: ""
         io.portainer.kubernetes.application.stack: best-name
         io.portainer.kubernetes.application.stackid: "123"
       name: redis
@@ -220,6 +225,7 @@ items:
         io.portainer.kubernetes.application.kind: git
         io.portainer.kubernetes.application.name: best-name
         io.portainer.kubernetes.application.owner: best-owner
+        io.portainer.kubernetes.application.owner.id: ""
         io.portainer.kubernetes.application.stack: best-name
         io.portainer.kubernetes.application.stackid: "123"
       name: web
@@ -302,6 +308,7 @@ metadata:
     io.portainer.kubernetes.application.kind: git
     io.portainer.kubernetes.application.name: best-name
     io.portainer.kubernetes.application.owner: best-owner
+    io.portainer.kubernetes.application.owner.id: ""
     io.portainer.kubernetes.application.stack: best-name
     io.portainer.kubernetes.application.stackid: "123"
   name: busybox
@@ -328,6 +335,7 @@ metadata:
     io.portainer.kubernetes.application.kind: git
     io.portainer.kubernetes.application.name: best-name
     io.portainer.kubernetes.application.owner: best-owner
+    io.portainer.kubernetes.application.owner.id: ""
     io.portainer.kubernetes.application.stack: best-name
     io.portainer.kubernetes.application.stackid: "123"
   name: web
@@ -347,6 +355,7 @@ metadata:
     io.portainer.kubernetes.application.kind: git
     io.portainer.kubernetes.application.name: best-name
     io.portainer.kubernetes.application.owner: best-owner
+    io.portainer.kubernetes.application.owner.id: ""
     io.portainer.kubernetes.application.stack: best-name
     io.portainer.kubernetes.application.stackid: "123"
   name: busybox
@@ -396,6 +405,7 @@ metadata:
     io.portainer.kubernetes.application.kind: git
     io.portainer.kubernetes.application.name: best-name
     io.portainer.kubernetes.application.owner: best-owner
+    io.portainer.kubernetes.application.owner.id: ""
     io.portainer.kubernetes.application.stack: best-name
     io.portainer.kubernetes.application.stackid: "123"
   name: web
@@ -420,7 +430,7 @@ spec:
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result, err := AddAppLabels([]byte(tt.input), labels.ToMap())
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tt.wantOutput, string(result))
 		})
 	}
@@ -584,7 +594,7 @@ spec:
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result, err := AddAppLabels([]byte(tt.input), labels)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tt.wantOutput, string(result))
 		})
 	}
@@ -618,6 +628,7 @@ metadata:
     io.portainer.kubernetes.application.kind: git
     io.portainer.kubernetes.application.name: best-name
     io.portainer.kubernetes.application.owner: best-owner
+    io.portainer.kubernetes.application.owner.id: ""
     io.portainer.kubernetes.application.stack: best-name
     io.portainer.kubernetes.application.stackid: "123"
 ---
@@ -629,11 +640,12 @@ metadata:
     io.portainer.kubernetes.application.kind: git
     io.portainer.kubernetes.application.name: best-name
     io.portainer.kubernetes.application.owner: best-owner
+    io.portainer.kubernetes.application.owner.id: ""
     io.portainer.kubernetes.application.stack: best-name
     io.portainer.kubernetes.application.stackid: "123"
 `
 	result, err := AddAppLabels([]byte(input), labels.ToMap())
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, string(result))
 }
 
@@ -664,7 +676,7 @@ kind: Namespace
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result, err := GetNamespace([]byte(tt.input))
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tt.want, result)
 		})
 	}
@@ -704,7 +716,8 @@ kind: Namespace
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			results, err := ExtractDocuments([]byte(tt.input), nil)
-			assert.NoError(t, err)
+			require.NoError(t, err)
+
 			for i := range results {
 				assert.Equal(t, tt.want[i], string(results[i]))
 			}

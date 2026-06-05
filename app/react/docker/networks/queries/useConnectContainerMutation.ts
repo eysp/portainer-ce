@@ -1,15 +1,15 @@
-import { EndpointSettings } from 'docker-types/generated/1.41';
+import { EndpointSettings } from 'docker-types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import axios, { parseAxiosError } from '@/portainer/services/axios';
 import { EnvironmentId } from '@/react/portainer/environments/types';
 import {
   mutationOptions,
-  withError,
+  withGlobalError,
   withInvalidate,
 } from '@/react-tools/react-query';
 
-import { queryKeys as dockerQueryKeys } from '../../queries/utils';
+import { queryKeys as containerQueryKeys } from '../../containers/queries/query-keys';
 import { withAgentTargetHeader } from '../../proxy/queries/utils';
 import { buildDockerProxyUrl } from '../../proxy/queries/buildDockerProxyUrl';
 
@@ -25,8 +25,8 @@ export function useConnectContainerMutation(environmentId: EnvironmentId) {
     (params: Omit<ConnectContainer, 'environmentId'>) =>
       connectContainer({ ...params, environmentId }),
     mutationOptions(
-      withError('连接容器到网络失败'),
-      withInvalidate(queryClient, [dockerQueryKeys.containers(environmentId)])
+      withGlobalError('连接容器到网络失败'),
+      withInvalidate(queryClient, [containerQueryKeys.list(environmentId)])
     )
   );
 }

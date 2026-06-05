@@ -14,7 +14,7 @@
               <td>{{ $ctrl.details.role }} {{ $ctrl.state.managerAddress }}</td>
             </tr>
             <tr>
-              <td>可用性</td>
+              <td>Availability</td>
               <td>
                 <node-availability-select
                   on-save="$ctrl.updateNodeAvailability(availability)"
@@ -33,7 +33,7 @@
             <tr>
               <td>
                 <div class="nopadding">
-                  <a class="btn btn-secondary btn-sm pull-right" ng-click="$ctrl.addLabel(node)"> <pr-icon icon="'plus'"></pr-icon> 标签 </a>
+                  <a class="btn btn-secondary btn-sm pull-right" ng-click="$ctrl.addLabel(node)"> <pr-icon icon="'plus'"></pr-icon> label </a>
                 </div>
                 节点标签
               </td>

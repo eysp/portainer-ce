@@ -1,6 +1,7 @@
 import axios, { parseAxiosError } from '@/portainer/services/axios';
 import { Pair } from '@/react/portainer/settings/types';
 import { EnvironmentId } from '@/react/portainer/environments/types';
+import { RegistryId } from '@/react/portainer/registries/types/registry';
 
 import { Stack } from '../../types';
 
@@ -12,7 +13,7 @@ export interface SwarmFileContentPayload {
 
   stackFileContent: string;
   /** List of environment variables */
-  env?: Array<Pair>;
+  env?: Array<Pair> | null;
 
   /** Whether the stack is from an app template */
   fromAppTemplate?: boolean;
@@ -22,6 +23,7 @@ export interface SwarmFileContentPayload {
   /** Swarm cluster identifier */
   swarmID: string;
   environmentId: EnvironmentId;
+  registries?: Array<RegistryId>;
 }
 
 export async function createSwarmStackFromFileContent({

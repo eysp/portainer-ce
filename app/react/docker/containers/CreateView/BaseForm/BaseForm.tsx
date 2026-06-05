@@ -112,13 +112,13 @@ export function BaseForm({
 
         {canUseWebhook && (
           <Authorized authorizations="PortainerWebhookCreate" adminOnlyCE>
-            <FormSection title="Webhook">
+            <FormSection title="网络钩子">
               <div className="form-group">
                 <div className="col-sm-12">
                   <SwitchField
-                    label="创建容器 Webhook"
+                    label="创建容器网络钩子"
                     data-cy="container-webhook-switch"
-                    tooltip="创建 Webhook（或回调 URI）以自动重新创建此容器。向此回调 URI 发送 POST 请求（无需任何身份验证）将拉取关联镜像的最新版本并重新创建此容器。"
+                    tooltip="创建一个网络钩子（或回调 URI）以自动重新创建此容器。向此回调 URI 发送 POST 请求（无需任何身份验证）将拉取关联镜像的最新版本并重新创建此容器。"
                     checked={values.enableWebhook}
                     onChange={(enableWebhook) =>
                       setFieldValue('enableWebhook', enableWebhook)
@@ -138,7 +138,7 @@ export function BaseForm({
               <SwitchField
                 label="将所有暴露的端口发布到随机主机端口"
                 data-cy="publish-all-ports-switch"
-                tooltip="启用后，Portainer 将让 Docker 自动将主机上的随机端口映射到镜像 Dockerfile 中定义的每个端口。"
+                tooltip="启用后，Portainer 将让 Docker 自动在主机上映射一个随机端口到镜像 Dockerfile 中定义的每个端口。"
                 checked={values.publishAllPorts}
                 onChange={(publishAllPorts) =>
                   setFieldValue('publishAllPorts', publishAllPorts)
@@ -176,9 +176,9 @@ export function BaseForm({
         <div className="form-group">
           <div className="col-sm-12">
             <SwitchField
-              label="自动移除"
+              label="自动删除"
               data-cy="container-auto-remove-switch"
-              tooltip="启用后，Portainer 将在容器退出时自动移除容器。当您只想使用容器一次时，这很有用。"
+              tooltip="启用后，Portainer 将在容器退出时自动删除容器。当您只想使用容器一次时，这很有用。"
               checked={values.autoRemove}
               onChange={(autoRemove) => setFieldValue('autoRemove', autoRemove)}
               labelClass="col-sm-3 col-lg-2"
@@ -189,7 +189,7 @@ export function BaseForm({
         <div className="form-group">
           <div className="col-sm-12">
             <LoadingButton
-              loadingText="部署进行中..."
+              loadingText="部署中..."
               data-cy="deploy-container-button"
               isLoading={isLoading}
               disabled={!isValid}

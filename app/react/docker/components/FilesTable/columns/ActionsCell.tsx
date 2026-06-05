@@ -28,7 +28,7 @@ export function ActionsCell({
             className="!m-0"
             data-cy={`docker-files-download-${item.Name}`}
           >
-            Download
+            下载
           </Button>
         </Authorized>
       )}
@@ -53,7 +53,7 @@ export function ActionsCell({
           className="!m-0"
           data-cy={`docker-files-delete-${item.Name}`}
         >
-          Delete
+          删除
         </Button>
       </Authorized>
     </div>

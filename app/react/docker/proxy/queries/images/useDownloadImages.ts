@@ -26,6 +26,6 @@ export async function downloadImages(
     );
     return data;
   } catch (e) {
-    throw parseAxiosError(e, 'Unable to download images');
+    throw parseAxiosError(e, '无法下载镜像');
   }
 }

@@ -16,7 +16,7 @@ export function useExecuteAMTDeviceActionMutation() {
     onSuccess(_data, { environmentId }) {
       queryClient.invalidateQueries([['amt_devices', environmentId]]);
     },
-    ...withError('无法执行设备操作'),
+    ...withError('Unable to execute device action'),
   });
 }
 
@@ -35,6 +35,6 @@ async function executeDeviceAction({
       { action }
     );
   } catch (e) {
-    throw parseAxiosError(e as Error, '无法执行设备操作');
+    throw parseAxiosError(e as Error, 'Unable to execute device action');
   }
 }

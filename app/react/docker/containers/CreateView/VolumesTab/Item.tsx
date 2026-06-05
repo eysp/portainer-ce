@@ -45,7 +45,7 @@ export function Item({
                 { value: 'volume', label: '卷' },
                 { value: 'bind', label: '绑定' },
               ]}
-              aria-label="Volume type"
+              aria-label="卷类型"
             />
           </InputGroup>
         )}
@@ -81,7 +81,7 @@ export function Item({
 
         <InputGroup size="small">
           <ButtonSelector<boolean>
-            aria-label="ReadWrite"
+            aria-label="读写"
             value={volume.readOnly}
             onChange={(readOnly) => setValue({ readOnly })}
             options={[

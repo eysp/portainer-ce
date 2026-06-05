@@ -16,7 +16,7 @@ import (
 func TestGenerateSignedToken(t *testing.T) {
 	dataStore := testhelpers.NewDatastore(testhelpers.WithSettingsService(&portainer.Settings{}))
 	svc, err := NewService("24h", dataStore)
-	assert.NoError(t, err, "failed to create a copy of service")
+	require.NoError(t, err, "failed to create a copy of service")
 
 	token := &portainer.TokenData{
 		Username: "Joe",
@@ -26,15 +26,15 @@ func TestGenerateSignedToken(t *testing.T) {
 	expiresAt := time.Now().Add(1 * time.Hour)
 
 	generatedToken, err := svc.generateSignedToken(token, expiresAt, defaultScope)
-	assert.NoError(t, err, "failed to generate a signed token")
+	require.NoError(t, err, "failed to generate a signed token")
 
 	parsedToken, err := jwt.ParseWithClaims(generatedToken, &claims{}, func(token *jwt.Token) (any, error) {
 		return svc.secrets[defaultScope], nil
 	})
-	assert.NoError(t, err, "failed to parse generated token")
+	require.NoError(t, err, "failed to parse generated token")
 
 	tokenClaims, ok := parsedToken.Claims.(*claims)
-	assert.Equal(t, true, ok, "failed to claims out of generated ticket")
+	assert.True(t, ok, "failed to claims out of generated ticket")
 
 	assert.Equal(t, token.Username, tokenClaims.Username)
 	assert.Equal(t, int(token.ID), tokenClaims.UserID)
@@ -45,7 +45,7 @@ func TestGenerateSignedToken(t *testing.T) {
 func TestGenerateSignedToken_InvalidScope(t *testing.T) {
 	dataStore := testhelpers.NewDatastore(testhelpers.WithSettingsService(&portainer.Settings{}))
 	svc, err := NewService("24h", dataStore)
-	assert.NoError(t, err, "failed to create a copy of service")
+	require.NoError(t, err, "failed to create a copy of service")
 
 	token := &portainer.TokenData{
 		Username: "Joe",
@@ -55,7 +55,7 @@ func TestGenerateSignedToken_InvalidScope(t *testing.T) {
 	expiresAt := time.Now().Add(1 * time.Hour)
 
 	_, err = svc.generateSignedToken(token, expiresAt, "testing")
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Equal(t, "invalid scope: testing", err.Error())
 }
 

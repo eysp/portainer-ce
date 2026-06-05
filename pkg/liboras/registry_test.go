@@ -4,16 +4,21 @@ import (
 	"testing"
 
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/pkg/fips"
+
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"oras.land/oras-go/v2/registry/remote/auth"
-	"oras.land/oras-go/v2/registry/remote/retry"
 )
 
 func TestCreateClient_AuthenticationScenarios(t *testing.T) {
+	fips.InitFIPS(false)
+
 	tests := []struct {
 		name                string
 		registry            portainer.Registry
 		expectAuthenticated bool
+		expectTLS           bool
 		description         string
 	}{
 		{
@@ -25,6 +30,7 @@ func TestCreateClient_AuthenticationScenarios(t *testing.T) {
 				Password:       "testpass",
 			},
 			expectAuthenticated: false,
+			expectTLS:           false,
 			description:         "Even with credentials present, authentication=false should result in anonymous access",
 		},
 		{
@@ -36,6 +42,7 @@ func TestCreateClient_AuthenticationScenarios(t *testing.T) {
 				Password:       "testpass",
 			},
 			expectAuthenticated: true,
+			expectTLS:           false,
 			description:         "Valid credentials with authentication=true should result in authenticated access",
 		},
 		{
@@ -47,6 +54,7 @@ func TestCreateClient_AuthenticationScenarios(t *testing.T) {
 				Password:       "testpass",
 			},
 			expectAuthenticated: false,
+			expectTLS:           false,
 			description:         "Empty username should fallback to anonymous access",
 		},
 		{
@@ -58,6 +66,7 @@ func TestCreateClient_AuthenticationScenarios(t *testing.T) {
 				Password:       "testpass",
 			},
 			expectAuthenticated: false,
+			expectTLS:           false,
 			description:         "Whitespace-only username should fallback to anonymous access",
 		},
 		{
@@ -69,6 +78,7 @@ func TestCreateClient_AuthenticationScenarios(t *testing.T) {
 				Password:       "",
 			},
 			expectAuthenticated: false,
+			expectTLS:           false,
 			description:         "Empty password should fallback to anonymous access",
 		},
 		{
@@ -80,6 +90,7 @@ func TestCreateClient_AuthenticationScenarios(t *testing.T) {
 				Password:       "   ",
 			},
 			expectAuthenticated: false,
+			expectTLS:           false,
 			description:         "Whitespace-only password should fallback to anonymous access",
 		},
 		{
@@ -91,18 +102,8 @@ func TestCreateClient_AuthenticationScenarios(t *testing.T) {
 				Password:       "",
 			},
 			expectAuthenticated: false,
+			expectTLS:           false,
 			description:         "Both credentials empty should fallback to anonymous access",
-		},
-		{
-			name: "public registry with no authentication should create anonymous client",
-			registry: portainer.Registry{
-				URL:            "docker.io",
-				Authentication: false,
-				Username:       "",
-				Password:       "",
-			},
-			expectAuthenticated: false,
-			description:         "Public registries without authentication should use anonymous access",
 		},
 		{
 			name: "GitLab registry with valid credentials should create authenticated client",
@@ -119,7 +120,19 @@ func TestCreateClient_AuthenticationScenarios(t *testing.T) {
 				},
 			},
 			expectAuthenticated: true,
+			expectTLS:           true,
 			description:         "GitLab registry with valid credentials should result in authenticated access",
+		},
+		{
+			name: "DockerHub registry without credentials should create anonymous client with TLS",
+			registry: portainer.Registry{
+				Type:           portainer.DockerHubRegistry,
+				URL:            "registry-1.docker.io",
+				Authentication: false,
+			},
+			expectAuthenticated: false,
+			expectTLS:           true,
+			description:         "DockerHub registry with without credentials should result in authenticated anonymous access",
 		},
 	}
 
@@ -127,28 +140,22 @@ func TestCreateClient_AuthenticationScenarios(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			client, err := CreateClient(tt.registry)
 
-			assert.NoError(t, err, "CreateClient should not return an error")
+			require.NoError(t, err, "CreateClient should not return an error")
 			assert.NotNil(t, client, "Client should not be nil")
 
+			// Should have auth.Client with credentials regardless of authentication setting
+			// If authentication is enabled, it should have the credentials set.
+			// If authentication is disabled, it should still be an auth.Client but with retry.DefaultClient
+			// (which handles anonymous access by requesting an anonymous token if needed).
+			authClient, ok := client.Client.(*auth.Client)
+			assert.True(t, ok, "Expected auth.Client for authenticated access")
+			assert.NotNil(t, authClient, "Auth client should not be nil")
 			// Check if the client has authentication configured
 			if tt.expectAuthenticated {
-				// Should have auth.Client with credentials
-				authClient, ok := client.Client.(*auth.Client)
-				assert.True(t, ok, "Expected auth.Client for authenticated access")
-				assert.NotNil(t, authClient, "Auth client should not be nil")
 				assert.NotNil(t, authClient.Credential, "Credential function should be set")
-			} else {
-				// For anonymous access without custom TLS, all registries should use retry.DefaultClient
-				// (Only registries with custom TLS configuration use a different retry client)
-				if tt.registry.ManagementConfiguration == nil || !tt.registry.ManagementConfiguration.TLSConfig.TLS {
-					assert.Equal(t, retry.DefaultClient, client.Client,
-						"Expected retry.DefaultClient for anonymous access without custom TLS")
-				} else {
-					// Custom TLS configuration means a custom retry client
-					assert.NotEqual(t, retry.DefaultClient, client.Client,
-						"Expected custom retry client for registry with custom TLS")
-				}
 			}
+
+			assert.Equal(t, tt.expectTLS, !client.PlainHTTP, "Expected TLS setting to match registry configuration")
 		})
 	}
 }
@@ -178,7 +185,7 @@ func TestCreateClient_RegistryTypes(t *testing.T) {
 
 			client, err := CreateClient(registry)
 
-			assert.NoError(t, err, "CreateClient should not return an error")
+			require.NoError(t, err, "CreateClient should not return an error")
 			assert.NotNil(t, client, "Client should not be nil")
 
 			// Verify that getRegistryTypeName returns the expected name
@@ -248,10 +255,10 @@ func TestCreateClient_ErrorHandling(t *testing.T) {
 			client, err := CreateClient(tt.registry)
 
 			if tt.expectError {
-				assert.Error(t, err, "Expected an error but got none")
+				require.Error(t, err, "Expected an error but got none")
 				assert.Nil(t, client, "Client should be nil when error occurs")
 			} else {
-				assert.NoError(t, err, "Expected no error but got: %v", err)
+				require.NoError(t, err, "Expected no error but got: %v", err)
 				assert.NotNil(t, client, "Client should not be nil")
 			}
 		})

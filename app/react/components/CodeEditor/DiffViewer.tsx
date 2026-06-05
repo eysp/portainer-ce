@@ -39,7 +39,7 @@ export function DiffViewer({
   id,
   'data-cy': dataCy,
   type,
-  placeholder = 'No values found',
+  placeholder = '未找到 values',
 
   height = '500px',
   fileNames,

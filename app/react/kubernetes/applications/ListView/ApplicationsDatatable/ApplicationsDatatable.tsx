@@ -87,7 +87,7 @@ export function ApplicationsDatatable({
       dataset={filteredApplications ?? []}
       settingsManager={tableState}
       columns={columns}
-      title="Applications"
+      title="应用"
       titleIcon={BoxIcon}
       isLoading={applicationsQuery.isLoading}
       disableSelect={!hasWriteAuth}
@@ -114,7 +114,7 @@ export function ApplicationsDatatable({
               onConfirmed={() => handleRemoveApplications(selectedItems)}
             />
             <AddButton data-cy="k8sApp-addApplicationButton" color="secondary">
-              Add with form
+              隐藏‘使用表单添加’按钮，并阻止通过表单添加/编辑资源
             </AddButton>
             <CreateFromManifestButton data-cy="k8sApp-deployFromManifestButton" />
           </>
@@ -168,9 +168,8 @@ function separateHelmApps(applications: Application[]): ApplicationRowData[] {
     applications,
     (app) =>
       app.Metadata?.labels &&
-      (app.Metadata.labels[PodKubernetesInstanceLabel] ||
-        // 'meta.helm.sh/release-name' annotation fallback
-        app.Metadata.annotations?.[HelmReleaseNameAnnotation]) &&
+      (app.Metadata.annotations?.[HelmReleaseNameAnnotation] ||
+        app.Metadata.labels[PodKubernetesInstanceLabel]) &&
       app.Metadata.labels[PodManagedByLabel] === 'Helm'
   );
 
@@ -178,8 +177,10 @@ function separateHelmApps(applications: Application[]): ApplicationRowData[] {
     helmApps,
     (app) =>
       `${app.ResourcePool}/${
-        app.Metadata?.labels[PodKubernetesInstanceLabel] ??
+        // Prioritize the official Helm annotation over the instance label
+        // meta.helm.sh/release-name is the authoritative source for Helm release names
         app.Metadata?.annotations?.[HelmReleaseNameAnnotation] ??
+        app.Metadata?.labels[PodKubernetesInstanceLabel] ??
         ''
       }`
   );

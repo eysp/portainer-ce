@@ -151,6 +151,46 @@ func Test_Filter_excludeIDs(t *testing.T) {
 	runTests(tests, t, handler, environments)
 }
 
+func Test_Filter_excludeGroupIDs(t *testing.T) {
+	groupA := portainer.EndpointGroupID(10)
+	groupB := portainer.EndpointGroupID(20)
+	groupC := portainer.EndpointGroupID(30)
+
+	endpoints := []portainer.Endpoint{
+		{ID: 1, GroupID: groupA, Type: portainer.DockerEnvironment},
+		{ID: 2, GroupID: groupA, Type: portainer.DockerEnvironment},
+		{ID: 3, GroupID: groupB, Type: portainer.DockerEnvironment},
+		{ID: 4, GroupID: groupB, Type: portainer.DockerEnvironment},
+		{ID: 5, GroupID: groupC, Type: portainer.DockerEnvironment},
+	}
+
+	handler := setupFilterTest(t, endpoints)
+
+	tests := []filterTest{
+		{
+			title:    "should exclude endpoints in groupA",
+			expected: []portainer.EndpointID{3, 4, 5},
+			query: EnvironmentsQuery{
+				excludeGroupIds: []portainer.EndpointGroupID{groupA},
+			},
+		},
+		{
+			title:    "should exclude endpoints in groupA and groupB",
+			expected: []portainer.EndpointID{5},
+			query: EnvironmentsQuery{
+				excludeGroupIds: []portainer.EndpointGroupID{groupA, groupB},
+			},
+		},
+		{
+			title:    "should return all endpoints when excludeGroupIds is empty",
+			expected: []portainer.EndpointID{1, 2, 3, 4, 5},
+			query:    EnvironmentsQuery{},
+		},
+	}
+
+	runTests(tests, t, handler, endpoints)
+}
+
 func BenchmarkFilterEndpointsBySearchCriteria_PartialMatch(b *testing.B) {
 	n := 10000
 
@@ -190,9 +230,7 @@ func BenchmarkFilterEndpointsBySearchCriteria_PartialMatch(b *testing.B) {
 
 	searchString := "edge-group"
 
-	b.ResetTimer()
-
-	for range b.N {
+	for b.Loop() {
 		e := filterEndpointsBySearchCriteria(endpoints, endpointGroups, edgeGroups, tagsMap, searchString)
 		if len(e) != n {
 			b.FailNow()
@@ -238,13 +276,9 @@ func BenchmarkFilterEndpointsBySearchCriteria_FullMatch(b *testing.B) {
 
 	searchString := "edge-group"
 
-	b.ResetTimer()
-
-	for range b.N {
+	for b.Loop() {
 		e := filterEndpointsBySearchCriteria(endpoints, endpointGroups, edgeGroups, tagsMap, searchString)
-		if len(e) != n {
-			b.FailNow()
-		}
+		require.Len(b, e, n)
 	}
 }
 
@@ -268,9 +302,9 @@ func runTest(t *testing.T, test filterTest, handler *Handler, endpoints []portai
 		&security.RestrictedRequestContext{IsAdmin: true},
 	)
 
-	is.NoError(err)
+	require.NoError(t, err)
 
-	is.Equal(len(test.expected), len(filteredEndpoints))
+	is.Len(filteredEndpoints, len(test.expected))
 
 	respIds := []portainer.EndpointID{}
 
@@ -282,16 +316,15 @@ func runTest(t *testing.T, test filterTest, handler *Handler, endpoints []portai
 }
 
 func setupFilterTest(t *testing.T, endpoints []portainer.Endpoint) *Handler {
-	is := assert.New(t)
 	_, store := datastore.MustNewTestStore(t, true, true)
 
 	for _, endpoint := range endpoints {
 		err := store.Endpoint().Create(&endpoint)
-		is.NoError(err, "error creating environment")
+		require.NoError(t, err, "error creating environment")
 	}
 
 	err := store.User().Create(&portainer.User{Username: "admin", Role: portainer.AdministratorRole})
-	is.NoError(err, "error creating a user")
+	require.NoError(t, err, "error creating a user")
 
 	bouncer := testhelpers.NewTestRequestBouncer()
 	handler := NewHandler(bouncer)
@@ -476,11 +509,11 @@ func TestFilterEndpointsByExcludeEdgeGroupIDs(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Len(t, es, 3)
-	require.Equal(t, es, []portainer.Endpoint{
+	require.Equal(t, []portainer.Endpoint{
 		{ID: 2, Name: "Endpoint 2"},
 		{ID: 3, Name: "Endpoint 3"},
 		{ID: 4, Name: "Endpoint 4"},
-	})
+	}, es)
 
 	require.Len(t, egs, 1)
 	require.Equal(t, egs[0].ID, portainer.EdgeGroupID(2))

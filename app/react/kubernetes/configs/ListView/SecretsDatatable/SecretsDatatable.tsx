@@ -64,7 +64,7 @@ export function SecretsDatatable() {
       settingsManager={tableState}
       isLoading={secretsQuery.isLoading || namespacesQuery.isLoading}
       emptyContentLabel="No secrets found"
-      title="Secrets"
+      title="密钥"
       titleIcon={Lock}
       getRowId={(row) => row.UID ?? ''}
       isRowSelectable={({ original: secret }) =>
@@ -100,14 +100,14 @@ function useSecretRowData(
 ): SecretRowData[] {
   return useMemo(
     () =>
-      (secrets ?? []).map((secret) => ({
+      secrets?.map((secret) => ({
         ...secret,
         inUse: secret.IsUsed,
         isSystem: namespaces
           ? namespaces.find((namespace) => namespace.Name === secret.Namespace)
               ?.IsSystem ?? false
           : false,
-      })),
+      })) || [],
     [secrets, namespaces]
   );
 }
@@ -149,7 +149,7 @@ function TableActions({
           data-cy="k8sSecret-addSecretWithFormButton"
           color="secondary"
         >
-          Add with form
+          隐藏‘使用表单添加’按钮，并阻止通过表单添加/编辑资源
         </AddButton>
       )}
 

@@ -1,6 +1,6 @@
 import { columnHelper } from './helper';
 
 export const kind = columnHelper.accessor('roleRef.kind', {
-  header: 'Role Kind',
+  header: '角色类型',
   id: 'roleKind',
 });

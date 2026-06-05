@@ -1,5 +1,5 @@
 import { CellContext } from '@tanstack/react-table';
-import { Node } from 'docker-types/generated/1.41';
+import { Node } from 'docker-types';
 
 import { ServiceViewModel } from '@/docker/models/service';
 import { useNodes } from '@/react/docker/proxy/queries/nodes/useNodes';

@@ -48,7 +48,7 @@ export function NameCell({
       )}
       {item.Authentication && (
         <span className="ml-2 label label-info image-tag">
-          已启用身份验证
+          已启用认证
         </span>
       )}
     </>

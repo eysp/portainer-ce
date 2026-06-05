@@ -63,7 +63,7 @@ export function AppIngressPathForm({
     isEditMode,
   ]);
 
-  // when the hostname options change (例如 after a namespace change) and the host and ingress is no longer available, update the selected ingress to the first available one
+  // when the hostname options change (e.g. after a namespace change) and the host and ingress is no longer available, update the selected ingress to the first available one
   useEffect(() => {
     if (ingressHostOptionsWithCurrentValue) {
       // some rerenders might not be from a namespace or hostname change so keep the current values if they're still valid
@@ -154,7 +154,7 @@ export function AppIngressPathForm({
       </div>
       <div className="flex min-w-[250px] basis-1/3 flex-col">
         <InputGroup size="small">
-          <InputGroup.Addon required>Path</InputGroup.Addon>
+          <InputGroup.Addon required>路径</InputGroup.Addon>
           <InputGroup.Input
             value={ingressPath?.Path ?? ''}
             data-cy={`k8sAppCreate-ingressPathPathInput-${ingressPath?.Host}`}

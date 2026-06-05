@@ -29,7 +29,7 @@ export function EnvironmentActions({ environment }: Props) {
         >
           <Button
             color="none"
-            title="Browse Snapshot"
+            title="浏览快照"
             data-cy="browse-snapshot-button"
           >
             <Icon icon={Search} className="searchIcon" />

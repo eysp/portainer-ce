@@ -10,6 +10,8 @@ import (
 
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/docker/consts"
+	"github.com/portainer/portainer/api/docker/stats"
+	"github.com/portainer/portainer/api/logs"
 	edgeutils "github.com/portainer/portainer/pkg/edge"
 	networkingutils "github.com/portainer/portainer/pkg/networking"
 
@@ -131,7 +133,8 @@ func dockerSnapshotSwarmServices(snapshot *portainer.DockerSnapshot, cli *client
 }
 
 func dockerSnapshotContainers(snapshot *portainer.DockerSnapshot, cli *client.Client) error {
-	containers, err := cli.ContainerList(context.Background(), dockercontainer.ListOptions{All: true})
+	ctx := context.Background()
+	containers, err := cli.ContainerList(ctx, dockercontainer.ListOptions{All: true})
 	if err != nil {
 		return err
 	}
@@ -207,13 +210,16 @@ func dockerSnapshotContainers(snapshot *portainer.DockerSnapshot, cli *client.Cl
 	snapshot.GpuUseAll = gpuUseAll
 	snapshot.GpuUseList = gpuUseList
 
-	stats := calculateContainerStats(containers)
+	result, err := stats.CalculateContainerStats(ctx, cli, snapshot.Swarm, containers)
+	if err != nil {
+		return fmt.Errorf("failed to calculate container stats: %w", err)
+	}
 
-	snapshot.ContainerCount = stats.Total
-	snapshot.RunningContainerCount = stats.Running
-	snapshot.StoppedContainerCount = stats.Stopped
-	snapshot.HealthyContainerCount = stats.Healthy
-	snapshot.UnhealthyContainerCount = stats.Unhealthy
+	snapshot.ContainerCount = result.Total
+	snapshot.RunningContainerCount = result.Running
+	snapshot.StoppedContainerCount = result.Stopped
+	snapshot.HealthyContainerCount = result.Healthy
+	snapshot.UnhealthyContainerCount = result.Unhealthy
 	snapshot.StackCount += len(stacks)
 
 	for _, container := range containers {
@@ -315,7 +321,7 @@ func dockerSnapshotContainerErrorLogs(snapshot *portainer.DockerSnapshot, cli *c
 	if err != nil {
 		return fmt.Errorf("failed to get container logs: %w", err)
 	}
-	defer rd.Close()
+	defer logs.CloseAndLogErr(rd)
 
 	var stdOut, stdErr bytes.Buffer
 	if _, err := stdcopy.StdCopy(&stdErr, &stdOut, rd); err != nil {
@@ -343,38 +349,4 @@ func isPodman(version types.Version) bool {
 	}
 
 	return false
-}
-
-type ContainerStats struct {
-	Running   int
-	Stopped   int
-	Healthy   int
-	Unhealthy int
-	Total     int
-}
-
-func calculateContainerStats(containers []types.Container) ContainerStats {
-	var running, stopped, healthy, unhealthy int
-	for _, container := range containers {
-		switch container.State {
-		case "running":
-			running++
-		case "healthy":
-			running++
-			healthy++
-		case "unhealthy":
-			running++
-			unhealthy++
-		case "exited", "stopped":
-			stopped++
-		}
-	}
-
-	return ContainerStats{
-		Running:   running,
-		Stopped:   stopped,
-		Healthy:   healthy,
-		Unhealthy: unhealthy,
-		Total:     len(containers),
-	}
 }

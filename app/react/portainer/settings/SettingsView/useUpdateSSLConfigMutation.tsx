@@ -6,7 +6,7 @@ import { mutationOptions, withError } from '@/react-tools/react-query';
 export function useUpdateSSLConfigMutation() {
   return useMutation(
     updateSSLConfig,
-    mutationOptions(withError('Unable to update SSL configuration'))
+    mutationOptions(withError('无法更新 SSL 配置'))
   );
 }
 
@@ -38,6 +38,6 @@ async function updateSSLConfig({
       clientCert,
     });
   } catch (error) {
-    throw parseAxiosError(error, 'Unable to update SSL configuration');
+    throw parseAxiosError(error, '无法更新 SSL 配置');
   }
 }

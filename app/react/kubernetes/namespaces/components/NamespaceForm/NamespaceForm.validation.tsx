@@ -19,7 +19,7 @@ export function getNamespaceValidationSchema(
       .max(63, 'Name must be at most 63 characters.')
       // must not have the same name as an existing namespace
       .notOneOf(namespaceNames, 'Name must be unique.')
-      .required('Name is required.'),
+      .required('名称为必填项。'),
     resourceQuota: getResourceQuotaValidationSchema(memoryLimit, cpuLimit),
     // ingress classes table is constrained already, and doesn't need validation
     ingressClasses: array(),

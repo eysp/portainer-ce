@@ -27,7 +27,7 @@ export function useAllVolumesQuery<T = K8sVolumeInfo>(
     {
       refetchInterval: queryOptions?.refetchInterval,
       select: queryOptions?.select,
-      ...withGlobalError('无法检索卷'),
+      ...withGlobalError('Unable to retrieve volumes'),
     }
   );
 }
@@ -45,7 +45,7 @@ export function useAllStoragesQuery(
     {
       refetchInterval: queryOptions?.refetchInterval,
       select: convertToStorageClassViewModels,
-      ...withGlobalError('无法检索卷'),
+      ...withGlobalError('Unable to retrieve volumes'),
     }
   );
 }
@@ -62,7 +62,7 @@ export async function getAllVolumes(
     );
     return data;
   } catch (e) {
-    throw parseKubernetesAxiosError(e, '无法检索卷');
+    throw parseKubernetesAxiosError(e, 'Unable to retrieve volumes');
   }
 }
 

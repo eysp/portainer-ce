@@ -34,10 +34,10 @@ export function ApplicationVolumeConfigsTable({ namespace, app }: Props) {
     <table className="table">
       <tbody>
         <tr className="text-muted">
-          <td className="w-1/4">Container</td>
+          <td className="w-1/4">容器</td>
           <td className="w-1/4">Configuration path</td>
-          <td className="w-1/4">Value</td>
-          <td className="w-1/4">Configuration</td>
+          <td className="w-1/4">值</td>
+          <td className="w-1/4">配置</td>
         </tr>
         {containerVolumeConfigs.map(
           (

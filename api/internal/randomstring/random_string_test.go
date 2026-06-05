@@ -37,7 +37,7 @@ func TestRandomString(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			result := RandomString(tc.length)
-			require.Equal(t, tc.expected, len(result))
+			require.Len(t, result, tc.expected)
 
 			// Verify all characters are from the expected alphabet
 			for _, char := range result {
@@ -56,7 +56,7 @@ func TestRandomStringUniqueness(t *testing.T) {
 
 	for range numStrings {
 		str := RandomString(stringLength)
-		require.Equal(t, stringLength, len(str))
+		require.Len(t, str, stringLength)
 
 		// Check if we've seen this string before (very unlikely for random strings)
 		require.False(t, generated[str], "Generated duplicate random string: %s", str)

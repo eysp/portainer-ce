@@ -57,7 +57,8 @@ function SSLSettingsPanel() {
               <div className="form-group">
                 <div className="col-sm-12">
                   <TextTip color="orange">
-                    强制仅使用 HTTPS 将导致 Portainer 停止监听 HTTP 端口。任何使用 HTTP 的边缘代理环境将不再可用。
+                    强制仅使用 HTTPS 会导致 Portainer 停止监听 HTTP 端口。
+                    任何使用 HTTP 的边缘代理环境都将不再可用。
                   </TextTip>
                 </div>
               </div>
@@ -78,7 +79,7 @@ function SSLSettingsPanel() {
               <div className="form-group">
                 <div className="col-sm-12">
                   <TextTip color="blue">
-                    提供新的 SSL 证书以替换用于 HTTPS 连接的现有证书。
+                    提供新的 SSL 证书来替换当前用于 HTTPS 连接的证书。
                   </TextTip>
                 </div>
               </div>
@@ -119,7 +120,7 @@ function SSLSettingsPanel() {
                     isLoading={mutation.isLoading || reloadingPage}
                     data-cy="save-ssl-settings-button"
                     disabled={!dirty || !isValid}
-                    loadingText={reloadingPage ? '重新加载中' : '保存中'}
+                    loadingText={reloadingPage ? '正在重新加载' : '正在保存'}
                     className="!ml-0"
                   >
                     保存 SSL 设置

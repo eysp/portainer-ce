@@ -98,7 +98,7 @@ export function AccessDatatable() {
         configMap: configMapPayload,
         configMapName: PortainerNamespaceAccessesConfigMap.configMapName,
       });
-      notifySuccess('Success', 'Namespace access updated');
+      notifySuccess('Success', '命名空间访问权限已更新');
       router.stateService.reload();
     } catch (error) {
       notifyError('Failed to update namespace access', error as Error);

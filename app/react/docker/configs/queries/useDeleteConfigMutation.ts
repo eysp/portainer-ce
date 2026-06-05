@@ -1,16 +1,26 @@
-import axios, { parseAxiosError } from '@/portainer/services/axios';
+import { useMutation } from '@tanstack/react-query';
+
 import { EnvironmentId } from '@/react/portainer/environments/types';
+import axios, { parseAxiosError } from '@/portainer/services/axios';
 
-import { DockerConfig } from '../types';
-import { buildDockerProxyUrl } from '../../proxy/queries/buildDockerProxyUrl';
+import { buildUrl } from './build-url';
 
-export async function deleteConfig(
-  environmentId: EnvironmentId,
-  id: DockerConfig['Id']
-) {
+export function useDeleteConfigMutation() {
+  return useMutation({
+    mutationFn: deleteConfig,
+  });
+}
+
+export async function deleteConfig({
+  environmentId,
+  configId,
+}: {
+  environmentId: EnvironmentId;
+  configId: string;
+}) {
   try {
-    await axios.delete(buildDockerProxyUrl(environmentId, 'configs', id));
-  } catch (e) {
-    throw parseAxiosError(e, 'Unable to delete config');
+    await axios.delete(buildUrl(environmentId, configId));
+  } catch (err) {
+    throw parseAxiosError(err, 'Unable to delete config');
   }
 }

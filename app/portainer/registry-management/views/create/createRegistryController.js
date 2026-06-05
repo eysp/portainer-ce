@@ -17,6 +17,7 @@ class CreateRegistryController {
     };
 
     this.createRegistry = this.createRegistry.bind(this);
+    this.onSubmitDocker = this.onSubmitDocker.bind(this);
     this.getRegistries = this.getRegistries.bind(this);
     this.nameIsUsed = this.nameIsUsed.bind(this);
     this.retrieveGitlabRegistries = this.retrieveGitlabRegistries.bind(this);
@@ -141,6 +142,15 @@ class CreateRegistryController {
         this.state.actionInProgress = false;
       }
     });
+  }
+
+  /**
+   *
+   * @param {import('@/react/portainer/registries/CreateView/RegistryFormDockerhub/RegistryFormDockerhub').RegistryFormDockerhubValues} model
+   */
+  onSubmitDocker(model) {
+    this.model = model;
+    this.createRegistry();
   }
 
   nameIsUsed(name) {

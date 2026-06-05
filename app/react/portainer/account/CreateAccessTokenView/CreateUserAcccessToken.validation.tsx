@@ -7,10 +7,10 @@ export function getAPITokenValidationSchema(
 ): SchemaOf<ApiKeyFormValues> {
   if (requirePassword) {
     return object({
-      password: string().required('Password is required.'),
+      password: string().required('密码为必填项。'),
       description: string()
         .max(128, 'Description must be at most 128 characters')
-        .required('Description is required.'),
+        .required('描述为必填项。'),
     });
   }
 
@@ -18,6 +18,6 @@ export function getAPITokenValidationSchema(
     password: string().optional(),
     description: string()
       .max(128, 'Description must be at most 128 characters')
-      .required('Description is required.'),
+      .required('描述为必填项。'),
   });
 }

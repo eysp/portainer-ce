@@ -18,7 +18,7 @@ export function UsersField({ name, users, value, onChange, errors }: Props) {
       label="授权用户"
       tooltip={
         users.length > 0
-          ? '您可以选择哪些用户能够管理此资源。'
+          ? '您可以选择哪些用户将能够管理此资源。'
           : undefined
       }
       inputId="authorized-users-selector"
@@ -35,7 +35,7 @@ export function UsersField({ name, users, value, onChange, errors }: Props) {
         />
       ) : (
         <span className="small text-muted">
-          您尚未创建任何用户。请前往{' '}
+          您尚未创建任何用户。前往{' '}
           <Link to="portainer.users" data-cy="access-control-users-link">
             用户视图
           </Link>{' '}

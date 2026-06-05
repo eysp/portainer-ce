@@ -47,7 +47,7 @@ function UpdateIngressPrompt({
           color="primary"
           data-cy="update-ingress-confirm-button"
         >
-          Update
+          更新
         </Button>
       </Modal.Footer>
     </Modal>

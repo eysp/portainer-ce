@@ -19,7 +19,7 @@ export function useUpdateExperimentalSettingsMutation() {
     updateExperimentalSettings,
     mutationOptions(
       withInvalidate(queryClient, [queryKeys.base()]),
-      withError('Unable to update experimental settings')
+      withError('无法更新实验功能设置')
     )
   );
 }
@@ -30,6 +30,6 @@ async function updateExperimentalSettings(
   try {
     await axios.put(buildUrl('experimental'), settings);
   } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to update experimental settings');
+    throw parseAxiosError(e as Error, '无法更新实验功能设置');
   }
 }

@@ -24,8 +24,8 @@ func (payload *logsPayload) Validate(r *http.Request) error {
 }
 
 // endpointEdgeJobsLogs
-// @summary Inspect an EdgeJob Log
-// @description **Access policy**: public
+// @summary Update the logs collected from an Edge Job
+// @description Authorized only if the request is done by an Edge Environment(Endpoint)
 // @tags edge, endpoints
 // @accept json
 // @produce json
@@ -34,6 +34,7 @@ func (payload *logsPayload) Validate(r *http.Request) error {
 // @success 200
 // @failure 500
 // @failure 400
+// @failure 403
 // @router /endpoints/{id}/edge/jobs/{jobID}/logs [post]
 func (handler *Handler) endpointEdgeJobsLogs(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
 	endpoint, err := middlewares.FetchEndpoint(r)
@@ -42,35 +43,35 @@ func (handler *Handler) endpointEdgeJobsLogs(w http.ResponseWriter, r *http.Requ
 	}
 
 	if err := handler.requestBouncer.AuthorizedEdgeEndpointOperation(r, endpoint); err != nil {
-		return httperror.Forbidden("Permission denied to access environment", fmt.Errorf("unauthorized edge endpoint operation: %w. Environment name: %s", err, endpoint.Name))
+		return httperror.Forbidden("Permission denied to access environment", fmt.Errorf("unauthorized edge endpoint operation: %w. Environment ID: %d", err, endpoint.ID))
 	}
 
 	edgeJobID, err := request.RetrieveNumericRouteVariableValue(r, "jobID")
 	if err != nil {
-		return httperror.BadRequest("Invalid edge job identifier route variable", fmt.Errorf("invalid Edge job route variable: %w. Environment name: %s", err, endpoint.Name))
+		return httperror.BadRequest("Invalid edge job identifier route variable", fmt.Errorf("invalid Edge job route variable: %w. Environment ID: %d", err, endpoint.ID))
 	}
 
 	var payload logsPayload
 	if err := request.DecodeAndValidateJSONPayload(r, &payload); err != nil {
-		return httperror.BadRequest("Invalid request payload", fmt.Errorf("invalid Edge job request payload: %w. Environment name: %s", err, endpoint.Name))
+		return httperror.BadRequest("Invalid request payload", fmt.Errorf("invalid Edge job request payload: %w. Environment ID: %d", err, endpoint.ID))
 	}
 
 	if err := handler.DataStore.UpdateTx(func(tx dataservices.DataStoreTx) error {
-		return handler.getEdgeJobLobs(tx, endpoint.ID, portainer.EdgeJobID(edgeJobID), payload)
+		return handler.updateEdgeJobLogs(tx, endpoint.ID, portainer.EdgeJobID(edgeJobID), payload)
 	}); err != nil {
 		var httpErr *httperror.HandlerError
 		if errors.As(err, &httpErr) {
-			httpErr.Err = fmt.Errorf("edge polling error: %w. Environment name: %s", httpErr.Err, endpoint.Name)
+			httpErr.Err = fmt.Errorf("edge polling error: %w. Environment ID: %d", httpErr.Err, endpoint.ID)
 			return httpErr
 		}
 
-		return httperror.InternalServerError("Unexpected error", fmt.Errorf("edge polling error: %w. Environment name: %s", err, endpoint.Name))
+		return httperror.InternalServerError("Unexpected error", fmt.Errorf("edge polling error: %w. Environment ID: %d", err, endpoint.ID))
 	}
 
 	return response.JSON(w, nil)
 }
 
-func (handler *Handler) getEdgeJobLobs(tx dataservices.DataStoreTx, endpointID portainer.EndpointID, edgeJobID portainer.EdgeJobID, payload logsPayload) error {
+func (handler *Handler) updateEdgeJobLogs(tx dataservices.DataStoreTx, endpointID portainer.EndpointID, edgeJobID portainer.EdgeJobID, payload logsPayload) error {
 	endpoint, err := tx.Endpoint().Endpoint(endpointID)
 	if tx.IsErrObjectNotFound(err) {
 		return httperror.NotFound("Unable to find an environment with the specified identifier inside the database", err)
@@ -83,6 +84,11 @@ func (handler *Handler) getEdgeJobLobs(tx dataservices.DataStoreTx, endpointID p
 		return httperror.NotFound("Unable to find an edge job with the specified identifier inside the database", err)
 	} else if err != nil {
 		return httperror.InternalServerError("Unable to find an edge job with the specified identifier inside the database", err)
+	}
+
+	if resp, err := handler.buildSchedules(tx, endpoint, []portainer.EdgeJob{*edgeJob}); err != nil || len(resp) == 0 {
+		return httperror.InternalServerError("Unable to verify if the edge job is assigned to the environment",
+			fmt.Errorf("unable to verify if the edge job is assigned to the environment: %w. Environment name: %s", err, endpoint.Name))
 	}
 
 	if err := handler.FileService.StoreEdgeJobTaskLogFileFromBytes(strconv.Itoa(int(edgeJobID)), strconv.Itoa(int(endpoint.ID)), []byte(payload.FileContent)); err != nil {

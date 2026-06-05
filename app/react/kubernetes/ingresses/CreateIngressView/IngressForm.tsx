@@ -34,9 +34,9 @@ const PathTypes: Record<string, string[]> = {
   other: ['Prefix', 'Exact'],
 };
 const PlaceholderAnnotations: Record<string, string[]> = {
-  nginx: ['例如 nginx.ingress.kubernetes.io/rewrite-target', '/$1'],
-  traefik: ['例如 traefik.ingress.kubernetes.io/router.tls', 'true'],
-  other: ['例如 app.kubernetes.io/name', 'examplename'],
+  nginx: ['e.g. nginx.ingress.kubernetes.io/rewrite-target', '/$1'],
+  traefik: ['e.g. traefik.ingress.kubernetes.io/router.tls', 'true'],
+  other: ['e.g. app.kubernetes.io/name', 'examplename'],
 };
 
 interface Props {
@@ -151,7 +151,7 @@ export function IngressForm({
                 className="control-label text-muted col-sm-3 col-lg-2"
                 htmlFor="namespace"
               >
-                Namespace
+                命名空间
               </label>
               {isNamespaceOptionsLoading && (
                 <div className="col-sm-4">
@@ -483,7 +483,7 @@ export function IngressForm({
 
                     <div className="col-sm-12 col-lg-4 flex h-[30px] items-center pl-2">
                       <TextTip color="blue">
-                        您也可以使用{' '}
+                        You may also use the{' '}
                         <Link
                           to="kubernetes.secrets.new"
                           params={{ id: environmentID }}
@@ -493,7 +493,7 @@ export function IngressForm({
                         >
                           创建密钥
                         </Link>{' '}
-                        功能，并刷新下拉列表。
+                        function, and reload the dropdown.
                       </TextTip>
                     </div>
                   </div>
@@ -709,7 +709,7 @@ export function IngressForm({
                           as="label"
                           htmlFor={`ingress_route_${hostIndex}-${pathIndex}`}
                         >
-                          Path
+                          路径
                         </InputGroup.Addon>
                         <InputGroup.Input
                           className="form-control"

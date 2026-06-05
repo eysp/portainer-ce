@@ -29,7 +29,7 @@ export function StackNameLabelInsight() {
   return (
     <InsightsBox
       type="slim"
-      header="Stack"
+      header="堆栈"
       content={insightsBoxContent}
       insightCloseId="k8s-stacks-name"
     />

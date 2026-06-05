@@ -10,6 +10,7 @@ import (
 	"github.com/portainer/portainer/api/roar"
 	httperror "github.com/portainer/portainer/pkg/libhttp/error"
 	"github.com/portainer/portainer/pkg/libhttp/request"
+	"github.com/portainer/portainer/pkg/libhttp/response"
 )
 
 type edgeGroupCreatePayload struct {
@@ -77,8 +78,7 @@ func (handler *Handler) edgeGroupCreate(w http.ResponseWriter, r *http.Request) 
 		return httperror.BadRequest("Invalid request payload", err)
 	}
 
-	var edgeGroup *portainer.EdgeGroup
-
+	var shadowEdgeGroup shadowedEdgeGroup
 	err := handler.DataStore.UpdateTx(func(tx dataservices.DataStoreTx) error {
 		edgeGroups, err := tx.EdgeGroup().ReadAll()
 		if err != nil {
@@ -91,7 +91,7 @@ func (handler *Handler) edgeGroupCreate(w http.ResponseWriter, r *http.Request) 
 			}
 		}
 
-		edgeGroup = &portainer.EdgeGroup{
+		edgeGroup := &portainer.EdgeGroup{
 			Name:         payload.Name,
 			Dynamic:      payload.Dynamic,
 			TagIDs:       []portainer.TagID{},
@@ -108,8 +108,10 @@ func (handler *Handler) edgeGroupCreate(w http.ResponseWriter, r *http.Request) 
 			return httperror.InternalServerError("Unable to persist the Edge group inside the database", err)
 		}
 
+		shadowEdgeGroup = shadowedEdgeGroup{EdgeGroup: *edgeGroup}
+
 		return nil
 	})
 
-	return txResponse(w, shadowedEdgeGroup{EdgeGroup: *edgeGroup}, err)
+	return response.TxResponse(w, shadowEdgeGroup, err)
 }

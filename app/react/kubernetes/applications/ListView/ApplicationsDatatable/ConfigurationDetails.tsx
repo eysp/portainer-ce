@@ -24,7 +24,7 @@ export function ConfigurationDetails({
 
   return (
     <>
-      <div className="col-xs-12 !px-0 !py-1 text-[13px]"> Secrets </div>
+      <div className="col-xs-12 !px-0 !py-1 text-[13px]"> 密钥 </div>
       <table className="w-1/2">
         <tbody>
           <tr>

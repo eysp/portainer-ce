@@ -48,7 +48,7 @@ export function UsersList({ users, disabled, teamId }: Props) {
               icon={UserPlus}
               data-cy="add-all-users-button"
             >
-              添加所有用户
+              Add all users
             </Button>
           )
         }
@@ -73,7 +73,7 @@ export function UsersList({ users, disabled, teamId }: Props) {
   function handleAddAllMembers(userIds: UserId[]) {
     addMemberMutation.mutate(userIds, {
       onSuccess() {
-        notifySuccess('成功', '所有用户已成功添加');
+        notifySuccess('Success', 'All users successfully added');
       },
     });
   }

@@ -17,7 +17,7 @@ export function TableActions({
   return (
     <div className="flex items-center gap-2">
       <DeleteButton
-        confirmMessage="您确定要移除选定的边缘作业吗？"
+        confirmMessage="您要删除选中的边缘作业吗？"
         disabled={selectedItems.length === 0}
         onConfirmed={() => handleRemove(selectedItems)}
         data-cy="remove-edge-jobs-button"
@@ -31,7 +31,7 @@ export function TableActions({
     const ids = selectedItems.map((item) => item.Id);
     removeMutation.mutate(ids, {
       onSuccess: () => {
-        notifySuccess('成功', '边缘作业已移除');
+        notifySuccess('成功', '边缘作业已删除');
       },
     });
   }

@@ -21,7 +21,7 @@ export function useDeleteVolumes(environmentId: EnvironmentId) {
       // one error notification per rejected item
       rejectedItems.forEach(({ item, reason }) => {
         notifyError(
-          `移除卷 '${item.PersistentVolumeClaim.Name}' 失败`,
+          `Failed to remove volume '${item.PersistentVolumeClaim.Name}'`,
           new Error(reason)
         );
       });
@@ -29,7 +29,7 @@ export function useDeleteVolumes(environmentId: EnvironmentId) {
       // one success notification for all fulfilled items
       if (fulfilledItems.length) {
         notifySuccess(
-          `${pluralize(fulfilledItems.length, '卷')}已成功移除`,
+          `${pluralize(fulfilledItems.length, 'Volume')} successfully removed`,
           fulfilledItems
             .map((item) => item.PersistentVolumeClaim.Name)
             .join(', ')
@@ -38,7 +38,7 @@ export function useDeleteVolumes(environmentId: EnvironmentId) {
       queryClient.invalidateQueries(queryKeys.storages(environmentId));
       return queryClient.invalidateQueries(queryKeys.volumes(environmentId));
     },
-    ...withGlobalError('无法移除卷'),
+    ...withGlobalError('Unable to remove volumes'),
   });
 }
 
@@ -54,7 +54,7 @@ function deleteVolumes(
         `/endpoints/${environmentId}/kubernetes/api/v1/namespaces/${volume.ResourcePool.Namespace.Name}/persistentvolumeclaims/${volume.PersistentVolumeClaim.Name}`
       );
     } catch (error) {
-      throw parseKubernetesAxiosError(error, '无法移除卷');
+      throw parseKubernetesAxiosError(error, 'Unable to remove volume');
     }
   }
 }

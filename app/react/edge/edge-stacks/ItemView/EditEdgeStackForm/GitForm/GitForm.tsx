@@ -110,7 +110,7 @@ export function GitForm({ stack }: { stack: EdgeStack }) {
 
           updateStackMutation.mutate(getPayload(values, credentialId, false), {
             onSuccess() {
-              notifySuccess('成功', '堆栈已成功更新');
+              notifySuccess('Success', '堆栈已成功更新');
               router.stateService.reload();
             },
           });
@@ -124,7 +124,7 @@ export function GitForm({ stack }: { stack: EdgeStack }) {
 
     updateStackMutation.mutate(getPayload(values, credentialId, true), {
       onSuccess() {
-        notifySuccess('Success', 'Stack updated successfully');
+        notifySuccess('Success', '堆栈已成功更新');
         router.stateService.reload();
       },
     });
@@ -187,13 +187,18 @@ function InnerForm({
 
       {hasKubeEndpoint && hasDockerEndpoint && (
         <TextTip>
-          当选择的 Edge 组中包含多种环境类型（例如同时包含 Kubernetes 与 Docker 环境）时，无法选择部署类型。请仅选择包含同一类型环境的 Edge 组。
+          There are no available deployment types when there is more than one
+          type of environment in your edge group selection (e.g. Kubernetes and
+          Docker environments). Please select edge groups that have environments
+          of the same type.
         </TextTip>
       )}
 
       {values.deploymentType === DeploymentType.Compose && hasKubeEndpoint && (
         <FormError>
-          包含 Kubernetes 环境的 Edge 组不再支持 Compose 部署类型。若需使用 Compose，请仅选择包含 Docker 环境的 Edge 组。
+          Edge groups with kubernetes environments no longer support compose
+          deployment types in Portainer. Please select edge groups that only
+          have docker environments when using compose deployment types.
         </FormError>
       )}
       <EdgeStackDeploymentTypeSelector
@@ -209,7 +214,7 @@ function InnerForm({
         <InfoPanel
           className="text-muted small"
           url={gitUrl}
-          type="Edge 堆栈"
+          type="Edge stack"
           configFilePath={gitPath}
         />
 
@@ -264,7 +269,7 @@ function InnerForm({
 
       <PrivateRegistryFieldset
         value={values.privateRegistryId}
-        onSelect={(value) => setFieldValue('privateRegistryId', value)}
+        onChange={(value) => setFieldValue('privateRegistryId', value)}
         registries={registriesQuery.data ?? []}
         formInvalid={!isValid}
         method="repository"

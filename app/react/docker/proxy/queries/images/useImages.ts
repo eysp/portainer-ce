@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { ImageSummary } from 'docker-types/generated/1.41';
+import { ImageSummary } from 'docker-types';
 
 import axios, { parseAxiosError } from '@/portainer/services/axios';
 import { EnvironmentId } from '@/react/portainer/environments/types';
@@ -36,6 +36,6 @@ export async function getImages(environmentId: EnvironmentId) {
     );
     return data;
   } catch (err) {
-    throw parseAxiosError(err, '无法检索镜像');
+    throw parseAxiosError(err, '无法获取镜像');
   }
 }

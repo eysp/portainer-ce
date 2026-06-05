@@ -1,10 +1,11 @@
-package aws
+package retry
 
 import (
 	"errors"
 	"fmt"
 	"math"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"github.com/stretchr/testify/assert"
@@ -40,10 +41,6 @@ func TestRetryTime(t *testing.T) {
 }
 
 func TestRetryWithWarnings(t *testing.T) {
-	originalSleepFunc := sleepFunc
-	defer func() { sleepFunc = originalSleepFunc }()
-	sleepFunc = func(d time.Duration) {}
-
 	// different number of retries than the default
 	settings := Settings{
 		MaxRetries:    7,
@@ -64,26 +61,28 @@ func TestRetryWithWarnings(t *testing.T) {
 
 	for _, tt := range cases {
 		t.Run(fmt.Sprintf("failures=%d", tt.failures), func(t *testing.T) {
-			attempts := 0
-			expectedErr := errors.New("temporary error")
-			result, err := RetryWithWarnings("test-operation", settings, func() (string, error) {
-				attempts++
-				if attempts <= tt.failures {
-					return "", expectedErr
-				}
-				return "success", nil
-			})
+			synctest.Test(t, func(t *testing.T) {
+				attempts := 0
+				expectedErr := errors.New("temporary error")
+				result, err := RetryWithWarnings("test-operation", settings, func() (string, error) {
+					attempts++
+					if attempts <= tt.failures {
+						return "", expectedErr
+					}
+					return "success", nil
+				})
 
-			if tt.expectSuccess {
-				require.NoError(t, err)
-				assert.Equal(t, "success", result)
-				assert.Equal(t, tt.failures+1, attempts)
-			} else {
-				require.Error(t, err)
-				assert.Equal(t, expectedErr, err)
-				assert.Equal(t, "", result)
-				assert.Equal(t, settings.MaxRetries, attempts)
-			}
+				if tt.expectSuccess {
+					require.NoError(t, err)
+					assert.Equal(t, "success", result)
+					assert.Equal(t, tt.failures+1, attempts)
+				} else {
+					require.Error(t, err)
+					assert.Equal(t, expectedErr, err)
+					assert.Empty(t, result)
+					assert.Equal(t, settings.MaxRetries, attempts)
+				}
+			})
 		})
 	}
 }

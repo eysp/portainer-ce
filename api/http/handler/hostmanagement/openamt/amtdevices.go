@@ -20,6 +20,7 @@ import (
 // @security jwt
 // @produce json
 // @param id path int true "Environment(Endpoint) identifier"
+// @deprecated
 // @success 200 "Success"
 // @failure 400 "Invalid request"
 // @failure 403 "Permission denied to access settings"
@@ -79,6 +80,7 @@ func (payload *deviceActionPayload) Validate(r *http.Request) error {
 // @security jwt
 // @accept json
 // @produce json
+// @deprecated
 // @param id path int true "Environment identifier"
 // @param deviceId path int true "Device identifier"
 // @param body body deviceActionPayload true "Device Action"
@@ -141,6 +143,7 @@ type AuthorizationResponse struct {
 // @security jwt
 // @accept json
 // @produce json
+// @deprecated
 // @param id path int true "Environment identifier"
 // @param deviceId path int true "Device identifier"
 // @param body body deviceFeaturesPayload true "Device Features"

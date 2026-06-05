@@ -9,12 +9,14 @@ interface Props {
   value: Option[];
   onChange(value: readonly Option[]): void;
   options: Option[];
+  isLoading?: boolean;
 }
 
 export function PorAccessManagementUsersSelector({
   options,
   value,
   onChange,
+  isLoading,
 }: Props) {
   return (
     <div className="form-group">
@@ -22,27 +24,26 @@ export function PorAccessManagementUsersSelector({
         className="col-sm-3 col-lg-2 control-label text-left"
         htmlFor="users-selector"
       >
-        Select user(s) and/or team(s)
+        选择用户和/或团队
       </label>
       <div className="col-sm-9 col-lg-4">
-        {options.length === 0 ? (
-          <span className="small text-muted">No users or teams available.</span>
-        ) : (
-          <Select
-            isMulti
-            getOptionLabel={(option) => option.Name}
-            getOptionValue={(option) => `${option.Id}-${option.Type}`}
-            options={options}
-            value={value}
-            closeMenuOnSelect={false}
-            onChange={onChange}
-            data-cy="component-selectUser"
-            id="component-selectUser"
-            inputId="users-selector"
-            placeholder="Select one or more users and/or teams"
-            components={{ MultiValueLabel, Option: OptionComponent }}
-          />
-        )}
+        <Select
+          isMulti
+          getOptionLabel={(option) => option.Name}
+          getOptionValue={(option) => `${option.Id}-${option.Type}`}
+          options={options}
+          value={value}
+          closeMenuOnSelect={false}
+          onChange={onChange}
+          data-cy="component-selectUser"
+          id="component-selectUser"
+          inputId="users-selector"
+          placeholder="选择一个或多个用户和/或团队"
+          components={{ MultiValueLabel, Option: OptionComponent }}
+          isLoading={isLoading}
+          loadingMessage={() => '正在加载用户和团队...'}
+          noOptionsMessage={() => '没有可用的用户或团队。'}
+        />
       </div>
     </div>
   );

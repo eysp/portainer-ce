@@ -13,7 +13,7 @@ import (
 )
 
 // UpdateGitObject updates a git object based on its config
-func UpdateGitObject(gitService portainer.GitService, objId string, gitConfig *gittypes.RepoConfig, forceUpdate, enableVersionFolder bool, projectPath string) (bool, string, error) {
+func UpdateGitObject(gitService portainer.GitService, objId string, gitConfig *gittypes.RepoConfig, enableVersionFolder bool, projectPath string) (bool, string, error) {
 	if gitConfig == nil {
 		return false, "", nil
 	}
@@ -43,7 +43,7 @@ func UpdateGitObject(gitService portainer.GitService, objId string, gitConfig *g
 
 	hashChanged := !strings.EqualFold(newHash, gitConfig.ConfigHash)
 
-	if !hashChanged && !forceUpdate {
+	if !hashChanged {
 		log.Debug().
 			Str("hash", newHash).
 			Str("url", gitConfig.URL).

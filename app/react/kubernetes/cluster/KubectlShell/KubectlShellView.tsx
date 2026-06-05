@@ -39,7 +39,7 @@ export function KubectlShellView() {
     terminal.focus();
     fit(terminal);
     terminal.writeln('#Run kubectl commands inside here');
-    terminal.writeln('#例如 kubectl get all');
+    terminal.writeln('#e.g. kubectl get all');
     terminal.writeln('');
     setShellState('connected');
   }, [terminal]);
@@ -119,7 +119,7 @@ export function KubectlShellView() {
       )}
       {shellState === 'disconnected' && (
         <div className="p-4">
-          <Alert color="info" title="Console disconnected">
+          <Alert color="info" title="控制台已断开连接">
             <div className="mt-4 flex items-center gap-2">
               <Button
                 onClick={() => window.location.reload()}
@@ -132,7 +132,7 @@ export function KubectlShellView() {
                 color="default"
                 data-cy="k8sShell-closeButton"
               >
-                Close
+                关闭
               </Button>
             </div>
           </Alert>

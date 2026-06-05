@@ -1,25 +1,25 @@
 <page-header
-  title="'容器统计'"
+  title="'容器统计信息'"
   breadcrumbs="[
     { label:'容器', link:'docker.containers' },
     {
       label:(container.Name | trimcontainername),
       link: 'docker.containers.container',
       linkParams: { id: container.Id },
-    }, '统计']"
+    }, '统计信息']"
 >
 </page-header>
 
 <div class="row">
   <div class="col-md-12">
     <rd-widget>
-      <rd-widget-header icon="info" title-text="关于统计"> </rd-widget-header>
+      <rd-widget-header icon="info" title-text="关于统计信息"> </rd-widget-header>
       <rd-widget-body>
         <form class="form-horizontal">
           <div class="form-group">
             <div class="col-sm-12">
               <span class="small text-muted">
-                此视图显示容器 <b>{{ container.Name | trimcontainername }}</b> 的实时统计信息以及此容器内运行的进程列表。
+                此视图显示关于容器 <b>{{ container.Name | trimcontainername }}</b> 的实时统计信息以及此容器内运行的进程列表。
               </span>
             </div>
           </div>
@@ -43,7 +43,7 @@
             <div class="col-sm-12">
               <span class="small text-muted">
                 <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
-                此容器无法使用网络统计信息。
+                此容器的网络统计信息不可用。
               </span>
             </div>
           </div>
@@ -51,7 +51,7 @@
             <div class="col-sm-12">
               <span class="small text-muted">
                 <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
-                此容器无法使用 I/O 统计信息。
+                此容器的 I/O 统计信息不可用。
               </span>
             </div>
           </div>
@@ -86,7 +86,7 @@
 
   <div class="col-lg-6 col-md-6 col-sm-12" ng-if="!state.networkStatsUnavailable">
     <rd-widget>
-      <rd-widget-header icon="bar-chart" title-text="网络使用（总计）"></rd-widget-header>
+      <rd-widget-header icon="bar-chart" title-text="网络使用（聚合）"></rd-widget-header>
       <rd-widget-body>
         <div class="chart-container" style="position: relative">
           <canvas id="networkChart" width="770" height="300"></canvas>
@@ -97,7 +97,7 @@
 
   <div class="col-lg-6 col-md-6 col-sm-12" ng-if="!state.ioStatsUnavailable">
     <rd-widget>
-      <rd-widget-header icon="bar-chart" title-text="I/O 使用（总计）"></rd-widget-header>
+      <rd-widget-header icon="bar-chart" title-text="I/O 使用（聚合）"></rd-widget-header>
       <rd-widget-body>
         <div class="chart-container" style="position: relative">
           <canvas id="ioChart" width="770" height="300"></canvas>

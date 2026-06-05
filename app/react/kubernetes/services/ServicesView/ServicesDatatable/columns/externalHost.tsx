@@ -17,7 +17,7 @@ export const externalHost = columnHelper.accessor(
     );
   },
   {
-    header: 'External Host',
+    header: '外部主机',
     id: 'externalHost',
     cell: Cell,
   }

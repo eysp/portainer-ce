@@ -9,7 +9,9 @@ import (
 
 	gittypes "github.com/portainer/portainer/api/git/types"
 	"github.com/portainer/portainer/pkg/fips"
+
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_buildDownloadUrl(t *testing.T) {
@@ -19,15 +21,18 @@ func Test_buildDownloadUrl(t *testing.T) {
 		project:      "project",
 		repository:   "repository",
 	}, "refs/heads/main")
+	require.NoError(t, err)
 
-	expectedUrl, _ := url.Parse("https://dev.azure.com/organisation/project/_apis/git/repositories/repository/items?scopePath=/&download=true&versionDescriptor.version=main&$format=zip&recursionLevel=full&api-version=6.0&versionDescriptor.versionType=branch")
-	actualUrl, _ := url.Parse(u)
-	if assert.NoError(t, err) {
-		assert.Equal(t, expectedUrl.Host, actualUrl.Host)
-		assert.Equal(t, expectedUrl.Scheme, actualUrl.Scheme)
-		assert.Equal(t, expectedUrl.Path, actualUrl.Path)
-		assert.Equal(t, expectedUrl.Query(), actualUrl.Query())
-	}
+	expectedUrl, err := url.Parse("https://dev.azure.com/organisation/project/_apis/git/repositories/repository/items?scopePath=/&download=true&versionDescriptor.version=main&$format=zip&recursionLevel=full&api-version=6.0&versionDescriptor.versionType=branch")
+	require.NoError(t, err)
+
+	actualUrl, err := url.Parse(u)
+	require.NoError(t, err)
+
+	assert.Equal(t, expectedUrl.Host, actualUrl.Host)
+	assert.Equal(t, expectedUrl.Scheme, actualUrl.Scheme)
+	assert.Equal(t, expectedUrl.Path, actualUrl.Path)
+	assert.Equal(t, expectedUrl.Query(), actualUrl.Query())
 }
 
 func Test_buildRootItemUrl(t *testing.T) {
@@ -40,7 +45,7 @@ func Test_buildRootItemUrl(t *testing.T) {
 
 	expectedUrl, _ := url.Parse("https://dev.azure.com/organisation/project/_apis/git/repositories/repository/items?scopePath=/&api-version=6.0&versionDescriptor.version=main&versionDescriptor.versionType=branch")
 	actualUrl, _ := url.Parse(u)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expectedUrl.Host, actualUrl.Host)
 	assert.Equal(t, expectedUrl.Scheme, actualUrl.Scheme)
 	assert.Equal(t, expectedUrl.Path, actualUrl.Path)
@@ -57,7 +62,7 @@ func Test_buildRefsUrl(t *testing.T) {
 
 	expectedUrl, _ := url.Parse("https://dev.azure.com/organisation/project/_apis/git/repositories/repository/refs?api-version=6.0")
 	actualUrl, _ := url.Parse(u)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expectedUrl.Host, actualUrl.Host)
 	assert.Equal(t, expectedUrl.Scheme, actualUrl.Scheme)
 	assert.Equal(t, expectedUrl.Path, actualUrl.Path)
@@ -74,7 +79,7 @@ func Test_buildTreeUrl(t *testing.T) {
 
 	expectedUrl, _ := url.Parse("https://dev.azure.com/organisation/project/_apis/git/repositories/repository/trees/sha1?api-version=6.0&recursive=true")
 	actualUrl, _ := url.Parse(u)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expectedUrl.Host, actualUrl.Host)
 	assert.Equal(t, expectedUrl.Scheme, actualUrl.Scheme)
 	assert.Equal(t, expectedUrl.Path, actualUrl.Path)
@@ -304,7 +309,7 @@ func Test_azureDownloader_downloadZipFromAzureDevOps(t *testing.T) {
 				},
 			}
 			_, err := a.downloadZipFromAzureDevOps(context.Background(), option)
-			assert.Error(t, err)
+			require.Error(t, err)
 			assert.Equal(t, tt.want, zipRequestAuth)
 		})
 	}
@@ -328,13 +333,12 @@ func Test_azureDownloader_latestCommitID(t *testing.T) {
 		  ]
 		}`
 		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(response))
+
+		_, _ = w.Write([]byte(response))
 	}))
 	defer server.Close()
 
-	a := &azureClient{
-		baseUrl: server.URL,
-	}
+	a := &azureClient{baseUrl: server.URL}
 
 	tests := []struct {
 		name    string
@@ -416,7 +420,7 @@ func Test_cloneRepository_azure(t *testing.T) {
 			git := &testRepoManager{}
 
 			s := &Service{azure: azure, git: git}
-			s.cloneRepository("", cloneOption{
+			err := s.cloneRepository("", cloneOption{
 				fetchOption: fetchOption{
 					baseOption: baseOption{
 
@@ -425,6 +429,7 @@ func Test_cloneRepository_azure(t *testing.T) {
 				},
 				depth: 1,
 			})
+			require.NoError(t, err)
 
 			// if azure API is called, git isn't and vice versa
 			assert.Equal(t, tt.called, azure.called)
@@ -502,12 +507,12 @@ func Test_listRefs_azure(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			refs, err := client.listRefs(context.TODO(), tt.args)
 			if tt.expect.err == nil {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				if tt.expect.refsCount > 0 {
-					assert.Greater(t, len(refs), 0)
+					assert.NotEmpty(t, refs)
 				}
 			} else {
-				assert.Error(t, err)
+				require.Error(t, err)
 				assert.Equal(t, tt.expect.err, err)
 			}
 		})
@@ -613,14 +618,14 @@ func Test_listFiles_azure(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			paths, err := client.listFiles(context.TODO(), tt.args)
 			if tt.expect.shouldFail {
-				assert.Error(t, err)
+				require.Error(t, err)
 				if tt.expect.err != nil {
 					assert.Equal(t, tt.expect.err, err)
 				}
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				if tt.expect.matchedCount > 0 {
-					assert.Greater(t, len(paths), 0)
+					assert.NotEmpty(t, paths)
 				}
 			}
 		})

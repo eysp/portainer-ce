@@ -52,7 +52,7 @@ function CreateView() {
   return (
     <>
       <PageHeader
-        title="Update & Rollback"
+        title="更新和回滚"
         breadcrumbs="Edge agent update and rollback"
         reload
       />
@@ -65,7 +65,7 @@ function CreateView() {
       <div className="row">
         <div className="col-sm-12">
           <Widget>
-            <Widget.Title title="Update & Rollback Scheduler" icon={Settings} />
+            <Widget.Title title="更新和回滚调度器" icon={Settings} />
             <Widget.Body>
               <TextTip color="blue" className="mb-2">
                 Devices need to be allocated to an Edge group, visit the{' '}
@@ -73,7 +73,7 @@ function CreateView() {
                   to="edge.groups"
                   data-cy="update-schedules-create-edge-groups-link"
                 >
-                  Edge Groups
+                  边缘组
                 </Link>{' '}
                 page to assign environments and create groups.
                 <br />

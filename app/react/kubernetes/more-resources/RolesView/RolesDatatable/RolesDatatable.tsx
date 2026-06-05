@@ -66,7 +66,7 @@ export function RolesDatatable() {
       settingsManager={tableState}
       isLoading={rolesQuery.isLoading || roleBindingsQuery.isLoading}
       emptyContentLabel="No roles found"
-      title="Roles"
+      title="角色"
       titleIcon={UserCheck}
       getRowId={(row) => row.uid}
       isRowSelectable={(row) => !row.original.isSystem}
@@ -114,7 +114,7 @@ function TableActions({ selectedItems }: TableActionsProps) {
         loadingText="Removing roles..."
         data-cy="k8s-roles-removeRoleButton"
       >
-        Remove
+        删除
       </LoadingButton>
 
       <CreateFromManifestButton

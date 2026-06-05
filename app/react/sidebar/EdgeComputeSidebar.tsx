@@ -33,7 +33,7 @@ export function EdgeComputeSidebar() {
       />
       <SidebarItem
         to="edge.jobs"
-        label="边缘作业"
+        label="边缘任务"
         icon={Clock}
         data-cy="portainerSidebar-edgeJobs"
       />

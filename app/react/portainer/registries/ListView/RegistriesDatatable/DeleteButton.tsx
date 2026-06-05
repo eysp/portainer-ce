@@ -26,7 +26,7 @@ export function DeleteButton({ selectedItems }: { selectedItems: Registry[] }) {
       selectedItems.map((item) => item.Id),
       {
         onSuccess() {
-          notifySuccess('成功', '注册表已移除');
+          notifySuccess('成功', '已删除镜像仓库');
         },
       }
     );
@@ -34,6 +34,7 @@ export function DeleteButton({ selectedItems }: { selectedItems: Registry[] }) {
 }
 
 function getMessage(selectedCount: number) {
-  const registriesMsg = selectedCount > 1 ? '注册表' : '注册表';
-  return `这些${registriesMsg}可能被一个或多个环境中的应用程序使用。移除${registriesMsg}可能会导致使用这些${registriesMsg}的应用程序服务中断。您要移除选定的${registriesMsg}吗？`;
+  const regAttrMsg = selectedCount > 1 ? '这些' : '这个';
+  const registriesMsg = selectedCount > 1 ? '镜像仓库' : '镜像仓库';
+  return `${regAttrMsg} ${registriesMsg} 可能被一个或多个环境中的应用程序使用。删除${regAttrMsg} ${registriesMsg} 可能会导致使用${regAttrMsg} ${registriesMsg} 的应用程序服务中断。您确定要删除选中的 ${registriesMsg} 吗？`;
 }

@@ -13,14 +13,14 @@ export function HelmSection() {
     <FormSection title="Helm 仓库">
       <div className="mb-2">
         <TextTip color="blue">
-          您可以在此指定您自己的{' '}
+          您可以在此处指定您自己的{' '}
           <ExternalLink
             to="https://helm.sh/docs/topics/chart_repository/"
             data-cy="helm-repository-link"
           >
             Helm 仓库
           </ExternalLink>{' '}
-          URL。
+          的 URL。
         </TextTip>
       </div>
 

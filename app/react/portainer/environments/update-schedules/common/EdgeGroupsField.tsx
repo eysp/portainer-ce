@@ -32,7 +32,7 @@ export function EdgeGroupsField({
   return (
     <div>
       <FormControl
-        label="Groups"
+        label="组"
         required
         inputId="groups-select"
         errors={error}
@@ -43,7 +43,7 @@ export function EdgeGroupsField({
           onBlur={onBlur}
           value={selectedGroups}
           inputId="groups-select"
-          placeholder="Select one or multiple group(s)"
+          placeholder="选择一个或多个组"
           onChange={(selectedGroups) =>
             onChange(selectedGroups.map((g) => g.Id))
           }

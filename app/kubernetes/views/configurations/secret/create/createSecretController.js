@@ -131,7 +131,7 @@ class KubernetesCreateSecretController {
 
       await this.KubernetesConfigurationService.create(this.formValues);
 
-      this.Notifications.success('Success', `Secret successfully created`);
+      this.Notifications.success('Success', `密钥已成功创建`);
       this.state.isEditorDirty = false;
       this.$state.go('kubernetes.configurations', { tab: 'secrets' });
     } catch (err) {

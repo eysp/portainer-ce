@@ -4,17 +4,18 @@ import (
 	"testing"
 	"time"
 
+	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/datastore"
+	"github.com/portainer/portainer/api/filesystem"
 
 	"github.com/gofrs/uuid"
-	portainer "github.com/portainer/portainer/api"
-	"github.com/portainer/portainer/api/filesystem"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func newGuidString(t *testing.T) string {
 	uuid, err := uuid.NewV4()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	return uuid.String()
 }
@@ -41,7 +42,7 @@ func TestService_StackByWebhookID(t *testing.T) {
 
 	// can find a stack by webhook ID
 	got, err := store.StackService.StackByWebhookID(webhookID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, stack, *got)
 
 	// returns nil and object not found error if there's no stack associated with the webhook
@@ -94,10 +95,10 @@ func Test_RefreshableStacks(t *testing.T) {
 
 	for _, stack := range []*portainer.Stack{&staticStack, &stackWithWebhook, &refreshableStack} {
 		err := store.Stack().Create(stack)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	}
 
 	stacks, err := store.Stack().RefreshableStacks()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.ElementsMatch(t, []portainer.Stack{refreshableStack}, stacks)
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/filesystem"
 	httperrors "github.com/portainer/portainer/api/http/errors"
+	"github.com/portainer/portainer/api/stacks/stackutils"
 	"github.com/portainer/portainer/pkg/edge"
 	"github.com/portainer/portainer/pkg/libhttp/request"
 
@@ -74,7 +75,7 @@ func (payload *edgeStackFromStringPayload) Validate(r *http.Request) error {
 // @failure 500 "Internal server error"
 // @failure 503 "Edge compute features are disabled"
 // @router /edge_stacks/create/string [post]
-func (handler *Handler) createEdgeStackFromFileContent(r *http.Request, tx dataservices.DataStoreTx, dryrun bool) (*portainer.EdgeStack, error) {
+func (handler *Handler) createEdgeStackFromFileContent(r *http.Request, tx dataservices.DataStoreTx, tokenData *portainer.TokenData, dryrun bool) (*portainer.EdgeStack, error) {
 	var payload edgeStackFromStringPayload
 	if err := request.DecodeAndValidateJSONPayload(r, &payload); err != nil {
 		return nil, err
@@ -84,6 +85,9 @@ func (handler *Handler) createEdgeStackFromFileContent(r *http.Request, tx datas
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create Edge stack object")
 	}
+
+	stack.CreatedByUserId = fmt.Sprintf("%d", tokenData.ID)
+	stack.CreatedBy = stackutils.SanitizeLabel(tokenData.Username)
 
 	if dryrun {
 		return stack, nil

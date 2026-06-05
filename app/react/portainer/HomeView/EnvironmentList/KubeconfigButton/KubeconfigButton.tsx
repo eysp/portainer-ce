@@ -3,7 +3,6 @@ import { Download } from 'lucide-react';
 
 import { Environment } from '@/react/portainer/environments/types';
 import { isKubernetesEnvironment } from '@/react/portainer/environments/utils';
-import { trackEvent } from '@/angulartics.matomo/analytics-services';
 import { Query } from '@/react/portainer/environments/queries/useEnvironmentList';
 
 import { Button } from '@@/buttons';
@@ -31,7 +30,7 @@ export function KubeconfigButton({ environments, envQueryParams }: Props) {
   let tooltipMessage = '';
   if (isHttp) {
     tooltipMessage =
-      '通过 HTTP 访问 Portainer 时无法下载 Kubeconfig。请使用 HTTPS';
+      '当通过 HTTP 访问 Portainer 时，无法下载 Kubeconfig。请使用 HTTPS。';
   } else if (noKubeEnvs) {
     tooltipMessage = '未检测到 Kubernetes 环境';
   }
@@ -46,7 +45,7 @@ export function KubeconfigButton({ environments, envQueryParams }: Props) {
       disabled={isDisabled}
       color="light"
     >
-      Kubeconfig
+      Kubeconfig 配置
     </Button>
   );
 
@@ -67,10 +66,6 @@ export function KubeconfigButton({ environments, envQueryParams }: Props) {
     if (!environments) {
       return;
     }
-
-    trackEvent('kubernetes-kubectl-kubeconfig-multi', {
-      category: 'kubernetes',
-    });
 
     setIsOpen(true);
   }

@@ -38,7 +38,7 @@ export function CredentialSelector({
             getOptionValue={(gitCredential) => gitCredential.id.toString()}
             onChange={onChange}
             isClearable
-            noOptionsMessage={() => '没有保存的凭据'}
+            noOptionsMessage={() => '没有已保存的凭据'}
             inputId="git-creds-selector"
             data-cy="git-credentials-selector"
             id="git-credentials-selector"

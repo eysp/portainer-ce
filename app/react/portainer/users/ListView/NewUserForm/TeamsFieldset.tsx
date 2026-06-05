@@ -57,11 +57,11 @@ function NoTeamSelected() {
     <div className="form-group">
       <div className="col-sm-12">
         <TextTip color="blue">
-          注意：默认情况下，不在团队中的非管理员用户无法访问任何环境。请前往{' '}
+          注意：不在团队中的非管理员用户默认无法访问任何环境。前往{' '}
           <Link to="portainer.endpoints" data-cy="env-link">
             环境视图
           </Link>{' '}
-          来管理他们的访问权限。
+          管理他们的访问权限。
         </TextTip>
       </div>
     </div>

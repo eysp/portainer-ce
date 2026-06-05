@@ -13,7 +13,7 @@ export function useDockerComposeSchema() {
     getDockerComposeSchema,
     {
       staleTime: 24 * 60 * 60 * 1000, // 24 hours
-      cacheTime: 30 * 24 * 60 * 60 * 1000, // 30 days
+      cacheTime: 24 * 24 * 60 * 60 * 1000, // 24 days - cacheTime is a 32 bit signed integer - so it can't be more than 24 days
       retry: 1,
       refetchOnWindowFocus: false,
       // Start with local schema while fetching

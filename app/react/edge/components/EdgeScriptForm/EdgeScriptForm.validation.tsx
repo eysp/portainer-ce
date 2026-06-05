@@ -5,7 +5,7 @@ export function validationSchema() {
     allowSelfSignedCertificates: boolean(),
     envVars: string(),
     edgeIdGenerator: string()
-      .required('Edge ID Generator is required')
+      .required('边缘 ID 生成器为必填项')
       .test(
         'valid edge id generator',
         'edge id generator cannot be empty',

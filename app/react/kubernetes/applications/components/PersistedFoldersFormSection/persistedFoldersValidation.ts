@@ -20,7 +20,7 @@ export function persistedFoldersValidation(
   return array(
     object({
       persistentVolumeClaimName: string(),
-      containerPath: string().required('Path is required.'),
+      containerPath: string().required('路径为必填项。'),
       size: string().when('useNewVolume', {
         is: true,
         then: string()

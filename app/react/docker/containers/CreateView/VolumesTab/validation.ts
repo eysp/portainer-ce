@@ -5,11 +5,11 @@ import { Values, VolumeType, volumeTypes } from './types';
 export function validation(): SchemaOf<Values> {
   return array(
     object({
-      containerPath: string().required('Container path is required'),
+      containerPath: string().required('容器路径为必填项'),
       type: mixed<VolumeType>()
         .oneOf([...volumeTypes])
         .default('volume'),
-      name: string().required('Volume name is required'),
+      name: string().required('卷名称为必填项'),
       readOnly: mixed<boolean>().default(false),
     })
   ).default([]);

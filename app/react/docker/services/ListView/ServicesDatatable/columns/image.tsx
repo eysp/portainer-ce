@@ -18,7 +18,7 @@ export const image = columnHelper.accessor((item) => item.Image, {
 function Header() {
   return (
     <>
-      Image
+      镜像
       <ImageUpToDateTooltip />
     </>
   );

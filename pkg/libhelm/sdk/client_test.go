@@ -6,13 +6,13 @@ import (
 	"github.com/portainer/portainer/pkg/libhelm/options"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"helm.sh/helm/v3/pkg/action"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/clientcmd/api"
 )
 
 func Test_InitActionConfig(t *testing.T) {
-	is := assert.New(t)
 	hspm := NewHelmSDKPackageManager()
 
 	t.Run("with nil k8sAccess should use default kubeconfig", func(t *testing.T) {
@@ -20,7 +20,7 @@ func Test_InitActionConfig(t *testing.T) {
 		err := hspm.initActionConfig(actionConfig, "default", nil)
 
 		// The function should not fail by design, even when not running in a k8s environment
-		is.NoError(err, "should not return error when not in k8s environment")
+		require.NoError(t, err, "should not return error when not in k8s environment")
 	})
 
 	t.Run("with k8sAccess should create in-memory config", func(t *testing.T) {
@@ -32,7 +32,7 @@ func Test_InitActionConfig(t *testing.T) {
 
 		// The function should not fail by design
 		err := hspm.initActionConfig(actionConfig, "default", k8sAccess)
-		is.NoError(err, "should not return error when using in-memory config")
+		require.NoError(t, err, "should not return error when using in-memory config")
 	})
 
 	t.Run("with k8sAccess and CA file should create config with CA", func(t *testing.T) {
@@ -45,7 +45,7 @@ func Test_InitActionConfig(t *testing.T) {
 
 		// The function should not fail by design
 		err := hspm.initActionConfig(actionConfig, "default", k8sAccess)
-		is.NoError(err, "should not return error when using in-memory config with CA")
+		require.NoError(t, err, "should not return error when using in-memory config with CA")
 	})
 }
 
@@ -80,23 +80,23 @@ func Test_ClientConfigGetter(t *testing.T) {
 
 	// Create client config getter
 	clientGetter, err := newRESTClientGetter(clientConfig, "default")
-	is.NoError(err, "should not return error when creating client getter")
+	require.NoError(t, err, "should not return error when creating client getter")
 
 	// Test ToRESTConfig
 	restConfig, err := clientGetter.ToRESTConfig()
-	is.NoError(err, "should not return error when creating REST config")
+	require.NoError(t, err, "should not return error when creating REST config")
 	is.NotNil(restConfig, "should return non-nil REST config")
 	is.Equal("https://kubernetes.default.svc", restConfig.Host, "host should be https://kubernetes.default.svc")
 	is.Equal("test-token", restConfig.BearerToken, "bearer token should be test-token")
 
 	// Test ToDiscoveryClient
 	discoveryClient, err := clientGetter.ToDiscoveryClient()
-	is.NoError(err, "should not return error when creating discovery client")
+	require.NoError(t, err, "should not return error when creating discovery client")
 	is.NotNil(discoveryClient, "should return non-nil discovery client")
 
 	// Test ToRESTMapper
 	restMapper, err := clientGetter.ToRESTMapper()
-	is.NoError(err, "should not return error when creating REST mapper")
+	require.NoError(t, err, "should not return error when creating REST mapper")
 	is.NotNil(restMapper, "should return non-nil REST mapper")
 
 	// Test ToRawKubeConfigLoader
@@ -106,7 +106,6 @@ func Test_ClientConfigGetter(t *testing.T) {
 
 func Test_ParseValues(t *testing.T) {
 	is := assert.New(t)
-	hspm := NewHelmSDKPackageManager()
 
 	t.Run("should parse valid YAML values", func(t *testing.T) {
 		yamlData := []byte(`
@@ -118,19 +117,19 @@ resources:
     cpu: 100m
     memory: 128Mi
 `)
-		values, err := hspm.parseValues(yamlData)
-		is.NoError(err, "should parse valid YAML without error")
+		values, err := parseValues(yamlData)
+		require.NoError(t, err, "should parse valid YAML without error")
 		is.NotNil(values, "should return non-nil values")
 
 		// Verify structure
-		service, ok := values["service"].(map[string]interface{})
+		service, ok := values["service"].(map[string]any)
 		is.True(ok, "service should be a map")
 		is.Equal("ClusterIP", service["type"], "service type should be ClusterIP")
-		is.Equal(float64(80), service["port"], "service port should be 80")
+		is.Equal(80, int(service["port"].(float64)), "service port should be 80")
 
-		resources, ok := values["resources"].(map[string]interface{})
+		resources, ok := values["resources"].(map[string]any)
 		is.True(ok, "resources should be a map")
-		limits, ok := resources["limits"].(map[string]interface{})
+		limits, ok := resources["limits"].(map[string]any)
 		is.True(ok, "limits should be a map")
 		is.Equal("100m", limits["cpu"], "cpu limit should be 100m")
 		is.Equal("128Mi", limits["memory"], "memory limit should be 128Mi")
@@ -143,15 +142,15 @@ service:
   port: 80
   invalid yaml
 `)
-		_, err := hspm.parseValues(yamlData)
-		is.Error(err, "should return error for invalid YAML")
+		_, err := parseValues(yamlData)
+		require.Error(t, err, "should return error for invalid YAML")
 	})
 
 	t.Run("should handle empty YAML", func(t *testing.T) {
 		yamlData := []byte(``)
-		values, err := hspm.parseValues(yamlData)
-		is.NoError(err, "should not return error for empty YAML")
+		values, err := parseValues(yamlData)
+		require.NoError(t, err, "should not return error for empty YAML")
 		is.NotNil(values, "should return non-nil values for empty YAML")
-		is.Len(values, 0, "should return empty map for empty YAML")
+		is.Empty(values, "should return empty map for empty YAML")
 	})
 }

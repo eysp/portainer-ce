@@ -31,7 +31,7 @@
 
   <auto-user-provision-toggle ng-model="$ctrl.settings.OAuthAutoCreateUsers">
     <field-description>
-      启用自动用户配置后，Portainer 将自动创建具有标准用户角色的用户。如果禁用，用户必须事先在 Portainer 中创建才能登录。
+      启用自动用户配置后，Portainer 将自动创建具有标准用户角色的用户。如果禁用，用户必须预先在 Portainer 中创建才能登录。
     </field-description>
   </auto-user-provision-toggle>
 
@@ -47,14 +47,14 @@
     <div class="form-group">
       <label class="col-sm-3 col-lg-2 control-label text-left">默认团队</label>
       <span class="small text-muted" style="margin-left: 20px" ng-if="$ctrl.teams.length === 0">
-        您还没有创建任何团队。前往 <a ui-sref="portainer.teams">团队视图</a> 管理团队。
+        您尚未创建任何团队。前往 <a ui-sref="portainer.teams">团队视图</a> 管理团队。
       </span>
 
       <div class="col-sm-9" ng-if="$ctrl.teams.length > 0">
         <div class="col-sm-12 small text-muted">
           <p class="vertical-center">
             <pr-icon icon="'info'" mode="'primary'"></pr-icon>
-            启用自动团队成员身份时，默认团队选项将被禁用
+            启用自动团队成员资格时，默认团队选项将被禁用
           </p>
         </div>
         <div class="col-xs-12 vertical-center">
@@ -81,14 +81,14 @@
     </div>
   </div>
 
-  <div class="col-sm-12 form-section-title"> 团队成员身份 </div>
+  <div class="col-sm-12 form-section-title"> 团队成员资格 </div>
   <div class="form-group">
-    <div class="col-sm-12 text-muted small"> 自动团队成员身份根据 OAuth 提供商令牌中的自定义声明同步团队成员身份。 </div>
+    <div class="col-sm-12 text-muted small"> 自动团队成员资格根据 OAuth 提供商令牌中的自定义声明同步团队成员资格。 </div>
   </div>
   <div class="form-group">
     <div class="col-sm-12">
       <por-switch-field
-        label="'自动团队成员身份'"
+        label="'自动团队成员资格'"
         name="'tls'"
         feature-id="$ctrl.limitedFeature"
         checked="$ctrl.settings.OAuthAutoMapTeamMemberships"
@@ -161,7 +161,7 @@
       <div class="col-sm-12 text-muted small" style="margin-bottom: 0.5em"> 当用户不属于任何其他团队时，将分配默认团队 </div>
       <label class="col-sm-3 col-lg-2 control-label text-left">默认团队</label>
       <span class="small text-muted" style="margin-left: 20px" ng-if="$ctrl.teams.length === 0">
-        您还没有创建任何团队。前往 <a ui-sref="portainer.teams">团队视图</a> 管理团队。
+        您尚未创建任何团队。前往 <a ui-sref="portainer.teams">团队视图</a> 管理团队。
       </span>
 
       <div class="col-sm-9" ng-if="$ctrl.teams.length > 0">
@@ -217,7 +217,7 @@
     <div class="form-group">
       <label for="oauth_authorization_uri" class="col-sm-3 col-lg-2 control-label text-left">
         授权 URL
-        <portainer-tooltip message="'用于对 OAuth 提供商进行身份验证的 URL。会将用户重定向到 OAuth 提供商登录视图'"></portainer-tooltip>
+        <portainer-tooltip message="'用于对 OAuth 提供商进行身份验证的 URL。将用户重定向到 OAuth 提供商登录视图'"></portainer-tooltip>
       </label>
       <div class="col-sm-9 col-lg-10">
         <input
@@ -255,7 +255,7 @@
     <div class="form-group">
       <label for="oauth_resource_uri" class="col-sm-3 col-lg-2 control-label text-left">
         资源 URL
-        <portainer-tooltip message="'Portainer 用于检索已认证用户信息的 URL'"></portainer-tooltip>
+        <portainer-tooltip message="'Portainer 用于检索已验证用户信息的 URL'"></portainer-tooltip>
       </label>
       <div class="col-sm-9 col-lg-10">
         <input
@@ -316,7 +316,7 @@
       <label for="oauth_user_identifier" class="col-sm-3 col-lg-2 control-label text-left">
         用户标识符
         <portainer-tooltip
-          message="'Portainer 将用于为已认证用户创建账户的标识符。从通过资源 URL 字段指定的资源服务器检索'"
+          message="'Portainer 将用于为已验证用户创建账户的标识符。从通过资源 URL 字段指定的资源服务器检索'"
         ></portainer-tooltip>
       </label>
       <div class="col-sm-9 col-lg-10">
@@ -335,9 +335,9 @@
 
     <div class="form-group">
       <label for="oauth_scopes" class="col-sm-3 col-lg-2 control-label text-left">
-        作用域
+        范围
         <portainer-tooltip
-          message="'OAuth 提供商检索已认证用户信息所需的作用域。有关此内容的更多信息，请参阅您的 OAuth 提供商文档'"
+          message="'OAuth 提供商检索已验证用户信息所需的作用域。有关此内容的更多信息，请参阅您的 OAuth 提供商文档'"
         ></portainer-tooltip>
       </label>
       <div class="col-sm-9 col-lg-10">
@@ -373,7 +373,7 @@
       <div class="form-group" ng-if="$ctrl.state.provider == 'microsoft'">
         <label for="oauth_microsoft_tenant_id" class="col-sm-3 col-lg-2 control-label text-left">
           租户 ID
-          <portainer-tooltip message="'您希望进行身份验证的 Azure 目录的 ID。也称为目录 ID'"></portainer-tooltip>
+          <portainer-tooltip message="'您希望对其进行身份验证的 Azure 目录的 ID。也称为目录 ID'"></portainer-tooltip>
         </label>
         <div class="col-sm-9 col-lg-10">
           <input

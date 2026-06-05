@@ -43,14 +43,13 @@ export function AutocompleteSelect({
 
   return (
     <Combobox
-      className={styles.root}
-      aria-label="compose"
+      className={clsx(styles.root, 'form-control')}
       onSelect={onSelect}
       data-cy="component-gitComposeInput"
     >
       <ComboboxInput
         value={searchTerm}
-        className="form-control"
+        className="w-full bg-transparent border-none outline-none"
         onChange={handleChange}
         placeholder={placeholder}
         readOnly={readOnly}

@@ -5,7 +5,9 @@ import (
 	"testing"
 
 	models "github.com/portainer/portainer/api/http/models/kubernetes"
+
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -241,70 +243,70 @@ func TestGetApplications(t *testing.T) {
 		// 1. Deployment with pods
 		deployWithPods := createTestDeployment("deploy-with-pods", namespace, 2)
 		_, err := fakeClient.AppsV1().Deployments(namespace).Create(context.TODO(), deployWithPods, metav1.CreateOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		replicaSet := createTestReplicaSet("rs-deploy-with-pods", namespace, "deploy-with-pods")
 		_, err = fakeClient.AppsV1().ReplicaSets(namespace).Create(context.TODO(), replicaSet, metav1.CreateOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		pod1 := createTestPod("pod1-deploy", namespace, "ReplicaSet", "rs-deploy-with-pods", true)
 		_, err = fakeClient.CoreV1().Pods(namespace).Create(context.TODO(), pod1, metav1.CreateOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		pod2 := createTestPod("pod2-deploy", namespace, "ReplicaSet", "rs-deploy-with-pods", true)
 		_, err = fakeClient.CoreV1().Pods(namespace).Create(context.TODO(), pod2, metav1.CreateOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// 2. Deployment without pods (scaled to 0)
 		deployNoPods := createTestDeployment("deploy-no-pods", namespace, 0)
 		_, err = fakeClient.AppsV1().Deployments(namespace).Create(context.TODO(), deployNoPods, metav1.CreateOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// 3. StatefulSet with pods
 		stsWithPods := createTestStatefulSet("sts-with-pods", namespace, 1)
 		_, err = fakeClient.AppsV1().StatefulSets(namespace).Create(context.TODO(), stsWithPods, metav1.CreateOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		pod3 := createTestPod("pod1-sts", namespace, "StatefulSet", "sts-with-pods", true)
 		_, err = fakeClient.CoreV1().Pods(namespace).Create(context.TODO(), pod3, metav1.CreateOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// 4. StatefulSet without pods
 		stsNoPods := createTestStatefulSet("sts-no-pods", namespace, 0)
 		_, err = fakeClient.AppsV1().StatefulSets(namespace).Create(context.TODO(), stsNoPods, metav1.CreateOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// 5. DaemonSet with pods
 		dsWithPods := createTestDaemonSet("ds-with-pods", namespace)
 		_, err = fakeClient.AppsV1().DaemonSets(namespace).Create(context.TODO(), dsWithPods, metav1.CreateOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		pod4 := createTestPod("pod1-ds", namespace, "DaemonSet", "ds-with-pods", true)
 		_, err = fakeClient.CoreV1().Pods(namespace).Create(context.TODO(), pod4, metav1.CreateOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		pod5 := createTestPod("pod2-ds", namespace, "DaemonSet", "ds-with-pods", true)
 		_, err = fakeClient.CoreV1().Pods(namespace).Create(context.TODO(), pod5, metav1.CreateOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// 6. Naked Pod (no owner reference)
 		nakedPod := createTestPod("naked-pod", namespace, "", "", true)
 		_, err = fakeClient.CoreV1().Pods(namespace).Create(context.TODO(), nakedPod, metav1.CreateOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// 7. Resources in another namespace
 		deployOtherNs := createTestDeployment("deploy-other-ns", defaultNamespace, 1)
 		_, err = fakeClient.AppsV1().Deployments(defaultNamespace).Create(context.TODO(), deployOtherNs, metav1.CreateOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		podOtherNs := createTestPod("pod-other-ns", defaultNamespace, "Deployment", "deploy-other-ns", true)
 		_, err = fakeClient.CoreV1().Pods(defaultNamespace).Create(context.TODO(), podOtherNs, metav1.CreateOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// 8. Add a service (dependency)
 		service := createTestService("svc-deploy", namespace, map[string]string{"app": "deploy-with-pods"})
 		_, err = fakeClient.CoreV1().Services(namespace).Create(context.TODO(), service, metav1.CreateOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// Create the KubeClient with admin privileges
 		kubeClient := &KubeClient{
@@ -318,11 +320,11 @@ func TestGetApplications(t *testing.T) {
 		// 1. All resources, no filtering
 		t.Run("All resources with dependencies", func(t *testing.T) {
 			apps, err := kubeClient.GetApplications("", "")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			// We expect 7 resources: 2 deployments + 2 statefulsets + 1 daemonset + 1 naked pod + 1 deployment in other namespace
 			// Note: Each controller with pods should count once, not per pod
-			assert.Equal(t, 7, len(apps))
+			assert.Len(t, apps, 7)
 
 			// Verify one of the deployments has services attached
 			appsWithServices := []models.K8sApplication{}
@@ -331,17 +333,17 @@ func TestGetApplications(t *testing.T) {
 					appsWithServices = append(appsWithServices, app)
 				}
 			}
-			assert.Equal(t, 1, len(appsWithServices))
+			assert.Len(t, appsWithServices, 1)
 			assert.Equal(t, "deploy-with-pods", appsWithServices[0].Name)
 		})
 
 		// 2. Filter by namespace
 		t.Run("Filter by namespace", func(t *testing.T) {
 			apps, err := kubeClient.GetApplications(namespace, "")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			// We expect 6 resources in the test namespace
-			assert.Equal(t, 6, len(apps))
+			assert.Len(t, apps, 6)
 
 			// Verify resources from other namespaces are not included
 			for _, app := range apps {
@@ -361,25 +363,25 @@ func TestGetApplications(t *testing.T) {
 		// Create resources in the allowed namespace
 		sts1 := createTestStatefulSet("sts-allowed", namespace1, 1)
 		_, err := fakeClient.AppsV1().StatefulSets(namespace1).Create(context.TODO(), sts1, metav1.CreateOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		pod1 := createTestPod("pod-allowed", namespace1, "StatefulSet", "sts-allowed", true)
 		_, err = fakeClient.CoreV1().Pods(namespace1).Create(context.TODO(), pod1, metav1.CreateOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// Add a StatefulSet without pods in the allowed namespace
 		stsNoPods := createTestStatefulSet("sts-no-pods-allowed", namespace1, 0)
 		_, err = fakeClient.AppsV1().StatefulSets(namespace1).Create(context.TODO(), stsNoPods, metav1.CreateOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// Create resources in the restricted namespace
 		sts2 := createTestStatefulSet("sts-restricted", namespace2, 1)
 		_, err = fakeClient.AppsV1().StatefulSets(namespace2).Create(context.TODO(), sts2, metav1.CreateOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		pod2 := createTestPod("pod-restricted", namespace2, "StatefulSet", "sts-restricted", true)
 		_, err = fakeClient.CoreV1().Pods(namespace2).Create(context.TODO(), pod2, metav1.CreateOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// Create the KubeClient with non-admin privileges (only allowed namespace1)
 		kubeClient := &KubeClient{
@@ -391,10 +393,10 @@ func TestGetApplications(t *testing.T) {
 
 		// Test that only resources from allowed namespace are returned
 		apps, err := kubeClient.GetApplications("", "")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// We expect 2 resources from the allowed namespace (1 sts with pod + 1 sts without pod)
-		assert.Equal(t, 2, len(apps))
+		assert.Len(t, apps, 2)
 
 		// Verify resources are from the allowed namespace
 		for _, app := range apps {
@@ -423,23 +425,23 @@ func TestGetApplications(t *testing.T) {
 		// Create a deployment with pods on specific node
 		deploy := createTestDeployment("node-deploy", namespace, 2)
 		_, err := fakeClient.AppsV1().Deployments(namespace).Create(context.TODO(), deploy, metav1.CreateOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// Create ReplicaSet for the deployment
 		rs := createTestReplicaSet("rs-node-deploy", namespace, "node-deploy")
 		_, err = fakeClient.AppsV1().ReplicaSets(namespace).Create(context.TODO(), rs, metav1.CreateOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// Create 2 pods, one on the specified node, one on a different node
 		pod1 := createTestPod("pod-on-node", namespace, "ReplicaSet", "rs-node-deploy", true)
 		pod1.Spec.NodeName = nodeName
 		_, err = fakeClient.CoreV1().Pods(namespace).Create(context.TODO(), pod1, metav1.CreateOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		pod2 := createTestPod("pod-other-node", namespace, "ReplicaSet", "rs-node-deploy", true)
 		pod2.Spec.NodeName = "worker-node-2"
 		_, err = fakeClient.CoreV1().Pods(namespace).Create(context.TODO(), pod2, metav1.CreateOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// Create the KubeClient
 		kubeClient := &KubeClient{
@@ -450,10 +452,10 @@ func TestGetApplications(t *testing.T) {
 
 		// Test filtering by node name
 		apps, err := kubeClient.GetApplications(namespace, nodeName)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// We expect to find only the pod on the specified node
-		assert.Equal(t, 1, len(apps))
+		assert.Len(t, apps, 1)
 		if len(apps) > 0 {
 			assert.Equal(t, "node-deploy", apps[0].Name)
 		}

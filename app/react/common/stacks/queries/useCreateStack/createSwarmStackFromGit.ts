@@ -1,7 +1,8 @@
 import axios, { parseAxiosError } from '@/portainer/services/axios';
 import { Pair } from '@/react/portainer/settings/types';
-import { AutoUpdateModel } from '@/react/portainer/gitops/types';
+import { AutoUpdateResponse } from '@/react/portainer/gitops/types';
 import { EnvironmentId } from '@/react/portainer/environments/types';
+import { RegistryId } from '@/react/portainer/registries/types/registry';
 
 import { Stack } from '../../types';
 
@@ -35,7 +36,7 @@ export type SwarmGitRepositoryPayload = {
   additionalFiles?: Array<string>;
 
   /** Optional GitOps update configuration */
-  autoUpdate?: AutoUpdateModel;
+  autoUpdate?: AutoUpdateResponse | null;
 
   /** Whether the stack supports relative path volume */
   supportRelativePath?: boolean;
@@ -44,6 +45,7 @@ export type SwarmGitRepositoryPayload = {
   /** TLSSkipVerify skips SSL verification when cloning the Git repository */
   tlsSkipVerify?: boolean;
   environmentId: EnvironmentId;
+  registries?: Array<RegistryId>;
 };
 
 export async function createSwarmStackFromGit({

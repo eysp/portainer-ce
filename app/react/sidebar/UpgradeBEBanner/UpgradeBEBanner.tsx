@@ -2,7 +2,6 @@ import { ArrowUpCircle } from 'lucide-react';
 import { useState } from 'react';
 import clsx from 'clsx';
 
-import { useAnalytics } from '@/react/hooks/useAnalytics';
 import { useNodesCount } from '@/react/portainer/system/useNodesCount';
 import {
   ContainerPlatform,
@@ -29,11 +28,9 @@ const enabledPlatforms: Array<ContainerPlatform> = [
 
 function UpgradeBEBanner() {
   const {
-    isPureAdmin,
     user: { Id },
   } = useCurrentUser();
 
-  const { trackEvent } = useAnalytics();
   const { isOpen: isSidebarOpen } = useSidebarState();
 
   const nodesCountQuery = useNodesCount();
@@ -46,18 +43,9 @@ function UpgradeBEBanner() {
     return null;
   }
 
-  const nodesCount = nodesCountQuery.data;
   const systemInfo = systemInfoQuery.data;
 
-  const metadata = {
-    upgrade: false,
-    nodeCount: nodesCount,
-    platform: systemInfo.platform,
-    edgeAgents: systemInfo.edgeAgents,
-    agents: systemInfo.agents,
-  };
-
-  {
+ {
     return null;
   }
 
@@ -86,13 +74,6 @@ function UpgradeBEBanner() {
   );
 
   function handleClick() {
-    trackEvent(
-      isPureAdmin ? 'portainer-upgrade-admin' : 'portainer-upgrade-non-admin',
-      {
-        category: 'portainer',
-        metadata,
-      }
-    );
     setIsOpen(true);
   }
 }

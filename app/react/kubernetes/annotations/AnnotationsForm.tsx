@@ -36,7 +36,7 @@ export function AnnotationsForm({
         <div className="row" key={annotation.id}>
           <div className="form-group col-sm-4 !m-0 !pl-0">
             <div className="input-group input-group-sm">
-              <span className="input-group-addon required">Key</span>
+              <span className="input-group-addon required">键</span>
               <input
                 name={`annotation_key_${i}`}
                 type="text"
@@ -57,7 +57,7 @@ export function AnnotationsForm({
           </div>
           <div className="form-group col-sm-4 !m-0 !pl-0">
             <div className="input-group input-group-sm">
-              <span className="input-group-addon required">Value</span>
+              <span className="input-group-addon required">值</span>
               <input
                 name={`annotation_value_${i}`}
                 type="text"

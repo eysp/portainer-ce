@@ -82,7 +82,7 @@ export function NetworksDatatable({ dataset, onRemove, onRefresh }: Props) {
             <DeleteButton
               disabled={selectedRows.length === 0}
               data-cy="network-removeNetworkButton"
-              confirmMessage="您确定要移除选定的网络吗？"
+              confirmMessage="您要删除选中的网络吗？"
               onConfirmed={() => onRemove(selectedRows)}
             />
           </Authorized>

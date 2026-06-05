@@ -1,7 +1,10 @@
 import { http, HttpResponse } from 'msw';
-import { SystemInfo, SystemVersion } from 'docker-types/generated/1.41';
+import { SystemInfo, SystemVersion } from 'docker-types';
+
+import { dockerImagesHandlers } from './docker/images';
 
 export const dockerHandlers = [
+  ...dockerImagesHandlers,
   http.get<never, never, SystemInfo>(
     '/api/endpoints/:endpointId/docker/info',
     () =>
@@ -15,5 +18,8 @@ export const dockerHandlers = [
   http.get<never, never, SystemVersion>(
     '/api/endpoints/:endpointId/docker/version',
     () => HttpResponse.json({ ApiVersion: '1.24' })
+  ),
+  http.get('/api/endpoints/:endpointId/docker/containers/json', () =>
+    HttpResponse.json([])
   ),
 ];

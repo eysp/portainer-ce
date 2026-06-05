@@ -1,4 +1,4 @@
-import { ImageInspect } from 'docker-types/generated/1.41';
+import { ImageInspect } from 'docker-types';
 
 type ImageInspectConfig = NonNullable<ImageInspect['Config']>;
 
@@ -56,9 +56,8 @@ export class ImageDetailsViewModel {
     let config: ImageInspect['Config'] = {};
     if (data.Config) {
       config = data.Config; // this is part of OCI images-spec
-    } else if (data.ContainerConfig) {
-      config = data.ContainerConfig; // not OCI ; has been removed in Docker 26 (API v1.45) along with .Container
     }
+
     this.Entrypoint = config.Entrypoint ?? [''];
     this.ExposedPorts = config.ExposedPorts
       ? Object.keys(config.ExposedPorts)

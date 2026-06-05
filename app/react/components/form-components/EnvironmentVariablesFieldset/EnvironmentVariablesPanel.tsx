@@ -48,7 +48,7 @@ export function EnvironmentVariablesPanel({
         {showHelpMessage && (
           <div className="col-sm-12">
             <TextTip color="blue" inline={false}>
-              环境变量更改在手动重新部署或通过 webhook 触发重新部署之前不会生效。
+              环境更改在手动重新部署或通过 webhook 重新部署之前不会生效。
             </TextTip>
           </div>
         )}

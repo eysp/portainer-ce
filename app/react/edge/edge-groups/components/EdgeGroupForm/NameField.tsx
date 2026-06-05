@@ -10,7 +10,7 @@ import { EdgeGroup } from '../../types';
 
 export function NameField({ errors }: { errors?: FormikErrors<string> }) {
   return (
-    <FormControl label="Name" required errors={errors} inputId="group_name">
+    <FormControl label="名称" required errors={errors} inputId="group_name">
       <Field
         as={Input}
         name="name"
@@ -28,7 +28,7 @@ export function useNameValidation(id?: EdgeGroup['Id']) {
   return useMemo(
     () =>
       string()
-        .required('Name is required')
+        .required('名称为必填项')
         .test({
           name: 'is-unique',
           test: (value) =>

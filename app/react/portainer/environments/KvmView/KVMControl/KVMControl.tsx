@@ -9,7 +9,7 @@ export interface KVMControlProps {
 }
 
 export function KVMControl({ deviceId, server, token }: KVMControlProps) {
-  if (!deviceId || !server || !token) return <div>Loading...</div>;
+  if (!deviceId || !server || !token) return <div>加载中...</div>;
 
   return (
     <KVM

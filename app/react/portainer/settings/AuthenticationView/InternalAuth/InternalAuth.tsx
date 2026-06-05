@@ -41,7 +41,7 @@ export function InternalAuth({
     <>
       <FormSectionTitle>信息</FormSectionTitle>
       <div className="form-group col-sm-12 text-muted small">
-        使用内部身份验证时，Portainer 将加密用户密码并在本地存储凭据。
+        使用内部认证时，Portainer 将加密用户密码并在本地存储凭据。
       </div>
 
       <FormSectionTitle>密码规则</FormSectionTitle>

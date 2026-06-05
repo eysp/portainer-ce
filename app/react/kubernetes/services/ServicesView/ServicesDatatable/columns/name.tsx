@@ -22,7 +22,7 @@ export const name = columnHelper.accessor(
     return name;
   },
   {
-    header: 'Name',
+    header: '名称',
     id: 'name',
     cell: ({ row }) => {
       const name = row.original.Name;

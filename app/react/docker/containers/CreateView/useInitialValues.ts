@@ -35,12 +35,13 @@ import {
 } from '@/react/docker/containers/CreateView/VolumesTab';
 import { envVarsTabUtils } from '@/react/docker/containers/CreateView/EnvVarsTab';
 import { UserId } from '@/portainer/users/types';
-import { getImageConfig } from '@/react/portainer/registries/utils/getImageConfig';
 import { useEnvironmentId } from '@/react/hooks/useEnvironmentId';
 import { useCurrentUser } from '@/react/hooks/useUser';
 import { useWebhooks } from '@/react/portainer/webhooks/useWebhooks';
 import { useEnvironmentRegistries } from '@/react/portainer/environments/queries/useEnvironmentRegistries';
+import { ContainerDetailsViewModel } from '@/docker/models/containerDetails';
 
+import { getImageConfig } from '@@/ImageConfigFieldset/getImageConfig';
 import { EnvVarValues } from '@@/form-components/EnvironmentVariablesFieldset';
 
 import { useNetworksForSelector } from '../components/NetworkSelector';
@@ -69,9 +70,13 @@ export function useInitialValues(submitting: boolean, isWindows: boolean) {
 
   const networksQuery = useNetworksForSelector();
 
-  const fromContainerQuery = useContainer(environmentId, from, nodeName, {
-    enabled: !submitting,
-  });
+  const fromContainerQuery = useContainer(
+    { environmentId, containerId: from, nodeName },
+    {
+      enabled: !submitting,
+      select: (c) => new ContainerDetailsViewModel(c),
+    }
+  );
 
   const runningContainersQuery = useContainers(environmentId, {
     enabled: !!from,

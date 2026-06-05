@@ -12,4 +12,5 @@ export const userHandlers = [
     '/api/users/:userId/memberships',
     () => HttpResponse.json([])
   ),
+  http.get('/api/users/:userId/gitcredentials', () => HttpResponse.json([])),
 ];

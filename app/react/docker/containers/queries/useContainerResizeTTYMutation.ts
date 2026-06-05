@@ -22,6 +22,6 @@ export async function resizeTTY(
       }
     );
   } catch (err) {
-    throw parseAxiosError(err, 'Unable to resize tty of container');
+    throw parseAxiosError(err, '无法调整容器 TTY 大小');
   }
 }

@@ -82,11 +82,14 @@ function HelmDatatableDescription({ isAdmin }: { isAdmin: boolean }) {
   return (
     <TextTip color="blue" className="mb-3">
       <p>
-        在此添加 Helm 仓库将使其仅在您的 Portainer 用户账户中可用。来自这些仓库的 Helm 图表（以及全局设置的 Helm 仓库）将显示在“从代码创建”屏幕中。
+        Adding a Helm repository here makes it available only in your Portainer
+        user account. The Helm charts from these repositories (along with the
+        globally set Helm repository) are shown in the &apos;Create from
+        Code&apos; screen.
       </p>
       {isAdmin && (
         <>
-          要全局管理您的 Helm 仓库，请导航至{' '}
+          To manage your helm repositories globally, navigate to{' '}
           <Link
             to="portainer.settings"
             params={{ '#': 'kubernetes-settings' }}
@@ -94,7 +97,7 @@ function HelmDatatableDescription({ isAdmin }: { isAdmin: boolean }) {
           >
             设置 &gt; 常规
           </Link>
-          。
+          .
         </>
       )}
     </TextTip>

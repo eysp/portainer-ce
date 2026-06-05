@@ -91,7 +91,7 @@ class KubernetesSecretController {
       if (this.formValues.Kind !== this.configuration.Kind || this.formValues.ResourcePool !== this.configuration.Namespace || this.formValues.Name !== this.configuration.Name) {
         await this.KubernetesConfigurationService.create(this.formValues);
         await this.KubernetesConfigurationService.delete(this.configuration);
-        this.Notifications.success('Success', `Secret successfully updated`);
+        this.Notifications.success('Success', `密钥已成功更新`);
         this.$state.go(
           'kubernetes.secrets.secret',
           {
@@ -102,7 +102,7 @@ class KubernetesSecretController {
         );
       } else {
         await this.KubernetesConfigurationService.update(this.formValues, this.configuration);
-        this.Notifications.success('Success', `Secret successfully updated`);
+        this.Notifications.success('Success', `密钥已成功更新`);
         this.$state.reload(this.$state.current);
       }
     } catch (err) {

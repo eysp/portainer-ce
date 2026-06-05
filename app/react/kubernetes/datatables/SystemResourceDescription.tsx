@@ -10,7 +10,7 @@ export function SystemResourceDescription({ showSystemResources }: Props) {
   return showSystemResources === false ? (
     <Authorized authorizations="K8sAccessSystemNamespaces" adminOnlyCE>
       <TextTip color="blue" className="!mb-0">
-        System resources are hidden, this can be changed in the table settings
+        系统资源已隐藏，可以在表格设置中更改
       </TextTip>
     </Authorized>
   ) : null;

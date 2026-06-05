@@ -28,7 +28,8 @@ export function ScreenBannerFieldset() {
         </div>
 
         <div className="col-sm-12 text-muted small mt-2">
-          您可以设置一个自定义横幅，该横幅将在所有用户登录时显示。
+          You can set a custom banner that will be shown to all users during
+          login.
         </div>
       </div>
 

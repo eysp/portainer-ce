@@ -20,7 +20,7 @@ export function DashboardLink({
       to={`${platformPath}.dashboard`}
       params={{ endpointId: environmentId }}
       icon={Layout}
-      label="仪表盘"
+      label="仪表板"
       data-cy={dataCy}
     />
   );

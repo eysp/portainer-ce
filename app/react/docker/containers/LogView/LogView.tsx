@@ -1,6 +1,7 @@
 import { useCurrentStateAndParams } from '@uirouter/react';
 
 import { useContainer } from '@/react/docker/containers/queries/useContainer';
+import { ContainerDetailsViewModel } from '@/docker/models/containerDetails';
 
 import { InformationPanel } from '@@/InformationPanel';
 import { TextTip } from '@@/Tip/TextTip';
@@ -11,7 +12,12 @@ export function LogView() {
     params: { endpointId: environmentId, id: containerId, nodeName },
   } = useCurrentStateAndParams();
 
-  const containerQuery = useContainer(environmentId, containerId, nodeName);
+  const containerQuery = useContainer(
+    { environmentId, containerId, nodeName },
+    {
+      select: (c) => new ContainerDetailsViewModel(c),
+    }
+  );
   if (!containerQuery.data || containerQuery.isLoading) {
     return null;
   }
@@ -41,7 +47,7 @@ function LogsDisabledInfoPanel() {
             >
               重新部署您的容器
             </Link>{' '}
-            并在"命令和日志"面板中选择日志驱动程序。
+            并在“命令和日志”面板中选择一个日志驱动程序。
           </TextTip>
         </InformationPanel>
       </div>

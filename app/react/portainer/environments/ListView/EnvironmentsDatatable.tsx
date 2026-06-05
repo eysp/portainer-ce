@@ -79,7 +79,7 @@ export function EnvironmentsDatatable({
             className="!m-0"
             data-cy="remove-environments-button"
           >
-            移除
+            删除
           </Button>
 
           {isBE && (
@@ -88,7 +88,7 @@ export function EnvironmentsDatatable({
               data-cy="environments-auto-onboarding-button"
               to="portainer.endpoints.edgeAutoCreateScript"
             >
-              自动加入
+              自动接入
             </AddButton>
           )}
 

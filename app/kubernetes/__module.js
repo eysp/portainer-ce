@@ -415,14 +415,11 @@ angular.module('portainer.kubernetes', ['portainer.app', registriesModule, custo
 
     const node = {
       name: 'kubernetes.cluster.node',
-      url: '/:nodeName',
+      url: '/:nodeName?tab',
       views: {
         'content@': {
-          component: 'kubernetesNodeView',
+          component: 'kubernetesNodeViewReact',
         },
-      },
-      data: {
-        docs: '/user/kubernetes/cluster/node',
       },
     };
 
@@ -470,6 +467,22 @@ angular.module('portainer.kubernetes', ['portainer.app', registriesModule, custo
       },
       data: {
         docs: '/user/kubernetes/applications/manifest',
+      },
+    };
+
+    const helmInstall = {
+      name: 'kubernetes.helminstall',
+      url: '/helm?referrer',
+      views: {
+        'content@': {
+          component: 'helmInstallView',
+        },
+      },
+      params: {
+        yaml: '',
+      },
+      data: {
+        docs: '/user/kubernetes/applications/manifest/helm',
       },
     };
 
@@ -678,6 +691,7 @@ angular.module('portainer.kubernetes', ['portainer.app', registriesModule, custo
     $stateRegistryProvider.register(cluster);
     $stateRegistryProvider.register(dashboard);
     $stateRegistryProvider.register(deploy);
+    $stateRegistryProvider.register(helmInstall);
     $stateRegistryProvider.register(node);
     $stateRegistryProvider.register(nodeStats);
     $stateRegistryProvider.register(kubectlShell);

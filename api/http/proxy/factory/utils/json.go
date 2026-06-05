@@ -7,8 +7,9 @@ import (
 	"io"
 	"mime"
 
+	"github.com/portainer/portainer/api/logs"
 	"github.com/segmentio/encoding/json"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v3"
 )
 
 // GetJSONObject will extract an object from a specific property of another JSON object.
@@ -47,7 +48,7 @@ func getBody(body io.ReadCloser, contentType string, isGzip bool) (any, error) {
 		reader = gzipReader
 	}
 
-	defer reader.Close()
+	defer logs.CloseAndLogErr(reader)
 
 	var data any
 	err := unmarshal(contentType, reader, &data)

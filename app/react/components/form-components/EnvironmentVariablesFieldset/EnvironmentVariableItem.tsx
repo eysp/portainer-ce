@@ -19,7 +19,7 @@ export function EnvironmentVariableItem({
           <InputLabeled
             className="w-full"
             data-cy={`env-name_${index}`}
-            label="name"
+            label="名称"
             required
             value={item.name}
             onChange={(e) => handleChange({ name: e.target.value })}
@@ -41,7 +41,7 @@ export function EnvironmentVariableItem({
         <InputLabeled
           className="w-1/2"
           data-cy={`env-value_${index}`}
-          label="value"
+          label="值"
           value={item.value}
           onChange={(e) => handleChange({ value: e.target.value })}
           disabled={disabled}

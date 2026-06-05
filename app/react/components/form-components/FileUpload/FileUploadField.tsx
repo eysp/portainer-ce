@@ -23,7 +23,7 @@ export function FileUploadField({
   onChange,
   value,
   accept,
-  title = 'Select a file',
+  title = '选择文件',
   required = false,
   inputId,
   color = 'primary',
@@ -42,8 +42,8 @@ export function FileUploadField({
         required={required}
         className={styles.fileInput}
         onChange={changeHandler}
-        aria-label="file-input"
         name={name}
+        data-cy={`${dataCy}-input`}
       />
       <Button
         size="small"

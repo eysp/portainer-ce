@@ -60,7 +60,7 @@ export function useGenericRegistriesQuery<T = Registry[]>(
 
       return [
         {
-          Name: 'Docker Hub（匿名）',
+          Name: 'Docker Hub (anonymous)',
           Id: 0,
           Type: RegistryTypes.DOCKERHUB,
         } as Registry,
@@ -69,7 +69,7 @@ export function useGenericRegistriesQuery<T = Registry[]>(
     },
     {
       select,
-      ...withError('无法检索镜像仓库'),
+      ...withError('Unable to retrieve registries'),
       enabled:
         (hideDefaultOverride || hideDefaultRegistryQuery.isSuccess) && enabled,
       onSuccess,
@@ -82,6 +82,6 @@ export async function getRegistries() {
     const { data } = await axios.get<Registry[]>('/registries');
     return data;
   } catch (e) {
-    throw parseAxiosError(e as Error, '无法检索镜像仓库');
+    throw parseAxiosError(e as Error, 'Unable to retrieve registries');
   }
 }

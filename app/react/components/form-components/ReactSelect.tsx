@@ -74,7 +74,7 @@ export function Select<
 }: Props<Option, IsMulti, Group> &
   AutomationTestingProps & {
     isItemVisible?: (item: Option, search: string) => boolean;
-    id: string;
+    id?: string;
   }) {
   const Component = isCreatable ? ReactSelectCreatable : ReactSelect;
   const {

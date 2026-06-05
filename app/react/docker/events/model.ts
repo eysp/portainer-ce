@@ -1,4 +1,4 @@
-import { EventMessage } from 'docker-types/generated/1.41';
+import { EventMessage } from 'docker-types';
 
 type EventType = NonNullable<EventMessage['Type']>;
 type Action = string;
@@ -41,7 +41,7 @@ const templates: EventToTemplateMap = {
     commit: ({ name }) => `容器 ${name} 已提交`,
     restart: ({ name }) => `容器 ${name} 已重启`,
     pause: ({ name }) => `容器 ${name} 已暂停`,
-    unpause: ({ name }) => `容器 ${name} 已取消暂停`,
+    unpause: ({ name }) => `容器 ${name} 已恢复`,
     attach: ({ name }) => `容器 ${name} 已附加`,
     detach: ({ name }) => `容器 ${name} 已分离`,
     copy: ({ name }) => `容器 ${name} 已复制`,
@@ -62,7 +62,7 @@ const templates: EventToTemplateMap = {
     import: ({ id }) => `镜像 ${id} 已导入`,
     load: ({ id }) => `镜像 ${id} 已加载`,
     tag: ({ name }) => `为 ${name} 创建了新标签`,
-    untag: () => `镜像标签已移除`,
+    untag: () => `镜像标签已删除`,
     save: ({ id }) => `镜像 ${id} 已保存`,
     pull: ({ id }) => `镜像 ${id} 已拉取`,
     push: ({ id }) => `镜像 ${id} 已推送`,
@@ -70,9 +70,9 @@ const templates: EventToTemplateMap = {
   network: {
     create: ({ name }) => `网络 ${name} 已创建`,
     destroy: ({ name }) => `网络 ${name} 已删除`,
-    remove: ({ name }) => `网络 ${name} 已移除`,
+    remove: ({ name }) => `网络 ${name} 已删除`,
     connect: ({ name }) => `容器已连接到 ${name} 网络`,
-    disconnect: ({ name }) => `容器已从 ${name} 网络断开`,
+    disconnect: ({ name }) => `容器已从 ${name} 网络断开连接`,
     prune: () => `网络已清理`,
   },
   node: {},

@@ -45,7 +45,7 @@ describe('ComposePathField', () => {
   it('should render with default props', () => {
     render(<ComposePathField {...defaultProps} />);
 
-    expect(screen.getByText('Compose path')).toBeInTheDocument();
+    expect(screen.getByText('Compose 路径')).toBeInTheDocument();
     expect(screen.getByRole('textbox')).toBeInTheDocument();
     expect(
       screen.getByPlaceholderText('docker-compose.yml')
@@ -55,7 +55,7 @@ describe('ComposePathField', () => {
   it('should show manifest path label when isCompose is false', () => {
     render(<ComposePathField {...defaultProps} isCompose={false} />);
 
-    expect(screen.getByText('Manifest path')).toBeInTheDocument();
+    expect(screen.getByText('Manifest 路径')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('manifest.yml')).toBeInTheDocument();
   });
 
@@ -63,19 +63,19 @@ describe('ComposePathField', () => {
     render(<ComposePathField {...defaultProps} />);
 
     expect(
-      screen.getByText(/Indicate the path to the Compose/)
+      screen.getByText(/指定仓库根目录中/)
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/requires a yaml, yml, json, or hcl file extension/)
+      screen.getByText(/文件扩展名必须是 yaml、yml、json 或 hcl/)
     ).toBeInTheDocument();
   });
 
   it('should display kubernetes manifest file tip text when not compose', () => {
     render(<ComposePathField {...defaultProps} isCompose={false} />);
 
-    expect(screen.getByText(/Indicate the path to the/)).toBeInTheDocument();
+    expect(screen.getByText(/指定仓库根目录中/)).toBeInTheDocument();
     expect(
-      screen.getByRole('link', { name: 'Kubernetes manifest file' })
+      screen.getByRole('link', { name: 'Kubernetes Manifest 文件' })
     ).toHaveAttribute(
       'href',
       'https://kubernetes.io/docs/concepts/overview/working-with-objects/'
@@ -86,7 +86,7 @@ describe('ComposePathField', () => {
     render(<ComposePathField {...defaultProps} isDockerStandalone />);
 
     expect(
-      screen.getByText(/To enable rebuilding of an image/)
+      screen.getByText(/若要在 Docker 独立环境中已有镜像时重新构建镜像/)
     ).toBeInTheDocument();
     expect(screen.getByText('pull_policy: build')).toBeInTheDocument();
     expect(

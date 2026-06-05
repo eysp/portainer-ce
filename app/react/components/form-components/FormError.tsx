@@ -19,6 +19,8 @@ export function FormError({ children, className }: PropsWithChildren<Props>) {
         `text-muted help-block !inline-flex gap-1 !align-top text-xs`,
         className
       )}
+      role="alert"
+      aria-label={typeof children === 'string' ? children : undefined}
     >
       <Icon
         icon={AlertTriangle}

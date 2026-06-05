@@ -31,28 +31,9 @@ export function createOwnershipColumn<D extends IResource>(
     return (
       <span className="flex items-center gap-2">
         <Icon icon={ownershipIcon(value)} className="space-right" />
-        {ownershipLabel(value)}
+        {value}
       </span>
     );
-  }
-
-  function ownershipLabel(ownership: ResourceControlOwnership): string {
-    return getOwnershipLabel(ownership);
-  }
-}
-
-export function getOwnershipLabel(ownership: ResourceControlOwnership): string {
-  switch (ownership) {
-    case ResourceControlOwnership.PUBLIC:
-      return '公开';
-    case ResourceControlOwnership.PRIVATE:
-      return '私有';
-    case ResourceControlOwnership.RESTRICTED:
-      return '受限';
-    case ResourceControlOwnership.ADMINISTRATORS:
-      return '管理员';
-    default:
-      return ownership;
   }
 }
 

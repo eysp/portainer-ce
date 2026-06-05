@@ -44,11 +44,11 @@ export function LoggerConfig({
   const pluginOptions = [
     { label: '默认日志驱动', value: '' },
     ...pluginsQuery.data.map((p) => ({ label: p, value: p })),
-    { label: 'none', value: 'none' },
+    { label: '无', value: 'none' },
   ];
 
   return (
-    <FormSection title="日志记录">
+    <FormSection title="日志">
       <FormControl label="驱动">
         <PortainerSelect
           value={value.type}
@@ -59,9 +59,9 @@ export function LoggerConfig({
       </FormControl>
 
       <TextTip color="blue">
-        将覆盖默认 Docker 守护进程驱动的日志驱动。
-        如果您不想覆盖它，请选择默认日志驱动。
-        支持的日志驱动可以在{' '}
+        将覆盖默认 docker 守护进程驱动的日志驱动。
+        如果不想覆盖它，请选择默认日志驱动。
+        可以在{' '}
         <a
           href="https://docs.docker.com/engine/admin/logging/overview/#supported-logging-drivers"
           target="_blank"
@@ -69,13 +69,13 @@ export function LoggerConfig({
         >
           Docker 文档
         </a>
-        中找到。
+        .
       </TextTip>
 
       <InputList
         tooltip={
           isDisabled
-            ? '除非选择了除 none 或默认之外的驱动，否则添加按钮将被禁用。选项特定于所选驱动，请参考驱动文档。'
+            ? '除非选择了除“无”或默认日志驱动以外的驱动程序，否则添加按钮将被禁用。选项特定于所选驱动程序，请参阅驱动程序文档。'
             : ''
         }
         label="选项"
@@ -109,7 +109,7 @@ function Item({
           <InputGroup.Input
             value={option}
             onChange={(e) => handleChange({ option: e.target.value })}
-            placeholder="例如：FOO"
+            placeholder="例如 FOO"
             data-cy={`docker-logging-option_${index}`}
           />
         </InputGroup>
@@ -118,7 +118,7 @@ function Item({
           <InputGroup.Input
             value={value}
             onChange={(e) => handleChange({ value: e.target.value })}
-            placeholder="例如：bar"
+            placeholder="例如 bar"
             data-cy={`docker-logging-value_${index}`}
           />
         </InputGroup>
@@ -136,8 +136,8 @@ export function validation(): SchemaOf<LogConfig> {
   return object({
     options: array().of(
       object({
-        option: string().required('选项是必需的'),
-        value: string().required('值是必需的'),
+        option: string().required('选项是必填项'),
+        value: string().required('值是必填项'),
       })
     ),
     type: string().default(''),

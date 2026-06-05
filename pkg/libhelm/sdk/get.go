@@ -1,6 +1,8 @@
 package sdk
 
 import (
+	"strconv"
+
 	"github.com/portainer/portainer/pkg/libhelm/options"
 	"github.com/portainer/portainer/pkg/libhelm/release"
 	"github.com/portainer/portainer/pkg/libhelm/time"
@@ -78,7 +80,23 @@ func convert(sdkRelease *sdkrelease.Release, values release.Values) *release.Rel
 			Str("name", sdkRelease.Name).
 			Err(err).Msg("Failed to parse resources")
 	}
-	return &release.Release{
+
+	// Parse stack ID from annotations -> int
+	stackID := 0
+	if sdkRelease.Chart != nil && sdkRelease.Chart.Metadata != nil {
+		if s, ok := sdkRelease.Chart.Metadata.Annotations[StackIDAnnotation]; ok && s != "" {
+			if id, err := strconv.Atoi(s); err == nil {
+				stackID = id
+			} else {
+				log.Warn().
+					Str("context", "HelmClient").
+					Str("namespace", sdkRelease.Namespace).
+					Str("name", sdkRelease.Name).
+					Err(err).Msg("Failed to parse stack id from annotations")
+			}
+		}
+	}
+	release := &release.Release{
 		Name:      sdkRelease.Name,
 		Namespace: sdkRelease.Namespace,
 		Version:   sdkRelease.Version,
@@ -99,5 +117,8 @@ func convert(sdkRelease *sdkrelease.Release, values release.Values) *release.Rel
 		},
 		Values:         values,
 		ChartReference: extractChartReferenceAnnotations(sdkRelease.Chart.Metadata.Annotations),
+		StackID:        stackID,
 	}
+
+	return release
 }

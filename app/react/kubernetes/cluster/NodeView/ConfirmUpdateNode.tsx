@@ -14,15 +14,17 @@ export function confirmUpdateNode(
       '对污点的更改将立即取消调度在此节点上运行但没有相应容忍度的应用程序。您要继续吗？';
   } else if (!taintsWarning && labelsWarning) {
     message =
-      '移除或更改正在使用的标签可能会阻止应用程序将来在此节点上调度。您要继续吗？';
+      '删除或更改正在使用的标签可能会阻止应用程序将来在此节点上调度。您要继续吗？';
   } else if (taintsWarning && labelsWarning) {
     message = (
       <>
         <p>
-          对污点的更改将立即取消调度在此节点上运行但没有相应容忍度的应用程序。
+          Changes to taints will immediately deschedule applications running on
+          this node without the corresponding tolerations.
         </p>
         <p>
-          移除或更改正在使用的标签可能会阻止应用程序将来在此节点上调度。
+          Removing or changing a label that is used might prevent applications
+          from scheduling on this node in the future.
         </p>
         <p>您要继续吗？</p>
       </>
@@ -36,9 +38,9 @@ export function confirmUpdateNode(
   }
 
   return confirm({
-    title: '您确定吗？',
+    title: 'Are you sure?',
     modalType: ModalType.Warn,
     message,
-    confirmButton: buildConfirmButton('更新', 'primary'),
+    confirmButton: buildConfirmButton('Update', 'primary'),
   });
 }

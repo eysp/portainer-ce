@@ -39,7 +39,10 @@ export function KubeConfigTeaserForm() {
                   >
                     导入 kubeconfig 文件
                   </a>{' '}
-                  的现有 Kubernetes 集群（位于本地或云平台）。这将在 Portainer 中创建对应的环境并在集群上安装代理。请确保：
+                  of an existing Kubernetes cluster located on-premise or on a
+                  cloud platform. This will create a corresponding environment
+                  in Portainer and install the agent on the cluster. Please
+                  ensure:
                 </span>
               </TextTip>
             </div>
@@ -48,11 +51,14 @@ export function KubeConfigTeaserForm() {
                 <li>您的集群中已启用负载均衡器</li>
                 <li>您在 kubeconfig 中指定了 current-context</li>
                 <li>
-                  kubeconfig 是自包含的 - 包括所有必需的凭据。
+                  The kubeconfig is self-contained - including any required
+                  credentials.
                 </li>
               </ul>
               <p>
-                注意：官方支持的云提供商包括 Civo、Akamai Connected Cloud、DigitalOcean 和 Microsoft Azure（其他提供商目前不保证可用）
+                Note: Officially supported cloud providers are Civo, Akamai
+                Connected Cloud, DigitalOcean and Microsoft Azure (others are
+                not guaranteed to work at present)
               </p>
             </div>
           </div>

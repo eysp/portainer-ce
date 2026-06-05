@@ -22,7 +22,8 @@ export function PlacementsTable({ app }: Props) {
       </div>
       {!formPlacements.length && (
         <TextTip color="blue">
-          此应用程序在应用程序表单中没有 Pod 偏好或约束规则。查看应用程序 YAML 以了解其他放置规则。
+          This application has no pod preference or constraint rules from the
+          application form. See the application YAML for other placement rules.
         </TextTip>
       )}
       {formPlacements.length > 0 && (

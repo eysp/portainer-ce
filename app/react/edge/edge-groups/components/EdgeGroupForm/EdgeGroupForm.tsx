@@ -67,7 +67,7 @@ function InnerForm({
     <Form className="form-horizontal">
       <NameField errors={errors.name} />
 
-      <FormSection title="Group type">
+      <FormSection title="组类型">
         <BoxSelector
           slim
           value={values.dynamic}

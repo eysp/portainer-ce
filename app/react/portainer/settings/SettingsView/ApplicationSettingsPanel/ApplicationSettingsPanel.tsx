@@ -17,7 +17,6 @@ import { Values } from './types';
 import { LogoFieldset } from './LogoFieldset';
 import { ScreenBannerFieldset } from './ScreenBannerFieldset';
 import { TemplatesUrlSection } from './TemplatesUrlSection';
-import { EnableTelemetryField } from './EnableTelemetryField';
 
 export function ApplicationSettingsPanel({
   onSuccess,
@@ -30,7 +29,6 @@ export function ApplicationSettingsPanel({
 
   const initialValues: Values = {
     edgeAgentCheckinInterval: settings.EdgeAgentCheckinInterval,
-    enableTelemetry: settings.EnableTelemetry,
     loginBannerEnabled: !!settings.CustomLoginBanner,
     loginBanner: settings.CustomLoginBanner,
     logoEnabled: !!settings.LogoURL,
@@ -60,7 +58,6 @@ export function ApplicationSettingsPanel({
       {
         SnapshotInterval: values.snapshotInterval,
         LogoURL: values.logo,
-        EnableTelemetry: values.enableTelemetry,
         CustomLoginBanner: values.loginBanner,
         TemplatesURL: values.templatesUrl,
         EdgeAgentCheckinInterval: values.edgeAgentCheckinInterval,
@@ -89,7 +86,7 @@ function InnerForm({ isLoading }: { isLoading: boolean }) {
         <Field
           as={Input}
           id="snapshot_interval"
-          placeholder="例如 15m"
+          placeholder="e.g. 15m"
           name="snapshotInterval"
         />
       </FormControl>
@@ -103,8 +100,6 @@ function InnerForm({ isLoading }: { isLoading: boolean }) {
 
       <LogoFieldset />
 
-      <EnableTelemetryField />
-
       <ScreenBannerFieldset />
 
       <TemplatesUrlSection />
@@ -115,7 +110,7 @@ function InnerForm({ isLoading }: { isLoading: boolean }) {
             isLoading={isLoading}
             disabled={!isValid}
             data-cy="settings-saveSettingsButton"
-            loadingText="保存中..."
+            loadingText="正在保存..."
           >
             保存应用程序设置
           </LoadingButton>

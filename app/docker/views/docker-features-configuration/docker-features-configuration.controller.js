@@ -2,11 +2,10 @@ import { FeatureId } from '@/react/portainer/feature-flags/enums';
 
 export default class DockerFeaturesConfigurationController {
   /* @ngInject */
-  constructor($async, $scope, $state, $analytics, EndpointService, SettingsService, Notifications, StateManager) {
+  constructor($async, $scope, $state, EndpointService, SettingsService, Notifications, StateManager) {
     this.$async = $async;
     this.$scope = $scope;
     this.$state = $state;
-    this.$analytics = $analytics;
     this.EndpointService = EndpointService;
     this.SettingsService = SettingsService;
     this.Notifications = Notifications;
@@ -127,32 +126,15 @@ export default class DockerFeaturesConfigurationController {
           gpus,
         };
 
-        const publicSettings = await this.SettingsService.publicSettings();
-        const analyticsAllowed = publicSettings.EnableTelemetry;
-        if (analyticsAllowed) {
-          // send analytics if GPU management is changed (with the new state)
-          if (this.initialEnableGPUManagement !== this.state.enableGPUManagement) {
-            this.$analytics.eventTrack('enable-gpu-management-updated', { category: 'portainer', metadata: { enableGPUManagementState: this.state.enableGPUManagement } });
-          }
-          // send analytics if the number of GPUs is changed (with a list of the names)
-          if (gpus.length > this.initialGPUs.length) {
-            const numberOfGPUSAdded = this.endpoint.Gpus.length - this.initialGPUs.length;
-            this.$analytics.eventTrack('gpus-added', { category: 'portainer', metadata: { gpus: gpus.map((gpu) => gpu.name), numberOfGPUSAdded } });
-          }
-          if (gpus.length < this.initialGPUs.length) {
-            const numberOfGPUSRemoved = this.initialGPUs.length - this.endpoint.Gpus.length;
-            this.$analytics.eventTrack('gpus-removed', { category: 'portainer', metadata: { gpus: gpus.map((gpu) => gpu.name), numberOfGPUSRemoved } });
-          }
-          this.initialGPUs = gpus;
-          this.initialEnableGPUManagement = this.state.enableGPUManagement;
-        }
+        this.initialGPUs = gpus;
+        this.initialEnableGPUManagement = this.state.enableGPUManagement;
 
         await this.EndpointService.updateSecuritySettings(this.endpoint.Id, settings);
 
         this.endpoint.SecuritySettings = settings;
-        this.Notifications.success('Success', 'Saved settings successfully');
+        this.Notifications.success('成功', '设置保存成功');
       } catch (e) {
-        this.Notifications.error('Failure', e, 'Failed saving settings');
+        this.Notifications.error('失败', e, '设置保存失败');
       }
       this.state.actionInProgress = false;
       this.$state.reload();

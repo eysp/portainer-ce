@@ -14,7 +14,7 @@ export function useContainerTop<T = ContainerProcesses>(
   id: ContainerId,
   select?: (environment: ContainerProcesses) => T
 ) {
-  // many containers don't allow this call, so fail early, and omit withError to silently fail
+  // 许多容器不允许此调用，因此快速失败，并省略 withError 以静默失败
   return useQuery({
     queryKey: queryKeys.top(environmentId, id),
     queryFn: () => getContainerTop(environmentId, id),
@@ -39,6 +39,6 @@ export async function getContainerTop(
     );
     return data;
   } catch (err) {
-    throw parseAxiosError(err, 'Unable to retrieve container top');
+    throw parseAxiosError(err, '无法获取容器进程信息');
   }
 }

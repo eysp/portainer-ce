@@ -28,6 +28,6 @@ export async function createExec(
     );
     return data;
   } catch (err) {
-    throw parseAxiosError(err, 'Unable to create exec');
+    throw parseAxiosError(err, '无法创建 exec');
   }
 }

@@ -30,7 +30,7 @@ export function RegistriesFormSection({
     hideDefault: true,
   });
   return (
-    <FormSection title="Registries">
+    <FormSection title="镜像仓库">
       {!isEditingDisabled && (
         <TextTip color="blue" className="mb-2">
           Define which registries can be used by users who have access to this

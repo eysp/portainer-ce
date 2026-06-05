@@ -4,7 +4,7 @@ import { CellContext } from '@tanstack/react-table';
 import { ResourceControlOwnership } from '@/react/portainer/access-control/types';
 import { ContainerGroup } from '@/react/azure/types';
 import { determineOwnership } from '@/react/portainer/access-control/models/ResourceControlViewModel';
-import { ownershipIcon, getOwnershipLabel } from '@/react/docker/components/datatable/createOwnershipColumn';
+import { ownershipIcon } from '@/react/docker/components/datatable/createOwnershipColumn';
 
 import { columnHelper } from './helper';
 
@@ -31,7 +31,7 @@ function OwnershipCell({
         className={clsx(ownershipIcon(value), 'space-right')}
         aria-hidden="true"
       />
-      {getOwnershipLabel(value)}
+      {value}
     </>
   );
 }

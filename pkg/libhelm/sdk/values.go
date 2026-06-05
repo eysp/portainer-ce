@@ -9,11 +9,12 @@ import (
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v2"
 	"helm.sh/helm/v3/pkg/action"
+	"helm.sh/helm/v3/pkg/chartutil"
 )
 
-// getHelmValuesFromFile reads the values file and parses it into a map[string]any
+// GetHelmValuesFromFile reads the values file and parses it into a map[string]any
 // and returns the map.
-func (hspm *HelmSDKPackageManager) getHelmValuesFromFile(valuesFile string) (map[string]any, error) {
+func GetHelmValuesFromFile(valuesFile string) (map[string]any, error) {
 	var vals map[string]any
 	if valuesFile != "" {
 		log.Debug().
@@ -31,7 +32,7 @@ func (hspm *HelmSDKPackageManager) getHelmValuesFromFile(valuesFile string) (map
 			return nil, errors.Wrap(err, "failed to read values file")
 		}
 
-		vals, err = hspm.parseValues(valuesData)
+		vals, err = parseValues(valuesData)
 		if err != nil {
 			log.Error().
 				Str("context", "HelmClient").
@@ -43,6 +44,35 @@ func (hspm *HelmSDKPackageManager) getHelmValuesFromFile(valuesFile string) (map
 	}
 
 	return vals, nil
+}
+
+// parseValues parses YAML values data into a map
+func parseValues(data []byte) (map[string]any, error) {
+	// Use Helm's built-in chartutil.ReadValues which properly handles the conversion
+	// from map[interface{}]interface{} to map[string]interface{}
+	return chartutil.ReadValues(data)
+}
+
+// MergeValues merges two maps recursively, with values from the override map taking precedence
+// over values from the base map. It returns a new map containing the merged values.
+func MergeValues(base, override map[string]any) map[string]any {
+	if base == nil {
+		return override
+	}
+	if override == nil {
+		return base
+	}
+
+	for k, v := range override {
+		if vMap, ok := v.(map[string]any); ok {
+			if baseMap, ok := base[k].(map[string]any); ok {
+				base[k] = MergeValues(baseMap, vMap)
+				continue
+			}
+		}
+		base[k] = v
+	}
+	return base
 }
 
 func (hspm *HelmSDKPackageManager) getValues(getOpts options.GetOptions) (release.Values, error) {

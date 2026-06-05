@@ -80,7 +80,8 @@ export function EdgeComputeSettings({ settings, onSubmit }: Props) {
                 </FormControl>
 
                 <TextTip color="blue" className="mb-2">
-                  启用此设置以使用 Portainer 边缘计算功能。
+                  Enable this setting to use Portainer Edge Compute
+                  capabilities.
                 </TextTip>
 
                 {isBE && values.EnableEdgeComputeFeatures && (

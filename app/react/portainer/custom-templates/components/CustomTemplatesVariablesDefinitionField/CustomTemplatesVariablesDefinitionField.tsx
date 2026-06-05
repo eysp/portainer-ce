@@ -48,7 +48,7 @@ export function CustomTemplatesVariablesDefinitionField({
         description: '',
       })}
       errors={errors}
-      textTip="列表应映射模板文件中的 mustache 变量，如果默认值为空，则该变量为必填项。"
+      textTip="列表应映射模板文件中的 mustache 变量，如果默认值为空，则该变量将是必需的。"
       isAddButtonHidden={isVariablesNamesFromParent}
       data-cy="custom-templates-variables-field"
     />
@@ -123,8 +123,8 @@ function Item({
 
 function itemValidation(): SchemaOf<VariableDefinition> {
   return object().shape({
-    name: string().required('名称是必填项'),
-    label: string().required('标签是必填项'),
+    name: string().required('名称是必需的'),
+    label: string().required('标签是必需的'),
     defaultValue: string().default(''),
     description: string().default(''),
   });

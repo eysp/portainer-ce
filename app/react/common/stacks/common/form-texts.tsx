@@ -2,7 +2,7 @@ import { StackType } from '../types';
 
 const dockerTexts = {
   editor: {
-    placeholder: '在此定义或粘贴您的 Docker Compose 文件内容',
+    placeholder: '在此定义或粘贴您的 docker compose 文件内容',
     description: (
       <p>
         您可以在{' '}
@@ -13,7 +13,7 @@ const dockerTexts = {
         >
           官方文档
         </a>
-        {' '}中获取有关 Compose 文件格式的更多信息。
+        获取有关 Compose 文件格式的更多信息。
       </p>
     ),
   },
@@ -30,7 +30,7 @@ export const textByType = {
         <>
           <p>
             模板允许部署任何类型的 Kubernetes 资源
-            (Deployment, Secret, ConfigMap...)
+            (Deployment、Secret、ConfigMap...)
           </p>
           <p>
             您可以在{' '}
@@ -41,7 +41,7 @@ export const textByType = {
             >
               官方文档
             </a>
-            {' '}中获取有关 Kubernetes 文件格式的更多信息。
+            获取有关 Kubernetes 文件格式的更多信息。
           </p>
         </>
       ),

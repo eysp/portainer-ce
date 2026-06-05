@@ -12,7 +12,7 @@ import { AccessControlForm } from '@/react/portainer/access-control';
 import { parseAccessControlFormData } from '@/react/portainer/access-control/utils';
 import { TemplateType } from '@/react/portainer/templates/app-templates/types';
 import { TemplateViewModel } from '@/react/portainer/templates/app-templates/view-model';
-import { NameField } from '@/react/common/stacks/CreateView/NameField';
+import { NameField } from '@/react/docker/stacks/common/NameField';
 import { useSwarmId } from '@/react/docker/proxy/queries/useSwarm';
 
 import { Button } from '@@/buttons';

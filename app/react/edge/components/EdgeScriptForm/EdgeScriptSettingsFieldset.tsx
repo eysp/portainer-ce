@@ -1,6 +1,6 @@
 import { useFormikContext, Field } from 'formik';
 
-import { GroupField } from '@/react/portainer/environments/wizard/EnvironmentsCreationView/shared/MetadataFieldset/GroupsField';
+import { GroupField } from '@/react/portainer/environments/common/MetadataFieldset/GroupsField';
 
 import { FormControl } from '@@/form-components/FormControl';
 import { Input } from '@@/form-components/Input';
@@ -47,7 +47,7 @@ export function EdgeScriptSettingsFieldset({
       {!hideIdGetter && (
         <>
           <FormControl
-            label="Edge ID Generator"
+            label="边缘 ID 生成器"
             tooltip="Enter a single-line bash command that generates a unique Edge ID. For example, you can use 'uuidgen' or 'uuid'. The result will be assigned to the 'PORTAINER_EDGE_ID' environment variable."
             inputId="edge-id-generator-input"
             required
@@ -75,7 +75,7 @@ export function EdgeScriptSettingsFieldset({
       )}
 
       <FormControl
-        label="Environment variables"
+        label="环境变量"
         tooltip="Comma separated list of environment variables that will be sourced from the host where the agent is deployed."
         inputId="env-variables-input"
       >

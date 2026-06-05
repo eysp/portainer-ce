@@ -22,7 +22,7 @@ export function StackName({
   setStackName,
   stacks = [],
   inputClassName,
-  textTip = "输入或选择 '堆栈' 名称以将多个部署组合在一起，否则留空以忽略。",
+  textTip = "Enter or select a 'stack' name to group multiple deployments together, or else leave empty to ignore.",
   error = '',
 }: Props) {
   const isAdminQuery = useIsEdgeAdmin();
@@ -35,20 +35,21 @@ export function StackName({
 
   const tooltip = (
     <>
-      您可以指定堆栈名称来标记要分组的资源。
-      这包括 Deployments、DaemonSets、StatefulSets 和 Pods。
+      You may specify a stack name to label resources that you want to group.
+      This includes Deployments, DaemonSets, StatefulSets and Pods.
       {isAdmin && (
         <>
           <br />
-          您可以将堆栈名称留空，或者通过{' '}
+          You can leave the stack name empty, or even turn off Kubernetes Stacks
+          functionality entirely via{' '}
           <Link
             to="portainer.settings"
             target="_blank"
             data-cy="k8s-deploy-stack-input-settings-link"
           >
-            Kubernetes 设置
+            Kubernetes Settings
           </Link>
-          完全关闭 Kubernetes 堆栈功能。
+          .
         </>
       )}
     </>

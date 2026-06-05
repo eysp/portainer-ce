@@ -63,6 +63,7 @@ func (payload *openAMTConfigurePayload) Validate(r *http.Request) error {
 // @security jwt
 // @accept json
 // @produce json
+// @deprecated
 // @param body body openAMTConfigurePayload true "OpenAMT Settings"
 // @success 204 "Success"
 // @failure 400 "Invalid request"

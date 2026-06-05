@@ -11,12 +11,12 @@ func TestCreateSignature(t *testing.T) {
 
 	privKey, pubKey, err := s.GenerateKeyPair()
 	require.NoError(t, err)
-	require.Greater(t, len(privKey), 0)
-	require.Greater(t, len(pubKey), 0)
+	require.NotEmpty(t, privKey)
+	require.NotEmpty(t, pubKey)
 
 	m := "test message"
 	r, err := s.CreateSignature(m)
 	require.NoError(t, err)
 	require.NotEqual(t, r, m)
-	require.Greater(t, len(r), 0)
+	require.NotEmpty(t, r)
 }

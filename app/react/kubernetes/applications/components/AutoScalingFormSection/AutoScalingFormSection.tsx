@@ -97,7 +97,7 @@ export function AutoScalingFormSection({
               className="flex items-center text-xs font-normal"
             >
               Target CPU usage (<b>%</b>)
-              <Tooltip message="The autoscaler will ensure enough instances are running to maintain an average CPU usage across all instances." />
+              <Tooltip message="自动伸缩器将确保运行足够的实例，以在所有实例中维持平均 CPU 使用率。" />
             </label>
             <Input
               id="cpu-threshold"

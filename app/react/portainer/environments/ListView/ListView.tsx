@@ -29,7 +29,7 @@ export function ListView() {
 
   async function handleRemove(environmentsToDelete: Array<Environment>) {
     const confirmed = await confirmDelete(
-      '此操作将移除与您的环境关联的所有配置。是否继续？'
+      '此操作将删除与您的环境关联的所有配置。是否继续？'
     );
 
     if (!confirmed) {
@@ -51,7 +51,7 @@ export function ListView() {
       {
         onSuccess() {
           notifySuccess(
-            '环境已成功移除',
+            '环境已成功删除',
             environmentsToDelete.map((e) => e.Name).join(', ')
           );
         },

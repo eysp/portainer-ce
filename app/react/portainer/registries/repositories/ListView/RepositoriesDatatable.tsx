@@ -10,7 +10,7 @@ export function RepositoriesDatatable({ dataset }: { dataset?: Repository[] }) {
   const tableState = useTableStateWithStorage('registryRepositories');
   return (
     <Datatable
-      title="仓库"
+      title="Repositories"
       titleIcon={Book}
       columns={columns}
       dataset={dataset || []}

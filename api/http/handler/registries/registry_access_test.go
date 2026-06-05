@@ -12,6 +12,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_RegistryAccess_RequiresAuthentication(t *testing.T) {
@@ -21,11 +22,11 @@ func Test_RegistryAccess_RequiresAuthentication(t *testing.T) {
 		Name: "test-registry",
 		URL:  "https://registry.test.com",
 	}
+
 	err := store.Registry().Create(registry)
-	assert.NoError(t, err)
-	handler := &Handler{
-		DataStore: store,
-	}
+	require.NoError(t, err)
+
+	handler := &Handler{DataStore: store}
 	req := httptest.NewRequest(http.MethodGet, "/registries/1", nil)
 	req = mux.SetURLVars(req, map[string]string{"id": "1"})
 	rr := httptest.NewRecorder()
@@ -39,16 +40,13 @@ func Test_RegistryAccess_InvalidRegistryID(t *testing.T) {
 	_, store := datastore.MustNewTestStore(t, true, true)
 	user := &portainer.User{ID: 1, Username: "test", Role: portainer.StandardUserRole}
 	err := store.User().Create(user)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	handler := &Handler{
-		DataStore: store,
-	}
+	handler := &Handler{DataStore: store}
 	req := httptest.NewRequest(http.MethodGet, "/registries/invalid", nil)
 	req = mux.SetURLVars(req, map[string]string{"id": "invalid"})
 	tokenData := &portainer.TokenData{ID: 1, Role: portainer.StandardUserRole}
 	req = req.WithContext(security.StoreTokenData(req, tokenData))
-
 	rr := httptest.NewRecorder()
 
 	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
@@ -60,14 +58,16 @@ func Test_RegistryAccess_InvalidRegistryID(t *testing.T) {
 
 func Test_RegistryAccess_RegistryNotFound(t *testing.T) {
 	_, store := datastore.MustNewTestStore(t, true, true)
+
 	user := &portainer.User{ID: 1, Username: "test", Role: portainer.StandardUserRole}
 	err := store.User().Create(user)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	handler := &Handler{
 		DataStore:      store,
 		requestBouncer: testhelpers.NewTestRequestBouncer(),
 	}
+
 	req := httptest.NewRequest(http.MethodGet, "/registries/999", nil)
 	req = mux.SetURLVars(req, map[string]string{"id": "999"})
 	tokenData := &portainer.TokenData{ID: 1, Role: portainer.StandardUserRole}

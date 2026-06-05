@@ -48,7 +48,15 @@ export const azureHandlers = [
       })
   ),
   http.get(
-    '/api/endpoints/:endpointId/azure/subscriptions/:subsriptionId/resourcegroups',
+    '/api/endpoints/:endpointId/azure/subscriptions/:subscriptionId/providers/Microsoft.ContainerInstance/containerGroups',
+    () => HttpResponse.json({ value: [] })
+  ),
+  http.get(
+    '/api/endpoints/:endpointId/azure/subscriptions/:subscriptionId/providers/Microsoft.Network/virtualNetworks',
+    () => HttpResponse.json({ value: [] })
+  ),
+  http.get(
+    '/api/endpoints/:endpointId/azure/subscriptions/:subscriptionId/resourcegroups',
     ({ params }) =>
       HttpResponse.json({
         value: [

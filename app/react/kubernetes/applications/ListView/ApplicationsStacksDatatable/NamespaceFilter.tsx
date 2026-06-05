@@ -11,11 +11,13 @@ function transformNamespaces(
   namespaces: PortainerNamespace[],
   showSystem?: boolean
 ) {
-  const transformedNamespaces = namespaces.map(({ Name, IsSystem }) => ({
-    label: IsSystem ? `${Name} - system` : Name,
-    value: Name,
-    isSystem: IsSystem,
-  }));
+  const transformedNamespaces = namespaces
+    .map(({ Name, IsSystem }) => ({
+      label: IsSystem ? `${Name} - system` : Name,
+      value: Name,
+      isSystem: IsSystem,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
   if (showSystem === undefined) {
     return transformedNamespaces;
   }
@@ -54,7 +56,7 @@ export function NamespaceFilter({
       <InputGroup.Addon>
         <div className="flex items-center gap-1">
           <Icon icon={Filter} />
-          Namespace
+          命名空间
         </div>
       </InputGroup.Addon>
       <Select

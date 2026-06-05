@@ -24,6 +24,7 @@ interface Props {
   title?: string;
   displayWarning?: boolean;
   warningMessage?: string;
+  memoryUnit?: string;
 }
 
 export function ResourceReservation({
@@ -37,17 +38,18 @@ export function ResourceReservation({
   isLoading = false,
   displayWarning = false,
   warningMessage = '',
+  memoryUnit = 'MB',
 }: Props) {
   const memoryReservationAnnotation = `${getSafeValue(
     resourceReservation.memory
-  )} / ${memoryLimit} MB ${getPercentageString(
+  )} / ${memoryLimit} ${memoryUnit} ${getPercentageString(
     resourceReservation.memory,
     memoryLimit
   )}`;
 
   const memoryUsageAnnotation = `${getSafeValue(
     resourceUsage.memory
-  )} / ${memoryLimit} MB ${getPercentageString(
+  )} / ${memoryLimit} ${memoryUnit} ${getPercentageString(
     resourceUsage.memory,
     memoryLimit
   )}`;
@@ -79,7 +81,7 @@ export function ResourceReservation({
           <ResourceUsageItem
             value={resourceReservation.memory}
             total={memoryLimit}
-            label="Memory reservation"
+            label="内存预留"
             annotation={memoryReservationAnnotation}
             isLoading={isLoading}
             dataCy="memory-reservation"
@@ -89,7 +91,7 @@ export function ResourceReservation({
           <ResourceUsageItem
             value={resourceUsage.memory}
             total={memoryLimit}
-            label="Memory usage"
+            label="内存使用量"
             annotation={memoryUsageAnnotation}
             isLoading={isLoading}
             dataCy="memory-usage"
@@ -99,7 +101,7 @@ export function ResourceReservation({
           <ResourceUsageItem
             value={resourceReservation.cpu}
             total={cpuLimit}
-            label="CPU reservation"
+            label="CPU 预留"
             annotation={cpuReservationAnnotation}
             isLoading={isLoading}
             dataCy="cpu-reservation"
@@ -109,7 +111,7 @@ export function ResourceReservation({
           <ResourceUsageItem
             value={resourceUsage.cpu}
             total={cpuLimit}
-            label="CPU usage"
+            label="CPU 使用率"
             annotation={cpuUsageAnnotation}
             isLoading={isLoading}
             dataCy="cpu-usage"

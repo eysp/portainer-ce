@@ -15,9 +15,9 @@ export function CreateView() {
   return (
     <>
       <PageHeader
-        title="Create edge group"
+        title="创建边缘组"
         breadcrumbs={[
-          { label: 'Edge groups', link: 'edge.groups' },
+          { label: '边缘组', link: 'edge.groups' },
           'Add edge group',
         ]}
       />

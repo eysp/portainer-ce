@@ -50,18 +50,18 @@ export const columns = [
     },
   }),
   helper.accessor('PersistentVolumeClaim.storageClass.Name', {
-    header: '存储',
+    header: 'Storage',
   }),
   helper.accessor('PersistentVolumeClaim.Storage', {
-    header: '大小',
+    header: 'Size',
   }),
   helper.accessor('PersistentVolumeClaim.CreationDate', {
-    header: '创建时间',
+    header: 'Created',
     cell: ({ row: { original: item } }) => (
       <>
         {isoDate(item.PersistentVolumeClaim.CreationDate)}
         {item.PersistentVolumeClaim.ApplicationOwner
-          ? ` 由 ${item.PersistentVolumeClaim.ApplicationOwner}`
+          ? ` by ${item.PersistentVolumeClaim.ApplicationOwner}`
           : ''}
       </>
     ),

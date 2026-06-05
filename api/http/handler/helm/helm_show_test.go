@@ -10,7 +10,9 @@ import (
 
 	"github.com/portainer/portainer/api/internal/testhelpers"
 	"github.com/portainer/portainer/pkg/libhelm/test"
+
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_helmShow(t *testing.T) {
@@ -37,11 +39,11 @@ func Test_helmShow(t *testing.T) {
 			rr := httptest.NewRecorder()
 			h.ServeHTTP(rr, req)
 
-			is.Equal(rr.Code, http.StatusOK, "Status should be 200 OK")
+			is.Equal(http.StatusOK, rr.Code, "Status should be 200 OK")
 
 			body, err := io.ReadAll(rr.Body)
-			is.NoError(err, "ReadAll should not return error")
-			is.EqualValues(string(body), expect, "Unexpected search response")
+			require.NoError(t, err, "ReadAll should not return error")
+			is.Equal(string(body), expect, "Unexpected search response")
 		})
 	}
 }

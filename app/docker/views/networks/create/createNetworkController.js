@@ -251,7 +251,7 @@ angular.module('portainer.docker').controller('CreateNetworkController', [
           }
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '创建网络时发生错误');
+          Notifications.error('失败', err, '网络创建过程中发生错误');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -319,7 +319,7 @@ angular.module('portainer.docker').controller('CreateNetworkController', [
           $scope.availableNetworkDrivers = _.filter($scope.availableNetworkDrivers, (driver) => driver !== 'host' && driver !== 'null');
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索网络驱动程序');
+          Notifications.error('失败', err, '无法获取网络驱动');
         });
     }
 

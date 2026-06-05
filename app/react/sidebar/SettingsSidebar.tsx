@@ -21,7 +21,11 @@ interface Props {
   isTeamLeader?: boolean;
 }
 
-export function SettingsSidebar({ isPureAdmin, isAdmin, isTeamLeader }: Props) {
+export function SettingsSidebar({
+  isPureAdmin,
+  isAdmin,
+  isTeamLeader = false,
+}: Props) {
   const teamSyncQuery = usePublicSettings<boolean>({
     select: (settings) => settings.TeamSync,
   });
@@ -205,11 +209,11 @@ export function SettingsSidebar({ isPureAdmin, isAdmin, isTeamLeader }: Props) {
             data-cy="portainerSidebar-edgeCompute"
           />
 
-            <SidebarItem.Wrapper label="获取帮助">
+          <SidebarItem.Wrapper label="获取帮助">
             <a
               href={
                 process.env.PORTAINER_EDITION === 'CE'
-                  ? 'https://hub.docker.com/r/6053537/portainer-ce'
+                  ? 'https://www.portainer.io/community_help'
                   : 'https://documentation.portainer.io/r/business-support'
               }
               target="_blank"

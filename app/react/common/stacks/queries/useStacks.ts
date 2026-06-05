@@ -9,7 +9,7 @@ import { queryKeys } from './query-keys';
 
 export function useStacks() {
   return useQuery(queryKeys.base(), () => getStacks(), {
-    ...withError('Failed loading stack'),
+    ...withError('加载堆栈失败'),
   });
 }
 

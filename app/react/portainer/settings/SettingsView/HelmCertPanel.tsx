@@ -34,7 +34,7 @@ export function HelmCertPanel() {
       <Widget>
         <Widget.Title
           icon={Key}
-          title="Certificate Authority file for Kubernetes Helm repositories"
+          title="Kubernetes Helm 仓库的证书颁发机构文件"
         />
         <Widget.Body>
           <Formik
@@ -59,7 +59,7 @@ export function HelmCertPanel() {
       { clientCertFile },
       {
         onSuccess() {
-          notifySuccess('Success', 'Helm certificate updated');
+          notifySuccess('成功', 'Helm 证书已更新');
         },
       }
     );
@@ -75,15 +75,15 @@ function InnerForm({ isLoading }: { isLoading: boolean }) {
       <div className="form-group">
         <div className="col-sm-12">
           <TextTip color="blue">
-            Provide an additional CA file containing certificate(s) for HTTPS
-            connections to Helm repositories.
+            提供额外的 CA 文件，其中包含用于连接 Helm 仓库 HTTPS
+            连接的证书。
           </TextTip>
         </div>
       </div>
 
       <FormControl
-        label="CA file"
-        tooltip="Select a CA file containing your X.509 certificate(s), commonly a crt, cer or pem file."
+        label="CA 文件"
+        tooltip="选择包含 X.509 证书的 CA 文件，通常是 crt、cer 或 pem 文件。"
         inputId="ca-cert-field"
         errors={errors?.clientCertFile}
       >
@@ -100,8 +100,8 @@ function InnerForm({ isLoading }: { isLoading: boolean }) {
       <FormActions
         isValid={isValid}
         isLoading={isLoading}
-        submitLabel="Apply changes"
-        loadingText="Saving in progress..."
+        submitLabel="应用更改"
+        loadingText="正在保存..."
         data-cy="helm-cert-panel-submit-button"
       />
     </Form>

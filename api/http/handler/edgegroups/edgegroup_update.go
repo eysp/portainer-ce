@@ -13,6 +13,7 @@ import (
 	"github.com/portainer/portainer/api/slicesx"
 	httperror "github.com/portainer/portainer/pkg/libhttp/error"
 	"github.com/portainer/portainer/pkg/libhttp/request"
+	"github.com/portainer/portainer/pkg/libhttp/response"
 )
 
 type edgeGroupUpdatePayload struct {
@@ -56,9 +57,9 @@ func (handler *Handler) edgeGroupUpdate(w http.ResponseWriter, r *http.Request) 
 		return httperror.BadRequest("Invalid request payload", err)
 	}
 
-	var edgeGroup *portainer.EdgeGroup
+	var shadowEdgeGroup shadowedEdgeGroup
 	err = handler.DataStore.UpdateTx(func(tx dataservices.DataStoreTx) error {
-		edgeGroup, err = tx.EdgeGroup().Read(portainer.EdgeGroupID(edgeGroupID))
+		edgeGroup, err := tx.EdgeGroup().Read(portainer.EdgeGroupID(edgeGroupID))
 		if handler.DataStore.IsErrObjectNotFound(err) {
 			return httperror.NotFound("Unable to find an Edge group with the specified identifier inside the database", err)
 		} else if err != nil {
@@ -155,10 +156,12 @@ func (handler *Handler) edgeGroupUpdate(w http.ResponseWriter, r *http.Request) 
 			}
 		}
 
+		shadowEdgeGroup = shadowedEdgeGroup{EdgeGroup: *edgeGroup}
+
 		return nil
 	})
 
-	return txResponse(w, shadowedEdgeGroup{EdgeGroup: *edgeGroup}, err)
+	return response.TxResponse(w, shadowEdgeGroup, err)
 }
 
 func (handler *Handler) updateEndpointStacks(tx dataservices.DataStoreTx, endpoint *portainer.Endpoint, edgeGroups []portainer.EdgeGroup, edgeStacks []portainer.EdgeStack) error {

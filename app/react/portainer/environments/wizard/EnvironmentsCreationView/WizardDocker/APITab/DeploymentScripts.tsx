@@ -47,7 +47,8 @@ function DeployCode({ code }: DeployCodeProps) {
   return (
     <>
       <TextTip color="blue" className="mb-1">
-        使用套接字时，请确保已使用以下 Docker 标志启动 Portainer 容器：
+        When using the socket, ensure that you have started the Portainer
+        container with the following Docker flag:
       </TextTip>
 
       <Code>{code}</Code>

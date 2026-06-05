@@ -2,10 +2,12 @@ package endpointutils
 
 import (
 	"testing"
+	"time"
 
 	portainer "github.com/portainer/portainer/api"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type isEndpointTypeTest struct {
@@ -97,7 +99,7 @@ func Test_FilterByExcludeIDs(t *testing.T) {
 				portainer.EndpointID(2),
 			},
 			asserts: func(t *testing.T, output []portainer.Endpoint) {
-				assert.Equal(t, 0, len(output))
+				assert.Empty(t, output)
 			},
 		},
 		{
@@ -108,7 +110,7 @@ func Test_FilterByExcludeIDs(t *testing.T) {
 			},
 			inputExcludeIDs: []portainer.EndpointID{},
 			asserts: func(t *testing.T, output []portainer.Endpoint) {
-				assert.Equal(t, 2, len(output))
+				assert.Len(t, output, 2)
 			},
 		},
 	}
@@ -119,4 +121,19 @@ func Test_FilterByExcludeIDs(t *testing.T) {
 			tt.asserts(t, output)
 		})
 	}
+}
+
+func TestUpdateEdgeEndpointHeartbeat(t *testing.T) {
+	endpoint := &portainer.Endpoint{
+		Type:                portainer.EdgeAgentOnDockerEnvironment,
+		LastCheckInDate:     time.Now().Unix(),
+		EdgeCheckinInterval: 5,
+	}
+
+	UpdateEdgeEndpointHeartbeat(endpoint, &portainer.Settings{})
+	require.True(t, endpoint.Heartbeat)
+
+	endpoint.LastCheckInDate = time.Now().Add(-time.Minute).Unix()
+	UpdateEdgeEndpointHeartbeat(endpoint, &portainer.Settings{})
+	require.False(t, endpoint.Heartbeat)
 }

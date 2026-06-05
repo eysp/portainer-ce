@@ -52,7 +52,7 @@ export function ClusterRoleBindingsDatatable() {
       settingsManager={tableState}
       isLoading={clusterRoleBindingsQuery.isLoading}
       emptyContentLabel="No supported cluster role bindings found"
-      title="Cluster Role Bindings"
+      title="集群角色绑定"
       titleIcon={LinkIcon}
       getRowId={(row) => row.uid}
       isRowSelectable={(row) => !row.original.isSystem}
@@ -158,7 +158,7 @@ function TableActions({ selectedItems }: TableActionsProps) {
         loadingText="Removing cluster role bindings..."
         data-cy="k8s-cluster-role-bindings-remove-button"
       >
-        Remove
+        删除
       </LoadingButton>
 
       <CreateFromManifestButton

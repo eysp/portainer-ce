@@ -70,7 +70,7 @@ export function ContainerQuickActions({
           <Link
             to="docker.containers.container.stats"
             params={{ id: containerId, nodeName }}
-            title="统计"
+            title="统计信息"
             data-cy={`container-stats-${containerId}`}
           >
             <Icon icon={BarChart} className="space-right" />

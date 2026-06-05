@@ -1,6 +1,6 @@
 <div id="service-container-labels">
   <rd-widget>
-    <rd-widget-header icon="list" title-text="Container labels">
+    <rd-widget-header icon="list" title-text="容器标签">
       <div class="nopadding" authorization="DockerServiceUpdate">
         <a class="btn btn-secondary btn-sm pull-right" ng-click="isUpdating ||addContainerLabel(service)" ng-disabled="isUpdating">
           <pr-icon icon="'plus'"></pr-icon> container label
@@ -14,8 +14,8 @@
       <table class="table">
         <thead>
           <tr>
-            <th>Label</th>
-            <th>Value</th>
+            <th>标签</th>
+            <th>值</th>
           </tr>
         </thead>
         <tbody>
@@ -63,14 +63,14 @@
       <div class="btn-toolbar" role="toolbar">
         <div class="btn-group" role="group">
           <button type="button" class="btn btn-primary btn-sm" ng-disabled="!hasChanges(service, ['ServiceContainerLabels'])" ng-click="updateService(service)"
-            >Apply changes</button
+            >应用更改</button
           >
           <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <pr-icon icon="'chevron-down'"></pr-icon>
           </button>
           <ul class="dropdown-menu">
-            <li><a ng-click="cancelChanges(service, ['ServiceContainerLabels'])">Reset changes</a></li>
-            <li><a ng-click="cancelChanges(service)">Reset all changes</a></li>
+            <li><a ng-click="cancelChanges(service, ['ServiceContainerLabels'])">重置更改</a></li>
+            <li><a ng-click="cancelChanges(service)">重置所有更改</a></li>
           </ul>
         </div>
       </div>

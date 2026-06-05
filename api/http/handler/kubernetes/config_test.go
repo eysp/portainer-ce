@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestIsSelfSignedCertificate(t *testing.T) {
@@ -179,7 +180,7 @@ w/pjiPVy
 	for _, tt := range tc {
 		t.Run(tt.name, func(t *testing.T) {
 			actual, err := IsSelfSignedCertificate([]byte(tt.cert))
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tt.expected, actual)
 		})
 	}

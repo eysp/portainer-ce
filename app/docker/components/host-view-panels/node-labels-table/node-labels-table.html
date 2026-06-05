@@ -3,7 +3,7 @@
 <div class="col-sm-12 form-inline !p-0" ng-if="$ctrl.labels.length">
   <div ng-repeat="label in $ctrl.labels" class="mt-1">
     <div class="input-group col-sm-5 input-group-sm">
-      <span class="input-group-addon">名称</span>
+      <span class="input-group-addon">name</span>
       <input
         type="text"
         class="form-control"
@@ -14,7 +14,7 @@
       />
     </div>
     <div class="input-group col-sm-5 input-group-sm">
-      <span class="input-group-addon">值</span>
+      <span class="input-group-addon">value</span>
       <input type="text" class="form-control" ng-model="label.value" placeholder="例如 bar" ng-change="$ctrl.updateLabel(label)" data-cy="node-label-value_{{ $index }}" />
     </div>
     <button class="btn btn-light" type="button" ng-click="$ctrl.removeLabel($index)">

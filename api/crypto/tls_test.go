@@ -44,7 +44,7 @@ func TestCreateTLSConfigurationFIPS(t *testing.T) {
 func TestCreateTLSConfigurationFromBytes(t *testing.T) {
 	// No TLS
 	config, err := CreateTLSConfigurationFromBytes(false, nil, nil, nil, false, false)
-	require.Nil(t, err)
+	require.NoError(t, err)
 	require.Nil(t, config)
 
 	// Skip TLS client/server verifications
@@ -61,7 +61,7 @@ func TestCreateTLSConfigurationFromBytes(t *testing.T) {
 func TestCreateTLSConfigurationFromDisk(t *testing.T) {
 	// No TLS
 	config, err := CreateTLSConfigurationFromDisk(portainer.TLSConfiguration{})
-	require.Nil(t, err)
+	require.NoError(t, err)
 	require.Nil(t, config)
 
 	// Skip TLS verifications

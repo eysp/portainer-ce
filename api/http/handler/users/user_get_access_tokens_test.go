@@ -16,6 +16,7 @@ import (
 
 	"github.com/segmentio/encoding/json"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_userGetAccessTokens(t *testing.T) {
@@ -26,15 +27,15 @@ func Test_userGetAccessTokens(t *testing.T) {
 	// create admin and standard user(s)
 	adminUser := &portainer.User{ID: 1, Username: "admin", Role: portainer.AdministratorRole}
 	err := store.User().Create(adminUser)
-	is.NoError(err, "error creating admin user")
+	require.NoError(t, err, "error creating admin user")
 
 	user := &portainer.User{ID: 2, Username: "standard", Role: portainer.StandardUserRole}
 	err = store.User().Create(user)
-	is.NoError(err, "error creating user")
+	require.NoError(t, err, "error creating user")
 
 	// setup services
 	jwtService, err := jwt.NewService("1h", store)
-	is.NoError(err, "Error initiating jwt service")
+	require.NoError(t, err, "Error initiating jwt service")
 	apiKeyService := apikey.NewAPIKeyService(store.APIKeyRepository(), store.User())
 	requestBouncer := security.NewRequestBouncer(store, jwtService, apiKeyService)
 	rateLimiter := security.NewRateLimiter(10, 1*time.Second, 1*time.Hour)
@@ -49,7 +50,7 @@ func Test_userGetAccessTokens(t *testing.T) {
 
 	t.Run("standard user can successfully retrieve API key", func(t *testing.T) {
 		_, apiKey, err := apiKeyService.GenerateApiKey(*user, "test-get-token")
-		is.NoError(err)
+		require.NoError(t, err)
 
 		req := httptest.NewRequest(http.MethodGet, "/users/2/tokens", nil)
 		testhelpers.AddTestSecurityCookie(req, jwt)
@@ -60,15 +61,15 @@ func Test_userGetAccessTokens(t *testing.T) {
 		is.Equal(http.StatusOK, rr.Code)
 
 		body, err := io.ReadAll(rr.Body)
-		is.NoError(err, "ReadAll should not return error")
+		require.NoError(t, err, "ReadAll should not return error")
 
 		var resp []portainer.APIKey
 		err = json.Unmarshal(body, &resp)
-		is.NoError(err, "response should be list json")
+		require.NoError(t, err, "response should be list json")
 
 		is.Len(resp, 1)
 		if len(resp) == 1 {
-			is.Equal(resp[0].Digest, "")
+			is.Empty(resp[0].Digest)
 			is.Equal(apiKey.ID, resp[0].ID)
 			is.Equal(apiKey.UserID, resp[0].UserID)
 			is.Equal(apiKey.Prefix, resp[0].Prefix)
@@ -78,7 +79,7 @@ func Test_userGetAccessTokens(t *testing.T) {
 
 	t.Run("admin can retrieve standard user API Key", func(t *testing.T) {
 		_, _, err := apiKeyService.GenerateApiKey(*user, "test-get-admin-token")
-		is.NoError(err)
+		require.NoError(t, err)
 
 		req := httptest.NewRequest(http.MethodGet, "/users/2/tokens", nil)
 		testhelpers.AddTestSecurityCookie(req, adminJWT)
@@ -89,18 +90,18 @@ func Test_userGetAccessTokens(t *testing.T) {
 		is.Equal(http.StatusOK, rr.Code)
 
 		body, err := io.ReadAll(rr.Body)
-		is.NoError(err, "ReadAll should not return error")
+		require.NoError(t, err, "ReadAll should not return error")
 
 		var resp []portainer.APIKey
 		err = json.Unmarshal(body, &resp)
-		is.NoError(err, "response should be list json")
+		require.NoError(t, err, "response should be list json")
 
-		is.True(len(resp) > 0)
+		is.NotEmpty(resp)
 	})
 
 	t.Run("user can retrieve API Key using api-key auth", func(t *testing.T) {
 		rawAPIKey, _, err := apiKeyService.GenerateApiKey(*user, "test-api-key")
-		is.NoError(err)
+		require.NoError(t, err)
 
 		req := httptest.NewRequest(http.MethodGet, "/users/2/tokens", nil)
 		req.Header.Add("x-api-key", rawAPIKey)
@@ -111,19 +112,17 @@ func Test_userGetAccessTokens(t *testing.T) {
 		is.Equal(http.StatusOK, rr.Code)
 
 		body, err := io.ReadAll(rr.Body)
-		is.NoError(err, "ReadAll should not return error")
+		require.NoError(t, err, "ReadAll should not return error")
 
 		var resp []portainer.APIKey
 		err = json.Unmarshal(body, &resp)
-		is.NoError(err, "response should be list json")
+		require.NoError(t, err, "response should be list json")
 
-		is.True(len(resp) > 0)
+		is.NotEmpty(resp)
 	})
 }
 
 func Test_hideAPIKeyFields(t *testing.T) {
-	is := assert.New(t)
-
 	apiKey := &portainer.APIKey{
 		ID:          1,
 		UserID:      2,
@@ -134,5 +133,5 @@ func Test_hideAPIKeyFields(t *testing.T) {
 
 	hideAPIKeyFields(apiKey)
 
-	is.Equal(apiKey.Digest, "", "digest should be cleared when hiding api key fields")
+	require.Empty(t, apiKey.Digest, "digest should be cleared when hiding api key fields")
 }

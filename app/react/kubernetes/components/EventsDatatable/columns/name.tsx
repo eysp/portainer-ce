@@ -3,7 +3,7 @@ import { columnHelper } from './helper';
 export const name = columnHelper.accessor(
   (event) => event.involvedObject.name ?? '-',
   {
-    header: 'Name',
+    header: '名称',
     cell: ({ getValue }) => {
       const name = getValue();
       return (

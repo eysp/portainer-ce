@@ -44,7 +44,7 @@ export function buildNameColumnFromObject<T extends DefaultType>({
   const cell = createCell();
 
   return {
-    header: 'Name',
+    header: '名称',
     accessorKey: nameKey,
     id: 'name',
     cell,

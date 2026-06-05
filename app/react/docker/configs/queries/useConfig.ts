@@ -1,18 +1,19 @@
-import { Config } from 'docker-types/generated/1.41';
+import { Config } from 'docker-types';
 
 import axios, { parseAxiosError } from '@/portainer/services/axios';
 import { EnvironmentId } from '@/react/portainer/environments/types';
 
-import { buildDockerProxyUrl } from '../../proxy/queries/buildDockerProxyUrl';
-import { DockerConfig } from '../types';
+import { PortainerResponse } from '../../types';
+
+import { buildUrl } from './build-url';
 
 export async function getConfig(
   environmentId: EnvironmentId,
-  configId: DockerConfig['Id']
+  configId: Config['ID']
 ) {
   try {
-    const { data } = await axios.get<Config>(
-      buildDockerProxyUrl(environmentId, 'configs', configId)
+    const { data } = await axios.get<PortainerResponse<Config>>(
+      buildUrl(environmentId, configId)
     );
     return data;
   } catch (e) {

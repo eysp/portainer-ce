@@ -113,7 +113,7 @@ export function useValidation({
             .default('')
             .when('method', {
               is: 'editor',
-              then: (schema) => schema.required('Config file is required'),
+              then: (schema) => schema.required('配置文件为必填项'),
             }),
           file: file().when('method', {
             is: 'upload',

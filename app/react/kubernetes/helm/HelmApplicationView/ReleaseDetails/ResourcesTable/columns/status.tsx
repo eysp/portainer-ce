@@ -8,7 +8,7 @@ import { ResourceRow } from '../types';
 import { columnHelper } from './helper';
 
 export const status = columnHelper.accessor((row) => row.status.label, {
-  header: 'Status',
+  header: '状态',
   id: 'status',
   cell: Cell,
   meta: {

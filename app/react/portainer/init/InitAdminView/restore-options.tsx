@@ -17,7 +17,7 @@ export const restoreOptions: ReadonlyArray<BoxSelectorOption<string>> = [
     value: 's3',
     icon: Download,
     iconType: 'badge',
-    label: '从 S3 检索',
+    label: '从 S3 恢复',
     feature: FeatureId.S3_RESTORE,
   },
 ] as const;

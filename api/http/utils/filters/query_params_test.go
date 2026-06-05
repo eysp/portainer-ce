@@ -199,27 +199,23 @@ func TestExtractListModifiersQueryParams(t *testing.T) {
 }
 
 func TestSortOrderConstants(t *testing.T) {
-	t.Run("sort order constants", func(t *testing.T) {
-		require.Equal(t, SortOrder("asc"), SortAsc, "SortAsc constant should equal 'asc'")
-		require.Equal(t, SortOrder("desc"), SortDesc, "SortDesc constant should equal 'desc'")
-	})
+	require.Equal(t, SortAsc, SortOrder("asc"), "SortAsc constant should equal 'asc'")
+	require.Equal(t, SortDesc, SortOrder("desc"), "SortDesc constant should equal 'desc'")
 }
 
 func TestQueryParamsStructEmbedding(t *testing.T) {
-	t.Run("struct embedding", func(t *testing.T) {
-		qp := QueryParams{
-			SearchQueryParams:     SearchQueryParams{search: "test"},
-			SortQueryParams:       SortQueryParams{sort: "name", order: SortAsc},
-			PaginationQueryParams: PaginationQueryParams{start: 10, limit: 20},
-		}
+	qp := QueryParams{
+		SearchQueryParams:     SearchQueryParams{search: "test"},
+		SortQueryParams:       SortQueryParams{sort: "name", order: SortAsc},
+		PaginationQueryParams: PaginationQueryParams{start: 10, limit: 20},
+	}
 
-		// Test that embedded fields are accessible
-		require.Equal(t, "test", qp.search, "Embedded search field should be accessible")
-		require.Equal(t, "name", qp.sort, "Embedded sort field should be accessible")
-		require.Equal(t, SortAsc, qp.order, "Embedded order field should be accessible")
-		require.Equal(t, 10, qp.start, "Embedded start field should be accessible")
-		require.Equal(t, 20, qp.limit, "Embedded limit field should be accessible")
-	})
+	// Test that embedded fields are accessible
+	require.Equal(t, "test", qp.search, "Embedded search field should be accessible")
+	require.Equal(t, "name", qp.sort, "Embedded sort field should be accessible")
+	require.Equal(t, SortAsc, qp.order, "Embedded order field should be accessible")
+	require.Equal(t, 10, qp.start, "Embedded start field should be accessible")
+	require.Equal(t, 20, qp.limit, "Embedded limit field should be accessible")
 }
 
 func TestExtractListModifiersQueryParamsEdgeCases(t *testing.T) {

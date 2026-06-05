@@ -46,7 +46,7 @@ export function ConfigurationItem({
       <div className="flex items-start gap-x-2 gap-y-2">
         <div>
           <InputGroup size="small" className="min-w-[250px]">
-            <InputGroup.Addon>Name</InputGroup.Addon>
+            <InputGroup.Addon>名称</InputGroup.Addon>
             <Select
               options={configurations}
               isMulti={false}

@@ -2,7 +2,8 @@
   <div class="col-sm-12 form-section-title"> 重要提示 </div>
   <div class="form-group">
     <div class="col-sm-12 text-muted small">
-      任何有权访问此镜像仓库的 Portainer 用户都将能够使用镜像仓库管理器功能来访问 ProGet 镜像仓库中 ProGet 用户有权访问的任何 Feed 的内容。
+      Any Portainer user that has access to this registry will be able to use the Registry Manager features against the content of any Feed in the ProGet registry that the ProGet
+      user has access to.
     </div>
   </div>
   <div class="col-sm-12 form-section-title"> ProGet 镜像仓库详情 </div>
@@ -26,7 +27,7 @@
           <div ng-messages="$ctrl.registryFormProGet.registry_name.$error">
             <p ng-message="required" class="vertical-center">
               <pr-icon icon="'alert-triangle'"></pr-icon>
-              此字段是必填项。
+              This field is required.
             </p>
             <p ng-message="used" class="vertical-center">
               <pr-icon icon="'alert-triangle'"></pr-icon>
@@ -60,7 +61,7 @@
           <div ng-messages="$ctrl.registryFormProGet.registry_url.$error">
             <p ng-message="required" class="vertical-center">
               <pr-icon icon="'alert-triangle'"></pr-icon>
-              此字段是必填项。
+              This field is required.
             </p>
           </div>
         </div>
@@ -90,7 +91,7 @@
           <div ng-messages="$ctrl.registryFormProGet.registry_base_url.$error">
             <p ng-message="required" class="vertical-center">
               <pr-icon icon="'alert-triangle'"></pr-icon>
-              此字段是必填项。
+              This field is required.
             </p>
           </div>
         </div>
@@ -109,7 +110,7 @@
             <div ng-messages="$ctrl.registryFormProGet.registry_username.$error">
               <p ng-message="required" class="vertical-center">
                 <pr-icon icon="'alert-triangle'"></pr-icon>
-                此字段是必填项。
+                This field is required.
               </p>
             </div>
           </div>
@@ -127,7 +128,7 @@
             <div ng-messages="$ctrl.registryFormProGet.registry_password.$error">
               <p ng-message="required" class="vertical-center">
                 <pr-icon icon="'alert-triangle'"></pr-icon>
-                此字段是必填项。
+                This field is required.
               </p>
             </div>
           </div>
@@ -151,7 +152,7 @@
         analytics-properties="{ metadata: { type: 'proget' } }"
       >
         <span ng-hide="$ctrl.actionInProgress">{{ $ctrl.formActionLabel }}</span>
-        <span ng-show="$ctrl.actionInProgress">进行中...</span>
+        <span ng-show="$ctrl.actionInProgress">In progress...</span>
       </button>
     </div>
   </div>

@@ -28,7 +28,6 @@ import {
 } from '../constants';
 import {
   applicationIsKind,
-  bytesToReadableFormat,
   getResourceRequests,
   getRunningPods,
   getTotalPods,
@@ -38,6 +37,7 @@ import { Application, ApplicationPatch } from '../types';
 import { useNamespaceQuery } from '../../namespaces/queries/useNamespaceQuery';
 import { useApplication } from '../queries/useApplication';
 import { usePatchApplicationMutation } from '../queries/usePatchApplicationMutation';
+import { bytesToReadableFormat } from '../../utils';
 
 export function ApplicationSummaryWidget() {
   const stateAndParams = useCurrentStateAndParams();
@@ -118,7 +118,7 @@ export function ApplicationSummaryWidget() {
                 )}
                 <DetailsTable dataCy="k8sAppDetail-table">
                   <tr>
-                    <td>Name</td>
+                    <td>名称</td>
                     <td>
                       <div
                         className="flex items-center gap-x-2"
@@ -135,7 +135,7 @@ export function ApplicationSummaryWidget() {
                     !globalDeploymentOptionsQuery.data
                       .hideStacksFunctionality && (
                       <tr>
-                        <td>Stack</td>
+                        <td>堆栈</td>
                         <td data-cy="k8sAppDetail-stackName">
                           {application?.metadata?.labels?.[appStackNameLabel] ||
                             '-'}
@@ -143,7 +143,7 @@ export function ApplicationSummaryWidget() {
                       </tr>
                     )}
                   <tr>
-                    <td>Namespace</td>
+                    <td>命名空间</td>
                     <td>
                       <div
                         className="flex items-center gap-x-2"
@@ -161,14 +161,14 @@ export function ApplicationSummaryWidget() {
                     </td>
                   </tr>
                   <tr>
-                    <td>Application type</td>
+                    <td>应用类型</td>
                     <td data-cy="k8sAppDetail-appType">
                       {application?.kind || '-'}
                     </td>
                   </tr>
                   {application?.kind && (
                     <tr>
-                      <td>Status</td>
+                      <td>状态</td>
                       {applicationIsKind<Pod>('Pod', application) && (
                         <td data-cy="k8sAppDetail-appType">
                           {application?.status?.phase}

@@ -26,18 +26,19 @@ export function NonAgentSwarmInfo() {
       <TextTip color="blue">
         {isManager ? (
           <>
-            Portainer 已连接到 Swarm 集群中的一个节点。集群中其他节点上的某些资源可能暂时无法管理，请查看{' '}
+            Portainer 已连接到属于 Swarm 集群的一个节点。
+            集群中其他节点上的某些资源可能无法用于管理，请查看{' '}
             <HelpLink
               docLink="/admin/environments/add/swarm/agent"
               target="_blank"
             >
               代理部署指南
             </HelpLink>{' '}
-            了解更多信息。
+            了解更多详情。
           </>
         ) : (
           <>
-            Portainer 已连接到一个工作节点，Swarm 管理功能不可用。
+            Portainer 已连接到工作节点。Swarm 管理功能将不可用。
           </>
         )}
       </TextTip>

@@ -73,7 +73,7 @@ export function TagSelector({
             {selectedTags.map((tag) => (
               <TagButton
                 key={tag.value}
-                title="移除标签"
+                title="删除标签"
                 value={tag.value}
                 label={tag.label}
                 onRemove={() => handleRemove(tag.value)}
@@ -83,8 +83,8 @@ export function TagSelector({
         </FormControl>
       )}
 
-        <FormControl
-        label="标签"
+      <FormControl
+        label="Tags"
         inputId="tags-selector"
         errors={
           typeof errors === 'string'
@@ -99,10 +99,10 @@ export function TagSelector({
           options={tags.filter((tag) => !value.includes(tag.value))}
           closeMenuOnSelect={false}
           onChange={handleAdd}
-          noOptionsMessage={() => '无可用标签'}
-          formatCreateLabel={(inputValue) => `创建 "${inputValue}"`}
+          noOptionsMessage={() => 'No tags available'}
+          formatCreateLabel={(inputValue) => `Create "${inputValue}"`}
           onCreateOption={handleCreateOption}
-          aria-label="标签"
+          aria-label="Tags"
           data-cy="environment-tags-selector"
           id="environment-tags-selector"
         />

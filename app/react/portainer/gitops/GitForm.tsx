@@ -83,7 +83,7 @@ export function GitForm({
             checked={value.TLSSkipVerify || false}
             onChange={(value) => handleChange({ TLSSkipVerify: value })}
             name="TLSSkipVerify"
-            tooltip="启用此选项将允许跳过任何自签名证书的 TLS 验证。"
+            tooltip="启用后，将允许跳过任何自签名证书的 TLS 验证。"
             labelClass="col-sm-3 col-lg-2"
           />
         </div>
@@ -165,7 +165,7 @@ export function buildGitValidationSchema(
 ): SchemaOf<GitFormModel> {
   return object({
     RepositoryURL: string()
-      .test('valid URL', 'The URL must be a valid URL', (value) => {
+      .test('valid URL', 'URL 必须是有效地址', (value) => {
         if (!value) {
           return true;
         }
@@ -177,14 +177,14 @@ export function buildGitValidationSchema(
           return false;
         }
       })
-      .required('仓库 URL 是必需的'),
+      .required('仓库 URL 为必填项'),
     RepositoryReferenceName: refFieldValidation(),
     ComposeFilePathInRepository: string().required(
       deployMethod === 'compose'
-        ? 'Compose 文件路径是必需的'
-        : '清单文件路径是必需的'
+        ? 'Compose 文件路径为必填项'
+        : 'Manifest 文件路径为必填项'
     ),
-    AdditionalFiles: array(string().required('路径是必需的')).default([]),
+    AdditionalFiles: array(string().required('路径为必填项')).default([]),
     RepositoryURLValid: boolean().default(false),
     AutoUpdate: autoUpdateValidation().nullable(),
     TLSSkipVerify: boolean().default(false),

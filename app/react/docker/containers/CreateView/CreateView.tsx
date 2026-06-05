@@ -8,7 +8,6 @@ import { useCurrentEnvironment } from '@/react/hooks/useCurrentEnvironment';
 import { useEnvironmentRegistries } from '@/react/portainer/environments/queries/useEnvironmentRegistries';
 import { Registry } from '@/react/portainer/registries/types/registry';
 import { notifySuccess } from '@/portainer/services/notifications';
-import { useAnalytics } from '@/react/hooks/useAnalytics';
 import { useDebouncedValue } from '@/react/hooks/useDebouncedValue';
 
 import { PageHeader } from '@@/PageHeader';
@@ -25,7 +24,7 @@ import { useSystemLimits, useIsWindows } from '../../proxy/queries/useInfo';
 import { useCreateOrReplaceMutation } from './useCreateMutation';
 import { useValidation } from './validation';
 import { useInitialValues, Values } from './useInitialValues';
-import { InnerForm } from './InnerForm';
+import { CreateInnerForm } from './CreateInnerForm';
 import { toRequest } from './toRequest';
 
 export function CreateView() {
@@ -49,11 +48,8 @@ function CreateForm() {
   const environmentId = useEnvironmentId();
   const router = useRouter();
   const isWindows = useIsWindows(environmentId);
-  const { trackEvent } = useAnalytics();
   const isAdminQuery = useIsEdgeAdmin();
-  const { authorized: isEnvironmentAdmin } = useIsEnvironmentAdmin({
-    adminOnlyCE: true,
-  });
+  const { authorized: isEnvironmentAdmin } = useIsEnvironmentAdmin();
   const [isDockerhubRateLimited, setIsDockerhubRateLimited] = useState(false);
 
   const mutation = useCreateOrReplaceMutation();
@@ -86,7 +82,6 @@ function CreateForm() {
 
   const environment = envQuery.data;
 
-  // if windows, hide capabilities. this is because capadd and capdel are not supported on windows
   const hideCapabilities =
     (!environment.SecuritySettings.allowContainerCapabilitiesForRegularUsers &&
       !isEnvironmentAdmin) ||
@@ -105,12 +100,13 @@ function CreateForm() {
           <div className="col-sm-12">
             <InformationPanel title-text="注意">
               <TextTip>
-                如果更改镜像，新容器可能无法启动，并且先前容器的设置可能不兼容。
-                常见原因包括入口点、命令或镜像设置的{' '}
+                如果更改了镜像，新容器可能无法启动，并且
+                之前容器的设置不兼容。
+                常见原因包括入口点、命令或{' '}
                 <HelpLink docLink="/user/docker/containers/advanced">
                   其他设置
-                </HelpLink>
-                。
+                </HelpLink>{' '}
+                由镜像设置。
               </TextTip>
             </InformationPanel>
           </div>
@@ -123,7 +119,7 @@ function CreateForm() {
         validateOnMount
         validationSchema={validationSchema}
       >
-        <InnerForm
+        <CreateInnerForm
           hideCapabilities={hideCapabilities}
           onChangeName={syncName}
           isDuplicate={isDuplicating}
@@ -139,7 +135,7 @@ function CreateForm() {
       const confirmed = await confirmDestructive({
         title: '您确定吗？',
         message:
-          '已存在同名容器。Portainer 可以自动移除并重新创建一个。您要替换它吗？',
+          '已存在同名容器。Portainer 可以自动删除它并重新创建一个。您要替换它吗？',
         confirmButton: buildConfirmButton('替换', 'danger'),
       });
 
@@ -169,24 +165,11 @@ function CreateForm() {
       },
       {
         onSuccess() {
-          sendAnalytics(values, registry);
-          notifySuccess('成功', '容器已成功创建');
+          notifySuccess('成功', '容器创建成功');
           router.stateService.go('docker.containers');
         },
       }
     );
-  }
-
-  function sendAnalytics(values: Values, registry?: Registry) {
-    const containerImage = registry?.URL
-      ? `${registry?.URL}/${values.image}`
-      : values.image;
-    if (values.resources.gpu.enabled) {
-      trackEvent('gpuContainerCreated', {
-        category: 'docker',
-        metadata: { gpu: values.resources.gpu, containerImage },
-      });
-    }
   }
 }
 

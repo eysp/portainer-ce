@@ -6,7 +6,7 @@ import { DecoratedItem } from '../types';
 import { columnHelper } from './helper';
 
 export const scheduleStatus = columnHelper.accessor('status', {
-  header: 'Status',
+  header: '状态',
   cell: StatusCell,
 });
 

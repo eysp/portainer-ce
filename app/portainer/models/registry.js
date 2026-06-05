@@ -15,21 +15,21 @@ export function RegistryViewModel(data) {
   this.Gitlab = data.Gitlab;
   this.Quay = data.Quay;
   this.Ecr = data.Ecr;
+  this.ManagementConfiguration = data.ManagementConfiguration;
 }
 
 export function RegistryManagementConfigurationDefaultModel(registry) {
   this.Authentication = registry.Authentication;
   this.Username = registry.Username;
   this.Password = '';
-  this.TLS = false;
-  this.TLSSkipVerify = false;
+  this.TLS = (registry.ManagementConfiguration && registry.ManagementConfiguration.TLSConfig && registry.ManagementConfiguration.TLSConfig.TLS) || false;
+  this.TLSSkipVerify = (registry.ManagementConfiguration && registry.ManagementConfiguration.TLSConfig && registry.ManagementConfiguration.TLSConfig.TLSSkipVerify) || false;
   this.TLSCACertFile = null;
   this.TLSCertFile = null;
   this.TLSKeyFile = null;
 
   if (registry.Type === RegistryTypes.ECR) {
     this.Region = registry.Ecr.Region;
-    this.TLSSkipVerify = true;
   }
 
   if (registry.Type === RegistryTypes.QUAY || registry.Type === RegistryTypes.ECR) {
@@ -59,6 +59,11 @@ export function RegistryCreateRequest(model) {
   this.URL = _.replace(model.URL, /^https?\:\/\//i, '');
   this.URL = _.replace(this.URL, /\/$/, '');
   this.Authentication = model.Authentication;
+  // default TLS based on URL scheme: enable TLS unless explicitly http://
+  const isHttp = /^http:\/\//i.test(model.URL);
+  if (!isHttp) {
+    this.TLS = true;
+  }
   if (model.Authentication) {
     this.Username = model.Username;
     this.Password = model.Password;

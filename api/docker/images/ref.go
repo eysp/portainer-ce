@@ -3,8 +3,8 @@ package images
 import (
 	"strings"
 
-	"github.com/containers/image/v5/docker"
-	"github.com/containers/image/v5/types"
+	"go.podman.io/image/v5/docker"
+	"go.podman.io/image/v5/types"
 )
 
 func ParseReference(imageStr string) (types.ImageReference, error) {

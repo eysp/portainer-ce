@@ -13,7 +13,7 @@ export function AdminSwitch() {
         <SwitchField
           data-cy="user-adminSwitch"
           label="管理员"
-          tooltip="管理员可以访问 Portainer 设置管理，并对所有定义的环境及其资源拥有完全控制权。'"
+          tooltip="管理员可以访问 Portainer 设置管理，以及对所有定义的环境及其资源进行完全控制。"
           checked={value}
           onChange={(checked) => setValue(checked)}
           name={name}

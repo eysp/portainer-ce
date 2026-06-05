@@ -19,7 +19,7 @@
                 label-class="'col-sm-3 col-lg-2 control-label text-left'"
                 checked="formValues.Administrator"
                 label="'管理员'"
-                tooltip="'管理员可以访问 Portainer 设置管理，并对所有定义的环境及其资源拥有完全控制权。'"
+                tooltip="'管理员可以访问 Portainer 设置管理，以及对所有定义的环境及其资源进行完全控制。'"
                 on-change="(handleAdministratorChange)"
               ></por-switch-field>
             </div>
@@ -42,7 +42,7 @@
 <div class="row" ng-if="AuthenticationMethod === 1">
   <div class="col-lg-12 col-md-12 col-xs-12">
     <rd-widget>
-      <rd-widget-header icon="lock" title-text="更改用户密码"></rd-widget-header>
+      <rd-widget-header icon="lock" title-text="Change user password"></rd-widget-header>
       <rd-widget-body>
         <form name="form" class="form-horizontal" style="margin-top: 15px">
           <!-- new-password-input -->

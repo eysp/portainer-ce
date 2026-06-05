@@ -10,7 +10,7 @@
           <div ng-messages="$ctrl.registryFormQuay.registry_name.$error">
             <p ng-message="required" class="vertical-center">
               <pr-icon icon="'alert-triangle'"></pr-icon>
-              此字段是必填项。
+              This field is required.
             </p>
             <p ng-message="used" class="vertical-center">
               <pr-icon icon="'alert-triangle'"></pr-icon>
@@ -24,7 +24,7 @@
   <!-- !name-input -->
   <!-- credentials-user -->
   <div class="form-group">
-      <label for="registry_username" class="col-sm-3 col-lg-2 control-label required text-left">用户名</label>
+    <label for="registry_username" class="col-sm-3 col-lg-2 control-label required text-left">用户名</label>
     <div class="col-sm-9 col-lg-10">
       <input
         type="text"
@@ -41,7 +41,7 @@
           <div ng-messages="$ctrl.registryFormQuay.registry_username.$error">
             <p ng-message="required" class="vertical-center">
               <pr-icon icon="'alert-triangle'"></pr-icon>
-              此字段是必填项。
+              This field is required.
             </p>
           </div>
         </div>
@@ -51,7 +51,7 @@
   <!-- !credentials-user -->
   <!-- credentials-password -->
   <div class="form-group">
-      <label for="registry_password" class="col-sm-3 col-lg-2 control-label required text-left">密码</label>
+    <label for="registry_password" class="col-sm-3 col-lg-2 control-label required text-left">密码</label>
     <div class="col-sm-9 col-lg-10">
       <input type="password" class="form-control" id="registry_password" name="registry_password" ng-model="$ctrl.model.Password" required />
       <div class="help-block" ng-show="$ctrl.registryFormQuay.registry_password.$invalid">
@@ -59,7 +59,7 @@
           <div ng-messages="$ctrl.registryFormQuay.registry_password.$error">
             <p ng-message="required" class="vertical-center">
               <pr-icon icon="'alert-triangle'"></pr-icon>
-              此字段是必填项。
+              This field is required.
             </p>
           </div>
         </div>
@@ -99,7 +99,7 @@
             <div ng-messages="$ctrl.registryFormQuay.organisation_name.$error">
               <p ng-message="required" class="vertical-center">
                 <pr-icon icon="'alert-triangle'"></pr-icon>
-                此字段是必填项。
+                This field is required.
               </p>
             </div>
           </div>
@@ -124,7 +124,7 @@
         analytics-properties="{ metadata: { type: 'quay' } }"
       >
         <span ng-hide="$ctrl.actionInProgress">{{ $ctrl.formActionLabel }}</span>
-        <span ng-show="$ctrl.actionInProgress">进行中...</span>
+        <span ng-show="$ctrl.actionInProgress">In progress...</span>
       </button>
     </div>
   </div>

@@ -29,3 +29,12 @@ func Deprecated(router http.Handler, urlBuilder func(w http.ResponseWriter, r *h
 		router.ServeHTTP(w, redirectedRequest)
 	})
 }
+
+// DeprecatedSimple is a middleware that marks an API route as deprecated
+//
+// if needed, use Deprecated with a custom urlBuilder
+func DeprecatedSimple(h http.Handler) http.Handler {
+	return Deprecated(h, func(w http.ResponseWriter, r *http.Request) (string, *httperror.HandlerError) {
+		return "", nil
+	})
+}

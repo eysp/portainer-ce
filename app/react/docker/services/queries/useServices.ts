@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Service } from 'docker-types/generated/1.41';
+import { Service } from 'docker-types';
 
 import axios, { parseAxiosError } from '@/portainer/services/axios';
 import { withGlobalError } from '@/react-tools/react-query';
@@ -10,12 +10,23 @@ import { buildUrl } from '@/react/docker/services/queries/build-url';
 import { Filters } from '../types';
 import { withFiltersQueryParam } from '../../proxy/queries/utils';
 
-export function useServices(environmentId: EnvironmentId, filters?: Filters) {
+export function useServices<T = Service>(
+  {
+    environmentId,
+    filters,
+  }: { environmentId: EnvironmentId; filters?: Filters },
+  {
+    enabled,
+    select,
+  }: { enabled?: boolean; select?: (services: Array<Service>) => Array<T> } = {}
+) {
   return useQuery(
     queryKeys.filters(environmentId, filters),
     () => getServices(environmentId, filters),
     {
       ...withGlobalError('Unable to retrieve services'),
+      enabled,
+      select,
     }
   );
 }

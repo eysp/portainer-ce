@@ -9,6 +9,7 @@ import (
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/datastore"
+	"github.com/portainer/portainer/api/filesystem"
 	"github.com/portainer/portainer/api/http/security"
 	"github.com/portainer/portainer/api/internal/testhelpers"
 	httperror "github.com/portainer/portainer/pkg/libhttp/error"
@@ -19,6 +20,9 @@ import (
 func TestInspectHandler(t *testing.T) {
 	_, ds := datastore.MustNewTestStore(t, true, false)
 	require.NotNil(t, ds)
+
+	fs, err := filesystem.NewService(t.TempDir(), t.TempDir())
+	require.NoError(t, err)
 
 	require.NoError(t, ds.UpdateTx(func(tx dataservices.DataStoreTx) error {
 		require.NoError(t, tx.User().Create(&portainer.User{ID: 1, Username: "admin", Role: portainer.AdministratorRole}))
@@ -42,7 +46,7 @@ func TestInspectHandler(t *testing.T) {
 		return nil
 	}))
 
-	handler := NewHandler(testhelpers.NewTestRequestBouncer(), ds, &TestFileService{}, nil)
+	handler := NewHandler(testhelpers.NewTestRequestBouncer(), ds, fs, nil)
 
 	test := func(templateID string, restrictedContext *security.RestrictedRequestContext) (*httptest.ResponseRecorder, *httperror.HandlerError) {
 		r := httptest.NewRequest(http.MethodGet, "/custom_templates/"+templateID, nil)

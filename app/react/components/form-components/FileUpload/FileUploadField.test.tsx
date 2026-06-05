@@ -4,10 +4,10 @@ import { FileUploadField } from './FileUploadField';
 
 test('render should make the file button clickable and fire onChange event after click', async () => {
   const onClick = vi.fn();
-  const { findByText, findByLabelText } = render(
+  const { findByText, findByTestId } = render(
     <FileUploadField
       title="test button"
-      data-cy="file-input"
+      data-cy="file-upload"
       onChange={onClick}
       inputId="file-field"
     />
@@ -16,7 +16,7 @@ test('render should make the file button clickable and fire onChange event after
   const button = await findByText('test button');
   expect(button).toBeVisible();
 
-  const input = await findByLabelText('file-input');
+  const input = await findByTestId('file-upload-input');
   expect(input).not.toBeNull();
 
   const mockFile = new File([], 'file.txt');

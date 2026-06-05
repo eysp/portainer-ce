@@ -40,7 +40,7 @@ export function TableActions({
               icon={RefreshCw}
               data-cy="service-updateServiceButton"
             >
-              Update
+              更新
             </Button>
           </Authorized>
         )}

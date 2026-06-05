@@ -98,15 +98,15 @@ export function resourcesValidation({
   return object({
     reservation: nanNumberSchema()
       .min(0)
-      .max(maxMemory, `值必须在 0 到 ${maxMemory} 之间`)
+      .max(maxMemory, `值必须在 0 和 ${maxMemory} 之间`)
       .default(0),
     limit: nanNumberSchema()
       .min(0)
-      .max(maxMemory, `值必须在 0 到 ${maxMemory} 之间`)
+      .max(maxMemory, `值必须在 0 和 ${maxMemory} 之间`)
       .default(0),
     cpu: nanNumberSchema()
       .min(0)
-      .max(maxCpu, `值必须在 0 到 ${maxCpu} 之间`)
+      .max(maxCpu, `值必须在 0 和 ${maxCpu} 之间`)
       .default(0),
   });
 }

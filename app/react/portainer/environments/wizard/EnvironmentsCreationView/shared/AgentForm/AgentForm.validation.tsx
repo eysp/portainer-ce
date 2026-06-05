@@ -1,9 +1,8 @@
 import { mixed, object, SchemaOf, string } from 'yup';
 
 import { CreateAgentEnvironmentValues } from '@/react/portainer/environments/environment.service/create';
-
-import { metadataValidation } from '../MetadataFieldset/validation';
-import { useNameValidation } from '../NameField';
+import { useNameValidation } from '@/react/portainer/environments/common/NameField/NameField';
+import { metadataValidation } from '@/react/portainer/environments/common/MetadataFieldset/validation';
 
 export function useValidation(): SchemaOf<CreateAgentEnvironmentValues> {
   return object({
@@ -19,7 +18,7 @@ function environmentValidation() {
     .required('此字段为必填项')
     .test(
       'address',
-      '环境地址必须为 <IP>:<PORT> 或 <HOST>:<PORT> 格式。',
+      'Environment address must be of the form <IP>:<PORT> or <HOST>:<PORT>.',
       (environmentUrl) => validateAddress(environmentUrl)
     );
 }

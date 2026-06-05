@@ -1,5 +1,5 @@
 import Chart from 'chart.js';
-import filesize from 'filesize';
+import { filesize } from 'filesize';
 
 angular.module('portainer.app').factory('ChartService', [
   function ChartService() {
@@ -77,7 +77,7 @@ angular.module('portainer.app').factory('ChartService', [
           labels: [],
           datasets: [
             {
-              label: 'Memory',
+              label: '内存',
               data: [],
               fill: true,
               backgroundColor: 'rgba(151,187,205,0.4)',

@@ -19,8 +19,8 @@ export function TableSettingsMenu({
             className={clsx('table-setting-menu-btn', {
               'setting-active': isExpanded,
             })}
-            aria-label="Settings"
-            title="Settings"
+            aria-label="设置"
+            title="设置"
           >
             <MoreVertical
               size="13"

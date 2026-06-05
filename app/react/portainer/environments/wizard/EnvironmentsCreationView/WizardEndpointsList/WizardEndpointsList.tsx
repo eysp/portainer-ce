@@ -1,7 +1,8 @@
 import { Plug2 } from 'lucide-react';
 import clsx from 'clsx';
 
-import { endpointTypeName, stripProtocol } from '@/portainer/filters/filters';
+import { stripProtocol } from '@/react/common/string-utils';
+import { endpointTypeName } from '@/portainer/filters/filters';
 import {
   getEnvironmentTypeIcon,
   isEdgeEnvironment,
@@ -65,10 +66,10 @@ export function WizardEndpointsList({ environmentIds }: Props) {
             </div>
             <div className={styles.wizardListTitle}>{environment.Name}</div>
             <div className={styles.wizardListSubtitle}>
-              URL: {stripProtocol(environment.URL)}
+              URL：{stripProtocol(environment.URL)}
             </div>
             <div className={styles.wizardListType}>
-              类型: {endpointTypeName(environment.Type)}
+              类型：{endpointTypeName(environment.Type)}
             </div>
             {isEdgeEnvironment(environment.Type) && (
               <div className={styles.wizardListEdgeStatus}>

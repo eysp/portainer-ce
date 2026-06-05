@@ -1,7 +1,10 @@
 import _ from 'lodash';
 
 import { notifyError } from '@/portainer/services/notifications';
-import { PrivateRegistryFieldset } from '@/react/edge/edge-stacks/components/PrivateRegistryFieldset';
+import {
+  PrivateRegistryFieldset,
+  REGISTRY_CREDENTIALS_ENABLED,
+} from '@/react/edge/edge-stacks/components/PrivateRegistryFieldset';
 import { useRegistries } from '@/react/portainer/registries/queries/useRegistries';
 import { isBE } from '@/react/portainer/feature-flags/feature-flags.service';
 
@@ -41,10 +44,14 @@ export function PrivateRegistryFieldsetWrapper({
       formInvalid={!values.file && !values.fileContent && !isGit}
       errorMessage={error}
       registries={registriesQuery.data}
-      onChange={() => matchRegistry(values)}
-      onSelect={(value) => onChange(value)}
-      isActive={!!value}
-      clearRegistries={() => onChange(undefined)}
+      onReload={() => matchRegistry(values)}
+      onChange={(value) => {
+        onChange(value);
+        if (value === REGISTRY_CREDENTIALS_ENABLED) {
+          // Enabled, need to match registry
+          matchRegistry(values);
+        }
+      }}
       method={isGit ? 'repository' : 'file'}
     />
   );

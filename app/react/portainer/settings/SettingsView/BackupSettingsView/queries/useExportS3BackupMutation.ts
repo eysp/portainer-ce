@@ -9,7 +9,7 @@ import { buildUrl } from './backupSettings.service';
 
 export function useExportS3BackupMutation() {
   return useMutation(exportS3Backup, {
-    ...withGlobalError('Unable to export backup to S3'),
+    ...withGlobalError('无法将备份导出到 S3'),
   });
 }
 
@@ -19,6 +19,6 @@ async function exportS3Backup(payload: BackupS3Model) {
 
     return response.data;
   } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to export s3 backup');
+    throw parseAxiosError(e as Error, '无法导出 S3 备份');
   }
 }

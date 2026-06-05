@@ -10,7 +10,7 @@ import { useEnvironmentId } from '@/react/hooks/useEnvironmentId';
 import { useCurrentUser, useIsEdgeAdmin } from '@/react/hooks/useUser';
 import { AccessControlForm } from '@/react/portainer/access-control';
 import { parseAccessControlFormData } from '@/react/portainer/access-control/utils';
-import { NameField } from '@/react/common/stacks/CreateView/NameField';
+import { NameField } from '@/react/docker/stacks/common/NameField';
 import { CustomTemplate } from '@/react/portainer/templates/custom-templates/types';
 import {
   isTemplateVariablesEnabled,
@@ -121,20 +121,20 @@ export function DeployForm({
               }}
               type="yaml"
               error={errors.fileContent}
-              textTip="在此定义或粘贴您的 Docker Compose 文件内容"
+              textTip="Define or paste the content of your docker compose file here"
               readonly={isGit}
               data-cy="custom-template-creation-editor"
             >
               <p>
-                您可以在{' '}
+                You can get more information about Compose file format in the{' '}
                 <a
                   href="https://docs.docker.com/compose/compose-file/"
                   target="_blank"
                   rel="noreferrer"
                 >
-                  官方文档
+                  official documentation
                 </a>
-                中了解更多关于 Compose 文件格式的信息。
+                .
               </p>
             </WebEditorForm>
           </AdvancedSettings>
@@ -164,7 +164,7 @@ export function DeployForm({
               color="default"
               data-cy="cancel-stack-creation"
             >
-              隐藏
+              Hide
             </Button>
           </FormActions>
         </Form>
@@ -177,7 +177,7 @@ export function DeployForm({
 
     return mutation.mutate(payload, {
       onSuccess() {
-        notifySuccess('成功', '堆栈已创建');
+        notifySuccess('Success', '堆栈已创建');
         router.stateService.go('docker.stacks');
       },
     });
@@ -239,8 +239,8 @@ export function DeployForm({
 
 function advancedSettingsLabel(isOpen: boolean, isGit: boolean) {
   if (isGit) {
-    return isOpen ? '隐藏堆栈' : '查看堆栈';
+    return isOpen ? 'Hide stack' : 'View stack';
   }
 
-  return isOpen ? '隐藏自定义堆栈' : '自定义堆栈';
+  return isOpen ? 'Hide custom stack' : 'Customize stack';
 }

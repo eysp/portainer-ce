@@ -24,7 +24,7 @@ export function Dialog<T>({
   onSubmit,
   modalType,
 }: Props<T>) {
-  const ariaLabel = requireString(title) || requireString(message) || '对话框';
+  const ariaLabel = requireString(title) || requireString(message) || 'Dialog';
 
   const [count, setCount] = useState<number>(0);
   const countRef = useRef(count);

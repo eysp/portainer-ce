@@ -36,7 +36,7 @@ function Cell({
       icon={Users}
       data-cy={`environment-manage-access-button-${environment.Name}`}
     >
-      管理访问权限
+      Manage access
     </Button>
   );
 }

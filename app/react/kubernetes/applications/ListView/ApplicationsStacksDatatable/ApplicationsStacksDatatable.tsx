@@ -59,7 +59,7 @@ export function ApplicationsStacksDatatable({
   return (
     <ExpandableDatatable
       getRowCanExpand={(row) => row.original.Applications.length > 0}
-      title="Stacks"
+      title="堆栈"
       titleIcon={List}
       dataset={stacks}
       isLoading={applicationsQuery.isLoading || namespaceListQuery.isLoading}

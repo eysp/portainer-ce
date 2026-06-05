@@ -1,8 +1,9 @@
 import clsx from 'clsx';
 import { useMemo } from 'react';
 import { Menu, MenuButton, MenuPopover } from '@reach/menu-button';
-import { Column, Row } from '@tanstack/react-table';
+import { Column, Row, TableMeta } from '@tanstack/react-table';
 import { Check, Filter } from 'lucide-react';
+import _ from 'lodash';
 
 import { getValueAsArrayOfStrings } from '@/portainer/helpers/array';
 
@@ -23,9 +24,17 @@ export function MultipleSelectionFilter({
   value = [],
   filterKey,
   onChange,
-  menuTitle = '按状态筛选',
+  menuTitle = 'Filter by state',
 }: MultipleSelectionFilterProps) {
   const enabled = value.length > 0;
+
+  // This will make sure that if the current value has options that are not in the options list,
+  // they will still be displayed in the filter menu.
+  const optionsWithValues = useMemo(
+    () => _.uniq([...options, ...value]),
+    [options, value]
+  );
+
   return (
     <div>
       <Menu>
@@ -41,7 +50,7 @@ export function MultipleSelectionFilter({
           <div className="tableMenu">
             <div className="menuHeader">{menuTitle}</div>
             <div className="menuContent">
-              {options.map((option, index) => (
+              {optionsWithValues.map((option, index) => (
                 <div className="md-checkbox" key={index}>
                   <input
                     id={`filter_${filterKey}_${index}`}
@@ -75,7 +84,8 @@ export function MultipleSelectionFilter({
 
 export type FilterOptionsTransformer<TData extends DefaultType> = (
   rows: Row<TData>[],
-  id: string
+  id: string,
+  tableMeta: TableMeta<TData>
 ) => string[];
 
 export function filterHOC<TData extends DefaultType>(
@@ -84,14 +94,16 @@ export function filterHOC<TData extends DefaultType>(
 ) {
   return function Filter({
     column: { getFilterValue, setFilterValue, getFacetedRowModel, id },
+    tableMeta,
   }: {
     column: Column<TData>;
+    tableMeta: TableMeta<TData>;
   }) {
     const { flatRows } = getFacetedRowModel();
 
     const options = useMemo(
-      () => filterOptionsTransformer(flatRows, id),
-      [flatRows, id]
+      () => filterOptionsTransformer(flatRows, id, tableMeta),
+      [flatRows, id, tableMeta]
     );
 
     const value = getFilterValue();

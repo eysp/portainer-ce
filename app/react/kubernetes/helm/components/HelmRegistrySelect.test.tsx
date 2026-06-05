@@ -35,20 +35,25 @@ const defaultProps = {
 
 const mockRepoOptions = [
   {
-    value: {
-      repoUrl: 'https://charts.bitnami.com/bitnami',
-      name: 'Bitnami',
-      type: RegistryTypes.CUSTOM,
-    },
-    label: 'Bitnami',
-  },
-  {
-    value: {
-      repoUrl: 'https://kubernetes-charts.storage.googleapis.com',
-      name: 'Stable',
-      type: RegistryTypes.CUSTOM,
-    },
-    label: 'Stable',
+    label: 'Custom Repositories',
+    options: [
+      {
+        value: {
+          repoUrl: 'https://charts.bitnami.com/bitnami',
+          name: 'Bitnami',
+          type: RegistryTypes.CUSTOM,
+        },
+        label: 'Bitnami',
+      },
+      {
+        value: {
+          repoUrl: 'https://kubernetes-charts.storage.googleapis.com',
+          name: 'Stable',
+          type: RegistryTypes.CUSTOM,
+        },
+        label: 'Stable',
+      },
+    ],
   },
 ];
 
@@ -129,8 +134,8 @@ describe('HelmRegistrySelect', () => {
       const select = screen.getByRole('combobox');
       await user.click(select);
 
-      expect(screen.getByText('Bitnami')).toBeInTheDocument();
-      expect(screen.getByText('Stable')).toBeInTheDocument();
+      screen.getAllByText('Bitnami').forEach((el) => expect(el).toBeVisible());
+      screen.getAllByText('Stable').forEach((el) => expect(el).toBeVisible());
     });
 
     it.skip('should call onRegistryChange when option is selected', async () => {

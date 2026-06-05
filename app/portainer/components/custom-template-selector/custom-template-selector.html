@@ -14,15 +14,15 @@
       </select>
       <span ng-if="$ctrl.isLoadFailed">
         <p class="text-warning mb-5 !inline-flex gap-1 !align-top text-xs" ng-if="ctrl.currentUser.isAdmin || ctrl.currentUser.id === ctrl.state.template.CreatedByUserId">
-          <pr-icon icon="'alert-triangle'" mode="'warning'" size="'sm'"></pr-icon>自定义模板加载失败，请
-          <a ui-sref="kubernetes.templates.custom.edit({id: ctrl.state.templateId})">点击此处</a> 进行配置。</p
+          <pr-icon icon="'alert-triangle'" mode="'warning'" size="'sm'"></pr-icon>自定义模板无法加载，请
+          <a ui-sref="kubernetes.templates.custom.edit({id: ctrl.state.templateId})">点击此处</a>进行配置。</p
         >
         <p class="text-warning mb-5 !inline-flex gap-1 !align-top text-xs" ng-if="!(ctrl.currentUser.isAdmin || ctrl.currentUser.id === ctrl.state.template.CreatedByUserId)">
           <pr-icon icon="'alert-triangle'" mode="'warning'" size="'sm'"></pr-icon>自定义模板无法加载，请联系您的管理员。</p
         >
       </span>
       <span class="small text-muted pt-[7px]" ng-if="!$ctrl.templates.length">
-        没有可用的自定义模板。请前往 <a ui-state="$ctrl.newTemplatePath">自定义模板视图</a> 创建模板。
+        没有可用的自定义模板。请前往<a ui-state="$ctrl.newTemplatePath">自定义模板视图</a>创建一个。
       </span>
     </div>
   </div>

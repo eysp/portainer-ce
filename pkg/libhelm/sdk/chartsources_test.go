@@ -1,14 +1,16 @@
 package sdk
 
 import (
+	"errors"
 	"strings"
 	"testing"
 
-	"github.com/pkg/errors"
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/pkg/fips"
 	helmregistrycache "github.com/portainer/portainer/pkg/libhelm/cache"
+
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/registry"
 )
@@ -41,8 +43,7 @@ func TestParseHTTPRepoChartRef(t *testing.T) {
 	is := assert.New(t)
 
 	chartRef, repoURL, err := parseHTTPRepoChartRef("my-chart", "https://my.repo/charts")
-
-	is.NoError(err)
+	require.NoError(t, err)
 	is.Equal("my-chart", chartRef)
 	is.Equal("https://my.repo/charts", repoURL)
 }
@@ -58,8 +59,7 @@ func TestParseOCIChartRef(t *testing.T) {
 	}
 
 	chartRef, repoURL, err := parseOCIChartRef("my-chart", registry)
-
-	is.NoError(err)
+	require.NoError(t, err)
 	is.Equal("oci://my-registry.io/my-namespace/my-chart", chartRef)
 	is.Equal("my-registry.io/my-namespace", repoURL)
 }
@@ -81,8 +81,7 @@ func TestParseOCIChartRef_GitLab(t *testing.T) {
 	}
 
 	chartRef, repoURL, err := parseOCIChartRef("my-chart", registry)
-
-	is.NoError(err)
+	require.NoError(t, err)
 	is.Equal("oci://registry.gitlab.com/my-chart", chartRef)
 	is.Equal("registry.gitlab.com", repoURL)
 }
@@ -92,8 +91,7 @@ func TestParseChartRef(t *testing.T) {
 		is := assert.New(t)
 
 		chartRef, repoURL, err := parseChartRef("my-chart", "https://my.repo/charts", nil)
-
-		is.NoError(err)
+		require.NoError(t, err)
 		is.Equal("my-chart", chartRef)
 		is.Equal("https://my.repo/charts", repoURL)
 	})
@@ -109,8 +107,7 @@ func TestParseChartRef(t *testing.T) {
 		}
 
 		chartRef, repoURL, err := parseChartRef("my-chart", "", registry)
-
-		is.NoError(err)
+		require.NoError(t, err)
 		is.Equal("oci://my-registry.io/my-namespace/my-chart", chartRef)
 		is.Equal("my-registry.io/my-namespace", repoURL)
 	})
@@ -163,8 +160,7 @@ func TestConfigureChartPathOptions(t *testing.T) {
 		chartPathOptions := &action.ChartPathOptions{}
 
 		err := configureChartPathOptions(chartPathOptions, "1.0.0", "https://my.repo/charts", nil)
-
-		is.NoError(err)
+		require.NoError(t, err)
 		is.Equal("https://my.repo/charts", chartPathOptions.RepoURL)
 		is.Equal("1.0.0", chartPathOptions.Version)
 	})
@@ -182,7 +178,7 @@ func TestConfigureChartPathOptions(t *testing.T) {
 
 		err := configureChartPathOptions(chartPathOptions, "1.0.0", "", registry)
 
-		is.NoError(err)
+		require.NoError(t, err)
 		is.Equal("user", chartPathOptions.Username)
 		is.Equal("pass", chartPathOptions.Password)
 		is.Equal("1.0.0", chartPathOptions.Version)
@@ -194,7 +190,7 @@ func TestLoginToOCIRegistry(t *testing.T) {
 
 	t.Run("should return nil for HTTP repository (nil registry)", func(t *testing.T) {
 		client, err := createOCIRegistryClient(nil)
-		is.NoError(err)
+		require.NoError(t, err)
 		is.Nil(client)
 	})
 
@@ -204,7 +200,7 @@ func TestLoginToOCIRegistry(t *testing.T) {
 			Authentication: false,
 		}
 		client, err := createOCIRegistryClient(registry)
-		is.NoError(err)
+		require.NoError(t, err)
 		is.NotNil(client) // Now returns a client even without auth for potential TLS configuration
 	})
 
@@ -223,9 +219,10 @@ func TestLoginToOCIRegistry(t *testing.T) {
 				},
 			},
 		}
+
 		client, err := createOCIRegistryClient(registry)
 		// Should succeed even without cert files when they're empty strings
-		is.NoError(err)
+		require.NoError(t, err)
 		is.NotNil(client) // Should get a client configured for TLS
 	})
 
@@ -235,8 +232,9 @@ func TestLoginToOCIRegistry(t *testing.T) {
 			Authentication: true,
 			Username:       " ",
 		}
+
 		client, err := createOCIRegistryClient(registry)
-		is.Error(err)
+		require.Error(t, err)
 		is.Nil(client)
 		// The error might be a validation error or a login error, both are acceptable
 		is.True(err.Error() == "username is required when registry authentication is enabled" ||
@@ -254,7 +252,7 @@ func TestLoginToOCIRegistry(t *testing.T) {
 		// this will fail because it can't connect to the registry,
 		// but it proves that the loginToOCIRegistry function is calling the login function.
 		client, err := createOCIRegistryClient(registry)
-		is.Error(err)
+		require.Error(t, err)
 		is.Nil(client)
 		is.Contains(err.Error(), "failed to login to registry")
 	})
@@ -276,7 +274,7 @@ func TestLoginToOCIRegistry(t *testing.T) {
 		// this will fail because it can't connect to the registry,
 		// but it proves that the loginToOCIRegistry function is calling the login function.
 		client, err := createOCIRegistryClient(registry)
-		is.Error(err)
+		require.Error(t, err)
 		is.Nil(client)
 		is.Contains(err.Error(), "failed to login to registry")
 	})
@@ -287,7 +285,7 @@ func TestAuthenticateChartSource(t *testing.T) {
 		is := assert.New(t)
 		actionConfig := &action.Configuration{}
 		err := authenticateChartSource(actionConfig, nil)
-		is.NoError(err)
+		require.NoError(t, err)
 		is.Nil(actionConfig.RegistryClient)
 	})
 
@@ -306,32 +304,32 @@ func TestAuthenticateChartSource(t *testing.T) {
 		}
 
 		err := authenticateChartSource(actionConfig, registry)
-		is.NoError(err)
+		require.NoError(t, err)
 		is.Equal(existingClient, actionConfig.RegistryClient)
 	})
 
 	t.Run("should authenticate OCI registry when registry is provided", func(t *testing.T) {
-		is := assert.New(t)
 		actionConfig := &action.Configuration{}
 		registry := &portainer.Registry{
 			ID:             123,
 			Authentication: false,
 		}
+
 		err := authenticateChartSource(actionConfig, registry)
-		is.NoError(err)
+		require.NoError(t, err)
 	})
 
 	t.Run("should return error for invalid registry credentials", func(t *testing.T) {
-		is := assert.New(t)
 		actionConfig := &action.Configuration{}
 		registry := &portainer.Registry{
 			ID:             123,
 			Authentication: true,
 			Username:       " ", // Invalid username
 		}
+
 		err := authenticateChartSource(actionConfig, registry)
-		is.Error(err)
-		is.Contains(err.Error(), "registry credential validation failed")
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "registry credential validation failed")
 	})
 }
 
@@ -341,6 +339,7 @@ func TestGetRegistryClientFromCache(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to initialize cache: %v", err)
 	}
+
 	// Clear cache before each test
 	helmregistrycache.FlushAll()
 
@@ -380,6 +379,7 @@ func TestSetRegistryClientInCache(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to initialize cache: %v", err)
 	}
+
 	// Clear cache before each test
 	helmregistrycache.FlushAll()
 
@@ -433,6 +433,7 @@ func TestFlushRegistryCache(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to initialize cache: %v", err)
 	}
+
 	// Clear cache before test
 	helmregistrycache.FlushAll()
 
@@ -643,12 +644,12 @@ func TestValidateRegistryCredentials(t *testing.T) {
 			err := validateRegistryCredentials(tt.registry)
 
 			if tt.expectError {
-				assert.Error(t, err)
+				require.Error(t, err)
 				if err != nil {
 					assert.Equal(t, tt.errorMsg, err.Error())
 				}
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}
 		})
 	}

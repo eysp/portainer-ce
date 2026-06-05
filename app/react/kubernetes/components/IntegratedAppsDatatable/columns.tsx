@@ -6,15 +6,15 @@ import { name } from './columns.name';
 export const columns = [
   name,
   helper.accessor('StackName', {
-    header: 'Stack',
+    header: '堆栈',
     cell: ({ getValue }) => getValue() || '-',
   }),
 
   helper.accessor('Image', {
-    header: 'Image',
+    header: '镜像',
     cell: ({ row: { original: item } }) => (
       <>
-        {truncate(item.Image, 64)}
+        <span title={item.Image}>{truncate(item.Image, 64)}</span>
         {item.Containers?.length > 1 && <>+ {item.Containers.length - 1}</>}
       </>
     ),

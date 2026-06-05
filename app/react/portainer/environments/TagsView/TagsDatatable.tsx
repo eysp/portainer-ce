@@ -40,7 +40,7 @@ export function TagsDatatable({
       renderTableActions={(selectedItems) => (
         <DeleteButton
           disabled={selectedItems.length === 0}
-          confirmMessage="您确定要移除选定的标签吗？"
+          confirmMessage="您确定要删除选中的标签吗？"
           onConfirmed={() => onRemove(selectedItems)}
           data-cy="remove-tag-button"
         />

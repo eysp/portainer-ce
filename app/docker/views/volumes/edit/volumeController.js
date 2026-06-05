@@ -21,15 +21,15 @@ angular.module('portainer.docker').controller('VolumeController', [
     };
 
     $scope.removeVolume = function removeVolume() {
-      confirmDelete('您确定要移除此卷吗？').then((confirmed) => {
+      confirmDelete('确定要删除此卷吗？').then((confirmed) => {
         if (confirmed) {
           VolumeService.remove($scope.volume.Id)
             .then(function success() {
-              Notifications.success('卷已成功移除', $transition$.params().id);
+              Notifications.success('卷删除成功', $transition$.params().id);
               $state.go('docker.volumes', {});
             })
             .catch(function error(err) {
-              Notifications.error('失败', err, '无法移除卷');
+              Notifications.error('失败', err, '无法删除卷');
             });
         }
       });
@@ -65,7 +65,7 @@ angular.module('portainer.docker').controller('VolumeController', [
           $scope.containersUsingVolume = containers;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索卷详细信息');
+          Notifications.error('失败', err, '无法获取卷详情');
         });
     }
 

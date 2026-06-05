@@ -12,7 +12,7 @@ export interface DownloadBackupPayload {
 
 export function useDownloadBackupMutation() {
   return useMutation(downloadBackup, {
-    ...withGlobalError('Unable to download backup'),
+    ...withGlobalError('无法下载备份'),
   });
 }
 
@@ -30,6 +30,6 @@ async function downloadBackup(payload: DownloadBackupPayload) {
     const blob = new Blob([file], { type: 'application/zip' });
     return saveAs(blob, filename);
   } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to download backup');
+    throw parseAxiosError(e as Error, '无法下载备份');
   }
 }

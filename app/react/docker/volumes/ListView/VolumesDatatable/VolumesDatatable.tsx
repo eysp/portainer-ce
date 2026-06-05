@@ -55,7 +55,6 @@ export function VolumesDatatable({
     <Datatable
       title="卷"
       titleIcon={Database}
-      emptyContentLabel="卷列表为空"
       columns={columns}
       dataset={dataset || []}
       isLoading={!dataset}

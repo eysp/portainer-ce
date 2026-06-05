@@ -19,7 +19,7 @@ export function AdditionalFileField({ onChange, value, errors }: Props) {
       label="附加路径"
       onChange={onChange}
       value={value}
-      addLabel="添加文件"
+      addLabel="Add file"
       item={Item}
       itemBuilder={() => ''}
       data-cy="gitops-additional-files"

@@ -1,23 +1,25 @@
-export type AutoUpdateMechanism = 'Webhook' | 'Interval';
+import {
+  AuthTypeOption,
+  GitCredential,
+} from '@/react/portainer/account/git-credentials/types';
+
+import {
+  AutoUpdateModel,
+  getDefaultAutoUpdateValues,
+} from './AutoUpdateFieldset/utils';
+
+export type {
+  AutoUpdateMechanism,
+  AutoUpdateModel,
+  AutoUpdateResponse,
+} from './AutoUpdateFieldset/utils';
+
 export { type RelativePathModel } from './RelativePathFieldset/types';
-
-export interface AutoUpdateResponse {
-  /* Auto update interval */
-  Interval: string;
-
-  /* A UUID generated from client */
-  Webhook: string;
-
-  /* Force update ignores repo changes */
-  ForceUpdate: boolean;
-
-  /* Pull latest image */
-  ForcePullImage: boolean;
-}
 
 export interface GitAuthenticationResponse {
   Username?: string;
   Password?: string;
+  AuthorizationType?: AuthTypeOption;
   GitCredentialID?: number;
 }
 
@@ -30,19 +32,12 @@ export interface RepoConfigResponse {
   TLSSkipVerify: boolean;
 }
 
-export type AutoUpdateModel = {
-  RepositoryAutomaticUpdates: boolean;
-  RepositoryMechanism: AutoUpdateMechanism;
-  RepositoryFetchInterval: string;
-  ForcePullImage: boolean;
-  RepositoryAutomaticUpdatesForce: boolean;
-};
-
 export type GitCredentialsModel = {
   RepositoryAuthentication?: boolean;
   RepositoryUsername?: string;
   RepositoryPassword?: string;
-  RepositoryGitCredentialID?: number;
+  RepositoryGitCredentialID?: GitCredential['id'];
+  RepositoryAuthorizationType?: AuthTypeOption;
 };
 
 export type GitNewCredentialModel = {
@@ -52,7 +47,7 @@ export type GitNewCredentialModel = {
 
 export type GitAuthModel = GitCredentialsModel & GitNewCredentialModel;
 
-export type DeployMethod = 'compose' | 'manifest';
+export type DeployMethod = 'compose' | 'manifest' | 'helm';
 
 export interface GitFormModel extends GitAuthModel {
   RepositoryURL: string;
@@ -71,18 +66,25 @@ export interface GitFormModel extends GitAuthModel {
   AutoUpdate?: AutoUpdateModel;
 }
 
+export function getDefaultModel(
+  autoUpdate: AutoUpdateModel = getDefaultAutoUpdateValues()
+): GitFormModel {
+  return {
+    RepositoryURL: '',
+    ComposeFilePathInRepository: 'docker-compose.yml',
+    RepositoryReferenceName: 'refs/heads/main',
+    RepositoryAuthentication: false,
+    TLSSkipVerify: false,
+    AutoUpdate: autoUpdate,
+  };
+}
+
 export function toGitFormModel(
   response?: RepoConfigResponse,
   autoUpdate?: AutoUpdateModel
 ): GitFormModel {
   if (!response) {
-    return {
-      RepositoryURL: '',
-      ComposeFilePathInRepository: '',
-      RepositoryAuthentication: false,
-      TLSSkipVerify: false,
-      AutoUpdate: autoUpdate,
-    };
+    return getDefaultModel(autoUpdate);
   }
 
   const { URL, ReferenceName, ConfigFilePath, Authentication, TLSSkipVerify } =
@@ -98,6 +100,7 @@ export function toGitFormModel(
     ),
     RepositoryUsername: Authentication?.Username,
     RepositoryPassword: Authentication?.Password,
+    RepositoryAuthorizationType: Authentication?.AuthorizationType,
     RepositoryGitCredentialID: Authentication?.GitCredentialID,
     TLSSkipVerify,
     AutoUpdate: autoUpdate,

@@ -61,14 +61,14 @@ export function KubeconfigPrompt({
       .every((env) => selection.includes(env.Id));
 
   return (
-    <Modal aria-label="Kubeconfig 视图" onDismiss={onClose}>
+    <Modal aria-label="Kubeconfig 视图" onDismiss={onClose} size="xl">
       <Modal.Header title="下载 kubeconfig 文件" />
 
       <Modal.Body>
         <div>
           <span>
-            选择要添加到 kubeconfig 文件的 Kubernetes 环境。
-            您可以选择跨多个页面。
+            请选择要添加到 kubeconfig 文件中的 Kubernetes 环境。
+         您可以跨多个页面进行选择。
           </span>
           <span className="space-left">{expiryQuery.data}</span>
         </div>
@@ -130,7 +130,7 @@ export function KubeconfigPrompt({
         <Button
           onClick={handleDownload}
           disabled={selection.length === 0}
-          data-cy="download-kubeconfig-confirbutton"
+          data-cy="download-kubeconfig-confirmbutton"
         >
           下载文件
         </Button>
@@ -161,18 +161,18 @@ export function KubeconfigPrompt({
 }
 
 export function expiryMessage(expiry: string) {
-  const prefix = 'kubeconfig 文件将在';
+  const prefix = 'Kubeconfig 文件将';
   switch (expiry) {
     case '24h':
-      return `${prefix} 1 天后过期。`;
+      return `${prefix}在 1 天后过期。`;
     case '168h':
-      return `${prefix} 7 天后过期。`;
+      return `${prefix}在 7 天后过期。`;
     case '720h':
-      return `${prefix} 30 天后过期。`;
+      return `${prefix}在 30 天后过期。`;
     case '8640h':
-      return `${prefix} 1 年后过期。`;
+      return `${prefix}在 1 年后过期。`;
     case '0':
     default:
-      return `kubeconfig 文件不会过期。`;
+      return `${prefix}不会过期。`;
   }
 }

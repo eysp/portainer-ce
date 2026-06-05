@@ -11,3 +11,6 @@ function getOs() {
 
   return userAgent.includes('Mac') ? 'mac' : 'lin';
 }
+
+export const COMPOSE_STACK_NAME_LABEL = 'com.docker.compose.project';
+export const SWARM_STACK_NAME_LABEL = 'com.docker.stack.namespace';

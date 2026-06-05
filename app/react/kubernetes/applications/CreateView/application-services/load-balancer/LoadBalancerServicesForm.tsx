@@ -94,7 +94,7 @@ export function LoadBalancerServicesForm({
                 className="!ml-0"
                 onClick={() => loadBalancerEnabledQuery.refetch()}
               >
-                Refresh
+                刷新
               </Button>
             </div>
           </div>

@@ -28,7 +28,7 @@ export function useCustomTemplates<T = Array<CustomTemplate>>({
 }: { params?: Params; select?(templates: Array<CustomTemplate>): T } = {}) {
   return useQuery(queryKeys.list(params), () => getCustomTemplates(params), {
     select,
-    ...withGlobalError('无法获取自定义模板'),
+    ...withGlobalError('Unable to retrieve custom templates'),
   });
 }
 
@@ -46,6 +46,6 @@ async function getCustomTemplates({ type, edge }: Params = {}) {
     });
     return data;
   } catch (e) {
-    throw parseAxiosError(e, '无法获取自定义模板');
+    throw parseAxiosError(e, 'Unable to get custom templates');
   }
 }

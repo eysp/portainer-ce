@@ -61,7 +61,7 @@ export function HelmRepositoryForm({
                 isLoading={isLoading}
                 loadingText="正在保存 Helm 仓库..."
               >
-                {isEditing ? '更新 Helm 仓库' : '保存 Helm 仓库'}
+                {isEditing ? 'Update Helm repository' : 'Save Helm repository'}
               </LoadingButton>
               {isEditing && (
                 <Button

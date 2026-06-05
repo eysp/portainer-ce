@@ -2,7 +2,7 @@
 
 <host-details-panel
   host="$ctrl.hostDetails"
-  is-browse-enabled="$ctrl.isAgent && $ctrl.agentApiVersion > 1 && $ctrl.hostFeaturesEnabled"
+  is-browse-enabled="$ctrl.isAdmin && $ctrl.isAgent && $ctrl.agentApiVersion > 1 && $ctrl.hostFeaturesEnabled"
   browse-url="{{ $ctrl.browseUrl }}"
 ></host-details-panel>
 

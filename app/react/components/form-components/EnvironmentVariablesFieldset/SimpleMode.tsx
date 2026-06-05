@@ -40,7 +40,7 @@ export function SimpleMode({
       </Button>
 
       <TextTip color="blue" inline={false}>
-        切换到高级模式以复制和粘贴多个变量
+        切换到高级模式以复制粘贴多个变量
       </TextTip>
 
       <InputList
@@ -92,7 +92,7 @@ function FileEnv({ onChooseFile }: { onChooseFile: (file: Values) => void }) {
 
       {fileTooBig && (
         <TextTip color="orange" inline>
-          文件太大！请上传小于 1MB 的文件
+          文件太大！请尝试上传小于 1MB 的文件
         </TextTip>
       )}
     </>

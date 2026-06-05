@@ -18,7 +18,7 @@ export function usePublicSettings<T = PublicSettingsResponse>({
 } = {}) {
   return useQuery(queryKeys.public(), getPublicSettings, {
     select,
-    ...withError('Unable to retrieve public settings'),
+    ...withError('无法获取公共设置'),
     enabled,
     onSuccess,
   });

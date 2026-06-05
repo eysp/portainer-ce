@@ -63,9 +63,9 @@ export function ItemView() {
   return (
     <>
       <PageHeader
-        title="Container Instance"
+        title="容器实例"
         breadcrumbs={[
-          { link: 'azure.containerinstances', label: 'Container instances' },
+          { link: 'azure.containerinstances', label: '容器实例' },
           { label: container.name },
         ]}
         reload
@@ -86,7 +86,7 @@ export function ItemView() {
                 />
               </FormControl>
 
-              <FormControl label="Resource group" inputId="resourceGroup-input">
+              <FormControl label="资源组" inputId="resourceGroup-input">
                 <Input
                   name="resourceGroup"
                   id="resourceGroup-input"
@@ -108,7 +108,7 @@ export function ItemView() {
 
               <FormSectionTitle>Container configuration</FormSectionTitle>
 
-              <FormControl label="Name" inputId="name-input">
+              <FormControl label="名称" inputId="name-input">
                 <Input
                   name="name"
                   id="name-input"
@@ -118,7 +118,7 @@ export function ItemView() {
                 />
               </FormControl>
 
-              <FormControl label="Image" inputId="image-input">
+              <FormControl label="镜像" inputId="image-input">
                 <Input
                   name="image"
                   id="image-input"
@@ -140,7 +140,7 @@ export function ItemView() {
 
               <PortsMappingField value={container.ports} readOnly />
 
-              <FormControl label="Public IP" inputId="public-ip">
+              <FormControl label="公网 IP" inputId="public-ip">
                 <Input
                   name="public-ip"
                   id="public-ip"
@@ -164,7 +164,7 @@ export function ItemView() {
                 />
               </FormControl>
 
-              <FormControl label="Memory" inputId="cpu-input">
+              <FormControl label="内存" inputId="cpu-input">
                 <Input
                   name="memory"
                   id="memory-input"
@@ -175,6 +175,32 @@ export function ItemView() {
                   data-cy="aci-container-memory-input"
                 />
               </FormControl>
+              {container.environmentVariables &&
+                container.environmentVariables.length > 0 && (
+                  <>
+                    <FormSectionTitle>环境变量</FormSectionTitle>
+                    <FormControl
+                      label="环境变量"
+                      inputId="env-vars-input"
+                    >
+                      <div data-cy="aci-container-env-vars-input">
+                        {container.environmentVariables.map((env) => (
+                          <>
+                            {/* show redacted values for secure values and values */}
+                            {/* when I add secure values in azure, the 'secureValue' and 'value' fields are ommitted (tested on current and latest, 2025-09-01 api versions) */}
+                            {env.secureValue || env.value === undefined ? (
+                              <div key={env.name}>{env.name} = ********</div>
+                            ) : (
+                              <div key={env.name}>
+                                {env.name} = {env.value}
+                              </div>
+                            )}
+                          </>
+                        ))}
+                      </div>
+                    </FormControl>
+                  </>
+                )}
             </WidgetBody>
           </Widget>
         </div>
@@ -267,11 +293,14 @@ function aggregateContainerData(
       }
     );
 
+    const { environmentVariables } = containerInstanceProperties;
+
     return {
       imageName,
       ports,
       cpu: containerInstanceProperties.resources.cpu,
       memory: containerInstanceProperties.resources.memoryInGB,
+      environmentVariables,
     };
   }
 }

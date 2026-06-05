@@ -1,5 +1,5 @@
 import axios, { parseAxiosError } from '@/portainer/services/axios';
-import { AutoUpdateModel } from '@/react/portainer/gitops/types';
+import { AutoUpdateResponse } from '@/react/portainer/gitops/types';
 import { EnvironmentId } from '@/react/portainer/environments/types';
 
 import { Stack } from '../../types';
@@ -31,7 +31,7 @@ export type KubernetesGitRepositoryPayload = {
   /** TLSSkipVerify skips SSL verification when cloning the Git repository */
   tlsSkipVerify?: boolean;
   /** Optional GitOps update configuration */
-  autoUpdate?: AutoUpdateModel;
+  autoUpdate?: AutoUpdateResponse | null;
   environmentId: EnvironmentId;
 };
 

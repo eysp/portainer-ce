@@ -6,6 +6,7 @@ import (
 	"github.com/portainer/portainer/pkg/libhelm/options"
 	"github.com/portainer/portainer/pkg/libhelm/test"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_Show(t *testing.T) {
@@ -23,9 +24,10 @@ func Test_Show(t *testing.T) {
 	}
 	release, err := hspm.Upgrade(installOpts)
 	if release != nil || err != nil {
-		defer hspm.Uninstall(options.UninstallOptions{
-			Name: "ingress-nginx",
-		})
+		defer func() {
+			err := hspm.Uninstall(options.UninstallOptions{Name: "ingress-nginx"})
+			require.NoError(t, err)
+		}()
 	}
 
 	t.Run("show requires chart, output format and repo or registry", func(t *testing.T) {
@@ -35,7 +37,7 @@ func Test_Show(t *testing.T) {
 			OutputFormat: "",
 		}
 		_, err := hspm.Show(showOpts)
-		is.Error(err, "should return error when required options are missing")
+		require.Error(t, err, "should return error when required options are missing")
 		is.Contains(err.Error(), "chart, output format and either repo or registry are required", "error message should indicate required options")
 	})
 
@@ -47,7 +49,7 @@ func Test_Show(t *testing.T) {
 		}
 		values, err := hspm.Show(showOpts)
 
-		is.NoError(err, "should not return error when not in k8s environment")
+		require.NoError(t, err, "should not return error when not in k8s environment")
 		is.NotEmpty(values, "should return non-empty values")
 	})
 
@@ -59,7 +61,7 @@ func Test_Show(t *testing.T) {
 		}
 		readme, err := hspm.Show(showOpts)
 
-		is.NoError(err, "should not return error when not in k8s environment")
+		require.NoError(t, err, "should not return error when not in k8s environment")
 		is.NotEmpty(readme, "should return non-empty readme")
 	})
 
@@ -71,7 +73,7 @@ func Test_Show(t *testing.T) {
 		}
 		chart, err := hspm.Show(showOpts)
 
-		is.NoError(err, "should not return error when not in k8s environment")
+		require.NoError(t, err, "should not return error when not in k8s environment")
 		is.NotNil(chart, "should return non-nil chart definition")
 	})
 
@@ -83,7 +85,7 @@ func Test_Show(t *testing.T) {
 		}
 		info, err := hspm.Show(showOpts)
 
-		is.NoError(err, "should not return error when not in k8s environment")
+		require.NoError(t, err, "should not return error when not in k8s environment")
 		is.NotEmpty(info, "should return non-empty chart info")
 	})
 
@@ -96,7 +98,7 @@ func Test_Show(t *testing.T) {
 		}
 		_, err := hspm.Show(showOpts)
 
-		is.Error(err, "should return error with invalid output format")
+		require.Error(t, err, "should return error with invalid output format")
 		is.Contains(err.Error(), "unsupported output format", "error message should indicate invalid output format")
 	})
 }

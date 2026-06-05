@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/portainer/portainer/api/logs"
 	"github.com/portainer/portainer/pkg/fips"
 
 	"github.com/stretchr/testify/assert"
@@ -47,26 +48,29 @@ func Test_encryptAndDecrypt_withTheSamePassword(t *testing.T) {
 		)
 
 		content := randBytes(1024*1024*100 + 523)
-		os.WriteFile(originFilePath, content, 0600)
+		err := os.WriteFile(originFilePath, content, 0600)
+		require.NoError(t, err)
 
 		originFile, _ := os.Open(originFilePath)
-		defer originFile.Close()
+		defer logs.CloseAndLogErr(originFile)
 
 		encryptedFileWriter, _ := os.Create(encryptedFilePath)
 
-		err := encrypt(originFile, encryptedFileWriter, []byte(passphrase))
-		require.Nil(t, err, "Failed to encrypt a file")
-		encryptedFileWriter.Close()
+		err = encrypt(originFile, encryptedFileWriter, []byte(passphrase))
+		require.NoError(t, err, "Failed to encrypt a file")
+		logs.CloseAndLogErr(encryptedFileWriter)
 
 		encryptedContent, err := os.ReadFile(encryptedFilePath)
-		require.Nil(t, err, "Couldn't read encrypted file")
+		require.NoError(t, err, "Couldn't read encrypted file")
 		assert.NotEqual(t, encryptedContent, content, "Content wasn't encrypted")
 
-		encryptedFileReader, _ := os.Open(encryptedFilePath)
-		defer encryptedFileReader.Close()
+		encryptedFileReader, err := os.Open(encryptedFilePath)
+		require.NoError(t, err)
+		defer logs.CloseAndLogErr(encryptedFileReader)
 
-		decryptedFileWriter, _ := os.Create(decryptedFilePath)
-		defer decryptedFileWriter.Close()
+		decryptedFileWriter, err := os.Create(decryptedFilePath)
+		require.NoError(t, err)
+		defer logs.CloseAndLogErr(decryptedFileWriter)
 
 		decryptedReader, err := decrypt(encryptedFileReader, []byte(passphrase))
 		if !decryptShouldSucceed {
@@ -74,9 +78,11 @@ func Test_encryptAndDecrypt_withTheSamePassword(t *testing.T) {
 		} else {
 			require.NoError(t, err, "Failed to decrypt file indicated by decryptShouldSucceed")
 
-			io.Copy(decryptedFileWriter, decryptedReader)
+			_, err = io.Copy(decryptedFileWriter, decryptedReader)
+			require.NoError(t, err)
 
-			decryptedContent, _ := os.ReadFile(decryptedFilePath)
+			decryptedContent, err := os.ReadFile(decryptedFilePath)
+			require.NoError(t, err)
 			assert.Equal(t, content, decryptedContent, "Original and decrypted content should match")
 		}
 	}
@@ -147,33 +153,40 @@ func Test_encryptAndDecrypt_withStrongPassphrase(t *testing.T) {
 		)
 
 		content := randBytes(500)
-		os.WriteFile(originFilePath, content, 0600)
 
-		originFile, _ := os.Open(originFilePath)
-		defer originFile.Close()
+		err := os.WriteFile(originFilePath, content, 0600)
+		require.NoError(t, err)
+
+		originFile, err := os.Open(originFilePath)
+		require.NoError(t, err)
+		defer logs.CloseAndLogErr(originFile)
 
 		encryptedFileWriter, _ := os.Create(encryptedFilePath)
 
-		err := encrypt(originFile, encryptedFileWriter, []byte(passphrase))
-		assert.Nil(t, err, "Failed to encrypt a file")
-		encryptedFileWriter.Close()
+		err = encrypt(originFile, encryptedFileWriter, []byte(passphrase))
+		require.NoError(t, err, "Failed to encrypt a file")
+		logs.CloseAndLogErr(encryptedFileWriter)
 
 		encryptedContent, err := os.ReadFile(encryptedFilePath)
-		assert.Nil(t, err, "Couldn't read encrypted file")
+		require.NoError(t, err, "Couldn't read encrypted file")
 		assert.NotEqual(t, encryptedContent, content, "Content wasn't encrypted")
 
-		encryptedFileReader, _ := os.Open(encryptedFilePath)
-		defer encryptedFileReader.Close()
+		encryptedFileReader, err := os.Open(encryptedFilePath)
+		require.NoError(t, err)
+		defer logs.CloseAndLogErr(encryptedFileReader)
 
-		decryptedFileWriter, _ := os.Create(decryptedFilePath)
-		defer decryptedFileWriter.Close()
+		decryptedFileWriter, err := os.Create(decryptedFilePath)
+		require.NoError(t, err)
+		defer logs.CloseAndLogErr(decryptedFileWriter)
 
 		decryptedReader, err := decrypt(encryptedFileReader, []byte(passphrase))
-		assert.Nil(t, err, "Failed to decrypt file")
+		require.NoError(t, err, "Failed to decrypt file")
 
-		io.Copy(decryptedFileWriter, decryptedReader)
+		_, err = io.Copy(decryptedFileWriter, decryptedReader)
+		require.NoError(t, err)
 
-		decryptedContent, _ := os.ReadFile(decryptedFilePath)
+		decryptedContent, err := os.ReadFile(decryptedFilePath)
+		require.NoError(t, err)
 		assert.Equal(t, content, decryptedContent, "Original and decrypted content should match")
 	}
 
@@ -197,33 +210,40 @@ func Test_encryptAndDecrypt_withTheSamePasswordSmallFile(t *testing.T) {
 		)
 
 		content := randBytes(500)
-		os.WriteFile(originFilePath, content, 0600)
+		err := os.WriteFile(originFilePath, content, 0600)
+		require.NoError(t, err)
 
-		originFile, _ := os.Open(originFilePath)
-		defer originFile.Close()
+		originFile, err := os.Open(originFilePath)
+		require.NoError(t, err)
+		defer logs.CloseAndLogErr(originFile)
 
-		encryptedFileWriter, _ := os.Create(encryptedFilePath)
+		encryptedFileWriter, err := os.Create(encryptedFilePath)
+		require.NoError(t, err)
 
-		err := encrypt(originFile, encryptedFileWriter, []byte("passphrase"))
-		assert.Nil(t, err, "Failed to encrypt a file")
-		encryptedFileWriter.Close()
+		err = encrypt(originFile, encryptedFileWriter, []byte("passphrase"))
+		require.NoError(t, err, "Failed to encrypt a file")
+		logs.CloseAndLogErr(encryptedFileWriter)
 
 		encryptedContent, err := os.ReadFile(encryptedFilePath)
-		assert.Nil(t, err, "Couldn't read encrypted file")
+		require.NoError(t, err, "Couldn't read encrypted file")
 		assert.NotEqual(t, encryptedContent, content, "Content wasn't encrypted")
 
-		encryptedFileReader, _ := os.Open(encryptedFilePath)
-		defer encryptedFileReader.Close()
+		encryptedFileReader, err := os.Open(encryptedFilePath)
+		require.NoError(t, err)
+		defer logs.CloseAndLogErr(encryptedFileReader)
 
-		decryptedFileWriter, _ := os.Create(decryptedFilePath)
-		defer decryptedFileWriter.Close()
+		decryptedFileWriter, err := os.Create(decryptedFilePath)
+		require.NoError(t, err)
+		defer logs.CloseAndLogErr(decryptedFileWriter)
 
 		decryptedReader, err := decrypt(encryptedFileReader, []byte("passphrase"))
-		assert.Nil(t, err, "Failed to decrypt file")
+		require.NoError(t, err, "Failed to decrypt file")
 
-		io.Copy(decryptedFileWriter, decryptedReader)
+		_, err = io.Copy(decryptedFileWriter, decryptedReader)
+		require.NoError(t, err)
 
-		decryptedContent, _ := os.ReadFile(decryptedFilePath)
+		decryptedContent, err := os.ReadFile(decryptedFilePath)
+		require.NoError(t, err)
 		assert.Equal(t, content, decryptedContent, "Original and decrypted content should match")
 	}
 
@@ -247,32 +267,40 @@ func Test_encryptAndDecrypt_withEmptyPassword(t *testing.T) {
 		)
 
 		content := randBytes(1024 * 50)
-		os.WriteFile(originFilePath, content, 0600)
+		err := os.WriteFile(originFilePath, content, 0600)
+		require.NoError(t, err)
 
-		originFile, _ := os.Open(originFilePath)
-		defer originFile.Close()
+		originFile, err := os.Open(originFilePath)
+		require.NoError(t, err)
+		defer logs.CloseAndLogErr(originFile)
 
-		encryptedFileWriter, _ := os.Create(encryptedFilePath)
-		defer encryptedFileWriter.Close()
+		encryptedFileWriter, err := os.Create(encryptedFilePath)
+		require.NoError(t, err)
+		defer logs.CloseAndLogErr(encryptedFileWriter)
 
-		err := encrypt(originFile, encryptedFileWriter, []byte(""))
-		assert.Nil(t, err, "Failed to encrypt a file")
+		err = encrypt(originFile, encryptedFileWriter, []byte(""))
+		require.NoError(t, err, "Failed to encrypt a file")
+
 		encryptedContent, err := os.ReadFile(encryptedFilePath)
-		assert.Nil(t, err, "Couldn't read encrypted file")
+		require.NoError(t, err, "Couldn't read encrypted file")
 		assert.NotEqual(t, encryptedContent, content, "Content wasn't encrypted")
 
-		encryptedFileReader, _ := os.Open(encryptedFilePath)
-		defer encryptedFileReader.Close()
+		encryptedFileReader, err := os.Open(encryptedFilePath)
+		require.NoError(t, err)
+		defer logs.CloseAndLogErr(encryptedFileReader)
 
-		decryptedFileWriter, _ := os.Create(decryptedFilePath)
-		defer decryptedFileWriter.Close()
+		decryptedFileWriter, err := os.Create(decryptedFilePath)
+		require.NoError(t, err)
+		defer logs.CloseAndLogErr(decryptedFileWriter)
 
 		decryptedReader, err := decrypt(encryptedFileReader, []byte(""))
-		assert.Nil(t, err, "Failed to decrypt file")
+		require.NoError(t, err, "Failed to decrypt file")
 
-		io.Copy(decryptedFileWriter, decryptedReader)
+		_, err = io.Copy(decryptedFileWriter, decryptedReader)
+		require.NoError(t, err)
 
-		decryptedContent, _ := os.ReadFile(decryptedFilePath)
+		decryptedContent, err := os.ReadFile(decryptedFilePath)
+		require.NoError(t, err)
 		assert.Equal(t, content, decryptedContent, "Original and decrypted content should match")
 	}
 
@@ -296,28 +324,33 @@ func Test_decryptWithDifferentPassphrase_shouldProduceWrongResult(t *testing.T) 
 		)
 
 		content := randBytes(1034)
-		os.WriteFile(originFilePath, content, 0600)
+		err := os.WriteFile(originFilePath, content, 0600)
+		require.NoError(t, err)
 
-		originFile, _ := os.Open(originFilePath)
-		defer originFile.Close()
+		originFile, err := os.Open(originFilePath)
+		require.NoError(t, err)
+		defer logs.CloseAndLogErr(originFile)
 
-		encryptedFileWriter, _ := os.Create(encryptedFilePath)
-		defer encryptedFileWriter.Close()
+		encryptedFileWriter, err := os.Create(encryptedFilePath)
+		require.NoError(t, err)
+		defer logs.CloseAndLogErr(encryptedFileWriter)
 
-		err := encrypt(originFile, encryptedFileWriter, []byte("passphrase"))
-		assert.Nil(t, err, "Failed to encrypt a file")
+		err = encrypt(originFile, encryptedFileWriter, []byte("passphrase"))
+		require.NoError(t, err, "Failed to encrypt a file")
 		encryptedContent, err := os.ReadFile(encryptedFilePath)
-		assert.Nil(t, err, "Couldn't read encrypted file")
+		require.NoError(t, err, "Couldn't read encrypted file")
 		assert.NotEqual(t, encryptedContent, content, "Content wasn't encrypted")
 
-		encryptedFileReader, _ := os.Open(encryptedFilePath)
-		defer encryptedFileReader.Close()
+		encryptedFileReader, err := os.Open(encryptedFilePath)
+		require.NoError(t, err)
+		defer logs.CloseAndLogErr(encryptedFileReader)
 
-		decryptedFileWriter, _ := os.Create(decryptedFilePath)
-		defer decryptedFileWriter.Close()
+		decryptedFileWriter, err := os.Create(decryptedFilePath)
+		require.NoError(t, err)
+		defer logs.CloseAndLogErr(decryptedFileWriter)
 
 		_, err = decrypt(encryptedFileReader, []byte("garbage"))
-		assert.NotNil(t, err, "Should not allow decrypt with wrong passphrase")
+		require.Error(t, err, "Should not allow decrypt with wrong passphrase")
 	}
 
 	t.Run("fips", func(t *testing.T) {

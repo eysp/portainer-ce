@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type mockKubectlClient struct {
@@ -68,7 +69,7 @@ func TestExecuteKubectlOperation_Apply_Success(t *testing.T) {
 	manifests := []string{"manifest1.yaml", "manifest2.yaml"}
 	err := testExecuteKubectlOperation(mockClient, "apply", manifests)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, called)
 }
 
@@ -86,7 +87,7 @@ func TestExecuteKubectlOperation_Apply_Error(t *testing.T) {
 	manifests := []string{"error.yaml"}
 	err := testExecuteKubectlOperation(mockClient, "apply", manifests)
 
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Contains(t, err.Error(), expectedErr.Error())
 	assert.True(t, called)
 }
@@ -104,7 +105,7 @@ func TestExecuteKubectlOperation_Delete_Success(t *testing.T) {
 	manifests := []string{"manifest1.yaml"}
 	err := testExecuteKubectlOperation(mockClient, "delete", manifests)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, called)
 }
 
@@ -122,7 +123,7 @@ func TestExecuteKubectlOperation_Delete_Error(t *testing.T) {
 	manifests := []string{"error.yaml"}
 	err := testExecuteKubectlOperation(mockClient, "delete", manifests)
 
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Contains(t, err.Error(), expectedErr.Error())
 	assert.True(t, called)
 }
@@ -140,7 +141,7 @@ func TestExecuteKubectlOperation_RolloutRestart_Success(t *testing.T) {
 	resources := []string{"deployment/nginx"}
 	err := testExecuteKubectlOperation(mockClient, "rollout-restart", resources)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, called)
 }
 
@@ -158,7 +159,7 @@ func TestExecuteKubectlOperation_RolloutRestart_Error(t *testing.T) {
 	resources := []string{"deployment/error"}
 	err := testExecuteKubectlOperation(mockClient, "rollout-restart", resources)
 
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Contains(t, err.Error(), expectedErr.Error())
 	assert.True(t, called)
 }
@@ -168,6 +169,6 @@ func TestExecuteKubectlOperation_UnsupportedOperation(t *testing.T) {
 
 	err := testExecuteKubectlOperation(mockClient, "unsupported", []string{})
 
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Contains(t, err.Error(), "unsupported operation")
 }

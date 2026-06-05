@@ -46,7 +46,7 @@ function SheetHeader({
               size="large"
               onClick={onReload}
               className="m-0 p-0 focus:text-inherit"
-            title="刷新抽屉内容"
+              title="刷新抽屉内容"
               data-cy="sheet-refreshButton"
             >
               <RefreshCw className="icon" />
@@ -65,7 +65,7 @@ const SheetOverlay = forwardRef<
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Overlay
     className={clsx(
-      'fixed inset-0 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+      'fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
       className
     )}
     // eslint-disable-next-line react/jsx-props-no-spreading
@@ -76,7 +76,7 @@ const SheetOverlay = forwardRef<
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName;
 
 const sheetVariants = cva(
-  'fixed gap-4 bg-widget-color p-5 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500',
+  'fixed z-50 bg-widget-color p-5 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500',
   {
     variants: {
       side: {
@@ -137,7 +137,7 @@ const SheetContent = forwardRef<
               size="medium"
               data-cy="sheet-closeButton"
             >
-              <span className="sr-only">Close</span>
+              <span className="sr-only">关闭</span>
             </Button>
           </SheetPrimitive.Close>
         )}

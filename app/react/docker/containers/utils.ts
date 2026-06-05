@@ -1,9 +1,8 @@
 import _ from 'lodash';
 
 import { ResourceControlViewModel } from '@/react/portainer/access-control/models/ResourceControlViewModel';
-import { EnvironmentId } from '@/react/portainer/environments/types';
 import { useIsStandAlone } from '@/react/docker/proxy/queries/useInfo';
-import { useEnvironment } from '@/react/portainer/environments/queries';
+import { Environment } from '@/react/portainer/environments/types';
 
 import { ContainerListViewModel, ContainerStatus } from './types';
 import { DockerContainerResponse } from './types/response';
@@ -43,10 +42,14 @@ export function toListViewModel(
     )
   );
 
-  const names = response.Names?.map((n) => {
+  let names = response.Names?.map((n) => {
     const nameWithoutSlash = n[0] === '/' ? n.slice(1) : n;
     return nameWithoutSlash;
   });
+
+  if (!names || names.length === 0) {
+    names = ['<empty_name>'];
+  }
 
   return {
     ...response,
@@ -100,11 +103,8 @@ function createStatus(statusText = ''): ContainerStatus {
   return ContainerStatus.Running;
 }
 
-export function useShowGPUsColumn(environmentId: EnvironmentId) {
-  const isDockerStandalone = useIsStandAlone(environmentId);
-  const enableGPUManagementQuery = useEnvironment(
-    environmentId,
-    (env) => env?.EnableGPUManagement
-  );
-  return isDockerStandalone && enableGPUManagementQuery.data;
+export function useShowGPUsColumn(environment: Environment | undefined) {
+  const isDockerStandalone = useIsStandAlone(environment?.Id);
+  const enableGPUManagement = !!environment?.EnableGPUManagement;
+  return isDockerStandalone && enableGPUManagement;
 }

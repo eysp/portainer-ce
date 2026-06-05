@@ -9,7 +9,7 @@ import { isTableMeta } from '../types';
 import { columnHelper } from './column-helper';
 
 export const name = columnHelper.accessor('Hostname', {
-  header: 'Name',
+  header: '名称',
   cell: Cell,
 });
 

@@ -1,21 +1,21 @@
-import { Pencil } from 'lucide-react';
 import { useCurrentStateAndParams } from '@uirouter/react';
 import { Pod } from 'kubernetes-types/core/v1';
 
 import { Authorized } from '@/react/hooks/useUser';
-import { useStackFile } from '@/react/common/stacks/stack.service';
 import { useNamespaceQuery } from '@/react/kubernetes/namespaces/queries/useNamespaceQuery';
 
 import { Widget, WidgetBody } from '@@/Widget';
-import { AddButton, Button } from '@@/buttons';
-import { Link } from '@@/Link';
-import { Icon } from '@@/Icon';
+import { AddButton } from '@@/buttons';
 
 import { applicationIsKind, isExternalApplication } from '../../utils';
-import { appStackIdLabel } from '../../constants';
+import { appStackIdLabel, appStackKindLabel } from '../../constants';
 import { useApplication } from '../../queries/useApplication';
 import { useApplicationServices } from '../../queries/useApplicationServices';
+import { useAppStackFile } from '../../queries/useAppStackFile';
+import { Application } from '../../types';
 
+import { EdgeEditButton } from './EdgeEditButton';
+import { EditButton } from './EditButton';
 import { RestartApplicationButton } from './RestartApplicationButton';
 import { RedeployApplicationButton } from './RedeployApplicationButton';
 import { RollbackApplicationButton } from './RollbackApplicationButton';
@@ -48,9 +48,20 @@ export function ApplicationDetailsWidget() {
     name,
     resourceType
   );
+
+  const { stackId: appStackId, stackKind: appStackKind } =
+    getStackDetailsFromLabels(app);
+
   const externalApp = app && isExternalApplication(app);
-  const appStackId = Number(app?.metadata?.labels?.[appStackIdLabel]);
-  const appStackFileQuery = useStackFile(appStackId);
+
+  // Use a single query hook that resolves to the stack file content (string)
+  // Only fetch stack file for directly managed apps
+  const appStackFileQuery = useAppStackFile(
+    !externalApp && appStackKind !== 'edge' ? appStackId : undefined,
+    appStackKind
+  );
+  const appStackFileContent = appStackFileQuery.data;
+
   const { data: appServices } = useApplicationServices(
     environmentId,
     namespace,
@@ -66,23 +77,15 @@ export function ApplicationDetailsWidget() {
             {!isSystemNamespace && (
               <div className="mb-4 flex flex-wrap gap-2">
                 <Authorized authorizations="K8sApplicationDetailsW">
-                  <Link
-                    to="kubernetes.applications.application.edit"
-                    data-cy="k8sAppDetail-editAppLink"
-                  >
-                    <Button
-                      type="button"
-                      color="light"
-                      size="small"
-                      className="hover:decoration-none !ml-0"
-                      data-cy="k8sAppDetail-editAppButton"
-                    >
-                      <Icon icon={Pencil} className="mr-1" />
+                  {appStackKind === 'edge' ? (
+                    <EdgeEditButton stackId={appStackId} />
+                  ) : (
+                    <EditButton to=".edit">
                       {externalApp
                         ? 'Edit external application'
                         : 'Edit this application'}
-                    </Button>
-                  </Link>
+                    </EditButton>
+                  )}
                 </Authorized>
                 {!applicationIsKind<Pod>('Pod', app) && (
                   <>
@@ -103,12 +106,12 @@ export function ApplicationDetailsWidget() {
                     app={app}
                   />
                 )}
-                {appStackFileQuery.data && (
+                {appStackFileContent && (
                   <AddButton
                     to="kubernetes.templates.custom.new"
                     data-cy="k8sAppDetail-createCustomTemplateButton"
                     params={{
-                      fileContent: appStackFileQuery.data.StackFileContent,
+                      fileContent: appStackFileContent,
                     }}
                   >
                     Create template from application
@@ -145,4 +148,16 @@ export function ApplicationDetailsWidget() {
       </div>
     </div>
   );
+}
+
+function getStackDetailsFromLabels(app?: Application): {
+  stackId?: number;
+  stackKind?: string;
+} {
+  // make undefined when missing so hooks don't run with invalid id
+  const appStackId = app?.metadata?.labels?.[appStackIdLabel]
+    ? Number(app.metadata.labels[appStackIdLabel])
+    : undefined;
+  const appStackKind = app?.metadata?.labels?.[appStackKindLabel];
+  return { stackId: appStackId, stackKind: appStackKind };
 }

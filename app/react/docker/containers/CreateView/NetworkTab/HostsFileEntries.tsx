@@ -6,7 +6,7 @@ import { ItemProps } from '@@/form-components/InputList';
 import { ArrayError, InputList } from '@@/form-components/InputList/InputList';
 
 export const hostFileSchema = array(
-  string().required('Entry is required')
+  string().required('条目为必填项')
 ).default([]);
 
 export function HostsFileEntries({

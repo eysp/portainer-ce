@@ -3,7 +3,6 @@ import { object, SchemaOf, string } from 'yup';
 
 import { useUpgradeEditionMutation } from '@/react/portainer/system/useUpgradeEditionMutation';
 import { notifySuccess } from '@/portainer/services/notifications';
-import { useAnalytics } from '@/react/hooks/useAnalytics';
 
 import { Button, LoadingButton } from '@@/buttons';
 import { FormControl } from '@@/form-components/FormControl';
@@ -31,12 +30,11 @@ export function UploadLicenseDialog({
   isGetLicenseSubmitted: boolean;
 }) {
   const upgradeMutation = useUpgradeEditionMutation();
-  const { trackEvent } = useAnalytics();
 
   return (
     <Modal
       onDismiss={onDismiss}
-      aria-label="Upgrade Portainer to Business Edition"
+      aria-label="升级 Portainer 到商业版"
     >
       <Modal.Header
         title={<h4 className="text-xl font-medium">Upgrade Portainer</h4>}
@@ -103,13 +101,6 @@ export function UploadLicenseDialog({
   function handleSubmit(values: FormValues) {
     upgradeMutation.mutate(values, {
       onSuccess() {
-        trackEvent('portainer-upgrade-license-key-provided', {
-          category: 'portainer',
-          metadata: {
-            Upgrade: 'true',
-          },
-        });
-
         notifySuccess('Starting upgrade', 'License validated successfully');
         goToLoading();
       },

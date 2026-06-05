@@ -18,7 +18,7 @@ export function NameFormSection({
 }: Props) {
   return (
     <FormControl
-      label="Name"
+      label="名称"
       inputId="application_name"
       errors={errors}
       required

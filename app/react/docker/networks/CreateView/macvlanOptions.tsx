@@ -11,7 +11,7 @@ export function getOptions(
       icon: Sliders,
       iconType: 'badge',
       label: '配置',
-      description: '我想在部署之前配置网络',
+      description: '我想在部署网络之前配置网络',
       value: 'local',
     },
     {

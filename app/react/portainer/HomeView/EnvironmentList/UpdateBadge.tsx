@@ -18,7 +18,7 @@ export function UpdateBadge() {
       )}
     >
       <span className="hidden text-sm 2xl:!inline">
-        有可用更新：Edge Agent {version}
+        可用更新：边缘代理 {version}
       </span>
       <Link
         to="portainer.endpoints.updateSchedules.create"

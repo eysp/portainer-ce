@@ -11,7 +11,7 @@ import { ExternalBadge } from '@@/Badge/ExternalBadge';
 import { helper } from './columns.helper';
 
 export const name = helper.accessor('Name', {
-  header: 'Name',
+  header: '名称',
   cell: Cell,
 });
 

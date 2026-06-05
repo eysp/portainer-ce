@@ -28,7 +28,7 @@ export const cpu = columnHelper.accessor(
 );
 
 export const memory = columnHelper.accessor('Memory', {
-  header: 'Memory',
+  header: '内存',
   cell({ getValue }) {
     const value = getValue();
     return humanize(value);

@@ -13,6 +13,7 @@ import (
 	"github.com/portainer/portainer/api/http/proxy"
 	"github.com/portainer/portainer/api/http/proxy/factory"
 	"github.com/portainer/portainer/api/internal/registryutils"
+	"github.com/portainer/portainer/api/logs"
 	"github.com/portainer/portainer/api/stacks/stackutils"
 	"github.com/portainer/portainer/pkg/libstack"
 
@@ -65,7 +66,7 @@ func (manager *ComposeStackManager) Up(ctx context.Context, stack *portainer.Sta
 			EnvFilePath: envFilePath,
 			Host:        url,
 			ProjectName: stack.Name,
-			Registries:  portainerRegistriesToAuthConfigs(manager.dataStore, options.Registries),
+			Registries:  portainerRegistriesToAuthConfigs(options.Registries),
 		},
 		ForceRecreate:        options.ForceRecreate,
 		AbortOnContainerExit: options.AbortOnContainerExit,
@@ -96,7 +97,7 @@ func (manager *ComposeStackManager) Run(ctx context.Context, stack *portainer.St
 			EnvFilePath: envFilePath,
 			Host:        url,
 			ProjectName: stack.Name,
-			Registries:  portainerRegistriesToAuthConfigs(manager.dataStore, options.Registries),
+			Registries:  portainerRegistriesToAuthConfigs(options.Registries),
 		},
 		Remove:   options.Remove,
 		Args:     options.Args,
@@ -145,7 +146,7 @@ func (manager *ComposeStackManager) Pull(ctx context.Context, stack *portainer.S
 		EnvFilePath: envFilePath,
 		Host:        url,
 		ProjectName: stack.Name,
-		Registries:  portainerRegistriesToAuthConfigs(manager.dataStore, options.Registries),
+		Registries:  portainerRegistriesToAuthConfigs(options.Registries),
 	})
 	return errors.Wrap(err, "failed to pull images of the stack")
 }
@@ -180,7 +181,7 @@ func createEnvFile(stack *portainer.Stack) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer envfile.Close()
+	defer logs.CloseAndLogErr(envfile)
 
 	// Copy from default .env file
 	defaultEnvPath := path.Join(stack.ProjectPath, path.Dir(stack.EntryPoint), ".env")
@@ -205,13 +206,14 @@ func copyDefaultEnvFile(w io.Writer, defaultEnvFilePath string) error {
 		return nil
 	}
 
-	defer defaultEnvFile.Close()
+	defer logs.CloseAndLogErr(defaultEnvFile)
 
 	if _, err = io.Copy(w, defaultEnvFile); err == nil {
 		if _, err = fmt.Fprintf(w, "\n"); err != nil {
 			return fmt.Errorf("failed to copy default env file: %w", err)
 		}
 	}
+
 	return nil
 	// If couldn't copy the .env file, then ignore the error and try to continue
 }
@@ -223,10 +225,16 @@ func copyConfigEnvVars(w io.Writer, envs []portainer.Pair) error {
 			return fmt.Errorf("failed to copy config env vars: %w", err)
 		}
 	}
+
 	return nil
 }
 
-func portainerRegistriesToAuthConfigs(tx dataservices.DataStoreTx, registries []portainer.Registry) []types.AuthConfig {
+// portainerRegistriesToAuthConfigs converts registries to Docker auth configs.
+// Callers must ensure ECR tokens are valid before calling this function (e.g. via
+// registryutils.ValidateRegistriesECRTokens with a real DataStoreTx). This function
+// intentionally performs no DB writes to avoid write-lock contention when called inside
+// an active BoltDB write transaction.
+func portainerRegistriesToAuthConfigs(registries []portainer.Registry) []types.AuthConfig {
 	var authConfigs []types.AuthConfig
 
 	for _, r := range registries {
@@ -239,7 +247,7 @@ func portainerRegistriesToAuthConfigs(tx dataservices.DataStoreTx, registries []
 		if r.Authentication {
 			var err error
 
-			ac.Username, ac.Password, err = getEffectiveRegUsernamePassword(tx, &r)
+			ac.Username, ac.Password, err = getEffectiveRegUsernamePassword(&r)
 			if err != nil {
 				continue
 			}
@@ -251,16 +259,7 @@ func portainerRegistriesToAuthConfigs(tx dataservices.DataStoreTx, registries []
 	return authConfigs
 }
 
-func getEffectiveRegUsernamePassword(tx dataservices.DataStoreTx, registry *portainer.Registry) (string, string, error) {
-	if err := registryutils.EnsureRegTokenValid(tx, registry); err != nil {
-		log.Warn().
-			Err(err).
-			Str("RegistryName", registry.Name).
-			Msg("Failed to validate registry token. Skip logging with this registry.")
-
-		return "", "", err
-	}
-
+func getEffectiveRegUsernamePassword(registry *portainer.Registry) (string, string, error) {
 	username, password, err := registryutils.GetRegEffectiveCredential(registry)
 	if err != nil {
 		log.Warn().

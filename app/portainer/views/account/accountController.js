@@ -22,7 +22,7 @@ angular.module('portainer.app').controller('AccountController', [
       if (confirmed) {
         try {
           await UserService.updateUserPassword($scope.userID, $scope.formValues.currentPassword, $scope.formValues.newPassword);
-          Notifications.success('成功', '密码更新成功');
+          Notifications.success('成功', '密码已成功更新');
           StateManager.resetPasswordChangeSkips($scope.userID.toString());
           $scope.forceChangePassword = false;
           $state.go('portainer.logout');
@@ -40,7 +40,7 @@ angular.module('portainer.app').controller('AccountController', [
           $state.go('portainer.home');
         }
       } catch (err) {
-        Notifications.error('Failure', err, err.msg);
+        Notifications.error('失败', err, err.msg);
       }
     };
 
@@ -103,7 +103,7 @@ angular.module('portainer.app').controller('AccountController', [
 
 function confirmForceChangePassword() {
   return openDialog({
-    message: '请将密码更新为更安全的密码以继续使用 Portainer',
+    message: '请将密码更新为更强的密码以继续使用 Portainer',
     buttons: [buildConfirmButton('确定')],
   });
 }

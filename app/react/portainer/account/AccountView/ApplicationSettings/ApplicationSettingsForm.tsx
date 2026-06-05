@@ -33,7 +33,9 @@ export function ApplicationSettingsForm() {
       {({ isValid, dirty, values, setFieldValue }) => (
         <Form className="form-horizontal">
           <TextTip color="orange" className="mb-3">
-            启用前端数据缓存可能意味着其他用户或在 Portainer 外部对 Kubernetes 集群所做的更改可能需要最多五分钟才能显示在您的会话中。此缓存仅适用于 Kubernetes 环境。
+            启用前端数据缓存可能会导致其他用户或在 Portainer 之外对 Kubernetes
+            集群所做的更改可能需要长达五分钟才能在您的会话中显示。此缓存仅适用于
+            Kubernetes 环境。
           </TextTip>
           <SwitchField
             label="为 Kubernetes 环境启用前端数据缓存"
@@ -72,12 +74,12 @@ export function ApplicationSettingsForm() {
           updateAxiosAdapter(values.useCache);
           notifySuccess(
             '成功',
-            '应用程序设置已成功更新。'
+            '成功更新应用设置。'
           );
           // a full reload is required to update the angular $http cache setting
           setTimeout(() => window.location.reload(), 2000); // allow 2s to show the success notification
         },
-        ...withError('无法更新应用程序设置'),
+        ...withError('无法更新应用设置'),
       }
     );
   }

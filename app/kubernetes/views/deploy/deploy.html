@@ -1,4 +1,4 @@
-<page-header ng-if="ctrl.state.viewReady" title="'Create from code'" breadcrumbs="['Deploy Kubernetes resources']" reload="true"></page-header>
+<page-header ng-if="ctrl.state.viewReady" title="'从代码创建'" breadcrumbs="['部署 Kubernetes 资源']" reload="true"></page-header>
 
 <kubernetes-view-loading view-ready="ctrl.state.viewReady"></kubernetes-view-loading>
 
@@ -11,9 +11,9 @@
         <rd-widget-body>
           <uib-tabset active="ctrl.state.activeTab" justified="true" type="pills">
             <uib-tab index="0">
-              <uib-tab-heading> <pr-icon icon="'code'"></pr-icon> Deploy </uib-tab-heading>
+              <uib-tab-heading> <pr-icon icon="'code'"></pr-icon> 部署 </uib-tab-heading>
               <form class="form-horizontal mt-6" name="ctrl.deploymentForm">
-                <div class="col-sm-12 form-section-title"> Deploy from </div>
+                <div class="col-sm-12 form-section-title"> 部署来源 </div>
                 <box-selector
                   slim="true"
                   radio-name="'method'"
@@ -24,11 +24,11 @@
                 ></box-selector>
 
                 <!-- namespace -->
-                <div class="col-sm-12 form-section-title !mt-4"> Deploy to </div>
-                <div class="form-group" ng-if="ctrl.formValues.Namespace && ctrl.state.BuildMethod !== ctrl.BuildMethods.HELM">
+                <div class="col-sm-12 form-section-title !mt-4"> 部署到 </div>
+                <div class="form-group" ng-if="ctrl.formValues.Namespace">
                   <label for="toggle_logo" class="col-lg-2 col-sm-3 control-label text-left">
-                    Use namespace(s) specified from manifest
-                    <portainer-tooltip message="'If you have defined namespaces in your deployment file turning this on will enforce the use of those only in the deployment'">
+                    使用清单文件中指定的命名空间
+                    <portainer-tooltip message="'如果您在部署文件中定义了命名空间，启用此选项将强制在部署中仅使用这些命名空间'">
                     </portainer-tooltip>
                   </label>
                   <div class="col-sm-9 col-lg-10 vertical-center pt-1">
@@ -40,53 +40,32 @@
                 </div>
 
                 <div class="form-group" ng-if="ctrl.formValues.Namespace">
-                  <label for="target_namespace" class="col-lg-2 col-sm-3 control-label text-left">Namespace</label>
+                  <label for="target_namespace" class="col-lg-2 col-sm-3 control-label text-left">命名空间</label>
                   <div class="col-sm-9 col-lg-10">
                     <namespace-portainer-select
-                      ng-if="!ctrl.formValues.namespace_toggle || ctrl.state.BuildMethod === ctrl.BuildMethods.HELM"
-                      is-disabled="ctrl.formValues.namespace_toggle && ctrl.state.BuildMethod !== ctrl.BuildMethods.HELM || ctrl.state.isNamespaceInputDisabled"
+                      ng-if="!ctrl.formValues.namespace_toggle"
+                      is-disabled="ctrl.formValues.namespace_toggle || ctrl.state.isNamespaceInputDisabled"
                       value="ctrl.formValues.Namespace"
                       on-change="(ctrl.onChangeNamespace)"
                       options="ctrl.namespaceOptions"
                     ></namespace-portainer-select>
-                    <span ng-if="ctrl.formValues.namespace_toggle && ctrl.state.BuildMethod !== ctrl.BuildMethods.HELM" class="small text-muted pt-[7px]"
-                      >Namespaces specified in the manifest will be used</span
-                    >
+                    <span ng-if="ctrl.formValues.namespace_toggle" class="small text-muted pt-[7px]">将使用清单文件中指定的命名空间</span>
                   </div>
                 </div>
 
                 <div class="form-group" ng-if="!ctrl.formValues.Namespace">
                   <div class="col-sm-12 small text-warning">
                     <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
-                    You do not have access to any namespace. Contact your administrator to get access to a namespace.
+                    您无权访问任何命名空间。请联系管理员以获取命名空间的访问权限。
                   </div>
                 </div>
 
                 <div class="form-group">
-                  <label for="name" class="col-lg-2 col-sm-3 control-label text-left" ng-class="{ required: ctrl.state.BuildMethod === ctrl.BuildMethods.HELM }">Name</label>
-                  <div class="col-sm-9 col-lg-10 small text-muted pt-[7px]" ng-if="ctrl.state.BuildMethod !== ctrl.BuildMethods.HELM">
-                    Resource names specified in the manifest will be used
-                  </div>
-                  <div class="col-sm-9 col-lg-10" ng-if="ctrl.state.BuildMethod === ctrl.BuildMethods.HELM">
-                    <input
-                      type="text"
-                      data-cy="name-input"
-                      class="form-control"
-                      ng-model="ctrl.formValues.Name"
-                      id="name"
-                      name="name"
-                      placeholder="例如 my-app"
-                      required="ctrl.state.BuildMethod === ctrl.BuildMethods.HELM"
-                    />
-                    <div class="small text-warning mt-2">
-                      <div ng-messages="ctrl.deploymentForm.name.$error">
-                        <p ng-message="required"> <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon> This field is required.</p>
-                      </div>
-                    </div>
-                  </div>
+                  <label for="name" class="col-lg-2 col-sm-3 control-label text-left">名称</label>
+                  <div class="col-sm-9 col-lg-10 text-muted small pt-[7px]"> 将使用清单文件中指定的资源名称 </div>
                 </div>
 
-                <div ng-if="!ctrl.deploymentOptions.hideStacksFunctionality && ctrl.state.BuildMethod !== ctrl.BuildMethods.HELM">
+                <div ng-if="!ctrl.deploymentOptions.hideStacksFunctionality">
                   <div class="mb-4 w-fit">
                     <stack-name-label-insight></stack-name-label-insight>
                   </div>
@@ -143,7 +122,7 @@
                     on-change="(ctrl.onChangeFileContent)"
                     ng-required="true"
                     yml="true"
-                    placeholder="在此定义或粘贴您的清单文件内容"
+                    placeholder="在此定义或粘贴清单文件的内容"
                     read-only="ctrl.state.isEditorReadOnly"
                   >
                     <editor-description>
@@ -153,7 +132,7 @@
                       </p>
                       <p>
                         您可以在
-                        <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/" target="_blank">官方文档</a>中了解更多关于 Kubernetes 文件格式的信息。
+                        <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/" target="_blank">官方文档</a>中获取有关 Kubernetes 文件格式的更多信息。
                       </p>
                     </editor-description>
                   </web-editor-form>
@@ -166,8 +145,8 @@
                   <div class="form-group">
                     <div class="col-sm-12 small pt-[7px] vertical-center">
                       <pr-icon icon="'info'" mode="'primary'"></pr-icon>
-                      Specify the URL to the
-                      <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/" target="_blank">Kubernetes manifest.</a>
+                      指定
+                      <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/" target="_blank">Kubernetes 清单</a>的 URL。
                     </div>
                   </div>
                   <div class="form-group">
@@ -186,15 +165,9 @@
                 </div>
                 <!-- !url -->
 
-                <!-- Helm -->
-                <div ng-show="ctrl.state.BuildMethod === ctrl.BuildMethods.HELM">
-                  <helm-templates-view on-select-helm-chart="(ctrl.onSelectHelmChart)" namespace="ctrl.formValues.Namespace" name="ctrl.formValues.Name" />
-                </div>
-                <!-- !Helm -->
-
                 <!-- actions -->
-                <div class="col-sm-12 form-section-title !mt-4" ng-if="ctrl.state.BuildMethod !== ctrl.BuildMethods.HELM"> Actions </div>
-                <div class="form-group" ng-if="ctrl.state.BuildMethod !== ctrl.BuildMethods.HELM">
+                <div class="col-sm-12 form-section-title !mt-4"> 操作 </div>
+                <div class="form-group">
                   <div class="col-sm-12">
                     <button
                       type="button"
@@ -208,8 +181,8 @@
                       analytics-event="kubernetes-application-advanced-deployment"
                       analytics-properties="ctrl.buildAnalyticsProperties()"
                     >
-                      <span ng-hide="ctrl.state.actionInProgress">Deploy</span>
-                      <span ng-show="ctrl.state.actionInProgress">Deployment in progress...</span>
+                      <span ng-hide="ctrl.state.actionInProgress">部署</span>
+                      <span ng-show="ctrl.state.actionInProgress">部署进行中...</span>
                     </button>
                   </div>
                 </div>
@@ -218,7 +191,7 @@
             </uib-tab>
 
             <uib-tab index="1" disable="ctrl.state.tabLogsDisabled">
-              <uib-tab-heading> <pr-icon icon="'file-text'"></pr-icon> Logs </uib-tab-heading>
+              <uib-tab-heading> <pr-icon icon="'file-text'"></pr-icon> 日志 </uib-tab-heading>
               <form class="form-horizontal mt-3">
                 <div class="form-group" ng-if="ctrl.state.activeTab === 1">
                   <div class="col-sm-12">

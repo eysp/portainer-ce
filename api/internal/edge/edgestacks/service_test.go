@@ -7,6 +7,7 @@ import (
 	"github.com/portainer/portainer/api/internal/testhelpers"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_updateEndpointRelation_successfulRuns(t *testing.T) {
@@ -26,8 +27,7 @@ func Test_updateEndpointRelation_successfulRuns(t *testing.T) {
 	service := NewService(dataStore)
 
 	err := service.updateEndpointRelations(dataStore, edgeStackID, relatedIds)
-
-	assert.NoError(t, err, "updateEndpointRelations should not fail")
+	require.NoError(t, err, "updateEndpointRelations should not fail")
 
 	relatedSet := map[portainer.EndpointID]bool{}
 	for _, relationID := range relatedIds {

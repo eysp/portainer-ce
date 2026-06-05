@@ -1,4 +1,4 @@
-import { Volume } from 'docker-types/generated/1.41';
+import { Volume } from 'docker-types';
 
 import { EnvironmentId } from '@/react/portainer/environments/types';
 import axios, { parseAxiosError } from '@/portainer/services/axios';
@@ -18,6 +18,6 @@ export async function removeVolume(
       },
     });
   } catch (e) {
-    throw parseAxiosError(e, '无法移除卷');
+    throw parseAxiosError(e, '无法删除卷');
   }
 }

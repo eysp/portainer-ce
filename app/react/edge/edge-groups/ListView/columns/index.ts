@@ -8,6 +8,6 @@ export const columns = [
   }),
   columnHelper.accessor('Dynamic', {
     header: '分组类型',
-    cell: ({ getValue }) => (getValue() ? '动态' : '静态'),
+    cell: ({ getValue }) => (getValue() ? 'Dynamic' : 'Static'),
   }),
 ];

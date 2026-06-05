@@ -13,27 +13,33 @@ export function confirmUpdateNamespace(warnings: Warnings) {
     <>
       {warnings.quota && (
         <p>
-          减少分配给"正在使用"命名空间的配额可能会产生意外后果，包括阻止正在运行的应用程序正常运作，甚至可能完全阻止它们运行。
+          Reducing the quota assigned to an &quot;in-use&quot; namespace may
+          have unintended consequences, including preventing running
+          applications from functioning correctly and potentially even blocking
+          them from running at all.
         </p>
       )}
       {warnings.ingress && (
         <p>
-          停用入口可能会使应用程序无法访问。受影响应用程序的所有入口配置将被移除。
+          Deactivating ingresses may cause applications to be unaccessible. All
+          ingress configurations from affected applications will be removed.
         </p>
       )}
       {warnings.registries && (
         <p>
-          您移除的某些注册表可能被此环境中的一个或多个应用程序使用。移除注册表访问可能导致这些应用程序的服务中断。
+          Some registries you removed might be used by one or more applications
+          inside this environment. Removing the registries access could lead to
+          a service interruption for these applications.
         </p>
       )}
-      <p>您确定要继续吗？</p>
+      <p>Are you sure you want to continue?</p>
     </>
   );
 
   return confirm({
-    title: '您确定吗？',
+    title: 'Are you sure?',
     modalType: ModalType.Warn,
     message,
-    confirmButton: buildConfirmButton('更新', 'primary'),
+    confirmButton: buildConfirmButton('Update', 'primary'),
   });
 }

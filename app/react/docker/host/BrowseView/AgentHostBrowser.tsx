@@ -37,7 +37,7 @@ export function AgentHostBrowser({
     <FilesTable
       tableState={tableState}
       dataset={dataset}
-      title={`主机浏览器 - ${relativePath}`}
+      title={`Host browser - ${relativePath}`}
       isRoot={isRoot}
       onRename={onRename}
       onBrowse={onBrowse}

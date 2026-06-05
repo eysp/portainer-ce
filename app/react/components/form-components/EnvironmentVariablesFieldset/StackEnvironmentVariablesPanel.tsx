@@ -22,7 +22,7 @@ export function StackEnvironmentVariablesPanel({
     <EnvironmentVariablesPanel
       explanation={
         <div>
-          您可以在 compose 文件中使用{' '}
+          您可以使用{' '}
           <a
             href={`${useDocsUrl(
               '/user/docker/stacks/add#environment-variables'
@@ -49,11 +49,10 @@ export function StackEnvironmentVariablesPanel({
                 <strong>stack.env 文件操作</strong>
               </p>
               <div>
-                通过 <strong>仓库</strong> 部署时，stack.env 文件必须已存在于 Git 仓库中。
+                通过 <strong>仓库</strong>，stack.env 文件必须已经存在于 Git 仓库中。
               </div>
               <div>
-                通过 <strong>Web 编辑器</strong>、<strong>上传</strong> 或{' '}
-                <strong>自定义模板部署</strong> 部署时，stack.env 文件将从您下面设置的内容自动创建。
+                通过 <strong>Web 编辑器</strong>、<strong>上传</strong>或<strong>自定义模板部署</strong>，stack.env 文件将根据您在下面设置的值自动创建。
               </div>
             </div>
           </Alert>

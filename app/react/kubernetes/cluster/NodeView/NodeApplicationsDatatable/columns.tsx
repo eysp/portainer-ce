@@ -1,8 +1,9 @@
-import _ from 'lodash';
+import _, { round } from 'lodash';
 import { useMemo } from 'react';
 
-import { humanize, truncate } from '@/portainer/filters/filters';
+import { truncate } from '@/portainer/filters/filters';
 import { usePublicSettings } from '@/react/portainer/settings/queries';
+import { bytesToReadableFormat } from '@/react/kubernetes/utils';
 
 import { Link } from '@@/Link';
 
@@ -21,11 +22,11 @@ export function useColumns() {
         name,
         !hideStacksQuery.data &&
           helper.accessor('StackName', {
-            header: 'Stack',
+            header: '堆栈',
             cell: ({ getValue }) => getValue() || '-',
           }),
         helper.accessor((item) => item.ResourcePool, {
-          header: 'Namespace',
+          header: '命名空间',
           cell: ({ getValue }) => {
             const namespace = getValue();
             return (
@@ -40,32 +41,40 @@ export function useColumns() {
           },
         }),
         helper.accessor('Image', {
-          header: 'Image',
+          header: '镜像',
           cell: ({ row: { original: item } }) => {
             const containersLength = item.Containers?.length || 0;
             return (
-              <>
+              <div title={item.Image}>
                 {truncate(item.Image, 64)}
                 {containersLength > 1 && <>+ {containersLength - 1}</>}
-              </>
+              </div>
             );
           },
         }),
         helper.accessor((row) => row.Resource?.CpuRequest, {
-          header: 'CPU reservation',
-          cell: ({ getValue }) => <>{_.round(getValue() || 0, 2)}</>,
+          header: 'CPU 预留',
+          cell: ({ getValue }) =>
+            typeof getValue() === 'number' ? round(getValue() || 0, 2) : '-',
         }),
         helper.accessor((row) => row.Resource?.CpuLimit, {
-          header: 'CPU Limit',
-          cell: ({ getValue }) => <>{_.round(getValue() || 0, 2)}</>,
+          header: 'CPU 限制',
+          cell: ({ getValue }) =>
+            typeof getValue() === 'number' ? round(getValue() || 0, 2) : '-',
         }),
         helper.accessor((row) => row.Resource?.MemoryRequest, {
-          header: 'Memory reservation',
-          cell: ({ getValue }) => <>{humanize(getValue() || 0)}</>,
+          header: '内存预留',
+          cell: ({ getValue }) =>
+            typeof getValue() === 'number'
+              ? bytesToReadableFormat(getValue() || 0)
+              : '-',
         }),
         helper.accessor((row) => row.Resource?.MemoryLimit, {
           header: 'Memory Limit',
-          cell: ({ getValue }) => <>{humanize(getValue() || 0)}</>,
+          cell: ({ getValue }) =>
+            typeof getValue() === 'number'
+              ? bytesToReadableFormat(getValue() || 0)
+              : '-',
         }),
       ]),
     [hideStacksQuery.data]

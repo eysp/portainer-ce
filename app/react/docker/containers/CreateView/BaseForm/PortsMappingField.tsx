@@ -49,7 +49,7 @@ export function PortsMappingField({
         errors={errors}
         disabled={disabled}
         readOnly={readOnly}
-        tooltip="指定主机上的端口范围和容器上的单个端口时，Docker 将在定义范围内随机选择一个可用端口并将其转发到容器端口。"
+        tooltip="当指定主机上的端口范围和容器上的单个端口时，Docker 将在定义的范围内随机选择一个可用端口并将其转发到容器端口。"
         data-cy="docker-containers-ports-mapping"
       />
       {typeof errors === 'string' && (
@@ -80,7 +80,7 @@ function Item({
           value={item.hostPort}
           onChange={(e) => handleChange('hostPort', e.target.value)}
           label="主机"
-          placeholder="例如 80"
+          placeholder="例如：80"
           className="w-1/2"
           id={`hostPort-${index}`}
         />
@@ -96,7 +96,7 @@ function Item({
           value={item.containerPort}
           onChange={(e) => handleChange('containerPort', e.target.value)}
           label="容器"
-          placeholder="例如 80"
+          placeholder="例如：80"
           className="w-1/2"
           id={`containerPort-${index}`}
           data-cy={`containerPort-${index}`}

@@ -48,7 +48,7 @@ function StatusCell({
       className={clsx('label', `label-${statusClassName}`, {
         interactive: hasHealthCheck,
       })}
-      title={hasHealthCheck ? '此容器具有健康检查' : ''}
+      title={hasHealthCheck ? '此容器有健康检查' : ''}
     >
       {transformedStatus}
     </span>

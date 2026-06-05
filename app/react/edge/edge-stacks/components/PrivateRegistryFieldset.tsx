@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
 
 import { Registry } from '@/react/portainer/registries/types/registry';
@@ -14,63 +13,36 @@ import { FormSection } from '@@/form-components/FormSection';
 interface Props {
   value?: number;
   registries: Registry[];
-  onChange?: () => void;
+  onReload?: () => void;
   formInvalid?: boolean;
   errorMessage?: string;
-  onSelect: (value?: number) => void;
-  isActive?: boolean;
-  clearRegistries?: () => void;
+  onChange: (value?: number) => void;
   method?: 'repository' | string;
 }
+
+export const REGISTRY_CREDENTIALS_ENABLED = -1;
 
 export function PrivateRegistryFieldset({
   value,
   registries,
-  onChange = () => {},
+  onReload,
   formInvalid,
   errorMessage,
-  onSelect,
-  isActive,
-  clearRegistries = () => {},
+  onChange,
   method,
 }: Props) {
-  const [checked, setChecked] = useState(isActive || false);
-  const [selected, setSelected] = useState(value);
-
   const tooltipMessage =
     'This allows you to provide credentials when using a private registry that requires authentication';
 
-  useEffect(() => {
-    if (isActive) {
-      setChecked(isActive);
-    }
-  }, [isActive]);
-
-  useEffect(() => {
-    if (checked) {
-      onChange();
-    } else {
-      clearRegistries();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checked]);
-
-  useEffect(() => {
-    setSelected(value);
-  }, [value]);
-
-  function reload() {
-    onChange();
-    setSelected(value);
-  }
+  const isActive = !!value;
 
   return (
-    <FormSection title="Registry">
+    <FormSection title="镜像仓库">
       <div className="form-group">
         <div className="col-sm-12">
           <SwitchField
-            checked={checked}
-            onChange={(value) => setChecked(value)}
+            checked={isActive}
+            onChange={handleCheckChange}
             tooltip={tooltipMessage}
             label="Use Credentials"
             labelClass="col-sm-3 col-lg-2"
@@ -80,7 +52,7 @@ export function PrivateRegistryFieldset({
         </div>
       </div>
 
-      {checked && (
+      {isActive && (
         <>
           {method !== 'repository' && (
             <TextTip color="blue">
@@ -90,27 +62,26 @@ export function PrivateRegistryFieldset({
           )}
 
           {!errorMessage ? (
-            <FormControl label="Registry" inputId="users-selector">
+            <FormControl label="镜像仓库" inputId="private-registry-selector">
               <div className="flex">
                 <Select
-                  value={registries.filter(
-                    (registry) => registry.Id === selected
-                  )}
+                  value={registries.filter((registry) => registry.Id === value)}
                   options={registries}
                   getOptionLabel={(registry) => registry.Name}
                   getOptionValue={(registry) => registry.Id.toString()}
-                  onChange={(value) => onSelect(value?.Id)}
+                  onChange={(value) => onChange(value?.Id)}
                   className="w-full"
                   data-cy="private-registry-selector"
-                  id="private-registry-selector"
+                  inputId="private-registry-selector"
                 />
-                {method !== 'repository' && (
+                {method !== 'repository' && onReload && (
                   <Button
-                    onClick={reload}
+                    onClick={onReload}
                     title="Reload"
                     icon={RefreshCw}
                     color="light"
                     data-cy="private-registry-reload-button"
+                    aria-label="Reload"
                   />
                 )}
               </div>
@@ -122,4 +93,8 @@ export function PrivateRegistryFieldset({
       )}
     </FormSection>
   );
+
+  function handleCheckChange(checked: boolean) {
+    onChange(checked ? REGISTRY_CREDENTIALS_ENABLED : undefined);
+  }
 }

@@ -7,7 +7,7 @@ export function ListView() {
     <>
       <PageHeader
         title="环境镜像仓库"
-        breadcrumbs="镜像仓库管理"
+        breadcrumbs="Registry management"
         reload
       />
 

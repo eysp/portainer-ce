@@ -47,7 +47,7 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
       ContainerService.container(endpoint.Id, attachId)
         .then((details) => {
           if (!details.State.Running) {
-            Notifications.error('Failure', details, 'Container ' + attachId + ' is not running!');
+            Notifications.error('失败', details, '容器 ' + attachId + ' 未运行！');
             $scope.disconnect();
             return;
           }
@@ -68,7 +68,7 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
           initTerm(url, ContainerService.resizeTTY.bind(this, endpoint.Id, attachId));
         })
         .catch(function error(err) {
-          Notifications.error('Error', err, 'Unable to retrieve container details');
+          Notifications.error('错误', err, '无法获取容器详情');
           $scope.disconnect();
         });
     };
@@ -108,7 +108,7 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
           initTerm(url, ExecService.resizeTTY.bind(this, params.id), isLinuxCommand);
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to exec into container');
+          Notifications.error('失败', err, '无法在容器中执行命令');
           $scope.disconnect();
         });
     };
@@ -120,7 +120,7 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
       if ($scope.state > states.disconnected) {
         $scope.state = states.disconnected;
         if (term) {
-          term.write('\n\r(connection closed)');
+          term.write('\n\r(连接已关闭)');
           term.dispose();
         }
       }
@@ -225,7 +225,7 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
           if (closeTerminal) {
             $scope.disconnect();
           } else {
-            Notifications.error('Failure', err, 'Connection error');
+            Notifications.error('失败', err, '连接错误');
           }
           $scope.$apply();
         };
@@ -268,7 +268,7 @@ angular.module('portainer.docker').controller('ContainerConsoleController', [
           $scope.loaded = true;
         })
         .catch(function error(err) {
-          Notifications.error('Error', err, 'Unable to retrieve container details');
+          Notifications.error('错误', err, '无法获取容器详情');
         });
     };
 

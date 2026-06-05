@@ -155,7 +155,7 @@ function useUpdateAngularService(isOpen: boolean) {
   useEffect(() => {
     // to sync "outside state" - for angularjs
     const $injector = angular.element(document).injector();
-    $injector.invoke(
+    $injector?.invoke(
       /* @ngInject */ (
         SidebarService: ReturnType<typeof AngularSidebarService>
       ) => {

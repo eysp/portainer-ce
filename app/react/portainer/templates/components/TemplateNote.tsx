@@ -8,7 +8,7 @@ export function TemplateNote({ note }: { note?: string }) {
   }
 
   return (
-    <FormSection title="Information">
+    <FormSection title="信息">
       <div className="form-group">
         <div className="col-sm-12">
           <div

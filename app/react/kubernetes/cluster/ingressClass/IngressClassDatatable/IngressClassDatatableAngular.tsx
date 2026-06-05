@@ -97,7 +97,7 @@ export function IngressClassDatatableAngular({
         dataset={ingControllerFormValues || []}
         columns={columns}
         isLoading={isLoading}
-        title="Ingress Controllers"
+        title="Ingress 控制器"
         titleIcon={Route}
         getRowId={(row) => `${row.Name}-${row.ClassName}-${row.Type}`}
         renderTableActions={(selectedRows) => renderTableActions(selectedRows)}

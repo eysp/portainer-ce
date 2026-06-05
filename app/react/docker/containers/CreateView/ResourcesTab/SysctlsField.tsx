@@ -26,8 +26,8 @@ export function SysctlsField({
       value={values}
       onChange={onChange}
       item={Item}
-      addLabel="添加系统调用"
-      label="系统调用"
+      addLabel="添加 sysctl 设置"
+      label="Sysctl 设置"
       errors={errors}
       itemBuilder={() => ({ name: '', value: '' })}
       data-cy="docker-container-sysctls"

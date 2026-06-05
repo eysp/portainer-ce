@@ -11,6 +11,7 @@ import (
 	dockerClient "github.com/portainer/portainer/api/docker/client"
 	"github.com/portainer/portainer/api/internal/endpointutils"
 	"github.com/portainer/portainer/api/kubernetes/cli"
+	"github.com/portainer/portainer/api/logs"
 	"github.com/portainer/portainer/api/pendingactions/actions"
 	"github.com/portainer/portainer/pkg/endpoints"
 
@@ -89,6 +90,7 @@ func (postInitMigrator *PostInitMigrator) createPostInitMigrationPendingAction(e
 		EndpointID: environmentID,
 		Action:     actions.PostInitMigrateEnvironment,
 	}
+
 	pendingActions, err := postInitMigrator.dataStore.PendingActions().ReadAll()
 	if err != nil {
 		return fmt.Errorf("failed to retrieve pending actions: %w", err)
@@ -119,11 +121,12 @@ func (migrator *PostInitMigrator) MigrateEnvironment(environment *portainer.Endp
 			log.Error().Err(err).Msgf("Error creating kubeclient for environment: %d", environment.ID)
 			return err
 		}
+
 		// if one environment fails, it is logged and the next migration runs. The error is returned at the end and handled by pending actions
-		err = migrator.MigrateIngresses(*environment, kubeclient)
-		if err != nil {
+		if err := migrator.MigrateIngresses(*environment, kubeclient); err != nil {
 			return err
 		}
+
 		return nil
 	case endpointutils.IsDockerEndpoint(environment):
 		// get the docker client for the environment, and skip all docker migrations if there's an error
@@ -132,8 +135,11 @@ func (migrator *PostInitMigrator) MigrateEnvironment(environment *portainer.Endp
 			log.Error().Err(err).Msgf("Error creating docker client for environment: %d", environment.ID)
 			return err
 		}
-		defer dockerClient.Close()
-		migrator.MigrateGPUs(*environment, dockerClient)
+		defer logs.CloseAndLogErr(dockerClient)
+
+		if err := migrator.MigrateGPUs(*environment, dockerClient); err != nil {
+			return err
+		}
 	}
 
 	return nil

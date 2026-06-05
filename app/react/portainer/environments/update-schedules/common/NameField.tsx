@@ -13,7 +13,7 @@ export function NameField() {
 
   return (
     <FormControl
-      label="Name"
+      label="名称"
       required
       inputId="name-input"
       errors={error}
@@ -29,7 +29,7 @@ export function nameValidation(
   currentId?: EdgeUpdateSchedule['id']
 ) {
   return string()
-    .required('This field is required')
+    .required('此字段为必填项')
     .test('unique', 'Name must be unique', (value) =>
       schedules.every((s) => s.id === currentId || s.name !== value)
     );

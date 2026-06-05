@@ -21,6 +21,6 @@ export async function uploadImages(environmentId: EnvironmentId, file: File) {
       }
     );
   } catch (e) {
-    throw parseAxiosError(e, 'Unable to upload image');
+    throw parseAxiosError(e, '无法上传镜像');
   }
 }

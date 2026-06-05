@@ -1,4 +1,4 @@
-import { RestartPolicy } from 'docker-types/generated/1.41';
+import { RestartPolicy } from 'docker-types';
 
 import { BasicTableSettings } from '@@/datatables/types';
 

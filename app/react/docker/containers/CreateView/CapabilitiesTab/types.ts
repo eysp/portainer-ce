@@ -38,7 +38,7 @@ const capDesc: Array<Capability> = [
   {
     key: 'FOWNER',
     description:
-      '绕过通常要求进程的文件系统 UID 与文件 UID 匹配的操作的权限检查。',
+      '绕过通常需要进程文件系统 UID 与文件 UID 匹配的操作的权限检查。',
     default: true,
   },
   {
@@ -89,7 +89,7 @@ const capDesc: Array<Capability> = [
   },
   {
     key: 'SYS_PACCT',
-    description: '使用 acct(2)，开启或关闭进程记账。',
+    description: '使用 acct(2)，打开或关闭进程记帐。',
   },
   {
     key: 'SYS_ADMIN',
@@ -131,7 +131,7 @@ const capDesc: Array<Capability> = [
   },
   {
     key: 'NET_ADMIN',
-    description: '执行各种网络相关操作。',
+    description: '执行各种与网络相关的操作。',
   },
   {
     key: 'SYSLOG',
@@ -148,7 +148,7 @@ const capDesc: Array<Capability> = [
   },
   {
     key: 'NET_BROADCAST',
-    description: '进行套接字广播并监听多播。',
+    description: '进行套接字广播，并监听多播。',
   },
   {
     key: 'IPC_LOCK',
@@ -157,7 +157,7 @@ const capDesc: Array<Capability> = [
   {
     key: 'IPC_OWNER',
     description:
-      '绕过 System V IPC 对象操作的权限检查。',
+      '绕过对 System V IPC 对象操作的权限检查。',
   },
   {
     key: 'SYS_PTRACE',
@@ -166,7 +166,7 @@ const capDesc: Array<Capability> = [
   {
     key: 'SYS_BOOT',
     description:
-      '使用 reboot(2) 和 kexec_load(2)，重启并加载新内核以供后续执行。',
+      '使用 reboot(2) 和 kexec_load(2)，重新启动并加载新内核以供后续执行。',
   },
   {
     key: 'LEASE',
@@ -174,7 +174,7 @@ const capDesc: Array<Capability> = [
   },
   {
     key: 'WAKE_ALARM',
-    description: '触发将唤醒系统的操作。',
+    description: '触发将唤醒系统的事件。',
   },
   {
     key: 'BLOCK_SUSPEND',

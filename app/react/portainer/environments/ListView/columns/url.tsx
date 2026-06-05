@@ -103,7 +103,7 @@ function Cell({
       },
       {
         onSuccess: () => {
-          notifySuccess('成功', '错误已成功忽略');
+          notifySuccess('Success', 'Error dismissed successfully');
         },
       }
     );

@@ -54,7 +54,7 @@ export function ListView() {
   return (
     <>
       <PageHeader
-        title="Update & Rollback"
+        title="更新和回滚"
         breadcrumbs="Update and rollback"
         reload
       />

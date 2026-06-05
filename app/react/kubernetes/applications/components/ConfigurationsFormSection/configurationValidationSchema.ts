@@ -30,7 +30,7 @@ export function configurationsValidationSchema(
                   );
                 }
               )
-              .required('Path is required.'),
+              .required('路径为必填项。'),
           }),
           type: mixed().oneOf(['NONE', 'ENVIRONMENT', 'FILESYSTEM']),
         })

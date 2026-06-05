@@ -12,7 +12,6 @@ export function SettingsViewModel(data) {
   this.EnableEdgeComputeFeatures = data.EnableEdgeComputeFeatures;
   this.FeatureFlagSettings = data.FeatureFlagSettings;
   this.UserSessionTimeout = data.UserSessionTimeout;
-  this.EnableTelemetry = data.EnableTelemetry;
   this.KubeconfigExpiry = data.KubeconfigExpiry;
   this.HelmRepositoryURL = data.HelmRepositoryURL;
   this.TrustOnFirstConnect = data.TrustOnFirstConnect;
@@ -29,7 +28,6 @@ export function PublicSettingsViewModel(settings) {
   this.EnforceEdgeID = settings.EnforceEdgeID;
   this.LogoURL = settings.LogoURL;
   this.OAuthLoginURI = settings.OAuthLoginURI;
-  this.EnableTelemetry = settings.EnableTelemetry;
   this.OAuthLogoutURI = settings.OAuthLogoutURI;
   this.KubeconfigExpiry = settings.KubeconfigExpiry;
   this.Features = settings.Features;

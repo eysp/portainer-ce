@@ -72,7 +72,7 @@ export function PortsMappingField({
               <th>Protocol</th>
               <th>Publish mode</th>
               <Authorized authorizations="DockerServiceUpdate">
-                <th>Actions</th>
+                <th>操作</th>
               </Authorized>
             </tr>
           </thead>

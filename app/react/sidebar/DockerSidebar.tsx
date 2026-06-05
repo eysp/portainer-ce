@@ -48,7 +48,7 @@ export function DockerSidebar({ environmentId, environment }: Props) {
 
   const setupSubMenuProps = isSwarmManager
     ? {
-        label: 'Swarm',
+        label: '集群',
         icon: Trello,
         to: 'docker.swarm',
         dataCy: 'portainerSidebar-swarm',
@@ -123,7 +123,7 @@ export function DockerSidebar({ environmentId, environment }: Props) {
         to="docker.containers"
         params={{ endpointId: environmentId }}
         icon={Box}
-          label="容器"
+        label="容器"
         data-cy="dockerSidebar-containers"
       />
 
@@ -131,7 +131,7 @@ export function DockerSidebar({ environmentId, environment }: Props) {
         to="docker.images"
         params={{ endpointId: environmentId }}
         icon={List}
-          label="镜像"
+        label="镜像"
         data-cy="dockerSidebar-images"
       />
 
@@ -139,7 +139,7 @@ export function DockerSidebar({ environmentId, environment }: Props) {
         to="docker.networks"
         params={{ endpointId: environmentId }}
         icon={Network}
-          label="网络"
+        label="网络"
         data-cy="dockerSidebar-networks"
       />
 
@@ -211,7 +211,7 @@ export function DockerSidebar({ environmentId, environment }: Props) {
         </Authorized>
 
         <SidebarItem
-          label="注册表"
+          label="镜像仓库"
           isSubMenu
           to={registrySubMenuTo}
           params={{ endpointId: environmentId }}

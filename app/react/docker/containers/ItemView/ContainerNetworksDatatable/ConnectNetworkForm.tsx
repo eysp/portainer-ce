@@ -1,10 +1,10 @@
 import { Form, Formik } from 'formik';
 import { SchemaOf, object, string } from 'yup';
-import { useRouter } from '@uirouter/react';
 
 import { useAuthorizations } from '@/react/hooks/useUser';
 import { useConnectContainerMutation } from '@/react/docker/networks/queries/useConnectContainerMutation';
 import { useEnvironmentId } from '@/react/hooks/useEnvironmentId';
+import { notifySuccess } from '@/portainer/services/notifications';
 
 import { FormControl } from '@@/form-components/FormControl';
 import { LoadingButton } from '@@/buttons';
@@ -27,7 +27,6 @@ export function ConnectNetworkForm({
   const environmentId = useEnvironmentId();
   const { authorized } = useAuthorizations('DockerNetworkConnect');
   const connectMutation = useConnectContainerMutation(environmentId);
-  const router = useRouter();
   if (!authorized) {
     return null;
   }
@@ -72,7 +71,7 @@ export function ConnectNetworkForm({
       { containerId, networkId, nodeName },
       {
         onSuccess() {
-          router.stateService.reload();
+          notifySuccess('成功', `已将容器连接到 ${networkId}`);
         },
       }
     );

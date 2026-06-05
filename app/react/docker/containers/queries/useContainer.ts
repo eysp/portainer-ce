@@ -2,17 +2,17 @@ import { useQuery } from '@tanstack/react-query';
 import {
   ContainerConfig,
   ContainerState,
-  GraphDriverData,
+  DriverData,
   HostConfig,
   MountPoint,
   NetworkSettings,
-} from 'docker-types/generated/1.41';
+} from 'docker-types';
 
 import { PortainerResponse } from '@/react/docker/types';
 import axios, { parseAxiosError } from '@/portainer/services/axios';
 import { ContainerId } from '@/react/docker/containers/types';
 import { EnvironmentId } from '@/react/portainer/environments/types';
-import { queryClient } from '@/react-tools/react-query';
+import { queryClient, withGlobalError } from '@/react-tools/react-query';
 
 import { buildDockerProxyUrl } from '../../proxy/queries/buildDockerProxyUrl';
 import { withAgentTargetHeader } from '../../proxy/queries/utils';
@@ -60,7 +60,7 @@ export interface ContainerDetailsJSON {
    */
   ExecIDs?: Array<string> | null;
   HostConfig?: HostConfig;
-  GraphDriver?: GraphDriverData;
+  GraphDriver?: DriverData;
   /**
    * The size of files that have been created or changed by this
    * container.
@@ -76,26 +76,28 @@ export interface ContainerDetailsJSON {
   NetworkSettings?: NetworkSettings;
 }
 
-export function useContainer(
-  environmentId: EnvironmentId,
-  containerId?: ContainerId,
-  nodeName?: string,
-  { enabled }: { enabled?: boolean } = {}
+export function useContainer<T>(
+  {
+    environmentId,
+    containerId,
+    nodeName,
+  }: {
+    environmentId: EnvironmentId;
+    containerId?: ContainerId;
+    nodeName?: string;
+  },
+  {
+    enabled,
+    select,
+  }: { enabled?: boolean; select?(container: ContainerDetailsResponse): T } = {}
 ) {
-  return useQuery(
-    containerId ? queryKeys.container(environmentId, containerId) : [],
-    () =>
-      containerId
-        ? getContainer(environmentId, containerId, { nodeName })
-        : undefined,
-    {
-      meta: {
-        title: 'Failure',
-        message: 'Unable to retrieve container',
-      },
-      enabled: enabled && !!containerId,
-    }
-  );
+  return useQuery({
+    queryKey: queryKeys.container(environmentId, containerId!),
+    queryFn: () => getContainer(environmentId, containerId!, { nodeName }),
+    enabled: enabled && !!containerId,
+    select,
+    ...withGlobalError('无法获取容器'),
+  });
 }
 
 export function invalidateContainer(
@@ -132,6 +134,6 @@ export async function getContainer(
     );
     return data;
   } catch (error) {
-    throw parseAxiosError(error as Error, 'Unable to retrieve container');
+    throw parseAxiosError(error as Error, '无法获取容器');
   }
 }

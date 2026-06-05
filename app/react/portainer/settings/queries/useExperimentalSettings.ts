@@ -20,7 +20,7 @@ export function useExperimentalSettings<T = ExperimentalFeaturesSettings>(
     select,
     enabled,
     staleTime: 50,
-    ...withError('Unable to retrieve experimental settings'),
+    ...withError('无法获取实验功能设置'),
   });
 }
 
@@ -33,7 +33,7 @@ async function getExperimentalSettings() {
   } catch (e) {
     throw parseAxiosError(
       e as Error,
-      'Unable to retrieve experimental settings'
+      '无法获取实验功能设置'
     );
   }
 }

@@ -97,13 +97,13 @@ func (handler *Handler) endpointEdgeStatusInspect(w http.ResponseWriter, r *http
 	firstConn := endpoint.LastCheckInDate == 0
 
 	if err := handler.requestBouncer.AuthorizedEdgeEndpointOperation(r, endpoint); err != nil {
-		return httperror.Forbidden("Permission denied to access environment. The device has not been trusted yet", fmt.Errorf("unauthorized Edge endpoint operation: %w. Environment name: %s", err, endpoint.Name))
+		return httperror.Forbidden("Permission denied to access environment. The device has not been trusted yet", fmt.Errorf("unauthorized Edge endpoint operation: %w. Environment ID: %d", err, endpoint.ID))
 	}
 
 	handler.DataStore.Endpoint().UpdateHeartbeat(endpoint.ID)
 
 	if err := handler.requestBouncer.TrustedEdgeEnvironmentAccess(handler.DataStore, endpoint); err != nil {
-		return httperror.Forbidden("Permission denied to access environment. The device has not been trusted yet", fmt.Errorf("untrusted Edge environment access: %w. Environment name: %s", err, endpoint.Name))
+		return httperror.Forbidden("Permission denied to access environment. The device has not been trusted yet", fmt.Errorf("untrusted Edge environment access: %w. Environment ID: %d", err, endpoint.ID))
 	}
 
 	var statusResponse *endpointEdgeStatusInspectResponse
@@ -113,11 +113,11 @@ func (handler *Handler) endpointEdgeStatusInspect(w http.ResponseWriter, r *http
 	}); err != nil {
 		var httpErr *httperror.HandlerError
 		if errors.As(err, &httpErr) {
-			httpErr.Err = fmt.Errorf("edge polling error: %w. Environment name: %s", httpErr.Err, endpoint.Name)
+			httpErr.Err = fmt.Errorf("edge polling error: %w. Environment ID: %d", httpErr.Err, endpoint.ID)
 			return httpErr
 		}
 
-		return httperror.InternalServerError("Unexpected error", fmt.Errorf("edge polling error: %w. Environment name: %s", err, endpoint.Name))
+		return httperror.InternalServerError("Unexpected error", fmt.Errorf("edge polling error: %w. Environment ID: %d", err, endpoint.ID))
 	}
 
 	return cacheResponse(w, endpoint.ID, *statusResponse)
@@ -170,7 +170,7 @@ func (handler *Handler) inspectStatus(tx dataservices.DataStoreTx, r *http.Reque
 		Credentials:     tunnel.Credentials,
 	}
 
-	schedules, handlerErr := handler.buildSchedules(tx, endpoint)
+	schedules, handlerErr := handler.buildAllSchedules(tx, endpoint)
 	if handlerErr != nil {
 		return nil, handlerErr
 	}
@@ -208,13 +208,17 @@ func parseAgentPlatform(r *http.Request) (portainer.EndpointType, error) {
 	}
 }
 
-func (handler *Handler) buildSchedules(tx dataservices.DataStoreTx, endpoint *portainer.Endpoint) ([]edgeJobResponse, *httperror.HandlerError) {
-	schedules := []edgeJobResponse{}
-
+func (handler *Handler) buildAllSchedules(tx dataservices.DataStoreTx, endpoint *portainer.Endpoint) ([]edgeJobResponse, *httperror.HandlerError) {
 	edgeJobs, err := tx.EdgeJob().ReadAll()
 	if err != nil {
 		return nil, httperror.InternalServerError("Unable to retrieve Edge Jobs", err)
 	}
+
+	return handler.buildSchedules(tx, endpoint, edgeJobs)
+}
+
+func (handler *Handler) buildSchedules(tx dataservices.DataStoreTx, endpoint *portainer.Endpoint, edgeJobs []portainer.EdgeJob) ([]edgeJobResponse, *httperror.HandlerError) {
+	schedules := []edgeJobResponse{}
 
 	endpointGroups, err := tx.EndpointGroup().ReadAll()
 	if err != nil {
@@ -240,17 +244,10 @@ func (handler *Handler) buildSchedules(tx dataservices.DataStoreTx, endpoint *po
 			continue
 		}
 
-		var collectLogs bool
-		if _, ok := job.GroupLogsCollection[endpoint.ID]; ok {
-			collectLogs = job.GroupLogsCollection[endpoint.ID].CollectLogs
-		} else {
-			collectLogs = job.Endpoints[endpoint.ID].CollectLogs
-		}
-
 		schedule := edgeJobResponse{
 			ID:             job.ID,
 			CronExpression: job.CronExpression,
-			CollectLogs:    collectLogs,
+			CollectLogs:    job.GroupLogsCollection[endpoint.ID].CollectLogs || job.Endpoints[endpoint.ID].CollectLogs,
 			Version:        job.Version,
 		}
 
@@ -312,7 +309,10 @@ func cacheResponse(w http.ResponseWriter, endpointID portainer.EndpointID, statu
 	}
 
 	w.Header().Set("ETag", etag)
-	io.Copy(w, resp.Body)
+
+	if _, err := io.Copy(w, resp.Body); err != nil {
+		log.Warn().Err(err).Msg("failed to copy response body")
+	}
 
 	return nil
 }

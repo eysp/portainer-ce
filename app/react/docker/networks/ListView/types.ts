@@ -1,4 +1,4 @@
-import { IPAMConfig } from 'docker-types/generated/1.41';
+import { IPAMConfig } from 'docker-types';
 
 import { NetworkViewModel } from '@/docker/models/network';
 

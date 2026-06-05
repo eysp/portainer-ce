@@ -30,7 +30,7 @@ angular.module('portainer.app').controller('UserController', [
     };
 
     $scope.deleteUser = function () {
-      confirmDelete('您确定要移除此用户吗？该用户将无法再登录 Portainer。').then((confirmed) => {
+      confirmDelete('您要删除此用户吗？此用户将无法再登录 Portainer。').then((confirmed) => {
         if (!confirmed) {
           return;
         }
@@ -58,11 +58,11 @@ angular.module('portainer.app').controller('UserController', [
 
       UserService.updateUser($scope.user.Id, { role, username })
         .then(function success() {
-          Notifications.success('成功', '用户更新成功');
+          Notifications.success('Success', 'User successfully updated');
           $state.reload();
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法更新用户权限');
+          Notifications.error('Failure', err, '无法更新用户权限');
         });
     };
 
@@ -74,7 +74,7 @@ angular.module('portainer.app').controller('UserController', [
       }
       UserService.updateUser($scope.user.Id, { newPassword: $scope.formValues.newPassword })
         .then(function success() {
-          Notifications.success('成功', '密码更新成功');
+          Notifications.success('Success', 'Password successfully updated');
 
           if (isCurrentUser) {
             $state.go('portainer.logout');
@@ -83,7 +83,7 @@ angular.module('portainer.app').controller('UserController', [
           }
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法更新用户密码');
+          Notifications.error('Failure', err, '无法更新用户密码');
         });
     };
 
@@ -94,7 +94,7 @@ angular.module('portainer.app').controller('UserController', [
           $state.go('portainer.users');
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法移除用户');
+          Notifications.error('Failure', err, '无法删除用户');
         });
     }
 
@@ -126,7 +126,7 @@ angular.module('portainer.app').controller('UserController', [
           $scope.requiredPasswordLength = data.settings.RequiredPasswordLength;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索用户信息');
+          Notifications.error('Failure', err, '无法获取用户信息');
         });
     }
 

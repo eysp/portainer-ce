@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { FormikErrors } from 'formik';
 
-import { GitFormModel } from '@/react/portainer/gitops/types';
-import { PathSelector } from '@/react/portainer/gitops/ComposePathField/PathSelector';
+import {
+  PathSelector,
+  PathSelectorGitModel,
+} from '@/react/portainer/gitops/ComposePathField/PathSelector';
 import { dummyGitForm } from '@/react/portainer/gitops/RelativePathFieldset/utils';
 
 import { SwitchField } from '@@/form-components/SwitchField';
@@ -16,7 +18,7 @@ import { RelativePathModel, getPerDevConfigsFilterType } from './types';
 
 interface Props {
   values: RelativePathModel;
-  gitModel?: GitFormModel;
+  gitModel?: PathSelectorGitModel;
   onChange: (value: RelativePathModel) => void;
   isEditing?: boolean;
   hideEdgeConfigs?: boolean;
@@ -258,7 +260,7 @@ export function RelativePathFieldset({
 
               <div className="form-group">
                 <div className="col-sm-12">
-                  <FormControl label="Group matching rule">
+                  <FormControl label="组匹配规则">
                     <Select
                       value={value.PerDeviceConfigsGroupMatchType}
                       data-cy="per-device-configs-group-match-type-select"

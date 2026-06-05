@@ -27,7 +27,7 @@ export function TeamsField({
       tooltip={
         teams.length > 0
           ? overrideTooltip ||
-            '您可以选择哪些团队能够管理此资源。'
+            '您可以选择哪些团队将能够管理此资源。'
           : undefined
       }
       inputId="authorized-teams-selector"
@@ -44,11 +44,11 @@ export function TeamsField({
         />
       ) : (
         <span className="small text-muted">
-          当前没有可用团队。您可以跳过团队授权，或前往{' '}
+          您尚未创建任何团队。前往{' '}
           <Link to="portainer.teams" data-cy="teams-view-link">
             团队视图
           </Link>{' '}
-          创建并管理团队。
+          来管理团队。
         </span>
       )}
     </FormControl>

@@ -1,44 +1,49 @@
 import { Clipboard } from 'lucide-react';
 
 import { Authorized, useAuthorizations } from '@/react/hooks/useUser';
+import { useEnvironmentId } from '@/react/hooks/useEnvironmentId';
 
 import { Datatable, TableSettingsMenu } from '@@/datatables';
 import { TableSettingsMenuAutoRefresh } from '@@/datatables/TableSettingsMenuAutoRefresh';
-import { useRepeater } from '@@/datatables/useRepeater';
 import { AddButton } from '@@/buttons';
 import { useTableState } from '@@/datatables/useTableState';
-import { DeleteButton } from '@@/buttons/DeleteButton';
 
-import { DockerConfig } from '../../types';
+import { useConfigsList } from '../../queries/useConfigs';
+import { ConfigViewModel } from '../../model';
 
 import { columns } from './columns';
 import { createStore } from './store';
-
-interface Props {
-  dataset: Array<DockerConfig>;
-  onRemoveClick: (configs: Array<DockerConfig>) => void;
-  onRefresh: () => void;
-}
+import { DeleteConfigButton } from './DeleteConfigButton';
 
 const storageKey = 'docker_configs';
 const settingsStore = createStore(storageKey);
 
-export function ConfigsDatatable({ dataset, onRefresh, onRemoveClick }: Props) {
+export function ConfigsDatatable() {
+  const environmentId = useEnvironmentId();
   const tableState = useTableState(settingsStore, storageKey);
 
-  useRepeater(tableState.autoRefreshRate, onRefresh);
+  const configListQuery = useConfigsList(environmentId, {
+    refetchInterval: tableState.autoRefreshRate * 1000,
+    select: (configs) => configs.map((c) => new ConfigViewModel(c)),
+  });
 
   const hasWriteAccessQuery = useAuthorizations([
     'DockerConfigCreate',
     'DockerConfigDelete',
   ]);
 
+  if (!configListQuery.data) {
+    return null;
+  }
+
+  const dataset = configListQuery.data;
+
   return (
     <Datatable
       dataset={dataset}
       columns={columns}
       settingsManager={tableState}
-      title="Configs"
+      title="配置"
       titleIcon={Clipboard}
       renderTableSettings={() => (
         <TableSettingsMenu>
@@ -54,17 +59,12 @@ export function ConfigsDatatable({ dataset, onRefresh, onRemoveClick }: Props) {
         hasWriteAccessQuery.authorized && (
           <div className="flex items-center gap-3">
             <Authorized authorizations="DockerConfigDelete">
-              <DeleteButton
-                disabled={selectedRows.length === 0}
-                data-cy="remove-docker-configs-button"
-                onConfirmed={() => onRemoveClick(selectedRows)}
-                confirmMessage="Do you want to remove the selected config(s)?"
-              />
+              <DeleteConfigButton selectedItems={selectedRows} />
             </Authorized>
 
             <Authorized authorizations="DockerConfigCreate">
               <AddButton data-cy="add-docker-config-button">
-                Add config
+                添加配置
               </AddButton>
             </Authorized>
           </div>

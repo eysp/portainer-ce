@@ -20,7 +20,7 @@ export function StaticGroupFieldset({ isEdit }: { isEdit?: boolean }) {
           onChange={async (environmentIds, meta) => {
             if (meta.type === 'remove' && isEdit) {
               const confirmed = await confirmDestructive({
-                title: 'Confirm action',
+                title: '确认操作',
                 message:
                   'Removing the environment from this group will remove its corresponding edge stacks',
                 confirmButton: buildConfirmButton('Confirm'),

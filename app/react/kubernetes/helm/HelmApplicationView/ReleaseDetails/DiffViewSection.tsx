@@ -40,7 +40,7 @@ export function DiffViewSection({
       originalCode={originalText}
       id={id}
       data-cy={dataCy}
-      placeholder="No values found"
+      placeholder="未找到 values"
       fileNames={{
         original: compareRevisionNumberFetched
           ? `Revision #${compareRevisionNumberFetched}`

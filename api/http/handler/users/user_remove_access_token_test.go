@@ -13,7 +13,9 @@ import (
 	"github.com/portainer/portainer/api/http/security"
 	"github.com/portainer/portainer/api/internal/testhelpers"
 	"github.com/portainer/portainer/api/jwt"
+
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_userRemoveAccessToken(t *testing.T) {
@@ -24,15 +26,15 @@ func Test_userRemoveAccessToken(t *testing.T) {
 	// create admin and standard user(s)
 	adminUser := &portainer.User{ID: 1, Username: "admin", Role: portainer.AdministratorRole}
 	err := store.User().Create(adminUser)
-	is.NoError(err, "error creating admin user")
+	require.NoError(t, err, "error creating admin user")
 
 	user := &portainer.User{ID: 2, Username: "standard", Role: portainer.StandardUserRole}
 	err = store.User().Create(user)
-	is.NoError(err, "error creating user")
+	require.NoError(t, err, "error creating user")
 
 	// setup services
 	jwtService, err := jwt.NewService("1h", store)
-	is.NoError(err, "Error initiating jwt service")
+	require.NoError(t, err, "Error initiating jwt service")
 	apiKeyService := apikey.NewAPIKeyService(store.APIKeyRepository(), store.User())
 	requestBouncer := security.NewRequestBouncer(store, jwtService, apiKeyService)
 	rateLimiter := security.NewRateLimiter(10, 1*time.Second, 1*time.Hour)
@@ -48,7 +50,7 @@ func Test_userRemoveAccessToken(t *testing.T) {
 	t.Run("standard user can successfully delete API key", func(t *testing.T) {
 		is := assert.New(t)
 		_, apiKey, err := apiKeyService.GenerateApiKey(*user, "test-delete-token")
-		is.NoError(err)
+		require.NoError(t, err)
 
 		req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("%s/%d", "/users/2/tokens", apiKey.ID), nil)
 		testhelpers.AddTestSecurityCookie(req, jwt)
@@ -59,15 +61,15 @@ func Test_userRemoveAccessToken(t *testing.T) {
 		is.Equal(http.StatusNoContent, rr.Code)
 
 		keys, err := apiKeyService.GetAPIKeys(user.ID)
-		is.NoError(err)
+		require.NoError(t, err)
 
-		is.Equal(0, len(keys))
+		require.Empty(t, keys)
 	})
 
 	t.Run("admin can delete a standard user API Key", func(t *testing.T) {
 		is := assert.New(t)
 		_, apiKey, err := apiKeyService.GenerateApiKey(*user, "test-admin-delete-token")
-		is.NoError(err)
+		require.NoError(t, err)
 
 		req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("%s/%d", "/users/2/tokens", apiKey.ID), nil)
 		testhelpers.AddTestSecurityCookie(req, adminJWT)
@@ -78,15 +80,15 @@ func Test_userRemoveAccessToken(t *testing.T) {
 		is.Equal(http.StatusNoContent, rr.Code)
 
 		keys, err := apiKeyService.GetAPIKeys(user.ID)
-		is.NoError(err)
+		require.NoError(t, err)
 
-		is.Equal(0, len(keys))
+		is.Empty(keys)
 	})
 
 	t.Run("user can delete API Key using api-key auth", func(t *testing.T) {
 		is := assert.New(t)
 		rawAPIKey, apiKey, err := apiKeyService.GenerateApiKey(*user, "test-api-key-auth-deletion")
-		is.NoError(err)
+		require.NoError(t, err)
 
 		req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("%s/%d", "/users/2/tokens", apiKey.ID), nil)
 		req.Header.Add("x-api-key", rawAPIKey)
@@ -97,17 +99,17 @@ func Test_userRemoveAccessToken(t *testing.T) {
 		is.Equal(http.StatusNoContent, rr.Code)
 
 		keys, err := apiKeyService.GetAPIKeys(user.ID)
-		is.NoError(err)
+		require.NoError(t, err)
 
-		is.Equal(0, len(keys))
+		is.Empty(keys)
 	})
 
 	t.Run("user cannot delete another users API Keys using api-key auth", func(t *testing.T) {
 		_, adminAPIKey, err := apiKeyService.GenerateApiKey(*adminUser, "admin-key")
-		is.NoError(err)
+		require.NoError(t, err)
 
 		rawAPIKey, _, err := apiKeyService.GenerateApiKey(*user, "user-key")
-		is.NoError(err)
+		require.NoError(t, err)
 
 		req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("/users/%d/tokens/%d", user.ID, adminAPIKey.ID), nil)
 		req.Header.Add("x-api-key", rawAPIKey)
@@ -118,7 +120,7 @@ func Test_userRemoveAccessToken(t *testing.T) {
 		is.Equal(http.StatusForbidden, rr.Code)
 
 		adminKeyGot, err := apiKeyService.GetAPIKey(adminAPIKey.ID)
-		is.NoError(err)
+		require.NoError(t, err)
 
 		is.Equal(adminAPIKey, adminKeyGot)
 	})

@@ -45,9 +45,9 @@ export function HelmApplicationView() {
   return (
     <>
       <PageHeader
-        title="Helm details"
+        title="Helm 详情"
         breadcrumbs={[
-          { label: 'Applications', link: 'kubernetes.applications' },
+          { label: '应用', link: 'kubernetes.applications' },
           name,
         ]}
         reload

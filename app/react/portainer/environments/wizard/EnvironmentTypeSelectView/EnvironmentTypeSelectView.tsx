@@ -1,9 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from '@uirouter/react';
-import _ from 'lodash';
 import { Wand2 } from 'lucide-react';
-
-import { useAnalytics } from '@/react/hooks/useAnalytics';
 
 import { Button } from '@@/buttons';
 import { PageHeader } from '@@/PageHeader';
@@ -15,12 +12,10 @@ import {
   EnvironmentOptionValue,
   existingEnvironmentTypes,
   newEnvironmentTypes,
-  environmentTypes,
 } from './environment-types';
 
 export function EnvironmentTypeSelectView() {
   const [types, setTypes] = useState<EnvironmentOptionValue[]>([]);
-  const { trackEvent } = useAnalytics();
   const router = useRouter();
 
   return (
@@ -39,7 +34,7 @@ export function EnvironmentTypeSelectView() {
               <div className="form-horizontal">
                 <FormSection title="选择您的环境">
                   <p className="text-muted small">
-                    您可以加入不同类型的环境，选择所有适用的环境。
+                    您可以接入不同类型的环境，选择所有适用的环境。
                   </p>
                   <p className="control-label !mb-2">
                     连接到现有环境
@@ -67,7 +62,7 @@ export function EnvironmentTypeSelectView() {
                 onClick={() => startWizard()}
                 className="!ml-0"
               >
-                开始向导
+                启动向导
               </Button>
             </WidgetBody>
           </Widget>
@@ -80,17 +75,6 @@ export function EnvironmentTypeSelectView() {
     if (types.length === 0) {
       return;
     }
-
-    const steps = _.compact(
-      types.map((id) => environmentTypes.find((eType) => eType.id === id))
-    );
-
-    trackEvent('endpoint-wizard-endpoint-select', {
-      category: 'portainer',
-      metadata: {
-        environment: steps.map((step) => step.label).join('/'),
-      },
-    });
 
     router.stateService.go('portainer.wizard.endpoints.create', {
       envType: types,

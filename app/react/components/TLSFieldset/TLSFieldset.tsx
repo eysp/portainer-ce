@@ -46,7 +46,7 @@ export function TLSFieldset({ values, onChange, errors }: Props) {
           {!values.skipVerify && (
             <>
               <FormControl
-                label="TLS CA certificate"
+                label="TLS CA 证书"
                 inputId="ca-cert-field"
                 errors={errors?.caCertFile}
               >
@@ -98,7 +98,7 @@ const MAX_FILE_SIZE = 5_242_880; // 5MB
 function certValidation(optional?: boolean) {
   return withFileSize(file(), MAX_FILE_SIZE).when(['tls', 'skipVerify'], {
     is: (tls: boolean, skipVerify: boolean) => tls && !skipVerify && !optional,
-    then: (schema) => schema.required('File is required'),
+    then: (schema) => schema.required('文件为必填项'),
   });
 }
 

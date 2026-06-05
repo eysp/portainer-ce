@@ -79,8 +79,7 @@ function RateLimitsInner({
           <TextTip color="blue">
             {isAuthenticated ? (
               <>
-                您当前使用免费账户从 DockerHub 拉取镜像，将限制为每 6 小时 200 次拉取。
-                剩余拉取次数：
+                您当前正在使用免费账户从 DockerHub 拉取镜像，每 6 小时限制 200 次拉取。剩余拉取次数：
                 <span className="font-bold">
                   {pullRateLimits.remaining}/{pullRateLimits.limit}
                 </span>
@@ -89,7 +88,7 @@ function RateLimitsInner({
               <>
                 {isPureAdmin ? (
                   <>
-                    您当前使用匿名账户从 DockerHub 拉取镜像，将限制为每 6 小时 100 次拉取。您可以在{' '}
+                    您当前正在使用匿名账户从 DockerHub 拉取镜像，每 6 小时限制 100 次拉取。您可以在{' '}
                     <Link
                       to="portainer.registries"
                       data-cy="image-registry-rate-limits-registries-view-link"
@@ -103,7 +102,7 @@ function RateLimitsInner({
                   </>
                 ) : (
                   <>
-                    您当前使用匿名账户从 DockerHub 拉取镜像，将限制为每 6 小时 100 次拉取。请联系您的管理员配置 DockerHub 身份验证。剩余拉取次数：{' '}
+                    您当前正在使用匿名账户从 DockerHub 拉取镜像，每 6 小时限制 100 次拉取。请联系您的管理员配置 DockerHub 身份验证。剩余拉取次数：{' '}
                     <span className="font-bold">
                       {pullRateLimits.remaining}/{pullRateLimits.limit}
                     </span>

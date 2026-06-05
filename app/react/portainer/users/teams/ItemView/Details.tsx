@@ -44,7 +44,7 @@ export function Details({ team, memberships, isAdmin }: Props) {
                         <DeleteButton
                           size="xsmall"
                           onConfirmed={handleDeleteClick}
-                          confirmMessage="您确定要删除此团队吗？该团队中的用户不会被删除。"
+                          confirmMessage="Do you want to delete this team? Users in this team will not be deleted."
                           data-cy={`delete-team-${team.Name}`}
                         >
                           删除此团队
@@ -54,7 +54,7 @@ export function Details({ team, memberships, isAdmin }: Props) {
                   </td>
                 </tr>
                 <tr>
-                  <td>负责人</td>
+                  <td>Leaders</td>
                   <td>{!teamSyncQuery.data && leaderCount}</td>
                 </tr>
                 <tr>

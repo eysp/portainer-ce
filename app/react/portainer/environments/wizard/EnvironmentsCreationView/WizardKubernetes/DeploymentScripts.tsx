@@ -62,7 +62,8 @@ export function DeploymentScripts({
 
       <div className="form-group">
         <span className="col-sm-12 text-muted small">
-          请先在集群中部署 Portainer Agent。参考下方与平台相关的命令进行部署。
+          Ensure that you have deployed the Portainer agent in your cluster
+          first. Refer to the platform related command below to deploy it.
         </span>
       </div>
 
@@ -105,8 +106,9 @@ function DeployCode({
       {showAgentSecretMessage && agentSecret && (
         <p className="text-muted small my-6">
           <Icon icon={Info} mode="primary" className="mr-1" />
-            注意：需要将环境变量 AGENT_SECRET 设置为
-            <code>{agentSecret}</code>。请更新从下方脚本下载的清单（manifest）。
+          注意：需要将环境变量 AGENT_SECRET 设置为
+          <code>{agentSecret}</code>. Please update the manifest that will be
+          downloaded from the following script.
         </p>
       )}
       <Code>{code}</Code>

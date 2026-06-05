@@ -41,7 +41,10 @@ func NewScheduler(ctx context.Context) *Scheduler {
 	if ctx != nil {
 		go func() {
 			<-ctx.Done()
-			s.Shutdown()
+
+			if err := s.Shutdown(); err != nil {
+				log.Error().Err(err).Msg("failed to shutdown the scheduler")
+			}
 		}()
 	}
 
@@ -55,21 +58,24 @@ func (s *Scheduler) Shutdown() error {
 	}
 
 	log.Debug().Msg("stopping scheduler")
+
 	ctx := s.crontab.Stop()
 	<-ctx.Done()
 
 	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	for _, job := range s.crontab.Entries() {
 		if cancel, ok := s.activeJobs[job.ID]; ok {
 			cancel()
 		}
 	}
-	s.mu.Unlock()
 
 	err := ctx.Err()
 	if errors.Is(err, context.Canceled) {
 		return nil
 	}
+
 	return err
 }
 
@@ -79,14 +85,15 @@ func (s *Scheduler) StopJob(jobID string) error {
 	if err != nil {
 		return errors.Wrapf(err, "failed convert jobID %q to int", jobID)
 	}
+
 	entryID := cron.EntryID(id)
 
 	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	if cancel, ok := s.activeJobs[entryID]; ok {
 		cancel()
-		delete(s.activeJobs, entryID)
 	}
-	s.mu.Unlock()
 
 	return nil
 }
@@ -100,6 +107,7 @@ func (s *Scheduler) StartJobEvery(duration time.Duration, job func() error) stri
 	cancelFn := func() {
 		log.Debug().Msg("job cancelled, stopping")
 		s.crontab.Remove(*entryID)
+		delete(s.activeJobs, *entryID)
 	}
 
 	jobFn := cron.FuncJob(func() {
@@ -111,6 +119,10 @@ func (s *Scheduler) StartJobEvery(duration time.Duration, job func() error) stri
 		var permErr *PermanentError
 		if errors.As(err, &permErr) {
 			log.Error().Err(permErr).Msg("job returned a permanent error, it will be stopped")
+
+			s.mu.Lock()
+			defer s.mu.Unlock()
+
 			cancelFn()
 
 			return
@@ -119,11 +131,11 @@ func (s *Scheduler) StartJobEvery(duration time.Duration, job func() error) stri
 		log.Error().Err(err).Msg("job returned an error, it will be rescheduled")
 	})
 
-	*entryID = s.crontab.Schedule(cron.Every(duration), jobFn)
-
 	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	*entryID = s.crontab.Schedule(cron.Every(duration), jobFn)
 	s.activeJobs[*entryID] = cancelFn
-	s.mu.Unlock()
 
 	return strconv.Itoa(int(*entryID))
 }

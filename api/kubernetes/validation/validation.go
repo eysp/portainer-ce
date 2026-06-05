@@ -6,6 +6,7 @@ package validation
 import (
 	"fmt"
 	"regexp"
+	"strings"
 )
 
 const dns1123LabelFmt string = "[a-z0-9]([-a-z0-9]*[a-z0-9])?"
@@ -33,16 +34,27 @@ func MaxLenError(length int) string {
 
 // RegexError returns a string explanation of a regex validation failure.
 func RegexError(fmt string, examples ...string) string {
-	s := "must match the regex " + fmt
+	var s strings.Builder
+
+	_, _ = s.WriteString("must match the regex ")
+	_, _ = s.WriteString(fmt)
+
 	if len(examples) == 0 {
-		return s
+		return s.String()
 	}
-	s += " (e.g. "
+
+	s.WriteString(" (e.g. ")
 	for i := range examples {
 		if i > 0 {
-			s += " or "
+			_, _ = s.WriteString(" or ")
 		}
-		s += "'" + examples[i] + "'"
+
+		_, _ = s.WriteRune('\'')
+		_, _ = s.WriteString(examples[i])
+		_, _ = s.WriteRune('\'')
 	}
-	return s + ")"
+
+	_, _ = s.WriteRune(')')
+
+	return s.String()
 }

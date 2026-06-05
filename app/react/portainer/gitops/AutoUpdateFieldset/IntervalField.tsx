@@ -1,5 +1,6 @@
-import { string } from 'yup';
 import parse from 'parse-duration';
+
+import { durationValidation } from '@/react/utils/validation';
 
 import { FormControl } from '@@/form-components/FormControl';
 import { Input } from '@@/form-components/Input';
@@ -42,20 +43,13 @@ export function IntervalField({
 }
 
 export function intervalValidation() {
-  return (
-    string()
-      .required('此字段是必需的。')
-      // TODO: find a regex that validates time.Duration
-      // .matches(
-      //   // validate golang time.Duration format
-      //   // https://cs.opensource.google/go/go/+/master:src/time/format.go;l=1590
-      //   /[-+]?([0-9]*(\.[0-9]*)?[a-z]+)+/g,
-      //   '请输入有效的时间间隔。'
-      // )
-      .test(
-        'minimumInterval',
-        '最小间隔为 1m',
-        (value) => !!value && parse(value, 'minute') >= 1
-      )
-  );
+  return durationValidation(false) // Don't allow empty - field is required
+    .required('This field is required.')
+    .test('minimumInterval', 'Minimum interval is 1m', (value) => {
+      if (!value) {
+        return false;
+      }
+      const minutes = parse(value, 'minute');
+      return minutes !== null && minutes >= 1;
+    });
 }

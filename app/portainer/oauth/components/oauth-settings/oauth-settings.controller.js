@@ -92,7 +92,7 @@ export default class OAuthSettingsController {
 
       if (checked) {
         const confirmed = await confirm({
-          title: 'Hide internal authentication prompt',
+          title: '隐藏内部认证提示',
           message: 'By hiding internal authentication prompt, you will only be able to login via SSO. Are you sure?',
           confirmButton: buildConfirmButton('Confirm', 'danger'),
           modalType: ModalType.Warn,

@@ -35,7 +35,8 @@ export function useLoadFormState(environmentId: EnvironmentId) {
 export function useFormState(
   subscriptions: Subscription[] = [],
   resourceGroups: Record<string, ResourceGroup[]> = {},
-  providers: Record<string, ProviderViewModel> = {}
+  providers: Record<string, ProviderViewModel> = {},
+  defaultValues?: Partial<ContainerInstanceFormValues>
 ) {
   const { user, isPureAdmin } = useCurrentUser();
 
@@ -68,6 +69,8 @@ export function useFormState(
     ports: [{ container: 80, host: 80, protocol: 'TCP' }],
     allocatePublicIP: true,
     accessControl: parseAccessControlFormData(isPureAdmin, user.Id),
+    env: [],
+    ...defaultValues,
   };
 
   return {

@@ -5,7 +5,7 @@ import { DecoratedItem } from '../types';
 import { columnHelper } from './helper';
 
 export const groups = columnHelper.accessor('edgeGroupNames', {
-  header: 'Edge Groups',
+  header: '边缘组',
   cell: GroupsCell,
 });
 

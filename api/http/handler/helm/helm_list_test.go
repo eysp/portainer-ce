@@ -19,6 +19,7 @@ import (
 
 	"github.com/segmentio/encoding/json"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_helmList(t *testing.T) {
@@ -27,13 +28,13 @@ func Test_helmList(t *testing.T) {
 	_, store := datastore.MustNewTestStore(t, true, true)
 
 	err := store.Endpoint().Create(&portainer.Endpoint{ID: 1})
-	assert.NoError(t, err, "error creating environment")
+	require.NoError(t, err, "error creating environment")
 
 	err = store.User().Create(&portainer.User{Username: "admin", Role: portainer.AdministratorRole})
-	assert.NoError(t, err, "error creating a user")
+	require.NoError(t, err, "error creating a user")
 
 	jwtService, err := jwt.NewService("1h", store)
-	is.NoError(err, "Error initialising jwt service")
+	require.NoError(t, err, "Error initialising jwt service")
 
 	kubernetesDeployer := exectest.NewKubernetesDeployer()
 	helmPackageManager := test.NewMockHelmPackageManager()
@@ -42,7 +43,9 @@ func Test_helmList(t *testing.T) {
 
 	// Install a single chart.  We expect to get these values back
 	options := options.InstallOptions{Name: "nginx-1", Chart: "nginx", Namespace: "default"}
-	h.helmPackageManager.Upgrade(options)
+
+	_, err = h.helmPackageManager.Upgrade(options)
+	require.NoError(t, err)
 
 	t.Run("helmList", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/1/kubernetes/helm", nil)
@@ -56,13 +59,14 @@ func Test_helmList(t *testing.T) {
 		is.Equal(http.StatusOK, rr.Code, "Status should be 200 OK")
 
 		body, err := io.ReadAll(rr.Body)
-		is.NoError(err, "ReadAll should not return error")
+		require.NoError(t, err, "ReadAll should not return error")
 
 		data := []release.ReleaseElement{}
-		json.Unmarshal(body, &data)
-		if is.Equal(1, len(data), "Expected one chart entry") {
-			is.EqualValues(options.Name, data[0].Name, "Name doesn't match")
-			is.EqualValues(options.Chart, data[0].Chart, "Chart doesn't match")
+		err = json.Unmarshal(body, &data)
+		require.NoError(t, err)
+		if is.Len(data, 1, "Expected one chart entry") {
+			is.Equal(options.Name, data[0].Name, "Name doesn't match")
+			is.Equal(options.Chart, data[0].Chart, "Chart doesn't match")
 		}
 	})
 }

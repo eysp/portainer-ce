@@ -38,7 +38,7 @@ function AccessCell({
           to="portainer.settings.edgeCompute"
           data-cy={`manage-access-button-${item.RoleName}`}
         >
-          <Icon icon={Users} /> 管理访问
+          <Icon icon={Users} /> Manage access
         </Link>
       </>
     );
@@ -46,7 +46,7 @@ function AccessCell({
 
   return (
     <>
-      {prefix(item.TeamName)} 访问权限定义于 {item.AccessLocation}{' '}
+      {prefix(item.TeamName)} access defined on {item.AccessLocation}{' '}
       {!!item.GroupName && <code>{item.GroupName}</code>}{' '}
       {manageAccess(item, isPureAdmin)}
     </>
@@ -55,7 +55,7 @@ function AccessCell({
 
 function prefix(teamName: string | undefined) {
   if (!teamName) {
-    return '用户';
+    return 'User';
   }
   return (
     <>

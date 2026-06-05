@@ -140,7 +140,7 @@ class KubernetesConfigurationDataController {
     // exit if the file is too big
     const maximumFileSizeBytes = 1024 * 1024; // 1MB
     if (event.target.result.byteLength > maximumFileSizeBytes) {
-      this.Notifications.error('File size is too big', 'File size is too big', 'Select a file that is 1MB or smaller.');
+      this.Notifications.error('文件大小过大', '文件大小过大', '请选择 1MB 或更小的文件。');
       return;
     }
 
@@ -158,7 +158,7 @@ class KubernetesConfigurationDataController {
         entry.Value = Base64.encode(stringValue);
       }
     } catch (error) {
-      this.Notifications.error('Failed to upload file', error, 'Failed to upload file');
+      this.Notifications.error('文件上传失败', error, '文件上传失败');
       return;
     }
 

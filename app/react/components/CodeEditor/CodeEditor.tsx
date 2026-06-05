@@ -1,5 +1,5 @@
 import CodeMirror from '@uiw/react-codemirror';
-import { useCallback, useState } from 'react';
+import { AriaAttributes, useCallback, useState } from 'react';
 import { createTheme } from '@uiw/codemirror-themes';
 import { tags as highlightTags } from '@lezer/highlight';
 import type { JSONSchema7 } from 'json-schema';
@@ -81,7 +81,8 @@ export function CodeEditor({
   fileName,
   placeholder,
   showToolbar = true,
-}: Props) {
+  'aria-label': ariaLabel,
+}: Props & Pick<AriaAttributes, 'aria-label'>) {
   const [isRollback, setIsRollback] = useState(false);
 
   const extensions = useCodeEditorExtensions(type, schema);
@@ -159,6 +160,7 @@ export function CodeEditor({
           }}
           data-cy={dataCy}
           placeholder={placeholder}
+          aria-label={ariaLabel || '代码编辑器'}
         />
       </div>
     </>

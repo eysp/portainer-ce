@@ -42,7 +42,7 @@ export async function containerStats(
     );
     return data;
   } catch (err) {
-    throw parseAxiosError(err, 'Unable to retrieve container stats');
+    throw parseAxiosError(err, '无法获取容器统计信息');
   }
 }
 

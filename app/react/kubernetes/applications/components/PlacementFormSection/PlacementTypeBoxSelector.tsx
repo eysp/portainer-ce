@@ -16,10 +16,11 @@ export const placementOptions: ReadonlyArray<BoxSelectorOption<PlacementType>> =
       value: 'mandatory',
       icon: Sliders,
       iconType: 'badge',
-      label: '强制',
+      label: 'Mandatory',
       description: (
         <>
-          仅在符合<b>所有</b>规则的节点上调度此应用程序
+          Schedule this application <b>ONLY</b> on nodes that match <b>ALL</b>{' '}
+          Rules
         </>
       ),
     },
@@ -28,9 +29,9 @@ export const placementOptions: ReadonlyArray<BoxSelectorOption<PlacementType>> =
       value: 'preferred',
       icon: AlignJustify,
       iconType: 'badge',
-      label: '首选',
+      label: 'Preferred',
       description:
-        '如果可能，在符合规则的节点上调度此应用程序',
+        'Schedule this application on nodes that match the rules if possible',
     },
   ] as const;
 

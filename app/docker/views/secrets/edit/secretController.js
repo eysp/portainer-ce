@@ -13,7 +13,7 @@ function SecretController($scope, $transition$, $state, SecretService, Notificat
   $scope.removeSecret = function removeSecret(secretId) {
     SecretService.remove(secretId)
       .then(function success() {
-        Notifications.success('Success', 'Secret successfully removed');
+        Notifications.success('Success', '密钥已成功删除');
         $state.go('docker.secrets', {});
       })
       .catch(function error(err) {

@@ -10,7 +10,7 @@ export function NoEnvironmentsInfoPanel({ isAdmin }: { isAdmin: boolean }) {
           <TextTip>
             {isAdmin ? (
               <span>
-                没有可用的环境进行管理。请前往{' '}
+                没有可用于管理的环境。请前往{' '}
                 <Link
                   to="portainer.wizard.endpoints"
                   data-cy="wizard-add-environments-link"
@@ -21,7 +21,8 @@ export function NoEnvironmentsInfoPanel({ isAdmin }: { isAdmin: boolean }) {
               </span>
             ) : (
               <span>
-                您无权访问任何环境。请联系您的管理员。
+                您没有访问任何环境的权限。请联系您的
+                管理员。
               </span>
             )}
           </TextTip>

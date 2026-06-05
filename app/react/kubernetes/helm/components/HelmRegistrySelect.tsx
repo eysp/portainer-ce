@@ -45,7 +45,7 @@ export function HelmRegistrySelect({
 
   return (
     <FormControl
-      label="Helm chart source"
+      label="Helm chart 源"
       tooltip={<HelmChartSourceTooltip isPureAdmin={isPureAdmin} />}
     >
       <PortainerSelect<RepoValue>

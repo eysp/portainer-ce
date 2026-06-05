@@ -12,9 +12,9 @@ function EdgeAutoCreateScriptView() {
   return (
     <>
       <PageHeader
-        title="Automatic Edge Environment Creation"
+        title="自动创建 Edge 环境"
         breadcrumbs={[
-          { label: 'Environments', link: 'portainer.endpoints' },
+          { label: '环境', link: 'portainer.endpoints' },
           'Automatic Edge Environment Creation',
         ]}
         reload

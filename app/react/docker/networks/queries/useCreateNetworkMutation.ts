@@ -1,4 +1,4 @@
-import { Network } from 'docker-types/generated/1.41';
+import { Network } from 'docker-types';
 
 import axios, { parseAxiosError } from '@/portainer/services/axios';
 import { EnvironmentId } from '@/react/portainer/environments/types';
@@ -41,7 +41,7 @@ type NetworkConfigBase = {
 /**
  * This type definition of NetworkConfig doesnt enforce the usage of only one type of the union
  * and not a mix of fields of the unionised types.
- * 例如 the following is valid for TS while it is not for the Docker API
+ * e.g. the following is valid for TS while it is not for the Docker API
  *
  * const config: NetworkConfig = {
  *   Name: 'my-network', // shared

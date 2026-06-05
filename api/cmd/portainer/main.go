@@ -134,15 +134,16 @@ func initDataStore(flags *portainer.CLIFlags, secretKey []byte, fileService port
 			InstanceID:    instanceId.String(),
 			MigratorCount: migratorCount,
 		}
-		store.VersionService.UpdateVersion(&v)
+
+		if err := store.VersionService.UpdateVersion(&v); err != nil {
+			log.Fatal().Err(err).Msg("failed to update version")
+		}
 
 		if err := updateSettingsFromFlags(store, flags); err != nil {
 			log.Fatal().Err(err).Msg("failed updating settings from flags")
 		}
-	} else {
-		if err := store.MigrateData(); err != nil {
-			log.Fatal().Err(err).Msg("failed migration")
-		}
+	} else if err := store.MigrateData(); err != nil {
+		log.Fatal().Err(err).Msg("failed migration")
 	}
 
 	if err := updateSettingsFromFlags(store, flags); err != nil {
@@ -153,7 +154,7 @@ func initDataStore(flags *portainer.CLIFlags, secretKey []byte, fileService port
 	go func() {
 		<-shutdownCtx.Done()
 
-		defer connection.Close()
+		defer logs.CloseAndLogErr(connection)
 	}()
 
 	return store
@@ -246,6 +247,10 @@ func updateSettingsFromFlags(dataStore dataservices.DataStore, flags *portainer.
 	settings.LogoURL = cmp.Or(*flags.Logo, settings.LogoURL)
 	settings.EnableEdgeComputeFeatures = cmp.Or(*flags.EnableEdgeComputeFeatures, settings.EnableEdgeComputeFeatures)
 	settings.TemplatesURL = cmp.Or(*flags.Templates, settings.TemplatesURL)
+
+	if flags.KubectlShellImageSet {
+		settings.KubectlShellImage = *flags.KubectlShellImage
+	}
 
 	if *flags.Labels != nil {
 		settings.BlackListedLabels = *flags.Labels
@@ -347,7 +352,7 @@ func buildServer(flags *portainer.CLIFlags) portainer.Server {
 	trustedOrigins := []string{}
 	if *flags.TrustedOrigins != "" {
 		// validate if the trusted origins are valid urls
-		for _, origin := range strings.Split(*flags.TrustedOrigins, ",") {
+		for origin := range strings.SplitSeq(*flags.TrustedOrigins, ",") {
 			if !validate.IsTrustedOrigin(origin) {
 				log.Fatal().Str("trusted_origin", origin).Msg("invalid url for trusted origin. Please check the trusted origins flag.")
 			}
@@ -529,7 +534,9 @@ func buildServer(flags *portainer.CLIFlags) portainer.Server {
 
 	scheduler := scheduler.NewScheduler(shutdownCtx)
 	stackDeployer := deployments.NewStackDeployer(swarmStackManager, composeStackManager, kubernetesDeployer, dockerClientFactory, dataStore)
-	deployments.StartStackSchedules(scheduler, stackDeployer, dataStore, gitService)
+	if err := deployments.StartStackSchedules(scheduler, stackDeployer, dataStore, gitService); err != nil {
+		log.Fatal().Err(err).Msg("failed to start stack scheduler")
+	}
 
 	sslDBSettings, err := dataStore.SSLSettings().Settings()
 	if err != nil {
@@ -630,7 +637,7 @@ func main() {
 			Str("build_number", build.BuildNumber).
 			Str("image_tag", build.ImageTag).
 			Str("nodejs_version", build.NodejsVersion).
-			Str("yarn_version", build.YarnVersion).
+			Str("pnpm_version", build.PnpmVersion).
 			Str("webpack_version", build.WebpackVersion).
 			Str("go_version", build.GoVersion).
 			Msg("starting Portainer")

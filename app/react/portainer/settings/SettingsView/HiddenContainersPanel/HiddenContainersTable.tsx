@@ -34,7 +34,7 @@ export function HiddenContainersTable({
               onClick={() => onDelete(label.name)}
               disabled={isLoading}
             >
-              移除
+              删除
             </Button>,
           ]}
         >

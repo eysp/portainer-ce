@@ -153,23 +153,23 @@ func TestHandler_tagDelete(t *testing.T) {
 		// Check that the endpoints are updated
 		endpoint1, err = store.Endpoint().Endpoint(endpoint1.ID)
 		require.NoError(t, err)
-		assert.Len(t, endpoint1.TagIDs, 0, "endpoint-1 should not have any tags")
+		assert.Empty(t, endpoint1.TagIDs, "endpoint-1 should not have any tags")
 		assert.Equal(t, endpoint1.GroupID, endpointGroup.ID, "endpoint-1 should still belong to the endpoint group")
 
 		endpoint2, err = store.Endpoint().Endpoint(endpoint2.ID)
 		require.NoError(t, err)
-		assert.Len(t, endpoint2.TagIDs, 0, "endpoint-2 should not have any tags")
+		assert.Empty(t, endpoint2.TagIDs, "endpoint-2 should not have any tags")
 
 		// Check that the dynamic edge group is updated
 		dynamicEdgeGroup, err = store.EdgeGroup().Read(dynamicEdgeGroup.ID)
 		require.NoError(t, err)
-		assert.Len(t, dynamicEdgeGroup.TagIDs, 0, "dynamic edge group should not have any tags")
+		assert.Empty(t, dynamicEdgeGroup.TagIDs, "dynamic edge group should not have any tags")
 		assert.Equal(t, 0, dynamicEdgeGroup.EndpointIDs.Len(), "dynamic edge group should not have any endpoints")
 
 		// Check that the static edge group is not updated
 		staticEdgeGroup, err = store.EdgeGroup().Read(staticEdgeGroup.ID)
 		require.NoError(t, err)
-		assert.Len(t, staticEdgeGroup.TagIDs, 0, "static edge group should not have any tags")
+		assert.Empty(t, staticEdgeGroup.TagIDs, "static edge group should not have any tags")
 		assert.Equal(t, 1, staticEdgeGroup.EndpointIDs.Len(), "static edge group should have one endpoint")
 		assert.True(t, staticEdgeGroup.EndpointIDs.Contains(endpoint2.ID), "static edge group should have the endpoint-2")
 	})

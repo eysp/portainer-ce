@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestJSONWithStatus(t *testing.T) {
@@ -44,7 +45,7 @@ func TestJSONWithStatus(t *testing.T) {
 			var response TestData
 			err := json.Unmarshal(recorder.Body.Bytes(), &response)
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, test.data, response)
 		})
 	}
@@ -79,7 +80,7 @@ func TestJSON(t *testing.T) {
 
 			var response TestData
 			err := json.Unmarshal(recorder.Body.Bytes(), &response)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, test.data, response)
 		})
 	}

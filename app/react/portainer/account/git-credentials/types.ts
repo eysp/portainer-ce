@@ -7,6 +7,11 @@ export interface GitCredentialTableSettings
   extends SortableTableSettings,
     PaginationTableSettings {}
 
+export enum AuthTypeOption {
+  Basic = 0,
+  Token = 1,
+}
+
 export interface GitCredentialFormValues {
   name: string;
   username?: string;
@@ -25,4 +30,5 @@ export type GitCredential = {
   name: string;
   username: string;
   creationDate: number;
+  authorizationType: AuthTypeOption;
 };

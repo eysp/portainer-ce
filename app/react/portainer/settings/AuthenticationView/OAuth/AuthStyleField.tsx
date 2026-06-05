@@ -15,17 +15,17 @@ interface Props {
 
 // The options are based on oauth2 lib definition @https://pkg.go.dev/golang.org/x/oauth2#AuthStyle
 export const authStyleOptions: Options = [
-  { label: 'Auto Detect', value: OAuthStyle.AutoDetect, isDefault: true },
-  { label: 'In Params', value: OAuthStyle.InParams },
-  { label: 'In Header', value: OAuthStyle.InHeader },
+  { label: '自动检测', value: OAuthStyle.AutoDetect, isDefault: true },
+  { label: '在参数中', value: OAuthStyle.InParams },
+  { label: '在请求头中', value: OAuthStyle.InHeader },
 ];
 
 export function AuthStyleField({
   value,
   readonly = false,
   onChange,
-  label = 'Auth Style',
-  tooltip = 'Auth Style specifies how the endpoint wants the client ID & client secret sent.',
+  label = '认证样式',
+  tooltip = '认证样式指定端点希望如何发送客户端 ID 和客户端密钥。',
   size = 'small',
 }: Props) {
   return (

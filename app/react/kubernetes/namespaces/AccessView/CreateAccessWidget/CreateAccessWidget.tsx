@@ -65,8 +65,8 @@ export function CreateAccessWidget() {
   return (
     <div className="row">
       <div className="col-sm-12">
-        <Widget aria-label="Create access">
-          <WidgetTitle icon={UserPlusIcon} title="Create access" />
+        <Widget aria-label="创建访问权限">
+          <WidgetTitle icon={UserPlusIcon} title="创建访问权限" />
           <WidgetBody>
             {isRBACEnabledQuery.data === false && <RBACAlert />}
             <TextTip className="mb-2" childrenWrapperClassName="text-warning">
@@ -115,7 +115,7 @@ export function CreateAccessWidget() {
         configMap: configMapPayload,
         configMapName: PortainerNamespaceAccessesConfigMap.configMapName,
       });
-      notifySuccess('Success', 'Namespace access updated');
+      notifySuccess('Success', '命名空间访问权限已更新');
       resetForm();
     } catch (error) {
       notifyError('Failed to update namespace access', error as Error);

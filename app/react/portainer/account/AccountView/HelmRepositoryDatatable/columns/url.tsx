@@ -9,7 +9,7 @@ export const url = columnHelper.accessor('URL', {
       {row.original.URL}
       {row.original.Global && (
         <Badge type="success" className="ml-2">
-          全局设置
+          Globally-set
         </Badge>
       )}
     </div>

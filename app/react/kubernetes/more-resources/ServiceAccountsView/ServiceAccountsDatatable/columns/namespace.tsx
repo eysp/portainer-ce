@@ -8,7 +8,7 @@ import { ServiceAccount } from '../../types';
 import { columnHelper } from './helper';
 
 export const namespace = columnHelper.accessor('namespace', {
-  header: 'Namespace',
+  header: '命名空间',
   id: 'namespace',
   cell: ({ row }) => (
     <Link

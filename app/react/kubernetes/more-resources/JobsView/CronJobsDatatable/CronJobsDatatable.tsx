@@ -144,7 +144,7 @@ function TableActions({ selectedItems }: TableActionsProps) {
         loadingText="Removing Cron Jobs..."
         data-cy="k8s-cronJobs-removeCronJobButton"
       >
-        Remove
+        删除
       </LoadingButton>
 
       <CreateFromManifestButton

@@ -83,7 +83,6 @@
         "MigrateIngresses": true
       },
       "PublicURL": "",
-      "QueryDate": 0,
       "SecuritySettings": {
         "allowBindMountsForRegularUsers": true,
         "allowContainerCapabilitiesForRegularUsers": true,
@@ -604,7 +603,6 @@
     "EdgeAgentCheckinInterval": 5,
     "EdgePortainerUrl": "",
     "EnableEdgeComputeFeatures": false,
-    "EnableTelemetry": true,
     "EnforceEdgeID": false,
     "FeatureFlagSettings": null,
     "GlobalDeploymentOptions": {
@@ -615,7 +613,7 @@
       "RequiredPasswordLength": 12
     },
     "KubeconfigExpiry": "0",
-    "KubectlShellImage": "portainer/kubectl-shell:2.33.3",
+    "KubectlShellImage": "portainer/kubectl-shell:2.39.2",
     "LDAPSettings": {
       "AnonymousMode": true,
       "AutoCreateUsers": true,
@@ -944,7 +942,7 @@
     }
   ],
   "version": {
-    "VERSION": "{\"SchemaVersion\":\"2.33.3\",\"MigratorCount\":0,\"Edition\":1,\"InstanceID\":\"463d5c47-0ea5-4aca-85b1-405ceefee254\"}"
+    "VERSION": "{\"SchemaVersion\":\"2.39.2\",\"MigratorCount\":0,\"Edition\":1,\"InstanceID\":\"463d5c47-0ea5-4aca-85b1-405ceefee254\"}"
   },
   "webhooks": null
 }

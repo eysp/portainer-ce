@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { SchemaOf, object } from 'yup';
 
 import { accessControlFormValidation } from '@/react/portainer/access-control/AccessControlForm';
-import { useNameValidation } from '@/react/common/stacks/CreateView/NameField';
+import { useNameValidation } from '@/react/docker/stacks/common/NameField';
 import { EnvironmentId } from '@/react/portainer/environments/types';
 
 import { envVarsFieldsetValidation } from '../EnvVarsFieldset';

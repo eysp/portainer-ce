@@ -82,7 +82,7 @@ func TestSearchOrderAndPaginate(t *testing.T) {
 
 		result := SearchOrderAndPaginate(users, params, userConfig)
 
-		require.Equal(t, 5, len(result.Items), "Should return all items when no filters applied")
+		require.Len(t, result.Items, 5, "Should return all items when no filters applied")
 		require.Equal(t, 5, result.TotalCount, "TotalCount should equal filtered items")
 		require.Equal(t, 5, result.TotalAvailable, "TotalAvailable should equal original items")
 		require.Equal(t, users, result.Items, "Items should be unchanged")
@@ -97,7 +97,7 @@ func TestSearchOrderAndPaginate(t *testing.T) {
 
 		result := SearchOrderAndPaginate(users, params, userConfig)
 
-		require.Equal(t, 1, len(result.Items), "Should find one user matching 'alice'")
+		require.Len(t, result.Items, 1, "Should find one user matching 'alice'")
 		require.Equal(t, 1, result.TotalCount, "TotalCount should reflect filtered items")
 		require.Equal(t, 5, result.TotalAvailable, "TotalAvailable should be original count")
 		require.Equal(t, "Alice Johnson", result.Items[0].Name, "Should return Alice")
@@ -112,7 +112,7 @@ func TestSearchOrderAndPaginate(t *testing.T) {
 
 		result := SearchOrderAndPaginate(users, params, userConfig)
 
-		require.Equal(t, 1, len(result.Items), "Search should be case insensitive")
+		require.Len(t, result.Items, 1, "Search should be case insensitive")
 		require.Equal(t, "Alice Johnson", result.Items[0].Name, "Should return Alice")
 	})
 
@@ -125,7 +125,7 @@ func TestSearchOrderAndPaginate(t *testing.T) {
 
 		result := SearchOrderAndPaginate(users, params, userConfig)
 
-		require.Equal(t, 1, len(result.Items), "Should find user by email")
+		require.Len(t, result.Items, 1, "Should find user by email")
 		require.Equal(t, "Bob Smith", result.Items[0].Name, "Should return Bob")
 	})
 
@@ -138,7 +138,7 @@ func TestSearchOrderAndPaginate(t *testing.T) {
 
 		result := SearchOrderAndPaginate(users, params, userConfig)
 
-		require.Equal(t, 0, len(result.Items), "Should return empty when no matches")
+		require.Empty(t, result.Items, "Should return empty when no matches")
 		require.Equal(t, 0, result.TotalCount, "TotalCount should be 0")
 		require.Equal(t, 5, result.TotalAvailable, "TotalAvailable should remain original count")
 	})
@@ -152,7 +152,7 @@ func TestSearchOrderAndPaginate(t *testing.T) {
 
 		result := SearchOrderAndPaginate(users, params, userConfig)
 
-		require.Equal(t, 1, len(result.Items), "Should trim whitespace from search")
+		require.Len(t, result.Items, 1, "Should trim whitespace from search")
 		require.Equal(t, "Alice Johnson", result.Items[0].Name, "Should return Alice")
 	})
 
@@ -165,7 +165,7 @@ func TestSearchOrderAndPaginate(t *testing.T) {
 
 		result := SearchOrderAndPaginate(users, params, userConfig)
 
-		require.Equal(t, 5, len(result.Items), "Should return all items")
+		require.Len(t, result.Items, 5, "Should return all items")
 		require.Equal(t, "Alice Johnson", result.Items[0].Name, "First should be Alice")
 		require.Equal(t, "Eve Adams", result.Items[4].Name, "Last should be Eve")
 	})
@@ -179,7 +179,7 @@ func TestSearchOrderAndPaginate(t *testing.T) {
 
 		result := SearchOrderAndPaginate(users, params, userConfig)
 
-		require.Equal(t, 5, len(result.Items), "Should return all items")
+		require.Len(t, result.Items, 5, "Should return all items")
 		require.Equal(t, "Eve Adams", result.Items[0].Name, "First should be Eve (desc order)")
 		require.Equal(t, "Alice Johnson", result.Items[4].Name, "Last should be Alice (desc order)")
 	})
@@ -193,7 +193,7 @@ func TestSearchOrderAndPaginate(t *testing.T) {
 
 		result := SearchOrderAndPaginate(users, params, userConfig)
 
-		require.Equal(t, 5, len(result.Items), "Should return all items")
+		require.Len(t, result.Items, 5, "Should return all items")
 		require.Equal(t, 22, result.Items[0].Age, "First should be youngest (22)")
 		require.Equal(t, 35, result.Items[4].Age, "Last should be oldest (35)")
 	})
@@ -207,7 +207,7 @@ func TestSearchOrderAndPaginate(t *testing.T) {
 
 		result := SearchOrderAndPaginate(users, params, userConfig)
 
-		require.Equal(t, 5, len(result.Items), "Should return all items")
+		require.Len(t, result.Items, 5, "Should return all items")
 		// Items should remain in original order since no valid sort key
 		require.Equal(t, users, result.Items, "Should maintain original order with invalid sort key")
 	})
@@ -221,7 +221,7 @@ func TestSearchOrderAndPaginate(t *testing.T) {
 
 		result := SearchOrderAndPaginate(users, params, userConfig)
 
-		require.Equal(t, 2, len(result.Items), "Should return 2 items")
+		require.Len(t, result.Items, 2, "Should return 2 items")
 		require.Equal(t, 5, result.TotalCount, "TotalCount should be all items")
 		require.Equal(t, 5, result.TotalAvailable, "TotalAvailable should be original count")
 		require.Equal(t, users[1], result.Items[0], "Should start from index 1")
@@ -237,7 +237,7 @@ func TestSearchOrderAndPaginate(t *testing.T) {
 
 		result := SearchOrderAndPaginate(users, params, userConfig)
 
-		require.Equal(t, 5, len(result.Items), "Should return all items when limit is 0")
+		require.Len(t, result.Items, 5, "Should return all items when limit is 0")
 		require.Equal(t, users, result.Items, "Should return all original items")
 	})
 
@@ -250,7 +250,7 @@ func TestSearchOrderAndPaginate(t *testing.T) {
 
 		result := SearchOrderAndPaginate(users, params, userConfig)
 
-		require.Equal(t, 5, len(result.Items), "Should return all items when limit is negative")
+		require.Len(t, result.Items, 5, "Should return all items when limit is negative")
 	})
 
 	t.Run("pagination start beyond length", func(t *testing.T) {
@@ -262,7 +262,7 @@ func TestSearchOrderAndPaginate(t *testing.T) {
 
 		result := SearchOrderAndPaginate(users, params, userConfig)
 
-		require.Equal(t, 0, len(result.Items), "Should return empty slice when start is beyond length")
+		require.Empty(t, result.Items, "Should return empty slice when start is beyond length")
 		require.Equal(t, 5, result.TotalCount, "TotalCount should still be original count")
 	})
 
@@ -275,7 +275,7 @@ func TestSearchOrderAndPaginate(t *testing.T) {
 
 		result := SearchOrderAndPaginate(users, params, userConfig)
 
-		require.Equal(t, 2, len(result.Items), "Should return 2 items starting from 0")
+		require.Len(t, result.Items, 2, "Should return 2 items starting from 0")
 		require.Equal(t, users[0], result.Items[0], "Should start from index 0")
 		require.Equal(t, users[1], result.Items[1], "Should include index 1")
 	})
@@ -292,7 +292,7 @@ func TestSearchOrderAndPaginate(t *testing.T) {
 		// All users have "example.com" in email, so all 5 should match search
 		// Then sorted by age: Eve(22), Alice(25), Diana(28), Bob(30), Charlie(35)
 		// Then paginated: start=1, limit=2 should give Alice(25), Diana(28)
-		require.Equal(t, 2, len(result.Items), "Should return 2 items after pagination")
+		require.Len(t, result.Items, 2, "Should return 2 items after pagination")
 		require.Equal(t, 5, result.TotalCount, "TotalCount should be all filtered items")
 		require.Equal(t, 5, result.TotalAvailable, "TotalAvailable should be original count")
 		require.Equal(t, 25, result.Items[0].Age, "First item should be Alice (age 25)")
@@ -310,7 +310,7 @@ func TestSearchOrderAndPaginate(t *testing.T) {
 
 		// Should find 3 electronics, sorted by price: Mouse(29.99), Keyboard(129.99), Laptop(999.99)
 		// Paginated to first 2: Mouse, Keyboard
-		require.Equal(t, 2, len(result.Items), "Should return 2 items")
+		require.Len(t, result.Items, 2, "Should return 2 items")
 		require.Equal(t, 3, result.TotalCount, "Should find 3 electronics items")
 		require.Equal(t, 5, result.TotalAvailable, "Should have 5 total products")
 		require.Equal(t, "Mouse", result.Items[0].Name, "First should be Mouse (cheapest)")
@@ -327,7 +327,7 @@ func TestSearchOrderAndPaginate(t *testing.T) {
 
 		result := SearchOrderAndPaginate(emptyUsers, params, userConfig)
 
-		require.Equal(t, 0, len(result.Items), "Should return empty slice")
+		require.Empty(t, result.Items, "Should return empty slice")
 		require.Equal(t, 0, result.TotalCount, "TotalCount should be 0")
 		require.Equal(t, 0, result.TotalAvailable, "TotalAvailable should be 0")
 	})
@@ -354,7 +354,7 @@ func TestSearchOrderAndPaginateWithErrors(t *testing.T) {
 		result := SearchOrderAndPaginate(users, params, errorConfig)
 
 		// Should still find Alice through the working accessor
-		require.Equal(t, 1, len(result.Items), "Should find user despite error in first accessor")
+		require.Len(t, result.Items, 1, "Should find user despite error in first accessor")
 		require.Equal(t, "Alice Johnson", result.Items[0].Name, "Should return Alice")
 	})
 }

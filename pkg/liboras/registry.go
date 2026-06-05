@@ -5,11 +5,15 @@ import (
 
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/pkg/registryhttp"
+
 	"github.com/rs/zerolog/log"
 	"oras.land/oras-go/v2/registry/remote"
 	"oras.land/oras-go/v2/registry/remote/auth"
 )
 
+// CreateClient creates a new ORAS registry client based on the provided portainer.Registry.
+// It configures the client for authentication if the registry requires it.
+// Furthermore, the client is configured to use the default retry client. Its policy is found in retry.DefaultPolicy
 func CreateClient(registry portainer.Registry) (*remote.Registry, error) {
 	registryClient, err := remote.NewRegistry(registry.URL)
 	if err != nil {
@@ -32,35 +36,38 @@ func CreateClient(registry portainer.Registry) (*remote.Registry, error) {
 	registryClient.TagListPageSize = 1000
 	registryClient.ReferrerListPageSize = 1000
 
-	// Only apply authentication if explicitly enabled AND credentials are provided
-	if registry.Authentication &&
+	authClient := &auth.Client{
+		Client: httpClient,
+	}
+
+	configureCredentials := registry.Authentication &&
 		strings.TrimSpace(registry.Username) != "" &&
-		strings.TrimSpace(registry.Password) != "" {
-
-		registryClient.Client = &auth.Client{
-			Client: httpClient,
-			Cache:  auth.NewCache(),
-			Credential: auth.StaticCredential(registry.URL, auth.Credential{
-				Username: registry.Username,
-				Password: registry.Password,
-			}),
-		}
-
-		log.Debug().
-			Str("registryURL", registry.URL).
-			Str("registryType", getRegistryTypeName(registry.Type)).
-			Bool("authentication", true).
-			Msg("Created ORAS registry client with authentication")
-	} else {
-		// Use the configured HTTP client for anonymous access
-		registryClient.Client = httpClient
-
+		strings.TrimSpace(registry.Password) != ""
+	if !configureCredentials {
+		// The authClient is still needed to handle anonymous access and token refresh. For instance to send requests to
+		// DockerHub which requires a token even for anonymous access.
+		registryClient.Client = authClient
 		log.Debug().
 			Str("registryURL", registry.URL).
 			Str("registryType", getRegistryTypeName(registry.Type)).
 			Bool("authentication", false).
 			Msg("Created ORAS registry client for anonymous access")
+
+		return registryClient, nil
 	}
+
+	authClient.Cache = auth.NewCache()
+	authClient.Credential = auth.StaticCredential(registry.URL, auth.Credential{
+		Username: registry.Username,
+		Password: registry.Password,
+	})
+	registryClient.Client = authClient
+
+	log.Debug().
+		Str("registryURL", registry.URL).
+		Str("registryType", getRegistryTypeName(registry.Type)).
+		Bool("authentication", true).
+		Msg("Created ORAS registry client with authentication")
 
 	return registryClient, nil
 }

@@ -5,7 +5,9 @@ import (
 
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/internal/testhelpers"
+
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_hasKubeEndpoint(t *testing.T) {
@@ -40,7 +42,7 @@ func Test_hasKubeEndpoint(t *testing.T) {
 	for _, test := range tests {
 
 		ans, err := hasKubeEndpoint(datastore.Endpoint(), test.endpointIds)
-		assert.NoError(t, err, "hasKubeEndpoint shouldn't fail")
+		require.NoError(t, err, "hasKubeEndpoint shouldn't fail")
 
 		assert.Equal(t, test.expected, ans, "hasKubeEndpoint expected to return %b for %v, but returned %b", test.expected, test.endpointIds, ans)
 	}
@@ -50,7 +52,7 @@ func Test_hasKubeEndpoint_failWhenEndpointDontExist(t *testing.T) {
 	datastore := testhelpers.NewDatastore(testhelpers.WithEndpoints([]portainer.Endpoint{}))
 
 	_, err := hasKubeEndpoint(datastore.Endpoint(), []portainer.EndpointID{1})
-	assert.Error(t, err, "hasKubeEndpoint should fail")
+	require.Error(t, err, "hasKubeEndpoint should fail")
 }
 
 func Test_hasDockerEndpoint(t *testing.T) {
@@ -85,7 +87,7 @@ func Test_hasDockerEndpoint(t *testing.T) {
 	for _, test := range tests {
 
 		ans, err := hasDockerEndpoint(datastore.Endpoint(), test.endpointIds)
-		assert.NoError(t, err, "hasDockerEndpoint shouldn't fail")
+		require.NoError(t, err, "hasDockerEndpoint shouldn't fail")
 
 		assert.Equal(t, test.expected, ans, "hasDockerEndpoint expected to return %b for %v, but returned %b", test.expected, test.endpointIds, ans)
 	}
@@ -95,5 +97,5 @@ func Test_hasDockerEndpoint_failWhenEndpointDontExist(t *testing.T) {
 	datastore := testhelpers.NewDatastore(testhelpers.WithEndpoints([]portainer.Endpoint{}))
 
 	_, err := hasDockerEndpoint(datastore.Endpoint(), []portainer.EndpointID{1})
-	assert.Error(t, err, "hasDockerEndpoint should fail")
+	require.Error(t, err, "hasDockerEndpoint should fail")
 }

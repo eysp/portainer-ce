@@ -28,7 +28,7 @@ export const id = columnHelper.accessor('id', {
       return true;
     }
 
-    if (filterValue.includes('未使用') && !used) {
+    if (filterValue.includes('已使用') && !used) {
       return true;
     }
 

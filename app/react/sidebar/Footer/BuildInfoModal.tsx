@@ -80,13 +80,13 @@ function BuildInfoModal({ closeModal }: { closeModal: () => void }) {
                 <td>
                   <span className="inline-flex items-center flex-wrap">
                     <Server size="13" className="space-right" />
-                    服务器版本: {ServerVersion} {VersionSupport}
+                    服务器版本： {ServerVersion} {VersionSupport}
                   </span>
                 </td>
                 <td>
                   <span className="inline-flex items-center flex-wrap">
                     <Database size="13" className="space-right" />
-                    数据库版本: {DatabaseVersion}
+                    数据库版本： {DatabaseVersion}
                   </span>
                 </td>
               </tr>
@@ -94,13 +94,13 @@ function BuildInfoModal({ closeModal }: { closeModal: () => void }) {
                 <td>
                   <span className="inline-flex items-center flex-wrap">
                     <Hash size="13" className="space-right" />
-                    CI 构建编号: {Build.BuildNumber}
+                    CI构建号： {Build.BuildNumber}
                   </span>
                 </td>
                 <td>
                   <span className="inline-flex items-center flex-wrap">
                     <Tag size="13" className="space-right" />
-                    镜像标签: {Build.ImageTag}
+                    镜像标签： {Build.ImageTag}
                   </span>
                 </td>
               </tr>
@@ -108,7 +108,7 @@ function BuildInfoModal({ closeModal }: { closeModal: () => void }) {
                 <td>
                   <span className="inline-flex items-center flex-wrap">
                     <GitCommit size="13" className="space-right" />
-                    Git 提交: {Build.GitCommit}
+                    Git提交： {Build.GitCommit}
                   </span>
                 </td>
                 <td />
@@ -126,7 +126,7 @@ function BuildInfoModal({ closeModal }: { closeModal: () => void }) {
             <span className="text-muted small">
               Nodejs {Build.NodejsVersion}
             </span>
-            <span className="text-muted small">Yarn v{Build.YarnVersion}</span>
+            <span className="text-muted small">pnpm v{Build.PnpmVersion}</span>
             <span className="text-muted small">
               Webpack v{Build.WebpackVersion}
             </span>
@@ -160,7 +160,7 @@ function BuildInfoModal({ closeModal }: { closeModal: () => void }) {
           <div className={clsx(styles.toolsList, 'mt-3')}>
             <span className="inline-flex items-center ">
               <Variable size="13" className="space-right" />
-              环境变量
+              环境变量: 
             </span>
 
             <div

@@ -18,7 +18,8 @@ function CEFooter() {
       <UpdateNotification />
 
       <FooterContent>
-        <span>Community Edition</span>
+        <span>&copy;</span>
+        <span>Portainer Community Edition</span>
 
         <BuildInfoModalButton />
       </FooterContent>

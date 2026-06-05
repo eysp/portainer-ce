@@ -1,23 +1,21 @@
 import { useCurrentStateAndParams, useRouter } from '@uirouter/react';
 import { useState } from 'react';
 import _ from 'lodash';
-import clsx from 'clsx';
-import { ArrowLeft, ArrowRight, Wand2 } from 'lucide-react';
+import { Wand2 } from 'lucide-react';
 
 import { notifyError } from '@/portainer/services/notifications';
 import {
   Environment,
   EnvironmentId,
 } from '@/react/portainer/environments/types';
-import { useAnalytics } from '@/react/hooks/useAnalytics';
 
-import { Stepper } from '@@/Stepper';
+import { Stepper } from '@@/Stepper/Stepper';
 import { Widget, WidgetBody, WidgetTitle } from '@@/Widget';
 import { PageHeader } from '@@/PageHeader';
 import { Button } from '@@/buttons';
 import { FormSection } from '@@/form-components/FormSection';
-import { Icon } from '@@/Icon';
 import { Alert } from '@@/Alert';
+import { StickyFooter } from '@@/StickyFooter/StickyFooter';
 
 import {
   EnvironmentOptionValue,
@@ -50,17 +48,17 @@ export function EnvironmentCreationView() {
   });
 
   const envTypes = useParamEnvironmentTypes();
-  const { trackEvent } = useAnalytics();
   const router = useRouter();
   const steps = _.compact(
     envTypes.map((id) => environmentTypes.find((eType) => eType.id === id))
   );
-  const { analytics, setAnalytics } = useAnalyticsState();
+  const { setAnalytics } = useAnalyticsState();
 
   const {
     currentStep,
     onNextClick,
     onPreviousClick,
+    onStepClick,
     currentStepIndex,
     Component,
     isFirstStep,
@@ -70,65 +68,64 @@ export function EnvironmentCreationView() {
   const isDockerStandalone = currentStep.id === 'dockerStandalone';
 
   return (
-    <>
+    <div className="pb-20">
       <PageHeader
         title="快速设置"
         breadcrumbs={[{ label: '环境向导' }]}
         reload
       />
 
+      <div className="row">
+        <div className="col-sm-12">
+          <Stepper
+            steps={steps}
+            currentStepIndex={currentStepIndex}
+            onStepClick={onStepClick}
+          />
+        </div>
+      </div>
       <div className={styles.wizardWrapper}>
         <Widget>
           <WidgetTitle icon={Wand2} title="环境向导" />
           <WidgetBody>
-            <Stepper steps={steps} currentStep={currentStepIndex + 1} />
-
-            <div className="mt-12">
-              <FormSection title={formTitles[currentStep.id]}>
-                {currentStep.id === 'kaas' && (
-                  <Alert
-                    color="warn"
-                    title="已弃用的功能"
-                    className="mb-2"
-                  >
-                    从 Portainer 配置 KaaS 环境已被弃用，并将在未来版本中移除。您仍可以使用通过此方法配置的任何 Kubernetes 集群，但将无法再访问任何 KaaS 特定的管理功能。
-                  </Alert>
-                )}
-                <Component
-                  onCreate={handleCreateEnvironment}
-                  isDockerStandalone={isDockerStandalone}
-                />
-
-                <div
-                  className={clsx(
-                    styles.wizardStepAction,
-                    'flex justify-between'
-                  )}
-                >
-                  <Button
-                    disabled={isFirstStep}
-                    onClick={onPreviousClick}
-                    data-cy="environment-wizard-previous-button"
-                  >
-                    <Icon icon={ArrowLeft} /> 上一步
-                  </Button>
-                  <Button
-                    onClick={onNextClick}
-                    data-cy="environment-wizard-next-button"
-                  >
-                    {isLastStep ? '关闭' : '下一步'}
-                    <Icon icon={ArrowRight} />
-                  </Button>
-                </div>
-              </FormSection>
-            </div>
+            <FormSection title={formTitles[currentStep.id]}>
+              {currentStep.id === 'kaas' && (
+                <Alert color="warn" title="已弃用功能" className="mb-2">
+                  从 Portainer 配置 KaaS 环境已弃用，并将在未来版本中删除。您仍然可以使用通过此方法配置的 Kubernetes 集群，但将无法访问任何 KaaS 特定的管理功能。
+                </Alert>
+              )}
+              <Component
+                onCreate={handleCreateEnvironment}
+                isDockerStandalone={isDockerStandalone}
+              />
+            </FormSection>
           </WidgetBody>
         </Widget>
         <div>
           <WizardEndpointsList environmentIds={environmentIds} />
         </div>
       </div>
-    </>
+
+      <StickyFooter className="justify-end gap-4">
+        <Button
+          color="default"
+          onClick={onPreviousClick}
+          disabled={isFirstStep}
+          data-cy="environment-wizard-back-button"
+          size="medium"
+        >
+          返回
+        </Button>
+        <Button
+          color="primary"
+          onClick={onNextClick}
+          data-cy="environment-wizard-continue-button"
+          size="medium"
+        >
+          {isLastStep ? '关闭' : '继续'}
+        </Button>
+      </StickyFooter>
+    </div>
   );
 
   function handleCreateEnvironment(
@@ -140,15 +137,6 @@ export function EnvironmentCreationView() {
   }
 
   function handleFinish() {
-    trackEvent('endpoint-wizard-environment-add-finish', {
-      category: 'portainer',
-      metadata: Object.fromEntries(
-        Object.entries(analytics).map(([key, value]) => [
-          _.kebabCase(key),
-          value,
-        ])
-      ),
-    });
     if (referrer === 'environments') {
       router.stateService.go('portainer.endpoints');
       return;
@@ -185,6 +173,7 @@ function useStepper(
     currentStep,
     onNextClick,
     onPreviousClick,
+    onStepClick,
     isFirstStep,
     isLastStep,
     currentStepIndex,
@@ -204,6 +193,10 @@ function useStepper(
     setCurrentStepIndex(currentStepIndex - 1);
   }
 
+  function onStepClick(stepIndex: number) {
+    setCurrentStepIndex(stepIndex);
+  }
+
   function getComponent(id: EnvironmentOptionValue) {
     switch (id) {
       case 'dockerStandalone':
@@ -216,7 +209,7 @@ function useStepper(
       case 'kubernetes':
         return WizardKubernetes;
       default:
-        throw new Error(`未知的环境类型 ${id}`);
+        throw new Error(`未知环境类型 ${id}`);
     }
   }
 }

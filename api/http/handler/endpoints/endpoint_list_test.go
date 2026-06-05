@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	portainer "github.com/portainer/portainer/api"
@@ -15,6 +16,7 @@ import (
 
 	"github.com/segmentio/encoding/json"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type endpointListTest struct {
@@ -78,17 +80,20 @@ func Test_EndpointList_AgentVersion(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.title, func(t *testing.T) {
 			is := assert.New(t)
-			query := ""
+
+			var query strings.Builder
 			for _, filter := range test.filter {
-				query += fmt.Sprintf("agentVersions[]=%s&", filter)
+				_, _ = query.WriteString("agentVersions[]=")
+				_, _ = query.WriteString(filter)
+				_, _ = query.WriteRune('&')
 			}
 
-			req := buildEndpointListRequest(query)
+			req := buildEndpointListRequest(query.String())
 
 			resp, err := doEndpointListRequest(req, handler, is)
-			is.NoError(err)
+			require.NoError(t, err)
 
-			is.Equal(len(test.expected), len(resp))
+			is.Len(resp, len(test.expected))
 
 			respIds := []portainer.EndpointID{}
 
@@ -164,9 +169,9 @@ func Test_endpointList_edgeFilter(t *testing.T) {
 
 			req := buildEndpointListRequest(query)
 			resp, err := doEndpointListRequest(req, handler, is)
-			is.NoError(err)
+			require.NoError(t, err)
 
-			is.Equal(len(test.expected), len(resp))
+			is.Len(resp, len(test.expected))
 
 			respIds := []portainer.EndpointID{}
 
@@ -180,16 +185,15 @@ func Test_endpointList_edgeFilter(t *testing.T) {
 }
 
 func setupEndpointListHandler(t *testing.T, endpoints []portainer.Endpoint) *Handler {
-	is := assert.New(t)
 	_, store := datastore.MustNewTestStore(t, true, true)
 
 	for _, endpoint := range endpoints {
 		err := store.Endpoint().Create(&endpoint)
-		is.NoError(err, "error creating environment")
+		require.NoError(t, err, "error creating environment")
 	}
 
 	err := store.User().Create(&portainer.User{Username: "admin", Role: portainer.AdministratorRole})
-	is.NoError(err, "error creating a user")
+	require.NoError(t, err, "error creating a user")
 
 	bouncer := testhelpers.NewTestRequestBouncer()
 

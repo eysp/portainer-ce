@@ -33,7 +33,7 @@ export function NamespaceSummary({ initialValues, values, isValid }: Props) {
     enabledQuotaInitialValues && !enabledQuotaNewValues;
 
   return (
-    <FormSection title="Summary" isFoldable defaultFolded={false}>
+    <FormSection title="摘要" isFoldable defaultFolded={false}>
       <div className="form-group">
         <div className="col-sm-12">
           <TextTip color="blue">
@@ -45,7 +45,7 @@ export function NamespaceSummary({ initialValues, values, isValid }: Props) {
         <ul>
           {isCreatingNamespace && (
             <li>
-              Create a <span className="bold">Namespace</span> named{' '}
+              Create a <span className="bold">命名空间</span> named{' '}
               <code>{values.name}</code>
             </li>
           )}

@@ -26,7 +26,7 @@ angular.module('portainer.docker', ['portainer.app', reactModule]).config([
           }
 
           try {
-            const status = await checkEndpointStatus(endpoint);
+            const { status, error } = await checkEndpointStatus(endpoint);
 
             if (endpoint.Type !== PortainerEndpointTypes.EdgeAgentOnDockerEnvironment) {
               await updateEndpointStatus(endpoint, status);
@@ -34,7 +34,7 @@ angular.module('portainer.docker', ['portainer.app', reactModule]).config([
             endpoint.Status = status;
 
             if (status === EnvironmentStatus.Down) {
-              throw new Error(`The environment named ${endpoint.Name} is unreachable.`);
+              throw error || new Error(`The environment named ${endpoint.Name} is unreachable.`);
             }
 
             await StateManager.updateEndpointState(endpoint);
@@ -54,9 +54,9 @@ angular.module('portainer.docker', ['portainer.app', reactModule]).config([
           async function checkEndpointStatus(endpoint) {
             try {
               await SystemService.ping(endpoint.Id);
-              return EnvironmentStatus.Up;
+              return { status: EnvironmentStatus.Up };
             } catch (e) {
-              return EnvironmentStatus.Down;
+              return { status: EnvironmentStatus.Down, error: e };
             }
           }
 
@@ -75,9 +75,7 @@ angular.module('portainer.docker', ['portainer.app', reactModule]).config([
       url: '/configs',
       views: {
         'content@': {
-          templateUrl: './views/configs/configs.html',
-          controller: 'ConfigsController',
-          controllerAs: 'ctrl',
+          component: 'configsListView',
         },
       },
       data: {
@@ -201,8 +199,7 @@ angular.module('portainer.docker', ['portainer.app', reactModule]).config([
       url: '/images',
       views: {
         'content@': {
-          templateUrl: './views/images/images.html',
-          controller: 'ImagesController',
+          component: 'imagesListView',
         },
       },
       data: {
@@ -421,11 +418,10 @@ angular.module('portainer.docker', ['portainer.app', reactModule]).config([
 
     var stack = {
       name: 'docker.stacks.stack',
-      url: '/:name?id&type&regular&external&orphaned&orphanedRunning',
+      url: '/:name?id&type&regular&external&orphaned&orphanedRunning&tab',
       views: {
         'content@': {
-          templateUrl: '~Portainer/views/stacks/edit/stack.html',
-          controller: 'StackController',
+          component: 'stackItemView',
         },
       },
     };
@@ -435,8 +431,7 @@ angular.module('portainer.docker', ['portainer.app', reactModule]).config([
       url: '/:id?nodeName',
       views: {
         'content@': {
-          templateUrl: '~@/docker/views/containers/edit/container.html',
-          controller: 'ContainerController',
+          component: 'containerItemView',
         },
       },
     };
@@ -446,8 +441,7 @@ angular.module('portainer.docker', ['portainer.app', reactModule]).config([
       url: '/newstack',
       views: {
         'content@': {
-          templateUrl: '~Portainer/views/stacks/create/createstack.html',
-          controller: 'CreateStackController',
+          component: 'createStackView',
         },
       },
     };

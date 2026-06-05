@@ -28,7 +28,7 @@ export const columns = _.compact([
     (item) =>
       item.StatusSummary?.AggregatedStatus?.[StatusType.Acknowledged] || 0,
     {
-      header: '已确认',
+      header: 'Acknowledged',
       enableSorting: false,
       enableHiding: false,
       cell: ({ getValue, row }) => (
@@ -182,10 +182,13 @@ function StatusHeader() {
         message={
           <>
             <div>
-              边缘堆栈的状态功能仅适用于边缘代理 2.19.0 及以上版本。
+              The status feature for the Edge stack is only available for Edge
+              Agent versions 2.19.0 and above.
             </div>
             <div>
-              要访问边缘堆栈的状态，必须将边缘代理升级到与 Portainer 服务器兼容的相应版本。
+              To access the status of your edge stack, it is essential to
+              upgrade your Edge Agent to a corresponding version that is
+              compatible with your Portainer server.
             </div>
           </>
         }

@@ -12,10 +12,10 @@ export function WebhookSwitch({
     <div>
       <div className="form-section-title"> Webhooks </div>
       <SwitchField
-        label="Create an Edge stack webhook"
+        label="创建 Edge 堆栈 Webhook"
         checked={value}
         onChange={onChange}
-        tooltip="Create a webhook (or callback URI) to automate the update of this stack. Sending a POST request to this callback URI (without requiring any authentication) will pull the most up-to-date version of the associated image and re-deploy this stack."
+        tooltip="创建一个 Webhook（回调地址）以自动更新该堆栈。向该回调地址发送 POST 请求（无需认证）将会拉取最新镜像并重新部署堆栈。"
         labelClass="col-sm-3 col-lg-2"
         data-cy="webhook-switch"
       />

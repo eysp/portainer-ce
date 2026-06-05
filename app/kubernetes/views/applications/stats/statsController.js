@@ -2,9 +2,9 @@ import angular from 'angular';
 import moment from 'moment';
 import _ from 'lodash-es';
 import filesizeParser from 'filesize-parser';
-import KubernetesResourceReservationHelper from 'Kubernetes/helpers/resourceReservationHelper';
 import KubernetesPodConverter from 'Kubernetes/pod/converter';
 import { getMetricsForPod } from '@/react/kubernetes/metrics/metrics.ts';
+import { parseCPU } from '@/react/kubernetes/utils';
 
 class KubernetesApplicationStatsController {
   /* @ngInject */
@@ -63,7 +63,7 @@ class KubernetesApplicationStatsController {
         this.updateMemoryChart();
       } catch (error) {
         this.stopRepeater();
-        this.Notifications.error('Failure', error);
+        this.Notifications.error('失败', error);
       }
     }, refreshRate * 1000);
   }
@@ -98,7 +98,7 @@ class KubernetesApplicationStatsController {
         const container = _.find(stats.containers, { name: this.state.transition.containerName });
         if (container) {
           const memory = filesizeParser(container.usage.memory);
-          const cpu = KubernetesResourceReservationHelper.parseCPU(container.usage.cpu);
+          const cpu = parseCPU(container.usage.cpu);
           this.stats = {
             read: stats.timestamp,
             preread: '',
@@ -112,7 +112,7 @@ class KubernetesApplicationStatsController {
           };
         }
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to retrieve application stats');
+        this.Notifications.error('失败', err, '无法获取应用统计信息');
       }
     });
   }
@@ -150,7 +150,7 @@ class KubernetesApplicationStatsController {
         const node = await this.KubernetesNodeService.get(pod.Node);
         this.nodeCPU = node.CPU;
       } else {
-        throw new Error('Unable to find pod');
+        throw new Error('无法找到 Pod');
       }
       await this.getStats();
       this.state.getMetrics = true;
@@ -159,7 +159,7 @@ class KubernetesApplicationStatsController {
         this.initCharts();
       });
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve application stats');
+      this.Notifications.error('失败', err, '无法获取应用统计信息');
     } finally {
       this.state.viewReady = true;
     }

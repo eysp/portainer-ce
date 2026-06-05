@@ -1,12 +1,9 @@
 import { round } from 'lodash';
 
-import { getSafeValue } from '@/react/kubernetes/utils';
+import { getSafeValue, parseCPU } from '@/react/kubernetes/utils';
 import { PodMetrics } from '@/react/kubernetes/metrics/types';
-import { useMetricsForNamespace } from '@/react/kubernetes/metrics/queries/useMetricsForNamespace';
-import {
-  megaBytesValue,
-  parseCPU,
-} from '@/react/kubernetes/namespaces/resourceQuotaUtils';
+import { useNamespaceMetricsQuery } from '@/react/kubernetes/metrics/queries/useNamespaceMetricsQuery';
+import { megaBytesValue } from '@/react/kubernetes/namespaces/resourceQuotaUtils';
 
 import { useResourceQuotaUsed } from './useResourceQuotaUsed';
 import { ResourceQuotaFormValues } from './types';
@@ -20,13 +17,10 @@ export function useNamespaceResourceReservationData(
     environmentId,
     namespaceName
   );
-  const { data: metrics, isLoading: isMetricsLoading } = useMetricsForNamespace(
-    environmentId,
-    namespaceName,
-    {
+  const { data: metrics, isLoading: isMetricsLoading } =
+    useNamespaceMetricsQuery(environmentId, namespaceName, {
       select: aggregatePodUsage,
-    }
-  );
+    });
 
   return {
     cpuLimit: Number(resourceQuotaValues.cpu) || 0,
@@ -50,16 +44,16 @@ export function useNamespaceResourceReservationData(
  * @returns Aggregated resource usage. CPU cores are rounded to 3 decimal places. Memory is in MB.
  */
 function aggregatePodUsage(podMetricsList: PodMetrics) {
-  const containerResourceUsageList = podMetricsList.items.flatMap((i) =>
+  const containerResourceUsageList = podMetricsList.items?.flatMap((i) =>
     i.containers.map((c) => c.usage)
   );
-  const namespaceResourceUsage = containerResourceUsageList.reduce(
+  const namespaceResourceUsage = containerResourceUsageList?.reduce(
     (total, usage) => ({
       cpu: total.cpu + parseCPU(usage.cpu),
       memory: total.memory + megaBytesValue(usage.memory),
     }),
     { cpu: 0, memory: 0 }
-  );
+  ) || { cpu: 0, memory: 0 };
   namespaceResourceUsage.cpu = round(namespaceResourceUsage.cpu, 3);
   return namespaceResourceUsage;
 }

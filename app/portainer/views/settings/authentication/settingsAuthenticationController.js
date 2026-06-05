@@ -16,29 +16,29 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
     actionInProgress: false,
     availableUserSessionTimeoutOptions: [
       {
-        key: '30 minutes',
+        key: '30 分钟',
         value: '30m',
       },
       {
-        key: '1 hour',
+        key: '1 小时',
         value: '1h',
       },
       {
-        key: '4 hours',
+        key: '4 小时',
         value: '4h',
       },
       {
-        key: '8 hours',
+        key: '8 小时',
         value: '8h',
       },
       {
-        key: '24 hours',
+        key: '24 小时',
         value: '24h',
       },
-      { key: '1 week', value: `${24 * 7}h` },
-      { key: '1 month', value: `${24 * 30}h` },
-      { key: '6 months', value: `${24 * 30 * 6}h` },
-      { key: '1 year', value: `${24 * 30 * 12}h` },
+      { key: '1 周', value: `${24 * 7}h` },
+      { key: '1 个月', value: `${24 * 30}h` },
+      { key: '6 个月', value: `${24 * 30 * 6}h` },
+      { key: '1 年', value: `${24 * 30 * 12}h` },
     ],
   };
 
@@ -115,12 +115,12 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
       .then(function success() {
         $scope.state.failedConnectivityCheck = false;
         $scope.state.successfulConnectivityCheck = true;
-        Notifications.success('Success', 'Connection to LDAP successful');
+        Notifications.success('成功', 'LDAP 连接成功');
       })
       .catch(function error(err) {
         $scope.state.failedConnectivityCheck = true;
         $scope.state.successfulConnectivityCheck = false;
-        Notifications.error('Failure', err, 'Connection to LDAP failed');
+        Notifications.error('失败', err, 'LDAP 连接失败');
       })
       .finally(function final() {
         $scope.state.uploadInProgress = false;
@@ -142,10 +142,10 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
         return SettingsService.update(settings);
       })
       .then(function success() {
-        Notifications.success('Success', 'Authentication settings updated');
+        Notifications.success('成功', '身份验证设置已更新');
       })
       .catch(function error(err) {
-        Notifications.error('Failure', err, 'Unable to update authentication settings');
+        Notifications.error('失败', err, '无法更新身份验证设置');
       })
       .finally(function final() {
         $scope.state.uploadInProgress = false;
@@ -266,7 +266,7 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
         $scope.state.initialServerType = settings.LDAPSettings.ServerType;
       })
       .catch(function error(err) {
-        Notifications.error('Failure', err, 'Unable to retrieve application settings');
+        Notifications.error('失败', err, '无法获取应用程序设置');
       });
   }
 

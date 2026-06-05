@@ -57,6 +57,7 @@ export function NavTabs<T extends string | number = string>({
                   data-cy="nav-tab-button"
                   className="!flex"
                   icon={option.icon}
+                  props={{ role: 'button' }}
                 >
                   {option.label}
                 </Button>

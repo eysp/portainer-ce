@@ -8,7 +8,7 @@ import { Ingress } from '../../types';
 import { columnHelper } from './helper';
 
 export const namespace = columnHelper.accessor('Namespace', {
-  header: 'Namespace',
+  header: '命名空间',
   id: 'namespace',
   cell: Cell,
   filterFn: (row: Row<Ingress>, columnId: string, filterValue: string[]) => {

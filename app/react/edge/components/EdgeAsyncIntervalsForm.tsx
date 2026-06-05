@@ -14,7 +14,7 @@ export interface EdgeAsyncIntervalsValues {
 }
 
 export const options: Options = [
-  { label: 'Use default interval', value: -1, isDefault: true },
+  { label: '使用默认间隔', value: -1, isDefault: true },
   {
     value: 0,
     label: 'disabled',
@@ -25,11 +25,11 @@ export const options: Options = [
   },
   {
     value: 60 * 60,
-    label: '1 hour',
+    label: '1 小时',
   },
   {
     value: 24 * 60 * 60,
-    label: '1 day',
+    label: '1 天',
   },
   {
     value: 7 * 24 * 60 * 60,
@@ -44,11 +44,11 @@ const defaultFieldSettings = {
       'Interval used by this Edge agent to check in with the Portainer instance',
   },
   snapshot: {
-    label: 'Snapshot interval',
+    label: '快照间隔',
     tooltip: 'Interval used by this Edge agent to snapshot the agent state',
   },
   command: {
-    label: 'Command interval',
+    label: '命令间隔',
     tooltip:
       'Interval used by this Edge agent to fetch commands from the Portainer instance',
   },
@@ -95,6 +95,7 @@ export function EdgeAsyncIntervalsForm({
         tooltip={fieldSettings.ping.tooltip}
       >
         <Select
+          id="edge_checkin_ping"
           value={values.PingInterval}
           data-cy="edge-checkin-ping-interval-select"
           name="PingInterval"
@@ -110,6 +111,7 @@ export function EdgeAsyncIntervalsForm({
         tooltip={fieldSettings.snapshot.tooltip}
       >
         <Select
+          id="edge_checkin_snapshot"
           value={values.SnapshotInterval}
           data-cy="edge-checkin-snapshot-interval-select"
           name="SnapshotInterval"
@@ -125,6 +127,7 @@ export function EdgeAsyncIntervalsForm({
         tooltip={fieldSettings.command.tooltip}
       >
         <Select
+          id="edge_checkin_command"
           value={values.CommandInterval}
           data-cy="edge-checkin-command-interval-select"
           name="CommandInterval"

@@ -5,23 +5,25 @@ package request
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/portainer/portainer/api/logs"
 	"github.com/segmentio/encoding/json"
 )
 
 const (
 	// ErrInvalidQueryParameter defines the message of an error raised when a mandatory query parameter has an invalid value.
-	ErrInvalidQueryParameter = "Invalid query parameter"
+	ErrInvalidQueryParameter = "invalid query parameter"
 	// ErrInvalidRequestURL defines the message of an error raised when the data sent in the query or the URL is invalid
-	ErrInvalidRequestURL = "Invalid request URL"
+	ErrInvalidRequestURL = "invalid request URL"
 	// ErrMissingQueryParameter defines the message of an error raised when a mandatory query parameter is missing.
-	ErrMissingQueryParameter = "Missing query parameter"
+	ErrMissingQueryParameter = "missing query parameter"
 	// ErrMissingFormDataValue defines the message of an error raised when a mandatory form data value is missing.
-	ErrMissingFormDataValue = "Missing form data value"
+	ErrMissingFormDataValue = "missing form data value"
 )
 
 // RetrieveMultiPartFormFile returns the content of an uploaded file (form data) as bytes as well
@@ -31,7 +33,7 @@ func RetrieveMultiPartFormFile(request *http.Request, requestParameter string) (
 	if err != nil {
 		return nil, "", err
 	}
-	defer file.Close()
+	defer logs.CloseAndLogErr(file)
 
 	fileContent, err := io.ReadAll(file)
 	if err != nil {
@@ -158,4 +160,47 @@ func RetrieveJSONQueryParameter(request *http.Request, name string, target any, 
 	}
 
 	return json.Unmarshal([]byte(queryParameter), target)
+}
+
+// RetrieveArrayQueryParameter returns the value of a query parameter as a string array.
+// it will return nil if the query parameter is not found.
+//
+// Example:
+//
+//	GET /api/resource?filter=foo&filter=bar
+//	RetrieveArrayQueryParameter(request, "filter") => []string{"foo", "bar"}
+func RetrieveArrayQueryParameter(r *http.Request, parameter string) []string {
+	list, exists := r.Form[parameter+"[]"]
+	if !exists {
+		return nil
+	}
+
+	return list
+}
+
+func RetrieveNumberArrayQueryParameter[T ~int](r *http.Request, parameter string) ([]T, error) {
+	if r.Form == nil {
+		err := r.ParseForm()
+		if err != nil {
+			return nil, fmt.Errorf("Unable to parse form: %w", err)
+		}
+	}
+
+	list := RetrieveArrayQueryParameter(r, parameter)
+	if list == nil {
+		return nil, nil
+	}
+
+	var result []T
+	for _, item := range list {
+		number, err := strconv.Atoi(item)
+		if err != nil {
+			return nil, fmt.Errorf("Unable to parse parameter %q: %w", parameter, err)
+
+		}
+
+		result = append(result, T(number))
+	}
+
+	return result, nil
 }

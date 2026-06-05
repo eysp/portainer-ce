@@ -10,7 +10,7 @@ import { ContainerRowData } from '../types';
 import { columnHelper } from './helper';
 
 export const status = columnHelper.accessor('status', {
-  header: 'Status',
+  header: '状态',
   cell: StatusCell,
 });
 

@@ -21,7 +21,11 @@ export function HelmRepositoryDatatableActions({ selectedItems }: Props) {
       <DeleteButton
         disabled={selectedItems.length === 0}
         onConfirmed={() => onDeleteClick(selectedItems)}
-        confirmMessage={`您确定要删除选中的 Helm ${selectedItems.length === 1 ? '仓库' : '仓库'}吗？`}
+        confirmMessage={`Are you sure you want to remove the selected Helm ${pluralize(
+          selectedItems.length,
+          'repository',
+          'repositories'
+        )}?`}
         data-cy="helmRepository-deleteButton"
       />
       <AddButton

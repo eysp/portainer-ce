@@ -33,6 +33,16 @@ func NewService(connection portainer.Connection) (*Service, error) {
 	}, nil
 }
 
+func (service *Service) Tx(tx portainer.Transaction) ServiceTx {
+	return ServiceTx{
+		BaseDataServiceTx: dataservices.BaseDataServiceTx[models.Version, int]{
+			Bucket:     BucketName,
+			Connection: service.connection,
+			Tx:         tx,
+		},
+	}
+}
+
 func (service *Service) SchemaVersion() (string, error) {
 	v, err := service.Version()
 	if err != nil {

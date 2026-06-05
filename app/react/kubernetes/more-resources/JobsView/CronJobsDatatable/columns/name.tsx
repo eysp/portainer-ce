@@ -11,7 +11,7 @@ export const name = columnHelper.accessor(
     return result;
   },
   {
-    header: 'Name',
+    header: '名称',
     id: 'name',
     cell: ({ row }) => (
       <div className="flex gap-2">

@@ -22,8 +22,18 @@ import (
 
 func hideFields(registry *portainer.Registry, hideAccesses bool) {
 	registry.Password = ""
-	registry.ManagementConfiguration = nil
+	if registry.ManagementConfiguration != nil {
+		// TLS and SkipTLSVerify should be retained since it's not sensitive information
+		minimalManagementConfig := &portainer.RegistryManagementConfiguration{}
+		minimalManagementConfig.TLSConfig = registry.ManagementConfiguration.TLSConfig
+		registry.ManagementConfiguration = minimalManagementConfig
+	}
 	if hideAccesses {
+		if registry.ManagementConfiguration != nil {
+			registry.ManagementConfiguration.TLSConfig.TLSCACertPath = ""
+			registry.ManagementConfiguration.TLSConfig.TLSCertPath = ""
+			registry.ManagementConfiguration.TLSConfig.TLSKeyPath = ""
+		}
 		registry.RegistryAccesses = nil
 	}
 }
@@ -71,6 +81,7 @@ func (handler *Handler) initRouter(bouncer accessGuard) {
 	// Keep the gitlab proxy on the regular authenticated router as it doesn't require specific registry access
 	authenticatedRouter := handler.NewRoute().Subrouter()
 	authenticatedRouter.Use(bouncer.AuthenticatedAccess)
+	authenticatedRouter.Handle("/registries/ping", httperror.LoggerHandler(handler.pingRegistry)).Methods(http.MethodPost)
 	authenticatedRouter.PathPrefix("/registries/proxies/gitlab").Handler(httperror.LoggerHandler(handler.proxyRequestsToGitlabAPIWithoutRegistry))
 }
 

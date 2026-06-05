@@ -18,6 +18,7 @@ import (
 
 	"github.com/segmentio/encoding/json"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_teamList(t *testing.T) {
@@ -28,11 +29,11 @@ func Test_teamList(t *testing.T) {
 	// create admin
 	adminUser := &portainer.User{ID: 1, Username: "admin", Role: portainer.AdministratorRole}
 	err := store.User().Create(adminUser)
-	is.NoError(err, "error creating admin user")
+	require.NoError(t, err, "error creating admin user")
 
 	// setup services
 	jwtService, err := jwt.NewService("1h", store)
-	is.NoError(err, "Error initiating jwt service")
+	require.NoError(t, err, "Error initiating jwt service")
 	apiKeyService := apikey.NewAPIKeyService(store.APIKeyRepository(), store.User())
 	requestBouncer := security.NewRequestBouncer(store, jwtService, apiKeyService)
 
@@ -46,25 +47,25 @@ func Test_teamList(t *testing.T) {
 	// create teams
 	teamWithEndpointAccess := &portainer.Team{ID: 1, Name: "team-with-endpoint-access"}
 	err = store.Team().Create(teamWithEndpointAccess)
-	is.NoError(err, "error creating team")
+	require.NoError(t, err, "error creating team")
 
 	teamWithoutEndpointAccess := &portainer.Team{ID: 2, Name: "team-without-endpoint-access"}
 	err = store.Team().Create(teamWithoutEndpointAccess)
-	is.NoError(err, "error creating team")
+	require.NoError(t, err, "error creating team")
 
 	// create users
 	userWithEndpointAccessByTeam := &portainer.User{ID: 2, Username: "standard-user-inherit-endpoint-access-from-team", Role: portainer.StandardUserRole, PortainerAuthorizations: authorization.DefaultPortainerAuthorizations()}
 	err = store.User().Create(userWithEndpointAccessByTeam)
-	is.NoError(err, "error creating user")
+	require.NoError(t, err, "error creating user")
 
 	userWithoutEndpointAccess := &portainer.User{ID: 3, Username: "standard-user-without-endpoint-access", Role: portainer.StandardUserRole, PortainerAuthorizations: authorization.DefaultPortainerAuthorizations()}
 	err = store.User().Create(userWithoutEndpointAccess)
-	is.NoError(err, "error creating user")
+	require.NoError(t, err, "error creating user")
 
 	// create team membership
 	teamMembership := &portainer.TeamMembership{ID: 1, UserID: userWithEndpointAccessByTeam.ID, TeamID: teamWithEndpointAccess.ID}
 	err = store.TeamMembership().Create(teamMembership)
-	is.NoError(err, "error creating team membership")
+	require.NoError(t, err, "error creating team membership")
 
 	// create endpoint and team access policies
 	teamAccessPolicies := make(portainer.TeamAccessPolicies, 0)
@@ -72,11 +73,11 @@ func Test_teamList(t *testing.T) {
 
 	endpointGroupOnly := &portainer.EndpointGroup{ID: 5, Name: "endpoint-group"}
 	err = store.EndpointGroup().Create(endpointGroupOnly)
-	is.NoError(err, "error creating endpoint group")
+	require.NoError(t, err, "error creating endpoint group")
 
 	endpointWithTeamAccessPolicy := &portainer.Endpoint{ID: 1, GroupID: endpointGroupOnly.ID, TeamAccessPolicies: teamAccessPolicies}
 	err = store.Endpoint().Create(endpointWithTeamAccessPolicy)
-	is.NoError(err, "error creating endpoint")
+	require.NoError(t, err, "error creating endpoint")
 
 	jwt, _, _ := jwtService.GenerateToken(&portainer.TokenData{ID: userWithEndpointAccessByTeam.ID, Username: userWithEndpointAccessByTeam.Username, Role: userWithEndpointAccessByTeam.Role})
 
@@ -90,11 +91,11 @@ func Test_teamList(t *testing.T) {
 		is.Equal(http.StatusOK, rr.Code)
 
 		body, err := io.ReadAll(rr.Body)
-		is.NoError(err, "ReadAll should not return error")
+		require.NoError(t, err, "ReadAll should not return error")
 
 		var resp []portainer.Team
 		err = json.Unmarshal(body, &resp)
-		is.NoError(err, "response should be list json")
+		require.NoError(t, err, "response should be list json")
 
 		is.Len(resp, 2)
 	})
@@ -111,11 +112,11 @@ func Test_teamList(t *testing.T) {
 		is.Equal(http.StatusOK, rr.Code)
 
 		body, err := io.ReadAll(rr.Body)
-		is.NoError(err, "ReadAll should not return error")
+		require.NoError(t, err, "ReadAll should not return error")
 
 		var resp []portainer.Team
 		err = json.Unmarshal(body, &resp)
-		is.NoError(err, "response should be list json")
+		require.NoError(t, err, "response should be list json")
 
 		is.Len(resp, 1)
 		if len(resp) == 1 {
@@ -133,11 +134,11 @@ func Test_teamList(t *testing.T) {
 		is.Equal(http.StatusOK, rr.Code)
 
 		body, err := io.ReadAll(rr.Body)
-		is.NoError(err, "ReadAll should not return error")
+		require.NoError(t, err, "ReadAll should not return error")
 
 		var resp []portainer.Team
 		err = json.Unmarshal(body, &resp)
-		is.NoError(err, "response should be list json")
+		require.NoError(t, err, "response should be list json")
 
 		is.Len(resp, 1)
 		if len(resp) == 1 {
@@ -150,7 +151,7 @@ func Test_teamList(t *testing.T) {
 	// create team
 	teamUnderGroup := &portainer.Team{ID: 3, Name: "team-under-environment-group"}
 	err = store.Team().Create(teamUnderGroup)
-	is.NoError(err, "error creating user")
+	require.NoError(t, err, "error creating user")
 
 	// create environment group including a team
 	teamAccessPoliciesUnderGroup := make(portainer.TeamAccessPolicies, 0)
@@ -158,12 +159,12 @@ func Test_teamList(t *testing.T) {
 
 	endpointGroupWithTeam := &portainer.EndpointGroup{ID: 2, Name: "endpoint-group-with-team", TeamAccessPolicies: teamAccessPoliciesUnderGroup}
 	err = store.EndpointGroup().Create(endpointGroupWithTeam)
-	is.NoError(err, "error creating endpoint group")
+	require.NoError(t, err, "error creating endpoint group")
 
 	// create endpoint
 	endpointUnderGroupWithTeam := &portainer.Endpoint{ID: 2, GroupID: endpointGroupWithTeam.ID}
 	err = store.Endpoint().Create(endpointUnderGroupWithTeam)
-	is.NoError(err, "error creating endpoint")
+	require.NoError(t, err, "error creating endpoint")
 
 	t.Run("admin user can list teams who inherit endpoint access from an environment group", func(t *testing.T) {
 		params := url.Values{}
@@ -177,11 +178,11 @@ func Test_teamList(t *testing.T) {
 		is.Equal(http.StatusOK, rr.Code)
 
 		body, err := io.ReadAll(rr.Body)
-		is.NoError(err, "ReadAll should not return error")
+		require.NoError(t, err, "ReadAll should not return error")
 
 		var resp []portainer.Team
 		err = json.Unmarshal(body, &resp)
-		is.NoError(err, "response should be list json")
+		require.NoError(t, err, "response should be list json")
 
 		is.Len(resp, 1)
 		if len(resp) == 1 {

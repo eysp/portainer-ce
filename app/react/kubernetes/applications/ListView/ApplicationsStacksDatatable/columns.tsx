@@ -14,7 +14,7 @@ export const columnHelper = createColumnHelper<Stack>();
 
 const namespace = columnHelper.accessor('ResourcePool', {
   id: 'namespace',
-  header: 'Namespace',
+  header: '命名空间',
   cell: NamespaceCell,
 });
 
@@ -37,17 +37,17 @@ function NamespaceCell({ row, getValue }: CellContext<Stack, string>) {
 
 const name = columnHelper.accessor('Name', {
   id: 'name',
-  header: 'Stack',
+  header: '堆栈',
 });
 
 const applications = columnHelper.accessor((row) => row.Applications.length, {
   id: 'applications',
-  header: 'Applications',
+  header: '应用',
 });
 
 const actions = columnHelper.display({
   id: 'actions',
-  header: 'Actions',
+  header: '操作',
   cell: ({ row: { original: item } }) => (
     <Link
       to="kubernetes.stacks.stack.logs"
@@ -56,7 +56,7 @@ const actions = columnHelper.display({
       data-cy={`app-stack-logs-link-${item.Name}`}
     >
       <Icon icon={FileText} />
-      Logs
+      日志
     </Link>
   ),
 });

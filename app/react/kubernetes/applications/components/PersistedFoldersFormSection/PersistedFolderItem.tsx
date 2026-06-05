@@ -50,7 +50,7 @@ export function PersistedFolderItem({
           size="small"
           className={clsx('min-w-[250px]', item.needsDeletion && 'striked')}
         >
-          <InputGroup.Addon required>Path in container</InputGroup.Addon>
+          <InputGroup.Addon required>容器内路径</InputGroup.Addon>
           <Input
             type="text"
             placeholder="例如 /data"
@@ -109,7 +109,7 @@ export function PersistedFolderItem({
               <Input
                 className="-mr-[1px] !w-20 !rounded-none"
                 type="number"
-                placeholder="例如 20"
+                placeholder="e.g. 20"
                 min="0"
                 disabled={
                   (isEdit && isExistingPersistedFolder()) ||
@@ -186,7 +186,7 @@ export function PersistedFolderItem({
           size="small"
           className={clsx(item.needsDeletion && 'striked')}
         >
-          <InputGroup.Addon>Volume</InputGroup.Addon>
+          <InputGroup.Addon>卷</InputGroup.Addon>
           <Select<Option<string>>
             className="w-[440px]"
             size="sm"

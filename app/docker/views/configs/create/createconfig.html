@@ -36,11 +36,11 @@
             <div class="col-sm-12 form-inline mt-2">
               <div ng-repeat="label in ctrl.formValues.Labels" class="mt-1">
                 <div class="input-group col-sm-5 input-group-sm">
-                  <span class="input-group-addon">name</span>
+                  <span class="input-group-addon">名称</span>
                   <input type="text" class="form-control" ng-model="label.name" placeholder="例如 com.example.foo" data-cy="config-label-input_{{ $index }}" />
                 </div>
                 <div class="input-group col-sm-6 input-group-sm">
-                  <span class="input-group-addon">value</span>
+                  <span class="input-group-addon">值</span>
                   <input type="text" class="form-control" ng-model="label.value" placeholder="例如 bar" data-cy="config-label-value_{{ $index }}" />
                   <span class="input-group-btn">
                     <button class="btn btn-dangerlight" type="button" ng-click="ctrl.removeLabel($index)">

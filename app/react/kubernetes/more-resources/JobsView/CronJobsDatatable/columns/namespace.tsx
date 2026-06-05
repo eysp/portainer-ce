@@ -8,7 +8,7 @@ import { CronJob } from '../types';
 import { columnHelper } from './helper';
 
 export const namespace = columnHelper.accessor((row) => row.Namespace, {
-  header: 'Namespace',
+  header: '命名空间',
   id: 'namespace',
   cell: ({ getValue, row }) => (
     <Link

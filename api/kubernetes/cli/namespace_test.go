@@ -6,7 +6,9 @@ import (
 	"testing"
 
 	portainer "github.com/portainer/portainer/api"
+
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kfake "k8s.io/client-go/kubernetes/fake"
@@ -21,10 +23,10 @@ func Test_ToggleSystemState(t *testing.T) {
 		}
 
 		err := kcl.ToggleSystemState(nsName, true)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		ns, err := kcl.cli.CoreV1().Namespaces().Get(context.Background(), nsName, metav1.GetOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		_, exists := ns.Labels[systemNamespaceLabel]
 		assert.False(t, exists, "system label should not exists")
@@ -38,7 +40,7 @@ func Test_ToggleSystemState(t *testing.T) {
 		}
 
 		err := kcl.ToggleSystemState(nsName, true)
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("if called with the same state, should skip (exit without error)", func(t *testing.T) {
@@ -60,10 +62,10 @@ func Test_ToggleSystemState(t *testing.T) {
 				}
 
 				err := kcl.ToggleSystemState(nsName, test.isSystem)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				ns, err := kcl.cli.CoreV1().Namespaces().Get(context.Background(), nsName, metav1.GetOptions{})
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				assert.Equal(t, test.isSystem, isSystemNamespace(ns))
 			})
@@ -89,10 +91,10 @@ func Test_ToggleSystemState(t *testing.T) {
 		}
 
 		err := kcl.ToggleSystemState(nsName, true)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		ns, err := kcl.cli.CoreV1().Namespaces().Get(context.Background(), nsName, metav1.GetOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		labelValue, exists := ns.Labels[systemNamespaceLabel]
 		assert.True(t, exists, "system label should exists")
@@ -109,10 +111,10 @@ func Test_ToggleSystemState(t *testing.T) {
 		}
 
 		err := kcl.ToggleSystemState(nsName, false)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		ns, err := kcl.cli.CoreV1().Namespaces().Get(context.Background(), nsName, metav1.GetOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		labelValue, exists := ns.Labels[systemNamespaceLabel]
 		assert.True(t, exists, "system label should exists")
@@ -131,10 +133,10 @@ func Test_ToggleSystemState(t *testing.T) {
 		}
 
 		err := kcl.ToggleSystemState(nsName, false)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		ns, err := kcl.cli.CoreV1().Namespaces().Get(context.Background(), nsName, metav1.GetOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		labelValue, exists := ns.Labels[systemNamespaceLabel]
 		assert.True(t, exists, "system label should exists")
@@ -164,10 +166,10 @@ func Test_ToggleSystemState(t *testing.T) {
 		}
 
 		err := kcl.ToggleSystemState(nsName, true)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		ns, err := kcl.cli.CoreV1().Namespaces().Get(context.Background(), nsName, metav1.GetOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		labelValue, exists := ns.Labels[systemNamespaceLabel]
 		assert.True(t, exists, "system label should exists")
@@ -178,7 +180,7 @@ func Test_ToggleSystemState(t *testing.T) {
 		}
 
 		actualPolicies, err := kcl.GetNamespaceAccessPolicies()
-		assert.NoError(t, err, "failed to fetch policies")
+		require.NoError(t, err, "failed to fetch policies")
 		assert.Equal(t, expectedPolicies, actualPolicies)
 	})
 }

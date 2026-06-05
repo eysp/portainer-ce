@@ -35,35 +35,34 @@ export function ComposePathField({
       <span className="col-sm-12">
         <TextTip color="blue" className="mb-2">
           <span>
-            指示从仓库根目录到{' '}
+            指定仓库根目录中{' '}
             {isCompose ? (
-              'Compose'
+              'Compose 文件'
             ) : (
               <a
                 href="https://kubernetes.io/docs/concepts/overview/working-with-objects/"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Kubernetes 清单文件
+                Kubernetes Manifest 文件
               </a>
             )}{' '}
-            的路径（需要 yaml、yml、json 或 hcl 文件扩展名）。
+            的路径（文件扩展名必须是 yaml、yml、json 或 hcl）。
           </span>
           {isDockerStandalone && (
             <span className="ml-2">
-              要在 Docker 独立环境中启用已存在镜像的重新构建，请在您的 compose 文件中包含
-              <code>pull_policy: build</code>，如{' '}
+              若要在 Docker 独立环境中已有镜像时重新构建镜像，请按照{' '}
               <a href="https://docs.docker.com/compose/compose-file/#pull_policy">
                 Docker 文档
               </a>
-              所示。
+              在 Compose 文件中加入 <code>pull_policy: build</code>。
             </span>
           )}
         </TextTip>
       </span>
       <div className="col-sm-12">
         <FormControl
-          label={isCompose ? 'Compose 路径' : '清单路径'}
+          label={isCompose ? 'Compose 路径' : 'Manifest 路径'}
           inputId="stack_repository_path"
           required
           errors={errors}

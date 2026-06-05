@@ -1,20 +1,20 @@
 import { FormikErrors } from 'formik';
-import { boolean, number, object, SchemaOf, string } from 'yup';
+import { boolean, mixed, number, object, SchemaOf, string } from 'yup';
 import { useState } from 'react';
 
 import { GitAuthModel } from '@/react/portainer/gitops/types';
-import { useDebounce } from '@/react/hooks/useDebounce';
-import { GitCredential } from '@/react/portainer/account/git-credentials/types';
+import {
+  AuthTypeOption,
+  GitCredential,
+} from '@/react/portainer/account/git-credentials/types';
 
 import { SwitchField } from '@@/form-components/SwitchField';
-import { Input } from '@@/form-components/Input';
-import { FormControl } from '@@/form-components/FormControl';
 import { TextTip } from '@@/Tip/TextTip';
 
 import { isBE } from '../../feature-flags/feature-flags.service';
 
 import { CredentialSelector } from './CredentialSelector';
-import { NewCredentialForm } from './NewCredentialForm';
+import { CredentialsSection } from './CredentialsSection';
 
 interface Props {
   value: GitAuthModel;
@@ -30,21 +30,13 @@ export function AuthFieldset({
   errors,
 }: Props) {
   const [value, setValue] = useState(initialValue); // TODO: remove this state when form is not inside angularjs
-  const [username, setUsername] = useDebounce(
-    value.RepositoryUsername || '',
-    (username) => handleChange({ RepositoryUsername: username })
-  );
-  const [password, setPassword] = useDebounce(
-    value.RepositoryPassword || '',
-    (password) => handleChange({ RepositoryPassword: password })
-  );
 
   return (
     <>
       <div className="form-group">
         <div className="col-sm-12">
           <SwitchField
-            label="认证"
+            label="身份验证"
             labelClass="col-sm-3 col-lg-2"
             name="authentication"
             checked={value.RepositoryAuthentication || false}
@@ -60,7 +52,7 @@ export function AuthFieldset({
         <>
           {isAuthExplanationVisible && (
             <TextTip color="orange" className="mb-2">
-              启用认证将存储凭据，建议使用 Git 服务账户
+              启用身份验证会存储凭据，建议使用 Git 服务账户。
             </TextTip>
           )}
 
@@ -71,50 +63,13 @@ export function AuthFieldset({
             />
           )}
 
-          <div className="form-group">
-            <div className="col-sm-12">
-              <FormControl label="用户名" errors={errors?.RepositoryUsername}>
-                <Input
-                  value={username}
-                  name="repository_username"
-                  placeholder={
-                    value.RepositoryGitCredentialID ? '' : 'git 用户名'
-                  }
-                  onChange={(e) => setUsername(e.target.value)}
-                  data-cy="component-gitUsernameInput"
-                  readOnly={!!value.RepositoryGitCredentialID}
-                />
-              </FormControl>
-            </div>
-          </div>
-          <div className="form-group !mb-0">
-            <div className="col-sm-12">
-              <FormControl
-                label="个人访问令牌"
-                tooltip="提供个人访问令牌或密码"
-                errors={errors?.RepositoryPassword}
-              >
-                <Input
-                  type="password"
-                  value={password}
-                  name="repository_password"
-                  placeholder="*******"
-                  onChange={(e) => setPassword(e.target.value)}
-                  data-cy="component-gitPasswordInput"
-                  readOnly={!!value.RepositoryGitCredentialID}
-                />
-              </FormControl>
-            </div>
-          </div>
-          {!value.RepositoryGitCredentialID &&
-            value.RepositoryPassword &&
-            isBE && (
-              <NewCredentialForm
-                value={value}
-                onChange={handleChange}
-                errors={errors}
-              />
-            )}
+          {!value.RepositoryGitCredentialID && (
+            <CredentialsSection
+              value={value}
+              onChange={handleChange}
+              errors={errors}
+            />
+          )}
         </>
       )}
     </>
@@ -155,16 +110,24 @@ export function gitAuthValidation(
     RepositoryUsername: string()
       .when(['RepositoryAuthentication', 'RepositoryGitCredentialID'], {
         is: (auth: boolean, id: number) => auth && !id,
-        then: string().required('用户名是必需的'),
+        then: string().required('用户名为必填项'),
       })
       .default(''),
     RepositoryPassword: string()
       .when(['RepositoryAuthentication', 'RepositoryGitCredentialID'], {
         is: (auth: boolean, id: number) =>
           auth && !id && !isAuthEdit && !isCreatedFromCustomTemplate,
-        then: string().required('密码是必需的'),
+        then: string().required('个人访问令牌为必填项'),
       })
       .default(''),
+    RepositoryAuthorizationType: mixed()
+      .oneOf(Object.values(AuthTypeOption))
+      .when(['RepositoryAuthentication', 'RepositoryGitCredentialID'], {
+        is: (auth: boolean, id: number) =>
+          isBE && auth && !id && !isAuthEdit && !isCreatedFromCustomTemplate,
+        then: mixed().required('授权类型为必填项'),
+      })
+      .default(AuthTypeOption.Basic),
     SaveCredential: boolean().default(false),
     NewCredentialName: string()
       .default('')
@@ -172,15 +135,15 @@ export function gitAuthValidation(
         is: (RepositoryAuthentication: boolean, SaveCredential: boolean) =>
           RepositoryAuthentication && SaveCredential && !isAuthEdit,
         then: string()
-          .required('名称是必需的')
+          .required('名称为必填项')
           .test(
             'is-unique',
-            '此名称已被使用，请尝试另一个',
+            '该名称已被使用，请尝试其他名称',
             (name) => !!name && !gitCredentials.find((x) => x.name === name)
           )
           .matches(
             /^[-_a-z0-9]+$/,
-            "此字段必须由小写字母数字字符、'_' 或 '-' 组成（例如 'my-name' 或 'abc-123'）。"
+            "此字段只能包含小写字母、数字、'_' 或 '-'（例如 'my-name' 或 'abc-123'）。"
           ),
       }),
   });

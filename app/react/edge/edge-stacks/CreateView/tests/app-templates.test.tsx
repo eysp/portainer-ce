@@ -19,6 +19,11 @@ vi.mock('@uirouter/react', async (importOriginal: () => Promise<object>) => ({
   useCurrentStateAndParams: vi.fn(() => ({
     params: { templateId: mockTemplateId, templateType: mockTemplateType },
   })),
+  useRouter: vi.fn(() => ({
+    stateService: {
+      go: vi.fn(),
+    },
+  })),
 }));
 
 mockCodeMirror();

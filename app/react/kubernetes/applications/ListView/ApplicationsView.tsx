@@ -1,10 +1,9 @@
 import { BoxIcon, List } from 'lucide-react';
-import { useCurrentStateAndParams } from '@uirouter/react';
 
 import { usePublicSettings } from '@/react/portainer/settings/queries/usePublicSettings';
 
 import { PageHeader } from '@@/PageHeader';
-import { Tab, WidgetTabs, findSelectedTabIndex } from '@@/Widget/WidgetTabs';
+import { Tab, WidgetTabs, useCurrentTabIndex } from '@@/Widget/WidgetTabs';
 
 import { ApplicationsDatatable } from './ApplicationsDatatable';
 import { ApplicationsStacksDatatable } from './ApplicationsStacksDatatable';
@@ -20,27 +19,24 @@ export function ApplicationsView() {
 
   const tabs: Tab[] = [
     {
-      name: '应用',
+      name: 'Applications',
       icon: BoxIcon,
       widget: <ApplicationsDatatable tableState={tableState} />,
       selectedTabParam: 'applications',
     },
     {
-      name: '堆栈',
+      name: 'Stacks',
       icon: List,
       widget: <ApplicationsStacksDatatable tableState={tableState} />,
       selectedTabParam: 'stacks',
     },
   ];
 
-  const currentTabIndex = findSelectedTabIndex(
-    useCurrentStateAndParams(),
-    tabs
-  );
+  const currentTabIndex = useCurrentTabIndex(tabs);
 
   return (
     <>
-      <PageHeader title="应用列表" breadcrumbs="应用" reload />
+      <PageHeader title="应用列表" breadcrumbs="Applications" reload />
       {hideStacks ? (
         <ApplicationsDatatable tableState={tableState} hideStacks />
       ) : (

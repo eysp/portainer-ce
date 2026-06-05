@@ -23,7 +23,7 @@ export function useColumns(isHostColumnVisible?: boolean) {
           header: '驱动程序',
         }),
         columnHelper.accessor('Attachable', {
-          header: '可附加',
+          header: 'Attachable',
         }),
         columnHelper.accessor('IPAM.Driver', {
           header: 'IPAM 驱动程序',

@@ -22,8 +22,9 @@ func TestMigrateGPUs(t *testing.T) {
 		if strings.HasSuffix(r.URL.Path, "/containers/json") {
 			containerSummary := []container.Summary{{ID: "container1"}}
 
-			err := json.NewEncoder(w).Encode(containerSummary)
-			require.NoError(t, err)
+			if err := json.NewEncoder(w).Encode(containerSummary); err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
 
 			return
 		}
@@ -41,8 +42,9 @@ func TestMigrateGPUs(t *testing.T) {
 			},
 		}
 
-		err := json.NewEncoder(w).Encode(container)
-		require.NoError(t, err)
+		if err := json.NewEncoder(w).Encode(container); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	}))
 	defer srv.Close()
 
@@ -129,12 +131,12 @@ func TestPostInitMigrate_PendingActionsCreated(t *testing.T) {
 				EdgeID: "edgeID",
 			}
 			err := store.Endpoint().Create(endpoint)
-			is.NoError(err, "error creating endpoint")
+			require.NoError(t, err, "error creating endpoint")
 
 			// Create any existing pending actions
 			for _, action := range tt.existingPendingActions {
 				err = store.PendingActions().Create(action)
-				is.NoError(err, "error creating pending action")
+				require.NoError(t, err, "error creating pending action")
 			}
 
 			migrator := NewPostInitMigrator(
@@ -146,11 +148,11 @@ func TestPostInitMigrate_PendingActionsCreated(t *testing.T) {
 			)
 
 			err = migrator.PostInitMigrate()
-			is.NoError(err, "PostInitMigrate should not return error")
+			require.NoError(t, err, "PostInitMigrate should not return error")
 
 			// Verify the results
 			pendingActions, err := store.PendingActions().ReadAll()
-			is.NoError(err, "error reading pending actions")
+			require.NoError(t, err, "error reading pending actions")
 			is.Len(pendingActions, tt.expectedPendingActions, "unexpected number of pending actions")
 
 			// If we expect any actions, verify at least one has the expected action type
@@ -160,9 +162,11 @@ func TestPostInitMigrate_PendingActionsCreated(t *testing.T) {
 					if action.Action == tt.expectedAction {
 						hasExpectedAction = true
 						is.Equal(endpoint.ID, action.EndpointID, "action should reference correct endpoint")
+
 						break
 					}
 				}
+
 				is.True(hasExpectedAction, "should have found action of expected type")
 			}
 		})

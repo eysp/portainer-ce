@@ -68,6 +68,7 @@ function SortWrapper({
         '!ml-0 h-full border-none !bg-transparent !px-0 focus:border-none',
         !isSorted && 'group'
       )}
+      aria-label="Sort column"
     >
       <div className="flex h-full w-full flex-row items-center justify-start">
         {children}

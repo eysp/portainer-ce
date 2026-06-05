@@ -2,7 +2,6 @@ package cli
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
 	portainer "github.com/portainer/portainer/api"
@@ -34,7 +33,7 @@ type (
 )
 
 func (kcl *KubeClient) DeleteRegistrySecret(registry portainer.RegistryID, namespace string) error {
-	if err := kcl.cli.CoreV1().Secrets(namespace).Delete(context.TODO(), kcl.RegistrySecretName(registry), metav1.DeleteOptions{}); err != nil && !k8serrors.IsNotFound(err) {
+	if err := kcl.cli.CoreV1().Secrets(namespace).Delete(context.TODO(), registryutils.RegistrySecretName(registry), metav1.DeleteOptions{}); err != nil && !k8serrors.IsNotFound(err) {
 		return errors.Wrap(err, "failed removing secret")
 	}
 
@@ -62,11 +61,15 @@ func (kcl *KubeClient) CreateRegistrySecret(registry *portainer.Registry, namesp
 	}
 
 	secret := &v1.Secret{
-		TypeMeta: metav1.TypeMeta{},
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "v1",
+			Kind:       "Secret",
+		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: kcl.RegistrySecretName(registry.ID),
+			Name: registryutils.RegistrySecretName(registry.ID),
 			Labels: map[string]string{
-				labelRegistryType: strconv.Itoa(int(registry.Type)),
+				labelRegistryType:              strconv.Itoa(int(registry.Type)),
+				"app.kubernetes.io/managed-by": "portainer",
 			},
 			Annotations: map[string]string{
 				annotationRegistryID: strconv.Itoa(int(registry.ID)),
@@ -98,8 +101,4 @@ func (cli *KubeClient) IsRegistrySecret(namespace, secretName string) (bool, err
 	isSecret := secret.Type == v1.SecretTypeDockerConfigJson
 
 	return isSecret, nil
-}
-
-func (*KubeClient) RegistrySecretName(registryID portainer.RegistryID) string {
-	return fmt.Sprintf("registry-%d", registryID)
 }

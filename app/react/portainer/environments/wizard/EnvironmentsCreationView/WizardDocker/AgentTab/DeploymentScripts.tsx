@@ -129,34 +129,35 @@ docker service create \\
 
 function winStandaloneCommand(agentVersion: string, agentSecret: string) {
   const secret =
-    agentSecret === '' ? '' : `\\\n  -e AGENT_SECRET=${agentSecret} `;
+    agentSecret === '' ? '' : `\`\n  -e AGENT_SECRET=${agentSecret} `;
 
-  return `docker run -d \\
-  -p 9001:9001 ${secret}\\
-  --name portainer_agent \\
-  --restart=always \\
-  -v C:\\:C:\\host \\
-  -v C:\\ProgramData\\docker\\volumes:C:\\ProgramData\\docker\\volumes \\
-  -v \\\\.\\pipe\\docker_engine:\\\\.\\pipe\\docker_engine \\
+  return `docker run -d \`
+  -p 9001:9001 ${secret}\`
+  --name portainer_agent \`
+  --restart=always \`
+  -v C:\\:C:\\host \`
+  -v C:\\ProgramData\\docker\\volumes:C:\\ProgramData\\docker\\volumes \`
+  -v \\\\.\\pipe\\docker_engine:\\\\.\\pipe\\docker_engine \`
   portainer/agent:${agentVersion}
 `;
 }
 
 function winSwarmCommand(agentVersion: string, agentSecret: string) {
   const secret =
-    agentSecret === '' ? '' : `\\\n  -e AGENT_SECRET=${agentSecret} `;
+    agentSecret === '' ? '' : `\`\n  -e AGENT_SECRET=${agentSecret} `;
 
-  return `docker network create \\
---driver overlay \\
-  portainer_agent_network && \\
-docker service create \\
-  --name portainer_agent \\
-  --network portainer_agent_network \\
-  -p 9001:9001/tcp ${secret}\\
-  --mode global \\
-  --constraint 'node.platform.os == windows' \\
-  --mount type=npipe,src=\\\\.\\pipe\\docker_engine,dst=\\\\.\\pipe\\docker_engine \\
-  --mount type=bind,src=C:\\ProgramData\\docker\\volumes,dst=C:\\ProgramData\\docker\\volumes \\
+  return `docker network create \`
+--driver overlay \`
+  portainer_agent_network
+
+docker service create \`
+  --name portainer_agent \`
+  --network portainer_agent_network \`
+  -p 9001:9001/tcp ${secret}\`
+  --mode global \`
+  --constraint 'node.platform.os == windows' \`
+  --mount type=npipe,src=\\\\.\\pipe\\docker_engine,dst=\\\\.\\pipe\\docker_engine \`
+  --mount type=bind,src=C:\\ProgramData\\docker\\volumes,dst=C:\\ProgramData\\docker\\volumes \`
   portainer/agent:${agentVersion}
 `;
 }

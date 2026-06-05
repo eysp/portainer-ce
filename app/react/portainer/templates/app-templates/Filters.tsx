@@ -59,7 +59,7 @@ export function Filters({
             value={listState.category}
             bindToBody
             isClearable
-            aria-label="分类筛选"
+            aria-label="分类过滤器"
             data-cy="app-templates-category-filter"
           />
         </div>
@@ -77,7 +77,7 @@ export function Filters({
             value={listState.types}
             bindToBody
             isClearable
-            aria-label="类型筛选"
+            aria-label="类型过滤器"
             data-cy="app-templates-type-filter"
           />
         </div>
@@ -89,9 +89,9 @@ export function Filters({
             onChange();
           }}
           options={orderByFields}
-            placeholder="排序方式"
-            value={listState.sortBy}
-            aria-label="排序"
+          placeholder="排序方式"
+          value={listState.sortBy}
+          aria-label="排序"
         />
       </div>
     </div>

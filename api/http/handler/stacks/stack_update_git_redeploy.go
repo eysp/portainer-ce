@@ -27,10 +27,13 @@ type stackGitRedployPayload struct {
 	RepositoryAuthorizationType gittypes.GitCredentialAuthType
 	Env                         []portainer.Pair
 	Prune                       bool
-	// Force a pulling to current image with the original tag though the image is already the latest
-	PullImage bool `example:"false"`
+	// RepullImageAndRedeploy indicates whether to force repulling images and redeploying the stack
+	RepullImageAndRedeploy bool
 
 	StackName string
+	// Deprecated(2.36): use RepullImageAndRedeploy instead for cleaner responsibility
+	// Force a pulling to current image with the original tag though the image is already the latest
+	PullImage bool `example:"false"`
 }
 
 func (payload *stackGitRedployPayload) Validate(r *http.Request) error {
@@ -124,7 +127,7 @@ func (handler *Handler) stackGitRedeploy(w http.ResponseWriter, r *http.Request)
 	if err := request.DecodeAndValidateJSONPayload(r, &payload); err != nil {
 		return httperror.BadRequest("Invalid request payload", err)
 	}
-
+	payload.RepullImageAndRedeploy = payload.RepullImageAndRedeploy || payload.PullImage
 	stack.GitConfig.ReferenceName = payload.RepositoryReferenceName
 	stack.Env = payload.Env
 	if stack.Type == portainer.DockerSwarmStack {
@@ -168,7 +171,7 @@ func (handler *Handler) stackGitRedeploy(w http.ResponseWriter, r *http.Request)
 
 	defer clean()
 
-	if err := handler.deployStack(r, stack, payload.PullImage, endpoint); err != nil {
+	if err := handler.deployStack(r, stack, payload.RepullImageAndRedeploy, endpoint); err != nil {
 		return err
 	}
 

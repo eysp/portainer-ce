@@ -27,8 +27,6 @@ type publicSettingsResponse struct {
 	OAuthLoginURI string `json:"OAuthLoginURI" example:"https://gitlab.com/oauth"`
 	// The URL used for oauth logout
 	OAuthLogoutURI string `json:"OAuthLogoutURI" example:"https://gitlab.com/oauth/logout"`
-	// Whether telemetry is enabled
-	EnableTelemetry bool `json:"EnableTelemetry" example:"true"`
 	// The expiry of a Kubeconfig
 	KubeconfigExpiry string `example:"24h" default:"0"`
 	// Whether team sync is enabled
@@ -78,7 +76,6 @@ func generatePublicSettings(appSettings *portainer.Settings) *publicSettingsResp
 		RequiredPasswordLength:    appSettings.InternalAuthSettings.RequiredPasswordLength,
 		EnableEdgeComputeFeatures: appSettings.EnableEdgeComputeFeatures,
 		GlobalDeploymentOptions:   appSettings.GlobalDeploymentOptions,
-		EnableTelemetry:           appSettings.EnableTelemetry,
 		KubeconfigExpiry:          appSettings.KubeconfigExpiry,
 		Features:                  featureflags.FeatureFlags(),
 		IsAMTEnabled:              appSettings.EnableEdgeComputeFeatures && appSettings.OpenAMTConfiguration.Enabled,

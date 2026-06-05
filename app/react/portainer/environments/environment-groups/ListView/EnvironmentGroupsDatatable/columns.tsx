@@ -31,7 +31,7 @@ function ActionsCell({
       icon={Users}
       data-cy={`manage-access-button_${item.Name}`}
     >
-      管理访问权限
+      Manage access
     </Button>
   );
 }

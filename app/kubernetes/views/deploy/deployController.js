@@ -11,7 +11,7 @@ import { baseStackWebhookUrl, createWebhookId } from '@/portainer/helpers/webhoo
 import { getVariablesFieldDefaultValues } from '@/react/portainer/custom-templates/components/CustomTemplatesVariablesField';
 import { KUBE_STACK_NAME_VALIDATION_REGEX } from '@/react/kubernetes/DeployView/StackName/constants';
 import { confirmWebEditorDiscard } from '@@/modals/confirm';
-import { editor, git, customTemplate, url, helm } from '@@/BoxSelector/common-options/build-methods';
+import { editor, git, customTemplate, url } from '@@/BoxSelector/common-options/build-methods';
 import { kubernetes } from '@@/BoxSelector/common-options/deployment-methods';
 
 class KubernetesDeployController {
@@ -34,7 +34,6 @@ class KubernetesDeployController {
 
     this.methodOptions = [
       { ...git, value: KubernetesDeployBuildMethods.GIT },
-      { ...helm, value: KubernetesDeployBuildMethods.HELM },
       { ...editor, value: KubernetesDeployBuildMethods.WEB_EDITOR },
       { ...url, value: KubernetesDeployBuildMethods.URL },
       { ...customTemplate, value: KubernetesDeployBuildMethods.CUSTOM_TEMPLATE },
@@ -129,7 +128,7 @@ class KubernetesDeployController {
         this.state.stackNameError = '';
       } else {
         this.state.stackNameError =
-          "Stack must consist of alphanumeric characters, '-', '_' or '.', must start and end with an alphanumeric character and must be 63 characters or less (例如 'my-name', or 'abc-123').";
+          "堆栈必须由字母数字字符、'-'、'_' 或 '.' 组成，必须以字母数字字符开头和结尾，且长度不得超过 63 个字符（例如 'my-name' 或 'abc-123'）。";
       }
 
       this.formValues.StackName = name;
@@ -252,7 +251,7 @@ class KubernetesDeployController {
           this.onChangeTemplateVariables(variables);
         }
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to load template file');
+        this.Notifications.error('失败', err, '无法加载模板文件');
       }
     });
   }
@@ -291,7 +290,7 @@ class KubernetesDeployController {
           method = KubernetesDeployRequestMethods.URL;
           break;
         default:
-          throw new PortainerError('Unable to determine build method');
+          throw new PortainerError('无法确定构建方法');
       }
 
       let deployNamespace = '';
@@ -328,7 +327,7 @@ class KubernetesDeployController {
 
       await this.StackService.kubernetesDeploy(this.endpoint.Id, method, payload);
 
-      this.Notifications.success('Success', 'Request to deploy manifest successfully submitted');
+      this.Notifications.success('成功', '部署清单的请求已成功提交');
       this.state.isEditorDirty = false;
 
       if (this.$state.params.referrer && this.$state.params.tab) {
@@ -343,7 +342,7 @@ class KubernetesDeployController {
 
       this.$state.go('kubernetes.applications');
     } catch (err) {
-      this.Notifications.error('Unable to deploy manifest', err, 'Unable to deploy resources');
+      this.Notifications.error('无法部署清单', err, '无法部署资源');
       this.displayErrorLog(err.err.data.details);
     } finally {
       this.state.actionInProgress = false;
@@ -377,7 +376,7 @@ class KubernetesDeployController {
         value: namespace.Name,
       }));
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to load namespaces data');
+      this.Notifications.error('失败', err, '无法加载命名空间数据');
     }
   }
 

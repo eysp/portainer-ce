@@ -1,6 +1,6 @@
 <div class="form-group ldap-dn-builder">
   <div class="col-sm-12" style="margin-bottom: 5px">
-    <label class="control-label text-left">{{ $ctrl.label || 'DN entries' }}</label>
+    <label class="control-label text-left">{{ $ctrl.label || 'DN 条目' }}</label>
     <button
       type="button"
       class="label label-default interactive vertical-center"
@@ -10,7 +10,7 @@
       limited-feature-tabindex="-1"
     >
       <pr-icon icon="'plus-circle'"></pr-icon>
-      add another entry
+      添加另一个条目
     </button>
   </div>
   <div class="col-sm-12" ng-if="$ctrl.entries.length">
@@ -25,10 +25,9 @@
               limited-feature-dir="{{::$ctrl.limitedFeatureId}}"
               limited-feature-tabindex="-1"
               data-cy="ldap-dn-builder-select"
-            >
               >
-              <option value="ou">OU Name</option>
-              <option value="cn">Folder Name</option>
+              <option value="ou">OU 名称</option>
+              <option value="cn">文件夹名称</option>
             </select>
           </div>
           <div class="col-sm-5">

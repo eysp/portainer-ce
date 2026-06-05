@@ -12,6 +12,7 @@ import { Checkbox } from '@@/form-components/Checkbox';
 import { Modal } from '@@/modals/Modal';
 import { PaginationControls } from '@@/PaginationControls';
 import { Button, LoadingButton } from '@@/buttons';
+import { Alert } from '@@/Alert';
 
 interface Props {
   envQueryParams: Query;
@@ -43,11 +44,19 @@ export function AssociateAMTDialog({
     !isLoading && environments.every((env) => selection.includes(env.Id));
 
   return (
-    <Modal onDismiss={onClose} aria-label="关联到 OpenAMT">
-      <Modal.Header title="关联到 OpenAMT" />
+    <Modal onDismiss={onClose} aria-label="Associate with OpenAMT">
+      <Modal.Header title="Associate with OpenAMT" />
       <Modal.Body>
+        <div className="mb-2">
+          <Alert color="warn">
+            OpenAMT support is deprecated and will be removed in a future
+            version of Portainer.
+          </Alert>
+        </div>
+
         <span>
-          选择要关联到 OpenAMT 的环境。您可以选择跨多个页面。
+          Select the environments to add to associate to OpenAMT. You may select
+          across multiple pages.
         </span>
         <div className="flex h-8 items-center">
           <Checkbox
@@ -101,10 +110,10 @@ export function AssociateAMTDialog({
           onClick={handleSubmit}
           data-cy="associate-amt-dialog-associate-button"
           disabled={selection.length === 0}
-          loadingText="正在关联..."
+          loadingText="Associating..."
           isLoading={activateDeviceMutation.isLoading}
         >
-          关联设备
+          Associate Devices
         </LoadingButton>
       </Modal.Footer>
     </Modal>

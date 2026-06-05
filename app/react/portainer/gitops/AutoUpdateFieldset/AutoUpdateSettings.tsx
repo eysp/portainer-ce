@@ -34,14 +34,16 @@ export function AutoUpdateSettings({
   return (
     <>
       <TextTip color="orange" className="mb-2">
-        通过 Portainer 在本地或直接在集群中对堆栈或应用程序所做的任何更改都将被 Git 仓库内容覆盖，这可能会导致服务中断。
+        Any changes to this stack or application that have been made locally via
+        Portainer or directly in the cluster will be overwritten by the git
+        repository content, which may cause service interruption.
       </TextTip>
 
-      <FormControl label="机制">
+      <FormControl label="Mechanism">
         <ButtonSelector
           size="small"
           options={[
-            { value: 'Interval', label: '轮询' },
+            { value: 'Interval', label: 'Polling' },
             { value: 'Webhook', label: 'Webhook' },
           ]}
           value={value.RepositoryMechanism || 'Interval'}
@@ -75,7 +77,7 @@ export function AutoUpdateSettings({
               checked={value.ForcePullImage || false}
               label="重新拉取镜像"
               labelClass="col-sm-3 col-lg-2"
-              tooltip="如果启用，则当通过 Webhook 或轮询触发重新部署时，如果有您指定的标签（例如可变的开发构建）的较新镜像，将拉取并重新部署。如果您未指定标签，或指定了 'latest' 作为标签，则将拉取并重新部署带有 'latest' 标签的镜像。启用相对路径后，当挂载的文件（不仅仅是 compose 文件）更改时也会重新部署。"
+              tooltip="If enabled, then when redeploy is triggered via the webhook or polling, if there's a newer image with the tag that you've specified (e.g. changeable development builds), it's pulled and redeployed. If you haven't specified a tag, or have specified 'latest' as the tag, then the image with the tag 'latest' is pulled and redeployed."
               onChange={(value) => onChange({ ForcePullImage: value })}
             />
           </div>
@@ -88,25 +90,29 @@ export function AutoUpdateSettings({
           onChange({ RepositoryAutomaticUpdatesForce: value })
         }
         label={
-          environmentType === 'KUBERNETES' ? '始终应用清单' : undefined
+          environmentType === 'KUBERNETES' ? 'Always apply manifest' : undefined
         }
         tooltip={
           environmentType === 'KUBERNETES' ? (
             <>
               <p>
-                如果启用，则当通过 Webhook 或轮询触发重新部署时，即使 Portainer 检测到 Git 仓库与上次 Git 拉取时本地存储的内容没有差异，也会始终执行 kubectl apply。
+                If enabled, then when redeploy is triggered via the webhook or
+                polling, kubectl apply is always performed, even if Portainer
+                detects no difference between the git repo and what was stored
+                locally on last git pull.
               </p>
               <p>
-                如果您希望 Git 仓库成为单一事实来源，并且可以接受直接对集群中的资源所做的更改被覆盖，这很有用。
+                This is useful if you want your git repo to be the source of
+                truth and are fine with changes made directly to resources in
+                the cluster being overwritten.
               </p>
             </>
           ) : (
             <p>
-              如果启用，则当通过 Webhook 或轮询触发重新部署时，堆栈行为取决于堆栈类型：
-              <br />
-              <strong>常规堆栈：</strong> 每当触发时重新部署，不检查 docker-compose 文件更改
-              <br />
-              <strong>边缘堆栈：</strong> 仅当 Git 仓库中的 docker-compose 文件发生更改时重新部署。更改无关文件或挂载文件（通过相对路径）的提交不会触发重新部署。目前，此选项不会更改重新部署行为，并且它仍然是一个临时解决方案，直到稍后添加更完整的行为。
+              If enabled, then when redeploy is triggered via the webhook or
+              polling, the stack will be always redeployed, even if Portainer
+              detects no difference between the git repo and what was stored
+              locally on last git pull.
             </p>
           )
         }

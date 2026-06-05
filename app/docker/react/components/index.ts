@@ -2,7 +2,6 @@ import angular from 'angular';
 
 import { r2a } from '@/react-tools/react2angular';
 import { withControlledInput } from '@/react-tools/withControlledInput';
-import { StackContainersDatatable } from '@/react/common/stacks/ItemView/StackContainersDatatable';
 import { withCurrentUser } from '@/react-tools/withCurrentUser';
 import { withReactQuery } from '@/react-tools/withReactQuery';
 import { withUIRouter } from '@/react-tools/withUIRouter';
@@ -11,9 +10,7 @@ import { HealthStatus } from '@/react/docker/containers/ItemView/HealthStatus';
 import { GpusList } from '@/react/docker/host/SetupView/GpusList';
 import { InsightsBox } from '@/react/components/InsightsBox';
 import { BetaAlert } from '@/react/portainer/environments/update-schedules/common/BetaAlert';
-import { ImagesDatatable } from '@/react/docker/images/ListView/ImagesDatatable/ImagesDatatable';
 import { EventsDatatable } from '@/react/docker/events/EventsDatatables';
-import { ConfigsDatatable } from '@/react/docker/configs/ListView/ConfigsDatatable';
 import { AgentHostBrowser } from '@/react/docker/host/BrowseView/AgentHostBrowser';
 import { AgentVolumeBrowser } from '@/react/docker/volumes/BrowseView/AgentVolumeBrowser';
 import { ProcessesDatatable } from '@/react/docker/containers/StatsView/ProcessesDatatable';
@@ -40,13 +37,6 @@ const ngModule = angular
   .component('dockerfileDetails', r2a(DockerfileDetails, ['image']))
   .component('dockerHealthStatus', r2a(HealthStatus, ['health']))
   .component(
-    'stackContainersDatatable',
-    r2a(
-      withUIRouter(withReactQuery(withCurrentUser(StackContainersDatatable))),
-      ['environment', 'stackName']
-    )
-  )
-  .component(
     'networksDatatable',
     r2a(withUIRouter(withCurrentUser(NetworksDatatable)), [
       'dataset',
@@ -69,24 +59,6 @@ const ngModule = angular
     ])
   )
   .component('betaAlert', r2a(BetaAlert, ['className', 'message', 'isHtml']))
-  .component(
-    'dockerImagesDatatable',
-    r2a(withUIRouter(withCurrentUser(ImagesDatatable)), [
-      'onRemove',
-      'isExportInProgress',
-      'isHostColumnVisible',
-      'onDownload',
-      'onRemove',
-    ])
-  )
-  .component(
-    'dockerConfigsDatatable',
-    r2a(withUIRouter(withCurrentUser(ConfigsDatatable)), [
-      'dataset',
-      'onRemoveClick',
-      'onRefresh',
-    ])
-  )
   .component(
     'agentHostBrowserReact',
     r2a(withUIRouter(withCurrentUser(AgentHostBrowser)), [

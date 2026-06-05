@@ -32,11 +32,11 @@ export function TeamsField({
         />
       ) : (
         <span className="small text-muted">
-          您似乎没有任何团队可以添加用户。请前往{' '}
+          您似乎没有任何团队可以添加用户。前往{' '}
           <Link to="portainer.teams" data-cy="teams-view-link">
             团队视图
           </Link>{' '}
-          创建一些。
+          创建一些团队。
         </span>
       )}
     </FormControl>

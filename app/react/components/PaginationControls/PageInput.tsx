@@ -45,7 +45,7 @@ export function PageInput({ onChange, totalPages }: Props) {
         disabled={!isValid}
         data-cy="pagination-go-to-page-button"
       >
-        跳转
+        Go
       </Button>
     </form>
   );

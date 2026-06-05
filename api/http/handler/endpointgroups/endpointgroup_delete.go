@@ -37,16 +37,8 @@ func (handler *Handler) endpointGroupDelete(w http.ResponseWriter, r *http.Reque
 	err = handler.DataStore.UpdateTx(func(tx dataservices.DataStoreTx) error {
 		return handler.deleteEndpointGroup(tx, portainer.EndpointGroupID(endpointGroupID))
 	})
-	if err != nil {
-		var httpErr *httperror.HandlerError
-		if errors.As(err, &httpErr) {
-			return httpErr
-		}
 
-		return httperror.InternalServerError("Unexpected error", err)
-	}
-
-	return response.Empty(w)
+	return response.TxEmptyResponse(w, err)
 }
 
 func (handler *Handler) deleteEndpointGroup(tx dataservices.DataStoreTx, endpointGroupID portainer.EndpointGroupID) error {
@@ -57,8 +49,7 @@ func (handler *Handler) deleteEndpointGroup(tx dataservices.DataStoreTx, endpoin
 		return httperror.InternalServerError("Unable to find an environment group with the specified identifier inside the database", err)
 	}
 
-	err = tx.EndpointGroup().Delete(endpointGroupID)
-	if err != nil {
+	if err := tx.EndpointGroup().Delete(endpointGroupID); err != nil {
 		return httperror.InternalServerError("Unable to remove the environment group from the database", err)
 	}
 
@@ -68,30 +59,29 @@ func (handler *Handler) deleteEndpointGroup(tx dataservices.DataStoreTx, endpoin
 	}
 
 	for _, endpoint := range endpoints {
-		if endpoint.GroupID == endpointGroupID {
-			endpoint.GroupID = portainer.EndpointGroupID(1)
-			err = tx.Endpoint().UpdateEndpoint(endpoint.ID, &endpoint)
-			if err != nil {
-				return httperror.InternalServerError("Unable to update environment", err)
-			}
+		if endpoint.GroupID != endpointGroupID {
+			continue
+		}
 
-			err = handler.updateEndpointRelations(tx, &endpoint, nil)
-			if err != nil {
-				return httperror.InternalServerError("Unable to persist environment relations changes inside the database", err)
-			}
+		endpoint.GroupID = portainer.EndpointGroupID(1)
+		if err := tx.Endpoint().UpdateEndpoint(endpoint.ID, &endpoint); err != nil {
+			return httperror.InternalServerError("Unable to update environment", err)
+		}
+
+		if err := handler.updateEndpointRelations(tx, &endpoint, nil); err != nil {
+			return httperror.InternalServerError("Unable to persist environment relations changes inside the database", err)
 		}
 	}
 
 	for _, tagID := range endpointGroup.TagIDs {
 		tag, err := tx.Tag().Read(tagID)
-		if tx.IsErrObjectNotFound(err) {
+		if err != nil {
 			return httperror.InternalServerError("Unable to find a tag inside the database", err)
 		}
 
 		delete(tag.EndpointGroups, endpointGroup.ID)
 
-		err = tx.Tag().Update(tagID, tag)
-		if err != nil {
+		if err := tx.Tag().Update(tagID, tag); err != nil {
 			return httperror.InternalServerError("Unable to persist tag changes inside the database", err)
 		}
 	}

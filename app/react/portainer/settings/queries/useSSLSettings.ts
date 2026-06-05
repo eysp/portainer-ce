@@ -19,6 +19,6 @@ async function getSSLSettings() {
     const response = await axios.get<SSLSettings>('/ssl');
     return response.data;
   } catch (error) {
-    throw parseAxiosError(error, 'Unable to retrieve SSL settings');
+    throw parseAxiosError(error, '无法获取 SSL 设置');
   }
 }

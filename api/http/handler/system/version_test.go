@@ -16,6 +16,7 @@ import (
 
 	"github.com/segmentio/encoding/json"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_getSystemVersion(t *testing.T) {
@@ -26,16 +27,16 @@ func Test_getSystemVersion(t *testing.T) {
 	// create version data
 	version := &models.Version{SchemaVersion: "2.20.0", Edition: 1}
 	err := store.Version().UpdateVersion(version)
-	is.NoError(err, "error creating version data")
+	require.NoError(t, err, "error creating version data")
 
 	// create admin and standard user(s)
 	adminUser := &portainer.User{ID: 1, Username: "admin", Role: portainer.AdministratorRole}
 	err = store.User().Create(adminUser)
-	is.NoError(err, "error creating admin user")
+	require.NoError(t, err, "error creating admin user")
 
 	// setup services
 	jwtService, err := jwt.NewService("1h", store)
-	is.NoError(err, "Error initiating jwt service")
+	require.NoError(t, err, "Error initiating jwt service")
 
 	apiKeyService := apikey.NewAPIKeyService(store.APIKeyRepository(), store.User())
 	requestBouncer := security.NewRequestBouncer(store, jwtService, apiKeyService)
@@ -55,11 +56,11 @@ func Test_getSystemVersion(t *testing.T) {
 		is.Equal(http.StatusOK, rr.Code)
 
 		body, err := io.ReadAll(rr.Body)
-		is.NoError(err, "ReadAll should not return error")
+		require.NoError(t, err, "ReadAll should not return error")
 
 		var resp versionResponse
 		err = json.Unmarshal(body, &resp)
-		is.NoError(err, "response should be list json")
+		require.NoError(t, err, "response should be list json")
 
 		is.Equal("CE", resp.ServerEdition, "Edition is not expected")
 	})

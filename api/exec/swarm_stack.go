@@ -61,7 +61,7 @@ func (manager *SwarmStackManager) Login(registries []portainer.Registry, endpoin
 
 	for _, registry := range registries {
 		if registry.Authentication {
-			username, password, err := getEffectiveRegUsernamePassword(manager.dataStore, &registry)
+			username, password, err := getEffectiveRegUsernamePassword(&registry)
 			if err != nil {
 				continue
 			}
@@ -183,7 +183,7 @@ func (manager *SwarmStackManager) prepareDockerCommandAndArgs(binaryPath, config
 		if !endpoint.TLSConfig.TLSSkipVerify {
 			args = append(args, "--tlsverify", "--tlscacert", endpoint.TLSConfig.TLSCACertPath)
 		} else {
-			args = append(args, "--tlscacert", "''")
+			args = append(args, "--tlscacert", "")
 		}
 
 		if endpoint.TLSConfig.TLSCertPath != "" && endpoint.TLSConfig.TLSKeyPath != "" {

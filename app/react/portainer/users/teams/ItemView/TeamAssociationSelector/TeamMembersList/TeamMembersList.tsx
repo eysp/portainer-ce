@@ -64,7 +64,7 @@ export function TeamMembersList({ users, roles, disabled, teamId }: Props) {
               icon={UserX}
               data-cy="remove-all-users-button"
             >
-              移除所有用户
+              Remove all users
             </Button>
           )
         }
@@ -89,7 +89,7 @@ export function TeamMembersList({ users, roles, disabled, teamId }: Props) {
   function handleRemoveMembers(userIds: UserId[]) {
     removeMemberMutation.mutate(userIds, {
       onSuccess() {
-        notifySuccess('成功', '所有用户已成功移除');
+        notifySuccess('Success', 'All users successfully removed');
       },
     });
   }

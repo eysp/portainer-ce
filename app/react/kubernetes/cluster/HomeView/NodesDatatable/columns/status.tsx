@@ -7,7 +7,7 @@ import { NodeRowData } from '../types';
 import { columnHelper } from './helper';
 
 export const status = columnHelper.accessor((row) => getStatus(row), {
-  header: 'Status',
+  header: '状态',
   cell: StatusCell,
 });
 

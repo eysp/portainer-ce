@@ -51,8 +51,8 @@ export function NetworkDetailsTable({
             </span>
           )}
         </DetailsTable.Row>
-        <DetailsTable.Row label="驱动程序">{network.Driver}</DetailsTable.Row>
-        <DetailsTable.Row label="作用域">{network.Scope}</DetailsTable.Row>
+        <DetailsTable.Row label="驱动">{network.Driver}</DetailsTable.Row>
+        <DetailsTable.Row label="范围">{network.Scope}</DetailsTable.Row>
         <DetailsTable.Row label="可附加">
           {String(network.Attachable)}
         </DetailsTable.Row>
@@ -64,14 +64,14 @@ export function NetworkDetailsTable({
         {ipv4Configs.map((config) => (
           <Fragment key={config.Subnet}>
             <DetailsTable.Row
-              label={`IPv4 子网${getConfigDetails(config.Subnet)}`}
+              label={`IPV4 Subnet${getConfigDetails(config.Subnet)}`}
             >
-              {`IPv4 网关${getConfigDetails(config.Gateway)}`}
+              {`IPV4 Gateway${getConfigDetails(config.Gateway)}`}
             </DetailsTable.Row>
             <DetailsTable.Row
-              label={`IPv4 IP 范围${getConfigDetails(config.IPRange)}`}
+              label={`IPV4 IP Range${getConfigDetails(config.IPRange)}`}
             >
-              {`IPv4 排除的 IP${getAuxiliaryAddresses(
+              {`IPV4 Excluded IPs${getAuxiliaryAddresses(
                 config.AuxiliaryAddresses
               )}`}
             </DetailsTable.Row>
@@ -82,14 +82,14 @@ export function NetworkDetailsTable({
         {ipv6Configs.map((config) => (
           <Fragment key={config.Subnet}>
             <DetailsTable.Row
-              label={`IPv6 子网${getConfigDetails(config.Subnet)}`}
+              label={`IPV6 Subnet${getConfigDetails(config.Subnet)}`}
             >
-              {`IPv6 网关${getConfigDetails(config.Gateway)}`}
+              {`IPV6 Gateway${getConfigDetails(config.Gateway)}`}
             </DetailsTable.Row>
             <DetailsTable.Row
-              label={`IPv6 IP 范围${getConfigDetails(config.IPRange)}`}
+              label={`IPV6 IP Range${getConfigDetails(config.IPRange)}`}
             >
-              {`IPv6 排除的 IP${getAuxiliaryAddresses(
+              {`IPV6 Excluded IPs${getAuxiliaryAddresses(
                 config.AuxiliaryAddresses
               )}`}
             </DetailsTable.Row>

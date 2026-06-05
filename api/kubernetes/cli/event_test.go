@@ -21,6 +21,7 @@ func TestGetEvents(t *testing.T) {
 			instanceID:  "instance",
 			isKubeAdmin: true,
 		}
+
 		event := corev1.Event{
 			InvolvedObject: corev1.ObjectReference{UID: "resourceId"},
 			Action:         "something",
@@ -29,18 +30,15 @@ func TestGetEvents(t *testing.T) {
 			Type:           "warning",
 			Message:        "This event has a very serious warning",
 		}
+
 		_, err := kcl.cli.CoreV1().Events("default").Create(context.TODO(), &event, metav1.CreateOptions{})
-		if err != nil {
-			t.Fatalf("Failed to create Event: %v", err)
-		}
+		require.NoError(t, err, "Failed to create Event")
 
 		events, err := kcl.GetEvents("default", "resourceId")
+		require.NoError(t, err, "Failed to fetch Events")
 
-		if err != nil {
-			t.Fatalf("Failed to fetch Cron Jobs: %v", err)
-		}
 		t.Logf("Fetched Events: %v", events)
-		require.Equal(t, 1, len(events), "Expected to return 1 event")
+		require.Len(t, events, 1, "Expected to return 1 event")
 		assert.Equal(t, event.Message, events[0].Message, "Expected Message to be equal to event message created")
 		assert.Equal(t, event.Type, events[0].Type, "Expected Type to be equal to event type created")
 		assert.Equal(t, event.EventTime.UTC(), events[0].EventTime, "Expected EventTime to be saved as a string from event time created")
@@ -52,6 +50,7 @@ func TestGetEvents(t *testing.T) {
 			isKubeAdmin:        false,
 			nonAdminNamespaces: []string{"nonAdmin"},
 		}
+
 		event := corev1.Event{
 			InvolvedObject: corev1.ObjectReference{UID: "resourceId"},
 			Action:         "something",
@@ -60,18 +59,15 @@ func TestGetEvents(t *testing.T) {
 			Type:           "warning",
 			Message:        "This event has a very serious warning",
 		}
+
 		_, err := kcl.cli.CoreV1().Events("nonAdmin").Create(context.TODO(), &event, metav1.CreateOptions{})
-		if err != nil {
-			t.Fatalf("Failed to create Event: %v", err)
-		}
+		require.NoError(t, err, "Failed to create Event")
 
 		events, err := kcl.GetEvents("nonAdmin", "resourceId")
+		require.NoError(t, err, "Failed to fetch Cron Jobs")
 
-		if err != nil {
-			t.Fatalf("Failed to fetch Cron Jobs: %v", err)
-		}
 		t.Logf("Fetched Events: %v", events)
-		require.Equal(t, 1, len(events), "Expected to return 1 event")
+		require.Len(t, events, 1, "Expected to return 1 event")
 		assert.Equal(t, event.Message, events[0].Message, "Expected Message to be equal to event message created")
 		assert.Equal(t, event.Type, events[0].Type, "Expected Type to be equal to event type created")
 		assert.Equal(t, event.EventTime.UTC(), events[0].EventTime, "Expected EventTime to be saved as a string from event time created")
@@ -84,6 +80,7 @@ func TestGetEvents(t *testing.T) {
 			isKubeAdmin:        false,
 			nonAdminNamespaces: []string{"nonAdmin"},
 		}
+
 		event := corev1.Event{
 			InvolvedObject: corev1.ObjectReference{UID: "resourceId"},
 			Action:         "something",
@@ -92,17 +89,13 @@ func TestGetEvents(t *testing.T) {
 			Type:           "warning",
 			Message:        "This event has a very serious warning",
 		}
+
 		_, err := kcl.cli.CoreV1().Events("admin").Create(context.TODO(), &event, metav1.CreateOptions{})
-		if err != nil {
-			t.Fatalf("Failed to create Event: %v", err)
-		}
+		require.NoError(t, err, "Failed to create Event")
 
 		events, err := kcl.GetEvents("admin", "resourceId")
-
-		if err != nil {
-			t.Fatalf("Failed to fetch Cron Jobs: %v", err)
-		}
+		require.NoError(t, err, "Failed to fetch Cron Jobs")
 		t.Logf("Fetched Events: %v", events)
-		assert.Equal(t, 0, len(events), "Expected to return 0 events")
+		assert.Empty(t, events, "Expected to return 0 events")
 	})
 }

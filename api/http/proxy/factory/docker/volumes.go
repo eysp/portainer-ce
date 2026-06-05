@@ -1,9 +1,11 @@
 package docker
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"path"
 
@@ -12,8 +14,10 @@ import (
 	"github.com/portainer/portainer/api/http/security"
 	"github.com/portainer/portainer/api/internal/authorization"
 	"github.com/portainer/portainer/api/internal/snapshot"
+	"github.com/portainer/portainer/api/logs"
 
 	"github.com/docker/docker/client"
+	"github.com/segmentio/encoding/json"
 )
 
 const volumeObjectIdentifier = "ResourceID"
@@ -121,10 +125,56 @@ func selectorVolumeLabels(responseObject map[string]any) map[string]any {
 	return utils.GetJSONObject(responseObject, "Labels")
 }
 
+func CheckVolumeBodyRestrictions(request *http.Request) error {
+	defer logs.CloseAndLogErr(request.Body)
+
+	body, err := io.ReadAll(request.Body)
+	if err != nil {
+		return err
+	}
+
+	var volumeCreateBody struct {
+		DriverOpts map[string]string `json:"DriverOpts"`
+	}
+
+	if err := json.Unmarshal(body, &volumeCreateBody); err != nil {
+		return err
+	}
+
+	if volumeCreateBody.DriverOpts["type"] == "bind" {
+		return ErrBindMountsForbidden
+	}
+
+	request.Body = io.NopCloser(bytes.NewBuffer(body))
+
+	return nil
+}
+
 func (transport *Transport) decorateVolumeResourceCreationOperation(request *http.Request, resourceType portainer.ResourceControlType) (*http.Response, error) {
 	tokenData, err := security.RetrieveTokenData(request)
 	if err != nil {
 		return nil, err
+	}
+
+	isAdminOrEndpointAdmin, err := transport.isAdminOrEndpointAdmin(request)
+	if err != nil {
+		return nil, err
+	}
+
+	if !isAdminOrEndpointAdmin {
+		securitySettings, err := transport.fetchEndpointSecuritySettings()
+		if err != nil {
+			return nil, err
+		}
+
+		if !securitySettings.AllowBindMountsForRegularUsers {
+			if err := CheckVolumeBodyRestrictions(request); err != nil {
+				return &http.Response{
+					StatusCode: http.StatusForbidden,
+					Body:       io.NopCloser(bytes.NewBufferString("Access denied: insufficient permissions to create volume with specified configuration")),
+				}, err
+			}
+		}
 	}
 
 	volumeID := request.Header.Get("X-Portainer-VolumeName")
@@ -135,7 +185,7 @@ func (transport *Transport) decorateVolumeResourceCreationOperation(request *htt
 		if err != nil {
 			return nil, err
 		}
-		defer cli.Close()
+		defer logs.CloseAndLogErr(cli)
 
 		if _, err := cli.VolumeInspect(context.Background(), volumeID); err == nil {
 			return &http.Response{
@@ -237,7 +287,7 @@ func (transport *Transport) getDockerID() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer client.Close()
+	defer logs.CloseAndLogErr(client)
 
 	info, err := client.Info(context.Background())
 	if err != nil {

@@ -30,7 +30,7 @@ export function AuthenticationLogsTable({
 }) {
   return (
     <Datatable<AuthLog>
-      title="身份验证事件"
+      title="认证事件"
       titleIcon={History}
       columns={columns}
       dataset={dataset || []}

@@ -137,7 +137,7 @@ angular.module('portainer.docker').controller('CreateVolumeController', [
           $state.go('docker.volumes', {}, { reload: true });
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '创建卷时发生错误');
+          Notifications.error('失败', err, '卷创建过程中发生错误');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -152,7 +152,7 @@ angular.module('portainer.docker').controller('CreateVolumeController', [
           $scope.availableVolumeDrivers = data;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索卷驱动程序');
+          Notifications.error('失败', err, '无法获取卷驱动');
         });
     }
 

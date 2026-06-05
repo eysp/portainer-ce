@@ -7,8 +7,7 @@ import { Link } from '@@/Link';
 
 import fullLogoBE from './portainer_logo-BE.svg';
 import fullLogoCE from './portainer_logo-CE.svg';
-import smallLogoBE from './logomark-BE.svg';
-import smallLogoCE from './logomark-CE.svg';
+import portainerIcon from './portainer-p-icon-white.svg';
 import { useSidebarState } from './useSidebarState';
 import styles from './Header.module.css';
 
@@ -89,7 +88,7 @@ function getLogo(isOpen: boolean, customLogo?: string) {
   }
 
   if (!isOpen) {
-    return isBE ? smallLogoBE : smallLogoCE;
+    return portainerIcon;
   }
 
   return isBE ? fullLogoBE : fullLogoCE;
@@ -110,7 +109,7 @@ function Logo({
       className={clsx('img-responsive', styles.logo, {
         '!max-h-[27px]': !isOpen,
       })}
-      alt="Logo"
+      alt="标志"
     />
   );
 }

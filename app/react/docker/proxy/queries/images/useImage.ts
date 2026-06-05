@@ -1,4 +1,4 @@
-import { ImageInspect } from 'docker-types/generated/1.41';
+import { ImageInspect } from 'docker-types';
 
 import axios, { parseAxiosError } from '@/portainer/services/axios';
 import { EnvironmentId } from '@/react/portainer/environments/types';
@@ -21,6 +21,6 @@ export async function getImage(
     );
     return data;
   } catch (e) {
-    throw parseAxiosError(e, 'Unable to retrieve image');
+    throw parseAxiosError(e, '无法获取镜像');
   }
 }

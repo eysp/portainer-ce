@@ -33,7 +33,7 @@ export function validation(
     ),
     alwaysPull: boolean()
       .default(true)
-      .test('rate-limits', '超出速率限制', (alwaysPull: boolean) =>
+      .test('rate-limits', 'Rate limit exceeded', (alwaysPull: boolean) =>
         alwaysPull ? !isDockerhubRateLimited : true
       ),
     accessControl: accessControlSchema(isAdmin),
@@ -44,7 +44,7 @@ export function validation(
     publishAllPorts: boolean().default(false),
     image: imageConfigValidation().test(
       'duplicate-must-have-registry',
-      '只有在选择了镜像仓库时才能复制',
+      '仅在选择注册表时才能复制',
       (value) => !isDuplicating || typeof value.registryId !== 'undefined'
     ),
   });

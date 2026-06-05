@@ -15,12 +15,12 @@ angular.module('portainer.docker').controller('VolumesController', [
       async function doRemove(volume) {
         return VolumeService.remove(volume.Name, volume.NodeName)
           .then(function success() {
-            Notifications.success('卷已成功移除', volume.Name);
+            Notifications.success('卷删除成功', volume.Name);
             var index = $scope.volumes.indexOf(volume);
             $scope.volumes.splice(index, 1);
           })
           .catch(function error(err) {
-            Notifications.error('失败', err, '无法移除卷');
+            Notifications.error('失败', err, '无法删除卷');
           });
       }
 
@@ -56,7 +56,7 @@ angular.module('portainer.docker').controller('VolumesController', [
             );
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索卷列表');
+          Notifications.error('失败', err, '无法获取卷');
         });
     }
 

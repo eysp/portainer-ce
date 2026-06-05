@@ -17,7 +17,7 @@ import { helper } from './helper';
 import { useDetails } from './buildCell';
 
 export const actions = helper.display({
-  header: 'Actions',
+  header: '操作',
   cell: ActionsCell,
 });
 

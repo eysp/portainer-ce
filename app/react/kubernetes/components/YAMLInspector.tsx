@@ -8,11 +8,15 @@ import { AutomationTestingProps } from '@/types';
 import { WebEditorForm } from '@@/WebEditorForm';
 import { Button } from '@@/buttons';
 import { BETeaserButton } from '@@/BETeaserButton';
+import { Alert } from '@@/Alert';
+import { Loading } from '@@/Widget/Loading';
 
 type Props = {
   identifier: string;
   data: string;
   hideMessage?: boolean;
+  isLoading?: boolean;
+  isError?: boolean;
 } & AutomationTestingProps;
 
 export function YAMLInspector({
@@ -20,9 +24,19 @@ export function YAMLInspector({
   data,
   hideMessage,
   'data-cy': dataCy,
+  isLoading,
+  isError,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
   const yaml = useMemo(() => cleanYamlUnwantedFields(data), [data]);
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  if (isError) {
+    return <Alert color="error">Error loading YAML</Alert>;
+  }
 
   return (
     <div>
@@ -55,7 +69,7 @@ export function YAMLInspector({
           featureId={FeatureId.K8S_EDIT_YAML}
           heading="Apply YAML changes"
           message="Applies any changes that you make in the YAML editor by calling the Kubernetes API to patch the relevant resources. Any resource removals or unexpected resource additions that you make in the YAML will be ignored. Note that editing is disabled for resources in namespaces marked as system."
-          buttonText="Apply changes"
+          buttonText="应用更改"
           data-cy="yaml-inspector-apply-changes-teaser-button"
         />
       </div>

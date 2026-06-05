@@ -26,10 +26,11 @@ export function EffectiveAccessViewerDatatable({
       columns={columns}
       settingsManager={tableState}
       noWidget
-      title="访问"
+      title="访问权限"
       description={
         <TextTip color="blue">
-          将为所选用户显示每个环境的有效角色。
+          Effective role for each environment will be displayed for the selected
+          user.
         </TextTip>
       }
       disableSelect

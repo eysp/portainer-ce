@@ -12,7 +12,7 @@ export function ClusterView() {
       <PageHeader
         title="Cluster"
         breadcrumbs={[
-          { label: 'Environments', link: 'portainer.endpoints' },
+          { label: '环境', link: 'portainer.endpoints' },
           {
             label: environment?.Name || '',
             link: 'portainer.endpoints.endpoint',

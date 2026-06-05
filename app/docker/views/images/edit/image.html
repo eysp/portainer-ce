@@ -1,4 +1,4 @@
-<page-header title="'镜像详细信息'" breadcrumbs="[{label:'镜像', link:'docker.images'}, image.Id]"> </page-header>
+<page-header title="'镜像详情'" breadcrumbs="[{label:'镜像', link:'docker.images'}, image.Id]"> </page-header>
 
 <div class="row" ng-if="image.RepoTags.length > 0">
   <div class="col-lg-12 col-md-12 col-xs-12">
@@ -15,13 +15,13 @@
                   }}</span>
                   <span class="input-group-btn" style="padding: 0px 5px">
                     <span style="margin: 0px 5px" authorization="DockerImagePush">
-                      <a data-toggle="tooltip" class="btn btn-primary interactive" title="推送到仓库" ng-click="pushTag(tag)">
+                      <a data-toggle="tooltip" class="btn btn-primary interactive" title="推送到镜像仓库" ng-click="pushTag(tag)">
                         <pr-icon icon="'upload'"></pr-icon>
                       </a>
                     </span>
 
                     <span class="mx-1 my-0" authorization="DockerImageCreate">
-                      <a data-toggle="tooltip" class="btn btn-primary interactive" title="从仓库拉取" ng-click="pullTag(tag)">
+                      <a data-toggle="tooltip" class="btn btn-primary interactive" title="从镜像仓库拉取" ng-click="pullTag(tag)">
                         <pr-icon icon="'download'"></pr-icon>
                       </a>
                     </span>
@@ -39,7 +39,7 @@
           <div class="form-group">
             <div class="col-sm-12">
               <span class="small text-muted" authorization="DockerImageDelete">
-                注意：您可以点击上传图标 <pr-icon icon="'upload'"></pr-icon> 推送镜像，点击下载图标 <pr-icon icon="'download'"></pr-icon> 拉取镜像，或点击删除图标 <pr-icon icon="'trash-2'"></pr-icon> 删除标签。
+                注意：您可以点击上传图标 <pr-icon icon="'upload'"></pr-icon> 来推送镜像，或点击下载图标 <pr-icon icon="'download'"></pr-icon> 来拉取镜像，或点击垃圾桶图标 <pr-icon icon="'trash-2'"></pr-icon> 来删除标签。
               </span>
             </div>
             <div class="col-sm-12">
@@ -79,7 +79,7 @@
           <!-- tag-note -->
           <div class="form-group">
             <div class="col-sm-12">
-              <span class="small text-muted">注意：如果您在镜像名称中未指定标签，将使用 <span class="label label-default">latest</span>。</span>
+              <span class="small text-muted">注意：如果您不在镜像名称中指定标签，将使用 <span class="label label-default">latest</span>。</span>
             </div>
           </div>
           <!-- !tag-note -->
@@ -97,7 +97,7 @@
 <div class="row">
   <div class="col-lg-12 col-md-12 col-xs-12">
     <rd-widget>
-      <rd-widget-header icon="list" title-text="镜像详细信息"></rd-widget-header>
+      <rd-widget-header icon="list" title-text="镜像详情"></rd-widget-header>
       <rd-widget-body classes="no-padding">
         <table class="table">
           <tbody>
@@ -136,7 +136,7 @@
               <td>{{ image.Created | getisodate }}</td>
             </tr>
             <tr>
-              <td>构建信息</td>
+              <td>构建</td>
               <td>Docker {{ image.DockerVersion }} on {{ image.Os }}, {{ image.Architecture }}</td>
             </tr>
             <tr ng-if="!(image.Labels | emptyobject)">

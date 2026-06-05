@@ -5,17 +5,18 @@ import (
 	"path"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func createService(t *testing.T) *Service {
 	dataStorePath := path.Join(t.TempDir(), t.Name())
 
 	service, err := NewService(dataStorePath, "")
-	assert.NoError(t, err, "NewService should not fail")
+	require.NoError(t, err, "NewService should not fail")
 
 	t.Cleanup(func() {
-		os.RemoveAll(dataStorePath)
+		err := os.RemoveAll(dataStorePath)
+		require.NoError(t, err)
 	})
 
 	return service

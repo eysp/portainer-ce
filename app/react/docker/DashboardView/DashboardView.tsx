@@ -44,7 +44,7 @@ export function DashboardView() {
 
   return (
     <>
-      <PageHeader title="仪表盘" breadcrumbs="环境摘要" reload />
+      <PageHeader title="仪表板" breadcrumbs="环境摘要" reload />
 
       <div className="mx-4 space-y-6">
         <InfoPanels isAgent={isAgentEnvironment(env.Type)} />
@@ -116,7 +116,6 @@ export function DashboardView() {
             <DashboardItem
               icon={CpuIcon}
               type="GPU"
-              pluralType="GPU"
               value={env.Gpus?.length}
               data-cy="gpus"
             />

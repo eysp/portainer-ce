@@ -136,7 +136,7 @@ export function IngressDatatable() {
             color="secondary"
             data-cy="add-ingress-button"
           >
-            Add with form
+            隐藏‘使用表单添加’按钮，并阻止通过表单添加/编辑资源
           </AddButton>
         )}
 

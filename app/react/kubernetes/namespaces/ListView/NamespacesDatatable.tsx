@@ -63,7 +63,7 @@ export function NamespacesDatatable() {
       columns={columns}
       settingsManager={tableState}
       isLoading={namespacesQuery.isLoading}
-      title="Namespaces"
+      title="命名空间"
       titleIcon={Layers}
       getRowId={(item) => item.Id}
       disableSelect={!hasWriteAuthQuery.authorized}
@@ -119,7 +119,7 @@ function TableActions({
       />
 
       <AddButton color="secondary" data-cy="add-namespace-form-button">
-        Add with form
+        隐藏‘使用表单添加’按钮，并阻止通过表单添加/编辑资源
       </AddButton>
 
       <CreateFromManifestButton data-cy="k8s-namespaces-deploy-button" />

@@ -6,12 +6,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dchest/uniuri"
-	"github.com/pkg/errors"
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/chisel"
 	"github.com/portainer/portainer/api/crypto"
+
+	"github.com/dchest/uniuri"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -30,56 +32,32 @@ func TestStoreFull(t *testing.T) {
 	_, store := MustNewTestStore(t, true, true)
 
 	testCases := map[string]func(t *testing.T){
-		"User Accounts": func(t *testing.T) {
-			store.testUserAccounts(t)
-		},
-		"Environments": func(t *testing.T) {
-			store.testEnvironments(t)
-		},
-		"Settings": func(t *testing.T) {
-			store.testSettings(t)
-		},
-		"SSL Settings": func(t *testing.T) {
-			store.testSSLSettings(t)
-		},
-		"Tunnel Server": func(t *testing.T) {
-			store.testTunnelServer(t)
-		},
-		"Custom Templates": func(t *testing.T) {
-			store.testCustomTemplates(t)
-		},
-		"Registries": func(t *testing.T) {
-			store.testRegistries(t)
-		},
-		"Resource Control": func(t *testing.T) {
-			store.testResourceControl(t)
-		},
-		"Schedules": func(t *testing.T) {
-			store.testSchedules(t)
-		},
-		"Tags": func(t *testing.T) {
-			store.testTags(t)
-		},
-
-		// "Test Title": func(t *testing.T) {
-		// },
+		"User Accounts":    store.testUserAccounts,
+		"Environments":     store.testEnvironments,
+		"Settings":         store.testSettings,
+		"SSL Settings":     store.testSSLSettings,
+		"Tunnel Server":    store.testTunnelServer,
+		"Custom Templates": store.testCustomTemplates,
+		"Registries":       store.testRegistries,
+		"Resource Control": store.testResourceControl,
+		"Schedules":        store.testSchedules,
+		"Tags":             store.testTags,
 	}
 
 	for name, test := range testCases {
 		t.Run(name, test)
 	}
-
 }
 
 func (store *Store) testEnvironments(t *testing.T) {
 	id := store.CreateEndpoint(t, "local", portainer.KubernetesLocalEnvironment, "", true)
-	store.CreateEndpointRelation(id)
+	store.CreateEndpointRelation(t, id)
 
 	id = store.CreateEndpoint(t, "agent", portainer.AgentOnDockerEnvironment, agentOnDockerEnvironmentUrl, true)
-	store.CreateEndpointRelation(id)
+	store.CreateEndpointRelation(t, id)
 
 	id = store.CreateEndpoint(t, "edge", portainer.EdgeAgentOnKubernetesEnvironment, edgeAgentOnKubernetesEnvironmentUrl, true)
-	store.CreateEndpointRelation(id)
+	store.CreateEndpointRelation(t, id)
 }
 
 func newEndpoint(endpointType portainer.EndpointType, id portainer.EndpointID, name, URL string, TLS bool) *portainer.Endpoint {
@@ -112,18 +90,7 @@ func newEndpoint(endpointType portainer.EndpointType, id portainer.EndpointID, n
 }
 
 func setEndpointAuthorizations(endpoint *portainer.Endpoint) {
-	endpoint.SecuritySettings = portainer.EndpointSecuritySettings{
-		AllowVolumeBrowserForRegularUsers: false,
-		EnableHostManagementFeatures:      false,
-
-		AllowSysctlSettingForRegularUsers:         true,
-		AllowBindMountsForRegularUsers:            true,
-		AllowPrivilegedModeForRegularUsers:        true,
-		AllowHostNamespaceForRegularUsers:         true,
-		AllowContainerCapabilitiesForRegularUsers: true,
-		AllowDeviceMappingForRegularUsers:         true,
-		AllowStackManagementForRegularUsers:       true,
-	}
+	endpoint.SecuritySettings = portainer.DefaultEndpointSecuritySettings()
 }
 
 func (store *Store) CreateEndpoint(t *testing.T, name string, endpointType portainer.EndpointType, URL string, tls bool) portainer.EndpointID {
@@ -164,22 +131,25 @@ func (store *Store) CreateEndpoint(t *testing.T, name string, endpointType porta
 	}
 
 	setEndpointAuthorizations(expectedEndpoint)
-	store.Endpoint().Create(expectedEndpoint)
+
+	err := store.Endpoint().Create(expectedEndpoint)
+	require.NoError(t, err)
 
 	endpoint, err := store.Endpoint().Endpoint(id)
-	is.NoError(err, "Endpoint() should not return an error")
+	require.NoError(t, err, "Endpoint() should not return an error")
 	is.Equal(expectedEndpoint, endpoint, "endpoint should be the same")
 
 	return endpoint.ID
 }
 
-func (store *Store) CreateEndpointRelation(id portainer.EndpointID) {
+func (store *Store) CreateEndpointRelation(t *testing.T, id portainer.EndpointID) {
 	relation := &portainer.EndpointRelation{
 		EndpointID: id,
 		EdgeStacks: map[portainer.EdgeStackID]bool{},
 	}
 
-	store.EndpointRelation().Create(relation)
+	err := store.EndpointRelation().Create(relation)
+	require.NoError(t, err)
 }
 
 func (store *Store) testSSLSettings(t *testing.T) {
@@ -191,10 +161,11 @@ func (store *Store) testSSLSettings(t *testing.T) {
 		SelfSigned:  true,
 	}
 
-	store.SSLSettings().UpdateSettings(ssl)
+	err := store.SSLSettings().UpdateSettings(ssl)
+	require.NoError(t, err)
 
 	settings, err := store.SSLSettings().Settings()
-	is.NoError(err, "Get sslsettings should succeed")
+	require.NoError(t, err, "Get sslsettings should succeed")
 	is.Equal(ssl, settings, "Stored SSLSettings should be the same as what is read out")
 }
 
@@ -203,27 +174,27 @@ func (store *Store) testTunnelServer(t *testing.T) {
 	expectPrivateKeySeed := uniuri.NewLen(16)
 
 	err := store.TunnelServer().UpdateInfo(&portainer.TunnelServerInfo{PrivateKeySeed: expectPrivateKeySeed})
-	is.NoError(err, "UpdateInfo should have succeeded")
+	require.NoError(t, err, "UpdateInfo should have succeeded")
 
 	serverInfo, err := store.TunnelServer().Info()
-	is.NoError(err, "Info should have succeeded")
+	require.NoError(t, err, "Info should have succeeded")
 
 	is.Equal(expectPrivateKeySeed, serverInfo.PrivateKeySeed, "hashed passwords should not differ")
 }
 
 // add users, read them back and check the details are unchanged
 func (store *Store) testUserAccounts(t *testing.T) {
-	is := assert.New(t)
-
 	err := store.createAccount(adminUsername, adminPassword, portainer.AdministratorRole)
-	is.NoError(err, "CreateAccount should succeed")
-	store.checkAccount(adminUsername, adminPassword, portainer.AdministratorRole)
-	is.NoError(err, "Account failure")
+	require.NoError(t, err, "CreateAccount should succeed")
+
+	err = store.checkAccount(adminUsername, adminPassword, portainer.AdministratorRole)
+	require.NoError(t, err, "Account failure")
 
 	err = store.createAccount(standardUsername, standardPassword, portainer.StandardUserRole)
-	is.NoError(err, "CreateAccount should succeed")
-	store.checkAccount(standardUsername, standardPassword, portainer.StandardUserRole)
-	is.NoError(err, "Account failure")
+	require.NoError(t, err, "CreateAccount should succeed")
+
+	err = store.checkAccount(standardUsername, standardPassword, portainer.StandardUserRole)
+	require.NoError(t, err, "Account failure")
 }
 
 // create an account with the provided details
@@ -238,12 +209,7 @@ func (store *Store) createAccount(username, password string, role portainer.User
 		return err
 	}
 
-	err = store.User().Create(user)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return store.User().Create(user)
 }
 
 func (store *Store) checkAccount(username, expectPassword string, expectRole portainer.UserRole) error {
@@ -260,12 +226,7 @@ func (store *Store) checkAccount(username, expectPassword string, expectRole por
 
 	// Check the password
 	cs := crypto.Service{}
-	expectPasswordHash, err := cs.Hash(expectPassword)
-	if err != nil {
-		return errors.Wrap(err, "hash failed")
-	}
-
-	if user.Password != expectPasswordHash {
+	if cs.CompareHashAndData(user.Password, expectPassword) != nil {
 		return fmt.Errorf("%s user password hash failure", user.Username)
 	}
 
@@ -277,7 +238,7 @@ func (store *Store) testSettings(t *testing.T) {
 
 	// since many settings are default and basically nil, I'm going to update some and read them back
 	expectedSettings, err := store.Settings().Settings()
-	is.NoError(err, "Settings() should not return an error")
+	require.NoError(t, err, "Settings() should not return an error")
 	expectedSettings.TemplatesURL = "http://portainer.io/application-templates"
 	expectedSettings.HelmRepositoryURL = "http://portainer.io/helm-repository"
 	expectedSettings.EdgeAgentCheckinInterval = 60
@@ -291,10 +252,10 @@ func (store *Store) testSettings(t *testing.T) {
 	expectedSettings.SnapshotInterval = "10m"
 
 	err = store.Settings().UpdateSettings(expectedSettings)
-	is.NoError(err, "UpdateSettings() should succeed")
+	require.NoError(t, err, "UpdateSettings() should succeed")
 
 	settings, err := store.Settings().Settings()
-	is.NoError(err, "Settings() should not return an error")
+	require.NoError(t, err, "Settings() should not return an error")
 	is.Equal(expectedSettings, settings, "stored settings should match")
 }
 
@@ -314,10 +275,11 @@ func (store *Store) testCustomTemplates(t *testing.T) {
 		CreatedByUserID: 10,
 	}
 
-	customTemplate.Create(expectedTemplate)
+	err := customTemplate.Create(expectedTemplate)
+	require.NoError(t, err)
 
 	actualTemplate, err := customTemplate.Read(expectedTemplate.ID)
-	is.NoError(err, "CustomTemplate should not return an error")
+	require.NoError(t, err, "CustomTemplate should not return an error")
 	is.Equal(expectedTemplate, actualTemplate, "expected and actual template do not match")
 }
 
@@ -345,17 +307,17 @@ func (store *Store) testRegistries(t *testing.T) {
 	}
 
 	err := regService.Create(reg1)
-	is.NoError(err)
+	require.NoError(t, err)
 
 	err = regService.Create(reg2)
-	is.NoError(err)
+	require.NoError(t, err)
 
 	actualReg1, err := regService.Read(reg1.ID)
-	is.NoError(err)
+	require.NoError(t, err)
 	is.Equal(reg1, actualReg1, "registries differ")
 
 	actualReg2, err := regService.Read(reg2.ID)
-	is.NoError(err)
+	require.NoError(t, err)
 	is.Equal(reg2, actualReg2, "registries differ")
 }
 
@@ -378,10 +340,10 @@ func (store *Store) testSchedules(t *testing.T) {
 	}
 
 	err := schedule.CreateSchedule(s)
-	is.NoError(err, "CreateSchedule should succeed")
+	require.NoError(t, err, "CreateSchedule should succeed")
 
 	actual, err := schedule.Schedule(s.ID)
-	is.NoError(err, "schedule should be found")
+	require.NoError(t, err, "schedule should be found")
 	is.Equal(s, actual, "schedules differ")
 }
 
@@ -401,16 +363,16 @@ func (store *Store) testTags(t *testing.T) {
 	}
 
 	err := tags.Create(tag1)
-	is.NoError(err, "Tags.Create should succeed")
+	require.NoError(t, err, "Tags.Create should succeed")
 
 	err = tags.Create(tag2)
-	is.NoError(err, "Tags.Create should succeed")
+	require.NoError(t, err, "Tags.Create should succeed")
 
 	actual, err := tags.Read(tag1.ID)
-	is.NoError(err, "tag1 should be found")
+	require.NoError(t, err, "tag1 should be found")
 	is.Equal(tag1, actual, "tags differ")
 
 	actual, err = tags.Read(tag2.ID)
-	is.NoError(err, "tag2 should be found")
+	require.NoError(t, err, "tag2 should be found")
 	is.Equal(tag2, actual, "tags differ")
 }

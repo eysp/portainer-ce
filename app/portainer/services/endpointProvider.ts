@@ -7,7 +7,7 @@ import {
 
 interface State {
   currentEndpoint: Environment | null;
-  pingInterval: NodeJS.Timer | null;
+  pingInterval: NodeJS.Timeout | null;
 }
 
 const DEFAULT_TITLE = 'Portainer';

@@ -9,7 +9,6 @@ import {
   Environment,
   EnvironmentId,
 } from '@/react/portainer/environments/types';
-import { useAnalytics } from '@/react/hooks/useAnalytics';
 import { FeatureId } from '@/react/portainer/feature-flags/enums';
 
 import { FormSection } from '@@/form-components/FormSection';
@@ -36,7 +35,6 @@ import { useConfigureClusterMutation } from './useConfigureClusterMutation';
 import { handleSubmitConfigureCluster } from './handleSubmitConfigureCluster';
 
 export function ConfigureForm() {
-  const { trackEvent } = useAnalytics();
   const configureClusterMutation = useConfigureClusterMutation();
   // get the initial values
   const { data: environment } = useCurrentEnvironment();
@@ -68,7 +66,6 @@ export function ConfigureForm() {
           initialValues,
           configureClusterMutation,
           formikHelpers,
-          trackEvent,
           environment
         );
       }}
@@ -257,7 +254,7 @@ function InnerForm({
             </div>
           </div>
         </FormSection>
-        <FormSection title="Change Window Settings">
+        <FormSection title="更改窗口设置">
           <div className="form-group">
             <div className="col-sm-12">
               <SwitchField

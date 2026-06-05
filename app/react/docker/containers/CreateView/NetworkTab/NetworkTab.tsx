@@ -94,7 +94,7 @@ export function NetworkTab({
         />
       </FormControl>
 
-      <FormControl label="辅助 DNS 服务器" errors={errors?.secondaryDns}>
+      <FormControl label="备用 DNS 服务器" errors={errors?.secondaryDns}>
         <Input
           value={values.secondaryDns}
           onChange={(e) => setFieldValue('secondaryDns', e.target.value)}
@@ -116,5 +116,5 @@ function getAdditionalOptions(isPodman?: boolean) {
   if (isPodman) {
     return [];
   }
-  return [{ label: 'Container', value: CONTAINER_MODE }];
+  return [{ label: '容器', value: CONTAINER_MODE }];
 }

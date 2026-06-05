@@ -73,9 +73,9 @@ function ItemView() {
   return (
     <>
       <PageHeader
-        title="Update & Rollback"
+        title="更新和回滚"
         breadcrumbs={[
-          { label: 'Edge agent update and rollback', link: '^' },
+          { label: '边缘 Agent 更新和回滚', link: '^' },
           item.name,
         ]}
         reload
@@ -89,7 +89,7 @@ function ItemView() {
       <div className="row">
         <div className="col-sm-12">
           <Widget>
-            <Widget.Title title="Update & Rollback Scheduler" icon={Settings} />
+            <Widget.Title title="更新和回滚调度器" icon={Settings} />
             <Widget.Body>
               <TextTip color="blue" className="mb-2">
                 Devices need to be allocated to an Edge group, visit the{' '}
@@ -97,7 +97,7 @@ function ItemView() {
                   to="edge.groups"
                   data-cy="update-schedules-edge-groups-link"
                 >
-                  Edge Groups
+                  边缘组
                 </Link>{' '}
                 page to assign environments and create groups.
                 <br />

@@ -7,6 +7,7 @@ import { Query } from '@/react/portainer/environments/queries/useEnvironmentList
 import { isEdgeEnvironment } from '@/react/portainer/environments/utils';
 
 import { Button } from '@@/buttons';
+import { Tooltip } from '@@/Tip/Tooltip';
 
 import { AssociateAMTDialog } from './AssociateAMTDialog';
 
@@ -41,7 +42,11 @@ export function AMTButton({
         color="light"
         data-cy="associate-amt-button"
       >
-        关联到 OpenAMT
+        Associate with OpenAMT{' '}
+        <Tooltip
+          message="OpenAMT support is deprecated and will be removed in a future
+              version of Portainer."
+        />
       </Button>
       {isOpenDialog && (
         <AssociateAMTDialog

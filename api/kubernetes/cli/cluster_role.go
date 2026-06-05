@@ -3,6 +3,7 @@ package cli
 import (
 	"context"
 	"errors"
+	"slices"
 	"strings"
 
 	models "github.com/portainer/portainer/api/http/models/kubernetes"
@@ -93,11 +94,5 @@ func isSystemClusterRole(role *rbacv1.ClusterRole) bool {
 	}
 
 	roles := getPortainerDefaultK8sRoleNames()
-	for i := range roles {
-		if role.Name == roles[i] {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(roles, role.Name)
 }

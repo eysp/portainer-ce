@@ -15,7 +15,7 @@ const publicOption: BoxSelectorOption<ResourceControlOwnership> = {
   label: '公开',
   id: 'access_public',
   description:
-    '我希望任何有权访问此环境的用户都能够管理此资源',
+    '我希望任何有权访问此环境的用户都能管理此资源',
   icon: <BadgeIcon icon={ownershipIcon(ResourceControlOwnership.PUBLIC)} />,
 };
 
@@ -74,7 +74,7 @@ function nonAdminOptions(teams?: Team[]) {
         '受限',
         teams.length === 1 ? (
           <>
-            我希望我的团队 (<b>{teams[0].Name}</b>) 的任何成员都能够管理此资源
+            我希望我的团队（<b>{teams[0].Name}</b>）的任何成员都能管理此资源
           </>
         ) : (
           <>

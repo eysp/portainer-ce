@@ -19,6 +19,7 @@ import (
 
 	"github.com/segmentio/encoding/json"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_userList(t *testing.T) {
@@ -29,11 +30,11 @@ func Test_userList(t *testing.T) {
 	// Create admin and standard user(s)
 	adminUser := &portainer.User{ID: 1, Username: "admin", Role: portainer.AdministratorRole}
 	err := store.User().Create(adminUser)
-	is.NoError(err, "error creating admin user")
+	require.NoError(t, err, "error creating admin user")
 
 	// Setup services
 	jwtService, err := jwt.NewService("1h", store)
-	is.NoError(err, "Error initiating jwt service")
+	require.NoError(t, err, "Error initiating jwt service")
 	apiKeyService := apikey.NewAPIKeyService(store.APIKeyRepository(), store.User())
 	requestBouncer := security.NewRequestBouncer(store, jwtService, apiKeyService)
 	rateLimiter := security.NewRateLimiter(10, 1*time.Second, 1*time.Hour)
@@ -48,16 +49,16 @@ func Test_userList(t *testing.T) {
 	// Case 1: the user is given the endpoint access directly
 	userWithEndpointAccess := &portainer.User{ID: 2, Username: "standard-user-with-endpoint-access", Role: portainer.StandardUserRole, PortainerAuthorizations: authorization.DefaultPortainerAuthorizations()}
 	err = store.User().Create(userWithEndpointAccess)
-	is.NoError(err, "error creating user")
+	require.NoError(t, err, "error creating user")
 
 	userWithoutEndpointAccess := &portainer.User{ID: 3, Username: "standard-user-without-endpoint-access", Role: portainer.StandardUserRole, PortainerAuthorizations: authorization.DefaultPortainerAuthorizations()}
 	err = store.User().Create(userWithoutEndpointAccess)
-	is.NoError(err, "error creating user")
+	require.NoError(t, err, "error creating user")
 
 	// Create environment group
 	endpointGroup := &portainer.EndpointGroup{ID: 1, Name: "default-endpoint-group"}
 	err = store.EndpointGroup().Create(endpointGroup)
-	is.NoError(err, "error creating endpoint group")
+	require.NoError(t, err, "error creating endpoint group")
 
 	// Create endpoint and user access policies
 	userAccessPolicies := make(portainer.UserAccessPolicies, 0)
@@ -65,7 +66,7 @@ func Test_userList(t *testing.T) {
 
 	endpointWithUserAccessPolicy := &portainer.Endpoint{ID: 1, UserAccessPolicies: userAccessPolicies, GroupID: endpointGroup.ID}
 	err = store.Endpoint().Create(endpointWithUserAccessPolicy)
-	is.NoError(err, "error creating endpoint")
+	require.NoError(t, err, "error creating endpoint")
 
 	jwt, _, _ := jwtService.GenerateToken(&portainer.TokenData{ID: userWithEndpointAccess.ID, Username: userWithEndpointAccess.Username, Role: userWithEndpointAccess.Role})
 
@@ -79,11 +80,11 @@ func Test_userList(t *testing.T) {
 		is.Equal(http.StatusOK, rr.Code)
 
 		body, err := io.ReadAll(rr.Body)
-		is.NoError(err, "ReadAll should not return error")
+		require.NoError(t, err, "ReadAll should not return error")
 
 		var resp []portainer.User
 		err = json.Unmarshal(body, &resp)
-		is.NoError(err, "response should be list json")
+		require.NoError(t, err, "response should be list json")
 
 		is.Len(resp, 3)
 	})
@@ -100,11 +101,11 @@ func Test_userList(t *testing.T) {
 		is.Equal(http.StatusOK, rr.Code)
 
 		body, err := io.ReadAll(rr.Body)
-		is.NoError(err, "ReadAll should not return error")
+		require.NoError(t, err, "ReadAll should not return error")
 
 		var resp []portainer.User
 		err = json.Unmarshal(body, &resp)
-		is.NoError(err, "response should be list json")
+		require.NoError(t, err, "response should be list json")
 
 		is.Len(resp, 1)
 		if len(resp) == 1 {
@@ -127,7 +128,7 @@ func Test_userList(t *testing.T) {
 	// create user
 	userUnderGroup := &portainer.User{ID: 4, Username: "standard-user-under-environment-group", Role: portainer.StandardUserRole, PortainerAuthorizations: authorization.DefaultPortainerAuthorizations()}
 	err = store.User().Create(userUnderGroup)
-	is.NoError(err, "error creating user")
+	require.NoError(t, err, "error creating user")
 
 	// Create environment group including a user
 	userAccessPoliciesUnderGroup := make(portainer.UserAccessPolicies, 0)
@@ -135,12 +136,12 @@ func Test_userList(t *testing.T) {
 
 	endpointGroupWithUser := &portainer.EndpointGroup{ID: 2, Name: "endpoint-group-with-user", UserAccessPolicies: userAccessPoliciesUnderGroup}
 	err = store.EndpointGroup().Create(endpointGroupWithUser)
-	is.NoError(err, "error creating endpoint group")
+	require.NoError(t, err, "error creating endpoint group")
 
 	// Create endpoint
 	endpointUnderGroupWithUser := &portainer.Endpoint{ID: 2, GroupID: endpointGroupWithUser.ID}
 	err = store.Endpoint().Create(endpointUnderGroupWithUser)
-	is.NoError(err, "error creating endpoint")
+	require.NoError(t, err, "error creating endpoint")
 
 	t.Run("admin user can list users who inherit endpoint access from an environment group", func(t *testing.T) {
 		params := url.Values{}
@@ -154,11 +155,11 @@ func Test_userList(t *testing.T) {
 		is.Equal(http.StatusOK, rr.Code)
 
 		body, err := io.ReadAll(rr.Body)
-		is.NoError(err, "ReadAll should not return error")
+		require.NoError(t, err, "ReadAll should not return error")
 
 		var resp []portainer.User
 		err = json.Unmarshal(body, &resp)
-		is.NoError(err, "response should be list json")
+		require.NoError(t, err, "response should be list json")
 
 		is.Len(resp, 1)
 		if len(resp) == 1 {
@@ -172,15 +173,15 @@ func Test_userList(t *testing.T) {
 	// create a team including a user
 	teamUnderGroup := &portainer.Team{ID: 1, Name: "team-under-environment-group"}
 	err = store.Team().Create(teamUnderGroup)
-	is.NoError(err, "error creating team")
+	require.NoError(t, err, "error creating team")
 
 	userUnderTeam := &portainer.User{ID: 4, Username: "standard-user-under-team", Role: portainer.StandardUserRole, PortainerAuthorizations: authorization.DefaultPortainerAuthorizations()}
 	err = store.User().Create(userUnderTeam)
-	is.NoError(err, "error creating user")
+	require.NoError(t, err, "error creating user")
 
 	teamMembership := &portainer.TeamMembership{ID: 1, UserID: userUnderTeam.ID, TeamID: teamUnderGroup.ID}
 	err = store.TeamMembership().Create(teamMembership)
-	is.NoError(err, "error creating team membership")
+	require.NoError(t, err, "error creating team membership")
 
 	// Create environment group including a team
 	teamAccessPoliciesUnderGroup := make(portainer.TeamAccessPolicies, 0)
@@ -188,12 +189,12 @@ func Test_userList(t *testing.T) {
 
 	endpointGroupWithTeam := &portainer.EndpointGroup{ID: 3, Name: "endpoint-group-with-team", TeamAccessPolicies: teamAccessPoliciesUnderGroup}
 	err = store.EndpointGroup().Create(endpointGroupWithTeam)
-	is.NoError(err, "error creating endpoint group")
+	require.NoError(t, err, "error creating endpoint group")
 
 	// Create endpoint
 	endpointUnderGroupWithTeam := &portainer.Endpoint{ID: 3, GroupID: endpointGroupWithTeam.ID}
 	err = store.Endpoint().Create(endpointUnderGroupWithTeam)
-	is.NoError(err, "error creating endpoint")
+	require.NoError(t, err, "error creating endpoint")
 	t.Run("admin user can list users who inherit endpoint access from a team that inherit from an environment group", func(t *testing.T) {
 		params := url.Values{}
 		params.Add("environmentId", fmt.Sprintf("%d", endpointUnderGroupWithTeam.ID))
@@ -206,11 +207,11 @@ func Test_userList(t *testing.T) {
 		is.Equal(http.StatusOK, rr.Code)
 
 		body, err := io.ReadAll(rr.Body)
-		is.NoError(err, "ReadAll should not return error")
+		require.NoError(t, err, "ReadAll should not return error")
 
 		var resp []portainer.User
 		err = json.Unmarshal(body, &resp)
-		is.NoError(err, "response should be list json")
+		require.NoError(t, err, "response should be list json")
 
 		is.Len(resp, 1)
 		if len(resp) == 1 {
@@ -223,20 +224,20 @@ func Test_userList(t *testing.T) {
 	// create a team including a user
 	teamWithEndpointAccess := &portainer.Team{ID: 2, Name: "team-with-endpoint-access"}
 	err = store.Team().Create(teamWithEndpointAccess)
-	is.NoError(err, "error creating team")
+	require.NoError(t, err, "error creating team")
 
 	userUnderTeamWithEndpointAccess := &portainer.User{ID: 5, Username: "standard-user-under-team-with-endpoint-access", Role: portainer.StandardUserRole, PortainerAuthorizations: authorization.DefaultPortainerAuthorizations()}
 	err = store.User().Create(userUnderTeamWithEndpointAccess)
-	is.NoError(err, "error creating user")
+	require.NoError(t, err, "error creating user")
 
 	teamMembershipWithEndpointAccess := &portainer.TeamMembership{ID: 2, UserID: userUnderTeamWithEndpointAccess.ID, TeamID: teamWithEndpointAccess.ID}
 	err = store.TeamMembership().Create(teamMembershipWithEndpointAccess)
-	is.NoError(err, "error creating team membership")
+	require.NoError(t, err, "error creating team membership")
 
 	// Create environment group
 	endpointGroupWithoutTeam := &portainer.EndpointGroup{ID: 4, Name: "endpoint-group-without-team"}
 	err = store.EndpointGroup().Create(endpointGroupWithoutTeam)
-	is.NoError(err, "error creating endpoint group")
+	require.NoError(t, err, "error creating endpoint group")
 
 	// Create endpoint and team access policies
 	teamAccessPolicies := make(portainer.TeamAccessPolicies, 0)
@@ -244,7 +245,7 @@ func Test_userList(t *testing.T) {
 
 	endpointWithTeamAccessPolicy := &portainer.Endpoint{ID: 4, TeamAccessPolicies: teamAccessPolicies, GroupID: endpointGroupWithoutTeam.ID}
 	err = store.Endpoint().Create(endpointWithTeamAccessPolicy)
-	is.NoError(err, "error creating endpoint")
+	require.NoError(t, err, "error creating endpoint")
 	t.Run("admin user can list users who inherit endpoint access from a team", func(t *testing.T) {
 		params := url.Values{}
 		params.Add("environmentId", fmt.Sprintf("%d", endpointWithTeamAccessPolicy.ID))
@@ -257,11 +258,11 @@ func Test_userList(t *testing.T) {
 		is.Equal(http.StatusOK, rr.Code)
 
 		body, err := io.ReadAll(rr.Body)
-		is.NoError(err, "ReadAll should not return error")
+		require.NoError(t, err, "ReadAll should not return error")
 
 		var resp []portainer.User
 		err = json.Unmarshal(body, &resp)
-		is.NoError(err, "response should be list json")
+		require.NoError(t, err, "response should be list json")
 
 		is.Len(resp, 1)
 		if len(resp) == 1 {

@@ -13,12 +13,12 @@ import { Application } from './types';
 import { helper } from './columns.helper';
 
 export const stackName = helper.accessor('StackName', {
-  header: 'Stack',
+  header: '堆栈',
   cell: ({ getValue }) => getValue() || '-',
 });
 
 export const namespace = helper.accessor('ResourcePool', {
-  header: 'Namespace',
+  header: '命名空间',
   cell: NamespaceCell,
 });
 
@@ -40,7 +40,7 @@ function NamespaceCell({ row, getValue }: CellContext<Application, string>) {
 }
 
 export const image = helper.accessor('Image', {
-  header: 'Image',
+  header: '镜像',
   cell: ({ row: { original: item } }) => (
     <ImageCell image={item.Image} imageCount={item.Containers?.length || 0} />
   ),
@@ -57,7 +57,11 @@ function ImageCell({
   const isTruncated = isWidthTruncated();
 
   const imageElement = (
-    <div className="inline-block max-w-xs truncate" ref={contentRef}>
+    <div
+      className="inline-block max-w-xs truncate"
+      ref={contentRef}
+      title={image}
+    >
       {image}
     </div>
   );
@@ -82,7 +86,7 @@ function ImageCell({
 }
 
 export const appType = helper.accessor('ApplicationType', {
-  header: 'Application type',
+  header: '应用类型',
   meta: {
     filter: filterHOC('Filter by application type'),
   },

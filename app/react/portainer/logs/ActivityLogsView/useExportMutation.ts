@@ -27,6 +27,6 @@ async function exportActivityLogs(query: Omit<Query, 'limit'>) {
       'logs.csv';
     saveAs(data, filename);
   } catch (err) {
-    throw parseAxiosError(err, 'Failed loading user activity logs csv');
+    throw parseAxiosError(err, '加载用户活动日志 CSV 失败');
   }
 }

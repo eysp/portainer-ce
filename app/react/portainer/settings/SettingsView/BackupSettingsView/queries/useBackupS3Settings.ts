@@ -20,7 +20,7 @@ export function useBackupS3Settings<T = BackupS3Model>({
   return useQuery(queryKeys.backupS3Settings(), getBackupS3Settings, {
     select,
     enabled,
-    ...withError('Unable to retrieve s3 backup settings'),
+    ...withError('无法获取 S3 备份设置'),
     onSuccess,
   });
 }
@@ -31,6 +31,6 @@ async function getBackupS3Settings() {
 
     return data;
   } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to retrieve s3 backup settings');
+    throw parseAxiosError(e as Error, '无法获取 S3 备份设置');
   }
 }

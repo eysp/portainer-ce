@@ -11,8 +11,8 @@ import {
   RepoValue,
 } from '../components/HelmRegistrySelect';
 import { useHelmRepoOptions } from '../helmChartSourceQueries/useHelmRepositories';
+import { HelmInstallForm } from '../install/HelmInstallForm';
 
-import { HelmInstallForm } from './HelmInstallForm';
 import { HelmTemplatesSelectedItem } from './HelmTemplatesSelectedItem';
 import { HelmTemplatesList } from './HelmTemplatesList';
 

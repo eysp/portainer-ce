@@ -18,7 +18,7 @@ export function TableActions({
     <>
       <DeleteButton
         disabled={selectedItems.length === 0}
-        confirmMessage="您确定要删除选中的访问令牌吗？使用这些令牌的任何脚本或应用程序将无法再调用 Portainer API。"
+        confirmMessage="您要删除选中的访问令牌吗？使用这些令牌的任何脚本或应用程序将无法再调用 Portainer API。"
         onConfirmed={handleRemove}
         data-cy="access-tokens-delete-button"
       />

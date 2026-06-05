@@ -12,7 +12,7 @@ import { Datatable } from '@@/datatables';
 import { createPersistedStore } from '@@/datatables/types';
 import { useTableState } from '@@/datatables/useTableState';
 import { withMeta } from '@@/datatables/extend-options/withMeta';
-import { Button } from '@@/buttons';
+import { LoadingButton } from '@@/buttons';
 import { TextTip } from '@@/Tip/TextTip';
 import { mergeOptions } from '@@/datatables/extend-options/mergeOptions';
 
@@ -20,16 +20,7 @@ import { useColumns } from './columns/useColumns';
 import { Access } from './types';
 import { RemoveAccessButton } from './RemoveAccessButton';
 
-export function AccessDatatable({
-  dataset,
-  tableKey,
-  onRemove,
-  onUpdate,
-  showWarning = false,
-  isUpdateEnabled = false,
-  showRoles = false,
-  inheritFrom = false,
-}: {
+type Props = {
   tableKey: string;
   dataset?: Array<Access>;
   onRemove(items: Array<Access>): void;
@@ -41,7 +32,22 @@ export function AccessDatatable({
   isUpdateEnabled?: boolean;
   showRoles?: boolean;
   inheritFrom?: boolean;
-}) {
+  isUpdatingAccess: boolean;
+  isLoading: boolean;
+};
+
+export function AccessDatatable({
+  dataset,
+  tableKey,
+  onRemove,
+  onUpdate,
+  showWarning = false,
+  isUpdateEnabled = false,
+  showRoles = false,
+  inheritFrom = false,
+  isUpdatingAccess,
+  isLoading,
+}: Props) {
   const columns = useColumns({ showRoles, inheritFrom });
   const [store] = useState(() => createPersistedStore(tableKey));
   const tableState = useTableState(store, tableKey);
@@ -50,10 +56,10 @@ export function AccessDatatable({
   return (
     <Datatable
       data-cy="access-datatable"
-      title="访问"
+      title="访问权限"
       titleIcon={UserX}
       dataset={dataset || []}
-      isLoading={!dataset}
+      isLoading={isLoading}
       columns={columns}
       settingsManager={tableState}
       getRowId={(row) => `${row.Type}-${row.Id}`}
@@ -69,14 +75,16 @@ export function AccessDatatable({
           <RemoveAccessButton items={selectedItems} onClick={onRemove} />
 
           {isBE && isUpdateEnabled && (
-            <Button
+            <LoadingButton
               data-cy="update-access-button"
               icon={Check}
               disabled={rolesState.count === 0}
               onClick={handleUpdate}
+              isLoading={isUpdatingAccess}
+              loadingText="正在更新..."
             >
               更新
-            </Button>
+            </LoadingButton>
           )}
         </>
       )}
@@ -85,17 +93,17 @@ export function AccessDatatable({
           {inheritFrom && (
             <div className="small text-muted">
               <div>
-                标记为 <code>继承</code> 的访问权限继承自组访问权限。它们不能在环境级别被移除或修改，但可以被覆盖。
+                标记为 <code>继承</code> 的访问权限是从组访问权限继承的。它们不能在环境级别删除或修改，但可以被覆盖。
               </div>
               <div>
-                标记为 <code>覆盖</code> 的访问权限正在覆盖组访问权限。
+                标记为 <code>覆盖</code> 的访问权限正在覆盖组
               </div>
             </div>
           )}
           {isBE && showWarning && isUpdateEnabled && (
             <TextTip>
               <div className="text-warning-9 th-highcontrast:text-warning-1 th-dark:text-warning-7">
-                更新用户访问权限将要求受影响的用户注销并重新登录，以使更改生效。
+                更新用户访问权限需要受影响的用户注销并重新登录以使更改生效。
               </div>
             </TextTip>
           )}

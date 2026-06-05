@@ -23,7 +23,7 @@ export function useSettings<T = Settings>(
     select,
     enabled,
     staleTime: 50,
-    ...withError('Unable to retrieve settings'),
+    ...withError('无法获取设置'),
   });
 }
 
@@ -34,7 +34,7 @@ export function useUpdateSettingsMutation() {
     updateSettings,
     mutationOptions(
       withInvalidate(queryClient, [queryKeys.base(), ['cloud']]),
-      withError('Unable to update settings')
+      withError('无法更新设置')
     )
   );
 }
@@ -46,7 +46,7 @@ export function useUpdateDefaultRegistrySettingsMutation() {
     (payload: Partial<DefaultRegistry>) => updateDefaultRegistry(payload),
     mutationOptions(
       withInvalidate(queryClient, [queryKeys.base()]),
-      withError('Unable to update default registry settings')
+      withError('无法更新默认镜像仓库设置')
     )
   );
 }

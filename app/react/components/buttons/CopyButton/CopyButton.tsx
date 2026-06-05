@@ -56,7 +56,7 @@ export function CopyButton({
         color={color}
         size="small"
         onClick={handleCopy}
-        title="Copy Value"
+        title="复制值"
         type="button"
         icon={Copy}
         disabled={!copyText}

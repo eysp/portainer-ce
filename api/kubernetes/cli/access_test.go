@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	portainer "github.com/portainer/portainer/api"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	ktypes "k8s.io/api/core/v1"
@@ -52,17 +51,19 @@ func Test_NamespaceAccessPoliciesDeleteNamespace_updatesPortainerConfig_whenConf
 					"NamespaceAccessPolicies": `{"ns1":{"UserAccessPolicies":{"2":{"RoleId":0}}}, "ns2":{"UserAccessPolicies":{"2":{"RoleId":0}}}}`,
 				},
 			}
+
 			_, err := k.cli.CoreV1().ConfigMaps(portainerNamespace).Create(context.Background(), config, metav1.CreateOptions{})
-			assert.NoError(t, err, "failed to create a portainer config")
+			require.NoError(t, err, "failed to create a portainer config")
 			defer func() {
-				k.cli.CoreV1().ConfigMaps(portainerNamespace).Delete(context.Background(), portainerConfigMapName, metav1.DeleteOptions{})
+				err := k.cli.CoreV1().ConfigMaps(portainerNamespace).Delete(context.Background(), portainerConfigMapName, metav1.DeleteOptions{})
+				require.NoError(t, err)
 			}()
 
 			err = k.NamespaceAccessPoliciesDeleteNamespace(test.namespaceToDelete)
-			assert.NoError(t, err, "failed to delete namespace")
+			require.NoError(t, err, "failed to delete namespace")
 
 			policies, err := k.GetNamespaceAccessPolicies()
-			assert.NoError(t, err, "failed to fetch policies")
+			require.NoError(t, err, "failed to fetch policies")
 			assert.Equal(t, test.expectedConfig, policies)
 		})
 	}

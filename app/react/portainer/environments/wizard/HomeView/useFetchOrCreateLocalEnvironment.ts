@@ -86,7 +86,7 @@ async function createLocalEnvironment() {
     }
   }
 
-  throw new Error('Failed to create local environment with any method');
+  throw new Error('无法使用任何方法创建本地环境');
 }
 
 function useFetchLocalEnvironment() {

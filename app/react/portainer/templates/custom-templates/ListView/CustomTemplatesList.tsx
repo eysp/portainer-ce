@@ -73,7 +73,7 @@ export function CustomTemplatesList({
             linkParams={templateLinkParams?.(template)}
           />
         ))}
-        {!templates && <div className="text-muted text-center">加载中...</div>}
+        {!templates && <div className="text-muted text-center">正在加载...</div>}
         {filteredTemplates.length === 0 && (
           <div className="text-muted text-center">没有可用的模板。</div>
         )}

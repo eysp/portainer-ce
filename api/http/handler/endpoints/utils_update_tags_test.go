@@ -6,7 +6,9 @@ import (
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/datastore"
+
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_updateTags(t *testing.T) {
@@ -33,7 +35,7 @@ func Test_updateTags(t *testing.T) {
 	checkTags := func(store *datastore.Store, is *assert.Assertions, tagIDs []portainer.TagID, endpointID portainer.EndpointID) {
 		for _, tagID := range tagIDs {
 			tag, err := store.Tag().Read(tagID)
-			is.NoError(err)
+			require.NoError(t, err)
 
 			_, ok := tag.Endpoints[endpointID]
 			is.True(ok, "expected endpoint to be tagged")
@@ -77,23 +79,23 @@ func Test_updateTags(t *testing.T) {
 		_, store := datastore.MustNewTestStore(t, true, true)
 
 		err := store.Endpoint().Create(testCase.endpoint)
-		is.NoError(err)
+		require.NoError(t, err)
 
 		tags, err := createTags(store, testCase.tagNames)
-		is.NoError(err)
+		require.NoError(t, err)
 
 		endpointTags := tagsByName(tags, testCase.endpointTagNames)
 		for _, tag := range endpointTags {
 			tag.Endpoints[testCase.endpoint.ID] = true
 
 			err = store.Tag().Update(tag.ID, &tag)
-			is.NoError(err)
+			require.NoError(t, err)
 		}
 
 		endpointTagIDs := getIDs(endpointTags)
 		testCase.endpoint.TagIDs = endpointTagIDs
 		err = store.Endpoint().UpdateEndpoint(testCase.endpoint.ID, testCase.endpoint)
-		is.NoError(err)
+		require.NoError(t, err)
 
 		expectedTags := tagsByName(tags, testCase.tagsToApply)
 		expectedTagIDs := make([]portainer.TagID, len(expectedTags))
@@ -103,14 +105,14 @@ func Test_updateTags(t *testing.T) {
 
 		err = store.UpdateTx(func(tx dataservices.DataStoreTx) error {
 			updated, err := updateEnvironmentTags(tx, expectedTagIDs, testCase.endpoint.TagIDs, testCase.endpoint.ID)
-			is.NoError(err)
+			require.NoError(t, err)
 
 			is.Equal(testCase.shouldNotBeUpdated, !updated)
 
 			return nil
 		})
 
-		is.NoError(err)
+		require.NoError(t, err)
 
 		checkTags(store, is, expectedTagIDs, testCase.endpoint.ID)
 	}

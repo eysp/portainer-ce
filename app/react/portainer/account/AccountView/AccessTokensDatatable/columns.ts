@@ -11,7 +11,7 @@ export const columns = [
     header: '描述',
   }),
   columnHelper.accessor('prefix', {
-    header: '前缀',
+    header: 'Prefix',
   }),
   columnHelper.accessor('dateCreated', {
     header: '创建时间',

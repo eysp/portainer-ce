@@ -37,7 +37,7 @@ export function ApplicationServicesTable({
             <tbody>
               <tr className="text-muted">
                 <td className="w-[15%]">Service name</td>
-                <td className="w-[10%]">Type</td>
+                <td className="w-[10%]">类型</td>
                 <td className="w-[10%]">Cluster IP</td>
                 <td className="w-[10%]">External IP</td>
                 <td className="w-[10%]">Container port</td>
@@ -60,7 +60,7 @@ export function ApplicationServicesTable({
                           >
                             <Icon icon={ExternalLink} className="!mr-1" />
                             <span data-cy="k8sAppDetail-containerPort">
-                              Access
+                              访问权限
                             </span>
                           </a>
                         )}

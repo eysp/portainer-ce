@@ -5,7 +5,6 @@ const WebpackBuildNotifierPlugin = require('webpack-build-notifier');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
-const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
 
 const CopyPlugin = require('copy-webpack-plugin');
@@ -25,18 +24,15 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.js$/,
+        enforce: 'pre',
+        exclude: /node_modules/,
+        use: ['source-map-loader'],
+      },
+      {
         test: /\.(js|ts)(x)?$/,
         exclude: /node_modules/,
-        use: [
-          {
-            loader: 'babel-loader',
-            options: {
-              cacheDirectory: true,
-              cacheCompression: false,
-            },
-          },
-          'auto-ngtemplate-loader',
-        ],
+        use: ['babel-loader', 'auto-ngtemplate-loader'],
       },
       {
         test: /\.html$/,
@@ -48,7 +44,13 @@ module.exports = {
               relativeTo: projectRoot + '/',
             },
           },
-          { loader: 'html-loader' },
+          {
+            loader: 'html-loader',
+            options: {
+              esModule: false, // Keep CommonJS format for ngtemplate-loader compatibility
+              minimize: false, // Match old behavior, disable auto-minification
+            },
+          },
         ],
       },
 
@@ -105,9 +107,12 @@ module.exports = {
     },
     compress: true,
     port: 8999,
-    proxy: {
-      '/api': 'http://localhost:9000',
-    },
+    proxy: [
+      {
+        context: ['/api'],
+        target: 'http://localhost:9000',
+      },
+    ],
     open: true,
     devMiddleware: {
       writeToDisk: true,
@@ -156,6 +161,7 @@ module.exports = {
       shorthands: true,
       collections: true,
       paths: true,
+      flattening: true,
     }),
     new CopyPlugin({
       patterns: [
@@ -166,6 +172,12 @@ module.exports = {
       ],
     }),
   ],
+  cache: {
+    type: 'filesystem',
+    buildDependencies: {
+      config: [__filename],
+    },
+  },
   optimization: {
     moduleIds: 'deterministic',
     runtimeChunk: 'single',
@@ -199,10 +211,6 @@ module.exports = {
       'yaml-schema': path.resolve(projectRoot, 'node_modules/codemirror-json-schema/dist/yaml'),
     },
     extensions: ['.js', '.ts', '.tsx'],
-    plugins: [
-      new TsconfigPathsPlugin({
-        extensions: ['.js', '.ts', '.tsx'],
-      }),
-    ],
+    tsconfig: path.resolve(projectRoot, 'tsconfig.json'),
   },
 };

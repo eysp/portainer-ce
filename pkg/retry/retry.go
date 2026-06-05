@@ -1,4 +1,4 @@
-package aws
+package retry
 
 import (
 	"math/rand/v2"
@@ -16,11 +16,6 @@ var Default = Settings{
 	MaxRetries:    3,
 	RetryTimeFunc: RetryTime,
 }
-
-// sleepFunc is the function used for sleeping between retries
-// It can be overridden in tests to avoid actual sleep delays
-// TODO: in go 1.25 version replace test with synctime
-var sleepFunc = time.Sleep
 
 // RetryWithWarnings executes a function with retries and backoff, logging warnings on failures
 func RetryWithWarnings[T any](operation string, settings Settings, fn func() (T, error)) (T, error) {
@@ -52,7 +47,7 @@ func RetryWithWarnings[T any](operation string, settings Settings, fn func() (T,
 				Str("retry_delay", retryDelay.String()). // the string version of the duration reads better in logs
 				Str("duration", time.Since(timeStart).String()).
 				Msg("operation failed, retrying")
-			sleepFunc(retryDelay)
+			time.Sleep(retryDelay)
 		}
 	}
 

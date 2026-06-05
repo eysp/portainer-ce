@@ -3,7 +3,6 @@ import clsx from 'clsx';
 import { v4 as uuidv4 } from 'uuid';
 
 import { EnvironmentId } from '@/react/portainer/environments/types';
-import { useAnalytics } from '@/react/hooks/useAnalytics';
 import { baseHref } from '@/portainer/helpers/pathHelper';
 
 import { Button } from '@@/buttons';
@@ -16,7 +15,6 @@ interface Props {
 }
 export function KubectlShellButton({ environmentId }: Props) {
   const { isOpen: isSidebarOpen } = useSidebarState();
-  const { trackEvent } = useAnalytics();
 
   const button = (
     <Button
@@ -54,7 +52,5 @@ export function KubectlShellButton({ environmentId }: Props) {
       `kubectl-shell-${environmentId}-${uuidv4()}`,
       'width=800,height=600'
     );
-
-    trackEvent('kubernetes-kubectl-shell', { category: 'kubernetes' });
   }
 }

@@ -11,16 +11,16 @@ import { ActivityType, AuthLog, AuthMethodType } from './types';
 
 const activityTypesProps = {
   [ActivityType.AuthSuccess]: {
-    label: '身份验证成功',
+    label: '认证成功',
     icon: Check,
     mode: 'success',
   },
   [ActivityType.AuthFailure]: {
-    label: '身份验证失败',
+    label: '认证失败',
     icon: X,
     mode: 'danger',
   },
-  [ActivityType.Logout]: { label: '注销', icon: undefined, mode: undefined },
+  [ActivityType.Logout]: { label: '登出', icon: undefined, mode: undefined },
 } as const;
 
 const columnHelper = createColumnHelper<AuthLog>();

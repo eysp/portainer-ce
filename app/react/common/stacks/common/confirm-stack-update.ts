@@ -10,7 +10,7 @@ export async function confirmStackUpdate(
     '您确定吗？',
     '重新拉取镜像并重新部署',
     {
-      message: message || '您是否要强制更新此堆栈？',
+      message,
       confirmButton: buildConfirmButton('更新'),
       modalType: ModalType.Warn,
       defaultValue,
@@ -18,5 +18,5 @@ export async function confirmStackUpdate(
     }
   );
 
-  return result ? { pullImage: result.value } : undefined;
+  return result ? { repullImageAndRedeploy: result.value } : undefined;
 }

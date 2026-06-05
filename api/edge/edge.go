@@ -60,11 +60,26 @@ type (
 		// EnvVars is a list of environment variables to inject into the stack
 		EnvVars []portainer.Pair
 
-		// Used only for EE async edge agent
-		// ReadyRePullImage is a flag to indicate whether the auto update is trigger to re-pull image
-		ReadyRePullImage bool
+		// ForceUpdate is a flag indicating if the agent must force the update of the stack.
+		// Used only for EE
+		ForceUpdate bool
 
 		DeployerOptionsPayload DeployerOptionsPayload
+
+		// Used only for EE async edge agent
+		// ReadyRePullImage is a flag to indicate whether the auto update is trigger to re-pull image
+		// Deprecated(2.36): use DeployerOptionsPayload.ForceRecreate instead
+		ReadyRePullImage bool
+
+		// CreatedBy is the username that created this stack
+		// Used for adding labels to Kubernetes manifests
+		CreatedBy string
+		// CreatedByUserId is the user ID that created this stack
+		// Used for adding labels to Kubernetes manifests
+		CreatedByUserId string
+
+		// HelmConfig represents the Helm configuration for an edge stack
+		HelmConfig portainer.HelmConfig
 	}
 
 	DeployerOptionsPayload struct {
@@ -77,6 +92,14 @@ type (
 		// This flag drives `docker compose down --volumes` option
 		// Used only for EE
 		RemoveVolumes bool
+
+		// ForceRecreate is a flag indicating if the agent must force the redeployment of the stack.
+		// This field is only used when the Force Redeployment is triggered.
+		// Once the stack is redeployed, this field will be reset to false.
+		// For standard edge agent, this field is used in agent side
+		// For async edge agent, this field is used in both agent side and server side.
+		// This flag drives `docker compose up --force-recreate` option
+		ForceRecreate bool
 	}
 
 	// RegistryCredentials holds the credentials for a Docker registry.

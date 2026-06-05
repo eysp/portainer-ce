@@ -41,7 +41,7 @@ export function ColumnVisibilityMenu<D extends object>({
           </MenuButton>
           <MenuList>
             <div className="tableMenu">
-              <div className="menuHeader">Show / Hide Columns</div>
+              <div className="menuHeader">显示/隐藏列</div>
               <div className="menuContent">
                 {columnsToHide.map((column) => (
                   <div key={column.id}>

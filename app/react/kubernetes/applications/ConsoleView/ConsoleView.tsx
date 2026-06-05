@@ -35,7 +35,7 @@ export function ConsoleView() {
 
   const breadcrumbs = [
     {
-      label: 'Namespaces',
+      label: '命名空间',
       link: 'kubernetes.resourcePools',
     },
     {
@@ -44,7 +44,7 @@ export function ConsoleView() {
       linkParams: { id: namespace },
     },
     {
-      label: 'Applications',
+      label: '应用',
       link: 'kubernetes.applications',
     },
     {
@@ -107,7 +107,7 @@ export function ConsoleView() {
   return (
     <>
       <PageHeader
-        title="Application console"
+        title="应用控制台"
         breadcrumbs={breadcrumbs}
         reload
       />
@@ -116,14 +116,14 @@ export function ConsoleView() {
           <Widget>
             <WidgetBody>
               <div className="row">
-                <div className="col-sm-12 form-section-title">Console</div>
+                <div className="col-sm-12 form-section-title">控制台</div>
               </div>
               <div className="form-row flex">
                 <label
                   htmlFor="consoleCommand"
                   className="col-sm-3 col-lg-2 control-label m-0 p-0 text-left"
                 >
-                  Command
+                  命令
                   <TerminalTooltip />
                 </label>
                 <div className="col-sm-8 input-group p-0">

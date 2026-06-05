@@ -74,7 +74,7 @@ export function VolumesDatatable() {
       renderTableActions={(selectedItems) => (
         <Authorized authorizations="K8sVolumesW">
           <DeleteButton
-            confirmMessage="您确定要移除选定的卷吗？"
+            confirmMessage="Do you want to remove the selected volume(s)?"
             onConfirmed={() => deleteVolumesMutation.mutate(selectedItems)}
             disabled={selectedItems.length === 0}
             isLoading={deleteVolumesMutation.isLoading}

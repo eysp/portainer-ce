@@ -9,7 +9,7 @@ import { ConfigMapRowData } from '../types';
 import { columnHelper } from './helper';
 
 export const namespace = columnHelper.accessor('Namespace', {
-  header: 'Namespace',
+  header: '命名空间',
   id: 'namespace',
   cell: ({ getValue }) => {
     const namespace = getValue();

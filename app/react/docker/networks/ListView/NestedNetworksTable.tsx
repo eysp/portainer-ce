@@ -20,7 +20,7 @@ export function NestedNetworksDatatable({
     <NestedDatatable
       columns={columns}
       dataset={dataset}
-      aria-label="网络表"
+      aria-label="网络表格"
       data-cy="docker-networks-nested-datatable"
     />
   );

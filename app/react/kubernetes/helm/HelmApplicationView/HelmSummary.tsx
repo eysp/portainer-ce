@@ -2,6 +2,7 @@ import { Badge } from '@/react/components/Badge';
 import { localizeDate } from '@/react/common/date-utils';
 
 import { Alert } from '@@/Alert';
+import { Card } from '@@/Card';
 
 import { HelmRelease } from '../types';
 import {
@@ -21,7 +22,7 @@ export function HelmSummary({ release }: Props) {
 
   return (
     <div>
-      <div className="flex flex-col gap-y-4">
+      <div className="flex flex-col gap-y-4 mt-4">
         <div>
           <Badge type={getStatusColor(release.info?.status)}>
             {getStatusText(release.info?.status)}
@@ -32,29 +33,81 @@ export function HelmSummary({ release }: Props) {
             {release.info?.description}
           </Alert>
         )}
-        <div className="flex flex-wrap gap-2">
-          {!!release.namespace && <Badge>Namespace: {release.namespace}</Badge>}
-          {!!release.version && <Badge>Revision: #{release.version}</Badge>}
-          {!!release.chart?.metadata?.name && (
-            <Badge>Chart: {release.chart.metadata.name}</Badge>
-          )}
-          {!!release.chart?.metadata?.appVersion && (
-            <Badge>App version: {release.chart.metadata.appVersion}</Badge>
-          )}
-          {!!release.chart?.metadata?.version && (
-            <Badge>
-              Chart version: {release.chart.metadata.name}-
-              {release.chart.metadata.version}
-            </Badge>
-          )}
-          {!!release.info?.last_deployed && (
-            <Badge>
-              Last deployed:{' '}
-              {localizeDate(new Date(release.info.last_deployed))}
-            </Badge>
-          )}
-        </div>
+        <Card>
+          <div className="form-section-title">详情</div>
+          <div
+            className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-1 text-sm"
+            data-cy="helm-release-info"
+          >
+            {!!release.namespace && (
+              <div className="min-w-0">
+                <span className="text-muted">Namespace: </span>
+                <span data-cy="helm-info-namespace">{release.namespace}</span>
+              </div>
+            )}
+            {!!release.version && (
+              <div className="min-w-0">
+                <span className="text-muted">Revision: </span>
+                <span data-cy="helm-info-revision">#{release.version}</span>
+              </div>
+            )}
+            {!!release.chart?.metadata?.name && (
+              <div className="min-w-0">
+                <span className="text-muted">Chart: </span>
+                <span data-cy="helm-info-chart">
+                  {release.chart.metadata.name}
+                </span>
+              </div>
+            )}
+            <ChartReferenceBadge chartReference={release.chartReference} />
+            {!!release.chart?.metadata?.appVersion && (
+              <div className="min-w-0">
+                <span className="text-muted">App version: </span>
+                <span data-cy="helm-info-app-version">
+                  {release.chart.metadata.appVersion}
+                </span>
+              </div>
+            )}
+            {!!release.chart?.metadata?.version && (
+              <div className="min-w-0">
+                <span className="text-muted">Chart version: </span>
+                <span className="inline-flex items-center gap-1 flex-wrap">
+                  <span data-cy="helm-info-chart-version">
+                    {release.chart.metadata.name}-
+                    {release.chart.metadata.version}
+                  </span>
+                </span>
+              </div>
+            )}
+            {!!release.info?.last_deployed && (
+              <div className="min-w-0">
+                <span className="text-muted">Last deployed: </span>
+                <span data-cy="helm-info-last-deployed">
+                  {localizeDate(new Date(release.info.last_deployed))}
+                </span>
+              </div>
+            )}
+          </div>
+        </Card>
       </div>
+    </div>
+  );
+}
+
+function ChartReferenceBadge({
+  chartReference,
+}: {
+  chartReference: HelmRelease['chartReference'];
+}) {
+  // CE only supports Helm repositories (not OCI registries)
+  if (!chartReference?.repoURL) {
+    return null;
+  }
+
+  return (
+    <div className="min-w-0">
+      <span className="text-muted">Chart source: </span>
+      <span>{chartReference.repoURL}</span>
     </div>
   );
 }

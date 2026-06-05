@@ -40,28 +40,28 @@ export function confirmDestructive(options: Omit<ConfirmOptions, 'modalType'>) {
 export function confirmWebEditorDiscard() {
   return openConfirm({
     modalType: ModalType.Warn,
-    title: '您确定吗？',
+    title: 'Are you sure?',
     message:
       '编辑器中当前有未保存的更改。您确定要离开吗？',
-    confirmButton: buildConfirmButton('是', 'danger'),
+    confirmButton: buildConfirmButton('Yes', 'danger'),
   });
 }
 
 export function confirmGenericDiscard() {
   return openConfirm({
     modalType: ModalType.Warn,
-    title: '您确定吗？',
+    title: 'Are you sure?',
     message:
       '当前有未保存的更改。您确定要离开吗？',
-    confirmButton: buildConfirmButton('是', 'danger'),
+    confirmButton: buildConfirmButton('Yes', 'danger'),
   });
 }
 
 export function confirmDelete(message: ReactNode) {
   return confirmDestructive({
-    title: '您确定吗？',
+    title: 'Are you sure?',
     message,
-    confirmButton: buildConfirmButton('移除', 'danger'),
+    confirmButton: buildConfirmButton('Remove', 'danger'),
   });
 }
 
@@ -70,10 +70,10 @@ export async function confirmUpdate(
   callback: ConfirmCallback
 ) {
   const result = await openConfirm({
-    title: '您确定吗？',
+    title: 'Are you sure?',
     modalType: ModalType.Warn,
     message,
-    confirmButton: buildConfirmButton('更新'),
+    confirmButton: buildConfirmButton('Update'),
   });
 
   callback(result);
@@ -84,9 +84,9 @@ export async function confirmUpdate(
 export function confirmChangePassword() {
   return openConfirm({
     modalType: ModalType.Warn,
-    title: '您确定吗？',
+    title: 'Are you sure?',
     message:
       '更改密码后您将被注销。您要更改密码吗？',
-    confirmButton: buildConfirmButton('更改'),
+    confirmButton: buildConfirmButton('Change'),
   });
 }

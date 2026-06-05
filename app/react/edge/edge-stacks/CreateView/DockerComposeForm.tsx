@@ -118,7 +118,7 @@ export function DockerComposeForm({ webhookId, onChangeTemplate }: Props) {
           value={values.file}
           onChange={(File) => handleChange({ file: File })}
           required
-          description="您可以从计算机上传 Compose 文件。"
+          description="You can upload a Compose file from your computer."
           data-cy="stack-creation-file-upload"
         />
       )}

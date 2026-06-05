@@ -18,8 +18,8 @@ export function CollapseExpandButton({
         onClick?.(e);
       }}
       color="none"
-      title={isExpanded ? 'Collapse' : 'Expand'}
-      aria-label={isExpanded ? 'Collapse' : 'Expand'}
+      title={isExpanded ? '折叠' : '展开'}
+      aria-label={isExpanded ? '折叠' : '展开'}
       aria-expanded={isExpanded}
       type="button"
       className="flex-none border-none bg-transparent flex items-center p-0 !ml-0 group"

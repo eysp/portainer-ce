@@ -8,7 +8,7 @@ import { columnHelper } from './helper';
 export const subjectNamespace = columnHelper.accessor(
   (row) => row.subjects?.flatMap((sub) => sub.namespace || '-') || [],
   {
-    header: 'Subject Namespace',
+    header: '主体命名空间',
     id: 'subjectNamespace',
     cell: ({ row }) =>
       row.original.subjects?.map((sub, index) => (

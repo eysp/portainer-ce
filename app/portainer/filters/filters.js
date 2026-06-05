@@ -1,6 +1,6 @@
 import moment from 'moment';
 import _ from 'lodash-es';
-import filesize from 'filesize';
+import { filesize } from 'filesize';
 
 export function truncateLeftRight(text, max, left, right) {
   max = isNaN(max) ? 50 : max;
@@ -12,10 +12,6 @@ export function truncateLeftRight(text, max, left, right) {
   } else {
     return text.substring(0, left) + '[...]' + text.substring(text.length - right, text.length);
   }
-}
-
-export function stripProtocol(url) {
-  return url.replace(/.*?:\/\//g, '');
 }
 
 export function humanize(bytes, round, base) {

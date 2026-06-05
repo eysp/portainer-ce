@@ -74,10 +74,10 @@ class PorAccessManagementController {
     }
 
     if (this.isRoleLimitedToBE(role)) {
-      return `${role.Name} (Business Feature)`;
+      return `${role.Name} (企业版功能)`;
     }
 
-    return `${role.Name} (Default)`;
+    return `${role.Name} (默认)`;
   }
 
   async $onInit() {
@@ -108,7 +108,7 @@ class PorAccessManagementController {
       this.$state.go('portainer.home');
       this.availableUsersAndTeams = [];
       this.authorizedUsersAndTeams = [];
-      this.Notifications.error('Failure', err, 'Unable to retrieve accesses');
+      this.Notifications.error('Failure', err, '无法获取访问权限');
     }
   }
 }

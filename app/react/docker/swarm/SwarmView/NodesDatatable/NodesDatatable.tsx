@@ -47,7 +47,7 @@ export function NodesDatatable({
   return (
     <Datatable<NodeViewModel>
       disableSelect
-      title="Nodes"
+      title="节点"
       titleIcon={Trello}
       columns={columns}
       dataset={dataset || []}

@@ -10,6 +10,8 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	portainer "github.com/portainer/portainer/api"
+	gittypes "github.com/portainer/portainer/api/git/types"
 	"github.com/portainer/portainer/pkg/libhelm/options"
 	"github.com/portainer/portainer/pkg/libhelm/release"
 	"github.com/rs/zerolog/log"
@@ -25,8 +27,9 @@ import (
 // Helm chart reference label constants
 const (
 	ChartPathAnnotation  = "portainer/chart-path"
-	RepoURLAnnotation    = "portainer/repo-url"
 	RegistryIDAnnotation = "portainer/registry-id"
+	RepoURLAnnotation    = "portainer/repo-url"
+	StackIDAnnotation    = "portainer/stack-id"
 )
 
 // loadAndValidateChartWithPathOptions locates and loads the chart, and validates it.
@@ -243,7 +246,7 @@ func ensureHelmDirectoriesExist(settings *cli.EnvSettings) error {
 // appendChartReferenceAnnotations encodes chart reference values for safe storage in Helm labels.
 // It creates a new map with encoded values for specific chart reference labels.
 // Preserves existing labels and handles edge cases gracefully.
-func appendChartReferenceAnnotations(chartPath, repoURL string, registryID int, existingAnnotations map[string]string) map[string]string {
+func appendChartReferenceAnnotations(chartPath, repoURL string, registryID int, stackID int, gitConfig *gittypes.RepoConfig, autoUpdateSettings *portainer.AutoUpdateSettings, existingAnnotations map[string]string) map[string]string {
 	// Copy existing annotations
 	annotations := make(map[string]string)
 	maps.Copy(annotations, existingAnnotations)
@@ -252,6 +255,7 @@ func appendChartReferenceAnnotations(chartPath, repoURL string, registryID int, 
 	delete(annotations, ChartPathAnnotation)
 	delete(annotations, RepoURLAnnotation)
 	delete(annotations, RegistryIDAnnotation)
+	delete(annotations, StackIDAnnotation)
 
 	if chartPath != "" {
 		annotations[ChartPathAnnotation] = chartPath
@@ -263,6 +267,10 @@ func appendChartReferenceAnnotations(chartPath, repoURL string, registryID int, 
 
 	if registryID != 0 {
 		annotations[RegistryIDAnnotation] = strconv.Itoa(registryID)
+	}
+
+	if stackID != 0 {
+		annotations[StackIDAnnotation] = strconv.Itoa(stackID)
 	}
 
 	return annotations

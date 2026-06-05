@@ -9,7 +9,7 @@ import { TextTip } from '@@/Tip/TextTip';
 const deployments = [
   {
     id: 'linux',
-    label: 'Linux（CentOS）',
+    label: 'Linux (CentOS)',
     command: `sudo systemctl enable --now podman.socket`,
   },
 ];
@@ -43,7 +43,8 @@ function DeployCode({ code }: DeployCodeProps) {
   return (
     <>
       <TextTip color="blue" className="mb-1">
-        使用 Socket 时，请确保启动 Portainer 容器时带上以下 Podman 参数：
+        When using the socket, ensure that you have started the Portainer
+        container with the following Podman flag:
       </TextTip>
       <Code>{bindMountCode}</Code>
       <div className="mt-2 mb-4">
@@ -53,7 +54,8 @@ function DeployCode({ code }: DeployCodeProps) {
       </div>
 
       <TextTip color="blue" className="mb-1">
-        要使用 Socket，请确保已启动 Podman 的 rootful（特权）Socket：
+        To use the socket, ensure that you have started the Podman rootful
+        socket:
       </TextTip>
       <Code>{code}</Code>
       <div className="mt-2">

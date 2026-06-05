@@ -79,12 +79,13 @@
           </div>
           <div ng-if="state !== states.disconnected">
             <label
-              >以 <code class="align-baseline !text-sm">{{ ::formValues.user || '默认用户' }}</code> 身份使用命令 <code class="align-baseline !text-sm">{{ formValues.isCustomCommand ? formValues.customCommand : formValues.command }}</code> 执行到容器中
+              >以 <code class="align-baseline !text-sm">{{ ::formValues.user || '默认用户' }}</code> 身份进入容器执行命令
+              <code class="align-baseline !text-sm">{{ formValues.isCustomCommand ? formValues.customCommand : formValues.command }}</code>
               <terminal-tooltip class="align-sub"> </terminal-tooltip>
             </label>
             <button type="button" class="btn btn-primary" ng-click="disconnect()">
               <span ng-show="state === states.connected">断开连接</span>
-              <span ng-show="state === states.connecting">连接中...</span>
+              <span ng-show="state === states.connecting">正在连接...</span>
             </button>
           </div>
         </form>

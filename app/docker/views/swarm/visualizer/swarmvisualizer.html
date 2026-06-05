@@ -1,28 +1,28 @@
-<page-header title="'Swarm visualizer'" breadcrumbs="[{label:'Swarm', link:'docker.swarm'}, {label:'Cluster visualizer', link:'docker.swarm.visualizer'}]" reload="true">
+<page-header title="'Swarm 可视化'" breadcrumbs="[{label:'Swarm', link:'docker.swarm'}, {label:'集群可视化', link:'docker.swarm.visualizer'}]" reload="true">
 </page-header>
 
 <div class="row">
   <div class="col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="trello" title-text="Cluster information">
+      <rd-widget-header icon="trello" title-text="集群信息">
         <div class="pull-right">
-          <button type="button" class="btn btn-sm btn-primary" ng-click="changeShowInformationPanel(true)" ng-if="!state.ShowInformationPanel">Show</button>
-          <button type="button" class="btn btn-sm btn-primary" ng-click="changeShowInformationPanel(false)" ng-if="state.ShowInformationPanel">Hide</button>
+          <button type="button" class="btn btn-sm btn-primary" ng-click="changeShowInformationPanel(true)" ng-if="!state.ShowInformationPanel">显示</button>
+          <button type="button" class="btn btn-sm btn-primary" ng-click="changeShowInformationPanel(false)" ng-if="state.ShowInformationPanel">隐藏</button>
         </div>
       </rd-widget-header>
       <rd-widget-body ng-if="state.ShowInformationPanel">
         <table class="table">
           <tbody>
             <tr>
-              <td>Nodes</td>
+              <td>节点</td>
               <td>{{ nodes.length }}</td>
             </tr>
             <tr>
-              <td>Services</td>
+              <td>服务</td>
               <td>{{ services.length }}</td>
             </tr>
             <tr>
-              <td>Tasks</td>
+              <td>任务</td>
               <td>{{ tasks.length }}</td>
             </tr>
           </tbody>
@@ -74,7 +74,7 @@
 <div class="row" ng-if="visualizerData">
   <div class="col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="trello" title-text="Cluster visualizer"></rd-widget-header>
+      <rd-widget-header icon="trello" title-text="集群可视化"></rd-widget-header>
       <rd-widget-body>
         <div class="visualizer_container">
           <div class="node" ng-repeat="node in visualizerData.nodes | orderBy : ['Role', 'Hostname'] track by $index">
@@ -95,7 +95,7 @@
                 ><span class="label label-{{ node.Status | nodestatusbadge }}">{{ node.Status }}</span></div
               >
               <div class="node_labels" ng-if="node.Labels.length > 0 && state.DisplayNodeLabels">
-                <div>Labels</div>
+                <div>标签</div>
                 <div class="node_label" ng-repeat="label in node.Labels">
                   <span class="label_key"> {{ label.key }} </span>
                   <span class="label_value" ng-if="label.value"> = {{ label.value }} </span>
@@ -109,11 +109,11 @@
                 ng-repeat="task in node.Tasks | orderBy: 'ServiceName' | filter: (state.DisplayOnlyRunningTasks || '') && { Status: { State: 'running' } }"
               >
                 <div class="service_name">{{ task.ServiceName }}</div>
-                <div>Image: {{ task.Spec.ContainerSpec.Image | hideshasum }}</div>
-                <div>Status: {{ task.Status.State }}</div>
-                <div>Update: {{ task.Updated | getisodate }}</div>
-                <div ng-if="task.Spec.Resources.Limits.MemoryBytes">Memory limit: {{ task.Spec.Resources.Limits.MemoryBytes | humansize: 2 : 2 }}</div>
-                <div ng-if="task.Spec.Resources.Limits.NanoCPUs">CPU limit: {{ task.Spec.Resources.Limits.NanoCPUs / 1000000000 }}</div>
+                <div>镜像: {{ task.Spec.ContainerSpec.Image | hideshasum }}</div>
+                <div>状态: {{ task.Status.State }}</div>
+                <div>更新: {{ task.Updated | getisodate }}</div>
+                <div ng-if="task.Spec.Resources.Limits.MemoryBytes">内存限制: {{ task.Spec.Resources.Limits.MemoryBytes | humansize: 2 : 2 }}</div>
+                <div ng-if="task.Spec.Resources.Limits.NanoCPUs">CPU 限制: {{ task.Spec.Resources.Limits.NanoCPUs / 1000000000 }}</div>
               </div>
             </div>
           </div>

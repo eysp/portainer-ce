@@ -34,6 +34,7 @@ export function DatatableContent<D extends DefaultType>({
             key={headerGroup.id}
             headers={headerGroup.headers}
             onSortChange={onSortChange}
+            tableMeta={tableInstance.options.meta}
           />
         ))}
       </thead>

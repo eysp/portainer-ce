@@ -6,10 +6,10 @@ const editorConfig = {
   mac: {
     tooltip: (
       <>
-        <div>Within the console:</div>
-        <div>Cmd+C - Copy</div>
-        <div>Cmd+V - Paste</div>
-        <div>or right-click -&gt; Copy/Paste</div>
+        <div>在控制台中：</div>
+        <div>Cmd+C - 复制</div>
+        <div>Cmd+V - 粘贴</div>
+        <div>或右键点击 -&gt; 复制/粘贴</div>
       </>
     ),
   },
@@ -17,10 +17,10 @@ const editorConfig = {
   lin: {
     tooltip: (
       <>
-        <div>Within the console:</div>
-        <div>Ctrl+Insert - Copy</div>
-        <div>Shift+Insert - Paste</div>
-        <div>or right-click -&gt; Copy/Paste</div>
+        <div>在控制台中：</div>
+        <div>Ctrl+Insert - 复制</div>
+        <div>Shift+Insert - 粘贴</div>
+        <div>或右键点击 -&gt; 复制/粘贴</div>
       </>
     ),
   },
@@ -28,10 +28,10 @@ const editorConfig = {
   win: {
     tooltip: (
       <>
-        <div>Within the console:</div>
-        <div>Ctrl+Insert - Copy</div>
-        <div>Shift+Insert - Paste</div>
-        <div>or right-click -&gt; Copy/Paste</div>
+        <div>在控制台中：</div>
+        <div>Ctrl+Insert - 复制</div>
+        <div>Shift+Insert - 粘贴</div>
+        <div>或右键点击 -&gt; 复制/粘贴</div>
       </>
     ),
   },

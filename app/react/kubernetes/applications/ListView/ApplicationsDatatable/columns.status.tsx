@@ -13,7 +13,7 @@ import { helper } from './columns.helper';
 import { ApplicationRowData } from './types';
 
 export const status = helper.accessor(getStatusSummary, {
-  header: 'Status',
+  header: '状态',
   cell: Cell,
   meta: {
     filter: filterHOC('Filter by status'),

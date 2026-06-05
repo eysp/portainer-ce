@@ -7,6 +7,11 @@ import { useCreateAzureEnvironmentMutation } from '@/react/portainer/environment
 import { notifySuccess } from '@/portainer/services/notifications';
 import { Environment } from '@/react/portainer/environments/types';
 import { EnvironmentMetadata } from '@/react/portainer/environments/environment.service/create';
+import {
+  NameField,
+  useNameValidation,
+} from '@/react/portainer/environments/common/NameField/NameField';
+import { metadataValidation } from '@/react/portainer/environments/common/MetadataFieldset/validation';
 
 import { LoadingButton } from '@@/buttons/LoadingButton';
 import { Input } from '@@/form-components/Input';
@@ -14,9 +19,7 @@ import { FormControl } from '@@/form-components/FormControl';
 import { BoxSelector, BoxSelectorOption } from '@@/BoxSelector';
 import { BadgeIcon } from '@@/BadgeIcon';
 
-import { NameField, useNameValidation } from '../shared/NameField';
 import { AnalyticsStateKey } from '../types';
-import { metadataValidation } from '../shared/MetadataFieldset/validation';
 import { MoreSettingsSection } from '../shared/MoreSettingsSection';
 
 interface FormValues {
@@ -80,7 +83,7 @@ export function WizardAzure({ onCreate }: Props) {
             <NameField />
 
             <FormControl
-            label="应用程序 ID"
+              label="应用程序 ID"
               errors={errors.applicationId}
               inputId="applicationId-input"
               required
@@ -94,7 +97,7 @@ export function WizardAzure({ onCreate }: Props) {
             </FormControl>
 
             <FormControl
-            label="租户 ID"
+              label="租户 ID"
               errors={errors.tenantId}
               inputId="tenantId-input"
               required
@@ -108,7 +111,7 @@ export function WizardAzure({ onCreate }: Props) {
             </FormControl>
 
             <FormControl
-            label="认证密钥"
+              label="身份验证密钥"
               errors={errors.authenticationKey}
               inputId="authenticationKey-input"
               required
@@ -174,9 +177,9 @@ export function WizardAzure({ onCreate }: Props) {
 function useValidation(): SchemaOf<FormValues> {
   return object({
     name: useNameValidation(),
-    applicationId: string().required('应用程序 ID 为必填项'),
-    tenantId: string().required('租户 ID 为必填项'),
-    authenticationKey: string().required('认证密钥为必填项'),
+    applicationId: string().required('应用程序 ID 是必填项'),
+    tenantId: string().required('租户 ID 是必填项'),
+    authenticationKey: string().required('身份验证密钥是必填项'),
     meta: metadataValidation(),
   });
 }

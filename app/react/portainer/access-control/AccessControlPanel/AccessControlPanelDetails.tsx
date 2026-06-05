@@ -9,7 +9,7 @@ import { TeamId } from '@/react/portainer/users/teams/types';
 import { useTeams } from '@/react/portainer/users/teams/queries';
 import { useUsers } from '@/portainer/users/queries';
 import { pluralize } from '@/portainer/helpers/strings';
-import { ownershipIcon, getOwnershipLabel } from '@/react/docker/components/datatable/createOwnershipColumn';
+import { ownershipIcon } from '@/react/docker/components/datatable/createOwnershipColumn';
 
 import { Link } from '@@/Link';
 import { Tooltip } from '@@/Tip/Tooltip';
@@ -55,18 +55,18 @@ export function AccessControlPanelDetails({
 
   let teamsMessage = teams.data && teams.data.join(', ');
   if (unauthoisedTeams > 0 && teams.isFetched) {
-    teamsMessage += teamsLength > 0 ? ' 和' : '';
-    teamsMessage += ` ${unauthoisedTeams} 个您不属于的${pluralize(
+    teamsMessage += teamsLength > 0 ? ' and' : '';
+    teamsMessage += ` ${unauthoisedTeams} ${pluralize(
       unauthoisedTeams,
-      '团队'
-    )}`;
+      'team'
+    )} you are not part of`;
   }
 
   const userMessage = users.data
     ? users.data.join(', ')
     : `${restrictedToUsers.length} ${pluralize(
         restrictedToUsers.length,
-        '用户'
+        'user'
       )}`;
 
   return (
@@ -80,7 +80,7 @@ export function AccessControlPanelDetails({
               aria-hidden="true"
               aria-label="ownership-icon"
             />
-            <span aria-label="ownership">{getOwnershipLabel(ownership)}</span>
+            <span aria-label="ownership">{ownership}</span>
             <Tooltip message={getOwnershipTooltip(ownership)} />
           </td>
         </tr>
@@ -105,14 +105,14 @@ export function AccessControlPanelDetails({
 function getOwnershipTooltip(ownership: ResourceControlOwnership) {
   switch (ownership) {
     case ResourceControlOwnership.PRIVATE:
-      return '此资源的管理限制为单个用户。';
+      return 'Management of this resource is restricted to a single user.';
     case ResourceControlOwnership.RESTRICTED:
-      return '此资源可由一组受限的用户和/或团队管理。';
+      return 'This resource can be managed by a restricted set of users and/or teams.';
     case ResourceControlOwnership.PUBLIC:
-      return '此资源可由任何有权访问此环境的用户管理。';
+      return 'This resource can be managed by any user with access to this environment.';
     case ResourceControlOwnership.ADMINISTRATORS:
     default:
-      return '此资源只能由管理员管理。';
+      return 'This resource can only be managed by administrators.';
   }
 }
 
@@ -138,6 +138,7 @@ function getInheritanceMessage(
           to="docker.services.service"
           params={{ id: resourceId }}
           data-cy="docker-access-inherited-service"
+          title={String(resourceId)}
         >
           {truncate(resourceId)}
         </Link>
@@ -151,11 +152,13 @@ function getInheritanceMessage(
   ) {
     return (
       <InheritanceMessage tooltip="应用于使用模板创建的容器的访问控制也会应用于与该容器关联的每个卷。">
-        此资源的访问控制继承自以下容器：
+        Access control on this resource is inherited from the following
+        container:
         <Link
           to="docker.containers.container"
           params={{ id: resourceId }}
           data-cy="docker-access-inherited-container"
+          title={String(resourceId)}
         >
           {truncate(resourceId)}
         </Link>

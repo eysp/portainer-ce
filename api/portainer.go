@@ -29,6 +29,8 @@ type (
 	AccessPolicy struct {
 		// Role identifier. Reference the role that will be associated to this access policy
 		RoleID RoleID `json:"RoleId" example:"1"`
+		// Namespaces is a list of namespaces that this access policy applies to. Only used for namespaced level roles
+		Namespaces []string `json:"Namespaces,omitempty"`
 	}
 
 	// AgentPlatform represents a platform type for an Agent
@@ -139,6 +141,7 @@ type (
 		LogLevel                  *string
 		LogMode                   *string
 		KubectlShellImage         *string
+		KubectlShellImageSet      bool
 		PullLimitCheckDisabled    *bool
 		TrustedOrigins            *string
 	}
@@ -347,6 +350,24 @@ type (
 		DeploymentType EdgeStackDeploymentType `json:"DeploymentType"`
 		// Uses the manifest's namespaces instead of the default one
 		UseManifestNamespaces bool
+		// The username id which created this stack
+		CreatedByUserId string `example:"1"`
+		// The username which created this stack
+		CreatedBy string `example:"admin"`
+	}
+
+	// HelmConfig represents the Helm configuration for an edge stack
+	HelmConfig struct {
+		// Path to a Helm chart folder for Helm git deployments
+		ChartPath string `json:"ChartPath,omitempty" example:"charts/my-app"`
+		// Array of paths to Helm values YAML files for Helm git deployments
+		ValuesFiles []string `json:"ValuesFiles,omitempty" example:"['values/prod.yaml', 'values/secrets.yaml']"`
+		// Helm chart version from Chart.yaml (read-only, extracted during Git sync)
+		Version string `json:"Version,omitempty" example:"1.2.3"`
+		// Enable automatic rollback on deployment failure (equivalent to helm --atomic flag)
+		Atomic bool `json:"Atomic" example:"true"`
+		// Timeout for Helm operations (equivalent to helm --timeout flag)
+		Timeout string `json:"Timeout,omitempty" example:"5m0s"`
 	}
 
 	EdgeStackStatusForEnv struct {
@@ -354,6 +375,14 @@ type (
 		Status     []EdgeStackDeploymentStatus
 		// EE only feature
 		DeploymentInfo StackDeploymentInfo
+		// RePullImage is a flag to indicate whether the auto update is trigger to re-pull image
+		RePullImage bool `json:"RePullImage,omitempty"`
+		// ForceRedeploy is a flag to indicate whether the force redeployment is set for the current
+		// deployment of the edge stack. The redeployment could be triggered by GitOps Update or manually by user.
+		ForceRedeploy bool `json:"ForceRedeploy,omitempty"`
+
+		// Deprecated(2.36): use ForceRedeploy and RePullImage instead for cleaner
+		// responsibility, but keep it for backward compatibility. To remove in future versions (2.44+)
 		// ReadyRePullImage is a flag to indicate whether the auto update is trigger to re-pull image
 		ReadyRePullImage bool `json:"ReadyRePullImage,omitempty"`
 	}
@@ -422,7 +451,7 @@ type (
 		PublicURL        string           `json:"PublicURL" example:"docker.mydomain.tld:2375"`
 		Gpus             []Pair           `json:"Gpus"`
 		TLSConfig        TLSConfiguration `json:"TLSConfig"`
-		AzureCredentials AzureCredentials `json:"AzureCredentials,omitempty"`
+		AzureCredentials AzureCredentials `json:"AzureCredentials,omitzero"`
 		// List of tag identifiers to which this environment(endpoint) is associated
 		TagIDs []TagID `json:"TagIds"`
 		// The status of the environment(endpoint) (1 - up, 2 - down)
@@ -449,8 +478,6 @@ type (
 		AMTDeviceGUID string `json:"AMTDeviceGUID,omitempty" example:"4c4c4544-004b-3910-8037-b6c04f504633"`
 		// LastCheckInDate mark last check-in date on checkin
 		LastCheckInDate int64
-		// QueryDate of each query with the endpoints list
-		QueryDate int64
 		// Heartbeat indicates the heartbeat status of an edge environment
 		Heartbeat bool `json:"Heartbeat" example:"true"`
 
@@ -526,6 +553,70 @@ type (
 		Tags []string `json:"Tags,omitempty"`
 	}
 
+	PolicyChartSummary struct {
+		ChartName   string `json:"ChartName"`
+		Fingerprint string `json:"Fingerprint"`
+	}
+
+	PolicyChartStatus struct {
+		// EnvironmentID is the endpoint this status belongs to.
+		// Stored so that ReadAll can group statuses by endpoint without parsing keys.
+		EnvironmentID EndpointID        `json:"environmentID,omitempty"`
+		ChartName     string            `json:"chartName"`
+		Fingerprint   string            `json:"fingerprint"`
+		Status        HelmInstallStatus `json:"status"`
+		Message       string            `json:"message"`
+		Namespace     string            `json:"namespace"`
+		// Unix timestamp
+		LastAttemptTime int64 `json:"lastAttemptTime"`
+	}
+
+	ImageBundle struct {
+		FileName     string `json:"FileName"`
+		EncodedTarGz string `json:"EncodedTarGz"`
+	}
+
+	PolicyChartBundle struct {
+		PolicyChartSummary  `mapstructure:",squash"`
+		EncodedTgz          string             `json:"EncodedTgz"`
+		Namespace           string             `json:"Namespace"`
+		PreReleaseManifest  string             `json:"PreReleaseManifest,omitempty"`
+		EncodedValues       string             `json:"EncodedValues"`
+		PreInstallDeletions []ResourceDeletion `json:"PreInstallDeletions,omitempty"`
+		PreInstallAdoptions []ResourceAdoption `json:"PreInstallAdoptions,omitempty"`
+	}
+
+	// ResourceDeletion identifies an existing Kubernetes resource to delete before policy install
+	ResourceDeletion struct {
+		APIVersion string `json:"apiVersion" example:"v1" yaml:"apiVersion"`
+		Kind       string `json:"kind" example:"Secret" yaml:"kind"`
+		Name       string `json:"name" example:"registry-1" yaml:"name"`
+		Namespace  string `json:"namespace,omitempty" example:"default" yaml:"namespace,omitempty"`
+	}
+
+	// ResourceAdoption identifies an existing Kubernetes resource to adopt into a Helm release
+	ResourceAdoption struct {
+		APIVersion string `json:"apiVersion" example:"v1" yaml:"apiVersion"`
+		Kind       string `json:"kind" example:"Secret" yaml:"kind"`
+		Name       string `json:"name" example:"registry-1" yaml:"name"`
+		Namespace  string `json:"namespace,omitempty" example:"default" yaml:"namespace,omitempty"`
+	}
+
+	// RestoreSettings contains instructions for restoring environment-level settings
+	RestoreSettings struct {
+		Manifest string `json:"manifest,omitempty"` // Base64-encoded Kubernetes YAML manifest
+	}
+
+	// RestoreSettingsBundle maps restore type to restoration instructions
+	RestoreSettingsBundle map[PolicyType]RestoreSettings
+
+	PolicyID int
+
+	// PolicyType represents the type of policy
+	PolicyType string
+)
+
+type (
 	// EndpointGroupID represents an environment(endpoint) group identifier
 	EndpointGroupID int
 
@@ -588,7 +679,7 @@ type (
 		PriceDescription string                      `json:"PriceDescription,omitempty"`
 		Deal             bool                        `json:"Deal,omitempty"`
 		Available        bool                        `json:"Available,omitempty"`
-		License          ExtensionLicenseInformation `json:"License,omitempty"`
+		License          ExtensionLicenseInformation `json:"License,omitzero"`
 		Version          string                      `json:"Version"`
 		UpdateAvailable  bool                        `json:"UpdateAvailable"`
 		ShopURL          string                      `json:"ShopURL,omitempty"`
@@ -856,9 +947,11 @@ type (
 	RegistryAccesses map[EndpointID]RegistryAccessPolicies
 
 	RegistryAccessPolicies struct {
+		// Docker specific fields (with docker, users/teams have access to a registry)
 		UserAccessPolicies UserAccessPolicies `json:"UserAccessPolicies"`
 		TeamAccessPolicies TeamAccessPolicies `json:"TeamAccessPolicies"`
-		Namespaces         []string           `json:"Namespaces"`
+		// Kubernetes specific fields (with kubernetes, namespaces have access to a registry, if users/teams have access to the same namespace, they have access to the registry)
+		Namespaces []string `json:"Namespaces"`
 	}
 
 	// RegistryID represents a registry identifier
@@ -1018,8 +1111,6 @@ type (
 		UserSessionTimeout string `json:"UserSessionTimeout" example:"5m"`
 		// The expiry of a Kubeconfig
 		KubeconfigExpiry string `json:"KubeconfigExpiry" example:"24h"`
-		// Whether telemetry is enabled
-		EnableTelemetry bool `json:"EnableTelemetry" example:"false"`
 		// Helm repository URL, defaults to "https://charts.bitnami.com/bitnami"
 		HelmRepositoryURL string `json:"HelmRepositoryURL" example:"https://charts.bitnami.com/bitnami"`
 		// KubectlImage, defaults to portainer/kubectl-shell
@@ -1114,6 +1205,8 @@ type (
 	StackOption struct {
 		// Prune services that are no longer referenced
 		Prune bool `example:"false"`
+		// Enable atomic rollback on failure (Helm --atomic flag for Kubernetes Helm stacks)
+		HelmAtomic bool `example:"false"`
 	}
 
 	// StackID represents a stack identifier (it must be composed of Name + "_" + SwarmID to create a unique identifier)
@@ -1742,7 +1835,7 @@ type (
 
 	// OAuthService represents a service used to authenticate users using OAuth
 	OAuthService interface {
-		Authenticate(code string, configuration *OAuthSettings) (string, error)
+		Authenticate(ctx context.Context, code string, configuration *OAuthSettings) (string, error)
 	}
 
 	// ReverseTunnelService represents a service used to manage reverse tunnel connections.
@@ -1782,7 +1875,7 @@ type (
 
 const (
 	// APIVersion is the version number of the Portainer API
-	APIVersion = "2.33.3"
+	APIVersion = "2.39.2"
 	// Support annotation for the API version ("STS" for Short-Term Support or "LTS" for Long-Term Support)
 	APIVersionSupport = "LTS"
 	// Edition is what this edition of Portainer is called
@@ -2355,3 +2448,39 @@ const (
 	ContainerEngineDocker = "docker"
 	ContainerEnginePodman = "podman"
 )
+
+const (
+	// PolicyType constants
+	RbacK8s        PolicyType = "rbac-k8s"
+	SecurityK8s    PolicyType = "security-k8s"
+	SetupK8s       PolicyType = "setup-k8s"
+	RegistryK8s    PolicyType = "registry-k8s"
+	RbacDocker     PolicyType = "rbac-docker"
+	SecurityDocker PolicyType = "security-docker"
+	SetupDocker    PolicyType = "setup-docker"
+	RegistryDocker PolicyType = "registry-docker"
+)
+
+type HelmInstallStatus string
+
+const (
+	HelmInstallStatusInstalling   HelmInstallStatus = "installing"
+	HelmInstallStatusInstalled    HelmInstallStatus = "installed"
+	HelmInstallStatusFailed       HelmInstallStatus = "failed"
+	HelmInstallStatusUninstalling HelmInstallStatus = "uninstalling"
+)
+
+func DefaultEndpointSecuritySettings() EndpointSecuritySettings {
+	return EndpointSecuritySettings{
+		AllowBindMountsForRegularUsers:            false,
+		AllowContainerCapabilitiesForRegularUsers: false,
+		AllowDeviceMappingForRegularUsers:         false,
+		AllowHostNamespaceForRegularUsers:         false,
+		AllowPrivilegedModeForRegularUsers:        false,
+		AllowSysctlSettingForRegularUsers:         false,
+		AllowVolumeBrowserForRegularUsers:         false,
+		EnableHostManagementFeatures:              false,
+
+		AllowStackManagementForRegularUsers: true,
+	}
+}

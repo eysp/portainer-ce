@@ -31,7 +31,7 @@ export function CommandsTab({
           value={values.cmd}
           onChange={(cmd) => setFieldValue('cmd', cmd)}
           id="command-input"
-          placeholder="例如 '-logtostderr' '--housekeeping_interval=5s' or /usr/bin/nginx -t -c /mynginx.conf"
+          placeholder="例如 '-logtostderr' '--housekeeping_interval=5s' 或 /usr/bin/nginx -t -c /mynginx.conf"
         />
       </FormControl>
 
@@ -39,7 +39,7 @@ export function CommandsTab({
         label="入口点"
         inputId="entrypoint-input"
         size="xsmall"
-        tooltip="当容器入口点作为命令字段的一部分输入时，将入口点设置为覆盖模式并留空，否则它将恢复为默认值。"
+        tooltip="当容器入口点作为命令字段的一部分输入时，将入口点设置为覆盖模式并留空，否则将恢复为默认值。"
         errors={errors?.entrypoint}
       >
         <OverridableInput

@@ -65,7 +65,7 @@ export function AddLabelForm({
 
 function validation(): SchemaOf<{ name: string; value: string }> {
   return object({
-    name: string().required('名称是必填项'),
+    name: string().required('名称为必填项'),
     value: string().default(''),
   });
 }

@@ -14,13 +14,14 @@ export function Link({
   to,
   params,
   options,
+  title,
   ...props
 }: PropsWithChildren<Props> & UISrefProps) {
   const { onClick, href } = useSref(to, params, options);
 
   return (
     // eslint-disable-next-line react/jsx-props-no-spreading
-    <a onClick={onClick} href={href} data-cy={dataCy} {...props}>
+    <a onClick={onClick} href={href} data-cy={dataCy} title={title} {...props}>
       {children}
     </a>
   );

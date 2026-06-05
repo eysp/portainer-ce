@@ -13,7 +13,7 @@ import { PortainerNamespace } from '../../types';
 import { helper } from './helper';
 
 export const actions = helper.display({
-  header: 'Actions',
+  header: '操作',
   cell: Cell,
 });
 

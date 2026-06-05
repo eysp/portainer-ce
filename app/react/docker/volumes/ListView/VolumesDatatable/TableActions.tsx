@@ -18,7 +18,7 @@ export function TableActions({
         <DeleteButton
           disabled={selectedItems.length === 0}
           onConfirmed={() => onRemove(selectedItems)}
-          confirmMessage="您确定要移除选定的卷吗？"
+          confirmMessage="您要删除选中的卷吗？"
           data-cy="volume-removeVolumeButton"
         />
       </Authorized>

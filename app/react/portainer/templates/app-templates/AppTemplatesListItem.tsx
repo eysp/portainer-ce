@@ -25,7 +25,7 @@ export function AppTemplatesListItem({
     <TemplateItem
       template={template}
       typeLabel={
-        template.Type === TemplateType.Container ? 'container' : 'stack'
+        template.Type === TemplateType.Container ? '容器' : '堆栈'
       }
       linkParams={linkParams}
       onSelect={() => onSelect?.(template)}

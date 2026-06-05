@@ -42,7 +42,7 @@ export function DashboardView() {
   return (
     <>
       <PageHeader
-        title="仪表盘"
+        title="仪表板"
         breadcrumbs={[{ label: '环境摘要' }]}
         reload
         onReload={() =>
@@ -88,8 +88,8 @@ export function DashboardView() {
             isRefetching={ingressesCountQuery.isRefetching}
             icon={Route}
             to="kubernetes.ingresses"
-            type="Ingress 规则"
-            pluralType="Ingress 规则"
+            type="Ingress"
+            pluralType="Ingress"
             data-cy="dashboard-ingress"
           />
           <DashboardItem

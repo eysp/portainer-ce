@@ -75,7 +75,7 @@ export function NotificationsMenu() {
             )}
           >
             <div>
-              <h4>通知</h4>
+              <h4>Notifications</h4>
             </div>
             <div className={notificationStyles.itemLast}>
               {reducedNotifications?.length > 0 && (
@@ -196,16 +196,16 @@ function formatTime(timeCreated: Date) {
   if (diff <= 86400) {
     let interval = Math.floor(diff / 3600);
     if (interval >= 1) {
-      return `${interval} 小时前`;
+      return `${interval} hours ago`;
     }
     interval = Math.floor(diff / 60);
     if (interval >= 1) {
-      return `${interval} 分钟前`;
+      return `${interval} min ago`;
     }
   }
   if (diff > 86400) {
     const formatDate = Moment(timeCreated).format('YYYY-MM-DD h:mm:ss');
     return formatDate;
   }
-  return '刚刚';
+  return 'Just now';
 }

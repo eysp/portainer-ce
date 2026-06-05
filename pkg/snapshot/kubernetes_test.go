@@ -267,7 +267,7 @@ func TestCalculateNodeMetrics(t *testing.T) {
 
 		metrics := calculateNodeMetrics(nodeStats, node)
 		require.NotNil(t, metrics)
-		require.Equal(t, float64(50), metrics.CPUUsage) // 2/4 = 50%
+		require.Equal(t, 50, int(metrics.CPUUsage)) // 2/4 = 50%
 	})
 
 	t.Run("CalculatesCorrectMemoryPercentage", func(t *testing.T) {
@@ -280,7 +280,7 @@ func TestCalculateNodeMetrics(t *testing.T) {
 
 		metrics := calculateNodeMetrics(nodeStats, node)
 		require.NotNil(t, metrics)
-		require.Equal(t, float64(50), metrics.MemoryUsage) // 4GB/8GB = 50%
+		require.Equal(t, 50, int(metrics.MemoryUsage)) // 4GB/8GB = 50%
 	})
 
 	t.Run("CalculatesCorrectNetworkUsage", func(t *testing.T) {
@@ -297,7 +297,7 @@ func TestCalculateNodeMetrics(t *testing.T) {
 
 		metrics := calculateNodeMetrics(nodeStats, node)
 		require.NotNil(t, metrics)
-		require.Equal(t, float64(2048), metrics.NetworkUsage) // 2GB = 2048MB
+		require.Equal(t, 2048, int(metrics.NetworkUsage)) // 2GB = 2048MB
 	})
 
 	t.Run("HandlesEmptyStats", func(t *testing.T) {
@@ -317,8 +317,8 @@ func TestCalculateNodeMetrics(t *testing.T) {
 
 		metrics := calculateNodeMetrics(nodeStats, node)
 		require.NotNil(t, metrics)
-		require.Equal(t, float64(25), metrics.CPUUsage) // 1/4 = 25%
-		require.Equal(t, float64(0), metrics.MemoryUsage)
-		require.Equal(t, float64(0), metrics.NetworkUsage)
+		require.Equal(t, 25, int(metrics.CPUUsage)) // 1/4 = 25%
+		require.Equal(t, 0, int(metrics.MemoryUsage))
+		require.Equal(t, 0, int(metrics.NetworkUsage))
 	})
 }

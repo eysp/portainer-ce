@@ -76,8 +76,8 @@ export function NonGitStackForm({ edgeStack }: { edgeStack: EdgeStack }) {
     privateRegistryId: edgeStack.Registries?.[0],
     content: fileContent,
     useManifestNamespaces: edgeStack.UseManifestNamespaces,
-    prePullImage: edgeStack.PrePullImage,
-    retryDeploy: edgeStack.RetryDeploy,
+    prePullImage: edgeStack.PrePullImage ?? false,
+    retryDeploy: edgeStack.RetryDeploy ?? false,
     webhookEnabled: !!edgeStack.Webhook,
     envVars: edgeStack.EnvVars || [],
     rollbackTo: undefined,
@@ -107,19 +107,19 @@ export function NonGitStackForm({ edgeStack }: { edgeStack: EdgeStack }) {
     if (isBE && values.deploymentType === DeploymentType.Compose) {
       const defaultToggle = values.prePullImage;
       const result = await confirmStackUpdate(
-        '是否要强制更新该堆栈？',
+        'Do you want to force an update of the stack?',
         defaultToggle
       );
       if (!result) {
         return;
       }
 
-      rePullImage = result.pullImage;
+      rePullImage = result.repullImageAndRedeploy;
     }
 
     const updateVersion = !!(
       fileContent !== values.content ||
-      values.privateRegistryId !== edgeStack.Registries[0] ||
+      values.privateRegistryId !== edgeStack.Registries?.[0] ||
       values.useManifestNamespaces !== edgeStack.UseManifestNamespaces ||
       values.prePullImage !== edgeStack.PrePullImage ||
       values.retryDeploy !== edgeStack.RetryDeploy ||
@@ -150,7 +150,7 @@ export function NonGitStackForm({ edgeStack }: { edgeStack: EdgeStack }) {
       },
       {
         onSuccess: () => {
-          notifySuccess('成功', '堆栈已成功部署');
+          notifySuccess('Success', '堆栈已成功部署');
           router.stateService.go('^');
         },
       }
@@ -230,13 +230,18 @@ function InnerForm({
 
       {hasKubeEndpoint && hasDockerEndpoint && (
         <TextTip>
-          当选择的 Edge 组中包含多种环境类型（例如同时包含 Kubernetes 与 Docker 环境）时，无法选择部署类型。请仅选择包含同一类型环境的 Edge 组。
+          There are no available deployment types when there is more than one
+          type of environment in your edge group selection (e.g. Kubernetes and
+          Docker environments). Please select edge groups that have environments
+          of the same type.
         </TextTip>
       )}
 
       {values.deploymentType === DeploymentType.Compose && hasKubeEndpoint && (
         <FormError>
-          包含 Kubernetes 环境的 Edge 组不再支持 Compose 部署类型。若需使用 Compose，请仅选择包含 Docker 环境的 Edge 组。
+          Edge groups with kubernetes environments no longer support compose
+          deployment types in Portainer. Please select edge groups that only
+          have docker environments when using compose deployment types.
         </FormError>
       )}
 
@@ -283,7 +288,9 @@ function InnerForm({
                 />
 
                 <TextTip color="orange">
-                  通过 Webhook 发送环境变量将使用新值更新该堆栈。新的变量名会被添加到堆栈中，已有变量会被更新。
+                  Sending environment variables to the webhook is updating the
+                  stack with the new values. New variables names will be added
+                  to the stack and existing variables will be updated.
                 </TextTip>
               </>
             )}
@@ -335,7 +342,7 @@ function InnerForm({
         </>
       )}
 
-      <FormSection title="Actions">
+      <FormSection title="操作">
         <div className="form-group">
           <div className="col-sm-12">
             <LoadingButton
@@ -353,7 +360,8 @@ function InnerForm({
           {staggerUpdating && (
             <div className="col-sm-12">
               <FormError>
-                存在并发更新，暂时无法更新该堆栈
+                Concurrent updates in progress, stack update temporarily
+                unavailable
               </FormError>
             </div>
           )}
@@ -417,7 +425,7 @@ function formValidation(): SchemaOf<FormValues> {
     edgeGroups: array()
       .of(number().required())
       .required()
-      .min(1, '至少需要选择一个 Edge 组'),
+      .min(1, 'At least one edge group is required'),
     webhookEnabled: boolean().default(false),
     versions: array().of(number().optional()).optional(),
     envVars: envVarValidation(),

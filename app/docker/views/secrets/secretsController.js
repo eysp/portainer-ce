@@ -10,7 +10,7 @@ angular.module('portainer.docker').controller('SecretsController', [
       async function doRemove(secret) {
         return SecretService.remove(secret.Id)
           .then(function success() {
-            Notifications.success('Secret successfully removed', secret.Name);
+            Notifications.success('密钥已成功删除', secret.Name);
             var index = $scope.secrets.indexOf(secret);
             $scope.secrets.splice(index, 1);
           })

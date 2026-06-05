@@ -21,6 +21,8 @@ import (
 	"github.com/portainer/portainer/api/http/proxy/factory/utils"
 	"github.com/portainer/portainer/api/http/security"
 	"github.com/portainer/portainer/api/internal/authorization"
+	"github.com/portainer/portainer/api/logs"
+	"github.com/portainer/portainer/api/slicesx"
 
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/swarm"
@@ -108,10 +110,32 @@ var prefixProxyFuncMap = map[string]func(*Transport, *http.Request, string) (*ht
 	"volumes":    (*Transport).proxyVolumeRequest,
 }
 
+type route struct {
+	method  string
+	pattern *regexp.Regexp
+}
+
+var adminOnlyRoutes = []route{
+	{http.MethodPost, regexp.MustCompile(`^/plugins/.+/enable$`)},
+	{http.MethodPost, regexp.MustCompile(`^/plugins/.+/disable$`)},
+	{http.MethodPost, regexp.MustCompile(`^/plugins/pull$`)},
+	{http.MethodPost, regexp.MustCompile(`^/plugins/.+/push$`)},
+	{http.MethodPost, regexp.MustCompile(`^/plugins/.+/upgrade$`)},
+	{http.MethodPost, regexp.MustCompile(`^/plugins/.+/set$`)},
+	{http.MethodPost, regexp.MustCompile(`^/plugins/create$`)},
+	{http.MethodDelete, regexp.MustCompile(`^/plugins/.+$`)},
+}
+
+func isAdminOnlyRoute(method string, path string) bool {
+	return slicesx.Some(adminOnlyRoutes, func(r route) bool {
+		return method == r.method && r.pattern.MatchString(path)
+	})
+}
+
 // ProxyDockerRequest intercepts a Docker API request and apply logic based
 // on the requested operation.
 func (transport *Transport) ProxyDockerRequest(request *http.Request) (*http.Response, error) {
-	// from : /v1.41/containers/{id}/json
+	// from : /v1.47/containers/{id}/json
 	// or   : /containers/{id}/json
 	// to   : /containers/{id}/json
 	unversionedPath := apiVersionRe.ReplaceAllString(request.URL.Path, "")
@@ -134,6 +158,10 @@ func (transport *Transport) ProxyDockerRequest(request *http.Request) (*http.Res
 
 	if proxyFunc := prefixProxyFuncMap[prefix]; proxyFunc != nil {
 		return proxyFunc(transport, request, unversionedPath)
+	}
+
+	if isAdminOnlyRoute(request.Method, unversionedPath) {
+		return transport.administratorOperation(request)
 	}
 
 	return transport.executeDockerRequest(request)
@@ -260,6 +288,11 @@ func (transport *Transport) proxyContainerRequest(request *http.Request, unversi
 			if action == "json" {
 				return transport.rewriteOperation(request, transport.containerInspectOperation)
 			}
+
+			if action == "update" {
+				return transport.decorateContainerUpdateOperation(request, containerID)
+			}
+
 			return transport.restrictedResourceOperation(request, containerID, containerID, portainer.ContainerResourceControl, false)
 		} else if match, _ := path.Match("/containers/*", requestPath); match {
 			// Handle /containers/{id} requests
@@ -291,6 +324,11 @@ func (transport *Transport) proxyServiceRequest(request *http.Request, unversion
 		if match, _ := path.Match("/services/*/*", requestPath); match {
 			// Handle /services/{id}/{action} requests
 			serviceID := path.Base(path.Dir(requestPath))
+			action := path.Base(requestPath)
+
+			if action == "update" {
+				return transport.decorateServiceUpdateOperation(request, serviceID)
+			}
 
 			if err := transport.decorateRegistryAuthenticationHeader(request); err != nil {
 				return nil, err
@@ -480,7 +518,9 @@ func (transport *Transport) proxyImageRequest(request *http.Request, unversioned
 }
 
 func (transport *Transport) replaceRegistryAuthenticationHeader(request *http.Request) (*http.Response, error) {
-	transport.decorateRegistryAuthenticationHeader(request)
+	if err := transport.decorateRegistryAuthenticationHeader(request); err != nil {
+		return nil, err
+	}
 
 	return transport.decorateGenericResourceCreationOperation(request, serviceObjectIdentifier, portainer.ServiceResourceControl)
 }
@@ -584,11 +624,11 @@ func (transport *Transport) restrictedResourceOperation(request *http.Request, r
 	if err != nil {
 		return nil, err
 	}
-	defer client.Close()
+	defer logs.CloseAndLogErr(client)
 
 	// the resourceID may be the resource name (as it's a valid proxy call to use the name and not the UUID)
 	// so get the real resource ID and retry with it
-	resourceID, err = getRealResourceID(client, resourceType, resourceID)
+	resourceID, err = getDockerResourceUUID(client, resourceType, resourceID)
 	if err != nil {
 		return nil, err
 	}
@@ -619,7 +659,7 @@ func (transport *Transport) restrictedResourceOperation(request *http.Request, r
 	return transport.executeDockerRequest(request)
 }
 
-func getRealResourceID(client *dockerclient.Client, resourceType portainer.ResourceControlType, resourceId string) (string, error) {
+func getDockerResourceUUID(client *dockerclient.Client, resourceType portainer.ResourceControlType, resourceId string) (string, error) {
 	switch resourceType {
 	case portainer.NetworkResourceControl:
 		network, err := client.NetworkInspect(context.Background(), resourceId, network.InspectOptions{})
@@ -744,7 +784,7 @@ func (transport *Transport) decorateGenericResourceCreationResponse(response *ht
 
 	responseObject = decorateObject(responseObject, resourceControl)
 
-	return utils.RewriteResponse(response, responseObject, http.StatusOK)
+	return utils.RewriteResponse(response, responseObject, response.StatusCode)
 }
 
 func (transport *Transport) decorateGenericResourceCreationOperation(request *http.Request, resourceIdentifierAttribute string, resourceType portainer.ResourceControlType) (*http.Response, error) {

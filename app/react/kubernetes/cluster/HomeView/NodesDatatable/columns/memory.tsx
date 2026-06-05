@@ -1,16 +1,24 @@
-import filesizeParser from 'filesize-parser';
-
-import { humanize } from '@/portainer/filters/filters';
+import {
+  bytesToReadableFormat,
+  safeFilesizeParser,
+} from '@/react/kubernetes/utils';
 
 import { NodeRowData } from '../types';
 
 import { columnHelper } from './helper';
 
 export const memory = columnHelper.accessor((row) => getMemory(row), {
-  header: 'Memory',
+  header: '内存',
   cell: ({ row: { original: node } }) => getMemory(node),
 });
 
 function getMemory(node: NodeRowData) {
-  return humanize(filesizeParser(node.status?.allocatable?.memory ?? ''));
+  return bytesToReadableFormat(
+    safeFilesizeParser(node.status?.allocatable?.memory ?? ''),
+    {
+      standard: 'iec',
+      exponent: 2, // MiB
+      round: 0,
+    }
+  );
 }

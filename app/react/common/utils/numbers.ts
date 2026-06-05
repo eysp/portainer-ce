@@ -6,7 +6,7 @@ const suffixes = ['', 'k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y'];
  *
  * @param num - The number to abbreviate
  * @param decimals - Number of decimal places (default: 1)
- * @returns Abbreviated number as string (例如, "90k", "123M")
+ * @returns Abbreviated number as string (e.g., "90k", "123M")
  */
 export function abbreviateNumber(num: number, decimals: number = 1): string {
   if (Number.isNaN(num)) {

@@ -2,6 +2,7 @@ package endpoints
 
 import (
 	"net/http"
+	"slices"
 
 	"github.com/pkg/errors"
 
@@ -35,19 +36,12 @@ func (handler *Handler) endpointRegistriesList(w http.ResponseWriter, r *http.Re
 	}
 
 	var registries []portainer.Registry
-	if err := handler.DataStore.ViewTx(func(tx dataservices.DataStoreTx) error {
+	err = handler.DataStore.ViewTx(func(tx dataservices.DataStoreTx) error {
 		registries, err = handler.listRegistries(tx, r, portainer.EndpointID(endpointID))
 		return err
-	}); err != nil {
-		var httpErr *httperror.HandlerError
-		if errors.As(err, &httpErr) {
-			return httpErr
-		}
+	})
 
-		return httperror.InternalServerError("Unexpected error", err)
-	}
-
-	return response.JSON(w, registries)
+	return response.TxResponse(w, registries, err)
 }
 
 func (handler *Handler) listRegistries(tx dataservices.DataStoreTx, r *http.Request, endpointID portainer.EndpointID) ([]portainer.Registry, error) {
@@ -160,10 +154,8 @@ func filterRegistriesByNamespaces(registries []portainer.Registry, endpointId po
 
 func registryAccessPoliciesContainsNamespace(registryAccess portainer.RegistryAccessPolicies, namespaces []string) bool {
 	for _, authorizedNamespace := range registryAccess.Namespaces {
-		for _, namespace := range namespaces {
-			if namespace == authorizedNamespace {
-				return true
-			}
+		if slices.Contains(namespaces, authorizedNamespace) {
+			return true
 		}
 	}
 	return false

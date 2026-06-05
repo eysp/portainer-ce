@@ -1,7 +1,7 @@
 import { FormikErrors } from 'formik';
 import { useMemo } from 'react';
 
-import { useNodesQuery } from '@/react/kubernetes/cluster/HomeView/nodes.service';
+import { useNodesQuery } from '@/react/kubernetes/cluster/queries/useNodesQuery';
 import { useEnvironmentId } from '@/react/hooks/useEnvironmentId';
 
 import { FormSection } from '@@/form-components/FormSection';
@@ -38,7 +38,8 @@ export function PlacementFormSection({ values, onChange, errors }: Props) {
       <FormSection title="放置偏好和约束" titleSize="sm">
         {values.placements?.length > 0 && (
           <TextTip color="blue">
-            在符合以下<b>所有</b>放置规则的节点上部署此应用程序。放置规则基于节点标签。
+            在符合以下 <b>ALL</b> of the
+            following placement rules. Placement rules are based on node labels.
           </TextTip>
         )}
         <InputList<Placement>
@@ -60,13 +61,13 @@ export function PlacementFormSection({ values, onChange, errors }: Props) {
             needsDeletion: false,
           })}
           errors={errors?.placements}
-          addLabel="添加规则"
+          addLabel="Add rule"
           canUndoDelete
           data-cy="k8sAppCreate-placement"
           disabled={Object.keys(availableNodeLabels).length === 0}
           addButtonError={
             Object.keys(availableNodeLabels).length === 0
-              ? '没有可用的节点标签可添加。'
+              ? 'There are no node labels available to add.'
               : ''
           }
         />
@@ -121,7 +122,7 @@ function useNodeLabels(): NodeLabels {
       }))
     ) || [];
 
-  // create a NodeLabels object with each label key's possible values, without duplicate keys or values. 例如 { 'beta.kubernetes.io/arch': ['amd64', 'arm64'] }
+  // create a NodeLabels object with each label key's possible values, without duplicate keys or values. e.g. { 'beta.kubernetes.io/arch': ['amd64', 'arm64'] }
   // in multinode clusters, there can be multiple nodes with the same label key
   const allNodesLabels = nodeLabelPairs.map((pair) => pair.key);
   const uniqueNodesLabels = new Set(allNodesLabels);

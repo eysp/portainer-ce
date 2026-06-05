@@ -121,7 +121,7 @@ func redeployWhenChangedSecondStage(
 	var gitCommitChangedOrForceUpdate bool
 
 	if !stack.FromAppTemplate {
-		updated, newHash, err := update.UpdateGitObject(gitService, fmt.Sprintf("stack:%d", stack.ID), stack.GitConfig, false, false, stack.ProjectPath)
+		updated, newHash, err := update.UpdateGitObject(gitService, fmt.Sprintf("stack:%d", stack.ID), stack.GitConfig, false, stack.ProjectPath)
 		if err != nil {
 			return err
 		}
@@ -130,6 +130,10 @@ func redeployWhenChangedSecondStage(
 			stack.GitConfig.ConfigHash = newHash
 			stack.UpdateDate = time.Now().Unix()
 			gitCommitChangedOrForceUpdate = updated
+		}
+
+		if stack.AutoUpdate != nil && stack.AutoUpdate.ForceUpdate {
+			gitCommitChangedOrForceUpdate = true
 		}
 	}
 

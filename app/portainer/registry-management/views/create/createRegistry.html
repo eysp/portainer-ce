@@ -64,12 +64,13 @@
             action-in-progress="$ctrl.state.actionInProgress"
             reset-defaults="$ctrl.useDefaultGitlabConfiguration"
           ></registry-form-gitlab>
+
           <registry-form-dockerhub
             ng-if="$ctrl.model.Type === $ctrl.RegistryTypes.DOCKERHUB"
-            model="$ctrl.model"
-            form-action="$ctrl.createRegistry"
-            form-action-label="添加镜像仓库"
-            action-in-progress="$ctrl.state.actionInProgress"
+            initial-values="$ctrl.model"
+            on-submit="($ctrl.onSubmitDocker)"
+            submit-label="'添加镜像仓库'"
+            is-loading="$ctrl.state.actionInProgress"
             name-is-used="($ctrl.nameIsUsed)"
           ></registry-form-dockerhub>
         </form>

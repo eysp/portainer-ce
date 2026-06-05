@@ -1,11 +1,13 @@
 package edgestacks
 
 import (
+	"fmt"
 	"net/http"
 
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/dataservices"
 	httperrors "github.com/portainer/portainer/api/http/errors"
+	"github.com/portainer/portainer/api/stacks/stackutils"
 	"github.com/portainer/portainer/pkg/edge"
 	"github.com/portainer/portainer/pkg/libhttp/request"
 
@@ -99,7 +101,7 @@ func (payload *edgeStackFromFileUploadPayload) Validate(r *http.Request) error {
 // @failure 500 "Internal server error"
 // @failure 503 "Edge compute features are disabled"
 // @router /edge_stacks/create/file [post]
-func (handler *Handler) createEdgeStackFromFileUpload(r *http.Request, tx dataservices.DataStoreTx, dryrun bool) (*portainer.EdgeStack, error) {
+func (handler *Handler) createEdgeStackFromFileUpload(r *http.Request, tx dataservices.DataStoreTx, tokenData *portainer.TokenData, dryrun bool) (*portainer.EdgeStack, error) {
 	payload := &edgeStackFromFileUploadPayload{}
 	if err := payload.Validate(r); err != nil {
 		return nil, err
@@ -113,6 +115,8 @@ func (handler *Handler) createEdgeStackFromFileUpload(r *http.Request, tx datase
 	if dryrun {
 		return stack, nil
 	}
+	stack.CreatedByUserId = fmt.Sprintf("%d", tokenData.ID)
+	stack.CreatedBy = stackutils.SanitizeLabel(tokenData.Username)
 
 	return handler.edgeStacksService.PersistEdgeStack(tx, stack, func(stackFolder string, relatedEndpointIds []portainer.EndpointID) (composePath string, manifestPath string, projectPath string, err error) {
 		return handler.storeFileContent(tx, stackFolder, payload.DeploymentType, relatedEndpointIds, payload.StackFileContent)

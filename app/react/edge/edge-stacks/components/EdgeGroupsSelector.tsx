@@ -44,7 +44,7 @@ export function EdgeGroupsSelector({
   return horizontal ? (
     <FormControl
       errors={error}
-      label="Edge Groups"
+      label="边缘组"
       required={required}
       inputId={inputId}
     >
@@ -85,7 +85,7 @@ function InnerSelector({
 
   return items.length ? (
     <Select
-      aria-label="Edge groups"
+      aria-label="边缘组"
       options={items}
       isMulti
       getOptionLabel={(item) => item.Name}
@@ -94,7 +94,7 @@ function InnerSelector({
       onChange={(value) => {
         onChange(value.map((item) => item.Id));
       }}
-      placeholder="Select one or multiple group(s)"
+      placeholder="选择一个或多个组"
       closeMenuOnSelect={false}
       data-cy="edge-stacks-groups-selector"
       id="edge-stacks-groups-selector"

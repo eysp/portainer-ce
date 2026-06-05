@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestUnzipFile(t *testing.T) {
@@ -20,7 +21,7 @@ func TestUnzipFile(t *testing.T) {
 
 	err := UnzipFile("./testdata/sample_archive.zip", dir)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	archiveDir := dir + "/sample_archive"
 	assert.FileExists(t, filepath.Join(archiveDir, "0.txt"))
 	assert.FileExists(t, filepath.Join(archiveDir, "0", "1.txt"))

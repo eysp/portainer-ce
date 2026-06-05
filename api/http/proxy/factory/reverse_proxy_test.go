@@ -1,7 +1,9 @@
 package factory
 
 import (
+	"context"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"testing"
 
@@ -9,7 +11,7 @@ import (
 	portainer "github.com/portainer/portainer/api"
 )
 
-func Test_createDirector(t *testing.T) {
+func Test_createRewriteFn(t *testing.T) {
 	testCases := []struct {
 		name        string
 		target      *url.URL
@@ -143,10 +145,18 @@ func Test_createDirector(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			director := createDirector(tc.target)
-			director(tc.req)
+			rewriteFn := createRewriteFn(tc.target)
+			proxyRequest := httputil.ProxyRequest{
+				In:  tc.req.Clone(context.Background()),
+				Out: tc.req.Clone(context.Background()),
+			}
+			rewriteFn(&proxyRequest)
 
-			if diff := cmp.Diff(tc.req, tc.expectedReq, cmp.Comparer(compareRequests)); diff != "" {
+			if diff := cmp.Diff(proxyRequest.In, tc.req, cmp.Comparer(compareRequests)); diff != "" {
+				t.Fatalf("rewriteFn modified in request: \n%s", diff)
+			}
+
+			if diff := cmp.Diff(proxyRequest.Out, tc.expectedReq, cmp.Comparer(compareRequests)); diff != "" {
 				t.Fatalf("requests are different: \n%s", diff)
 			}
 		})

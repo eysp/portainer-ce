@@ -1,7 +1,6 @@
 import { Wand2, Plug2 } from 'lucide-react';
 
 import { EnvironmentType } from '@/react/portainer/environments/types';
-import { useAnalytics } from '@/react/hooks/useAnalytics';
 import DockerIcon from '@/assets/ico/vendor/docker-icon.svg?c';
 import Kube from '@/assets/ico/kube.svg?c';
 
@@ -16,7 +15,6 @@ import styles from './HomeView.module.css';
 
 export function HomeView() {
   const localEnvironmentAdded = useConnectLocalEnvironment();
-  const { trackEvent } = useAnalytics();
   return (
     <>
       <PageHeader
@@ -37,8 +35,7 @@ export function HomeView() {
                 <div className="text-muted small">
                   {localEnvironmentAdded.status === 'success' && (
                     <p>
-                      我们已将您的本地{' '}
-                      {getTypeLabel(localEnvironmentAdded.type)} 环境连接到 Portainer。
+                      我们已将您的本地环境（{getTypeLabel(localEnvironmentAdded.type)}）连接到 Portainer。
                     </p>
                   )}
 
@@ -46,7 +43,7 @@ export function HomeView() {
                     <p>
                       我们无法将您的本地环境连接到 Portainer。
                       <br />
-                      请确保您的环境正确暴露。如需安装帮助，请访问{' '}
+                      请确保您的环境已正确暴露。如需安装帮助，请访问{' '}
                       <a
                         href="https://documentation.portainer.io/quickstart/"
                         target="_blank"
@@ -58,7 +55,7 @@ export function HomeView() {
                   )}
 
                   <p>
-                    从下面的本地 Portainer 开始，或连接更多容器环境。
+                    在下方开始使用您的本地 Portainer 或连接更多容器环境。
                   </p>
                 </div>
 
@@ -76,8 +73,7 @@ export function HomeView() {
                             : Kube
                         }
                         title="开始使用"
-                        description="使用 Portainer 运行所在的本地环境继续"
-                        onClick={() => trackLocalEnvironmentAnalytics()}
+                        description="使用 Portainer 运行的本地环境继续"
                       />
                     </Link>
                   )}
@@ -100,13 +96,6 @@ export function HomeView() {
       </div>
     </>
   );
-
-  function trackLocalEnvironmentAnalytics() {
-    trackEvent('endpoint-wizard-endpoint-select', {
-      category: 'portainer',
-      metadata: { environment: 'Get-started-local-environment' },
-    });
-  }
 }
 
 function getTypeLabel(type?: EnvironmentType) {

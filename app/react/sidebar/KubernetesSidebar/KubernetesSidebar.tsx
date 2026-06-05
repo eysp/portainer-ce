@@ -56,7 +56,7 @@ export function KubernetesSidebar({ environmentId }: Props) {
         to="kubernetes.applications"
         params={{ endpointId: environmentId }}
         icon={Box}
-        label="应用"
+        label="应用程序"
         data-cy="k8sSidebar-applications"
       />
 
@@ -90,7 +90,7 @@ export function KubernetesSidebar({ environmentId }: Props) {
         to="kubernetes.configurations"
         params={{ endpointId: environmentId }}
         icon={Lock}
-        label="ConfigMaps 和 Secrets"
+        label="配置映射和密钥"
         data-cy="k8sSidebar-configurations"
       />
 
@@ -105,6 +105,7 @@ export function KubernetesSidebar({ environmentId }: Props) {
         to="kubernetes.moreResources.jobs"
         pathOptions={{
           includePaths: [
+            'kubernetes.moreResources.jobs',
             'kubernetes.moreResources.serviceAccounts',
             'kubernetes.moreResources.clusterRoles',
             'kubernetes.moreResources.roles',
@@ -118,7 +119,7 @@ export function KubernetesSidebar({ environmentId }: Props) {
         <SidebarItem
           to="kubernetes.moreResources.jobs"
           params={{ endpointId: environmentId }}
-            label="Cron 作业和作业"
+          label="定时任务和任务"
           data-cy="k8sSidebar-jobs"
           isSubMenu
         />
@@ -218,7 +219,7 @@ export function KubernetesSidebar({ environmentId }: Props) {
         <SidebarItem
           to="kubernetes.registries"
           params={{ endpointId: environmentId }}
-          label="注册表"
+          label="镜像仓库"
           isSubMenu
           data-cy="k8sSidebar-registries"
         />

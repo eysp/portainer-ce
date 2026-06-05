@@ -23,7 +23,7 @@ interface UseContainers {
 }
 
 export function useContainers<T = ContainerListViewModel[]>(
-  environmentId: EnvironmentId,
+  environmentId: EnvironmentId | undefined,
   {
     autoRefreshRate,
     select,
@@ -36,13 +36,13 @@ export function useContainers<T = ContainerListViewModel[]>(
   } = {}
 ) {
   return useQuery(
-    queryKeys.filters(environmentId, params),
-    () => getContainers(environmentId, params),
+    queryKeys.filters(environmentId!, params),
+    () => getContainers(environmentId!, params),
     {
-      ...withGlobalError('无法检索容器'),
+      ...withGlobalError('无法获取容器'),
       refetchInterval: autoRefreshRate ?? false,
       select,
-      enabled,
+      enabled: enabled && !!environmentId,
     }
   );
 }
@@ -58,6 +58,10 @@ export async function getContainers(
   { all = true, filters, nodeName }: UseContainers = {}
 ) {
   try {
+    if (!environmentId) {
+      return [];
+    }
+
     const { data } = await axios.get<DockerContainerResponse[]>(
       buildDockerProxyUrl(environmentId, 'containers', 'json'),
       {
@@ -67,6 +71,6 @@ export async function getContainers(
     );
     return data.map((c) => toListViewModel(c));
   } catch (error) {
-    throw parseAxiosError(error as Error, '无法检索容器');
+    throw parseAxiosError(error as Error, '无法获取容器');
   }
 }

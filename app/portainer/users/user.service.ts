@@ -15,7 +15,7 @@ export async function getUsers(
 
     return includeAdministrators ? data : filterNonAdministratorUsers(data);
   } catch (e) {
-    throw parseAxiosError(e as Error, '无法获取用户列表');
+    throw parseAxiosError(e as Error, 'Unable to retrieve users');
   }
 }
 
@@ -26,7 +26,7 @@ export async function getUserMemberships(id: UserId) {
     );
     return data;
   } catch (err) {
-    throw parseAxiosError(err as Error, '无法获取用户成员关系');
+    throw parseAxiosError(err as Error, 'Unable to retrieve user memberships');
   }
 }
 

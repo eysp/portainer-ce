@@ -44,11 +44,11 @@ export function useValidation(): SchemaOf<FormValues> {
 function passwordValidation(minLength: number | undefined = 12) {
   return object({
     password: string()
-      .required('密码为必填项')
+      .required('密码是必填项')
       .min(
         minLength,
         ({ value, min }) =>
-          `密码长度必须至少为 ${min} 个字符。 (${value.length}/${min})`
+          `密码长度至少为 ${min} 个字符。(${value.length}/${min})`
       ),
     confirmPassword: string().oneOf(
       [ref('password'), null],

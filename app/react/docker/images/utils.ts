@@ -55,6 +55,10 @@ export function buildImageFullURIFromModel(imageModel: ImageModel) {
  * builds the complete uri for an image based on its registry
  */
 export function buildImageFullURI(image: string, registry?: Registry) {
+  if (!image) {
+    throw new Error('缺少镜像');
+  }
+
   if (!registry) {
     return ensureTag(image);
   }

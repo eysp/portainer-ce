@@ -14,17 +14,10 @@ export type ListSortType = Exclude<SortType, 'LastCheckIn' | 'EdgeID'>;
 
 const sortByOptions = SortOptions.filter(
   (v): v is ListSortType => !['LastCheckIn', 'EdgeID'].includes(v)
-).map((v) => {
-  const labelMap: Record<ListSortType, string> = {
-    Name: '名称',
-    Group: '分组',
-    Status: '状态',
-  };
-  return {
-    value: v,
-    label: labelMap[v],
-  };
-});
+).map((v) => ({
+  value: v,
+  label: v,
+}));
 
 interface Props {
   onChange: (value: ListSortType) => void;

@@ -21,7 +21,7 @@ export function AccessView() {
       <PageHeader
         title="Namespace access management"
         breadcrumbs={[
-          { label: 'Namespaces', link: 'kubernetes.resourcePools' },
+          { label: '命名空间', link: 'kubernetes.resourcePools' },
           {
             label: namespaceName,
             link: 'kubernetes.resourcePools.resourcePool',

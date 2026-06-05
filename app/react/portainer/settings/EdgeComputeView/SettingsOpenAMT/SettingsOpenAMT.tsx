@@ -11,6 +11,7 @@ import { LoadingButton } from '@@/buttons/LoadingButton';
 import { TextTip } from '@@/Tip/TextTip';
 import { Input } from '@@/form-components/Input';
 import { FileUploadField } from '@@/form-components/FileUpload';
+import { Alert } from '@@/Alert';
 
 import { validationSchema } from './SettingsOpenAMT.validation';
 
@@ -57,7 +58,7 @@ export function SettingsOpenAMT({ settings, onSubmit }: Props) {
         resolve(cert);
       };
       fileReader.onerror = () => {
-        reject(new Error('读取配置证书文件时出错'));
+        reject(new Error('error reading provisioning certificate file'));
       };
       fileReader.readAsDataURL(file);
     });
@@ -96,6 +97,14 @@ export function SettingsOpenAMT({ settings, onSubmit }: Props) {
       <Widget>
         <WidgetTitle icon={Laptop} title="Intel OpenAMT" />
         <WidgetBody>
+          <div className="mb-2">
+            <Alert color="warn">
+              OpenAMT 支持已弃用，并将在未来版本的 Portainer 中移除。
+              <br />
+              请计划迁移到其他设备管理解决方案。
+            </Alert>
+          </div>
+
           <Formik
             initialValues={initialValues}
             onSubmit={onSubmit}
@@ -175,7 +184,7 @@ export function SettingsOpenAMT({ settings, onSubmit }: Props) {
                       inputId="mps_password"
                       label="MPS 密码"
                       size="medium"
-                      tooltip="需要 8-32 个字符，包括一个大写字母、一个小写字母、一个数字和一个特殊字符。"
+                      tooltip="需要 8-32 个字符，包含一个大写字母、一个小写字母、一个十进制数字和一个特殊字符。"
                       errors={errors.mpsPassword}
                     >
                       <Field
@@ -232,7 +241,7 @@ export function SettingsOpenAMT({ settings, onSubmit }: Props) {
                       inputId="certificate_password"
                       label="配置证书密码"
                       size="medium"
-                      tooltip="需要 8-32 个字符，包括一个大写字母、一个小写字母、一个数字和一个特殊字符。"
+                      tooltip="需要 8-32 个字符，包含一个大写字母、一个小写字母、一个十进制数字和一个特殊字符。"
                       errors={errors.certFilePassword}
                     >
                       <Field

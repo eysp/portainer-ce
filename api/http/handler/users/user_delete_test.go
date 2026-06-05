@@ -11,7 +11,9 @@ import (
 	"github.com/portainer/portainer/api/datastore"
 	"github.com/portainer/portainer/api/http/security"
 	"github.com/portainer/portainer/api/jwt"
+
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_deleteUserRemovesAccessTokens(t *testing.T) {
@@ -22,11 +24,11 @@ func Test_deleteUserRemovesAccessTokens(t *testing.T) {
 	// create standard user
 	user := &portainer.User{ID: 2, Username: "standard", Role: portainer.StandardUserRole}
 	err := store.User().Create(user)
-	is.NoError(err, "error creating user")
+	require.NoError(t, err, "error creating user")
 
 	// setup services
 	jwtService, err := jwt.NewService("1h", store)
-	is.NoError(err, "Error initiating jwt service")
+	require.NoError(t, err, "Error initiating jwt service")
 	apiKeyService := apikey.NewAPIKeyService(store.APIKeyRepository(), store.User())
 	requestBouncer := security.NewRequestBouncer(store, jwtService, apiKeyService)
 	rateLimiter := security.NewRateLimiter(10, 1*time.Second, 1*time.Hour)
@@ -37,20 +39,21 @@ func Test_deleteUserRemovesAccessTokens(t *testing.T) {
 
 	t.Run("standard user deletion removes all associated access tokens", func(t *testing.T) {
 		_, _, err := apiKeyService.GenerateApiKey(*user, "test-user-token")
-		is.NoError(err)
+		require.NoError(t, err)
 
 		keys, err := apiKeyService.GetAPIKeys(user.ID)
-		is.NoError(err)
+		require.NoError(t, err)
 		is.Len(keys, 1)
 
 		rr := httptest.NewRecorder()
 
-		h.deleteUser(rr, user)
+		handleErr := h.deleteUser(rr, user)
+		require.Nil(t, handleErr)
 
 		is.Equal(http.StatusNoContent, rr.Code)
 
 		keys, err = apiKeyService.GetAPIKeys(user.ID)
-		is.NoError(err)
-		is.Equal(0, len(keys))
+		require.NoError(t, err)
+		is.Empty(keys)
 	})
 }

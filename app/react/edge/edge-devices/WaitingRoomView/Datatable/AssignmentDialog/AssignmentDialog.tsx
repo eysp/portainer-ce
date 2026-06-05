@@ -61,7 +61,7 @@ export function AssignmentDialog({
               <div>
                 <FormControl
                   size="vertical"
-                  label="Group"
+                  label="组"
                   tooltip="For managing RBAC with user access"
                   errors={errors.group}
                 >
@@ -85,7 +85,7 @@ export function AssignmentDialog({
 
                 <FormControl
                   size="vertical"
-                  label="Edge Groups"
+                  label="边缘组"
                   tooltip="Required to manage edge job and edge stack deployments"
                   errors={errors.edgeGroups}
                 >
@@ -145,7 +145,7 @@ export function AssignmentDialog({
                 color="default"
                 data-cy="waiting-room-cancel-assignment-button"
               >
-                Cancel
+                取消
               </Button>
               <LoadingButton
                 isLoading={assignRelationsMutation.isLoading}

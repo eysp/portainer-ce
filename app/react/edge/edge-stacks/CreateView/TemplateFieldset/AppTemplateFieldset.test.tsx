@@ -64,8 +64,6 @@ test('renders AppTemplateFieldset component', async () => {
     <Wrapped templateId={template.id} values={values} onChange={onChange} />
   );
 
-  screen.debug();
-
   await expect(
     screen.findByText('This is a template note')
   ).resolves.toBeInTheDocument();

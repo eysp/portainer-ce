@@ -56,7 +56,7 @@ export function AccessControlPanelForm({
       ),
     {
       meta: {
-        error: { title: '失败', message: '无法更新访问控制' },
+        error: { title: 'Failure', message: '无法更新访问控制' },
       },
       onSuccess() {
         return onUpdateSuccess();
@@ -140,7 +140,7 @@ export function AccessControlPanelForm({
 
     updateAccess.mutate(accessControl, {
       onSuccess() {
-        notifySuccess('成功', '访问控制已成功更新');
+        notifySuccess('Success', 'Access control successfully updated');
       },
     });
   }
@@ -149,9 +149,9 @@ export function AccessControlPanelForm({
 function confirmAccessControlUpdate() {
   return confirm({
     modalType: ModalType.Warn,
-    title: '您确定吗？',
+    title: 'Are you sure?',
     message:
       '更改此资源的所有权可能会限制某些用户对其进行管理。',
-    confirmButton: buildConfirmButton('更改所有权'),
+    confirmButton: buildConfirmButton('Change ownership'),
   });
 }

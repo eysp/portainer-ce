@@ -59,7 +59,7 @@ const NvidiaCapabilitiesOptions = [
   {
     value: 'video',
     label: 'video',
-    description: '使用视频编解码器 SDK 所需',
+    description: '使用 Video Codec SDK 所需',
   },
   {
     value: 'display',
@@ -122,7 +122,7 @@ export function GpuFieldset({
 
       {!enableGpuManagement && (
         <TextTip color="blue">
-          此环境中当前未启用 UI 中的 GPU。
+          此环境当前未在 UI 中启用 GPU。
         </TextTip>
       )}
 
@@ -163,7 +163,7 @@ export function GpuFieldset({
           <div className="form-group">
             <div className="col-sm-3 col-lg-2 control-label text-left">
               能力
-              <Tooltip message="'compute' 和 'utility' 能力由 Portainer 预选，因为当您未明确使用 docker CLI '--gpus' 选项指定能力时，它们默认使用。" />
+              <Tooltip message="'compute' 和 'utility' 能力由 Portainer 预先选择，因为当您不使用 docker CLI '--gpus' 选项明确指定能力时，它们是默认使用的。" />
             </div>
             <div className="col-sm-9 col-lg-10 text-left">
               <Select<GpuOption, true>
@@ -182,7 +182,7 @@ export function GpuFieldset({
           <div className="form-group">
             <div className="col-sm-3 col-lg-2 control-label text-left">
               控制
-              <Tooltip message="这是根据您的设置生成的等效于 '--gpus' docker CLI 参数。" />
+              <Tooltip message="这是根据您的设置生成的等效于 '--gups' docker CLI 参数。" />
             </div>
             <div className="col-sm-9 col-lg-10">
               <code>{gpuCmd}</code>

@@ -40,7 +40,7 @@ export function ApplicationIngressesTable({
           <td className="w-[10%]">Service name</td>
           <td className="w-[10%]">Host</td>
           <td className="w-[10%]">Port</td>
-          <td className="w-[10%]">Path</td>
+          <td className="w-[10%]">路径</td>
           <td className="w-[15%]">HTTP Route</td>
         </tr>
         {ingressPathsForAppServices?.map((ingressPath, index) => (

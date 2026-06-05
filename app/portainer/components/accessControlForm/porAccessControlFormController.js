@@ -5,14 +5,12 @@ angular.module('portainer.app').controller('porAccessControlFormController', [
   '$q',
   '$scope',
   '$state',
-  '$transition$',
   'UserService',
   'TeamService',
   'Notifications',
   'Authentication',
   'ResourceControlService',
-  'EndpointProvider',
-  function ($q, $scope, $state, $transition$, UserService, TeamService, Notifications, Authentication, ResourceControlService, EndpointProvider) {
+  function ($q, $scope, $state, UserService, TeamService, Notifications, Authentication, ResourceControlService) {
     var ctrl = this;
 
     ctrl.RCO = RCO;
@@ -73,34 +71,7 @@ angular.module('portainer.app').controller('porAccessControlFormController', [
         ctrl.formData.Ownership = ctrl.RCO.ADMINISTRATORS;
       }
 
-      // Try to get endpointId from multiple sources
-      let environmentId = $state.params.endpointId;
-      
-      // If not found in current params, try transition params
-      if (!environmentId && $transition$ && $transition$.params()) {
-        environmentId = $transition$.params().endpointId;
-      }
-      
-      // If still not found, try to get from EndpointProvider (current endpoint)
-      if (!environmentId) {
-        const currentEndpoint = EndpointProvider.endpoint();
-        if (currentEndpoint && currentEndpoint.Id) {
-          environmentId = currentEndpoint.Id;
-        }
-      }
-
-      if (!environmentId) {
-        Notifications.error('失败', '无法获取环境ID', '无法加载访问控制信息');
-        return;
-      }
-
-      // Ensure environmentId is a number
-      environmentId = parseInt(environmentId, 10);
-      if (isNaN(environmentId)) {
-        Notifications.error('失败', '环境ID格式无效', '无法加载访问控制信息');
-        return;
-      }
-
+      const environmentId = $state.params.endpointId;
       $q.all({
         availableTeams: TeamService.teams(environmentId),
         availableUsers: isAdmin ? UserService.users(false, environmentId) : [],
@@ -122,7 +93,7 @@ angular.module('portainer.app').controller('porAccessControlFormController', [
           }
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索访问控制信息');
+          Notifications.error('Failure', err, '无法获取访问控制信息');
         });
     }
 

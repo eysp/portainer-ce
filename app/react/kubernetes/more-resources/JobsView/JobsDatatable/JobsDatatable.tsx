@@ -123,7 +123,7 @@ function TableActions({ selectedItems }: TableActionsProps) {
         loadingText="Removing jobs..."
         data-cy="k8s-jobs-removeJobButton"
       >
-        Remove
+        删除
       </LoadingButton>
 
       <CreateFromManifestButton

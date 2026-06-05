@@ -3,18 +3,18 @@
     <div ng-if="$ctrl.pullRateLimits.remaining > 0" class="text-muted vertical-center">
       <pr-icon icon="'alert-circle'" mode="'primary'"></pr-icon>
       <span ng-if="$ctrl.isAuthenticated">
-        您当前使用免费账户从 DockerHub 拉取镜像，将限制为每 6 小时 200 次拉取。剩余拉取次数：
+        您当前正在使用免费账户从 DockerHub 拉取镜像，每 6 小时限制 200 次拉取。剩余拉取次数：
         <span style="font-weight: bold">{{ $ctrl.pullRateLimits.remaining }}/{{ $ctrl.pullRateLimits.limit }}</span>
       </span>
       <span ng-if="!$ctrl.isAuthenticated">
         <span ng-if="$ctrl.isAdmin">
-          您当前使用匿名账户从 DockerHub 拉取镜像，将限制为每 6 小时 100 次拉取。您可以在
-          <a ui-sref="portainer.registries">镜像仓库视图</a> 中配置 DockerHub 身份验证。剩余拉取次数：
+          您当前正在使用匿名账户从 DockerHub 拉取镜像，每 6 小时限制 100 次拉取。您可以在
+          the
+          <a ui-sref="portainer.registries">镜像仓库视图</a>. 剩余拉取次数：
           <span style="font-weight: bold">{{ $ctrl.pullRateLimits.remaining }}/{{ $ctrl.pullRateLimits.limit }}</span>
         </span>
         <span ng-if="!$ctrl.isAdmin">
-          您当前使用匿名账户从 DockerHub 拉取镜像，将限制为每 6 小时 100 次拉取。请联系您的管理员配置
-          DockerHub 身份验证。剩余拉取次数： <span style="font-weight: bold">{{ $ctrl.pullRateLimits.remaining }}/{{ $ctrl.pullRateLimits.limit }}</span>
+          您当前正在使用匿名账户从 DockerHub 拉取镜像，每 6 小时限制 100 次拉取。请联系您的管理员配置 DockerHub 身份验证。剩余拉取次数： <span style="font-weight: bold">{{ $ctrl.pullRateLimits.remaining }}/{{ $ctrl.pullRateLimits.limit }}</span>
         </span>
       </span>
     </div>

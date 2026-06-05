@@ -23,7 +23,6 @@ angular.module('portainer.app').controller('InitAdminController', [
       Username: 'admin',
       Password: '',
       ConfirmPassword: '',
-      enableTelemetry: false,
       restoreFormType: $scope.RESTORE_FORM_TYPES.FILE,
     };
 
@@ -56,9 +55,6 @@ angular.module('portainer.app').controller('InitAdminController', [
         .then(function success() {
           return Authentication.login(username, password);
         })
-        .then(function success() {
-          return SettingsService.update({ enableTelemetry: $scope.formValues.enableTelemetry });
-        })
         .then(() => {
           return StateManager.initialize();
         })
@@ -74,7 +70,7 @@ angular.module('portainer.app').controller('InitAdminController', [
         })
         .catch(function error(err) {
           handleError(err);
-          Notifications.error('失败', err, '无法创建管理员用户');
+          Notifications.error('Failure', err, '无法创建管理员用户');
         })
         .finally(function final() {
           $scope.state.actionInProgress = false;
@@ -97,7 +93,7 @@ angular.module('portainer.app').controller('InitAdminController', [
           $scope.requiredPasswordLength = data.RequiredPasswordLength;
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索应用程序设置');
+          Notifications.error('Failure', err, '无法获取应用程序设置');
         });
 
       UserService.administratorExists()
@@ -107,7 +103,7 @@ angular.module('portainer.app').controller('InitAdminController', [
           }
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法验证管理员账户是否存在');
+          Notifications.error('Failure', err, '无法验证管理员账户是否存在');
         });
     }
 
@@ -127,7 +123,7 @@ angular.module('portainer.app').controller('InitAdminController', [
         await restoreAsyncFn();
       } catch (err) {
         handleError(err);
-        Notifications.error('失败', err, '无法恢复备份');
+        Notifications.error('Failure', err, '无法恢复备份');
         $scope.state.backupInProgress = false;
 
         return;
@@ -135,11 +131,11 @@ angular.module('portainer.app').controller('InitAdminController', [
 
       try {
         await waitPortainerRestart();
-        Notifications.success('成功', '备份已成功恢复');
+        Notifications.success('Success', '备份已成功恢复');
         $state.go('portainer.auth');
       } catch (err) {
         handleError(err);
-        Notifications.error('失败', err, '无法检查状态');
+        Notifications.error('Failure', err, '无法检查状态');
         await wait(2);
         location.reload();
       }
@@ -159,7 +155,7 @@ angular.module('portainer.app').controller('InitAdminController', [
           // pass
         }
       }
-      throw new Error('Timeout to wait for Portainer restarting');
+      throw new Error('等待 Portainer 重启超时');
     }
   },
 ]);

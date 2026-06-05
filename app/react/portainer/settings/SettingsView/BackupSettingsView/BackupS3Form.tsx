@@ -249,7 +249,7 @@ export function BackupS3Form() {
 
     updateS3Mutate.mutate(payload, {
       onSuccess() {
-        notifySuccess('成功', 'S3 备份设置已成功保存');
+        notifySuccess('成功', 'S3 备份设置已保存');
       },
     });
   }

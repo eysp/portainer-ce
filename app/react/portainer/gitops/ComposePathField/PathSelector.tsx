@@ -5,6 +5,19 @@ import { AutocompleteSelect } from '@@/form-components/AutocompleteSelect';
 import { getAuthentication } from '../utils';
 import { GitFormModel } from '../types';
 
+export type PathSelectorGitModel = Pick<
+  GitFormModel,
+  | 'RepositoryAuthentication'
+  | 'RepositoryPassword'
+  | 'RepositoryUsername'
+  | 'RepositoryGitCredentialID'
+  | 'RepositoryAuthorizationType'
+  | 'RepositoryURL'
+  | 'RepositoryReferenceName'
+  | 'TLSSkipVerify'
+  | 'RepositoryURLValid'
+>;
+
 export function PathSelector({
   value,
   onChange,
@@ -18,7 +31,7 @@ export function PathSelector({
   value: string;
   onChange(value: string): void;
   placeholder: string;
-  model: GitFormModel;
+  model: PathSelectorGitModel;
   dirOnly?: boolean;
   readOnly?: boolean;
   inputId: string;

@@ -51,7 +51,7 @@ export function LogsActions({ environmentId, edgeStackId }: Props) {
       <Button
         className="p-0"
         color="link"
-        title="Download logs"
+        title="下载日志"
         disabled={status !== 'collected'}
         onClick={handleDownloadLogs}
         data-cy="edge-stack-logs-download-button"
@@ -66,7 +66,7 @@ export function LogsActions({ environmentId, edgeStackId }: Props) {
       <Button
         className="p-0"
         color="link"
-        title="Delete logs"
+        title="删除日志"
         disabled={status !== 'collected'}
         onClick={handleDeleteLogs}
         data-cy="edge-stack-logs-delete-button"

@@ -172,7 +172,7 @@ function TableActions({ selectedItems }: TableActionsProps) {
         loadingText="Removing role bindings..."
         data-cy="k8s-role-bindings-remove-button"
       >
-        Remove
+        删除
       </LoadingButton>
 
       <CreateFromManifestButton

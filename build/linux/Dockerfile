@@ -1,4 +1,4 @@
-FROM portainer/base as production
+FROM portainer/base AS production
 
 LABEL org.opencontainers.image.title="Portainer" \
   org.opencontainers.image.description="Docker container management made simple, with the world’s most popular GUI-based container management platform." \
@@ -27,7 +27,17 @@ EXPOSE 9000
 EXPOSE 9443
 EXPOSE 8000
 
-LABEL io.portainer.server true
+ARG GIT_COMMIT=unspecified
+ARG BUILD_DATE=unspecified
+LABEL git_commit=$GIT_COMMIT \
+  org.opencontainers.image.revision=$GIT_COMMIT \
+  org.opencontainers.image.created=$BUILD_DATE \
+  org.opencontainers.image.title="Portainer CE" \
+  org.opencontainers.image.description="Portainer Community Edition server." \
+  org.opencontainers.image.vendor="Portainer.io" \
+  org.opencontainers.image.url="https://www.portainer.io" \
+  org.opencontainers.image.documentation="https://docs.portainer.io" \
+  io.portainer.server="true"
 
 ENTRYPOINT ["/portainer"]
 

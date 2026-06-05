@@ -18,7 +18,7 @@ export function TableActions({
       <DeleteButton
         disabled={selectedItems.length === 0}
         onConfirmed={() => handleRemove(selectedItems)}
-        confirmMessage="您确定要移除选定的边缘堆栈吗？"
+        confirmMessage="Are you sure you want to remove the selected Edge stack(s)?"
         data-cy="edgeStack-removeStackButton"
       />
 
@@ -30,7 +30,7 @@ export function TableActions({
     const ids = selectedItems.map((item) => item.Id);
     removeMutation.mutate(ids, {
       onSuccess: () => {
-        notifySuccess('成功', '边缘堆栈已移除');
+        notifySuccess('Success', 'Edge stack(s) removed');
       },
     });
   }

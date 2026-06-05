@@ -1,10 +1,16 @@
 import clsx from 'clsx';
-import { AlertCircle, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import {
+  AlertCircle,
+  AlertTriangle,
+  CheckCircle,
+  Info,
+  XCircle,
+} from 'lucide-react';
 import { PropsWithChildren, ReactNode } from 'react';
 
 import { Icon } from '@@/Icon';
 
-type AlertType = 'success' | 'error' | 'info' | 'warn';
+type AlertType = 'success' | 'error' | 'info' | 'warn' | 'default';
 
 export const alertSettings: Record<
   AlertType,
@@ -12,31 +18,38 @@ export const alertSettings: Record<
 > = {
   success: {
     container:
-      'border-green-4 bg-green-2 th-dark:bg-green-10 th-dark:border-green-8 th-highcontrast:bg-green-10 th-highcontrast:border-green-8',
+      'border-green-4 bg-green-2 th-dark:bg-green-10 th-dark:border-green-8 th-highcontrast:bg-green-10 th-highcontrast:border-white',
     header: 'text-green-8 th-dark:text-white th-highcontrast:text-white',
     body: 'text-green-7 th-dark:text-white th-highcontrast:text-white',
     icon: CheckCircle,
   },
   error: {
     container:
-      'border-error-4 bg-error-2 th-dark:bg-error-10 th-dark:border-error-8 th-highcontrast:bg-error-10 th-highcontrast:border-error-8',
+      'border-error-4 bg-error-2 th-dark:bg-error-10 th-dark:border-error-8 th-highcontrast:bg-error-10 th-highcontrast:border-white',
     header: 'text-error-8 th-dark:text-white th-highcontrast:text-white',
     body: 'text-error-7 th-dark:text-white th-highcontrast:text-white',
     icon: XCircle,
   },
   info: {
     container:
-      'border-blue-4 bg-blue-2 th-dark:bg-blue-10 th-dark:border-blue-8 th-highcontrast:bg-blue-10 th-highcontrast:border-blue-8',
+      'border-blue-4 bg-blue-2 th-dark:bg-blue-10 th-dark:border-blue-8 th-highcontrast:bg-blue-10 th-highcontrast:border-white',
     header: 'text-blue-8 th-dark:text-white th-highcontrast:text-white',
     body: 'text-blue-7 th-dark:text-white th-highcontrast:text-white',
     icon: AlertCircle,
   },
   warn: {
     container:
-      'border-warning-4 bg-warning-2 th-dark:bg-warning-10 th-dark:border-warning-8 th-highcontrast:bg-warning-10 th-highcontrast:border-warning-8',
+      'border-warning-4 bg-warning-2 th-dark:bg-warning-10 th-dark:border-warning-8 th-highcontrast:bg-warning-10 th-highcontrast:border-white',
     header: 'text-warning-8 th-dark:text-white th-highcontrast:text-white',
     body: 'text-warning-7 th-dark:text-white th-highcontrast:text-white',
     icon: AlertTriangle,
+  },
+  default: {
+    container:
+      'border-graphite-200 bg-graphite-50 th-dark:bg-graphite-700 th-dark:border-graphite-500 th-highcontrast:bg-graphite-800 th-highcontrast:border-white',
+    header: 'text-graphite-600 th-dark:text-white th-highcontrast:text-white',
+    body: 'text-graphite-500 th-dark:text-white th-highcontrast:text-white',
+    icon: Info,
   },
 };
 
@@ -83,7 +96,7 @@ export function AlertContainer({
   return (
     <div
       className={clsx(
-        'border rounded-lg border-solid [&_ul]:ps-8',
+        'border rounded-xl border-solid [&_ul]:ps-8',
         'p-3',
         className
       )}

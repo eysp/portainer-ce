@@ -10,7 +10,7 @@ import {
   Registry,
   RegistryId,
 } from '@/react/portainer/registries/types/registry';
-import { createWebhook } from '@/react/portainer/webhooks/createWebhook';
+import { createWebhook } from '@/react/portainer/webhooks/useCreateWebhook';
 import { WebhookType } from '@/react/portainer/webhooks/types';
 import {
   AccessControlFormData,
@@ -54,7 +54,7 @@ export function useCreateOrReplaceMutation() {
   return useMutation(
     createOrReplace,
     mutationOptions(
-      withError('Failed to create container'),
+      withError('创建容器失败'),
       withInvalidate(queryClient, [queryKeys.list(environmentId)])
     )
   );
@@ -299,7 +299,7 @@ async function createContainer(
 
     return data;
   } catch (err) {
-    throw parseAxiosError(err, 'Unable to create container');
+    throw parseAxiosError(err, '无法创建容器');
   }
 }
 
@@ -315,10 +315,10 @@ async function createContainerWebhook(
   }
 
   await createWebhook({
-    ResourceId: containerId,
-    EndpointID: environment.Id,
-    RegistryId: registryId,
-    WebhookType: WebhookType.DockerContainer,
+    resourceId: containerId,
+    environmentId: environment.Id,
+    registryId,
+    webhookType: WebhookType.DockerContainer,
   });
 }
 

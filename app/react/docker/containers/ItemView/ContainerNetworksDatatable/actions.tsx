@@ -1,5 +1,4 @@
 import { CellContext } from '@tanstack/react-table';
-import { useRouter } from '@uirouter/react';
 
 import { Authorized } from '@/react/hooks/useUser';
 import { useDisconnectContainer } from '@/react/docker/networks/queries/useDisconnectContainerMutation';
@@ -25,7 +24,6 @@ export function buildActions({ nodeName }: { nodeName?: string } = {}) {
       options: { meta },
     },
   }: CellContext<TableNetwork, unknown>) {
-    const router = useRouter();
     const environmentId = useEnvironmentId();
     const disconnectMutation = useDisconnectContainer({
       environmentId,
@@ -60,7 +58,6 @@ export function buildActions({ nodeName }: { nodeName?: string } = {}) {
         {
           onSuccess() {
             notifySuccess('容器已成功断开连接', networkId);
-            router.stateService.reload();
           },
         }
       );

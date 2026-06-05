@@ -4,11 +4,12 @@ import { EnvironmentId } from '@/react/portainer/environments/types';
 import axios, { parseAxiosError } from '@/portainer/services/axios';
 import {
   mutationOptions,
-  withError,
+  withGlobalError,
   withInvalidate,
 } from '@/react-tools/react-query';
 
 import { buildDockerProxyUrl } from '../../proxy/queries/buildDockerProxyUrl';
+import { queryKeys as containerQueryKeys } from '../../containers/queries/query-keys';
 import { withAgentTargetHeader } from '../../proxy/queries/utils';
 import { ContainerId } from '../../containers/types';
 import { NetworkId } from '../types';
@@ -33,8 +34,11 @@ export function useDisconnectContainer({
       nodeName?: string;
     }) => disconnectContainer(environmentId, networkId, containerId, nodeName),
     mutationOptions(
-      withInvalidate(client, [queryKeys.item(environmentId, networkId)]),
-      withError('无法从网络断开容器连接')
+      withInvalidate(client, [
+        queryKeys.item(environmentId, networkId),
+        containerQueryKeys.list(environmentId),
+      ]),
+      withGlobalError('无法从网络断开容器')
     )
   );
 }
@@ -63,6 +67,6 @@ export async function disconnectContainer(
     );
     return { networkId, environmentId };
   } catch (err) {
-    throw parseAxiosError(err, '无法从网络断开容器连接');
+    throw parseAxiosError(err, '无法从网络断开容器');
   }
 }

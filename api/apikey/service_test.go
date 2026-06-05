@@ -10,9 +10,10 @@ import (
 
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/datastore"
-	"github.com/stretchr/testify/assert"
 
 	"github.com/rs/zerolog/log"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_SatisfiesAPIKeyServiceInterface(t *testing.T) {
@@ -30,7 +31,7 @@ func Test_GenerateApiKey(t *testing.T) {
 	t.Run("Successfully generates API key", func(t *testing.T) {
 		desc := "test-1"
 		rawKey, apiKey, err := service.GenerateApiKey(portainer.User{ID: 1}, desc)
-		is.NoError(err)
+		require.NoError(t, err)
 		is.NotEmpty(rawKey)
 		is.NotEmpty(apiKey)
 		is.Equal(desc, apiKey.Description)
@@ -38,7 +39,7 @@ func Test_GenerateApiKey(t *testing.T) {
 
 	t.Run("Api key prefix is 7 chars", func(t *testing.T) {
 		rawKey, apiKey, err := service.GenerateApiKey(portainer.User{ID: 1}, "test-2")
-		is.NoError(err)
+		require.NoError(t, err)
 
 		is.Equal(rawKey[:7], apiKey.Prefix)
 		is.Len(apiKey.Prefix, 7)
@@ -46,7 +47,7 @@ func Test_GenerateApiKey(t *testing.T) {
 
 	t.Run("Api key has 'ptr_' as prefix", func(t *testing.T) {
 		rawKey, _, err := service.GenerateApiKey(portainer.User{ID: 1}, "test-x")
-		is.NoError(err)
+		require.NoError(t, err)
 
 		is.Equal(portainerAPIKeyPrefix, "ptr_")
 		is.True(strings.HasPrefix(rawKey, "ptr_"))
@@ -55,7 +56,7 @@ func Test_GenerateApiKey(t *testing.T) {
 	t.Run("Successfully caches API key", func(t *testing.T) {
 		user := portainer.User{ID: 1}
 		_, apiKey, err := service.GenerateApiKey(user, "test-3")
-		is.NoError(err)
+		require.NoError(t, err)
 
 		userFromCache, apiKeyFromCache, ok := service.cache.Get(apiKey.Digest)
 		is.True(ok)
@@ -65,7 +66,7 @@ func Test_GenerateApiKey(t *testing.T) {
 
 	t.Run("Decoded raw api-key digest matches generated digest", func(t *testing.T) {
 		rawKey, apiKey, err := service.GenerateApiKey(portainer.User{ID: 1}, "test-4")
-		is.NoError(err)
+		require.NoError(t, err)
 
 		generatedDigest := sha256.Sum256([]byte(rawKey))
 
@@ -83,10 +84,10 @@ func Test_GetAPIKey(t *testing.T) {
 	t.Run("Successfully returns all API keys", func(t *testing.T) {
 		user := portainer.User{ID: 1}
 		_, apiKey, err := service.GenerateApiKey(user, "test-1")
-		is.NoError(err)
+		require.NoError(t, err)
 
 		apiKeyGot, err := service.GetAPIKey(apiKey.ID)
-		is.NoError(err)
+		require.NoError(t, err)
 
 		is.Equal(apiKey, apiKeyGot)
 	})
@@ -102,12 +103,12 @@ func Test_GetAPIKeys(t *testing.T) {
 	t.Run("Successfully returns all API keys", func(t *testing.T) {
 		user := portainer.User{ID: 1}
 		_, _, err := service.GenerateApiKey(user, "test-1")
-		is.NoError(err)
+		require.NoError(t, err)
 		_, _, err = service.GenerateApiKey(user, "test-2")
-		is.NoError(err)
+		require.NoError(t, err)
 
 		keys, err := service.GetAPIKeys(user.ID)
-		is.NoError(err)
+		require.NoError(t, err)
 		is.Len(keys, 2)
 	})
 }
@@ -122,10 +123,10 @@ func Test_GetDigestUserAndKey(t *testing.T) {
 	t.Run("Successfully returns user and api key associated to digest", func(t *testing.T) {
 		user := portainer.User{ID: 1}
 		_, apiKey, err := service.GenerateApiKey(user, "test-1")
-		is.NoError(err)
+		require.NoError(t, err)
 
 		userGot, apiKeyGot, err := service.GetDigestUserAndKey(apiKey.Digest)
-		is.NoError(err)
+		require.NoError(t, err)
 		is.Equal(user, userGot)
 		is.Equal(*apiKey, apiKeyGot)
 	})
@@ -133,10 +134,10 @@ func Test_GetDigestUserAndKey(t *testing.T) {
 	t.Run("Successfully caches user and api key associated to digest", func(t *testing.T) {
 		user := portainer.User{ID: 1}
 		_, apiKey, err := service.GenerateApiKey(user, "test-1")
-		is.NoError(err)
+		require.NoError(t, err)
 
 		userGot, apiKeyGot, err := service.GetDigestUserAndKey(apiKey.Digest)
-		is.NoError(err)
+		require.NoError(t, err)
 		is.Equal(user, userGot)
 		is.Equal(*apiKey, apiKeyGot)
 
@@ -156,16 +157,19 @@ func Test_UpdateAPIKey(t *testing.T) {
 
 	t.Run("Successfully updates the api-key LastUsed time", func(t *testing.T) {
 		user := portainer.User{ID: 1}
-		store.User().Create(&user)
+
+		err := store.User().Create(&user)
+		require.NoError(t, err)
+
 		_, apiKey, err := service.GenerateApiKey(user, "test-x")
-		is.NoError(err)
+		require.NoError(t, err)
 
 		apiKey.LastUsed = time.Now().UTC().Unix()
 		err = service.UpdateAPIKey(apiKey)
-		is.NoError(err)
+		require.NoError(t, err)
 
 		_, apiKeyGot, err := service.GetDigestUserAndKey(apiKey.Digest)
-		is.NoError(err)
+		require.NoError(t, err)
 
 		log.Debug().Str("wanted", fmt.Sprintf("%+v", apiKey)).Str("got", fmt.Sprintf("%+v", apiKeyGot)).Msg("")
 
@@ -174,7 +178,7 @@ func Test_UpdateAPIKey(t *testing.T) {
 
 	t.Run("Successfully updates api-key in cache upon api-key update", func(t *testing.T) {
 		_, apiKey, err := service.GenerateApiKey(portainer.User{ID: 1}, "test-x2")
-		is.NoError(err)
+		require.NoError(t, err)
 
 		_, apiKeyFromCache, ok := service.cache.Get(apiKey.Digest)
 		is.True(ok)
@@ -184,7 +188,7 @@ func Test_UpdateAPIKey(t *testing.T) {
 		is.NotEqual(*apiKey, apiKeyFromCache)
 
 		err = service.UpdateAPIKey(apiKey)
-		is.NoError(err)
+		require.NoError(t, err)
 
 		_, updatedAPIKeyFromCache, ok := service.cache.Get(apiKey.Digest)
 		is.True(ok)
@@ -202,30 +206,30 @@ func Test_DeleteAPIKey(t *testing.T) {
 	t.Run("Successfully updates the api-key", func(t *testing.T) {
 		user := portainer.User{ID: 1}
 		_, apiKey, err := service.GenerateApiKey(user, "test-1")
-		is.NoError(err)
+		require.NoError(t, err)
 
 		_, apiKeyGot, err := service.GetDigestUserAndKey(apiKey.Digest)
-		is.NoError(err)
+		require.NoError(t, err)
 		is.Equal(*apiKey, apiKeyGot)
 
 		err = service.DeleteAPIKey(apiKey.ID)
-		is.NoError(err)
+		require.NoError(t, err)
 
 		_, _, err = service.GetDigestUserAndKey(apiKey.Digest)
-		is.Error(err)
+		require.Error(t, err)
 	})
 
 	t.Run("Successfully removes api-key from cache upon deletion", func(t *testing.T) {
 		user := portainer.User{ID: 1}
 		_, apiKey, err := service.GenerateApiKey(user, "test-1")
-		is.NoError(err)
+		require.NoError(t, err)
 
 		_, apiKeyFromCache, ok := service.cache.Get(apiKey.Digest)
 		is.True(ok)
 		is.Equal(*apiKey, apiKeyFromCache)
 
 		err = service.DeleteAPIKey(apiKey.ID)
-		is.NoError(err)
+		require.NoError(t, err)
 
 		_, _, ok = service.cache.Get(apiKey.Digest)
 		is.False(ok)
@@ -243,10 +247,10 @@ func Test_InvalidateUserKeyCache(t *testing.T) {
 		// generate api keys
 		user := portainer.User{ID: 1}
 		_, apiKey1, err := service.GenerateApiKey(user, "test-1")
-		is.NoError(err)
+		require.NoError(t, err)
 
 		_, apiKey2, err := service.GenerateApiKey(user, "test-2")
-		is.NoError(err)
+		require.NoError(t, err)
 
 		// verify api keys are present in cache
 		_, apiKeyFromCache, ok := service.cache.Get(apiKey1.Digest)
@@ -273,11 +277,11 @@ func Test_InvalidateUserKeyCache(t *testing.T) {
 		// generate keys for 2 users
 		user1 := portainer.User{ID: 1}
 		_, apiKey1, err := service.GenerateApiKey(user1, "test-1")
-		is.NoError(err)
+		require.NoError(t, err)
 
 		user2 := portainer.User{ID: 2}
 		_, apiKey2, err := service.GenerateApiKey(user2, "test-2")
-		is.NoError(err)
+		require.NoError(t, err)
 
 		// verify keys in cache
 		_, apiKeyFromCache, ok := service.cache.Get(apiKey1.Digest)

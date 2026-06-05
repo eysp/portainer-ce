@@ -1,8 +1,7 @@
-import { useCurrentStateAndParams } from '@uirouter/react';
 import { Database, HardDrive } from 'lucide-react';
 
 import { PageHeader } from '@@/PageHeader';
-import { WidgetTabs, Tab, findSelectedTabIndex } from '@@/Widget/WidgetTabs';
+import { WidgetTabs, Tab, useCurrentTabIndex } from '@@/Widget/WidgetTabs';
 
 import { VolumesDatatable } from './VolumesDatatable';
 import { StorageDatatable } from './StorageDatatable';
@@ -10,27 +9,24 @@ import { StorageDatatable } from './StorageDatatable';
 export function VolumesView() {
   const tabs: Tab[] = [
     {
-      name: '卷',
+      name: 'Volumes',
       icon: Database,
       widget: <VolumesDatatable />,
       selectedTabParam: 'volumes',
     },
     {
-      name: '存储',
+      name: 'Storage',
       icon: HardDrive,
       widget: <StorageDatatable />,
       selectedTabParam: 'storage',
     },
   ];
 
-  const currentTabIndex = findSelectedTabIndex(
-    useCurrentStateAndParams(),
-    tabs
-  );
+  const currentTabIndex = useCurrentTabIndex(tabs);
 
   return (
     <>
-      <PageHeader title="卷列表" breadcrumbs="卷" reload />
+      <PageHeader title="卷列表" breadcrumbs="Volumes" reload />
       <>
         <WidgetTabs tabs={tabs} currentTabIndex={currentTabIndex} />
         <div className="content">{tabs[currentTabIndex].widget}</div>

@@ -43,8 +43,6 @@ type settingsUpdatePayload struct {
 	UserSessionTimeout *string `example:"5m"`
 	// The expiry of a Kubeconfig
 	KubeconfigExpiry *string `example:"24h" default:"0"`
-	// Whether telemetry is enabled
-	EnableTelemetry *bool `example:"false"`
 	// Helm repository URL
 	HelmRepositoryURL *string `example:"https://charts.bitnami.com/bitnami"`
 	// Kubectl Shell Image
@@ -128,12 +126,7 @@ func (handler *Handler) settingsUpdate(w http.ResponseWriter, r *http.Request) *
 
 		return err
 	}); err != nil {
-		var httpErr *httperror.HandlerError
-		if errors.As(err, &httpErr) {
-			return httpErr
-		}
-
-		return httperror.InternalServerError("Unexpected error", err)
+		return response.TxErrorResponse(err)
 	}
 
 	hideFields(settings)
@@ -226,8 +219,6 @@ func (handler *Handler) updateSettings(tx dataservices.DataStoreTx, payload sett
 
 		handler.JWTService.SetUserSessionDuration(userSessionDuration)
 	}
-
-	settings.EnableTelemetry = *cmp.Or(payload.EnableTelemetry, &settings.EnableTelemetry)
 
 	if err := handler.updateTLS(settings); err != nil {
 		return nil, err

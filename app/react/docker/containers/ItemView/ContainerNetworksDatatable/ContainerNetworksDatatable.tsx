@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Network } from 'lucide-react';
-import { EndpointSettings, NetworkSettings } from 'docker-types/generated/1.41';
+import { EndpointSettings, NetworkSettings } from 'docker-types';
 
 import { createPersistedStore } from '@@/datatables/types';
 import { useTableState } from '@@/datatables/useTableState';
@@ -19,11 +19,11 @@ const store = createPersistedStore(storageKey, 'name');
 
 export function ContainerNetworksDatatable({
   dataset,
-  container,
+  containerId,
   nodeName,
 }: {
   dataset: NetworkSettings['Networks'];
-  container: ContainerListViewModel;
+  containerId: ContainerListViewModel['Id'];
   nodeName?: string;
 }) {
   const tableState = useTableState(store, storageKey);
@@ -56,7 +56,7 @@ export function ContainerNetworksDatatable({
       )}
       description={
         <ConnectNetworkForm
-          containerId={container.Id}
+          containerId={containerId}
           nodeName={nodeName}
           selectedNetworks={networks.map((n) => n.id)}
         />
@@ -64,7 +64,7 @@ export function ContainerNetworksDatatable({
       extendTableOptions={mergeOptions(
         withMeta({
           table: 'container-networks',
-          containerId: container.Id,
+          containerId,
         })
       )}
       data-cy="container-networks-datatable"

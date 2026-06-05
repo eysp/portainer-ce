@@ -6,10 +6,10 @@ import { Link } from '@@/Link';
 export function DisplayUserAccessToken({ apikey }: { apikey: string }) {
   return (
     <>
-      <FormSectionTitle>New access token</FormSectionTitle>
+      <FormSectionTitle>新访问令牌</FormSectionTitle>
       <TextTip>
-        Please copy the new access token. You won&#39;t be able to view the
-        token again.
+        请复制新的访问令牌。您将无法再次
+        查看此令牌。
       </TextTip>
       <div className="pt-5">
         <div className="inline-flex">
@@ -31,7 +31,7 @@ export function DisplayUserAccessToken({ apikey }: { apikey: string }) {
         }}
         data-cy="create-access-token-done-button"
       >
-        Done
+        完成
       </Button>
     </>
   );

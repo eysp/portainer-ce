@@ -18,6 +18,7 @@ import (
 	"github.com/portainer/portainer/api/internal/testhelpers"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_restoreArchive_usingCombinationOfPasswords(t *testing.T) {
@@ -64,13 +65,12 @@ func Test_restoreArchive_usingCombinationOfPasswords(t *testing.T) {
 				adminMonitor,
 			)
 
-			//backup
+			// backup
 			archive := backup(t, h, test.backupPassword)
 
-			//restore
+			// restore
 			w := httptest.NewRecorder()
-			r, err := prepareMultipartRequest(test.restorePassword, archive)
-			assert.Nil(t, err, "Shouldn't fail to write multipart form")
+			r := prepareMultipartRequest(t, test.restorePassword, archive)
 
 			restoreErr := h.restore(w, r)
 			assert.Equal(t, test.fails, restoreErr != nil, "Didn't meet expectation of failing restore handler")
@@ -96,13 +96,12 @@ func Test_restoreArchive_shouldFailIfSystemWasAlreadyInitialized(t *testing.T) {
 		adminMonitor,
 	)
 
-	//backup
+	// backup
 	archive := backup(t, h, "password")
 
-	//restore
+	// restore
 	w := httptest.NewRecorder()
-	r, err := prepareMultipartRequest("password", archive)
-	assert.Nil(t, err, "Shouldn't fail to write multipart form")
+	r := prepareMultipartRequest(t, "password", archive)
 
 	restoreErr := h.restore(w, r)
 	assert.NotNil(t, restoreErr, "Should fail, because system it already initialized")
@@ -117,31 +116,33 @@ func backup(t *testing.T, h *Handler, password string) []byte {
 	assert.Nil(t, backupErr, "Backup should not fail")
 
 	response := w.Result()
-	archive, _ := io.ReadAll(response.Body)
-	response.Body.Close()
+	archive, err := io.ReadAll(response.Body)
+	require.NoError(t, err)
+
+	err = response.Body.Close()
+	require.NoError(t, err)
 
 	return archive
 }
 
-func prepareMultipartRequest(password string, file []byte) (*http.Request, error) {
+func prepareMultipartRequest(t *testing.T, password string, file []byte) *http.Request {
 	var body bytes.Buffer
 
 	w := multipart.NewWriter(&body)
 	err := w.WriteField("password", password)
-	if err != nil {
-		return nil, err
-	}
+	require.NoError(t, err)
 
 	fw, err := w.CreateFormFile("file", "filename")
-	if err != nil {
-		return nil, err
-	}
-	io.Copy(fw, bytes.NewReader(file))
+	require.NoError(t, err)
+
+	_, err = io.Copy(fw, bytes.NewReader(file))
+	require.NoError(t, err)
 
 	r := httptest.NewRequest(http.MethodPost, "http://localhost/", &body)
 	r.Header.Set("Content-Type", w.FormDataContentType())
 
-	w.Close()
+	err = w.Close()
+	require.NoError(t, err)
 
-	return r, nil
+	return r
 }

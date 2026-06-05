@@ -85,6 +85,7 @@ function Cell({
           nodeName: item.NodeName,
         }}
         data-cy={`volume-link-${name}`}
+        title={name}
       >
         {truncate(name, 40)}
       </Link>

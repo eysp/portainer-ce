@@ -12,7 +12,7 @@ const columnHelper = createColumnHelper<Item>();
 
 const columns = [
   columnHelper.accessor('value', {
-    header: 'Namespace',
+    header: '命名空间',
   }),
 ];
 
@@ -31,11 +31,12 @@ export function AccessTable({
 
   return (
     <Datatable
-      title="Access"
+      title="访问权限"
       titleIcon={UserX}
       dataset={dataset}
       columns={columns}
       settingsManager={tableState}
+      getRowId={(row) => row.value}
       renderTableActions={(selectedItems) => (
         <DeleteButton
           disabled={selectedItems.length === 0}

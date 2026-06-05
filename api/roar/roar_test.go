@@ -45,7 +45,7 @@ func TestRoar(t *testing.T) {
 	})
 
 	rSlice := r.ToSlice()
-	require.EqualValues(t, []int{2, 3, 4, 5}, rSlice)
+	require.Equal(t, []int{2, 3, 4, 5}, rSlice)
 
 	r.Intersection(FromSlice([]int{4}))
 	require.Equal(t, 1, r.Len())

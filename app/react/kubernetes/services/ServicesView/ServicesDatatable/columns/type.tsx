@@ -7,7 +7,7 @@ import { ServiceRowData } from '../types';
 import { columnHelper } from './helper';
 
 export const type = columnHelper.accessor('Type', {
-  header: 'Type',
+  header: '类型',
   id: 'type',
   meta: {
     filter: filterHOC('Filter by type'),

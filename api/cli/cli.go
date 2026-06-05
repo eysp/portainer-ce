@@ -52,7 +52,6 @@ func CLIFlags() *portainer.CLIFlags {
 		SecretKeyName:             kingpin.Flag("secret-key-name", "Secret key name for encryption and will be used as /run/secrets/<secret-key-name>.").Default(defaultSecretKeyName).String(),
 		LogLevel:                  kingpin.Flag("log-level", "Set the minimum logging level to show").Default("INFO").Enum("DEBUG", "INFO", "WARN", "ERROR"),
 		LogMode:                   kingpin.Flag("log-mode", "Set the logging output mode").Default("PRETTY").Enum("NOCOLOR", "PRETTY", "JSON"),
-		KubectlShellImage:         kingpin.Flag("kubectl-shell-image", "Kubectl shell image").Envar(portainer.KubectlShellImageEnvVar).Default(portainer.DefaultKubectlShellImage).String(),
 		PullLimitCheckDisabled:    kingpin.Flag("pull-limit-check-disabled", "Pull limit check").Envar(portainer.PullLimitCheckDisabledEnvVar).Default(defaultPullLimitCheckDisabled).Bool(),
 		TrustedOrigins:            kingpin.Flag("trusted-origins", "List of trusted origins for CSRF protection. Separate multiple origins with a comma.").Envar(portainer.TrustedOriginsEnvVar).String(),
 		CSP:                       kingpin.Flag("csp", "Content Security Policy (CSP) header").Envar(portainer.CSPEnvVar).Default("true").Bool(),
@@ -95,7 +94,19 @@ func (Service) ParseFlags(version string) (*portainer.CLIFlags, error) {
 	flags.TLSKey = tlsKeyFlag.String()
 	flags.TLSCacert = kingpin.Flag("tlscacert", "Path to the CA").Default(defaultTLSCACertPath).String()
 
+	var hasKubectlShellImageFlag bool
+	kubectlShellImageFlag := kingpin.Flag(
+		"kubectl-shell-image",
+		"Kubectl shell image",
+	).Envar(portainer.KubectlShellImageEnvVar).
+		Default(portainer.DefaultKubectlShellImage).
+		IsSetByUser(&hasKubectlShellImageFlag)
+	flags.KubectlShellImage = kubectlShellImageFlag.String()
+
 	kingpin.Parse()
+
+	_, kubectlShellImageEnvVarSet := os.LookupEnv(portainer.KubectlShellImageEnvVar)
+	flags.KubectlShellImageSet = hasKubectlShellImageFlag || kubectlShellImageEnvVarSet
 
 	if !filepath.IsAbs(*flags.Assets) {
 		ex, err := os.Executable()

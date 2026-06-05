@@ -6,7 +6,6 @@ import { UseMutationResult } from '@tanstack/react-query';
 import { notifyError, notifySuccess } from '@/portainer/services/notifications';
 import { UpdateEnvironmentPayload } from '@/react/portainer/environments/queries/useUpdateEnvironmentMutation';
 import { Environment } from '@/react/portainer/environments/types';
-import { TrackEventProps } from '@/angulartics.matomo/analytics-services';
 
 import { ConfigureFormValues, StorageClassFormValues } from './types';
 import { ConfigureClusterPayloads } from './useConfigureClusterMutation';
@@ -22,25 +21,11 @@ export async function handleSubmitConfigureCluster(
     unknown
   >,
   { resetForm }: FormikHelpers<ConfigureFormValues>,
-  trackEvent: (action: string, properties: TrackEventProps) => void,
   environment?: Environment
 ) {
   if (!environment) {
     notifyError('Unable to save configuration: environment not found');
     return;
-  }
-
-  // send metrics if needed
-  if (
-    values.restrictDefaultNamespace &&
-    !initialValues?.restrictDefaultNamespace
-  ) {
-    trackEvent('kubernetes-configure', {
-      category: 'kubernetes',
-      metadata: {
-        restrictAccessToDefaultNamespace: values.restrictDefaultNamespace,
-      },
-    });
   }
 
   // transform the form values into the environment object

@@ -61,7 +61,7 @@ function ActionsCell({
             onClick={() => clearLogsMutations.mutate(item.EndpointId)}
             data-cy={`edge-job-clear-logs-${item.EndpointName}`}
           >
-            清除日志
+            Clear logs
           </Button>
         </>
       );
@@ -72,7 +72,7 @@ function ActionsCell({
           onClick={() => collectLogsMutation.mutate(item.EndpointId)}
           data-cy={`edge-job-retrieve-logs-${item.EndpointName}`}
         >
-          检索日志
+          Retrieve logs
         </Button>
       );
   }

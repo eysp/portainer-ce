@@ -30,10 +30,11 @@ export function LogoFieldset() {
         <div>
           <div className="form-group">
             <span className="col-sm-12 text-muted small">
-              您可以在此指定 Logo 的 URL。为了获得最佳显示效果，Logo 尺寸应为 155px × 55px。
+              您可以在此处指定 Logo 的 URL。为了获得最佳显示效果，
+              Logo 尺寸应为 155px × 55px。
             </span>
           </div>
-          <FormControl label="URL" inputId="logo_url" errors={error} required>
+          <FormControl label="链接" inputId="logo_url" errors={error} required>
             <Field
               as={Input}
               name={name}

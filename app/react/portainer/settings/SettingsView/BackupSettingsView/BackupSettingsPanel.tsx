@@ -19,7 +19,7 @@ export function BackupSettingsPanel() {
         <div className="form-horizontal">
           <FormSection title="备份配置">
             <div className="form-group col-sm-12 text-muted small">
-              这将备份您的 Portainer 服务器配置，不包括容器。
+              此操作将备份您的 Portainer 服务器配置，但不包含容器。
             </div>
             <BoxSelector
               slim

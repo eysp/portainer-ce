@@ -16,7 +16,7 @@ const otherEditorConfig = {
       <div className="ml-5">Shift+Enter - 查找上一个</div>
     </>
   ),
-  searchCmdLabel: 'Ctrl+F 搜索',
+  searchCmdLabel: 'Ctrl+F 进行搜索',
 } as const;
 
 export const editorConfig = {
@@ -34,7 +34,7 @@ export const editorConfig = {
         <div className="ml-5">Shift+Enter - 查找上一个</div>
       </>
     ),
-    searchCmdLabel: 'Cmd+F 搜索',
+    searchCmdLabel: 'Cmd+F 进行搜索',
   },
 
   lin: otherEditorConfig,

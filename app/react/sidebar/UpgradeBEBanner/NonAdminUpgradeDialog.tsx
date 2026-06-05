@@ -16,7 +16,8 @@ export function NonAdminUpgradeDialog({
         modalType={ModalType.Warn}
       />
       <Modal.Body>
-        您需要以管理员身份登录才能将 Portainer 升级到商业版。
+        You need to be logged in as an admin to upgrade Portainer to Business
+        Edition.
       </Modal.Body>
       <Modal.Footer>
         <div className="flex w-full gap-2">

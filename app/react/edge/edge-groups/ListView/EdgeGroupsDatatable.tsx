@@ -19,7 +19,7 @@ export function EdgeGroupsDatatable() {
 
   return (
     <Datatable
-      title="边缘分组"
+      title="边缘组"
       titleIcon={LayoutGrid}
       columns={columns}
       dataset={edgeGroupsQuery.data || []}

@@ -8,6 +8,7 @@ import (
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/http/security"
+	"github.com/portainer/portainer/api/internal/registryutils"
 	"github.com/portainer/portainer/api/stacks/stackutils"
 )
 
@@ -24,17 +25,28 @@ type SwarmStackDeploymentConfig struct {
 }
 
 func CreateSwarmStackDeploymentConfig(securityContext *security.RestrictedRequestContext, stack *portainer.Stack, endpoint *portainer.Endpoint, dataStore dataservices.DataStore, fileService portainer.FileService, deployer StackDeployer, prune bool, pullImage bool) (*SwarmStackDeploymentConfig, error) {
-	user, err := dataStore.User().Read(securityContext.UserID)
+	return CreateSwarmStackDeploymentConfigTx(dataStore, securityContext, stack, endpoint, fileService, deployer, prune, pullImage)
+}
+
+// Alternate function that works within a transaction
+// We didn't update the original function to use a transaction because it would be a breaking change for many other files.
+// Let's do this only where necessary for now. This is also planed to be refactored in the future, but not prioritized right now.
+func CreateSwarmStackDeploymentConfigTx(tx dataservices.DataStoreTx, securityContext *security.RestrictedRequestContext, stack *portainer.Stack, endpoint *portainer.Endpoint, fileService portainer.FileService, deployer StackDeployer, prune bool, pullImage bool) (*SwarmStackDeploymentConfig, error) {
+	user, err := tx.User().Read(securityContext.UserID)
 	if err != nil {
 		return nil, fmt.Errorf("unable to load user information from the database: %w", err)
 	}
 
-	registries, err := dataStore.Registry().ReadAll()
+	registries, err := tx.Registry().ReadAll()
 	if err != nil {
 		return nil, fmt.Errorf("unable to retrieve registries from the database: %w", err)
 	}
 
 	filteredRegistries := security.FilterRegistries(registries, user, securityContext.UserMemberships, endpoint.ID)
+
+	if err := registryutils.ValidateRegistriesECRTokens(tx, filteredRegistries); err != nil {
+		return nil, err
+	}
 
 	config := &SwarmStackDeploymentConfig{
 		stack:         stack,
@@ -71,9 +83,8 @@ func (config *SwarmStackDeploymentConfig) Deploy() error {
 
 	settings := &config.endpoint.SecuritySettings
 
-	if !settings.AllowBindMountsForRegularUsers && !isAdminOrEndpointAdmin {
-		err = stackutils.ValidateStackFiles(config.stack, settings, config.FileService)
-		if err != nil {
+	if !isAdminOrEndpointAdmin {
+		if err := stackutils.ValidateStackFiles(config.stack, settings, config.FileService); err != nil {
 			return err
 		}
 	}

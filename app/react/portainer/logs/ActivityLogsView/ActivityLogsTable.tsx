@@ -34,7 +34,7 @@ const columns = [
     header: '操作',
   }),
   columnHelper.accessor('payload', {
-    header: '载荷',
+    header: '负载',
     enableSorting: false,
     cell: ({ row, getValue }) =>
       getValue() ? (
@@ -44,7 +44,7 @@ const columns = [
           icon={Search}
           data-cy={`activity-logs-inspect_${row.index}`}
         >
-          检查
+          查看
         </Button>
       ) : null,
   }),

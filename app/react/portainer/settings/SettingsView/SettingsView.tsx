@@ -69,7 +69,6 @@ function handleSuccess(settings: Settings) {
     /* @ngInject */ (StateManager: StateManager) => {
       StateManager?.updateLogo(settings.LogoURL);
       StateManager?.updateSnapshotInterval(settings.SnapshotInterval);
-      StateManager?.updateEnableTelemetry(settings.EnableTelemetry);
     }
   );
 }

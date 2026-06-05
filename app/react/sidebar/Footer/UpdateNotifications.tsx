@@ -18,7 +18,7 @@ export function UpdateNotification() {
 
   const { LatestVersion } = query.data;
 
- {
+   {
     return null;
   }
 

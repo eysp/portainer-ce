@@ -32,7 +32,7 @@ export function SecretsFormSection({
   }
 
   return (
-    <FormSection title="Secrets" titleSize="sm">
+    <FormSection title="密钥" titleSize="sm">
       {!!values.length && (
         <TextTip color="blue">
           Portainer will automatically expose all the keys of a Secret as

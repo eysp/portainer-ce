@@ -8,7 +8,7 @@ import { filterHOC } from '@@/datatables/Filter';
 import { columnHelper } from './helper';
 
 export const eventType = columnHelper.accessor('type', {
-  header: 'Type',
+  header: '类型',
   cell: ({ getValue }) => (
     <Badge type={getBadgeColor(getValue())}>{getValue()}</Badge>
   ),

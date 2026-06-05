@@ -57,7 +57,7 @@ export function useCreate(template: TemplateViewModel) {
           },
           {
             onSuccess() {
-              notifySuccess('成功', '容器已成功创建');
+              notifySuccess('成功', '容器创建成功');
               router.stateService.go('docker.containers');
             },
           }

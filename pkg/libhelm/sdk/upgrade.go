@@ -82,13 +82,18 @@ func (hspm *HelmSDKPackageManager) Upgrade(upgradeOpts options.InstallOptions) (
 		return nil, errors.Wrap(err, "failed to initialize helm upgrade client for helm release upgrade")
 	}
 
-	values, err := hspm.getHelmValuesFromFile(upgradeOpts.ValuesFile)
-	if err != nil {
-		log.Error().
-			Str("context", "HelmClient").
-			Err(err).
-			Msg("Failed to get Helm values from file for helm release upgrade")
-		return nil, errors.Wrap(err, "failed to get Helm values from file for helm release upgrade")
+	var values map[string]any
+	if upgradeOpts.Values != nil {
+		values = upgradeOpts.Values
+	} else {
+		values, err = GetHelmValuesFromFile(upgradeOpts.ValuesFile)
+		if err != nil {
+			log.Error().
+				Str("context", "HelmClient").
+				Err(err).
+				Msg("Failed to get Helm values from file for helm release upgrade")
+			return nil, errors.Wrap(err, "failed to get Helm values from file for helm release upgrade")
+		}
 	}
 
 	chartRef, repoURL, err := parseChartRef(upgradeOpts.Chart, upgradeOpts.Repo, upgradeOpts.Registry)
@@ -119,14 +124,14 @@ func (hspm *HelmSDKPackageManager) Upgrade(upgradeOpts options.InstallOptions) (
 	if upgradeOpts.Registry != nil {
 		registryID = int(upgradeOpts.Registry.ID)
 	}
-	chart.Metadata.Annotations = appendChartReferenceAnnotations(upgradeOpts.Chart, upgradeOpts.Repo, registryID, chart.Metadata.Annotations)
+	chart.Metadata.Annotations = appendChartReferenceAnnotations(upgradeOpts.Chart, upgradeOpts.Repo, registryID, upgradeOpts.StackID, upgradeOpts.GitConfig, upgradeOpts.AutoUpdate, chart.Metadata.Annotations)
 
 	log.Info().
 		Str("context", "HelmClient").
 		Str("chart", upgradeOpts.Chart).
 		Str("name", upgradeOpts.Name).
 		Str("namespace", upgradeOpts.Namespace).
-		Msg("Running chart upgrade for helm release")
+		Msgf("Running chart upgrade for helm release with the annotations: %+v", chart.Metadata.Annotations)
 
 	helmRelease, err := upgradeClient.Run(upgradeOpts.Name, chart, values)
 	if err != nil {
@@ -166,6 +171,7 @@ func initUpgradeClient(actionConfig *action.Configuration, upgradeOpts options.I
 	upgradeClient.Wait = upgradeOpts.Wait
 	upgradeClient.Version = upgradeOpts.Version
 	upgradeClient.DryRun = upgradeOpts.DryRun
+	upgradeClient.TakeOwnership = upgradeOpts.TakeOwnership // Equivalent to --take-ownership flag
 	err := configureChartPathOptions(&upgradeClient.ChartPathOptions, upgradeOpts.Version, upgradeOpts.Repo, upgradeOpts.Registry)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to configure chart path options for helm release upgrade")
@@ -182,7 +188,7 @@ func initUpgradeClient(actionConfig *action.Configuration, upgradeOpts options.I
 		upgradeClient.Timeout = upgradeOpts.Timeout
 	}
 	if upgradeOpts.Namespace == "" {
-		upgradeOpts.Namespace = "default"
+		upgradeClient.Namespace = "default"
 	} else {
 		upgradeClient.Namespace = upgradeOpts.Namespace
 	}

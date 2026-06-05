@@ -77,7 +77,7 @@ export function ResourceQuotaFormSection({
           )}
 
           <FormControl
-            label="Memory limit (MB)"
+            label="内存限制 (MB)"
             inputId="memory-limit"
             className="[&>label]:mt-8"
             errors={errors?.memory}
@@ -99,7 +99,7 @@ export function ResourceQuotaFormSection({
           </FormControl>
 
           <FormControl
-            label="CPU limit"
+            label="CPU 限制"
             inputId="cpu-limit"
             className="[&>label]:mt-8"
             errors={errors?.cpu}

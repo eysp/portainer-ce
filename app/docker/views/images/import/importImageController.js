@@ -66,7 +66,7 @@ angular.module('portainer.docker').controller('ImportImageController', [
           }
           Notifications.success('成功', '镜像上传成功');
         } else {
-          Notifications.success('成功', '上传的 tar 文件包含多个镜像。因此提供的标签已被忽略。');
+          Notifications.success('成功', '上传的 tar 文件包含多个镜像。因此已忽略提供的标签。');
         }
       } catch (err) {
         Notifications.error('失败', err, '无法上传镜像');

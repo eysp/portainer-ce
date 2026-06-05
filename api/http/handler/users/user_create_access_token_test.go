@@ -17,6 +17,7 @@ import (
 
 	"github.com/segmentio/encoding/json"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_userCreateAccessToken(t *testing.T) {
@@ -27,15 +28,15 @@ func Test_userCreateAccessToken(t *testing.T) {
 	// create admin and standard user(s)
 	adminUser := &portainer.User{ID: 1, Password: "password", Username: "admin", Role: portainer.AdministratorRole}
 	err := store.User().Create(adminUser)
-	is.NoError(err, "error creating admin user")
+	require.NoError(t, err, "error creating admin user")
 
 	user := &portainer.User{ID: 2, Username: "standard", Role: portainer.StandardUserRole}
 	err = store.User().Create(user)
-	is.NoError(err, "error creating user")
+	require.NoError(t, err, "error creating user")
 
 	// setup services
 	jwtService, err := jwt.NewService("1h", store)
-	is.NoError(err, "Error initiating jwt service")
+	require.NoError(t, err, "Error initiating jwt service")
 	apiKeyService := apikey.NewAPIKeyService(store.APIKeyRepository(), store.User())
 	requestBouncer := security.NewRequestBouncer(store, jwtService, apiKeyService)
 	rateLimiter := security.NewRateLimiter(10, 1*time.Second, 1*time.Hour)
@@ -52,7 +53,7 @@ func Test_userCreateAccessToken(t *testing.T) {
 	t.Run("standard user successfully generates API key", func(t *testing.T) {
 		data := userAccessTokenCreatePayload{Password: "password", Description: "test-token"}
 		payload, err := json.Marshal(data)
-		is.NoError(err)
+		require.NoError(t, err)
 
 		req := httptest.NewRequest(http.MethodPost, "/users/2/tokens", bytes.NewBuffer(payload))
 		testhelpers.AddTestSecurityCookie(req, jwt)
@@ -63,19 +64,19 @@ func Test_userCreateAccessToken(t *testing.T) {
 		is.Equal(http.StatusOK, rr.Code)
 
 		body, err := io.ReadAll(rr.Body)
-		is.NoError(err, "ReadAll should not return error")
+		require.NoError(t, err, "ReadAll should not return error")
 
 		var resp accessTokenResponse
 		err = json.Unmarshal(body, &resp)
-		is.NoError(err, "response should be json")
-		is.EqualValues(data.Description, resp.APIKey.Description)
+		require.NoError(t, err, "response should be json")
+		is.Equal(data.Description, resp.APIKey.Description)
 		is.NotEmpty(resp.RawAPIKey)
 	})
 
 	t.Run("admin cannot generate API key for standard user", func(t *testing.T) {
 		data := userAccessTokenCreatePayload{Password: "password", Description: "test-token-admin"}
 		payload, err := json.Marshal(data)
-		is.NoError(err)
+		require.NoError(t, err)
 
 		req := httptest.NewRequest(http.MethodPost, "/users/2/tokens", bytes.NewBuffer(payload))
 		testhelpers.AddTestSecurityCookie(req, adminJWT)
@@ -86,16 +87,16 @@ func Test_userCreateAccessToken(t *testing.T) {
 		is.Equal(http.StatusForbidden, rr.Code)
 
 		_, err = io.ReadAll(rr.Body)
-		is.NoError(err, "ReadAll should not return error")
+		require.NoError(t, err, "ReadAll should not return error")
 	})
 
 	t.Run("endpoint cannot generate api-key using api-key auth", func(t *testing.T) {
 		rawAPIKey, _, err := apiKeyService.GenerateApiKey(*user, "test-api-key")
-		is.NoError(err)
+		require.NoError(t, err)
 
 		data := userAccessTokenCreatePayload{Password: "password", Description: "test-token-fails"}
 		payload, err := json.Marshal(data)
-		is.NoError(err)
+		require.NoError(t, err)
 
 		req := httptest.NewRequest(http.MethodPost, "/users/2/tokens", bytes.NewBuffer(payload))
 		req.Header.Add("x-api-key", rawAPIKey)
@@ -106,14 +107,12 @@ func Test_userCreateAccessToken(t *testing.T) {
 		is.Equal(http.StatusUnauthorized, rr.Code)
 
 		body, err := io.ReadAll(rr.Body)
-		is.NoError(err, "ReadAll should not return error")
-		is.Equal(`{"message":"Auth not supported","details":"Authentication required"}`, string(body))
+		require.NoError(t, err, "ReadAll should not return error")
+		is.JSONEq(`{"message":"Auth not supported","details":"Authentication required"}`, string(body))
 	})
 }
 
 func Test_userAccessTokenCreatePayload(t *testing.T) {
-	is := assert.New(t)
-
 	tests := []struct {
 		payload    userAccessTokenCreatePayload
 		shouldFail bool
@@ -150,9 +149,9 @@ this string is longer than 128 characters and hence this will fail.
 	for _, test := range tests {
 		err := test.payload.Validate(nil)
 		if test.shouldFail {
-			is.Error(err)
+			require.Error(t, err)
 		} else {
-			is.NoError(err)
+			require.NoError(t, err)
 		}
 	}
 }

@@ -4,16 +4,15 @@ angular.module('portainer.docker').factory('TaskHelper', [
 
     var helper = {};
 
-    helper.associateContainerToTask = function (task, containers) {
-      for (var i = 0; i < containers.length; i++) {
-        var container = containers[i];
-        if (task.ContainerId === container.Id) {
-          task.Container = container;
-          break;
-        }
-      }
-    };
+    helper.associateContainerToTask = associateContainerToTaskAJS;
 
     return helper;
+
+    function associateContainerToTaskAJS(task, containers) {
+      const container = containers.find((c) => c.Id === task.ContainerId);
+      if (container) {
+        task.Container = container;
+      }
+    }
   },
 ]);

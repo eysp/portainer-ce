@@ -17,7 +17,7 @@ export const annotationsSchema: SchemaOf<Annotation[]> = array(
 function getAnnotationValidation(): SchemaOf<Annotation> {
   return object({
     key: string()
-      .required('Key is required.')
+      .required('键为必填项。')
       .test('is-valid', (value, { createError }) => {
         if (!value) {
           return true;
@@ -43,7 +43,7 @@ function getAnnotationValidation(): SchemaOf<Annotation> {
           if (!re.test(keySegments[1])) {
             return createError({
               message:
-                'Start and end with alphanumeric characters only, limiting characters in between to dashes, underscores, and alphanumerics.',
+                '只能以字母数字字符开头和结尾，中间字符限为短横线、下划线和字母数字。',
             });
           }
         } else if (keySegments.length === 1) {
@@ -56,7 +56,7 @@ function getAnnotationValidation(): SchemaOf<Annotation> {
           if (!re.test(keySegments[0])) {
             return createError({
               message:
-                'Start and end with alphanumeric characters only, limiting characters in between to dashes, underscores, and alphanumerics.',
+                '只能以字母数字字符开头和结尾，中间字符限为短横线、下划线和字母数字。',
             });
           }
         }

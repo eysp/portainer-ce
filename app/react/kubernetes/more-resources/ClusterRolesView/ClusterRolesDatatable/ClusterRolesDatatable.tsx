@@ -159,7 +159,7 @@ function TableActions({ selectedItems }: TableActionsProps) {
         loadingText="Removing cluster roles..."
         data-cy="k8sClusterRoles-removeRoleButton"
       >
-        Remove
+        删除
       </LoadingButton>
 
       <CreateFromManifestButton

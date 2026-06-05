@@ -38,7 +38,7 @@ export function AutoEnvCreationSettingsForm({ settings }: Props) {
           onSuccess() {
             notifySuccess(
               '成功',
-              '自动创建环境设置已成功更新'
+              '自动环境创建设置已更新'
             );
           },
         }

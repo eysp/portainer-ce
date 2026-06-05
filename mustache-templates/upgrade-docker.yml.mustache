@@ -1,7 +1,6 @@
-version: "3"
-
 services:
   updater:
+    network_mode: none
     image: {{updater_image}}{{^updater_image}}portainer/portainer-updater:latest{{/updater_image}}
     labels:
       - io.portainer.hideStack=true 

@@ -36,6 +36,7 @@ export function StackVersionSelector({ versions, onChange }: Props) {
           <select
             className="form-select"
             data-cy="version-selector"
+            id="version_id"
             style={{
               width: '60px',
               height: '24px',

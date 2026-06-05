@@ -3,7 +3,7 @@
     <rd-widget-header icon="list" title-text="日志驱动"> </rd-widget-header>
     <rd-widget-body classes="no-padding">
       <div class="form-inline" style="padding: 10px 20px" authorization="DockerServiceUpdate">
-        驱动：
+        Driver:
         <select
           class="form-control !h-[30px] !text-[13px]"
           ng-model="service.LogDriverName"
@@ -22,7 +22,7 @@
       <table class="table">
         <thead>
           <tr>
-            <th>选项</th>
+            <th>Option</th>
             <th>值</th>
           </tr>
         </thead>
@@ -30,27 +30,27 @@
           <tr ng-repeat="option in service.LogDriverOpts">
             <td class="w-1/2">
               <div class="input-group input-group-sm">
-                <span class="input-group-addon fit-text-size">选项</span>
+                <span class="input-group-addon fit-text-size">name</span>
                 <input
                   type="text"
                   data-cy="service-logging-driver-option-name-input-{{ $index }}"
                   class="form-control"
                   ng-model="option.key"
                   ng-disabled="option.added || isUpdating"
-                  placeholder="例如：FOO"
+                  placeholder="例如 FOO"
                 />
               </div>
             </td>
             <td>
               <div class="input-group input-group-sm">
-                <span class="input-group-addon fit-text-size">值</span>
+                <span class="input-group-addon fit-text-size">value</span>
                 <input
                   type="text"
                   data-cy="service-logging-driver-option-value-input-{{ $index }}"
                   class="form-control"
                   ng-model="option.value"
                   ng-change="updateLogDriverOpt(service, option)"
-                  placeholder="例如：bar"
+                  placeholder="例如 bar"
                   ng-disabled="isUpdating"
                   disable-authorization="DockerServiceUpdate"
                 />

@@ -33,7 +33,7 @@ export function DescribeModal({
       <ModalHeader title={title} />
       <ModalBody>
         {isLoading ? (
-          <InlineLoader>Loading...</InlineLoader>
+          <InlineLoader>加载中...</InlineLoader>
         ) : (
           <>
             {isError ? (

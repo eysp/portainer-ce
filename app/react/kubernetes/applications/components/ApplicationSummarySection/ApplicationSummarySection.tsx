@@ -30,7 +30,7 @@ export function ApplicationSummarySection({
   }
 
   return (
-    <FormSection title="Summary" isFoldable defaultFolded={false}>
+    <FormSection title="摘要" isFoldable defaultFolded={false}>
       <TextTip color="blue">
         Portainer will execute the following Kubernetes actions.
       </TextTip>

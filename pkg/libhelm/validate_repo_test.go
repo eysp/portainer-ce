@@ -7,13 +7,11 @@ import (
 	"testing"
 
 	"github.com/portainer/portainer/pkg/libhelm/test"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func Test_ValidateHelmRepositoryURL(t *testing.T) {
 	test.EnsureIntegrationTest(t)
-	is := assert.New(t)
 
 	type testCase struct {
 		name    string
@@ -45,9 +43,9 @@ func Test_ValidateHelmRepositoryURL(t *testing.T) {
 				t.Parallel()
 				err := ValidateHelmRepositoryURL(tc.url, nil)
 				if tc.invalid {
-					is.Errorf(err, "error expected: %s", tc.url)
+					require.Error(t, err, "error expected: %s", tc.url)
 				} else {
-					is.NoError(err, "no error expected: %s", tc.url)
+					require.NoError(t, err, "no error expected: %s", tc.url)
 				}
 			})
 		}(test)
@@ -100,7 +98,7 @@ func TestValidateHelmRepositoryURL(t *testing.T) {
 func Test_ValidateSeedsCacheAndSearchUsesCache(t *testing.T) {
 	const indexYAML = "apiVersion: v1\nentries: {}\ngenerated: \"2020-01-01T00:00:00Z\"\n"
 
-	var requestCount int32
+	var requestCount atomic.Int32
 	var fail bool
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -109,7 +107,7 @@ func Test_ValidateSeedsCacheAndSearchUsesCache(t *testing.T) {
 				w.WriteHeader(http.StatusNotFound)
 				return
 			}
-			atomic.AddInt32(&requestCount, 1)
+			requestCount.Add(1)
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(indexYAML))
 			return
@@ -128,5 +126,5 @@ func Test_ValidateSeedsCacheAndSearchUsesCache(t *testing.T) {
 	// validate cache is used
 	err := ValidateHelmRepositoryURL(srv.URL, nil)
 	require.NoError(t, err)
-	require.Equal(t, int32(1), atomic.LoadInt32(&requestCount))
+	require.Equal(t, int32(1), requestCount.Load())
 }

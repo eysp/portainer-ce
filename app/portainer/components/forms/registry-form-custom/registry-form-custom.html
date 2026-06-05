@@ -2,10 +2,11 @@
   <div class="col-sm-12 form-section-title"> 重要提示 </div>
   <div class="form-group">
     <span class="col-sm-12 text-muted small">
-      Docker 要求您连接到<a href="https://docs.docker.com/registry/deploying/#running-a-domain-registry" target="_blank">安全镜像仓库</a>。您可以在<a href="https://docs.docker.com/registry/insecure/" target="_blank">Docker 文档</a>中找到有关如何连接到不安全镜像仓库的更多信息。
+      Docker requires you to connect to a <a href="https://docs.docker.com/registry/deploying/#running-a-domain-registry" target="_blank">secure registry</a>. You can find more
+      information about how to connect to an insecure registry <a href="https://docs.docker.com/registry/insecure/" target="_blank">in the Docker documentation</a>.
     </span>
   </div>
-  <div class="col-sm-12 form-section-title"> 自定义镜像仓库详情 </div>
+  <div class="col-sm-12 form-section-title"> Custom registry details </div>
   <!-- name-input -->
   <div class="form-group">
     <label for="registry_name" class="col-sm-3 col-lg-2 control-label required text-left">名称</label>
@@ -26,7 +27,7 @@
           <div ng-messages="$ctrl.registryFormCustom.registry_name.$error">
             <p ng-message="required" class="vertical-center">
               <pr-icon icon="'alert-triangle'"></pr-icon>
-              此字段是必填项。
+              This field is required.
             </p>
             <p ng-message="used" class="vertical-center">
               <pr-icon icon="'alert-triangle'"></pr-icon>
@@ -42,7 +43,7 @@
   <div class="form-group">
     <label for="registry_url" class="col-sm-3 col-lg-2 control-label required text-left">
       镜像仓库 URL
-      <portainer-tooltip message="'Docker 镜像仓库的 URL 或 IP 地址。如果存在协议和尾部斜杠，将被移除。'"></portainer-tooltip>
+      <portainer-tooltip message="'URL or IP address of a Docker registry. Any protocol and trailing slash will be stripped if present.'"></portainer-tooltip>
     </label>
     <div class="col-sm-9 col-lg-10">
       <input
@@ -60,7 +61,7 @@
           <div ng-messages="$ctrl.registryFormCustom.registry_url.$error">
             <p ng-message="required" class="vertical-center">
               <pr-icon icon="'alert-triangle'"></pr-icon>
-              此字段是必填项。
+              This field is required.
             </p>
           </div>
         </div>
@@ -74,7 +75,7 @@
       <por-switch-field
         label="'身份验证'"
         label-class="'col-sm-3 col-lg-2'"
-        tooltip="'如果需要指定凭据来连接此镜像仓库，请启用此选项。'"
+        tooltip="'Enable this option if you need to specify credentials to connect to this registry.'"
         name="'administrator'"
         checked="$ctrl.model.Authentication"
         on-change="($ctrl.toggleAuthentication)"
@@ -102,7 +103,7 @@
             <div ng-messages="$ctrl.registryFormCustom.registry_username.$error">
               <p ng-message="required" class="vertical-center">
                 <pr-icon icon="'alert-triangle'"></pr-icon>
-                此字段是必填项。
+                This field is required.
               </p>
             </div>
           </div>
@@ -120,7 +121,7 @@
             <div ng-messages="$ctrl.registryFormCustom.registry_password.$error">
               <p ng-message="required" class="vertical-center">
                 <pr-icon icon="'alert-triangle'"></pr-icon>
-                此字段是必填项。
+                This field is required.
               </p>
             </div>
           </div>
@@ -144,7 +145,7 @@
         analytics-properties="{ metadata: { type: 'custom' }}"
       >
         <span ng-hide="$ctrl.actionInProgress">{{ $ctrl.formActionLabel }}</span>
-        <span ng-show="$ctrl.actionInProgress">进行中...</span>
+        <span ng-show="$ctrl.actionInProgress">In progress...</span>
       </button>
     </div>
   </div>

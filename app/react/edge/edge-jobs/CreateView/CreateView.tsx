@@ -7,9 +7,9 @@ export function CreateView() {
   return (
     <>
       <PageHeader
-        title="Create edge job"
+        title="创建边缘任务"
         breadcrumbs={[
-          { label: 'Edge jobs', link: 'edge.jobs' },
+          { label: '边缘任务', link: 'edge.jobs' },
           'Create edge job',
         ]}
       />

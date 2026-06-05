@@ -11,18 +11,20 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestHandler_webhookInvoke(t *testing.T) {
 	_, store := datastore.MustNewTestStore(t, true, true)
 
 	webhookID := newGuidString(t)
-	store.StackService.Create(&portainer.Stack{
+	err := store.StackService.Create(&portainer.Stack{
 		ID: 1,
 		AutoUpdate: &portainer.AutoUpdateSettings{
 			Webhook: webhookID,
 		},
 	})
+	require.NoError(t, err)
 
 	h := NewHandler(testhelpers.NewTestRequestBouncer())
 	h.DataStore = store
@@ -51,7 +53,7 @@ func TestHandler_webhookInvoke(t *testing.T) {
 
 func newGuidString(t *testing.T) string {
 	uuid, err := uuid.NewV4()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	return uuid.String()
 }

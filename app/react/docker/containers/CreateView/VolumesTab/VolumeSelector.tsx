@@ -1,3 +1,5 @@
+import { components, OptionProps } from 'react-select';
+
 import { truncate } from '@/portainer/filters/filters';
 import { useVolumes } from '@/react/docker/volumes/queries/useVolumes';
 import { useEnvironmentId } from '@/react/hooks/useEnvironmentId';
@@ -33,12 +35,8 @@ export function VolumeSelector({
     <Select
       placeholder="选择卷"
       options={volumes}
-      getOptionLabel={(vol) =>
-        vol.Name !== 'auto'
-          ? `${truncate(vol.Name, 30)} - ${truncate(vol.Driver, 30)}`
-          : 'auto'
-      }
       getOptionValue={(vol) => vol.Name}
+      getOptionLabel={(vol) => (vol.Name === 'auto' ? '自动' : vol.Name)}
       isMulti={false}
       value={selectedValue}
       onChange={(vol) => onChange(vol?.Name)}
@@ -46,6 +44,25 @@ export function VolumeSelector({
       data-cy="docker-containers-volume-selector"
       id="docker-containers-volume-selector"
       size="sm"
+      components={{ Option }}
     />
+  );
+}
+
+function Option(props: OptionProps<{ Name: string; Driver: string }, false>) {
+  const { data: vol } = props;
+  return (
+    // eslint-disable-next-line react/jsx-props-no-spreading
+    <components.Option {...props}>
+      <span
+        title={
+          vol.Name !== 'auto' ? `${vol.Name} - ${vol.Driver}` : '自动'
+        }
+      >
+        {vol.Name !== 'auto'
+          ? `${truncate(vol.Name, 30)} - ${truncate(vol.Driver, 30)}`
+          : '自动'}
+      </span>
+    </components.Option>
   );
 }

@@ -6,6 +6,7 @@ import (
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/http/security"
+	"github.com/portainer/portainer/api/internal/registryutils"
 	"github.com/portainer/portainer/api/stacks/stackutils"
 
 	"github.com/pkg/errors"
@@ -25,17 +26,28 @@ type ComposeStackDeploymentConfig struct {
 }
 
 func CreateComposeStackDeploymentConfig(securityContext *security.RestrictedRequestContext, stack *portainer.Stack, endpoint *portainer.Endpoint, dataStore dataservices.DataStore, fileService portainer.FileService, deployer StackDeployer, forcePullImage, forceCreate bool) (*ComposeStackDeploymentConfig, error) {
-	user, err := dataStore.User().Read(securityContext.UserID)
+	return CreateComposeStackDeploymentConfigTx(dataStore, securityContext, stack, endpoint, fileService, deployer, forcePullImage, forceCreate)
+}
+
+// Alternate function that works within a transaction
+// We didn't update the original function to use a transaction because it would be a breaking change for many other files.
+// Let's do this only where necessary for now. This is also planed to be refactored in the future, but not prioritized right now.
+func CreateComposeStackDeploymentConfigTx(tx dataservices.DataStoreTx, securityContext *security.RestrictedRequestContext, stack *portainer.Stack, endpoint *portainer.Endpoint, fileService portainer.FileService, deployer StackDeployer, forcePullImage, forceCreate bool) (*ComposeStackDeploymentConfig, error) {
+	user, err := tx.User().Read(securityContext.UserID)
 	if err != nil {
 		return nil, fmt.Errorf("unable to load user information from the database: %w", err)
 	}
 
-	registries, err := dataStore.Registry().ReadAll()
+	registries, err := tx.Registry().ReadAll()
 	if err != nil {
 		return nil, fmt.Errorf("unable to retrieve registries from the database: %w", err)
 	}
 
 	filteredRegistries := security.FilterRegistries(registries, user, securityContext.UserMemberships, endpoint.ID)
+
+	if err := registryutils.ValidateRegistriesECRTokens(tx, filteredRegistries); err != nil {
+		return nil, err
+	}
 
 	config := &ComposeStackDeploymentConfig{
 		stack:          stack,
@@ -72,14 +84,7 @@ func (config *ComposeStackDeploymentConfig) Deploy() error {
 
 	securitySettings := &config.endpoint.SecuritySettings
 
-	if (!securitySettings.AllowBindMountsForRegularUsers ||
-		!securitySettings.AllowPrivilegedModeForRegularUsers ||
-		!securitySettings.AllowHostNamespaceForRegularUsers ||
-		!securitySettings.AllowDeviceMappingForRegularUsers ||
-		!securitySettings.AllowSysctlSettingForRegularUsers ||
-		!securitySettings.AllowContainerCapabilitiesForRegularUsers) &&
-		!isAdminOrEndpointAdmin {
-
+	if !isAdminOrEndpointAdmin {
 		if err := stackutils.ValidateStackFiles(config.stack, securitySettings, config.FileService); err != nil {
 			return err
 		}

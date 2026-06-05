@@ -10,7 +10,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/segmentio/encoding/json"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v3"
 )
 
 const (
@@ -110,6 +110,11 @@ func (hpm helmMockPackageManager) Uninstall(uninstallOpts options.UninstallOptio
 	return nil
 }
 
+// ForceRemoveRelease removes release history without deleting resources (not thread safe)
+func (hpm helmMockPackageManager) ForceRemoveRelease(uninstallOpts options.UninstallOptions) error {
+	return hpm.Uninstall(uninstallOpts)
+}
+
 // List a helm chart (not thread safe)
 func (hpm helmMockPackageManager) List(listOpts options.ListOptions) ([]release.ReleaseElement, error) {
 	return mockCharts, nil
@@ -120,6 +125,10 @@ func (hpm helmMockPackageManager) Get(getOpts options.GetOptions) (*release.Rele
 	index := slices.IndexFunc(mockCharts, func(re release.ReleaseElement) bool {
 		return re.Name == getOpts.Name && re.Namespace == getOpts.Namespace
 	})
+
+	if index == -1 {
+		return nil, errors.Errorf("release %s not found in namespace %s", getOpts.Name, getOpts.Namespace)
+	}
 
 	return newMockRelease(&mockCharts[index]), nil
 }

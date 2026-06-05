@@ -11,7 +11,7 @@ export async function getPublicSettings() {
   } catch (e) {
     throw parseAxiosError(
       e as Error,
-      'Unable to retrieve application settings'
+      '无法获取应用程序设置'
     );
   }
 }
@@ -28,7 +28,7 @@ export async function getSettings() {
   } catch (e) {
     throw parseAxiosError(
       e as Error,
-      'Unable to retrieve application settings'
+      '无法获取应用程序设置'
     );
   }
 }
@@ -42,7 +42,7 @@ export async function updateSettings(settings: OptionalSettings) {
     const { data } = await axios.put<Settings>(buildUrl(), settings);
     return data;
   } catch (e) {
-    throw parseAxiosError(e as Error, 'Unable to update application settings');
+    throw parseAxiosError(e as Error, '无法更新应用程序设置');
   }
 }
 
@@ -54,7 +54,7 @@ export async function updateDefaultRegistry(
   } catch (e) {
     throw parseAxiosError(
       e as Error,
-      'Unable to update default registry settings'
+      '无法更新默认镜像仓库设置'
     );
   }
 }

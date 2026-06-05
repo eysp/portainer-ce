@@ -23,6 +23,6 @@ export async function removeImage(
     );
     return data;
   } catch (e) {
-    throw parseAxiosError(e, 'Unable to remove image');
+    throw parseAxiosError(e, '无法删除镜像');
   }
 }

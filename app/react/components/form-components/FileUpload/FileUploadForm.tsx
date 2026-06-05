@@ -5,12 +5,15 @@ import { AutomationTestingProps } from '@/types';
 import { FormSectionTitle } from '@@/form-components/FormSectionTitle';
 import { FileUploadField } from '@@/form-components/FileUpload/FileUploadField';
 
+import { FormError } from '../FormError';
+
 export interface Props {
   onChange(value?: File): void;
   value: File | undefined;
   title?: string;
   required?: boolean;
   description: ReactNode;
+  error?: string;
 }
 
 export function FileUploadForm({
@@ -19,13 +22,19 @@ export function FileUploadForm({
   title = '选择文件',
   required = false,
   description,
+  error,
   'data-cy': dataCy,
 }: PropsWithChildren<Props> & AutomationTestingProps) {
   return (
     <div className="file-upload-form">
-      <FormSectionTitle>上传</FormSectionTitle>
+      <FormSectionTitle htmlFor="file-upload-field">上传</FormSectionTitle>
       <div className="form-group">
         <span className="col-sm-12 text-muted small">{description}</span>
+        {error && (
+          <div className="col-sm-12">
+            <FormError>{error}</FormError>
+          </div>
+        )}
       </div>
       <div className="form-group">
         <div className="col-sm-12">

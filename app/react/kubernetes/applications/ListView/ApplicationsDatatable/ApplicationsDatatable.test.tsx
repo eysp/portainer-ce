@@ -1,10 +1,13 @@
 import { render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
+import { HttpResponse } from 'msw';
 
 import { withTestQueryProvider } from '@/react/test-utils/withTestQuery';
 import { withTestRouter } from '@/react/test-utils/withRouter';
 import { UserViewModel } from '@/portainer/models/user';
 import { withUserProvider } from '@/react/test-utils/withUserProvider';
+import { http, server } from '@/setup-tests/server';
+import { createMockEnvironment } from '@/react-tools/test-mocks';
 
 import { PodKubernetesInstanceLabel, PodManagedByLabel } from '../../constants';
 
@@ -108,6 +111,12 @@ vi.mock('@/react/kubernetes/components/CreateFromManifestButton', () => ({
 }));
 
 function renderComponent() {
+  server.use(
+    http.get('/api/endpoints/:endpointId', () =>
+      HttpResponse.json(createMockEnvironment())
+    )
+  );
+
   const user = new UserViewModel({ Username: 'user' });
 
   const Wrapped = withTestQueryProvider(

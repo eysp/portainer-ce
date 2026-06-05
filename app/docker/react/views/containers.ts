@@ -9,6 +9,7 @@ import { withUIRouter } from '@/react-tools/withUIRouter';
 import { LogView } from '@/react/docker/containers/LogView';
 import { CreateView } from '@/react/docker/containers/CreateView';
 import { InspectView } from '@/react/docker/containers/InspectView/InspectView';
+import { ItemView } from '@/react/docker/containers/ItemView/ItemView';
 
 export const containersModule = angular
   .module('portainer.docker.react.views.containers', [])
@@ -19,6 +20,10 @@ export const containersModule = angular
   .component(
     'containersView',
     r2a(withUIRouter(withReactQuery(withCurrentUser(ListView))), ['endpoint'])
+  )
+  .component(
+    'containerItemView',
+    r2a(withUIRouter(withCurrentUser(ItemView)), [])
   )
   // the view only contains the information panel when logging is disabled
   // this is a temporary solution to avoid creating a publicly exposed component
@@ -53,8 +58,7 @@ function config($stateRegistryProvider: StateRegistry) {
     url: '/:id?nodeName',
     views: {
       'content@': {
-        templateUrl: '~@/docker/views/containers/edit/container.html',
-        controller: 'ContainerController',
+        component: 'containerItemView',
       },
     },
   });

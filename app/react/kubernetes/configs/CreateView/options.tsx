@@ -18,7 +18,7 @@ export const typeOptions: ReadonlyArray<BoxSelectorOption<number>> = [
     value: KubernetesConfigurationKinds.SECRET,
     icon: Lock,
     iconType: 'badge',
-    label: 'Secret',
+    label: '密钥',
     description: 'This kind holds sensitive information',
   },
 ] as const;

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -30,8 +31,8 @@ func TestParseResources(t *testing.T) {
 		}
 
 		got, err := parseResources(resourceTypesLists)
-		assert.NoError(t, err)
-		assert.Equal(t, 1, len(got))
+		require.NoError(t, err)
+		assert.Len(t, got, 1)
 
 		// Check resource metadata
 		assert.Equal(t, "test-pod", got[0].GetName())
@@ -81,8 +82,8 @@ func TestParseResources(t *testing.T) {
 		}
 
 		got, err := parseResources(resourceTypesLists)
-		assert.NoError(t, err)
-		assert.Equal(t, 2, len(got))
+		require.NoError(t, err)
+		assert.Len(t, got, 2)
 
 		// Check first resource
 		assert.Equal(t, "test-pod-1", got[0].GetName())

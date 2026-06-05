@@ -11,7 +11,7 @@ import { DescribeModal } from '../DescribeModal';
 import { columnHelper } from './helper';
 
 export const actions = columnHelper.accessor((row) => row.status.label, {
-  header: 'Actions',
+  header: '操作',
   id: 'actions',
   cell: Cell,
   enableSorting: false,

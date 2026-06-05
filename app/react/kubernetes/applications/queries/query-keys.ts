@@ -101,4 +101,6 @@ export const queryKeys = {
       name,
       'pods',
     ] as const,
+  appStackFile: (id?: number, kind?: string) =>
+    ['app-stack-file', id, kind] as const,
 };

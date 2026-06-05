@@ -97,7 +97,7 @@ export function EditForm({
       },
       {
         onSuccess() {
-          notifySuccess('成功', '自定义模板已更新');
+          notifySuccess('Success', 'Template updated successfully');
           router.stateService.go('^');
         },
       }

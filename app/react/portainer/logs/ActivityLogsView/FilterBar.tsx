@@ -22,7 +22,7 @@ export function FilterBar({
           <DateRangePicker value={value} onChange={onChange} />
 
           <TextTip color="blue">
-            Portainer 用户活动日志的最大保留期为 7 天。
+            Portainer 用户活动日志的最长保留时间为 7 天。
           </TextTip>
 
           <div className="mt-4">

@@ -12,6 +12,7 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const privateAzureRepoURL = "https://portainer.visualstudio.com/gitops-test/_git/gitops-test"
@@ -67,7 +68,7 @@ func TestService_ClonePublicRepository_Azure(t *testing.T) {
 				gittypes.GitCredentialAuthType_Basic,
 				false,
 			)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.FileExists(t, filepath.Join(dst, "README.md"))
 		})
 	}
@@ -90,7 +91,7 @@ func TestService_ClonePrivateRepository_Azure(t *testing.T) {
 		gittypes.GitCredentialAuthType_Basic,
 		false,
 	)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.FileExists(t, filepath.Join(dst, "README.md"))
 }
 
@@ -108,7 +109,7 @@ func TestService_LatestCommitID_Azure(t *testing.T) {
 		gittypes.GitCredentialAuthType_Basic,
 		false,
 	)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotEmpty(t, id, "cannot guarantee commit id, but it should be not empty")
 }
 
@@ -127,7 +128,7 @@ func TestService_ListRefs_Azure(t *testing.T) {
 		false,
 		false,
 	)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.GreaterOrEqual(t, len(refs), 1)
 }
 
@@ -138,8 +139,12 @@ func TestService_ListRefs_Azure_Concurrently(t *testing.T) {
 	username := getRequiredValue(t, "AZURE_DEVOPS_USERNAME")
 	service := newService(context.TODO(), repositoryCacheSize, 200*time.Millisecond)
 
-	go service.ListRefs(privateAzureRepoURL, username, accessToken, gittypes.GitCredentialAuthType_Basic, false, false)
-	service.ListRefs(privateAzureRepoURL, username, accessToken, gittypes.GitCredentialAuthType_Basic, false, false)
+	go func() {
+		_, _ = service.ListRefs(privateAzureRepoURL, username, accessToken, gittypes.GitCredentialAuthType_Basic, false, false)
+	}()
+
+	_, err := service.ListRefs(privateAzureRepoURL, username, accessToken, gittypes.GitCredentialAuthType_Basic, false, false)
+	require.NoError(t, err)
 
 	time.Sleep(2 * time.Second)
 }
@@ -152,6 +157,7 @@ func TestService_ListFiles_Azure(t *testing.T) {
 		err          error
 		matchedCount int
 	}
+
 	service := newService(context.TODO(), 0, 0)
 	accessToken := getRequiredValue(t, "AZURE_DEVOPS_PAT")
 	username := getRequiredValue(t, "AZURE_DEVOPS_USERNAME")
@@ -288,15 +294,16 @@ func TestService_ListFiles_Azure(t *testing.T) {
 				tt.extensions,
 				false,
 			)
+
 			if tt.expect.shouldFail {
-				assert.Error(t, err)
+				require.Error(t, err)
 				if tt.expect.err != nil {
 					assert.Equal(t, tt.expect.err, err)
 				}
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				if tt.expect.matchedCount > 0 {
-					assert.Greater(t, len(paths), 0)
+					assert.NotEmpty(t, paths)
 				}
 			}
 		})
@@ -310,7 +317,21 @@ func TestService_ListFiles_Azure_Concurrently(t *testing.T) {
 	username := getRequiredValue(t, "AZURE_DEVOPS_USERNAME")
 	service := newService(context.TODO(), repositoryCacheSize, 200*time.Millisecond)
 
-	go service.ListFiles(
+	go func() {
+		_, _ = service.ListFiles(
+			privateAzureRepoURL,
+			"refs/heads/main",
+			username,
+			accessToken,
+			gittypes.GitCredentialAuthType_Basic,
+			false,
+			false,
+			[]string{},
+			false,
+		)
+	}()
+
+	_, err := service.ListFiles(
 		privateAzureRepoURL,
 		"refs/heads/main",
 		username,
@@ -321,17 +342,7 @@ func TestService_ListFiles_Azure_Concurrently(t *testing.T) {
 		[]string{},
 		false,
 	)
-	service.ListFiles(
-		privateAzureRepoURL,
-		"refs/heads/main",
-		username,
-		accessToken,
-		gittypes.GitCredentialAuthType_Basic,
-		false,
-		false,
-		[]string{},
-		false,
-	)
+	require.NoError(t, err)
 
 	time.Sleep(2 * time.Second)
 }
@@ -341,6 +352,7 @@ func getRequiredValue(t *testing.T, name string) string {
 	if !ok {
 		t.Fatalf("can't find required env var \"%s\"", name)
 	}
+
 	return value
 }
 

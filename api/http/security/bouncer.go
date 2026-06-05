@@ -447,26 +447,14 @@ func (bouncer *RequestBouncer) apiKeyLookup(r *http.Request) (*portainer.TokenDa
 	return tokenData, nil
 }
 
-// extractBearerToken extracts the Bearer token from the request header or query parameter and returns the token.
+// extractBearerToken extracts the Bearer token from the Authorization header and returns the token.
 func extractBearerToken(r *http.Request) (string, bool) {
-	// Token might be set via the "token" query parameter.
-	// For example, in websocket requests
-	// For these cases, hide the token from the query
-	query := r.URL.Query()
-	token := query.Get("token")
-	if token != "" {
-		query.Del("token")
-		r.URL.RawQuery = query.Encode()
-
-		return token, true
-	}
-
 	tokens, ok := r.Header[jwtTokenHeader]
 	if !ok || len(tokens) == 0 {
 		return "", false
 	}
 
-	token = tokens[0]
+	token := tokens[0]
 	token = strings.TrimPrefix(token, "Bearer ")
 
 	return token, true
@@ -535,7 +523,7 @@ func MWSecureHeaders(next http.Handler, hsts, csp bool) http.Handler {
 		}
 
 		if csp {
-			w.Header().Set("Content-Security-Policy", "script-src 'self' 'unsafe-eval' cdn.matomo.cloud js.hsforms.net https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; object-src 'none'; frame-ancestors 'none'; frame-src https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/")
+			w.Header().Set("Content-Security-Policy", "script-src 'self' https://js.hsforms.net https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; object-src 'none'; frame-ancestors 'none'; frame-src https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/")
 		}
 
 		w.Header().Set("X-Content-Type-Options", "nosniff")

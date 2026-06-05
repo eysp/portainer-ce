@@ -1,4 +1,4 @@
-import { Volume } from 'docker-types/generated/1.41';
+import { Volume } from 'docker-types';
 
 import axios, { parseAxiosError } from '@/portainer/services/axios';
 import { EnvironmentId } from '@/react/portainer/environments/types';
@@ -21,6 +21,6 @@ export async function getVolume(
     );
     return data;
   } catch (e) {
-    throw parseAxiosError(e, '无法检索卷详细信息');
+    throw parseAxiosError(e, '无法获取卷详情');
   }
 }

@@ -17,12 +17,17 @@ export interface ContainerInstanceFormValues {
   ports: PortMapping[];
   allocatePublicIP: boolean;
   accessControl: AccessControlFormData;
+  env: { name: string; value: string }[];
 }
 
 interface Container {
   name: string;
   properties: {
-    environmentVariables: unknown[];
+    environmentVariables?: {
+      name: string;
+      value: string;
+      secureValue?: string;
+    }[];
     image: string;
     ports: { port: number }[];
     resources: {

@@ -52,7 +52,7 @@ export function useValidation({
         Method: string().oneOf(initialBuildMethods.map((m) => m.value)),
         FileContent: string().when('Method', {
           is: editor.value,
-          then: (schema) => schema.required('Template is required.'),
+          then: (schema) => schema.required('模板为必填项。'),
         }),
         File: file().when('Method', {
           is: upload.value,

@@ -17,7 +17,7 @@ export function DetailsRow({
   columns,
 }: Props) {
   return (
-    <tr className={className}>
+    <tr className={className} aria-label={label}>
       <td className={clsx(colClassName, 'min-w-[150px] !break-normal')}>
         {label}
       </td>

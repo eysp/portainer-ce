@@ -18,15 +18,15 @@ export function BackupFailedPanel() {
   return (
     <div className="row">
       <div className="col-sm-12">
-        <InformationPanel title="Information">
+        <InformationPanel title="信息">
           <TextTip>
-            The latest automated backup has failed at{' '}
-            {isoDate(status.TimestampUTC)}. For details please see the log files
-            and have a look at the{' '}
+            最新的自动备份在{' '}
+            {isoDate(status.TimestampUTC)} 失败。有关详细信息，请查看日志文件
+            并查看{' '}
             <Link to="portainer.settings" data-cy="backup-failed-settings-link">
-              settings
+              设置
             </Link>{' '}
-            to verify the backup configuration.
+            以验证备份配置。
           </TextTip>
         </InformationPanel>
       </div>

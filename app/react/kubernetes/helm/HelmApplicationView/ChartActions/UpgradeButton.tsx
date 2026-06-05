@@ -151,7 +151,7 @@ export function UpgradeButton({
             onClick={handleRefreshVersions}
             type="button"
           >
-          刷新
+            刷新
           </Button>
         </span>
       )}

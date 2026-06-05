@@ -26,12 +26,12 @@ function ControlCell({
   row: { original: item },
 }: CellContext<DecoratedStack, unknown>) {
   if (isRegularStack(item)) {
-    return <>总计</>;
+    return <>全部</>;
   }
 
   if (isExternalStack(item)) {
     return (
-      <Warning tooltip="此堆栈是在 Portainer 外部创建的。对此堆栈的控制有限。">
+      <Warning tooltip="此堆栈是在 Portainer 外部创建的。对此堆栈的控制受限。">
         受限
       </Warning>
     );
@@ -39,7 +39,7 @@ function ControlCell({
 
   if (isOrphanedStack(item)) {
     return (
-      <Warning tooltip="此堆栈是在一个不再在 Portainer 中注册的环境内创建的。">
+      <Warning tooltip="此堆栈是在不再在 Portainer 中注册的环境中创建的。">
         孤立
       </Warning>
     );

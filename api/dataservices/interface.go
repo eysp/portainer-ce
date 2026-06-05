@@ -223,6 +223,7 @@ type (
 	UserService interface {
 		BaseCRUD[portainer.User, portainer.UserID]
 		UserByUsername(username string) (*portainer.User, error)
+		UserIDByUsername(username string) (portainer.UserID, error)
 		UsersByRole(role portainer.UserRole) ([]portainer.User, error)
 	}
 

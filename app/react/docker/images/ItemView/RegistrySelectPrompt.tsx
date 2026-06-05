@@ -13,7 +13,7 @@ interface Props {
 }
 
 function RegistrySelectPrompt({ onSubmit, defaultValue, registries }: Props) {
-  const title = '您想使用哪个镜像仓库？';
+  const title = '您要使用哪个镜像仓库？';
   const [registryId, setRegistryId] = useState(defaultValue);
   const options = registries2Options(registries);
 

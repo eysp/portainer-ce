@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_fileSystemService_FileExists_whenFileExistsShouldReturnTrue(t *testing.T) {
@@ -29,15 +30,16 @@ func Test_FileExists_whenFileNotExistsShouldReturnFalse(t *testing.T) {
 }
 
 func testHelperFileExists_fileExists(t *testing.T, checker func(path string) (bool, error)) {
-	file, err := os.CreateTemp("", t.Name())
-	assert.NoError(t, err, "CreateTemp should not fail")
+	file, err := os.CreateTemp(t.TempDir(), t.Name())
+	require.NoError(t, err, "CreateTemp should not fail")
 
 	t.Cleanup(func() {
-		os.RemoveAll(file.Name())
+		err := os.RemoveAll(file.Name())
+		require.NoError(t, err)
 	})
 
 	exists, err := checker(file.Name())
-	assert.NoError(t, err, "FileExists should not fail")
+	require.NoError(t, err, "FileExists should not fail")
 
 	assert.True(t, exists)
 }
@@ -46,10 +48,10 @@ func testHelperFileExists_fileNotExists(t *testing.T, checker func(path string) 
 	filePath := path.Join(t.TempDir(), fmt.Sprintf("%s%d", t.Name(), rand.Int()))
 
 	err := os.RemoveAll(filePath)
-	assert.NoError(t, err, "RemoveAll should not fail")
+	require.NoError(t, err, "RemoveAll should not fail")
 
 	exists, err := checker(filePath)
-	assert.NoError(t, err, "FileExists should not fail")
+	require.NoError(t, err, "FileExists should not fail")
 
 	assert.False(t, exists)
 }

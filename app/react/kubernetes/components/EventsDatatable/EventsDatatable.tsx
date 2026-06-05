@@ -27,7 +27,7 @@ export function EventsDatatable({
   isLoading,
   'data-cy': dataCy,
   noWidget,
-  title = 'Events',
+  title = '事件',
   titleIcon = History,
 }: Props) {
   return (

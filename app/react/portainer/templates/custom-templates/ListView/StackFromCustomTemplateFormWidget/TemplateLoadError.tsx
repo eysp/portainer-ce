@@ -25,7 +25,7 @@ export function TemplateLoadError({
     <FormError>
       {isAdminOrWriter ? (
         <>
-          无法加载自定义模板，请{' '}
+          自定义模板无法加载，请{' '}
           <Link
             to=".edit"
             params={{ id: templateId }}
@@ -37,7 +37,8 @@ export function TemplateLoadError({
         </>
       ) : (
         <>
-          无法加载自定义模板，请联系您的管理员。
+          自定义模板无法加载，请联系您的
+          管理员。
         </>
       )}
     </FormError>

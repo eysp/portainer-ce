@@ -48,7 +48,7 @@ export function AccessControlForm({
             name={withNamespace('accessControlEnabled')}
             label="启用访问控制"
             labelClass="col-sm-3 col-lg-2"
-            tooltip="启用后，您可以限制此资源的访问和管理。"
+            tooltip="启用后，您可以限制对此资源的访问和管理。"
             onChange={handleToggleEnable}
           />
         </div>

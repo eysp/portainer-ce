@@ -5,7 +5,9 @@ import (
 
 	"github.com/portainer/portainer/api/dataservices/errors"
 	"github.com/portainer/portainer/api/datastore"
+
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_teamByName(t *testing.T) {
@@ -13,7 +15,7 @@ func Test_teamByName(t *testing.T) {
 		_, store := datastore.MustNewTestStore(t, true, true)
 
 		_, err := store.Team().TeamByName("name")
-		assert.ErrorIs(t, err, errors.ErrObjectNotFound)
+		require.ErrorIs(t, err, errors.ErrObjectNotFound)
 
 	})
 
@@ -29,7 +31,7 @@ func Test_teamByName(t *testing.T) {
 		teamBuilder.createNew("name1")
 
 		_, err := store.Team().TeamByName("name")
-		assert.ErrorIs(t, err, errors.ErrObjectNotFound)
+		require.ErrorIs(t, err, errors.ErrObjectNotFound)
 	})
 
 	t.Run("When there is an object with the same name should return the object", func(t *testing.T) {
@@ -44,7 +46,7 @@ func Test_teamByName(t *testing.T) {
 		expectedTeam := teamBuilder.createNew("name1")
 
 		team, err := store.Team().TeamByName("name1")
-		assert.NoError(t, err, "TeamByName should succeed")
+		require.NoError(t, err, "TeamByName should succeed")
 		assert.Equal(t, expectedTeam, team)
 	})
 }

@@ -9,7 +9,7 @@ export const columns = [
   buildExpandColumn<NodePlacementRowData>(),
   status,
   columnHelper.accessor('name', {
-    header: 'Node',
+    header: '节点',
     id: 'node',
   }),
 ];

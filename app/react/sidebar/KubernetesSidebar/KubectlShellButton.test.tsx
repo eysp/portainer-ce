@@ -2,17 +2,9 @@ import { render, fireEvent, screen } from '@testing-library/react';
 import { vi } from 'vitest';
 import { PropsWithChildren, useMemo } from 'react';
 
-import { useAnalytics } from '@/react/hooks/useAnalytics';
-
 import { Context } from '../useSidebarState';
 
 import { KubectlShellButton } from './KubectlShellButton';
-
-vi.mock('@/react/hooks/useAnalytics', () => ({
-  useAnalytics: vi.fn().mockReturnValue({
-    trackEvent: vi.fn(),
-  }),
-}));
 
 vi.mock('@/portainer/helpers/pathHelper', () => ({
   baseHref: vi.fn().mockReturnValue('/portainer'),
@@ -92,20 +84,6 @@ describe('KubectlShellButton', () => {
     );
     expect(windowName).toMatch(/^kubectl-shell-5-[a-f0-9-]+$/);
     expect(windowFeatures).toBe('width=800,height=600');
-  });
-
-  test('should track analytics event when button is clicked', () => {
-    const mockTrackEvent = vi.fn();
-    vi.mocked(useAnalytics).mockReturnValue({ trackEvent: mockTrackEvent });
-
-    renderComponent();
-
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
-
-    expect(mockTrackEvent).toHaveBeenCalledWith('kubernetes-kubectl-shell', {
-      category: 'kubernetes',
-    });
   });
 
   test('should generate unique window names for multiple clicks', () => {

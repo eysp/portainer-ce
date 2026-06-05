@@ -89,7 +89,7 @@ angular.module('portainer.docker').controller('CreateSecretController', [
           return ResourceControlService.applyResourceControl(userId, accessControlData, resourceControl);
         })
         .then(function success() {
-          Notifications.success('Success', 'Secret successfully created');
+          Notifications.success('Success', '密钥已成功创建');
           $state.go('docker.secrets', {}, { reload: true });
         })
         .catch(function error(err) {

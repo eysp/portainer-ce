@@ -6,7 +6,9 @@ angular.module('portainer.docker').factory('ServiceHelper', [
 
     var helper = {};
 
-    helper.associateTasksToService = function (service, tasks) {
+    helper.associateTasksToService = associateTasksToServiceAJS;
+
+    function associateTasksToServiceAJS(service, tasks) {
       service.Tasks = [];
       var otherServicesTasks = [];
       for (var i = 0; i < tasks.length; i++) {
@@ -19,7 +21,7 @@ angular.module('portainer.docker').factory('ServiceHelper', [
         }
       }
       tasks = otherServicesTasks;
-    };
+    }
 
     helper.translateKeyValueToPlacementPreferences = function (keyValuePreferences) {
       if (keyValuePreferences) {

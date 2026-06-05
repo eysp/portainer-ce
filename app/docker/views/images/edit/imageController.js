@@ -182,7 +182,7 @@ angular.module('portainer.docker').controller('ImageController', [
         return;
       }
 
-      confirmImageExport(function (confirmed) {
+      confirmImageExport().then(function (confirmed) {
         if (!confirmed) {
           return;
         }
@@ -196,7 +196,7 @@ angular.module('portainer.docker').controller('ImageController', [
       try {
         $scope.registries = await RegistryService.loadRegistriesForDropdown(endpoint.Id);
       } catch (err) {
-        this.Notifications.error('失败', err, '无法加载仓库');
+        this.Notifications.error('失败', err, '无法加载镜像仓库');
       }
 
       $q.all({
@@ -209,7 +209,7 @@ angular.module('portainer.docker').controller('ImageController', [
           $scope.image.Env = _.sortBy($scope.image.Env, _.toLower);
         })
         .catch(function error(err) {
-          Notifications.error('失败', err, '无法检索镜像详细信息');
+          Notifications.error('失败', err, '无法获取镜像详情');
           $state.go('docker.images');
         });
     }

@@ -18,3 +18,5 @@ api/docs
 .env
 go.work.sum
 
+.vitest
+

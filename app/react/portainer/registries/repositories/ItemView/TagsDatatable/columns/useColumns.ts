@@ -25,7 +25,7 @@ const columns = [
     cell: buildCell((model) => `${model.Os}/${model.Architecture}`),
   }),
   helper.display({
-    header: 'Image ID',
+    header: '镜像 ID',
     cell: buildCell((model) => trimSHA(model.ImageId)),
   }),
   helper.display({

@@ -64,7 +64,7 @@ export function useIngresses(
   const { enabled, autoRefreshRate, ...params } = options ?? {};
 
   return useQuery(
-    ['environments', environmentId, 'kubernetes', 'ingress', params],
+    [...queryKeys.clusterIngresses(environmentId), params],
     async () => getIngresses(environmentId, params),
     {
       ...withGlobalError('Unable to get ingresses'),

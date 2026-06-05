@@ -39,7 +39,7 @@
             <div class="form-group">
               <label for="username" class="col-sm-4 control-label text-left"> 用户名 </label>
               <div class="col-sm-8">
-                <input type="text" class="form-control" id="username" ng-model="formValues.Username" placeholder="例如 admin" data-cy="init-username" />
+                <input type="text" class="form-control" id="username" ng-model="formValues.Username" placeholder="例如：admin" data-cy="init-username" />
               </div>
             </div>
             <!-- !username-input -->
@@ -70,7 +70,7 @@
               <div class="col-sm-12 text-warning">
                 <p class="vertical-center">
                   <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
-                  <span>密码必须至少包含 {{ requiredPasswordLength }} 个字符。</span>
+                  <span>密码长度至少为 {{ requiredPasswordLength }} 个字符。</span>
                   <pr-icon mode="'success'" icon="'check'" ng-if="form.password.$valid && formValues.Password"></pr-icon>
                 </p>
               </div>
@@ -92,17 +92,6 @@
               </div>
             </div>
             <!-- !actions -->
-            <!-- enableTelemetry-->
-            <div class="form-group">
-              <div class="col-sm-12 vertical-center">
-                <input type="checkbox" name="toggle_enableTelemetry" ng-model="formValues.enableTelemetry" data-cy="init-enableTelemetry" />
-                <span class="text-muted small"
-                  >允许收集匿名统计信息。您可以在我们的
-                  <a class="hyperlink" href="https://www.portainer.io/documentation/in-app-analytics-and-privacy-policy/" target="_blank">隐私政策</a>中找到更多相关信息。</span
-                >
-              </div>
-            </div>
-            <!-- !enableTelemetry-->
           </form>
           <!-- !init password form -->
         </div>
@@ -170,7 +159,7 @@
                 <label for="password" class="col-sm-3 control-label text-left">
                   密码
                   <portainer-tooltip
-                    message="'如果备份受密码保护，请提供密码以解压备份文件，否则此字段可以留空。'"
+                    message="'如果备份受密码保护，请提供密码以提取备份文件，否则此字段可以留空。'"
                   ></portainer-tooltip>
                 </label>
                 <div class="col-sm-4">
@@ -243,7 +232,7 @@
                     id="s3-compatible-host"
                     name="s3-compatible-host"
                     ng-model="formValues.S3CompatibleHost"
-                    placeholder="对于 AWS S3 留空"
+                    placeholder="如果使用 AWS S3，请留空"
                   />
                 </div>
               </div>
@@ -269,7 +258,7 @@
                 <label for="password" class="col-sm-3 control-label text-left">
                   密码
                   <portainer-tooltip
-                    message="'如果备份受密码保护，请提供密码以解压备份文件，否则此字段可以留空。'"
+                    message="'如果备份受密码保护，请提供密码以提取备份文件，否则此字段可以留空。'"
                   ></portainer-tooltip>
                 </label>
                 <div class="col-sm-4">
@@ -281,10 +270,10 @@
             <!-- note -->
             <div class="form-group">
               <div class="col-sm-12">
-                <span class="small text-muted"> 您即将从该备份恢复 Portainer。 </span>
+                <span class="small text-muted"> 您即将从此备份恢复 Portainer。 </span>
               </div>
               <div class="col-sm-12">
-                <span class="small text-muted"> 恢复完成后，请使用已恢复的 Portainer 中已知的用户登录。 </span>
+                <span class="small text-muted"> 恢复完成后，请使用被恢复的 Portainer 中已知的用户登录。 </span>
               </div>
             </div>
             <!-- !note -->

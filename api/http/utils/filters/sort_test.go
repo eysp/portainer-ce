@@ -233,10 +233,10 @@ func TestReverseSortFn(t *testing.T) {
 	userB := User{Name: "Bob", Age: 30}
 
 	// Original function: A < B (returns negative)
-	require.Less(t, originalFn(userA, userB), 0)
+	require.Negative(t, originalFn(userA, userB))
 
 	// Reversed function: A > B (returns positive)
-	require.Greater(t, reversedFn(userA, userB), 0)
+	require.Positive(t, reversedFn(userA, userB))
 
 	// Test symmetry
 	require.Equal(t, -originalFn(userA, userB), reversedFn(userA, userB))

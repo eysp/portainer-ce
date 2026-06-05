@@ -9,13 +9,14 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestService_GenerateTokenForKubeconfig(t *testing.T) {
 	_, store := datastore.MustNewTestStore(t, true, false)
 
 	err := store.User().Create(&portainer.User{ID: 1})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	type fields struct {
 		userSessionTimeout string
@@ -27,12 +28,12 @@ func TestService_GenerateTokenForKubeconfig(t *testing.T) {
 	}
 
 	settings, err := store.Settings().Settings()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	settings.KubeconfigExpiry = "0"
 
 	err = store.Settings().UpdateSettings(settings)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	myFields := fields{
 		userSessionTimeout: "24h",
@@ -68,7 +69,7 @@ func TestService_GenerateTokenForKubeconfig(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			service, err := NewService(tt.fields.userSessionTimeout, tt.fields.dataStore)
-			assert.NoError(t, err, "failed to create a copy of service")
+			require.NoError(t, err, "failed to create a copy of service")
 
 			got, err := service.GenerateTokenForKubeconfig(tt.args.data)
 			if (err != nil) != tt.wantErr {
@@ -77,15 +78,15 @@ func TestService_GenerateTokenForKubeconfig(t *testing.T) {
 			}
 
 			_, _, _, err = service.ParseAndVerifyToken(got)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			parsedToken, err := jwt.ParseWithClaims(got, &claims{}, func(token *jwt.Token) (any, error) {
 				return service.secrets[kubeConfigScope], nil
 			})
-			assert.NoError(t, err, "failed to parse generated token")
+			require.NoError(t, err, "failed to parse generated token")
 
 			tokenClaims, ok := parsedToken.Claims.(*claims)
-			assert.Equal(t, true, ok, "failed to claims out of generated ticket")
+			assert.True(t, ok, "failed to claims out of generated ticket")
 
 			assert.Equal(t, myTokenData.Username, tokenClaims.Username)
 			assert.Equal(t, int(myTokenData.ID), tokenClaims.UserID)

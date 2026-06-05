@@ -12,11 +12,11 @@ export function AdvancedCronFieldset() {
 
   return (
     <>
-      <FormControl label="Cron rule" inputId="edge_job_cron" errors={error}>
+      <FormControl label="Cron 规则" inputId="edge_job_cron" errors={error}>
         <Input
           data-cy="edge-job-cron-input"
           id="edge_job_cron"
-          placeholder="例如 0 2 * * *"
+          placeholder="e.g. 0 2 * * *"
           required
           value={value}
           onChange={onChange}

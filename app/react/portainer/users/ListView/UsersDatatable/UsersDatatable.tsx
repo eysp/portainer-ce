@@ -8,11 +8,12 @@ import { useSettings } from '@/react/portainer/settings/queries';
 import { notifySuccess } from '@/portainer/services/notifications';
 import {
   mutationOptions,
-  withError,
+  withGlobalError,
   withInvalidate,
 } from '@/react-tools/react-query';
 import { processItemsInBatches } from '@/react/common/processItemsInBatches';
 import { useCurrentUser } from '@/react/hooks/useUser';
+import { userQueryKeys } from '@/portainer/users/queries/queryKeys';
 
 import { Datatable } from '@@/datatables';
 import { useTableState } from '@@/datatables/useTableState';
@@ -29,7 +30,7 @@ import { DecoratedUser } from './types';
 const store = createPersistedStore('users');
 
 export function UsersDatatable() {
-  const { handleRemove } = useRemoveMutation();
+  const removeMutation = useRemoveMutation();
   const { isPureAdmin } = useCurrentUser();
   const usersQuery = useUsers(isPureAdmin);
   const membershipsQuery = useTeamMemberships();
@@ -66,16 +67,26 @@ export function UsersDatatable() {
       columns={columns}
       dataset={dataset || []}
       isLoading={!dataset}
-      title="用户"
+      title="Usersers"
       titleIcon={UserIcon}
       settingsManager={tableState}
       isRowSelectable={(row) => row.original.Id !== 1}
-      renderTableActions={(selectedItems) => (
+      renderTableActions={(selectedUsers) => (
         <DeleteButton
-          disabled={selectedItems.length === 0}
-          confirmMessage="您要移除选定的用户吗？他们将无法再登录 Portainer。"
-          onConfirmed={() => handleRemove(selectedItems.map((i) => i.Id))}
+          disabled={selectedUsers.length === 0}
+          confirmMessage="Do you want to remove the selected users? They will not be able to login into Portainer anymore."
+          onConfirmed={() =>
+            removeMutation.mutate(
+              selectedUsers.map((i) => i.Id),
+              {
+                onSuccess: () => {
+                  notifySuccess('用户已成功删除', '');
+                },
+              }
+            )
+          }
           data-cy="remove-users-button"
+          isLoading={removeMutation.isLoading}
         />
       )}
       data-cy="users-datatable"
@@ -86,21 +97,11 @@ export function UsersDatatable() {
 function useRemoveMutation() {
   const queryClient = useQueryClient();
 
-  const deleteMutation = useMutation(
+  return useMutation(
     async (ids: TeamId[]) => processItemsInBatches(ids, deleteUser),
     mutationOptions(
-      withError('无法移除用户'),
-      withInvalidate(queryClient, [['users']])
+      withGlobalError('无法删除用户'),
+      withInvalidate(queryClient, [userQueryKeys.base()])
     )
   );
-
-  return { handleRemove };
-
-  async function handleRemove(teams: TeamId[]) {
-    deleteMutation.mutate(teams, {
-      onSuccess: () => {
-        notifySuccess('用户已成功移除', '');
-      },
-    });
-  }
 }

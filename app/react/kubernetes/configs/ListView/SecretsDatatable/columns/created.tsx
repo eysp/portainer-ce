@@ -5,7 +5,7 @@ import { SecretRowData } from '../types';
 import { columnHelper } from './helper';
 
 export const created = columnHelper.accessor((row) => getCreatedAtText(row), {
-  header: 'Created',
+  header: '创建时间',
   id: 'created',
   cell: ({ row }) => getCreatedAtText(row.original),
 });
@@ -13,5 +13,5 @@ export const created = columnHelper.accessor((row) => getCreatedAtText(row), {
 function getCreatedAtText(row: SecretRowData) {
   const owner = row.ConfigurationOwner || row.ConfigurationOwnerId;
   const date = formatDate(row.CreationDate);
-  return owner ? `${date} by ${owner}` : date;
+  return owner ? `${date} 由 ${owner}` : date;
 }

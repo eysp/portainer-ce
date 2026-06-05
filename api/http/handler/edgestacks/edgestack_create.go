@@ -27,7 +27,7 @@ func (handler *Handler) edgeStackCreate(w http.ResponseWriter, r *http.Request) 
 
 	var edgeStack *portainer.EdgeStack
 	if err := handler.DataStore.UpdateTx(func(tx dataservices.DataStoreTx) error {
-		edgeStack, err = handler.createSwarmStack(tx, method, dryrun, tokenData.ID, r)
+		edgeStack, err = handler.createSwarmStack(tx, method, dryrun, tokenData, r)
 		return err
 	}); err != nil {
 		switch {
@@ -43,14 +43,14 @@ func (handler *Handler) edgeStackCreate(w http.ResponseWriter, r *http.Request) 
 	return response.JSON(w, edgeStack)
 }
 
-func (handler *Handler) createSwarmStack(tx dataservices.DataStoreTx, method string, dryrun bool, userID portainer.UserID, r *http.Request) (*portainer.EdgeStack, error) {
+func (handler *Handler) createSwarmStack(tx dataservices.DataStoreTx, method string, dryrun bool, tokenData *portainer.TokenData, r *http.Request) (*portainer.EdgeStack, error) {
 	switch method {
 	case "string":
-		return handler.createEdgeStackFromFileContent(r, tx, dryrun)
+		return handler.createEdgeStackFromFileContent(r, tx, tokenData, dryrun)
 	case "repository":
-		return handler.createEdgeStackFromGitRepository(r, tx, dryrun, userID)
+		return handler.createEdgeStackFromGitRepository(r, tx, tokenData, dryrun)
 	case "file":
-		return handler.createEdgeStackFromFileUpload(r, tx, dryrun)
+		return handler.createEdgeStackFromFileUpload(r, tx, tokenData, dryrun)
 	}
 
 	return nil, httperrors.NewInvalidPayloadError("Invalid value for query parameter: method. Value must be one of: string, repository or file")

@@ -1,11 +1,11 @@
-<page-header title="'Registry access'" breadcrumbs="[{label:'Registries', link:'kubernetes.registries'}, $ctrl.registry.Name, 'Access management']" reload="true"> </page-header>
+<page-header title="'镜像仓库访问权限'" breadcrumbs="[{label:'镜像仓库', link:'kubernetes.registries'}, $ctrl.registry.Name, 'Access management']" reload="true"> </page-header>
 
 <registry-details registry="$ctrl.registry" ng-if="$ctrl.registry"></registry-details>
 
 <div class="row">
   <div class="col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="user-x" title-text="Create access"></rd-widget-header>
+      <rd-widget-header icon="user-x" title-text="创建访问权限"></rd-widget-header>
       <rd-widget-body>
         <form class="form-horizontal">
           <div class="form-group">
@@ -17,7 +17,7 @@
                 ng-if="$ctrl.resourcePools.length"
                 value="$ctrl.selectedResourcePools"
                 namespaces="$ctrl.resourcePools"
-                placeholder="'Select one or more namespaces'"
+                placeholder="'选择一个或多个命名空间'"
                 on-change="($ctrl.onChangeResourcePools)"
                 allow-select-all="true"
               ></namespaces-selector>
@@ -38,7 +38,7 @@
                 ng-click="$ctrl.submit()"
                 button-spinner="$ctrl.state.actionInProgress"
               >
-                <span ng-hide="$ctrl.state.actionInProgress" class="vertical-center"><pr-icon icon="'plus'" size="'sm'"></pr-icon> Create access</span>
+                <span ng-hide="$ctrl.state.actionInProgress" class="vertical-center"><pr-icon icon="'plus'" size="'sm'"></pr-icon> 创建访问权限</span>
                 <span ng-show="$ctrl.state.actionInProgress">Creating access...</span>
               </button>
             </div>

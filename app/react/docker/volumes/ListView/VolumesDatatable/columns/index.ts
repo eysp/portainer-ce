@@ -23,7 +23,7 @@ export function useColumns() {
           header: '堆栈',
         }),
         columnHelper.accessor((item) => item.Driver, {
-          header: '驱动程序',
+          header: '驱动',
         }),
         columnHelper.accessor((item) => item.Mountpoint, {
           header: '挂载点',

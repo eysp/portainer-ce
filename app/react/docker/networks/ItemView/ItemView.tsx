@@ -97,7 +97,7 @@ export function ItemView() {
       { networkId, nodeName },
       {
         onSuccess: () => {
-          notifySuccess('网络已成功移除', networkId);
+          notifySuccess('网络已成功删除', networkId);
           router.stateService.go('docker.networks');
         },
       }

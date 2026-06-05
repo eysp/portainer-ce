@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Volume } from 'docker-types/generated/1.41';
+import { Volume } from 'docker-types';
 
 import axios, { parseAxiosError } from '@/portainer/services/axios';
 import { buildDockerProxyUrl } from '@/react/docker/proxy/queries/buildDockerProxyUrl';
@@ -62,6 +62,6 @@ export async function getVolumes(
 
     return data.Volumes;
   } catch (error) {
-    throw parseAxiosError(error, '无法检索卷');
+    throw parseAxiosError(error, '无法获取卷');
   }
 }

@@ -6,6 +6,7 @@ import (
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/internal/testhelpers"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestExecute(t *testing.T) {
@@ -78,11 +79,13 @@ func TestExecute(t *testing.T) {
 			service.execute(tt.endpoint.ID)
 
 			// Verify expectations
-			pendingActions, _ := store.PendingActions().ReadAll()
+			pendingActions, err := store.PendingActions().ReadAll()
+			require.NoError(t, err)
+
 			if tt.shouldExecute {
-				assert.Equal(t, len(tt.pendingActions)-1, len(pendingActions))
+				assert.Len(t, pendingActions, len(tt.pendingActions)-1)
 			} else {
-				assert.Equal(t, len(tt.pendingActions), len(pendingActions))
+				assert.Len(t, pendingActions, len(tt.pendingActions))
 			}
 		})
 	}

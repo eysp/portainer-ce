@@ -31,7 +31,7 @@ export function RadioGroup<T extends string | number = string>({
           key={option.value}
           className={
             itemClassName ??
-            'col-sm-3 col-lg-2 control-label !p-0 text-left font-normal'
+            'col-sm-3 col-lg-2 control-label !p-0 text-left font-normal cursor-pointer'
           }
         >
           <input
@@ -43,6 +43,7 @@ export function RadioGroup<T extends string | number = string>({
             style={{ margin: '0 4px 0 0' }}
             data-cy={`radio-${option.value}`}
             disabled={option.disabled}
+            className="cursor-pointer"
           />
           {option.label}
         </label>

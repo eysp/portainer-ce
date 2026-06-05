@@ -6,6 +6,7 @@ import (
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/database/boltdb"
 	"github.com/portainer/portainer/api/dataservices/edgegroup"
+	"github.com/portainer/portainer/api/logs"
 
 	"github.com/stretchr/testify/require"
 )
@@ -15,7 +16,7 @@ func TestMigrateEdgeGroupEndpointsToRoars_2_33_0Idempotency(t *testing.T) {
 	err := conn.Open()
 	require.NoError(t, err)
 
-	defer conn.Close()
+	defer logs.CloseAndLogErr(conn)
 
 	edgeGroupService, err := edgegroup.NewService(conn)
 	require.NoError(t, err)
@@ -39,7 +40,7 @@ func TestMigrateEdgeGroupEndpointsToRoars_2_33_0Idempotency(t *testing.T) {
 	migratedEdgeGroup, err := edgeGroupService.Read(edgeGroup.ID)
 	require.NoError(t, err)
 
-	require.Len(t, migratedEdgeGroup.Endpoints, 0)
+	require.Empty(t, migratedEdgeGroup.Endpoints)
 	require.Equal(t, len(edgeGroup.Endpoints), migratedEdgeGroup.EndpointIDs.Len())
 
 	// Run migration again to ensure the results didn't change
@@ -50,6 +51,6 @@ func TestMigrateEdgeGroupEndpointsToRoars_2_33_0Idempotency(t *testing.T) {
 	migratedEdgeGroup, err = edgeGroupService.Read(edgeGroup.ID)
 	require.NoError(t, err)
 
-	require.Len(t, migratedEdgeGroup.Endpoints, 0)
+	require.Empty(t, migratedEdgeGroup.Endpoints)
 	require.Equal(t, len(edgeGroup.Endpoints), migratedEdgeGroup.EndpointIDs.Len())
 }

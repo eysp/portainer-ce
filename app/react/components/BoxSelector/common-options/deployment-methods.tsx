@@ -7,7 +7,7 @@ export const kubernetes: BoxSelectorOption<'kubernetes'> = {
   id: 'method_kubernetes',
   icon: Kubernetes,
   label: 'Kubernetes',
-  description: 'Kubernetes manifest format',
+  description: 'Kubernetes 清单格式',
   value: 'kubernetes',
   iconType: 'logo',
 };
@@ -16,7 +16,7 @@ export const compose: BoxSelectorOption<'compose'> = {
   id: 'method_compose',
   icon: DockerCompose,
   label: 'Compose',
-  description: 'docker-compose format',
+  description: 'docker-compose 格式',
   value: 'compose',
   iconType: 'logo',
 };

@@ -6,8 +6,6 @@ import { withReactQuery } from '@/react-tools/withReactQuery';
 import { withUIRouter } from '@/react-tools/withUIRouter';
 import { AnnotationsBeTeaser } from '@/react/kubernetes/annotations/AnnotationsBeTeaser';
 import { withFormValidation } from '@/react-tools/withFormValidation';
-import { GroupAssociationTable } from '@/react/portainer/environments/environment-groups/components/GroupAssociationTable';
-import { AssociatedEnvironmentsSelector } from '@/react/portainer/environments/environment-groups/components/AssociatedEnvironmentsSelector';
 import { withControlledInput } from '@/react-tools/withControlledInput';
 import { NamespacePortainerSelect } from '@/react/kubernetes/applications/components/NamespaceSelector/NamespaceSelector';
 
@@ -53,6 +51,7 @@ import { accountModule } from './account';
 import { usersModule } from './users';
 import { activityLogsModule } from './activity-logs';
 import { rbacModule } from './rbac';
+import { stacksModule } from './stacks';
 
 export const ngModule = angular
   .module('portainer.app.react.components', [
@@ -66,6 +65,7 @@ export const ngModule = angular
     usersModule,
     activityLogsModule,
     rbacModule,
+    stacksModule,
   ])
   .component(
     'tagSelector',
@@ -206,7 +206,10 @@ export const ngModule = angular
       'isLoading',
       'noOptionsMessage',
       'aria-label',
+      'size',
       'loadingMessage',
+      'getOptionValue',
+      'onBlur',
     ])
   )
   .component(
@@ -248,6 +251,7 @@ export const ngModule = angular
       'fileName',
       'placeholder',
       'showToolbar',
+      'aria-label',
     ])
   )
   .component(
@@ -265,20 +269,7 @@ export const ngModule = angular
     'inlineLoader',
     r2a(InlineLoader, ['children', 'className', 'size'])
   )
-  .component(
-    'groupAssociationTable',
-    r2a(withReactQuery(GroupAssociationTable), [
-      'onClickRow',
-      'query',
-      'title',
-      'data-cy',
-    ])
-  )
-  .component('annotationsBeTeaser', r2a(AnnotationsBeTeaser, []))
-  .component(
-    'associatedEndpointsSelector',
-    r2a(withReactQuery(AssociatedEnvironmentsSelector), ['onChange', 'value'])
-  );
+  .component('annotationsBeTeaser', r2a(AnnotationsBeTeaser, []));
 
 export const componentsModule = ngModule.name;
 

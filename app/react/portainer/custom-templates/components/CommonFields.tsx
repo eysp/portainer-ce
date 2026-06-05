@@ -33,7 +33,7 @@ export function CommonFields({
         <Input
           name="title"
           data-cy="custom-templates-title-input"
-          placeholder="例如 mytemplate"
+          placeholder="例如：mytemplate"
           id="template-title"
           required
           value={values.Title}
@@ -114,7 +114,7 @@ export function validation({
       )
       .max(
         200,
-        '自定义模板标题必须少于或等于 200 个字符'
+        '自定义模板标题必须小于或等于 200 个字符'
       ),
     Description: string().required('描述是必填项。'),
     Note: string().default(''),

@@ -5,7 +5,7 @@ import { Link } from '@@/Link';
 import { columnHelper } from './helper';
 
 export const node = columnHelper.accessor('nodeName', {
-  header: 'Node',
+  header: '节点',
   cell: ({ getValue }) => {
     const nodeName = getValue();
     return (

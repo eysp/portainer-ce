@@ -13,7 +13,7 @@ export function DefaultRegistryName() {
         'cm-strikethrough': settingsQuery.isSuccess && settingsQuery.data,
       })}
     >
-      Docker Hub（匿名）
+      Docker Hub (匿名)
     </span>
   );
 }

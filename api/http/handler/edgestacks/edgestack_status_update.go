@@ -74,7 +74,7 @@ func (handler *Handler) edgeStackStatusUpdate(w http.ResponseWriter, r *http.Req
 	}
 
 	if err := handler.requestBouncer.AuthorizedEdgeEndpointOperation(r, endpoint); err != nil {
-		return httperror.Forbidden("Permission denied to access environment", fmt.Errorf("unauthorized edge endpoint operation: %w. Environment name: %s", err, endpoint.Name))
+		return httperror.Forbidden("Permission denied to access environment", fmt.Errorf("unauthorized edge endpoint operation: %w. Environment ID: %d", err, payload.EndpointID))
 	}
 
 	var stack *portainer.EdgeStack
@@ -96,12 +96,7 @@ func (handler *Handler) edgeStackStatusUpdate(w http.ResponseWriter, r *http.Req
 
 		return nil
 	}); err != nil {
-		var httpErr *httperror.HandlerError
-		if errors.As(err, &httpErr) {
-			return httpErr
-		}
-
-		return httperror.InternalServerError("Unexpected error", err)
+		return response.TxErrorResponse(err)
 	}
 
 	if ok, _ := strconv.ParseBool(r.Header.Get("X-Portainer-No-Body")); ok {

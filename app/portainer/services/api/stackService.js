@@ -48,42 +48,6 @@ angular.module('portainer.app').factory('StackService', [
       return deferred.promise;
     };
 
-    service.migrateSwarmStack = function (stack, targetEndpointId, newName) {
-      var deferred = $q.defer();
-
-      SwarmService.swarm(targetEndpointId)
-        .then(function success(data) {
-          var swarm = data;
-          if (swarm.ID === stack.SwarmId) {
-            deferred.reject({ msg: 'Target environment is located in the same Swarm cluster as the current environment', err: null });
-            return;
-          }
-          return Stack.migrate({ id: stack.Id, endpointId: stack.EndpointId }, { EndpointID: targetEndpointId, SwarmID: swarm.ID, Name: newName }).$promise;
-        })
-        .then(function success() {
-          deferred.resolve();
-        })
-        .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to migrate stack', err: err });
-        });
-
-      return deferred.promise;
-    };
-
-    service.migrateComposeStack = function (stack, targetEndpointId, newName) {
-      var deferred = $q.defer();
-
-      Stack.migrate({ id: stack.Id, endpointId: stack.EndpointId }, { EndpointID: targetEndpointId, Name: newName })
-        .$promise.then(function success() {
-          deferred.resolve();
-        })
-        .catch(function error(err) {
-          deferred.reject({ msg: 'Unable to migrate stack', err: err });
-        });
-
-      return deferred.promise;
-    };
-
     service.stacks = function (compose, swarm, endpointId, includeOrphanedStacks = false) {
       var deferred = $q.defer();
 
@@ -263,7 +227,7 @@ angular.module('portainer.app').factory('StackService', [
       return deferred.promise;
     };
 
-    service.updateStack = function (stack, stackFile, env, prune, pullImage) {
+    service.updateStack = function (stack, stackFile, env, prune, repullImageAndRedeploy) {
       return Stack.update(
         { endpointId: stack.EndpointId },
         {
@@ -271,7 +235,7 @@ angular.module('portainer.app').factory('StackService', [
           StackFileContent: stackFile,
           Env: env,
           Prune: prune,
-          PullImage: pullImage,
+          RepullImageAndRedeploy: repullImageAndRedeploy,
         }
       ).$promise;
     };
@@ -408,11 +372,6 @@ angular.module('portainer.app').factory('StackService', [
         });
 
       return deferred.promise;
-    };
-
-    service.duplicateStack = function duplicateStack(name, stackFileContent, env, endpointId, type) {
-      var action = type === 1 ? service.createSwarmStackFromFileContent : service.createComposeStackFromFileContent;
-      return action(name, stackFileContent, env, endpointId);
     };
 
     async function kubernetesDeployAsync(endpointId, method, payload) {

@@ -6,6 +6,7 @@ import (
 	"github.com/portainer/portainer/pkg/libhelm/options"
 	"github.com/portainer/portainer/pkg/libhelm/test"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_Uninstall(t *testing.T) {
@@ -21,7 +22,7 @@ func Test_Uninstall(t *testing.T) {
 			Name: "",
 		}
 		err := hspm.Uninstall(uninstallOpts)
-		is.Error(err, "should return error when release name is empty")
+		require.Error(t, err, "should return error when release name is empty")
 		is.Contains(err.Error(), "release name is required", "error message should indicate release name is required")
 	})
 
@@ -34,7 +35,7 @@ func Test_Uninstall(t *testing.T) {
 
 		// The function should not fail by design, even when not running in a k8s environment
 		// However, it should return an error for a non-existent release
-		is.Error(err, "should return error when release doesn't exist")
+		require.Error(t, err, "should return error when release doesn't exist")
 		is.Contains(err.Error(), "not found", "error message should indicate release not found")
 	})
 
@@ -60,6 +61,6 @@ func Test_Uninstall(t *testing.T) {
 			Name: "test-uninstall",
 		}
 		err = hspm.Uninstall(uninstallOpts)
-		is.NoError(err, "should successfully uninstall release")
+		require.NoError(t, err, "should successfully uninstall release")
 	})
 }

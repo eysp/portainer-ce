@@ -11,24 +11,24 @@ export function getResourceQuotaValidationSchema(
     memory: string()
       .test(
         'non-negative-memory-validation',
-        '现有命名空间的内存限制已超过集群中可用的资源。在您设置此处的值之前，必须减少命名空间中的数量（您可能需要临时启用过度提交才能这样做）。',
+        'Existing namespaces already have memory limits exceeding what is available in the cluster. Before you can set values here, you must reduce amounts in namespaces (and you may have to turn on over-commit temporarily to do so).',
         () => nonNegativeLimit(memoryLimit)
       )
       .test(
         'memory-validation',
-        `值必须在 0 到 ${memoryLimit} 之间。`,
+        `Value must be between 0 and ${memoryLimit}.`,
         memoryValidation
       ),
     cpu: string()
       .test(
         'non-negative-memory-validation',
-        '现有命名空间的 CPU 限制已超过集群中可用的资源。在您设置此处的值之前，必须减少命名空间中的数量（您可能需要临时启用过度提交才能这样做）。',
+        'Existing namespaces already have CPU limits exceeding what is available in the cluster. Before you can set values here, you must reduce amounts in namespaces (and you may have to turn on over-commit temporarily to do so).',
         () => nonNegativeLimit(cpuLimit)
       )
-      .test('cpu-validation', 'CPU 限制值是必填项。', cpuValidation),
+      .test('cpu-validation', 'CPU limit value is required.', cpuValidation),
   }).test(
     'resource-quota-validation',
-    '至少必须设置一个限制。',
+    'At least a single limit must be set.',
     oneLimitSet
   );
 

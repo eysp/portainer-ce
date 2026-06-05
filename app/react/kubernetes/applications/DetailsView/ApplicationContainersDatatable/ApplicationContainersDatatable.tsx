@@ -67,7 +67,7 @@ export function ApplicationContainersDatatable() {
         podsQuery.isLoading ||
         useServerMetricsQuery.isLoading
       }
-      title="Application containers"
+      title="应用容器"
       titleIcon={Server}
       getRowId={(row) => row.podName} // use pod name because it's unique (name is not unique)
       disableSelect

@@ -27,6 +27,6 @@ export async function getImageHistory(
     );
     return data;
   } catch (err) {
-    throw parseAxiosError(err as Error, '无法检索镜像层');
+    throw parseAxiosError(err as Error, '无法获取镜像层');
   }
 }

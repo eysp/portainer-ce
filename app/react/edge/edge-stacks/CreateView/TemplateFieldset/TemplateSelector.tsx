@@ -30,7 +30,7 @@ export function TemplateSelector({
   const { options, getTemplate, selectedValue } = useOptions(value);
 
   return (
-    <FormControl label="Template" inputId="template_selector" errors={error}>
+    <FormControl label="模板" inputId="template_selector" errors={error}>
       <ReactSelect
         inputId="template_selector"
         formatGroupLabel={GroupLabel}
@@ -122,11 +122,11 @@ function useOptions(value: SelectedTemplateValue) {
     () =>
       [
         {
-          label: 'Edge App Templates',
+          label: '边缘应用模板',
           options: appTemplateOptions,
         },
         {
-          label: 'Edge Custom Templates',
+          label: '边缘自定义模板',
           options: customTemplateOptions,
         },
       ] as const,

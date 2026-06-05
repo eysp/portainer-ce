@@ -19,11 +19,12 @@ export function TemplatesUrlSection() {
       <div className="form-group">
         <div className="col-sm-12 text-muted small">
           <p>
-            您可以在此指定您自己的模板定义文件的 URL。查看{' '}
+            您可以在此处指定自定义模板定义文件的 URL。 
+            欲了解更多详情，请参阅{' '}
             <a href={buildTemplateDocUrl} target="_blank" rel="noreferrer">
               Portainer 文档
             </a>{' '}
-            了解更多详情。
+            。
           </p>
           <p>
             默认值为 <a href={DEFAULT_URL}>{DEFAULT_URL}</a>
