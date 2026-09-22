@@ -5,10 +5,10 @@ import { Team } from '@/react/portainer/users/teams/types';
 export function validationSchema(teams: Team[]) {
   return object().shape({
     name: string()
-      .required('This field is required.')
+      .required('团队名称不能为空。')
       .test(
         'is-unique',
-        'This team already exists.',
+        '该团队已存在。',
         (name) => !!name && teams.every((team) => team.Name !== name)
       ),
     leaders: array().of(number()),

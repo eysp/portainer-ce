@@ -7,10 +7,10 @@ export function CreateHelmRepositoriesView() {
   return (
     <>
       <PageHeader
-        title="Create Helm repository"
+        title="创建 Helm 仓库"
         breadcrumbs={[
-          { label: 'My account', link: 'portainer.account' },
-          { label: 'Create Helm repository' },
+          { label: '个人设置', link: 'portainer.account' },
+          { label: '创建 Helm 仓库' },
         ]}
         reload
       />

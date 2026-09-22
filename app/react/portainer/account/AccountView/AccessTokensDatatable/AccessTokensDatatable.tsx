@@ -22,7 +22,7 @@ export function AccessTokensDatatable() {
       isLoading={query.isLoading}
       dataset={query.data || []}
       settingsManager={tableState}
-      title="Access tokens"
+      title="访问令牌"
       titleIcon={Key}
       renderTableActions={(selectedItems) => (
         <TableActions selectedItems={selectedItems} />
