@@ -109,7 +109,7 @@ class CreateRegistryController {
       try {
         this.gitlabProjects = await this.RegistryGitlabService.projects(this.model.Gitlab.InstanceURL, this.model.Token);
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to retrieve projects');
+        this.Notifications.error('失败', err, '无法获取 GitLab 项目');
       } finally {
         this.state.actionInProgress = false;
       }
@@ -121,10 +121,10 @@ class CreateRegistryController {
       try {
         this.state.actionInProgress = true;
         await this.RegistryService.createGitlabRegistries(this.model, registries);
-        this.Notifications.success('Success', 'Registries successfully created');
+        this.Notifications.success('成功', '镜像仓库创建成功');
         this.$state.go(this.state.originViewReference, { endpointId: this.state.originalEndpointId });
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to create registries');
+        this.Notifications.error('失败', err, '无法创建镜像仓库');
         this.state.actionInProgress = false;
       }
     });
@@ -135,10 +135,10 @@ class CreateRegistryController {
       try {
         this.state.actionInProgress = true;
         await this.RegistryService.createRegistry(this.model);
-        this.Notifications.success('Success', 'Registry successfully created');
+        this.Notifications.success('成功', '镜像仓库创建成功');
         this.$state.go(this.state.originViewReference, { endpointId: this.state.originalEndpointId });
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to create registry');
+        this.Notifications.error('失败', err, '无法创建镜像仓库');
         this.state.actionInProgress = false;
       }
     });
@@ -163,7 +163,7 @@ class CreateRegistryController {
         const registries = await this.RegistryService.registries();
         this.registriesNames = _.map(registries, 'Name');
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to fetch existing registries');
+        this.Notifications.error('失败', err, '无法获取现有镜像仓库');
       }
     });
   }
