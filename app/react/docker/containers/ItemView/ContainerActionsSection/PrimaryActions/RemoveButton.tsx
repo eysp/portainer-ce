@@ -29,8 +29,8 @@ export function RemoveButton({
 
   async function handleRemove() {
     const title = isRunning
-      ? 'You are about to remove a running container.'
-      : 'You are about to remove a container.';
+      ? '您即将删除一个正在运行的容器。'
+      : '您即将删除一个容器。';
 
     const result = await confirmContainerDeletion(title);
 
@@ -47,7 +47,7 @@ export function RemoveButton({
       },
       {
         onSuccess() {
-          notifySuccess('Success', 'Container successfully removed');
+          notifySuccess('成功', '容器已成功删除');
         },
       }
     );
@@ -61,11 +61,11 @@ export function RemoveButton({
         onClick={handleRemove}
         disabled={isPortainer}
         isLoading={removeMutation.isLoading}
-        loadingText="Removing..."
+        loadingText="正在删除..."
         data-cy="remove-container-button"
         icon={Trash2}
       >
-        Remove
+        删除
       </LoadingButton>
     </Authorized>
   );

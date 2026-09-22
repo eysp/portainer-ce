@@ -38,10 +38,10 @@ export function VolumesTab({
     <InputContext.Provider value={inputContext}>
       <InputList<Volume>
         errors={Array.isArray(errors) ? errors : []}
-        label="Volume mapping"
+        label="存储卷与路径映射"
         onChange={(volumes) => handleChange(volumes)}
         value={values}
-        addLabel="map additional volume"
+        addLabel="映射更多存储卷"
         item={Item}
         itemBuilder={() => ({
           containerPath: '',

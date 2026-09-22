@@ -33,7 +33,7 @@ export function StopButton({
       { environmentId, containerId, nodeName },
       {
         onSuccess() {
-          notifySuccess('Success', 'Container successfully stopped');
+          notifySuccess('成功', '容器已成功停止');
           onSuccess();
         },
       }
@@ -48,11 +48,11 @@ export function StopButton({
         onClick={handleStop}
         disabled={!isRunning || isPortainer}
         isLoading={stopMutation.isLoading}
-        loadingText="Stopping..."
+        loadingText="正在停止..."
         data-cy="stop-container-button"
         icon={Square}
       >
-        Stop
+        停止
       </LoadingButton>
     </Authorized>
   );

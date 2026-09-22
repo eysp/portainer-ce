@@ -41,7 +41,7 @@ export function CreateImageSection({
 
   return (
     <Widget>
-      <Widget.Title icon={ListIcon} title="Create image" />
+      <Widget.Title icon={ListIcon} title="从容器创建镜像" />
       <Widget.Body>
         <Formik
           initialValues={initialValues}
@@ -71,7 +71,7 @@ export function CreateImageSection({
       },
       {
         onSuccess() {
-          notifySuccess('Image created', containerId);
+          notifySuccess('镜像已创建', containerId);
           onSuccess?.();
         },
       }

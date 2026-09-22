@@ -36,10 +36,10 @@ export function PortsMappingField({
   return (
     <>
       <InputList<PortMapping>
-        label="Port mapping"
+        label="端口映射"
         value={value}
         onChange={onChange}
-        addLabel="Map additional port"
+        addLabel="映射更多端口"
         itemBuilder={() => ({
           hostPort: '',
           containerPort: '',
@@ -49,7 +49,7 @@ export function PortsMappingField({
         errors={errors}
         disabled={disabled}
         readOnly={readOnly}
-        tooltip="When a range of ports on the host and a single port on the container is specified, Docker will randomly choose a single available port in the defined range and forward that to the container port."
+        tooltip="如果指定了主机端口范围和容器单个端口，Docker 将在定义的范围内随机选择一个可用端口并转发到该容器端口。"
         data-cy="docker-containers-ports-mapping"
       />
       {typeof errors === 'string' && (
@@ -79,8 +79,8 @@ function Item({
           readOnly={readOnly}
           value={item.hostPort}
           onChange={(e) => handleChange('hostPort', e.target.value)}
-          label="Host"
-          placeholder="e.g. 80"
+          label="主机"
+          placeholder="例如 80"
           className="w-1/2"
           id={`hostPort-${index}`}
         />
@@ -95,8 +95,8 @@ function Item({
           readOnly={readOnly}
           value={item.containerPort}
           onChange={(e) => handleChange('containerPort', e.target.value)}
-          label="Container"
-          placeholder="e.g. 80"
+          label="容器"
+          placeholder="例如 80"
           className="w-1/2"
           id={`containerPort-${index}`}
           data-cy={`containerPort-${index}`}

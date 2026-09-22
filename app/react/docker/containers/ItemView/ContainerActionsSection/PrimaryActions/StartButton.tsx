@@ -33,7 +33,7 @@ export function StartButton({
       { environmentId, containerId, nodeName },
       {
         onSuccess() {
-          notifySuccess('Success', 'Container successfully started');
+          notifySuccess('成功', '容器已成功启动');
           onSuccess();
         },
       }
@@ -48,11 +48,11 @@ export function StartButton({
         onClick={handleStart}
         disabled={isRunning || isPortainer}
         isLoading={startMutation.isLoading}
-        loadingText="Starting..."
+        loadingText="正在启动..."
         data-cy="start-container-button"
         icon={Play}
       >
-        Start
+        启动
       </LoadingButton>
     </Authorized>
   );

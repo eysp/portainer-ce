@@ -27,10 +27,10 @@ interface Props {
 }
 
 const restartPolicyOptions: Array<Option<RestartPolicy>> = [
-  { label: 'None', value: RestartPolicy.No },
-  { label: 'On Failure', value: RestartPolicy.OnFailure },
-  { label: 'Always', value: RestartPolicy.Always },
-  { label: 'Unless Stopped', value: RestartPolicy.UnlessStopped },
+  { label: '从不重启 (None)', value: RestartPolicy.No },
+  { label: '故障时重启 (On Failure)', value: RestartPolicy.OnFailure },
+  { label: '总是重启 (Always)', value: RestartPolicy.Always },
+  { label: '除非手动停止 (Unless Stopped)', value: RestartPolicy.UnlessStopped },
 ];
 
 export function RestartPolicySection({
@@ -57,7 +57,7 @@ export function RestartPolicySection({
           >
             <Authorized authorizations="DockerContainerUpdate">
               <DetailsRow
-                label="Name"
+                label="策略名称"
                 columns={[
                   <LoadingButton
                     key="update-button"
@@ -65,9 +65,9 @@ export function RestartPolicySection({
                     disabled={!isValid || !dirty}
                     isLoading={updateMutation.isLoading}
                     data-cy="container-restart-policy-update-button"
-                    loadingText="Updating..."
+                    loadingText="正在更新..."
                   >
-                    Update
+                    更新
                   </LoadingButton>,
                 ]}
               >
@@ -80,7 +80,7 @@ export function RestartPolicySection({
               </DetailsRow>
             </Authorized>
             {values.name === RestartPolicy.OnFailure && (
-              <DetailsRow label="Maximum Retry Count">
+              <DetailsRow label="最大重试次数">
                 <Input
                   type="number"
                   value={values.maximumRetryCount}
@@ -111,7 +111,7 @@ export function RestartPolicySection({
       },
       {
         onSuccess: () => {
-          notifySuccess('Success', 'Restart policy updated');
+          notifySuccess('成功', '重启策略已更新');
 
           onUpdateSuccess?.(values);
         },

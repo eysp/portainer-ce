@@ -33,7 +33,7 @@ export function VolumeSelector({
   const selectedValue = volumes.find((vol) => vol.Name === value);
   return (
     <Select
-      placeholder="Select a volume"
+      placeholder="请选择存储卷"
       options={volumes}
       getOptionLabel={(vol) =>
         vol.Name !== 'auto'

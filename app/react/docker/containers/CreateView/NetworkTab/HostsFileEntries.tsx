@@ -6,7 +6,7 @@ import { ItemProps } from '@@/form-components/InputList';
 import { ArrayError, InputList } from '@@/form-components/InputList/InputList';
 
 export const hostFileSchema = array(
-  string().required('Entry is required')
+  string().required('条目内容不能为空')
 ).default([]);
 
 export function HostsFileEntries({
@@ -20,7 +20,7 @@ export function HostsFileEntries({
 }) {
   return (
     <InputList
-      label="Hosts file entries"
+      label="Hosts 文件条目 (Hosts file entries)"
       value={values}
       onChange={(hostsFileEntries) => onChange(hostsFileEntries)}
       errors={errors}
@@ -42,7 +42,7 @@ function HostsFileEntryItem({
   return (
     <div>
       <InputLabeled
-        label="value"
+        label="条目值"
         value={item}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
