@@ -65,7 +65,7 @@ export function CreateForm({
       },
       {
         onSuccess() {
-          notifySuccess('Success', 'Template created');
+          notifySuccess('成功', '模板创建成功');
           router.stateService.go('^');
         },
       }
