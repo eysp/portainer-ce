@@ -66,17 +66,17 @@ export function EnvironmentHeader() {
     return null;
   }
   const segments: StatusSegment[] = [
-    { key: 'up', label: 'Up', count: counts.up, color: 'success' },
-    { key: 'down', label: 'Down', count: counts.down, color: 'error' },
+    { key: 'up', label: '在线', count: counts.up, color: 'success' },
+    { key: 'down', label: '离线', count: counts.down, color: 'error' },
     {
       key: 'outdated',
-      label: 'Outdated',
+      label: '待更新',
       count: counts.outdated,
       color: 'warning',
     },
     {
       key: 'unassigned',
-      label: 'Unassigned',
+      label: '未分配',
       count: counts.unassigned,
       color: 'gray',
     },
@@ -90,7 +90,7 @@ export function EnvironmentHeader() {
       onChange={handleFilterChange}
       radioGroupName="environment-status-filter"
       data-cy="environment-status-bar"
-      ariaLabel="Filter by environment status"
+      ariaLabel="按环境状态过滤"
     />
   );
 }

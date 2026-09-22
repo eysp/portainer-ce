@@ -26,7 +26,7 @@ const filterOptions = [
 type FilterOption = (typeof filterOptions)[number];
 
 export const name = columnHelper.accessor('Name', {
-  header: 'Name',
+  header: '名称',
   id: 'name',
   cell: NameCell,
   enableHiding: false,
@@ -68,17 +68,17 @@ function NameCell({
       <NameLink item={item} />
       {isRegularStack(item) && item.Status === StackStatus.Inactive && (
         <span className="label label-warning image-tag space-left ml-2">
-          Inactive
+          未激活
         </span>
       )}
       {isRegularStack(item) && item.Status === StackStatus.Deploying && (
         <span className="label label-info image-tag space-left ml-2">
-          Deploying...
+          部署中...
         </span>
       )}
       {isRegularStack(item) && item.Status === StackStatus.Error && (
         <span className="label label-danger image-tag space-left ml-2">
-          Error
+          错误
         </span>
       )}
     </>
@@ -145,7 +145,7 @@ function Filter<TData extends { Used: boolean }>({
       filterKey={id}
       value={valueAsArray}
       onChange={setFilterValue}
-      menuTitle="Filter by activity"
+      menuTitle="按活动状态过滤"
     />
   );
 }

@@ -38,7 +38,7 @@ export function RemoveButtonMenu({
             handleRemove(false);
           }}
         >
-          Remove
+          删除
         </Button>
         <Menu>
           <MenuButton
@@ -49,7 +49,7 @@ export function RemoveButtonMenu({
             icon={ChevronDown}
             data-cy="image-toggleRemoveButtonMenu"
           >
-            <span className="sr-only">Toggle Dropdown</span>
+            <span className="sr-only">展开菜单</span>
           </MenuButton>
           <MenuPopover position={positionRight}>
             <div className="mt-3 bg-white th-highcontrast:bg-black th-dark:bg-black">
@@ -58,7 +58,7 @@ export function RemoveButtonMenu({
                   handleRemove(true);
                 }}
               >
-                Force Remove
+                强制删除
               </MenuItem>
             </div>
           </MenuPopover>
@@ -69,19 +69,19 @@ export function RemoveButtonMenu({
 
   function confirmForceRemove() {
     return confirmDestructive({
-      title: 'Are you sure?',
+      title: '您确定吗？',
       message:
-        "Forcing removal of an image will remove it even if it's used by stopped containers, and delete all associated tags. Are you sure you want to remove the selected image(s)?",
-      confirmButton: buildConfirmButton('Remove the image', 'danger'),
+        '强制删除镜像即使该镜像被已停止的容器使用也会将其删除，并删除所有关联的标签。您确定要删除选中的镜像吗？',
+      confirmButton: buildConfirmButton('确认删除镜像', 'danger'),
     });
   }
 
   function confirmRegularRemove() {
     return confirmDestructive({
-      title: 'Are you sure?',
+      title: '您确定吗？',
       message:
-        'Removing an image will also delete all associated tags. Are you sure you want to remove the selected image(s)?',
-      confirmButton: buildConfirmButton('Remove the image', 'danger'),
+        '删除镜像还将同时删除所有关联的标签。您确定要删除选中的镜像吗？',
+      confirmButton: buildConfirmButton('确认删除镜像', 'danger'),
     });
   }
 
@@ -129,13 +129,13 @@ function useDeleteImageListMutation() {
     onSuccess: ({ fulfilledItems, rejectedItems }) => {
       // one error notification per rejected item
       rejectedItems.forEach(({ item, reason }) => {
-        notifyError(`Failed to remove image '${item.id}'`, new Error(reason));
+        notifyError(`删除镜像 '${item.id}' 失败`, new Error(reason));
       });
 
       // one success notification for all fulfilled items
       if (fulfilledItems.length) {
         notifySuccess(
-          `${pluralize(fulfilledItems.length, 'Image')} successfully removed`,
+          `成功删除 ${fulfilledItems.length} 个镜像`,
           fulfilledItems.map((item) => item.id).join(', ')
         );
       }

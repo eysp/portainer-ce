@@ -32,7 +32,7 @@ export function PullImageForm({
         onRateLimit={onRateLimit}
       >
         {isNodeVisible && (
-          <FormSection title="Deployment">
+          <FormSection title="部署目标">
             <NodeSelector
               value={values.node}
               onChange={(node) => setFieldValue('node', node)}
@@ -44,8 +44,8 @@ export function PullImageForm({
         <FormActions
           isLoading={isLoading}
           isValid={isValid}
-          loadingText="Download in progress..."
-          submitLabel="Pull the image"
+          loadingText="正在下载镜像..."
+          submitLabel="拉取镜像"
           data-cy="pull-image-button"
         />
       </ImageConfigFieldset>

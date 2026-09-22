@@ -12,11 +12,20 @@ import styles from './SortbySelector.module.css';
 
 export type ListSortType = Exclude<SortType, 'LastCheckIn' | 'EdgeID'>;
 
+const sortLabels: Record<string, string> = {
+  Name: '名称',
+  Group: '分组',
+  Status: '状态',
+  PlatformType: '平台类型',
+  Health: '健康状态',
+  Id: 'ID',
+};
+
 const sortByOptions = SortOptions.filter(
   (v): v is ListSortType => !['LastCheckIn', 'EdgeID'].includes(v)
 ).map((v) => ({
   value: v,
-  label: v,
+  label: sortLabels[v] || v,
 }));
 
 interface Props {

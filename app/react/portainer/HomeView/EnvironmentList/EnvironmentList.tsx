@@ -47,13 +47,13 @@ interface Props {
 const SORT_OPTIONS: SortOption<SortType>[] = [
   {
     key: 'Id',
-    label: 'Age',
-    descendingLabel: 'Newest',
-    ascendingLabel: 'Oldest',
+    label: '时间',
+    descendingLabel: '最新',
+    ascendingLabel: '最早',
   },
-  { key: 'Group', label: 'Group', grouped: true },
-  { key: 'PlatformType', label: 'Platform', grouped: true },
-  { key: 'Health', label: 'Health', grouped: true },
+  { key: 'Group', label: '分组', grouped: true },
+  { key: 'PlatformType', label: '平台', grouped: true },
+  { key: 'Health', label: '健康状态', grouped: true },
 ];
 
 const platformDetails: Record<
@@ -62,14 +62,14 @@ const platformDetails: Record<
 > = {
   Docker: {
     type: PlatformType.Docker,
-    description: 'Docker hosts and Swarm clusters',
+    description: 'Docker 主机与 Swarm 集群',
   },
   Kubernetes: {
     type: PlatformType.Kubernetes,
-    description: 'Kubernetes clusters and nodes',
+    description: 'Kubernetes 集群与节点',
   },
-  Azure: { type: PlatformType.Azure, description: 'Azure Container Instances' },
-  Podman: { type: PlatformType.Podman, description: 'Podman Containers' },
+  Azure: { type: PlatformType.Azure, description: 'Azure 容器实例' },
+  Podman: { type: PlatformType.Podman, description: 'Podman 容器' },
 };
 
 const healthDetails: Record<
@@ -78,19 +78,19 @@ const healthDetails: Record<
 > = {
   Up: {
     type: EnvironmentHealth.Up,
-    description: 'Environments online and up-to-date',
+    description: '环境在线且为最新版本',
   },
   Down: {
     type: EnvironmentHealth.Down,
-    description: 'Environments currently offline or unreachable',
+    description: '环境当前离线或无法连通',
   },
   Outdated: {
     type: EnvironmentHealth.Outdated,
-    description: 'Environments with agents that can be upgraded',
+    description: '环境代理版本可升级',
   },
   Heartbeat: {
     type: EnvironmentHealth.Heartbeat,
-    description: 'Edge environments with active heartbeat',
+    description: '心跳活跃的边缘环境',
   },
 };
 
@@ -200,8 +200,8 @@ export function EnvironmentList({ onClickBrowse }: Props) {
         groupOptions={availableGroupsBySort}
         totalCount={totalCount}
         groups={environmentGroups}
-        searchPlaceholder="Search environments..."
-        emptyMessage="No environments available."
+        searchPlaceholder="搜索环境..."
+        emptyMessage="暂无可用环境。"
         headerButtons={headerButtons}
         data-cy="home-endpointList"
         showGroupHeaders

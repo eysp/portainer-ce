@@ -12,7 +12,7 @@ import { columnHelper } from './helper';
 
 export const id = columnHelper.accessor('id', {
   id: 'id',
-  header: 'Id',
+  header: 'ID',
   cell: Cell,
   enableColumnFilter: true,
   filterFn: (
@@ -56,7 +56,7 @@ function FilterByUsage<TData extends { Used: boolean }>({
       filterKey={id}
       value={valueAsArray}
       onChange={setFilterValue}
-      menuTitle="Filter by usage"
+      menuTitle="按使用状态过滤"
     />
   );
 }
