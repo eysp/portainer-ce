@@ -19,7 +19,7 @@ import { AdminGroupSearchConfigItem } from './AdminGroupSearchConfigItem';
 
 type CEProps = Omit<
   AdminGroupsSectionProps,
-  'groups' | 'is获取中... 'onFetch'
+  'groups' | 'isFetching' | 'onFetch'
 >;
 
 export function AdminGroupsSectionCE({
@@ -43,7 +43,7 @@ export function AdminGroupsSectionCE({
       limitedFeatureId={limitedFeatureId}
       isLimitedFeatureSelfContained={isLimitedFeatureSelfContained}
       groups={null}
-      is获取中...alse}
+      isFetching={false}
       onFetch={noop}
     />
   );
@@ -57,7 +57,7 @@ interface AdminGroupsSectionProps {
   selectedAdminGroups: string[];
   onSelectedAdminGroupsChange: (groups: string[]) => void;
   groups: string[] | null;
-  is获取中...oolean;
+  isFetching: boolean;
   onFetch: () => void;
   limitedFeatureId?: FeatureId;
   isLimitedFeatureSelfContained?: boolean;
@@ -76,8 +76,7 @@ export function AdminGroupsSection({
   limitedFeatureId,
   isLimitedFeatureSelfContained,
 }: AdminGroupsSectionProps) {
-  const isLimited =
-    (isLimitedFeatureSelfContained ?? false) || isLimitedToBE(limitedFeatureId);
+  const isLimited = isLimitedToBE(limitedFeatureId);
 
   const { handleAdd, handleRemoveItem, handleChangeItem } = useInputList({
     value: searchSettings,
@@ -90,7 +89,10 @@ export function AdminGroupsSection({
   });
 
   const enableAssignAdminGroup = groups !== null && groups.length > 0;
-  const groupOptions = (groups ?? []).map((g) => ({ label: g, value: g }));
+  const groupOptions = (groups || []).map((group) => ({
+    label: group,
+    value: group,
+  }));
 
   return (
     <FormSection
@@ -103,36 +105,30 @@ export function AdminGroupsSection({
         </>
       }
     >
-      <div className="space-y-3">
-        {searchSettings.map((config, index) => (
-          <Widget
-            key={index}
-            aria-label={`Admin group search configuration ${index + 1}`}
-          >
-            <WidgetBody>
-              {index > 0 && (
-                <div className="form-group mt-2">
-                  <span className="col-sm-12 text-muted small">
-                    Extra search configuration
-                  </span>
-                </div>
-              )}
-
-              <AdminGroupSearchConfigItem
-                value={config}
-                index={index}
-                count={searchSettings.length}
-                isLimited={isLimited}
-                onChange={(value) => handleChangeItem(index, value)}
-                onRemove={() => handleRemoveItem(index, config)}
-              />
-            </WidgetBody>
-          </Widget>
-        ))}
+      <div className="form-group">
+        <span className="col-sm-12 text-muted small">
+          如果未添加组搜索配置，自动填充将使用您的默认组搜索配置。
+        </span>
       </div>
 
-      <div className="form-group mt-2">
-        <div className="col-sm-12">
+      <Widget>
+        <WidgetBody>
+          {searchSettings.map((item, index) => (
+            <AdminGroupSearchConfigItem
+              key={index}
+              value={item}
+              index={index}
+              count={searchSettings.length}
+              isLimited={isLimited}
+              onChange={(value) => handleChangeItem(value, index)}
+              onRemove={() => handleRemoveItem(index)}
+            />
+          ))}
+        </WidgetBody>
+      </Widget>
+
+      <div className="form-group">
+        <div className="col-sm-12 mt-2">
           <Button
             color="light"
             size="small"
@@ -202,5 +198,5 @@ export function AdminGroupsSection({
 }
 
 function noop() {
-  // CE stub – admin group fetch is a BE-only feature
+  // CE stub — admin group fetch is a BE-only feature
 }
