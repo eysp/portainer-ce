@@ -41,8 +41,8 @@ export function SessionLifetimeSelect({ value, onChange }: Props) {
   return (
     <FormControl
       inputId="user_timeout"
-      label="Session lifetime"
-      tooltip="Time before users are forced to relogin."
+      label="会话周期"
+      tooltip="用户被强制重新登录前的超时时间"
     >
       <Select
         id="user_timeout"
