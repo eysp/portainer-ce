@@ -32,18 +32,18 @@ export function EdgeGroupsField({
   return (
     <div>
       <FormControl
-        label="Groups"
+        label="分组"
         required
         inputId="groups-select"
         errors={error}
-        tooltip="Updates are done based on groups, allowing you to choose multiple devices at the same time and the ability to roll out progressively across all environments by scheduling them for different days."
+        tooltip="更新基于分组进行，允许您同时选择多个设备，并能够通过为它们安排不同的日期在所有环境中逐步推出。"
       >
         <Select
           name="groupIds"
           onBlur={onBlur}
           value={selectedGroups}
           inputId="groups-select"
-          placeholder="Select one or multiple group(s)"
+          placeholder="选择一个或多个分组"
           onChange={(selectedGroups) =>
             onChange(selectedGroups.map((g) => g.Id))
           }
@@ -58,7 +58,7 @@ export function EdgeGroupsField({
         />
       </FormControl>
       <TextTip color="blue">
-        Select groups of Edge environments to update
+        选择要更新的 Edge 环境分组
       </TextTip>
     </div>
   );

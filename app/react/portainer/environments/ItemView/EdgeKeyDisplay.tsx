@@ -5,15 +5,15 @@ import { Code } from '@@/Code';
 
 export function EdgeKeyDisplay({ edgeKey }: { edgeKey: string }) {
   return (
-    <FormSection title="Join token">
+    <FormSection title="加入令牌 (Join token)">
       <TextTip color="blue">
-        For those pre-staging the edge agent, use the following join token to
-        associate the Edge agent with this environment.
+        对于预配置边缘 Agent 的场景，请使用以下加入令牌将边缘 Agent 关联到此环境。
       </TextTip>
 
       <p className="small text-muted mt-2">
-        You can read more about pre-staging in the user-guide available{' '}
-        <a href="https://downloads.portainer.io/edge_agent_guide.pdf">here.</a>
+        您可以在{' '}
+        <a href="https://downloads.portainer.io/edge_agent_guide.pdf">此处</a>
+        的用户指南中了解更多有关预配置的信息。
       </p>
 
       <Code>{edgeKey}</Code>
@@ -23,7 +23,7 @@ export function EdgeKeyDisplay({ edgeKey }: { edgeKey: string }) {
         className="mt-2"
         data-cy="copy-edge-key-button"
       >
-        Copy token
+        复制令牌
       </CopyButton>
     </FormSection>
   );

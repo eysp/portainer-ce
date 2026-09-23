@@ -52,34 +52,32 @@ function CreateView() {
   return (
     <>
       <PageHeader
-        title="Update & Rollback"
-        breadcrumbs="Edge agent update and rollback"
+        title="更新与回滚"
+        breadcrumbs="Edge agent 更新与回滚"
         reload
       />
 
       <BetaAlert
         className="mb-2 ml-[15px]"
-        message="Beta feature - currently limited to standalone Linux edge devices."
+        message="Beta 阶段功能 - 目前仅限于独立 Linux 边缘设备。"
       />
 
       <div className="row">
         <div className="col-sm-12">
           <Widget>
-            <Widget.Title title="Update & Rollback Scheduler" icon={Settings} />
+            <Widget.Title title="更新与回滚计划" icon={Settings} />
             <Widget.Body>
               <TextTip color="blue" className="mb-2">
-                Devices need to be allocated to an Edge group, visit the{' '}
+                设备需要分配给一个 Edge 分组，请访问{' '}
                 <Link
                   to="edge.groups"
                   data-cy="update-schedules-create-edge-groups-link"
                 >
-                  Edge Groups
+                  Edge 分组
                 </Link>{' '}
-                page to assign environments and create groups.
+                页面分配环境并创建分组。
                 <br />
-                You can upgrade from any agent version to 2.17 or later only.
-                You can not upgrade to an agent version prior to 2.17 . The
-                ability to rollback to originating version is for 2.15.0+ only.
+                你只能从任何 agent 版本升级到 2.17 或更高版本。不能升级到 2.17 之前的 agent 版本。回滚到原始版本的功能仅适用于 2.15.0 及更高版本。
               </TextTip>
 
               <Formik
@@ -110,9 +108,9 @@ function CreateView() {
                           disabled={!isValid}
                           data-cy="update-schedules-create-submit-button"
                           isLoading={createMutation.isLoading}
-                          loadingText="Creating..."
+                          loadingText="正在创建..."
                         >
-                          Create Schedule
+                          创建计划
                         </LoadingButton>
                       </div>
                     </div>
@@ -129,7 +127,7 @@ function CreateView() {
   function handleSubmit(values: FormValues) {
     createMutation.mutate(values, {
       onSuccess() {
-        notifySuccess('Success', 'Created schedule successfully');
+        notifySuccess('Success', '计划创建成功');
         router.stateService.go('^');
       },
     });

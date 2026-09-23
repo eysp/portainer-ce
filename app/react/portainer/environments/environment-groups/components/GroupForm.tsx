@@ -46,7 +46,7 @@ interface Props {
 }
 
 const validationSchema = object({
-  name: string().required('Name is required'),
+  name: string().required('需要填写名称'),
   description: string(),
   tagIds: array(number()),
 });
@@ -105,7 +105,7 @@ function InnerForm({
   return (
     <Form className="form-horizontal">
       <FormControl
-        label="Name"
+        label="名称"
         required
         errors={errors.name}
         inputId="group-name"
@@ -115,18 +115,18 @@ function InnerForm({
           name="name"
           value={values.name}
           onChange={handleChange}
-          placeholder="e.g. my-group"
+          placeholder="例如：我的分组"
           data-cy="group-name-input"
         />
       </FormControl>
 
-      <FormControl label="Description" inputId="group-description">
+      <FormControl label="描述" inputId="group-description">
         <Input
           id="group-description"
           name="description"
           value={values.description}
           onChange={handleChange}
-          placeholder="e.g. production environments..."
+          placeholder="例如：生产环境..."
           data-cy="group-description-input"
         />
       </FormControl>

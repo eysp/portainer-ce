@@ -17,9 +17,9 @@ export function validation(
   return object({
     groupIds: array()
       .of(number().default(0))
-      .min(1, 'At least one group is required')
+      .min(1, '至少需要一个分组')
       .test(
-        'At least one group must have endpoints',
+        '至少一个分组必须有环境(Endpoints)',
         (groupIds) =>
           !!(
             groupIds &&
@@ -39,9 +39,9 @@ export function validation(
       .when('type', {
         is: ScheduleType.Update,
         // update type
-        then: (schema) => schema.required('Version is required'),
+        then: (schema) => schema.required('版本是必填项'),
         // rollback
-        otherwise: (schema) => schema.required('No rollback options available'),
+        otherwise: (schema) => schema.required('没有可用的回滚选项'),
       }),
     registryId: number().default(0),
     agentImage: string()
@@ -49,14 +49,14 @@ export function validation(
       .when('registryId', {
         is: 0,
         then: (schema) => schema.optional(),
-        otherwise: (schema) => schema.required('Agent image is required'),
+        otherwise: (schema) => schema.required('Agent 镜像是必填项'),
       }),
     updaterImage: string()
       .default('')
       .when('registryId', {
         is: 0,
         then: (schema) => schema.optional(),
-        otherwise: (schema) => schema.required('Updater image is required'),
+        otherwise: (schema) => schema.required('更新程序镜像是必填项'),
       }),
   });
 }

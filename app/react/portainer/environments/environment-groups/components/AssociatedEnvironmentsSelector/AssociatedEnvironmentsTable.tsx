@@ -74,7 +74,7 @@ export function AssociatedEnvironmentsTable({
               <DeleteButton
                 disabled={selectedItems.length === 0}
                 isLoading={isRemoving}
-                confirmMessage="Are you sure you want to remove the selected environment(s) from this group?"
+                confirmMessage="确定要从该分组中移除选中的环境吗？"
                 onConfirmed={() => handleRemove(selectedItems)}
                 data-cy="remove-environments-button"
                 type="button"
@@ -94,7 +94,7 @@ export function AssociatedEnvironmentsTable({
               onClick={onOpenAddDrawer}
               data-cy="add-environments-button"
             >
-              Add
+              添加
             </Button>
           </>
         )
@@ -112,7 +112,7 @@ export function AssociatedEnvironmentsTable({
 function buildColumns() {
   return [
     columnHelper.accessor('Name', {
-      header: 'Name',
+      header: '名称',
       id: 'Name',
       cell: ({ getValue }) => (
         <span title={getValue()}>{truncate(getValue(), { length: 64 })}</span>
