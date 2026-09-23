@@ -1,4 +1,4 @@
-import { Box } from 'lucide-react';
+﻿import { Box } from 'lucide-react';
 
 import { notifySuccess } from '@/portainer/services/notifications';
 
@@ -22,7 +22,7 @@ export function HiddenContainersPanel() {
   const labels = settingsQuery.data;
   return (
     <Widget>
-      <Widget.Title icon={Box} title="Hidden containers" />
+      <Widget.Title icon={Box} title="隐藏容器" />
       <Widget.Body>
         <div className="mb-3">
           <TextTip color="blue">
@@ -54,7 +54,7 @@ export function HiddenContainersPanel() {
       },
       {
         onSuccess: () => {
-          notifySuccess('Success', 'Hidden container settings updated');
+          notifySuccess('成功', '隐藏容器设置已更新');
         },
       }
     );
