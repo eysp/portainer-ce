@@ -88,7 +88,7 @@ export function CreateStackForm({ environmentId, isSwarm, swarmId }: Props) {
 
     createStackMutation.mutate(payload, {
       onSuccess: (stack) => {
-        notifySuccess('Success', 'Stack successfully created');
+        notifySuccess('Success', '堆栈创建成功');
         router.stateService.go('docker.stacks.stack', {
           name: stack.Name,
           id: stack.Id,

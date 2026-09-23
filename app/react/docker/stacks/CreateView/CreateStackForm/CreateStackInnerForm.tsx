@@ -59,7 +59,7 @@ export function CreateStackInnerForm({
       <NameField
         value={values.name}
         onChange={(name) => setFieldValue('name', name)}
-        placeholder="e.g. mystack"
+        placeholder="例如：mystack"
         errors={errors.name}
       />
 
@@ -68,7 +68,7 @@ export function CreateStackInnerForm({
         composeSyntaxMaxVersion={composeSyntaxMaxVersion}
       />
 
-      <FormSection title="Build method">
+      <FormSection title="构建方式">
         <BoxSelector
           radioName="build-method"
           value={values.method}
@@ -123,15 +123,15 @@ export function CreateStackInnerForm({
         errors={errors.accessControl}
       />
 
-      <FormSection title="Actions">
+      <FormSection title="操作">
         <LoadingButton
-          loadingText="Deployment in progress..."
+          loadingText="部署中..."
           isLoading={isDeploying}
           disabled={!isValid}
           className="!ml-0"
           data-cy="create-stack-submit-btn"
         >
-          Deploy the stack
+          部署堆栈
         </LoadingButton>
       </FormSection>
     </Form>
