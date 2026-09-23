@@ -1,4 +1,4 @@
-﻿import { Fragment } from 'react';
+import { Fragment } from 'react';
 import { Network } from 'lucide-react';
 
 import DockerNetworkHelper from '@/docker/helpers/networkHelper';
@@ -30,10 +30,10 @@ export function NetworkDetailsTable({
 
   return (
     <TableContainer>
-      <TableTitle label="网络详情" icon={Network} />
+      <TableTitle label="��������" icon={Network} />
       <DetailsTable dataCy="networkDetails-detailsTable">
         {/* networkRowContent */}
-        <DetailsTable.Row label="名称">{network.Name}</DetailsTable.Row>
+        <DetailsTable.Row label="����">{network.Name}</DetailsTable.Row>
         <DetailsTable.Row label="ID">
           {network.Id}
           {allowRemoveNetwork && (
@@ -43,20 +43,20 @@ export function NetworkDetailsTable({
                   data-cy="networkDetails-deleteNetwork"
                   size="xsmall"
                   onConfirmed={onRemoveNetworkClicked}
-                  confirmMessage="您想删除此网络吗？"
+                  confirmMessage="����ɾ����������"
                 >
-                  删除此网络
+                  ɾ��������
                 </DeleteButton>
               </Authorized>
             </span>
           )}
         </DetailsTable.Row>
-        <DetailsTable.Row label="驱动">{network.Driver}</DetailsTable.Row>
-        <DetailsTable.Row label="作用域">{network.Scope}</DetailsTable.Row>
-        <DetailsTable.Row label="可附加">
+        <DetailsTable.Row label="����">{network.Driver}</DetailsTable.Row>
+        <DetailsTable.Row label="������">{network.Scope}</DetailsTable.Row>
+        <DetailsTable.Row label="�ɸ���">
           {String(network.Attachable)}
         </DetailsTable.Row>
-        <DetailsTable.Row label="内部">
+        <DetailsTable.Row label="�ڲ�">
           {String(network.Internal)}
         </DetailsTable.Row>
 
@@ -64,16 +64,16 @@ export function NetworkDetailsTable({
         {ipv4Configs.map((config) => (
           <Fragment key={config.Subnet}>
             <DetailsTable.Row
-              label={IPV4 子网+getConfigDetails(config.Subnet)}
+              label={`IPV4 ����${getConfigDetails(config.Subnet)}`}
             >
-              {IPV4 网关+getConfigDetails(config.Gateway)}
+              {`IPV4 ����${getConfigDetails(config.Gateway)}`}
             </DetailsTable.Row>
             <DetailsTable.Row
-              label={IPV4 IP 范围+getConfigDetails(config.IPRange)}
+              label={`IPV4 IP ��Χ${getConfigDetails(config.IPRange)}`}
             >
-              {IPV4 排除的 IP+getAuxiliaryAddresses(
+              {`IPV4 �ų��� IP${getAuxiliaryAddresses(
                 config.AuxiliaryAddresses
-              )}
+              )}`}
             </DetailsTable.Row>
           </Fragment>
         ))}
@@ -82,16 +82,16 @@ export function NetworkDetailsTable({
         {ipv6Configs.map((config) => (
           <Fragment key={config.Subnet}>
             <DetailsTable.Row
-              label={IPV6 子网+getConfigDetails(config.Subnet)}
+              label={`IPV6 ����${getConfigDetails(config.Subnet)}`}
             >
-              {IPV6 网关+getConfigDetails(config.Gateway)}
+              {`IPV6 ����${getConfigDetails(config.Gateway)}`}
             </DetailsTable.Row>
             <DetailsTable.Row
-              label={IPV6 IP 范围+getConfigDetails(config.IPRange)}
+              label={`IPV6 IP ��Χ${getConfigDetails(config.IPRange)}`}
             >
-              {IPV6 排除的 IP+getAuxiliaryAddresses(
+              {`IPV6 �ų��� IP${getAuxiliaryAddresses(
                 config.AuxiliaryAddresses
-              )}
+              )}`}
             </DetailsTable.Row>
           </Fragment>
         ))}
@@ -100,12 +100,12 @@ export function NetworkDetailsTable({
   );
 
   function getConfigDetails(configValue?: string) {
-    return configValue ?  - +configValue : '';
+    return configValue ? ` - ${configValue}` : '';
   }
 
   function getAuxiliaryAddresses(auxiliaryAddresses?: object) {
     return auxiliaryAddresses
-      ?  - +Object.values(auxiliaryAddresses).join(' - ')
+      ? ` - ${Object.values(auxiliaryAddresses).join(' - ')}`
       : '';
   }
 }
