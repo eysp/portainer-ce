@@ -126,13 +126,13 @@ function useDeleteImageListMutation() {
     onSuccess: ({ fulfilledItems, rejectedItems }) => {
       // one error notification per rejected item
       rejectedItems.forEach(({ item, reason }) => {
-        notifyError(删除 ' + item.id + ' 失败, new Error(reason));
+        notifyError('删除 \'' + item.id + '\' 失败', new Error(reason));
       });
 
       // one success notification for all fulfilled items
       if (fulfilledItems.length) {
         notifySuccess(
-          成功删除  + fulfilledItems.length +  个镜像,
+          '成功删除 ' + fulfilledItems.length + ' 个镜像',
           fulfilledItems.map((item) => item.id).join(', ')
         );
       }
