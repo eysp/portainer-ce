@@ -1,18 +1,16 @@
-<page-header title="'Docker features configuration'" breadcrumbs="['Docker configuration']"> </page-header>
+<page-header title="'Docker ��������'" breadcrumbs="['Docker ����']"> </page-header>
 
 <div class="row">
   <div class="col-sm-12">
     <rd-widget>
       <rd-widget-body>
         <form class="form-horizontal" name="$ctrl.form">
-          <div class="col-sm-12 form-section-title"> Host and filesystem </div>
+          <div class="col-sm-12 form-section-title"> �������ļ�ϵͳ </div>
           <div class="form-group">
             <span class="col-sm-12 text-muted small vertical-center">
               <pr-icon icon="'info'" mode="'primary'" class-name="'space-right'"></pr-icon>
               <span class="text-muted"
-                >The environment must be <a href="https://docs.portainer.io/start/agent">running the Portainer Agent</a> to use this functionality, and the root of the host must be
-                bind-mounted to <b>/host</b> in the agent deployment. Check
-                <a href="https://docs.portainer.io/user/docker/host/setup#enable-host-management-features">our documentation</a> for more information.</span
+                >��������<a href="https://docs.portainer.io/start/agent">���� Portainer Agent</a> ����ʹ�ô˹��ܣ����������ĸ�Ŀ¼������ Agent �����й��ص� <b>/host</b>���鿴<a href="https://docs.portainer.io/user/docker/host/setup#enable-host-management-features">���ǵ��ĵ�</a>�Ի�ȡ������Ϣ��</span
               >
             </span>
           </div>
@@ -21,8 +19,8 @@
               <por-switch-field
                 checked="$ctrl.formValues.enableHostManagementFeatures"
                 name="'enableHostManagementFeatures'"
-                label="'Enable host management features'"
-                tooltip="'Enable host management features: host system browsing and advanced host details.'"
+                label="'����������������'"
+                tooltip="'���������������ܣ�����ϵͳ����͸߼�������ϸ��Ϣ��'"
                 label-class="'col-sm-7 col-lg-4'"
                 disabled="!$ctrl.isAgent"
                 on-change="($ctrl.onChangeEnableHostManagementFeatures)"
@@ -34,8 +32,8 @@
               <por-switch-field
                 checked="$ctrl.formValues.allowVolumeBrowserForRegularUsers"
                 name="'allowVolumeBrowserForRegularUsers'"
-                label="'Enable volume management for non-administrators'"
-                tooltip="'When enabled, regular users will be able to use Portainer volume management features.'"
+                label="'�����ǹ���Ա���о�����'"
+                tooltip="'���ú���ͨ�û����ܹ�ʹ�� Portainer ���������ܡ�'"
                 label-class="'col-sm-7 col-lg-4'"
                 on-change="($ctrl.onChangeAllowVolumeBrowserForRegularUsers)"
                 disabled="!$ctrl.isAgent"
@@ -43,17 +41,17 @@
             </div>
           </div>
           <!-- auto update window -->
-          <div class="col-sm-12 form-section-title"> Change window setting </div>
+          <div class="col-sm-12 form-section-title"> ���´������� </div>
 
           <div class="form-group">
             <div class="col-sm-12">
               <por-switch-field
                 checked="$ctrl.state.autoUpdateSettings.Enabled"
                 name="'disableSysctlSettingForRegularUsers'"
-                label="'Enable Change Window'"
+                label="'���ø��´���'"
                 label-class="'col-sm-7 col-lg-4'"
                 feature-id="$ctrl.limitedFeatureAutoUpdate"
-                tooltip="'Specify a time-frame during which GitOps updates can occur in this environment.'"
+                tooltip="'ָ���ڴ˻����п��Խ��� GitOps ���µ�ʱ��Ρ�'"
                 on-change="($ctrl.onToggleAutoUpdate)"
               >
               </por-switch-field>
@@ -61,14 +59,14 @@
           </div>
 
           <!-- security -->
-          <div class="col-sm-12 form-section-title"> Docker security settings </div>
+          <div class="col-sm-12 form-section-title"> Docker ��ȫ���� </div>
           <div class="form-group">
             <div class="col-sm-12">
               <por-switch-field
                 checked="$ctrl.formValues.disableBindMountsForRegularUsers"
                 name="'disableBindMountsForRegularUsers'"
-                label="'Hide bind mounts for non-administrators'"
-                tooltip="'When enabled, bind mounts are hidden from regular users when creating containers, services, or stacks.'"
+                label="'�Էǹ���Ա���ذ󶨹���'"
+                tooltip="'���ú���ͨ�û��ڴ���������������ջʱ�޷������󶨹��ء�'"
                 label-class="'col-sm-7 col-lg-4'"
                 on-change="($ctrl.onChangeDisableBindMountsForRegularUsers)"
               ></por-switch-field>
@@ -79,8 +77,8 @@
               <por-switch-field
                 checked="$ctrl.formValues.disablePrivilegedModeForRegularUsers"
                 name="'disablePrivilegedModeForRegularUsers'"
-                label="'Hide privileged mode for non-administrators'"
-                tooltip="'When enabled, regular users will not be able to use privileged mode when creating containers.'"
+                label="'�Էǹ���Ա������Ȩģʽ'"
+                tooltip="'���ú���ͨ�û��ڴ�������ʱ���޷�ʹ����Ȩģʽ��'"
                 label-class="'col-sm-7 col-lg-4'"
                 on-change="($ctrl.onChangeDisablePrivilegedModeForRegularUsers)"
               ></por-switch-field>
@@ -91,8 +89,8 @@
               <por-switch-field
                 checked="$ctrl.formValues.disableHostNamespaceForRegularUsers"
                 name="'disableHostNamespaceForRegularUsers'"
-                label="'Hide the use of host PID 1 for non-administrators'"
-                tooltip="'Prevent users from accessing the host filesystem through the host PID namespace.'"
+                label="'�Էǹ���Ա����ʹ������ PID 1'"
+                tooltip="'��ֹ�û�ͨ������ PID �����ռ���������ļ�ϵͳ��'"
                 label-class="'col-sm-7 col-lg-4'"
                 on-change="($ctrl.onChangeDisableHostNamespaceForRegularUsers)"
               ></por-switch-field>
@@ -103,7 +101,7 @@
               <por-switch-field
                 checked="$ctrl.formValues.disableStackManagementForRegularUsers"
                 name="'disableStackManagementForRegularUsers'"
-                label="'Hide the use of Stacks for non-administrators'"
+                label="'�Էǹ���Ա���ض�ջʹ��'"
                 label-class="'col-sm-7 col-lg-4'"
                 on-change="($ctrl.onChangeDisableStackManagementForRegularUsers)"
               ></por-switch-field>
@@ -114,7 +112,7 @@
               <por-switch-field
                 checked="$ctrl.formValues.disableDeviceMappingForRegularUsers"
                 name="'disableDeviceMappingForRegularUsers'"
-                label="'Hide device mappings for non-administrators'"
+                label="'�Էǹ���Ա�����豸ӳ��'"
                 label-class="'col-sm-7 col-lg-4'"
                 on-change="($ctrl.onChangeDisableDeviceMappingForRegularUsers)"
               ></por-switch-field>
@@ -125,7 +123,7 @@
               <por-switch-field
                 checked="$ctrl.formValues.disableContainerCapabilitiesForRegularUsers"
                 name="'disableContainerCapabilitiesForRegularUsers'"
-                label="'Hide container capabilities for non-administrators'"
+                label="'�Էǹ���Ա������������ (capabilities)'"
                 label-class="'col-sm-7 col-lg-4'"
                 on-change="($ctrl.onChangeDisableContainerCapabilitiesForRegularUsers)"
               ></por-switch-field>
@@ -136,7 +134,7 @@
               <por-switch-field
                 checked="$ctrl.formValues.disableSysctlSettingForRegularUsers"
                 name="'disableSysctlSettingForRegularUsers'"
-                label="'Hide sysctl settings for non-administrators'"
+                label="'�Էǹ���Ա���� sysctl ����'"
                 label-class="'col-sm-7 col-lg-4'"
                 on-change="($ctrl.onChangeDisableSysctlSettingForRegularUsers)"
               ></por-switch-field>
@@ -147,7 +145,7 @@
               <por-switch-field
                 checked="$ctrl.formValues.disableSecurityOptForRegularUsers"
                 name="'disableSecurityOptForRegularUsers'"
-                label="'Hide security-opt for non-administrators'"
+                label="'�Էǹ���Ա���� security-opt'"
                 label-class="'col-sm-7 col-lg-4'"
                 on-change="($ctrl.onChangeDisableSecurityOptForRegularUsers)"
               ></por-switch-field>
@@ -157,24 +155,24 @@
           <div class="form-group" ng-if="$ctrl.isContainerEditDisabled()">
             <span class="col-sm-12 text-muted small">
               <pr-icon icon="'info'" mode="'primary'" class-name="'mr-0.5'"></pr-icon>
-              Note: The recreate/duplicate/edit feature is currently hidden (for non-admin users) by one or more security settings.
+              ע�⣺�ؽ�/����/�༭����Ŀǰ��һ��������ȫ���ã��Էǹ���Ա�û��������ء�
             </span>
           </div>
           <!-- !security -->
 
           <!-- other -->
-          <div class="col-sm-12 form-section-title"> Other </div>
+          <div class="col-sm-12 form-section-title"> ���� </div>
           <div class="form-group">
             <div class="col-sm-12" ng-if="!$ctrl.isDockerStandaloneEnv">
-              <text-tip children="'Showing GPU in the UI is currently only available with Docker Standalone and is limited to NVIDIA graphics cards.'" color="'blue'" />
+              <text-tip children="'�� UI ����ʾ GPU Ŀǰ��֧�� Docker ���������������� NVIDIA �Կ���'" color="'blue'" />
             </div>
           </div>
 
           <div class="form-group">
             <div class="col-sm-12">
               <por-switch-field
-                label="'Show GPU in the UI'"
-                tooltip="'This allows managing of GPUs for container/stack hardware acceleration via the Portainer UI.'"
+                label="'�� UI ����ʾ GPU'"
+                tooltip="'������ͨ�� Portainer UI ���� GPU����������/��ջ��Ӳ�����١�'"
                 checked="$ctrl.state.enableGPUManagement"
                 name="'enableGPUManagement'"
                 on-change="($ctrl.onToggleGPUManagement)"
@@ -185,7 +183,7 @@
 
             <div ng-if="$ctrl.state.enableGPUManagement">
               <div class="col-sm-12">
-                <text-tip children="'GPU support is currently limited to NVIDIA graphics cards only.'" color="'blue'" />
+                <text-tip children="'GPU ֧��Ŀǰ���� NVIDIA �Կ���'" color="'blue'" />
               </div>
               <div class="col-sm-12">
                 <div class="pl-4">
@@ -198,7 +196,7 @@
           <div class="form-group">
             <div class="col-sm-12">
               <por-switch-field
-                label="'Show image up to date indicators for Stacks, Services and Containers'"
+                label="'Ϊ��ջ�������������ʾ��������ָ��'"
                 checked="false"
                 name="'outOfDateImageToggle'"
                 label-class="'col-sm-7 col-lg-4'"
@@ -209,7 +207,7 @@
           <!-- !other -->
 
           <!-- actions -->
-          <div class="col-sm-12 form-section-title"> Actions </div>
+          <div class="col-sm-12 form-section-title"> ���� </div>
           <div class="form-group">
             <div class="col-sm-12">
               <button
@@ -219,8 +217,8 @@
                 ng-disabled="$ctrl.state.actionInProgress"
                 button-spinner="$ctrl.state.actionInProgress"
               >
-                <span ng-hide="$ctrl.state.actionInProgress">Save configuration</span>
-                <span ng-show="$ctrl.state.actionInProgress">Saving...</span>
+                <span ng-hide="$ctrl.state.actionInProgress">��������</span>
+                <span ng-show="$ctrl.state.actionInProgress">������...</span>
               </button>
             </div>
           </div>

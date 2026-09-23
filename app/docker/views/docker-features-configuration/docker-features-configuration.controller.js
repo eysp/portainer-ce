@@ -1,4 +1,4 @@
-import { FeatureId } from '@/react/portainer/feature-flags/enums';
+﻿import { FeatureId } from '@/react/portainer/feature-flags/enums';
 
 export default class DockerFeaturesConfigurationController {
   /* @ngInject */
@@ -137,9 +137,9 @@ export default class DockerFeaturesConfigurationController {
         await this.EndpointService.updateSecuritySettings(this.endpoint.Id, settings);
 
         this.endpoint.SecuritySettings = settings;
-        this.Notifications.success('Success', 'Saved settings successfully');
+        this.Notifications.success('成功', '保存设置成功');
       } catch (e) {
-        this.Notifications.error('Failure', e, 'Failed saving settings');
+        this.Notifications.error('操作失败', e, '保存设置失败');
       }
       this.state.actionInProgress = false;
       this.$state.reload();
