@@ -1,4 +1,4 @@
-import { ChevronDown, Trash2 } from 'lucide-react';
+﻿import { ChevronDown, Trash2 } from 'lucide-react';
 import { Menu, MenuButton, MenuItem, MenuPopover } from '@reach/menu-button';
 import { positionRight } from '@reach/popover';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -48,19 +48,16 @@ export function RemoveButtonMenu({
             disabled={selectedItems.length === 0}
             icon={ChevronDown}
             data-cy="image-toggleRemoveButtonMenu"
-          >
-            <span className="sr-only">展开菜单</span>
-          </MenuButton>
+          />
           <MenuPopover position={positionRight}>
-            <div className="mt-3 bg-white th-highcontrast:bg-black th-dark:bg-black">
-              <MenuItem
-                onSelect={() => {
-                  handleRemove(true);
-                }}
-              >
-                强制删除
-              </MenuItem>
-            </div>
+            <MenuItem
+              onSelect={() => {
+                handleRemove(true);
+              }}
+              data-cy="image-forceRemoveImageButton"
+            >
+              强制删除
+            </MenuItem>
           </MenuPopover>
         </Menu>
       </ButtonGroup>
@@ -71,8 +68,8 @@ export function RemoveButtonMenu({
     return confirmDestructive({
       title: '您确定吗？',
       message:
-        '强制删除镜像即使该镜像被已停止的容器使用也会将其删除，并删除所有关联的标签。您确定要删除选中的镜像吗？',
-      confirmButton: buildConfirmButton('确认删除镜像', 'danger'),
+        '强制删除使用中及停止使用的镜像，同时也将删除其相关的标签。您确定要删除选中的镜像吗？',
+      confirmButton: buildConfirmButton('确认删除', 'danger'),
     });
   }
 
@@ -80,8 +77,8 @@ export function RemoveButtonMenu({
     return confirmDestructive({
       title: '您确定吗？',
       message:
-        '删除镜像还将同时删除所有关联的标签。您确定要删除选中的镜像吗？',
-      confirmButton: buildConfirmButton('确认删除镜像', 'danger'),
+        '删除镜像将会同时删除其相关的标签。您确定要删除选中的镜像吗？',
+      confirmButton: buildConfirmButton('确认删除', 'danger'),
     });
   }
 
@@ -129,13 +126,13 @@ function useDeleteImageListMutation() {
     onSuccess: ({ fulfilledItems, rejectedItems }) => {
       // one error notification per rejected item
       rejectedItems.forEach(({ item, reason }) => {
-        notifyError(`删除镜像 '${item.id}' 失败`, new Error(reason));
+        notifyError(删除 ' + item.id + ' 失败, new Error(reason));
       });
 
       // one success notification for all fulfilled items
       if (fulfilledItems.length) {
         notifySuccess(
-          `成功删除 ${fulfilledItems.length} 个镜像`,
+          成功删除  + fulfilledItems.length +  个镜像,
           fulfilledItems.map((item) => item.id).join(', ')
         );
       }

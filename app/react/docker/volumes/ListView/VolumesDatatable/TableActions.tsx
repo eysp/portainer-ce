@@ -1,4 +1,4 @@
-import { Authorized } from '@/react/hooks/useUser';
+﻿import { Authorized } from '@/react/hooks/useUser';
 
 import { AddButton } from '@@/buttons';
 import { DeleteButton } from '@@/buttons/DeleteButton';
@@ -18,7 +18,7 @@ export function TableActions({
         <DeleteButton
           disabled={selectedItems.length === 0}
           onConfirmed={() => onRemove(selectedItems)}
-          confirmMessage="确定要删除所选存储卷吗？"
+          confirmMessage="确认要删除选中的存储卷吗？"
           data-cy="volume-removeVolumeButton"
         />
       </Authorized>

@@ -1,4 +1,4 @@
-import { Trash2 } from 'lucide-react';
+﻿import { Trash2 } from 'lucide-react';
 
 import { Authorized } from '@/react/hooks/useUser';
 import { EnvironmentId } from '@/react/portainer/environments/types';

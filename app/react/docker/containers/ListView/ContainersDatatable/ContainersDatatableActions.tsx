@@ -1,4 +1,4 @@
-import { useRouter } from '@uirouter/react';
+﻿import { useRouter } from '@uirouter/react';
 import { Pause, Play, RefreshCw, Slash, Square, Trash2 } from 'lucide-react';
 
 import * as notifications from '@/portainer/services/notifications';

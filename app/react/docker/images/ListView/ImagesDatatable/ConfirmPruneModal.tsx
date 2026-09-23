@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 
 import { Modal, OnSubmit, ModalType, openModal } from '@@/modals';
 import { Button } from '@@/buttons';
@@ -23,32 +23,32 @@ function ConfirmPruneModal({ onSubmit, images = [] }: Props) {
     !pruneAll && !hasUntaggedImages && hasUnusedImages;
 
   return (
-    <Modal onDismiss={() => onSubmit()} aria-label="confirm prune images modal">
-      <Modal.Header title="Are you sure?" modalType={ModalType.Destructive} />
+    <Modal onDismiss={() => onSubmit()} aria-label="确认清理镜像模态框">
+      <Modal.Header title="您确定吗？" modalType={ModalType.Destructive} />
       <Modal.Body>
         <p>
-          This will delete all untagged (dangling) images in this environment.
+          这将删除此环境中的所有无标签（悬空）镜像。
         </p>
         <div className="mb-4">
           <SwitchField
             name="pruneAll"
             data-cy="prune-all-unused-switch"
-            label="Delete all unused images"
-            tooltip="Delete all unused images, even if they are tagged."
+            label="删除所有未使用的镜像"
+            tooltip="删除所有未使用的镜像，即使它们带有标签。"
             checked={pruneAll}
             onChange={setPruneAll}
           />
           {showValidationMessage && (
             <p className="text-muted mt-1 text-xs">
-              No untagged (dangling) images available to delete.
+              没有可删除的无标签（悬空）镜像。
             </p>
           )}
         </div>
         <SwitchField
           name="clearBuildCache"
           data-cy="prune-clear-build-cache-switch"
-          label="Clear Docker build cache"
-          tooltip="This removes cached build layers that are no longer in use. Future builds may take longer until the cache is rebuilt."
+          label="清理 Docker 构建缓存"
+          tooltip="这会移除不再使用的缓存构建层。未来的构建可能需要更长的时间，直到缓存重新建立。"
           checked={clearBuildCache}
           onChange={setClearBuildCache}
         />

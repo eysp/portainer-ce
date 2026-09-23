@@ -1,4 +1,4 @@
-import {
+﻿import {
   ArrowRightIcon,
   PlayIcon,
   PlusIcon,
@@ -134,7 +134,7 @@ export function StackActions({
                 disabled={isMutating}
                 data-cy="stack-detach-git-btn"
                 isLoading={detachFromGitMutation.isLoading}
-                loadingText="Detachment in progress..."
+                loadingText="分离中..."
               >
                 Detach from Git
               </LoadingButton>
@@ -163,10 +163,10 @@ export function StackActions({
 
   async function handleStop() {
     const confirmed = await confirm({
-      title: 'Are you sure?',
+      title: '您确定吗？',
       modalType: ModalType.Warn,
-      message: 'Are you sure you want to stop this stack?',
-      confirmButton: buildConfirmButton('Stop', 'danger'),
+      message: '您确定要停止此堆栈吗？',
+      confirmButton: buildConfirmButton('停止', 'danger'),
     });
 
     if (!confirmed) {
@@ -189,7 +189,7 @@ export function StackActions({
 
   async function handleDelete() {
     const confirmed = await confirmDelete(
-      'Do you want to remove the stack? Associated services will be removed as well'
+      '您想删除此堆栈吗？关联的服务也将被删除'
     );
     if (!confirmed) {
       return;
@@ -220,9 +220,9 @@ export function StackActions({
   async function handleDetachFromGit() {
     const confirmed = await confirm({
       modalType: ModalType.Warn,
-      title: 'Are you sure?',
-      message: 'Do you want to detach the stack from Git?',
-      confirmButton: buildConfirmButton('Detach', 'danger'),
+      title: '您确定吗？',
+      message: '您想将此堆栈与 Git 分离吗？',
+      confirmButton: buildConfirmButton('分离', 'danger'),
     });
 
     if (!confirmed) {
