@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+﻿import { ReactNode } from 'react';
 
 import { openDialog, DialogOptions } from './Dialog';
 import { OnSubmit, ModalType } from './Modal';
@@ -42,20 +42,20 @@ export function confirmDestructive(options: Omit<ConfirmOptions, 'modalType'>) {
 export function confirmWebEditorDiscard() {
   return openConfirm({
     modalType: ModalType.Warn,
-    title: 'Are you sure?',
+    title: '确定吗？',
     message:
-      'You currently have unsaved changes in the editor. Are you sure you want to leave?',
-    confirmButton: buildConfirmButton('Yes', 'danger'),
+      '您当前在编辑器中有未保存的更改。确定要离开吗？',
+    confirmButton: buildConfirmButton('确定', 'danger'),
   });
 }
 
 export function confirmGenericDiscard() {
   return openConfirm({
     modalType: ModalType.Warn,
-    title: 'Are you sure?',
+    title: '确定吗？',
     message:
-      'You currently have unsaved changes. Are you sure you want to leave?',
-    confirmButton: buildConfirmButton('Yes', 'danger'),
+      '您当前有未保存的更改。确定要离开吗？',
+    confirmButton: buildConfirmButton('确定', 'danger'),
   });
 }
 
@@ -88,7 +88,7 @@ export function confirmChangePassword() {
     modalType: ModalType.Warn,
     title: 'Are you sure?',
     message:
-      'You will be logged out after the password change. Do you want to change your password?',
-    confirmButton: buildConfirmButton('Change'),
+      '修改密码后您将被登出。是否要修改密码？',
+    confirmButton: buildConfirmButton('修改'),
   });
 }
