@@ -17,10 +17,10 @@ import { DecoratedStack } from '../types';
 import { columnHelper } from './helper';
 
 const filterOptions = [
-  'Active Stacks',
-  'Inactive Stacks',
-  'Deploying Stacks',
-  'Error Stacks',
+  '活动堆栈',
+  '未激活堆栈',
+  '部署中堆栈',
+  '错误堆栈',
 ] as const;
 
 type FilterOption = (typeof filterOptions)[number];
@@ -46,13 +46,13 @@ export const name = columnHelper.accessor('Name', {
 
     return (
       (stack.Status === StackStatus.Active &&
-        filterValue.includes('Active Stacks')) ||
+        filterValue.includes('活动堆栈')) ||
       (stack.Status === StackStatus.Inactive &&
-        filterValue.includes('Inactive Stacks')) ||
+        filterValue.includes('未激活堆栈')) ||
       (stack.Status === StackStatus.Deploying &&
-        filterValue.includes('Deploying Stacks')) ||
+        filterValue.includes('部署中堆栈')) ||
       (stack.Status === StackStatus.Error &&
-        filterValue.includes('Error Stacks'))
+        filterValue.includes('错误堆栈'))
     );
   },
   meta: {
