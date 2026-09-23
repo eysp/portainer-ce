@@ -28,7 +28,7 @@ export const existingEnvironmentTypes: EnvironmentOption[] = [
     label: 'Docker Standalone',
     icon: Docker,
     iconType: 'logo',
-    description: 'Connect to Docker Standalone via URL/IP, API or Socket',
+    description: '通过 URL/IP、API 或 Socket 连接到 Docker 独立主机',
   },
   {
     id: 'dockerSwarm',
@@ -36,7 +36,7 @@ export const existingEnvironmentTypes: EnvironmentOption[] = [
     label: 'Docker Swarm',
     icon: Docker,
     iconType: 'logo',
-    description: 'Connect to Docker Swarm via URL/IP, API or Socket',
+    description: '通过 URL/IP、API 或 Socket 连接到 Docker Swarm',
   },
   {
     id: 'podman',
@@ -44,7 +44,7 @@ export const existingEnvironmentTypes: EnvironmentOption[] = [
     label: 'Podman',
     icon: Podman,
     iconType: 'logo',
-    description: 'Connect to Podman via URL/IP or Socket',
+    description: '通过 URL/IP 或 Socket 连接到 Podman',
   },
   {
     id: 'kubernetes',
@@ -52,13 +52,13 @@ export const existingEnvironmentTypes: EnvironmentOption[] = [
     label: 'Kubernetes',
     icon: Kubernetes,
     iconType: 'logo',
-    description: 'Connect to a Kubernetes environment via URL/IP',
+    description: '通过 URL/IP 连接到 Kubernetes 环境',
   },
   {
     id: 'aci',
     value: 'aci',
     label: 'ACI',
-    description: 'Connect to ACI environment via API',
+    description: '通过 API 连接到 ACI 环境',
     iconType: 'logo',
     icon: Azure,
   },
@@ -70,7 +70,7 @@ export const newEnvironmentTypes: EnvironmentOption[] = [
     value: 'kubesolo',
     label: 'KubeSolo (Edge)',
     description:
-      'Deploy a single-node Kubernetes edge environment with KubeSolo',
+      '使用 KubeSolo 部署单节点 Kubernetes 边缘环境',
     icon: Kubesolo,
     iconType: 'logo',
     feature: FeatureId.KUBESOLO,
@@ -79,8 +79,8 @@ export const newEnvironmentTypes: EnvironmentOption[] = [
   {
     id: 'k8sInstall',
     value: 'k8sInstall',
-    label: 'Create Kubernetes cluster',
-    description: 'Create a Kubernetes cluster on existing infrastructure',
+    label: '创建 Kubernetes 集群',
+    description: '在现有基础架构上创建 Kubernetes 集群',
     icon: InstallK8s,
     iconType: 'logo',
     feature: FeatureId.K8SINSTALL,
@@ -94,11 +94,11 @@ export const environmentTypes: EnvironmentOption[] = [
 ];
 
 export const formTitles: Record<EnvironmentOptionValue, string> = {
-  dockerStandalone: 'Connect to your Docker Standalone environment',
-  dockerSwarm: 'Connect to your Docker Swarm environment',
-  podman: 'Connect to your Podman environment',
-  kubernetes: 'Connect to your Kubernetes environment',
-  aci: 'Connect to your ACI environment',
-  kubesolo: 'Deploy a KubeSolo edge environment',
-  k8sInstall: 'Create a Kubernetes cluster',
+  dockerStandalone: '连接到您的 Docker 独立主机环境',
+  dockerSwarm: '连接到您的 Docker Swarm 环境',
+  podman: '连接到您的 Podman 环境',
+  kubernetes: '连接到您的 Kubernetes 环境',
+  aci: '连接到您的 ACI 环境',
+  kubesolo: '部署 KubeSolo 边缘环境',
+  k8sInstall: '创建 Kubernetes 集群',
 };
