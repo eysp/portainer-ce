@@ -22,13 +22,13 @@ export function SecurityFieldset({
   const [{ name }, { error }] = useField<string>('password');
 
   return (
-    <FormSection title="Security settings">
+    <FormSection title="安全设置">
       <div className="form-group">
         <div className="col-sm-12">
           <SwitchField
             name="password-switch"
             labelClass="col-sm-3 col-lg-2"
-            label="Password Protect"
+            label="密码保护"
             checked={passwordProtect}
             data-cy={switchDataCy}
             onChange={(checked) => setPasswordProtect(checked)}
@@ -40,7 +40,7 @@ export function SecurityFieldset({
       {passwordProtect && (
         <FormControl
           inputId="password"
-          label="Password"
+          label="密码"
           size="small"
           errors={error}
           required
