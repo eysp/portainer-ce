@@ -1,4 +1,4 @@
-﻿import { Network } from 'lucide-react';
+import { Network } from 'lucide-react';
 
 import { TableContainer, TableTitle } from '@@/datatables';
 import { DetailsTable } from '@@/DetailsTable';

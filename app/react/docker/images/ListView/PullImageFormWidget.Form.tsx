@@ -32,7 +32,7 @@ export function PullImageForm({
         onRateLimit={onRateLimit}
       >
         {isNodeVisible && (
-          <FormSection title="Ŀ��ڵ�">
+          <FormSection title="目标节点">
             <NodeSelector
               value={values.node}
               onChange={(node) => setFieldValue('node', node)}
@@ -44,8 +44,8 @@ export function PullImageForm({
         <FormActions
           isLoading={isLoading}
           isValid={isValid}
-          loadingText="��ȡ��..."
-          submitLabel="��ȡ����"
+          loadingText="拉取中..."
+          submitLabel="拉取镜像"
           data-cy="pull-image-button"
         />
       </ImageConfigFieldset>

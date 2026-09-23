@@ -1,4 +1,4 @@
-﻿import { Server, Trash2 } from 'lucide-react';
+import { Server, Trash2 } from 'lucide-react';
 
 import { Authorized } from '@/react/hooks/useUser';
 import { EnvironmentId } from '@/react/portainer/environments/types';
@@ -60,8 +60,7 @@ export function NetworkContainersTable({
                   nodeName,
                 }}
                 title={container.Name}
-                data-cy={
-etworkDetails-containerName-+container.Name}
+                data-cy={`networkDetails-containerName-${container.Name}`}
               >
                 {container.Name}
               </Link>
@@ -72,8 +71,7 @@ etworkDetails-containerName-+container.Name}
             <td>
               <Authorized authorizations="DockerNetworkDisconnect">
                 <Button
-                  data-cy={
-etworkDetails-disconnect+container.Name}
+                  data-cy={`networkDetails-disconnect${container.Name}`}
                   size="xsmall"
                   color="dangerlight"
                   onClick={() => {
