@@ -48,6 +48,15 @@ export function confirmWebEditorDiscard() {
   });
 }
 
+export function confirmGenericDiscard() {
+  return openConfirm({
+    modalType: ModalType.Warn,
+    title: '确认',
+    message: '您有未保存的更改。确定要离开吗？',
+    confirmButton: buildConfirmButton('确认', 'danger'),
+  });
+}
+
 export function confirmDelete(message: ReactNode) {
   return confirmDestructive({
     title: '您确定吗？',
