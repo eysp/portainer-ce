@@ -33,7 +33,7 @@ export function LdapSettingsTestLogin({
   const mutation = useTestLdapMutation();
 
   return (
-    <FormSection title="Test login">
+    <FormSection title="测试登录">
       <Formik
         initialValues={initialValues}
         onSubmit={({ username, password }) =>
@@ -44,7 +44,7 @@ export function LdapSettingsTestLogin({
           <Form noValidate>
             <div className="form-inline mb-4 flex gap-3">
               <FormControl
-                label="Username"
+                label="用户名"
                 inputId="ldap_test_username"
                 size="medium"
               >
@@ -61,7 +61,7 @@ export function LdapSettingsTestLogin({
               </FormControl>
 
               <FormControl
-                label="Password"
+                label="密码"
                 inputId="ldap_test_password"
                 size="medium"
               >
@@ -83,13 +83,13 @@ export function LdapSettingsTestLogin({
                 <LoadingButton
                   isLoading={mutation.isLoading}
                   disabled={isDisabled || !values.username || !values.password}
-                  loadingText="Testing"
+                  loadingText="测试中"
                   data-cy="ldap-test-button"
                   className={
                     isLimitedFeatureSelfContained ? 'limited-be' : undefined
                   }
                 >
-                  Test
+                  测试
                 </LoadingButton>
 
                 {mutation.isSuccess && mutation.data?.valid && (

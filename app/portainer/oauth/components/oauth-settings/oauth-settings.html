@@ -1,5 +1,5 @@
-<ng-form name="oauthSettingsForm">
-  <div class="col-sm-12 form-section-title"> Single Sign-On </div>
+﻿<ng-form name="oauthSettingsForm">
+  <div class="col-sm-12 form-section-title"> 单点登录 (SSO) </div>
 
   <!-- SSO -->
   <div class="form-group">
@@ -178,12 +178,12 @@
   <oauth-providers-selector on-change="($ctrl.onSelectProvider)" value="$ctrl.state.provider"></oauth-providers-selector>
 
   <div ng-if="$ctrl.state.provider == 'custom' || $ctrl.state.overrideConfiguration">
-    <div class="col-sm-12 form-section-title">OAuth Configuration</div>
+    <div class="col-sm-12 form-section-title">OAuth 配置</div>
 
     <div class="form-group">
       <label for="oauth_client_id" class="col-sm-3 col-lg-2 control-label text-left">
-        {{ $ctrl.state.provider == 'microsoft' ? 'Application ID' : 'Client ID' }}
-        <portainer-tooltip message="'Public identifier of the OAuth application'"></portainer-tooltip>
+        {{ $ctrl.state.provider == 'microsoft' ? '应用 ID' : '客户端 ID' }}
+        <portainer-tooltip message="'OAuth 应用的公共标识符'"></portainer-tooltip>
       </label>
       <div class="col-sm-9 col-lg-10">
         <input
@@ -199,7 +199,7 @@
     </div>
 
     <div class="form-group">
-      <label for="oauth_client_secret" class="col-sm-3 col-lg-2 control-label text-left"> {{ $ctrl.state.provider == 'microsoft' ? 'Application key' : 'Client secret' }} </label>
+      <label for="oauth_client_secret" class="col-sm-3 col-lg-2 control-label text-left"> {{ $ctrl.state.provider == 'microsoft' ? '应用密钥' : '客户端密钥' }} </label>
       <div class="col-sm-9 col-lg-10">
         <input
           type="password"
@@ -315,9 +315,9 @@
 
     <div class="form-group">
       <label for="oauth_user_identifier" class="col-sm-3 col-lg-2 control-label text-left">
-        User identifier
+        用户标识符
         <portainer-tooltip
-          message="'Identifier that will be used by Portainer to create an account for the authenticated user. Retrieved from the resource server specified via the Resource URL field'"
+          message="'Portainer 用来为已认证用户创建账户的标识符。通过资源 URL 字段指定的资源服务器获取。'"
         ></portainer-tooltip>
       </label>
       <div class="col-sm-9 col-lg-10">
@@ -338,7 +338,7 @@
       <label for="oauth_scopes" class="col-sm-3 col-lg-2 control-label text-left">
         Scopes
         <portainer-tooltip
-          message="'Space-separated list of scopes the OAuth provider requires to return information about the authenticated user (for example, openid profile email). The required scopes depend on your provider; refer to your OAuth provider documentation.'"
+          message="'OAuth 提供商要求返回认证用户信息的以空格分隔的作用域列表（例如，openid profile email）。需要的作用域取决于您的提供商；请参阅您的 OAuth 提供商文档。'"
         ></portainer-tooltip>
       </label>
       <div class="col-sm-9 col-lg-10">
@@ -369,12 +369,12 @@
   <div ng-if="$ctrl.state.provider != 'custom'" class="limited-be be-indicator-container">
     <div class="limited-be-link vertical-center"><be-feature-indicator feature="$ctrl.limitedFeature"></be-feature-indicator></div>
     <div class="limited-be-content">
-      <div class="col-sm-12 form-section-title">OAuth Configuration</div>
+      <div class="col-sm-12 form-section-title">OAuth 配置</div>
 
       <div class="form-group" ng-if="$ctrl.state.provider == 'microsoft'">
         <label for="oauth_microsoft_tenant_id" class="col-sm-3 col-lg-2 control-label text-left">
-          Tenant ID
-          <portainer-tooltip message="'ID of the Azure Directory you wish to authenticate against. Also known as the Directory ID'"></portainer-tooltip>
+          租户 ID
+          <portainer-tooltip message="'您希望用来认证的 Azure 目录的 ID。也称为目录 ID。'"></portainer-tooltip>
         </label>
         <div class="col-sm-9 col-lg-10">
           <input
@@ -396,8 +396,8 @@
 
       <div class="form-group">
         <label for="oauth_client_id" class="col-sm-3 col-lg-2 control-label text-left">
-          {{ $ctrl.state.provider == 'microsoft' ? 'Application ID' : 'Client ID' }}
-          <portainer-tooltip message="'Public identifier of the OAuth application'"></portainer-tooltip>
+          {{ $ctrl.state.provider == 'microsoft' ? '应用 ID' : '客户端 ID' }}
+          <portainer-tooltip message="'OAuth 应用的公共标识符'"></portainer-tooltip>
         </label>
         <div class="col-sm-9 col-lg-10">
           <input
@@ -414,7 +414,7 @@
       </div>
 
       <div class="form-group">
-        <label for="oauth_client_secret" class="col-sm-3 col-lg-2 control-label text-left"> {{ $ctrl.state.provider == 'microsoft' ? 'Application key' : 'Client secret' }} </label>
+        <label for="oauth_client_secret" class="col-sm-3 col-lg-2 control-label text-left"> {{ $ctrl.state.provider == 'microsoft' ? '应用密钥' : '客户端密钥' }} </label>
         <div class="col-sm-9 col-lg-10">
           <input
             type="password"
@@ -434,11 +434,11 @@
         <div class="col-sm-12">
           <a class="small interactive vertical-center" ng-if="!$ctrl.state.overrideConfiguration" ng-click="$ctrl.state.overrideConfiguration = true;">
             <pr-icon icon="'wrench'"></pr-icon>
-            Override default configuration
+            覆盖默认配置
           </a>
           <a class="small interactive vertical-center" ng-if="$ctrl.state.overrideConfiguration" ng-click="$ctrl.useDefaultProviderConfiguration($ctrl.state.provider)">
             <pr-icon icon="'settings'"></pr-icon>
-            Use default configuration
+            使用默认配置
           </a>
         </div>
       </div>

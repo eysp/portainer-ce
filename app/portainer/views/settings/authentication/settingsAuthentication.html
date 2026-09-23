@@ -1,4 +1,4 @@
-<page-header title="'身份认证设置'" breadcrumbs="[{label:'设置', link:'portainer.settings'}, '身份认证']" reload="true"> </page-header>
+﻿<page-header title="'身份认证'" breadcrumbs="[{label:'设置', link:'portainer.settings'}, '身份认证']" reload="true"> </page-header>
 
 <div class="row" ng-if="settings">
   <div class="col-sm-12">
@@ -6,14 +6,14 @@
       <rd-widget-header icon="users" title-text="身份认证"></rd-widget-header>
       <rd-widget-body>
         <form class="form-horizontal" name="authSettingsForm">
-          <div class="col-sm-12 form-section-title"> 配置 </div>
+          <div class="col-sm-12 form-section-title"> 认证设置 </div>
 
           <session-lifetime-select value="settings.UserSessionTimeout" on-change="(onChangeSessionLifetime)"> </session-lifetime-select>
 
           <div class="form-group">
             <span class="col-sm-12 text-muted small vertical-center">
               <pr-icon icon="'alert-triangle'" class-name="'icon-sm icon-yellow'"></pr-icon>
-              仅在 Portainer 之前有额外认证层时，才建议更改默认值。
+              在关闭 Portainer 之前，未活动时间超过此设置的用户将被自动注销。
             </span>
           </div>
 
