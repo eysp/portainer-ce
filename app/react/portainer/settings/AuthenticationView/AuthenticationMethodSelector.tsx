@@ -14,23 +14,23 @@ const options = [
     id: 'auth_internal',
     icon: ArrowDownCircle,
     iconType: 'badge',
-    label: 'Internal',
-    description: 'Internal authentication mechanism',
+    label: '内部认证',
+    description: '内部认证机制',
     value: AuthenticationMethod.Internal,
   },
   {
     id: 'auth_ldap',
     icon: Ldap,
     label: 'LDAP',
-    description: 'LDAP authentication',
+    description: 'LDAP 认证',
     iconType: 'logo',
     value: AuthenticationMethod.LDAP,
   },
   {
     id: 'auth_ad',
     icon: Microsoft,
-    label: 'Microsoft Active Directory',
-    description: 'AD authentication',
+    label: '微软 Active Directory',
+    description: 'AD 认证',
     iconType: 'logo',
     value: AuthenticationMethod.AD,
     feature: FeatureId.HIDE_INTERNAL_AUTH,
@@ -39,7 +39,7 @@ const options = [
     id: 'auth_oauth',
     icon: OAuth,
     label: 'OAuth',
-    description: 'OAuth authentication',
+    description: 'OAuth 认证',
     iconType: 'logo',
     value: AuthenticationMethod.OAuth,
   },
@@ -58,7 +58,7 @@ export function AuthenticationMethodSelector({
       options={options}
       value={value}
       onChange={onChange}
-      label="Authentication method"
+      label="身份认证方法"
     />
   );
 }
