@@ -1,4 +1,4 @@
-import { Form, useFormikContext } from 'formik';
+﻿import { Form, useFormikContext } from 'formik';
 
 import { ImageConfigFieldset } from '@@/ImageConfigFieldset';
 import { FormSection } from '@@/form-components/FormSection';
@@ -26,13 +26,13 @@ export function PullImageForm({
         autoComplete
         values={values.config}
         setFieldValue={(field, value) =>
-          setFieldValue(`config.${field}`, value)
+          setFieldValue(config. + field, value)
         }
         errors={errors.config}
         onRateLimit={onRateLimit}
       >
         {isNodeVisible && (
-          <FormSection title="部署目标">
+          <FormSection title="目标节点">
             <NodeSelector
               value={values.node}
               onChange={(node) => setFieldValue('node', node)}
@@ -44,7 +44,7 @@ export function PullImageForm({
         <FormActions
           isLoading={isLoading}
           isValid={isValid}
-          loadingText="正在下载镜像..."
+          loadingText="拉取中..."
           submitLabel="拉取镜像"
           data-cy="pull-image-button"
         />

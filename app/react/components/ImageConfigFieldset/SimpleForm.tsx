@@ -1,4 +1,4 @@
-import { FormikErrors } from 'formik';
+﻿import { FormikErrors } from 'formik';
 import _ from 'lodash';
 import { useMemo } from 'react';
 
@@ -51,7 +51,7 @@ export function SimpleForm({
   return (
     <>
       <FormControl
-        label="Registry"
+        label="仓库"
         inputId="registry-field"
         errors={errors?.registryId}
       >
@@ -62,7 +62,7 @@ export function SimpleForm({
         />
       </FormControl>
 
-      <FormControl label="Image" inputId="image-field" errors={errors?.image}>
+      <FormControl label="镜像" inputId="image-field" errors={errors?.image}>
         <InputGroup>
           <InputGroup.Addon>{registryUrl}</InputGroup.Addon>
 
@@ -231,7 +231,7 @@ function ImageFieldAutoComplete({
       value={value}
       onChange={(value) => onChange(value)}
       data-cy="component-imageInput"
-      placeholder="e.g. my-image:my-tag"
+      placeholder="例如 my-image:my-tag"
       options={imageOptions}
       inputId={inputId}
     />
