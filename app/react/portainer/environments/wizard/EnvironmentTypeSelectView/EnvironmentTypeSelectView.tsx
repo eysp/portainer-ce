@@ -44,7 +44,7 @@ export function EnvironmentTypeSelectView() {
                     onChange={setTypes}
                     options={existingEnvironmentTypes}
                   />
-                  <p className="control-label !mb-2">设置新环境</p>
+                  <p className="control-label !mb-2">Set up new environments</p>
                   <EnvironmentSelector
                     value={types}
                     onChange={setTypes}

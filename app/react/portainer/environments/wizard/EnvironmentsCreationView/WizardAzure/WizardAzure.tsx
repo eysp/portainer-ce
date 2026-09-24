@@ -83,7 +83,7 @@ export function WizardAzure({ onCreate }: Props) {
             <NameField />
 
             <FormControl
-              label="应用程序 ID (Application ID)"
+              label="Application ID"
               errors={errors.applicationId}
               inputId="applicationId-input"
               required
@@ -97,7 +97,7 @@ export function WizardAzure({ onCreate }: Props) {
             </FormControl>
 
             <FormControl
-              label="租户 ID (Tenant ID)"
+              label="Tenant ID"
               errors={errors.tenantId}
               inputId="tenantId-input"
               required
@@ -111,7 +111,7 @@ export function WizardAzure({ onCreate }: Props) {
             </FormControl>
 
             <FormControl
-              label="认证密钥 (Authentication Key)"
+              label="Authentication Key"
               errors={errors.authenticationKey}
               inputId="authenticationKey-input"
               required
@@ -131,12 +131,12 @@ export function WizardAzure({ onCreate }: Props) {
                 <LoadingButton
                   className="vertical-center"
                   data-cy="create-azure-environment-button"
-                  loadingText="连接环境中..."
+                  loadingText="Connecting environment..."
                   isLoading={mutation.isLoading}
                   disabled={!dirty || !isValid}
                   icon={Plug2}
                 >
-                  连接
+                  Connect
                 </LoadingButton>
               </div>
             </div>
@@ -165,7 +165,7 @@ export function WizardAzure({ onCreate }: Props) {
       },
       {
         onSuccess(environment) {
-          notifySuccess('环境已创建', environment.Name);
+          notifySuccess('Environment created', environment.Name);
           clearForm();
           onCreate(environment, 'aciApi');
         },
@@ -177,9 +177,9 @@ export function WizardAzure({ onCreate }: Props) {
 function useValidation(): SchemaOf<FormValues> {
   return object({
     name: useNameValidation(),
-    applicationId: string().required('必须填写应用程序 ID'),
-    tenantId: string().required('必须填写租户 ID'),
-    authenticationKey: string().required('必须填写认证密钥'),
+    applicationId: string().required('Application ID is required'),
+    tenantId: string().required('Tenant ID is required'),
+    authenticationKey: string().required('Authentication Key is required'),
     meta: metadataValidation(),
   });
 }

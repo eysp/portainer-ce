@@ -30,9 +30,9 @@ export function KubeconfigButton({ environments, envQueryParams }: Props) {
   let tooltipMessage = '';
   if (isHttp) {
     tooltipMessage =
-      '通过 HTTP 访问 Portainer 时无法下载 Kubeconfig。请使用 HTTPS。';
+      'Kubeconfig download is not available when Portainer is accessed via HTTP. Please use HTTPS';
   } else if (noKubeEnvs) {
-    tooltipMessage = '未检测到 Kubernetes 环境';
+    tooltipMessage = 'No Kubernetes environments detected';
   }
 
   const button = (

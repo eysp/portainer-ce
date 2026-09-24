@@ -70,7 +70,7 @@ export function EnvironmentHeader() {
     { key: 'down', label: '离线', count: counts.down, color: 'error' },
     {
       key: 'outdated',
-      label: '待更新',
+      label: '过时',
       count: counts.outdated,
       color: 'warning',
     },

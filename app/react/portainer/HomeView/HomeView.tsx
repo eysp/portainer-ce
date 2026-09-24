@@ -32,7 +32,7 @@ export function HomeView() {
     async function redirect() {
       const options = {
         title: `连接 ${params.environmentName} 失败`,
-        message: `通过隧道连接边缘代理时出现问题。点击下方的“重试”立即重试，或等待 10 秒后自动重试。`,
+        message: `通过隧道连接到边缘 Agent 时出现问题。点击下方的“重试”立即重试，或等待 10 秒后自动重试。`,
         confirmButton: buildConfirmButton('重试', 'primary', 10),
         modalType: ModalType.Destructive,
       };
@@ -61,8 +61,8 @@ export function HomeView() {
     <div className="flex min-h-screen flex-col">
       <PageHeader
         reload
-        title="首页"
-        breadcrumbs={[{ label: '环境列表' }]}
+        title="欢迎页"
+        breadcrumbs={[{ label: '环境' }]}
       />
 
       {process.env.PORTAINER_EDITION !== 'CE' && <LicenseNodePanel />}

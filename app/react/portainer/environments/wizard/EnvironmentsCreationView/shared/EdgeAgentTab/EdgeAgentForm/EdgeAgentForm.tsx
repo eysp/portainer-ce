@@ -67,7 +67,7 @@ export function EdgeAgentForm({
           />
 
           <MoreSettingsSection>
-            <FormSection title="回连间隔 (Check-in Intervals)">
+            <FormSection title="Check-in Intervals">
               {asyncMode ? (
                 <EdgeAsyncIntervalsForm
                   values={values.edge}
@@ -91,11 +91,11 @@ export function EdgeAgentForm({
                   className="vertical-center"
                   data-cy="edge-agent-form-submit-button"
                   isLoading={createMutation.isLoading}
-                  loadingText="创建环境中..."
+                  loadingText="Creating environment..."
                   disabled={!isValid}
                   icon={Plug2}
                 >
-                  创建
+                  Create
                 </LoadingButton>
               </div>
             </div>

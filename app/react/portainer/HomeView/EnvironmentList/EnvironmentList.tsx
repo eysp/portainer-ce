@@ -47,13 +47,13 @@ interface Props {
 const SORT_OPTIONS: SortOption<SortType>[] = [
   {
     key: 'Id',
-    label: '时间',
+    label: '添加时间',
     descendingLabel: '最新',
-    ascendingLabel: '最早',
+    ascendingLabel: '最旧',
   },
-  { key: 'Group', label: '分组', grouped: true },
+  { key: 'Group', label: '群组', grouped: true },
   { key: 'PlatformType', label: '平台', grouped: true },
-  { key: 'Health', label: '健康状态', grouped: true },
+  { key: 'Health', label: '状态', grouped: true },
 ];
 
 const platformDetails: Record<
@@ -62,14 +62,14 @@ const platformDetails: Record<
 > = {
   Docker: {
     type: PlatformType.Docker,
-    description: 'Docker 主机与 Swarm 集群',
+    description: 'Docker hosts and Swarm clusters',
   },
   Kubernetes: {
     type: PlatformType.Kubernetes,
-    description: 'Kubernetes 集群与节点',
+    description: 'Kubernetes clusters and nodes',
   },
-  Azure: { type: PlatformType.Azure, description: 'Azure 容器实例' },
-  Podman: { type: PlatformType.Podman, description: 'Podman 容器' },
+  Azure: { type: PlatformType.Azure, description: 'Azure Container Instances' },
+  Podman: { type: PlatformType.Podman, description: 'Podman Containers' },
 };
 
 const healthDetails: Record<
@@ -78,19 +78,19 @@ const healthDetails: Record<
 > = {
   Up: {
     type: EnvironmentHealth.Up,
-    description: '环境在线且为最新版本',
+    description: 'Environments online and up-to-date',
   },
   Down: {
     type: EnvironmentHealth.Down,
-    description: '环境当前离线或无法连通',
+    description: 'Environments currently offline or unreachable',
   },
   Outdated: {
     type: EnvironmentHealth.Outdated,
-    description: '环境代理版本可升级',
+    description: 'Environments with agents that can be upgraded',
   },
   Heartbeat: {
     type: EnvironmentHealth.Heartbeat,
-    description: '心跳活跃的边缘环境',
+    description: 'Edge environments with active heartbeat',
   },
 };
 
@@ -154,7 +154,7 @@ export function EnvironmentList({ onClickBrowse }: Props) {
   const environmentRows = useMemo<EnvironmentRow[]>(() => {
     return environments.map((env) => ({
       ...env,
-      groupName: groupDetails[env.GroupId.toString()]?.name ?? 'Unassigned',
+      groupName: groupDetails[env.GroupId.toString()]?.name ?? '未分配',
       platformName:
         PlatformType[getPlatformType(env.Type, env.ContainerEngine)],
       healthLabel: getHealthLabel(env, tableState.groupFilter),
@@ -201,7 +201,7 @@ export function EnvironmentList({ onClickBrowse }: Props) {
         totalCount={totalCount}
         groups={environmentGroups}
         searchPlaceholder="搜索环境..."
-        emptyMessage="暂无可用环境。"
+        emptyMessage="没有可用的环境。"
         headerButtons={headerButtons}
         data-cy="home-endpointList"
         showGroupHeaders
@@ -228,7 +228,7 @@ function getHealthLabel(
 
   const status = resolveBaseStatus(env);
   if (env.Agent.IsOutdated && status !== 'Down') {
-    return 'Outdated';
+    return '过时';
   }
   return status;
 }
@@ -239,13 +239,13 @@ function resolveBaseStatus(env: Environment): string {
   }
   switch (env.Status) {
     case EnvironmentStatus.Up:
-      return 'Up';
+      return '在线';
     case EnvironmentStatus.Down:
     case EnvironmentStatus.Provisioning:
     case EnvironmentStatus.Error:
-      return 'Down';
+      return '离线';
     default:
-      return 'Unknown';
+      return '未知';
   }
 }
 
@@ -259,7 +259,7 @@ function buildGroups(
   const options = groupOptions[sortBy];
   const getField = GROUP_FIELD[sortBy];
   if (!options?.length || !getField) {
-    return [{ key: 'all', label: 'All', items }];
+    return [{ key: 'all', label: '全部', items }];
   }
   const itemsByKey = new Map<string, EnvironmentRow[]>();
   for (const item of items) {

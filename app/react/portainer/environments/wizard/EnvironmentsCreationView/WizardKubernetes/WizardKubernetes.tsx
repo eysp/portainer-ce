@@ -45,11 +45,14 @@ const primaryOptions: BoxSelectorOption<CreationType>[] = _.compact([
     description: (
       <>
         <span>
-          <Badge type="infoSecondary">推荐</Badge>{' '}
-          <Badge type="infoSecondary">支持策略</Badge>
+          <Badge type="infoSecondary">Recommended</Badge>{' '}
+          <Badge type="infoSecondary">Supports Policies</Badge>
         </span>
         <span className="mt-1 block">
-          远程环境将主动连接到 Portainer 服务器，能够建立安全按需隧道以实现实时交互。Portainer 服务器必须可以从 Edge Agent 环境中访问。
+          The remote environment will initiate connections to the Portainer
+          server, with the ability to open a secure on-demand tunnel for
+          real-time interaction. The Portainer server must be accessible from
+          the Edge Agent environment.
         </span>
       </>
     ),
@@ -61,7 +64,7 @@ const primaryOptions: BoxSelectorOption<CreationType>[] = _.compact([
     iconType: 'badge',
     label: 'Edge Agent Async',
     description:
-      '远程环境将主动连接到 Portainer 服务器，不支持建立实时隧道。Portainer 服务器必须可以从 Edge Agent 环境中访问。',
+      'The remote environment will initiate connections to the Portainer server, without the ability to open a real-time tunnel. The Portainer server must be accessible from the Edge Agent environment.',
     value: 'edgeAgentAsync',
   },
 ]);
@@ -74,15 +77,15 @@ const legacyOptions: BoxSelectorOption<CreationType>[] = [
     label: 'Agent',
     value: 'agent',
     description:
-      'Portainer 服务器将主动连接到远程环境。Portainer 服务器环境必须可以访问远程环境上的 Agent。',
+      'The Portainer Server will initiate connections to the remote environment. The agent on the remote environment must be accessible from the Portainer server environment.',
   },
   {
     id: 'kubeconfig_endpoint',
     icon: UploadCloud,
     iconType: 'badge',
-    label: '导入',
+    label: 'Import',
     value: 'kubeconfig',
-    description: '导入现有的 Kubernetes 配置文件。',
+    description: 'Import an existing Kubernetes config.',
     feature: FeatureId.K8S_CREATE_FROM_KUBECONFIG,
   },
 ];
@@ -109,19 +112,20 @@ export function WizardKubernetes({ onCreate }: Props) {
 
       <FormSection
         key="legacy-options"
-        title="更多选项"
+        title="More options"
         titleSize="sm"
         isFoldable
         defaultFolded={false}
         className="mb-8"
       >
         <p className="text-muted mb-2 text-xs">
-          这些是传统选项，不支持边缘特性或策略管理。对于大多数用例，{' '}
+          These are legacy options that don&apos;t support edge features or
+          policy management. For most use cases,{' '}
           <ExternalLink
             to={edgeAgentDocsUrl}
             data-cy="wizard-edge-agent-docs-link"
           >
-            推荐使用 Edge Agent
+            the Edge Agent is recommended
           </ExternalLink>
         </p>
         <BoxSelector
