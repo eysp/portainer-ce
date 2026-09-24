@@ -28,7 +28,7 @@ export function useNameValidation(id?: EdgeJob['Id']) {
   return useMemo(
     () =>
       string()
-        .required('Name is required')
+        .required('名称是必填项')
         .matches(
           /^[a-zA-Z0-9][a-zA-Z0-9_.-]+$/,
           'Allowed characters are: [a-zA-Z0-9_.-]'

@@ -147,7 +147,7 @@ function buildCreateStackPayload({
 
     case 'upload':
       if (!values.upload.file) {
-        throw new Error('File is required for upload method');
+        throw new Error('对于上传方法，文件是必填项');
       }
       if (stackType === 'swarm') {
         return {

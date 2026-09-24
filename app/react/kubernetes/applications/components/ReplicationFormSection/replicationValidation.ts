@@ -21,7 +21,7 @@ export function replicationValidation(
     supportScalableReplicaDeployment,
   } = validationData || {};
   return object({
-    replicaCount: nanNumberSchema('Instance count is required')
+    replicaCount: nanNumberSchema('实例计数是必填项')
       .min(0, 'Instance count must be greater than or equal to 0.')
       .test(
         'overflow',
@@ -49,6 +49,6 @@ export function replicationValidation(
           return !!supportScalableReplicaDeployment;
         } // must have support scalable replica deployment
       )
-      .required('Instance count is required.'),
+      .required('实例计数是必填项.'),
   });
 }

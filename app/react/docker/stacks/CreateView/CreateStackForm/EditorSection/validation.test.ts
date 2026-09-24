@@ -38,7 +38,7 @@ describe('Editor validation', () => {
     };
 
     await expect(schema.validate(invalidData)).rejects.toThrow(
-      'Stack file content is required'
+      '堆栈文件内容是必填项'
     );
   });
 

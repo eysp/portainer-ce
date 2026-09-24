@@ -54,7 +54,7 @@ test('should show validation errors for empty required fields', async () => {
   expect(submitButton).toBeDisabled();
 
   await waitFor(() => {
-    const errorMessages = screen.getAllByText('This field is required.');
+    const errorMessages = screen.getAllByText('此字段是必填项。');
     expect(errorMessages.length).toBe(3);
     expect(errorMessages[0]).toBeVisible();
   });

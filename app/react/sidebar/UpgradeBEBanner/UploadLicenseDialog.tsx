@@ -111,7 +111,7 @@ export function UploadLicenseDialog({
 function validation(): SchemaOf<FormValues> {
   return object().shape({
     license: string()
-      .required('License is required')
+      .required('许可是必填项')
       .matches(/^\d-.+/, 'License is invalid'),
   });
 }
