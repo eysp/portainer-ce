@@ -37,8 +37,8 @@ export function VersionSelect({
 
   if (!supportedAgentVersionsQuery.data.length) {
     return (
-      <FormControl label="Version">
-        <TextTip>No supported versions available</TextTip>
+      <FormControl label="版本">
+        <TextTip>没有可用的支持版本</TextTip>
       </FormControl>
     );
   }
@@ -49,13 +49,13 @@ export function VersionSelect({
   }));
 
   return (
-    <FormControl label="Version" errors={error} inputId="version-input">
+    <FormControl label="版本" errors={error} inputId="version-input">
       <Field
         id="version-input"
         name="version"
         as={Select}
         className="form-control"
-        placeholder="Version"
+        placeholder="版本"
         options={supportedVersions}
       />
     </FormControl>

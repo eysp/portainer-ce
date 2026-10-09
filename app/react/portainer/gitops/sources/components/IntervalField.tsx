@@ -44,7 +44,7 @@ export function IntervalField({
 
 export function intervalValidation() {
   return durationValidation(false) // Don't allow empty - field is required
-    .required('This field is required.')
+    .required('此字段是必填项。')
     .test('minimumInterval', 'Minimum interval is 1m', (value) => {
       if (!value) {
         return false;

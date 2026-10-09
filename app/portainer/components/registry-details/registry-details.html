@@ -1,18 +1,18 @@
 <div class="row" ng-if="$ctrl.registry">
   <div class="col-lg-12 col-md-12 col-xs-12">
     <rd-widget>
-      <rd-widget-header icon="radio" title-text="Registry"></rd-widget-header>
+      <rd-widget-header icon="radio" title-text="镜像仓库信息"></rd-widget-header>
       <rd-widget-body classes="no-padding">
         <table class="table">
           <tbody>
             <tr>
-              <td>Name</td>
+              <td>仓库名称</td>
               <td>
                 {{ $ctrl.registry.Name }}
               </td>
             </tr>
             <tr>
-              <td>URL</td>
+              <td>仓库 URL</td>
               <td>
                 {{ $ctrl.registry.URL }}
               </td>

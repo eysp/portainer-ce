@@ -41,8 +41,8 @@ export function NameRow({
             className="!ml-1 !p-0 hover:no-underline"
             onClick={handleEdit}
             data-cy="container-edit-name-button"
-            title="Edit container name"
-            aria-label="Edit container name"
+            title="编辑容器名称"
+            aria-label="编辑容器名称"
           >
             <Icon icon={Edit} className="lucide" />
           </Button>

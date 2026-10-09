@@ -29,7 +29,7 @@ export function LdapSecurityFieldset({
   values,
   onChange,
   errors,
-  title = 'LDAP security',
+  title = 'LDAP 安全',
   uploadState,
   limitedFeatureId,
 }: Props) {
@@ -42,10 +42,10 @@ export function LdapSecurityFieldset({
         <div className="form-group">
           <div className="col-sm-12">
             <SwitchField
-              label="Use StartTLS"
+              label="使用 StartTLS"
               checked={values.startTLS}
               onChange={(checked) => onChange({ startTLS: checked })}
-              tooltip="Enable this option if you want to use StartTLS to secure the connection to the server. Ignored if Use TLS is selected."
+              tooltip="如果您希望使用 StartTLS 保护与服务器的连接，请启用此选项。如果选择了“使用 TLS”，则忽略此项。"
               labelClass="col-sm-3 col-lg-2"
               featureId={limitedFeatureId}
               data-cy="starttls-toggle"
@@ -58,10 +58,10 @@ export function LdapSecurityFieldset({
         <div className="form-group">
           <div className="col-sm-12">
             <SwitchField
-              label="Use TLS"
+              label="使用 TLS"
               checked={values.tls}
               onChange={(checked) => onChange({ tls: checked })}
-              tooltip="Enable this option if you need to specify TLS certificates to connect to the LDAP server."
+              tooltip="如果您需要指定 TLS 证书以连接到 LDAP 服务器，请启用此选项。"
               labelClass="col-sm-3 col-lg-2"
               featureId={limitedFeatureId}
               data-cy="tls-toggle"
@@ -73,10 +73,10 @@ export function LdapSecurityFieldset({
       <div className="form-group">
         <div className="col-sm-12">
           <SwitchField
-            label="Skip verification of server certificate"
+            label="跳过验证服务器证书"
             checked={values.tlsSkipVerify}
             onChange={(checked) => onChange({ tlsSkipVerify: checked })}
-            tooltip="Skip the verification of the server TLS certificate. Not recommended on unsecured networks."
+            tooltip="跳过服务器 TLS 证书的验证。不建议在不安全的网络上使用。"
             labelClass="col-sm-3 col-lg-2"
             featureId={limitedFeatureId}
             data-cy="tls-skip-verify-toggle"
@@ -86,7 +86,7 @@ export function LdapSecurityFieldset({
 
       {showCaCert && (
         <FormControl
-          label="TLS CA certificate"
+          label="TLS CA 证书"
           errors={errors?.caCertFile}
           inputId="tls-ca-cert"
         >
@@ -94,7 +94,7 @@ export function LdapSecurityFieldset({
             inputId="tls-ca-cert"
             onChange={(file) => onChange({ caCertFile: file })}
             value={values.caCertFile}
-            title="Select file"
+            title="选择文件"
             required
             data-cy="tls-ca-cert-upload"
             state={uploadState}

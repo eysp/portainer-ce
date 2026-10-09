@@ -43,26 +43,25 @@ export function RegistryFormDockerhub({
     >
       {({ errors, isValid, values, setFieldValue }) => (
         <Form className="form-horizontal">
-          <FormSection title="Important notice">
+          <FormSection title="重要提示">
             <TextTip color="blue">
               <p>
-                For information on how to generate a DockerHub Access Token,
-                follow the{' '}
+                有关如何生成 DockerHub 访问令牌 (Access Token) 的信息，请参阅{' '}
                 <a
                   href="https://docs.docker.com/security/access-tokens/"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  dockerhub guide
+                  DockerHub 官方指引
                 </a>
-                .
+                。
               </p>
             </TextTip>
           </FormSection>
 
-          <FormSection title="DockerHub account details">
+          <FormSection title="DockerHub 账户信息">
             <FormControl
-              label="Name"
+              label="仓库名称"
               inputId="registry_name"
               errors={errors.Name}
               required
@@ -70,7 +69,7 @@ export function RegistryFormDockerhub({
               <Input
                 id="registry_name"
                 name="Name"
-                placeholder="dockerhub-prod-us"
+                placeholder="例如 dockerhub-prod-us"
                 data-cy="component-registryName"
                 value={values.Name}
                 onChange={(event) => {
@@ -81,7 +80,7 @@ export function RegistryFormDockerhub({
             </FormControl>
 
             <FormControl
-              label="DockerHub username"
+              label="DockerHub 用户名"
               inputId="registry_username"
               errors={errors.Username}
               required
@@ -99,7 +98,7 @@ export function RegistryFormDockerhub({
             </FormControl>
 
             <FormControl
-              label="DockerHub access token"
+              label="DockerHub 访问令牌 (Access Token)"
               inputId="registry_password"
               errors={errors.Password}
               required
@@ -130,7 +129,7 @@ export function RegistryFormDockerhub({
             isValid={isValid && isConnectionTested}
             submitLabel={submitLabel}
             errors={errors}
-            loadingText="In progress..."
+            loadingText="正在处理..."
             data-cy="registry-form-submit"
           />
         </Form>
@@ -148,13 +147,13 @@ function validationSchema(
 ): SchemaOf<RegistryFormDockerhubValues> {
   return object({
     Name: string()
-      .required('This field is required.')
+      .required('此字段为必填项。')
       .test(
         'name-not-used',
-        'A registry with the same name already exists.',
+        '已存在同名的镜像仓库。',
         async (name) => !(await nameIsUsed(name || ''))
       ),
-    Username: string().required('This field is required.'),
-    Password: string().required('This field is required.'),
+    Username: string().required('此字段为必填项。'),
+    Password: string().required('此字段为必填项。'),
   });
 }

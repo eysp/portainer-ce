@@ -31,6 +31,7 @@ export function ContainerSelector({
       onChange={onChange}
       options={containersQuery.data || []}
       isLoading={containersQuery.isLoading}
+      placeholder="请选择容器"
       data-cy="docker-container-selector"
     />
   );

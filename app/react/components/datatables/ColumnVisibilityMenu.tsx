@@ -36,12 +36,12 @@ export function ColumnVisibilityMenu<D extends object>({
               className="space-right"
               strokeWidth="3px"
               aria-hidden="true"
-              aria-label="Columns"
+              aria-label="列显示设置"
             />
           </MenuButton>
           <MenuList>
             <div className="tableMenu">
-              <div className="menuHeader">Show / Hide Columns</div>
+              <div className="menuHeader">显示 / 隐藏列</div>
               <div className="menuContent">
                 {columnsToHide.map((column) => (
                   <div key={column.id}>

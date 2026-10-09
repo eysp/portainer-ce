@@ -19,7 +19,7 @@ function CEFooter() {
 
       <FooterContent>
         <span>&copy;</span>
-        <span>Portainer Community Edition</span>
+        <span>Portainer 社区版</span>
 
         <BuildInfoModalButton />
       </FooterContent>
@@ -32,7 +32,7 @@ function BEFooter() {
     <div className={clsx(styles.root, 'text-center')}>
       <FooterContent>
         <span>&copy;</span>
-        <span>Portainer Business Edition</span>
+        <span>Portainer 商业版</span>
 
         <BuildInfoModalButton />
       </FooterContent>

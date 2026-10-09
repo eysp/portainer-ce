@@ -13,7 +13,7 @@ export function ConfirmPasswordField() {
   return (
     <FormControl
       inputId="confirm_password"
-      label="Confirm password"
+      label="确认密码"
       required
       errors={error}
     >

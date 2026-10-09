@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+﻿import { useCallback } from 'react';
 import RcSlider from 'rc-slider';
 import clsx from 'clsx';
 import { Lock, XCircle, CheckCircle } from 'lucide-react';
@@ -28,22 +28,22 @@ const sliderProperties: Record<
   weak: {
     strength: 'weak',
     color: '#F04438',
-    text: 'Weak password',
+    text: '弱密码',
   },
   good: {
     strength: 'good',
     color: '#F79009',
-    text: 'Good password',
+    text: '中等密码',
   },
   strong: {
     strength: 'strong',
     color: '#12B76A',
-    text: 'Strong password',
+    text: '强密码',
   },
   veryStrong: {
     strength: 'veryStrong',
     color: '#0BA5EC',
-    text: 'Very strong password',
+    text: 'Very 强密码',
   },
 };
 
@@ -93,7 +93,7 @@ export function PasswordLengthSlider({
   const sliderTooltip = useCallback(
     (node, handleProps) => (
       <SliderTooltip
-        value={`${handleProps.value} characters`}
+        value={`${handleProps.value} 个字符`}
         child={node}
         delay={800}
       />

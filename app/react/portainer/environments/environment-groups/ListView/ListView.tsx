@@ -7,12 +7,12 @@ export function ListView() {
   return (
     <>
       <PageHeader
-        title="Environment Groups"
-        breadcrumbs="Environment group management"
+        title="环境分组"
+        breadcrumbs="环境分组管理"
         reload
       >
         <AddButton to=".new" data-cy="add-environment-group-button">
-          Add group
+          添加分组
         </AddButton>
       </PageHeader>
 

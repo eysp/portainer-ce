@@ -21,8 +21,8 @@ export function SecurityOptField({
       value={values}
       onChange={onChange}
       item={Item}
-      addLabel="Add security-opt"
-      label="SecurityOpt"
+      addLabel="添加安全选项"
+      label="安全选项 (SecurityOpt)"
       errors={errors}
       itemBuilder={() => ''}
       data-cy="docker-container-securityopts"
@@ -37,8 +37,8 @@ function Item({ item, onChange, error, index }: ItemProps<string>) {
         <InputLabeled
           value={item}
           onChange={(e) => onChange(e.target.value)}
-          label="Security Option"
-          placeholder="e.g. seccomp=unconfined"
+          label="安全选项"
+          placeholder="例如 seccomp=unconfined"
           className="w-full"
           size="small"
           data-cy={`docker-container-securityopt-name_${index}`}
@@ -54,5 +54,5 @@ function Item({ item, onChange, error, index }: ItemProps<string>) {
 }
 
 export function securityOptValidation(): SchemaOf<Values> {
-  return array(string().required('Security option is required'));
+  return array(string().required('安全选项不能为空'));
 }

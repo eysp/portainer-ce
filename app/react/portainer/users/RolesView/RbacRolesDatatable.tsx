@@ -29,7 +29,7 @@ export function RbacRolesDatatable({
 
   return (
     <Datatable
-      title="Roles"
+      title="角色列表"
       titleIcon={FileCode}
       dataset={dataset || []}
       columns={columns}
@@ -46,17 +46,17 @@ function getColumns() {
 
   return _.compact([
     columnHelper.accessor('Name', {
-      header: 'Name',
+      header: '名称',
     }),
     columnHelper.accessor('Description', {
-      header: 'Description',
+      header: '描述',
     }),
     !isBE &&
       columnHelper.display({
         id: 'be-indicator',
         cell: ({ row: { original: item } }) =>
           item.Id === RoleTypes.STANDARD ? (
-            <b>Default</b>
+            <b>默认</b>
           ) : (
             <BEFeatureIndicator featureId={FeatureId.RBAC_ROLES} />
           ),

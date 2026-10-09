@@ -7,7 +7,7 @@ import { useContainerGpus } from '@/react/docker/containers/queries/gpus';
 import { columnHelper } from './helper';
 
 export const gpus = columnHelper.display({
-  header: 'GPUs',
+  header: 'GPU',
   id: 'gpus',
   cell: GpusCell,
 });

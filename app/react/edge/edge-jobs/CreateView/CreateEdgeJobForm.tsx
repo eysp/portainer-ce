@@ -134,7 +134,7 @@ function getPayload(
   switch (method) {
     case 'upload':
       if (!values.file) {
-        throw new Error('File is required');
+        throw new Error('文件是必填项');
       }
 
       return {

@@ -8,12 +8,12 @@ export function SidebarToggleButton() {
   const { isOpen, toggle } = sidebarStore();
 
   return (
-    <TooltipWithChildren message={`${isOpen ? 'Collapse' : 'Expand'} sidebar`}>
+    <TooltipWithChildren message={`${isOpen ? '收起' : '展开'} 侧边栏`}>
       <button
         type="button"
         onClick={toggle}
         className="flex h-6 shrink-0 items-center justify-center rounded border-0 bg-transparent text-sm text-gray-8 transition-colors duration-200 hover:bg-gray-6/30 th-highcontrast:text-white th-dark:text-gray-5"
-        aria-label="Toggle Sidebar"
+        aria-label="Collapse sidebar"
       >
         {isOpen ? <PanelLeftClose /> : <PanelLeftOpen />}
       </button>

@@ -15,7 +15,7 @@ function setup(...args: Parameters<typeof useValidation>) {
   return returnVal;
 }
 
-test('image is required', async () => {
+test('镜像是必填项', async () => {
   const { schema } = setup(false, false);
   const object: FormValues = {
     config: { image: '', registryId: 0, useRegistry: true },
@@ -25,6 +25,6 @@ test('image is required', async () => {
   await expect(
     schema?.validate(object, { strict: true })
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `[ValidationError: Image is required]`
+    `[ValidationError: 镜像是必填项]`
   );
 });

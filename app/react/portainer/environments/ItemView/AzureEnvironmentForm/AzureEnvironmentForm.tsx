@@ -53,7 +53,7 @@ export function AzureEnvironmentForm({ environment, onSuccess }: Props) {
         >
           {({ values, setFieldValue, isValid, dirty, isSubmitting }) => (
             <Form className="form-horizontal">
-              <FormSection title="Configuration">
+              <FormSection title="配置">
                 <NameField />
 
                 <EnvironmentUrlField disabled optional />

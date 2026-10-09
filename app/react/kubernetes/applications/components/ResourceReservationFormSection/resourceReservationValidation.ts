@@ -25,7 +25,7 @@ export function resourceReservationValidation(
   validationData?: ValidationData
 ): SchemaOf<ResourceQuotaFormValues> {
   return object().shape({
-    memoryLimit: nanNumberSchema('Memory limit is required.')
+    memoryLimit: nanNumberSchema('内存限制是必填项。')
       .min(0, 'Value must be greater than or equal to 0.')
       .test(
         'exhaused',
@@ -59,7 +59,7 @@ export function resourceReservationValidation(
           );
         }
       )
-      .required('Memory limit is required.'),
+      .required('内存限制是必填项。'),
     cpuLimit: number()
       .min(0)
       .test(

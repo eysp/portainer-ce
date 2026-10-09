@@ -19,10 +19,10 @@ export function RollbackOptions() {
     return <TextTip>{versionError}</TextTip>;
   }
 
-  if (!count) {
+    if (!count) {
     return (
       <TextTip>
-        There are no rollback options available for your selected groups(s)
+        所选分组没有可用的回滚选项
       </TextTip>
     );
   }
@@ -34,8 +34,7 @@ export function RollbackOptions() {
   return (
     <div className="form-group">
       <div className="col-sm-12">
-        {count} edge device(s) from {groupNames} will rollback to version{' '}
-        {version}
+        来自 {groupNames} 的 {count} 个边缘设备将回滚到 {version} 版本
       </div>
     </div>
   );
@@ -68,7 +67,7 @@ function useSelectVersionOnMount() {
     switch (previousVersions.length) {
       case 0:
         setFieldValue('version', '');
-        setFieldError('version', 'No rollback options available');
+        setFieldError('version', '没有可用的回滚选项');
         break;
       case 1:
         setFieldValue('version', previousVersions[0]);
@@ -76,7 +75,7 @@ function useSelectVersionOnMount() {
       default:
         setFieldError(
           'version',
-          'Rollback is not available for these edge group as there are multiple version types to rollback to'
+          '这些 edge 分组不可用回滚，因为有多个版本类型可以回滚'
         );
     }
   }, [previousVersions, setFieldError, setFieldValue]);

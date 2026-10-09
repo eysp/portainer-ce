@@ -22,7 +22,7 @@ export function EnvironmentTypeBreakdown({ group, className }: Props) {
         className={className}
         data-cy={`environment-group-size_${group.Name}`}
       >
-        {group.Total} {group.Total === 1 ? 'Environment' : 'Environments'}
+        {group.Total} 环境
       </span>
     );
   }
