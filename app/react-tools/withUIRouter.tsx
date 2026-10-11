@@ -1,6 +1,14 @@
-import { ComponentType, ReactNode, useContext } from 'react';
+import {
+  ComponentType,
+  ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { UIRouterContextComponent } from '@uirouter/react-hybrid';
-import { UIRouterContext, UIRouter } from '@uirouter/react';
+import { UIRouterContext, UIViewContext, UIRouter } from '@uirouter/react';
+import { StateDeclaration } from '@uirouter/core';
 import angular from 'angular';
 
 export function getGlobalUIRouter(): UIRouter | undefined {
@@ -36,22 +44,95 @@ export function getGlobalUIRouter(): UIRouter | undefined {
   return undefined;
 }
 
-export function FallbackUIRouterProvider({ children }: { children: ReactNode }) {
-  const router = useContext(UIRouterContext);
-  if (router) {
-    return <>{children}</>;
+export function getCurrentState(
+  router?: UIRouter
+): StateDeclaration | undefined {
+  if (!router) {
+    return undefined;
   }
 
-  const fallbackRouter = getGlobalUIRouter();
-  if (fallbackRouter) {
-    return (
-      <UIRouterContext.Provider value={fallbackRouter}>
-        {children}
+  const transitionTo = router.globals?.transition?.to();
+  if (transitionTo?.name) {
+    return transitionTo;
+  }
+
+  if (router.globals?.current?.name) {
+    return router.globals.current;
+  }
+
+  if (router.stateService?.current?.name) {
+    return router.stateService.current;
+  }
+
+  if (typeof window !== 'undefined') {
+    const ngState = (
+      window as unknown as { $state?: { current?: { name?: string } } }
+    ).$state;
+    if (ngState?.current?.name) {
+      return router.stateRegistry.get(ngState.current.name) || undefined;
+    }
+  }
+
+  return undefined;
+}
+
+export function FallbackUIRouterProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const routerFromContext = useContext(UIRouterContext);
+  const router = routerFromContext || getGlobalUIRouter();
+  const parentViewContext = useContext(UIViewContext);
+
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    if (!router) {
+      return;
+    }
+    return router.transitionService?.onSuccess({}, () => {
+      setTick((t) => t + 1);
+    });
+  }, [router]);
+
+  const fallbackViewContext = useMemo(() => {
+    if (parentViewContext?.context?.name) {
+      return parentViewContext;
+    }
+
+    const state = getCurrentState(router);
+    if (state && state.name) {
+      return {
+        fqn: parentViewContext?.fqn || '',
+        context: state,
+      };
+    }
+
+    return parentViewContext;
+  }, [parentViewContext, router]);
+
+  let content = children;
+
+  if (
+    fallbackViewContext &&
+    (!parentViewContext || !parentViewContext.context?.name)
+  ) {
+    content = (
+      <UIViewContext.Provider value={fallbackViewContext}>
+        {content}
+      </UIViewContext.Provider>
+    );
+  }
+
+  if (router && !routerFromContext) {
+    content = (
+      <UIRouterContext.Provider value={router}>
+        {content}
       </UIRouterContext.Provider>
     );
   }
 
-  return <>{children}</>;
+  return <>{content}</>;
 }
 
 export function withUIRouter<T>(

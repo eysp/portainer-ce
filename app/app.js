@@ -5,6 +5,7 @@ export function onStartupAngular($rootScope, $state, cfpLoadingBar, $transitions
   $rootScope.$state = $state;
 
   if (typeof window !== 'undefined') {
+    window.$state = $state;
     window.$uiRouter = ($transitions && $transitions._router) || ($state && $state.router);
   }
 
@@ -26,8 +27,11 @@ export function onStartupAngular($rootScope, $state, cfpLoadingBar, $transitions
   // Fix found at https://github.com/angular-ui/ui-router/issues/3652#issuecomment-574499009
   // This hook is cleaning the internal viewConfigs list, removing leftover data unrelated to the current transition
   $transitions.onStart({}, (transition) => {
-    if (typeof window !== 'undefined' && transition.router) {
-      window.$uiRouter = transition.router;
+    if (typeof window !== 'undefined') {
+      window.$state = $state;
+      if (transition.router) {
+        window.$uiRouter = transition.router;
+      }
     }
     const toList = transition.treeChanges().to.map((t) => t.state.name);
     const toConfigs = transition.router.viewService._viewConfigs.filter((vc) => toList.includes(vc.viewDecl.$context.name));
