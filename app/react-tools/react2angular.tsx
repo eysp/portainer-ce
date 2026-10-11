@@ -3,6 +3,8 @@ import { IComponentOptions, IController } from 'angular';
 import { StrictMode } from 'react';
 import _ from 'lodash';
 
+import { FallbackUIRouterProvider } from './withUIRouter';
+
 function toProps(
   propNames: string[],
   controller: IController,
@@ -60,8 +62,10 @@ export function react2angular<T, U extends PropNames<T>[]>(
         const props = toProps(propNames, this, $q);
         ReactDOM.render(
           <StrictMode>
-            {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-            <Component {...(props as T & JSX.IntrinsicAttributes)} />
+            <FallbackUIRouterProvider>
+              {/* eslint-disable-next-line react/jsx-props-no-spreading */}
+              <Component {...(props as T & JSX.IntrinsicAttributes)} />
+            </FallbackUIRouterProvider>
           </StrictMode>,
 
           el
