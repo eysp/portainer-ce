@@ -36,7 +36,7 @@ export function GitPullButton({ stack }: { stack: Stack }) {
     const stackLabel =
       stack.Type === StackType.Kubernetes ? 'application' : 'stack';
     const result = await confirmStackUpdate(
-      `Pulling from git will override any local changes to this ${stackLabel} and may cause a service interruption. Do you wish to continue?`,
+      `从 git 拉取将覆盖对此 ${stackLabel === "application" ? "应用" : "堆栈"} 的任何本地更改，并可能导致服务中断。您要继续吗？`,
       false
     );
     if (!result) {
@@ -52,13 +52,13 @@ export function GitPullButton({ stack }: { stack: Stack }) {
       {
         onSuccess: () => {
           notifySuccess(
-            'Success',
-            `${capitalize(stackLabel)} successfully pulled and redeployed`
+            '成功',
+            `${stackLabel === 'application' ? '应用' : '堆栈'}已成功拉取并重新部署`
           );
           router.stateService.reload();
         },
         onError: (err) => {
-          notifyError('Failure', err, 'Unable to pull and redeploy');
+          notifyError('失败', err, '无法拉取并重新部署');
         },
       }
     );

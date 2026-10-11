@@ -69,7 +69,7 @@ export function StackActions({
               disabled={isMutating}
               data-cy="stack-stop-btn"
             >
-              Stop this stack
+              停止此堆栈
             </Button>
           )}
           {status === StackStatus.Inactive && (
@@ -81,7 +81,7 @@ export function StackActions({
               disabled={isMutating}
               onClick={() => handleStart()}
             >
-              Start this stack
+              启动此堆栈
             </Button>
           )}
         </Authorized>
@@ -96,7 +96,7 @@ export function StackActions({
           disabled={isMutating || isDeploying}
           data-cy="stack-delete-btn"
         >
-          Delete this stack
+          删除此堆栈
         </Button>
       </Authorized>
 
@@ -115,7 +115,7 @@ export function StackActions({
             },
           }}
         >
-          Create template from stack
+          从堆栈创建模板
         </Button>
       )}
 
@@ -136,7 +136,7 @@ export function StackActions({
                 isLoading={detachFromGitMutation.isLoading}
                 loadingText="分离中..."
               >
-                Detach from Git
+                从 Git 分离
               </LoadingButton>
             </Authorized>
           )}
@@ -150,11 +150,11 @@ export function StackActions({
       { id: stackId, environmentId },
       {
         onError(err) {
-          notifyError('Failure', err as Error, 'Unable to start stack');
+          notifyError('失败', err as Error, '无法启动堆栈');
           router.stateService.reload();
         },
         onSuccess() {
-          notifySuccess('Success', `Stack ${stack.Name} started successfully`);
+          notifySuccess('成功', `堆栈 ${stack.Name} 启动成功`);
           router.stateService.reload();
         },
       }
@@ -177,10 +177,10 @@ export function StackActions({
       { id: stackId, environmentId },
       {
         onError(err) {
-          notifyError('Failure', err as Error, 'Unable to stop stack');
+          notifyError('失败', err as Error, '无法停止堆栈');
         },
         onSuccess() {
-          notifySuccess('Success', `Stack ${stack.Name} stopped successfully`);
+          notifySuccess('成功', `堆栈 ${stack.Name} 停止成功`);
           router.stateService.reload();
         },
       }
@@ -210,7 +210,7 @@ export function StackActions({
           );
         },
         onSuccess() {
-          notifySuccess('Stack successfully removed', stack.Name);
+          notifySuccess('堆栈删除成功', stack.Name);
           router.stateService.go('^');
         },
       }
