@@ -79,7 +79,7 @@ angular.module('portainer.app').controller('InitAdminController', [
         })
         .catch(function error(err) {
           if (!handleError(err)) {
-            Notifications.error('Failure', err, 'Unable to create administrator user');
+            Notifications.error('Failure', err, '无法创建管理员用户');
           }
         })
         .finally(function final() {
@@ -96,7 +96,7 @@ angular.module('portainer.app').controller('InitAdminController', [
         return true;
       }
       if (err.status === 403) {
-        Notifications.error('Failure', err, 'Setup token is missing or invalid. Find the current token in the Portainer server logs.');
+        Notifications.error('Failure', err, '设置令牌缺失或无效。请在 Portainer 服务端日志中查找当前令牌。');
         return true;
       }
       return false;
@@ -109,7 +109,7 @@ angular.module('portainer.app').controller('InitAdminController', [
           $scope.requiresSetupToken = data.RequiresSetupToken;
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve application settings');
+          Notifications.error('Failure', err, '无法获取应用设置');
         });
 
       UserService.administratorExists()
@@ -119,7 +119,7 @@ angular.module('portainer.app').controller('InitAdminController', [
           }
         })
         .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to verify administrator account existence');
+          Notifications.error('Failure', err, '无法验证管理员账户是否存在');
         });
     }
 
@@ -139,7 +139,7 @@ angular.module('portainer.app').controller('InitAdminController', [
         await restoreAsyncFn();
       } catch (err) {
         if (!handleError(err)) {
-          Notifications.error('Failure', err, 'Unable to restore the backup');
+          Notifications.error('Failure', err, '无法恢复备份');
         }
         $scope.state.backupInProgress = false;
 
@@ -148,11 +148,11 @@ angular.module('portainer.app').controller('InitAdminController', [
 
       try {
         await waitPortainerRestart();
-        Notifications.success('Success', 'The backup has successfully been restored');
+        Notifications.success('Success', '备份已成功恢复');
         $state.go('portainer.auth');
       } catch (err) {
         handleError(err);
-        Notifications.error('Failure', err, 'Unable to check for status');
+        Notifications.error('Failure', err, '无法检查状态');
         await wait(2);
         location.reload();
       }
@@ -172,7 +172,7 @@ angular.module('portainer.app').controller('InitAdminController', [
           // pass
         }
       }
-      throw new Error('Timeout to wait for Portainer restarting');
+      throw new Error('等待 Portainer 重启超时');
     }
   },
 ]);

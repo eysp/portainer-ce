@@ -80,7 +80,7 @@ describe('EnvSelector', () => {
       }),
     ];
 
-    const error = 'Environment is required';
+    const error = '环境是必填项';
 
     renderComponent({
       environments: mockEnvironments,

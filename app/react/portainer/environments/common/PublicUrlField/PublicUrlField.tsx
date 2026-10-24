@@ -8,16 +8,16 @@ export function PublicUrlField() {
 
   return (
     <FormControl
-      label="Public IP"
+      label="公网 IP / 域名"
       inputId="public-url-field"
       errors={meta.error}
-      tooltip="URL or IP address where exposed containers will be reachable. This field is optional and will default to the environment URL."
+      tooltip="暴露的容器对外可访问的 URL 或 IP 地址。此项为选填，默认使用环境 URL。"
     >
       <Field
         id="public-url-field"
         name="publicUrl"
         as={Input}
-        placeholder="e.g. 10.0.0.10 or mydocker.mydomain.com"
+        placeholder="例如 10.0.0.10 或 mydocker.mydomain.com"
         data-cy="public-url-input"
       />
     </FormControl>

@@ -127,7 +127,7 @@ export function EnvironmentGroupRow({ group, tags }: Props) {
             onClick={(e: React.MouseEvent) => e.stopPropagation()}
             data-cy={`manage-access-button_${group.Name}`}
           >
-            Manage access
+            管理访问
           </Button>
         </div>
       )}

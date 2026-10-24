@@ -12,12 +12,12 @@ import { RegistryGitlabProject } from '../../types/gitlabProject';
 const helper = createColumnHelper<RegistryGitlabProject>();
 
 const columns = [
-  helper.accessor('Namespace', {}),
-  helper.accessor('Name', {}),
+  helper.accessor('Namespace', { header: '命名空间' }),
+  helper.accessor('Name', { header: '名称' }),
   helper.accessor('PathWithNamespace', {
-    header: 'Path with namespace',
+    header: '完整命名空间路径',
   }),
-  helper.accessor('Description', {}),
+  helper.accessor('Description', { header: '描述' }),
 ];
 
 const tableKey = 'gitlab-projects';
@@ -39,7 +39,7 @@ export function GitlabProjectTable({
       columns={columns}
       dataset={dataset}
       settingsManager={tableState}
-      title="Gitlab projects"
+      title="GitLab 项目列表"
       titleIcon={ListIcon}
       extendTableOptions={mergeOptions(
         withControlledSelected(

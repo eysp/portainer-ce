@@ -27,7 +27,7 @@ export function TaskTableQuickActions({
           <Link
             to="docker.tasks.task.logs"
             params={{ id: taskId }}
-            title="Logs"
+            title="日志"
             data-cy="docker-task-logs-link"
           >
             <Icon icon={FileText} className="space-right" />
@@ -40,7 +40,7 @@ export function TaskTableQuickActions({
           <Link
             to="docker.tasks.task"
             params={{ id: taskId }}
-            title="Inspect"
+            title="检查"
             data-cy="docker-task-inspect-link"
           >
             <Icon icon={Info} className="space-right" />

@@ -116,7 +116,7 @@ describe('ComposePathField', () => {
   });
 
   it('should display error message when provided', () => {
-    const errorMessage = 'Path is required';
+    const errorMessage = '路径是必填项';
     render(<ComposePathField {...defaultProps} errors={errorMessage} />);
 
     expect(screen.getByText(errorMessage)).toBeInTheDocument();

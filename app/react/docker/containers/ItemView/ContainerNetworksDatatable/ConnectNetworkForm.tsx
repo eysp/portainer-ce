@@ -40,7 +40,7 @@ export function ConnectNetworkForm({
       {({ values, errors, setFieldValue }) => (
         <Form className="form-horizontal w-full">
           <FormControl
-            label="Join a network"
+            label="加入网络"
             className="!mb-0"
             errors={errors.networkId}
           >
@@ -53,11 +53,11 @@ export function ConnectNetworkForm({
                 />
               </div>
               <LoadingButton
-                loadingText="Joining network..."
+                loadingText="正在加入网络..."
                 data-cy="connect-network-button"
                 isLoading={connectMutation.isLoading}
               >
-                Join Network
+                加入网络
               </LoadingButton>
             </div>
           </FormControl>
@@ -71,7 +71,7 @@ export function ConnectNetworkForm({
       { containerId, networkId, nodeName },
       {
         onSuccess() {
-          notifySuccess('Success', `Connected container to ${networkId}`);
+          notifySuccess('成功', `容器已成功连接至网络 ${networkId}`);
         },
       }
     );
@@ -80,6 +80,6 @@ export function ConnectNetworkForm({
 
 function validation(): SchemaOf<FormValues> {
   return object({
-    networkId: string().required('Please select a network'),
+    networkId: string().required('请选择一个网络'),
   });
 }

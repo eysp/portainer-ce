@@ -23,7 +23,7 @@ export function useCreateInstanceMutation(
   return useMutation<ContainerGroup, unknown, ContainerInstanceFormValues>(
     (values) => {
       if (!values.subscription) {
-        throw new PortainerError('subscription is required');
+        throw new PortainerError('订阅是必填项');
       }
 
       const subscriptionResourceGroup = getSubscriptionResourceGroups(

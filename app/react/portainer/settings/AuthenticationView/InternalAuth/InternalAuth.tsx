@@ -1,4 +1,4 @@
-import { Settings } from '@/react/portainer/settings/types';
+﻿import { Settings } from '@/react/portainer/settings/types';
 
 import { confirmDestructive } from '@@/modals/confirm';
 import { FormSectionTitle } from '@@/form-components/FormSectionTitle';
@@ -23,10 +23,10 @@ export function InternalAuth({
   async function onSubmit() {
     if (value.RequiredPasswordLength < 10) {
       const confirmed = await confirmDestructive({
-        title: 'Allow weak passwords?',
+        title: '允许弱密码？',
         message:
-          'You have set an insecure minimum password length. This could leave your system vulnerable to attack, are you sure?',
-        confirmButton: buildConfirmButton('Yes', 'danger'),
+          '您设置了一个不安全的最小密码长度。这可能会使您的系统容易受到攻击，确定吗？',
+        confirmButton: buildConfirmButton('确定', 'danger'),
       });
 
       if (confirmed) {
@@ -39,15 +39,15 @@ export function InternalAuth({
 
   return (
     <>
-      <FormSectionTitle>Information</FormSectionTitle>
+      <FormSectionTitle>信息</FormSectionTitle>
       <div className="form-group col-sm-12 text-muted small">
         When using internal authentication, Portainer will encrypt user
         passwords and store credentials locally.
       </div>
 
-      <FormSectionTitle>Password rules</FormSectionTitle>
+      <FormSectionTitle>密码规则</FormSectionTitle>
       <div className="form-group col-sm-12 text-muted small">
-        Define minimum length for user-generated passwords.
+        定义用户生成密码的最小长度。
       </div>
 
       <div className="form-group">

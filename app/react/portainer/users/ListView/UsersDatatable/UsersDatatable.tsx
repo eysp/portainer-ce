@@ -67,20 +67,20 @@ export function UsersDatatable() {
       columns={columns}
       dataset={dataset || []}
       isLoading={!dataset}
-      title="Users"
+      title="用户列表"
       titleIcon={UserIcon}
       settingsManager={tableState}
       isRowSelectable={(row) => row.original.Id !== 1}
       renderTableActions={(selectedUsers) => (
         <DeleteButton
           disabled={selectedUsers.length === 0}
-          confirmMessage="Do you want to remove the selected users? They will not be able to login into Portainer anymore."
+          confirmMessage="确定要删除选中的用户吗？他们将无法再登录 Portainer。"
           onConfirmed={() =>
             removeMutation.mutate(
               selectedUsers.map((i) => i.Id),
               {
                 onSuccess: () => {
-                  notifySuccess('Users successfully removed', '');
+                  notifySuccess('用户删除成功', '');
                 },
               }
             )
@@ -100,7 +100,7 @@ function useRemoveMutation() {
   return useMutation(
     async (ids: TeamId[]) => processItemsInBatches(ids, deleteUser),
     mutationOptions(
-      withError('Unable to remove users'),
+      withError('无法删除用户'),
       withInvalidate(queryClient, [userQueryKeys.base()])
     )
   );

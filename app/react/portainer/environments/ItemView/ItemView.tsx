@@ -26,9 +26,9 @@ export function ItemView() {
   return (
     <>
       <PageHeader
-        title="Environment details"
+        title="环境详情"
         breadcrumbs={[
-          { label: 'Environments', link: 'portainer.endpoints' },
+          { label: '环境列表', link: 'portainer.endpoints' },
           environment.Name,
         ]}
         reload

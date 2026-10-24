@@ -1,4 +1,4 @@
-import { AutomationTestingProps } from '@/types';
+﻿import { AutomationTestingProps } from '@/types';
 
 import { FormSection } from '@@/form-components/FormSection';
 import { SwitchField } from '@@/form-components/SwitchField';
@@ -16,14 +16,14 @@ export function AutoUserProvisionToggle({
   'data-cy': dataCy = 'auto-user-provision-toggle',
 }: AutoUserProvisionToggleProps) {
   return (
-    <FormSection title="Automatic user provisioning">
+    <FormSection title="自动创建用户">
       <div className="form-group">
         <span className="col-sm-12 text-muted small">{description}</span>
       </div>
       <div className="form-group">
         <div className="col-sm-12">
           <SwitchField
-            label="Automatic user provisioning"
+            label="自动创建用户"
             checked={value}
             onChange={onChange}
             data-cy={dataCy}

@@ -15,7 +15,7 @@ export function useValidation(): SchemaOf<CreateAgentEnvironmentValues> {
 
 function environmentValidation() {
   return string()
-    .required('This field is required')
+    .required('此字段是必填项')
     .test(
       'address',
       'Environment address must be of the form <IP>:<PORT> or <HOST>:<PORT>.',

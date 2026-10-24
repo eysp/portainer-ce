@@ -1,4 +1,4 @@
-import { ChevronDown, Trash2 } from 'lucide-react';
+﻿import { ChevronDown, Trash2 } from 'lucide-react';
 import { Menu, MenuButton, MenuItem, MenuPopover } from '@reach/menu-button';
 import { positionRight } from '@reach/popover';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -38,7 +38,7 @@ export function RemoveButtonMenu({
             handleRemove(false);
           }}
         >
-          Remove
+          删除
         </Button>
         <Menu>
           <MenuButton
@@ -48,19 +48,16 @@ export function RemoveButtonMenu({
             disabled={selectedItems.length === 0}
             icon={ChevronDown}
             data-cy="image-toggleRemoveButtonMenu"
-          >
-            <span className="sr-only">Toggle Dropdown</span>
-          </MenuButton>
+          />
           <MenuPopover position={positionRight}>
-            <div className="mt-3 bg-white th-highcontrast:bg-black th-dark:bg-black">
-              <MenuItem
-                onSelect={() => {
-                  handleRemove(true);
-                }}
-              >
-                Force Remove
-              </MenuItem>
-            </div>
+            <MenuItem
+              onSelect={() => {
+                handleRemove(true);
+              }}
+              data-cy="image-forceRemoveImageButton"
+            >
+              强制删除
+            </MenuItem>
           </MenuPopover>
         </Menu>
       </ButtonGroup>
@@ -69,19 +66,19 @@ export function RemoveButtonMenu({
 
   function confirmForceRemove() {
     return confirmDestructive({
-      title: 'Are you sure?',
+      title: '您确定吗？',
       message:
-        "Forcing removal of an image will remove it even if it's used by stopped containers, and delete all associated tags. Are you sure you want to remove the selected image(s)?",
-      confirmButton: buildConfirmButton('Remove the image', 'danger'),
+        '强制删除使用中及停止使用的镜像，同时也将删除其相关的标签。您确定要删除选中的镜像吗？',
+      confirmButton: buildConfirmButton('确认删除', 'danger'),
     });
   }
 
   function confirmRegularRemove() {
     return confirmDestructive({
-      title: 'Are you sure?',
+      title: '您确定吗？',
       message:
-        'Removing an image will also delete all associated tags. Are you sure you want to remove the selected image(s)?',
-      confirmButton: buildConfirmButton('Remove the image', 'danger'),
+        '删除镜像将会同时删除其相关的标签。您确定要删除选中的镜像吗？',
+      confirmButton: buildConfirmButton('确认删除', 'danger'),
     });
   }
 
@@ -129,13 +126,13 @@ function useDeleteImageListMutation() {
     onSuccess: ({ fulfilledItems, rejectedItems }) => {
       // one error notification per rejected item
       rejectedItems.forEach(({ item, reason }) => {
-        notifyError(`Failed to remove image '${item.id}'`, new Error(reason));
+        notifyError('删除 \'' + item.id + '\' 失败', new Error(reason));
       });
 
       // one success notification for all fulfilled items
       if (fulfilledItems.length) {
         notifySuccess(
-          `${pluralize(fulfilledItems.length, 'Image')} successfully removed`,
+          '成功删除 ' + fulfilledItems.length + ' 个镜像',
           fulfilledItems.map((item) => item.id).join(', ')
         );
       }

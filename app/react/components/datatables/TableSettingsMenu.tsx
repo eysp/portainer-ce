@@ -19,8 +19,8 @@ export function TableSettingsMenu({
             className={clsx('table-setting-menu-btn', {
               'setting-active': isExpanded,
             })}
-            aria-label="Settings"
-            title="Settings"
+            aria-label="设置"
+            title="设置"
           >
             <MoreVertical
               size="13"
@@ -31,11 +31,11 @@ export function TableSettingsMenu({
           </MenuButton>
           <MenuList>
             <div className="tableMenu">
-              <div className="menuHeader">Table settings</div>
+              <div className="menuHeader">表格设置</div>
               <div className="menuContent">{children}</div>
               {quickActions && (
                 <div>
-                  <div className="menuHeader">Quick actions</div>
+                  <div className="menuHeader">快捷操作</div>
                   <div className="menuContent">{quickActions}</div>
                 </div>
               )}

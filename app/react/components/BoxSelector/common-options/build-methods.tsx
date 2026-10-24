@@ -9,7 +9,7 @@ export const editor: BoxSelectorOption<'editor'> = {
   id: 'method_editor',
   icon: Edit,
   iconType: 'badge',
-  label: 'Web editor',
+  label: 'Web 编辑器',
   value: 'editor',
 };
 
@@ -17,7 +17,7 @@ export const upload: BoxSelectorOption<'upload'> = {
   id: 'method_upload',
   icon: UploadCloud,
   iconType: 'badge',
-  label: 'Upload',
+  label: '上传文件',
   value: 'upload',
 };
 
@@ -25,7 +25,7 @@ export const git: BoxSelectorOption<'repository'> = {
   id: 'method_repository',
   icon: GitIcon,
   iconType: 'logo',
-  label: 'Repository',
+  label: 'Git 仓库',
   value: 'repository',
 };
 
@@ -33,8 +33,8 @@ export const edgeStackTemplate: BoxSelectorOption<'template'> = {
   id: 'method_template',
   icon: FileText,
   iconType: 'badge',
-  label: 'Template',
-  description: 'Use an Edge stack app or custom template',
+  label: '应用模板',
+  description: '使用 Edge 栈应用或自定义模板',
   value: 'template',
 };
 
@@ -42,14 +42,14 @@ export const customTemplate: BoxSelectorOption<'template'> = {
   id: 'method_template',
   icon: FileText,
   iconType: 'badge',
-  label: 'Custom template',
+  label: '自定义模板',
   value: 'template',
 };
 
 export const helm: BoxSelectorOption<'helm'> = {
   id: 'method_helm',
   icon: Helm,
-  label: 'Helm chart',
+  label: 'Helm Chart',
   value: 'helm',
   iconClass: '!text-[#0f1689] th-dark:!text-white th-highcontrast:!text-white',
 };
@@ -58,6 +58,6 @@ export const url: BoxSelectorOption<'url'> = {
   id: 'method_url',
   icon: Globe,
   iconType: 'badge',
-  label: 'URL',
+  label: 'URL 地址',
   value: 'url',
 };

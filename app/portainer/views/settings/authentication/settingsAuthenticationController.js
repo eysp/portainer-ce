@@ -94,12 +94,12 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
       .then(function success() {
         $scope.state.failedConnectivityCheck = false;
         $scope.state.successfulConnectivityCheck = true;
-        Notifications.success('Success', 'Connection to LDAP successful');
+        Notifications.success('Success', '成功连接到 LDAP');
       })
       .catch(function error(err) {
         $scope.state.failedConnectivityCheck = true;
         $scope.state.successfulConnectivityCheck = false;
-        Notifications.error('Failure', err, 'Connection to LDAP failed');
+        Notifications.error('Failure', err, '连接到 LDAP 失败');
       })
       .finally(function final() {
         $scope.state.uploadInProgress = false;
@@ -121,10 +121,10 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
         return SettingsService.update(settings);
       })
       .then(function success() {
-        Notifications.success('Success', 'Authentication settings updated');
+        Notifications.success('Success', '身份认证设置已更新');
       })
       .catch(function error(err) {
-        Notifications.error('Failure', err, 'Unable to update authentication settings');
+        Notifications.error('Failure', err, '无法更新身份认证设置');
       })
       .finally(function final() {
         $scope.state.uploadInProgress = false;
@@ -245,7 +245,7 @@ function SettingsAuthenticationController($q, $scope, $state, Notifications, Set
         $scope.state.initialServerType = settings.LDAPSettings.ServerType;
       })
       .catch(function error(err) {
-        Notifications.error('Failure', err, 'Unable to retrieve application settings');
+        Notifications.error('Failure', err, '无法获取应用设置');
       });
   }
 

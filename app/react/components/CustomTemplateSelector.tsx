@@ -47,14 +47,14 @@ export function CustomTemplateSelector({
 
   return (
     <FormControl
-      label="Template"
+      label="模板"
       inputId={inputId}
       errors={error}
-      tooltip="Select a custom template to deploy as a stack"
+      tooltip="选择要作为堆栈部署的自定义模板"
     >
       {hasTemplates && (
         <PortainerSelect
-          placeholder="Select a custom template"
+          placeholder="选择自定义模板"
           options={templateOptions}
           value={value}
           onChange={handleChange}
@@ -67,12 +67,12 @@ export function CustomTemplateSelector({
 
       {!isLoading && !hasTemplates && (
         <span className="small text-muted">
-          No custom templates are available.
+          没有可用的自定义模板。
           {newTemplatePath && (
             <>
               {' '}
-              Head over to the{' '}
-              <a href={newTemplatePath}>custom template view</a> to create one.
+              前往{' '}
+              <a href={newTemplatePath}>自定义模板视图</a> 创建一个。
             </>
           )}
         </span>

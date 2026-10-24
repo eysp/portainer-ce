@@ -78,7 +78,7 @@ export function useNameValidation(
   return useMemo(
     () =>
       nameValidation({ environmentId, stacks: stacksQuery.data }).required(
-        'Name is required'
+        '名称是必填项'
       ),
     [environmentId, stacksQuery.data]
   );

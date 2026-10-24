@@ -61,7 +61,7 @@ export function ImagesDatatable({
 
   return (
     <Datatable
-      title="Images"
+      title="镜像"
       titleIcon={List}
       data-cy="docker-images-datatable"
       extendTableOptions={mergeOptions(
@@ -80,7 +80,7 @@ export function ImagesDatatable({
               to="docker.images.build"
               data-cy="image-buildImageButton"
             >
-              Build a new image
+              构建新镜像
             </AddButton>
           </Authorized>
         </div>

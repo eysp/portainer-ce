@@ -16,10 +16,10 @@ export function AdditionalFileField({ onChange, value, errors }: Props) {
   return (
     <InputList
       errors={errors}
-      label="Additional paths"
+      label="附加路径"
       onChange={onChange}
       value={value}
-      addLabel="Add file"
+      addLabel="添加文件"
       item={Item}
       itemBuilder={() => ''}
       data-cy="gitops-additional-files"
@@ -40,7 +40,7 @@ function Item({
   return (
     <div className="relative flex flex-col">
       <InputGroup size="small">
-        <InputGroup.Addon>path</InputGroup.Addon>
+        <InputGroup.Addon>路径</InputGroup.Addon>
         <InputGroup.Input
           required
           disabled={disabled}

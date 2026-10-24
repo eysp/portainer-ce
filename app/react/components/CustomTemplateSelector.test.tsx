@@ -82,12 +82,12 @@ test('should render select with templates', async () => {
 
 test('should display error message when provided', async () => {
   const queries = await renderComponent(
-    { error: 'This field is required' },
+    { error: '此字段是必填项' },
     mockCustomTemplates
   );
 
   await waitFor(() => {
-    expect(queries.getByText('This field is required')).toBeInTheDocument();
+    expect(queries.getByText('此字段是必填项')).toBeInTheDocument();
   });
 });
 

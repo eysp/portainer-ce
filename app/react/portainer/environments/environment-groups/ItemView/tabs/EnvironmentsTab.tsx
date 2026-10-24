@@ -51,8 +51,8 @@ export function EnvironmentsTab({
               <GroupForm
                 initialValues={initialValues}
                 onSubmit={handleSubmit}
-                submitLabel="Update"
-                submitLoadingLabel="Updating..."
+                submitLabel="更新"
+                submitLoadingLabel="正在更新..."
                 groupId={groupId}
               />
             )}

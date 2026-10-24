@@ -67,7 +67,7 @@ export function EditGitSettingsModal({ stack, onClose }: Props) {
     let repullImageAndRedeploy: boolean | undefined;
     if (values.redeployNow) {
       const result = await confirmStackUpdate(
-        'Any changes to this stack or application made locally in Portainer will be overridden, which may cause service interruption. Do you wish to continue?',
+        '在 Portainer 本地对此堆栈或应用所做的任何更改都将被覆盖，这可能会导致服务中断。您要继续吗？',
         stack.Type === StackType.DockerSwarm
       );
       if (!result) {
@@ -86,14 +86,14 @@ export function EditGitSettingsModal({ stack, onClose }: Props) {
         onSuccess({ redeployAttempted, redeployFailed, redeployError }) {
           if (redeployFailed) {
             notifyError(
-              'Failure',
+              '失败',
               redeployError,
-              'Stack settings saved but redeploy failed'
+              '堆栈设置已保存，但重新部署失败'
             );
           } else if (redeployAttempted) {
-            notifySuccess('Success', 'Stack deployed successfully');
+            notifySuccess('成功', '堆栈部署成功');
           } else {
-            notifySuccess('Success', 'Stack settings saved successfully');
+            notifySuccess('成功', '堆栈设置保存成功');
           }
           onClose();
         },

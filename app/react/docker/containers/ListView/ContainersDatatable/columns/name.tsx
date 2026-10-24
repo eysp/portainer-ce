@@ -1,17 +1,17 @@
 import { CellContext } from '@tanstack/react-table';
 import _ from 'lodash';
-import { useSref } from '@uirouter/react';
 
 import type { ContainerListViewModel } from '@/react/docker/containers/types';
 
 import { useTableSettings } from '@@/datatables/useTableSettings';
+import { Link } from '@@/Link';
 
 import { TableSettings } from '../types';
 
 import { columnHelper } from './helper';
 
 export const name = columnHelper.accessor((row) => row.Names[0], {
-  header: 'Name',
+  header: '名称',
   id: 'name',
   cell: NameCell,
 });
@@ -22,11 +22,6 @@ export function NameCell({
 }: CellContext<ContainerListViewModel, string>) {
   const name = getValue();
 
-  const linkProps = useSref('.container', {
-    id: container.Id,
-    nodeName: container.NodeName,
-  });
-
   const settings = useTableSettings<TableSettings>();
   const truncate = settings.truncateContainerName;
 
@@ -36,8 +31,13 @@ export function NameCell({
   }
 
   return (
-    <a href={linkProps.href} onClick={linkProps.onClick} title={name}>
+    <Link
+      to=".container"
+      params={{ id: container.Id, nodeName: container.NodeName }}
+      title={name}
+      data-cy={`container-name-link-${container.Id}`}
+    >
       {shortName}
-    </a>
+    </Link>
   );
 }

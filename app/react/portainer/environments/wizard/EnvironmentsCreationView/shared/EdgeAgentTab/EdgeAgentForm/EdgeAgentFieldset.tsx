@@ -58,7 +58,7 @@ export function EdgeAgentFieldset({
             onClick={() => setIsModalOpen(true)}
             data-cy="edge-agent-test-connectivity-button"
           >
-            Test connectivity
+            测试连通性
           </Button>
         </div>
       </div>

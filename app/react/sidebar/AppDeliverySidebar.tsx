@@ -5,16 +5,16 @@ import { SidebarSection } from './SidebarSection';
 
 export function AppDeliverySidebar() {
   return (
-    <SidebarSection title="App Delivery">
+    <SidebarSection title="应用交付">
       <SidebarItem
-        label="Workflows"
+        label="工作流"
         to="portainer.gitops.workflows"
         icon={GitBranch}
         data-cy="portainerSidebar-workflows"
       />
 
       <SidebarItem
-        label="Sources"
+        label="资源仓库"
         to="portainer.gitops.sources"
         icon={Database}
         data-cy="portainerSidebar-sources"

@@ -20,13 +20,13 @@ export function ConsoleSettings({
   onChange(value: ConsoleSetting): void;
 }) {
   return (
-    <FormControl label="Console" size="xsmall">
+    <FormControl label="控制台设置" size="xsmall">
       <Item
         value="both"
         onChange={handleChange}
         label={
           <>
-            Interactive & TTY <span className="small text-muted">(-i -t)</span>
+            交互式与伪终端 <span className="small text-muted">(-i -t)</span>
           </>
         }
         selected={value}
@@ -37,7 +37,7 @@ export function ConsoleSettings({
         onChange={handleChange}
         label={
           <>
-            Interactive <span className="small text-muted">(-i)</span>
+            交互式 <span className="small text-muted">(-i)</span>
           </>
         }
         selected={value}
@@ -48,7 +48,7 @@ export function ConsoleSettings({
         onChange={handleChange}
         label={
           <>
-            TTY <span className="small text-muted">(-t)</span>
+            伪终端 <span className="small text-muted">(-t)</span>
           </>
         }
         selected={value}
@@ -57,7 +57,7 @@ export function ConsoleSettings({
       <Item
         value="none"
         onChange={handleChange}
-        label={<>None</>}
+        label={<>无 (None)</>}
         selected={value}
         data-cy="container-console-none"
       />

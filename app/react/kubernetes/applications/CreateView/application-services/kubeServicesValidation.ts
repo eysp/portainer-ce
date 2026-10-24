@@ -87,8 +87,8 @@ export function kubeServicesValidation(
                 return duplicateServicePortCount <= 1;
               }
             ),
-          targetPort: nanNumberSchema('Container port number is required.')
-            .required('Container port number is required.')
+          targetPort: nanNumberSchema('容器端口号是必填项。')
+            .required('容器端口号是必填项。')
             .min(1, 'Container port number must be inside the range 1-65535.')
             .max(
               65535,

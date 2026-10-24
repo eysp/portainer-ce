@@ -21,7 +21,7 @@
                 <pr-icon icon="'chevron-down'" ng-if="state.showInitPassword" size="'lg'" class-name="'icon-primary'"></pr-icon>
                 <pr-icon icon="'chevron-right'" ng-if="!state.showInitPassword" size="'lg'" class-name="'icon-primary'"></pr-icon>
               </span>
-              <span class="form-section-title">New Portainer installation</span>
+              <span class="form-section-title">新安装 Portainer</span>
             </a>
           </div>
           <!-- !toggle -->
@@ -31,21 +31,21 @@
             <!-- note -->
             <div class="form-group">
               <div class="col-sm-12">
-                <span class="small text-muted"> Please create the initial administrator user. </span>
+                <span class="small text-muted"> 请创建初始管理员账户。 </span>
               </div>
             </div>
             <!-- !note -->
             <!-- username-input -->
             <div class="form-group">
-              <label for="username" class="col-sm-4 control-label text-left"> Username </label>
+              <label for="username" class="col-sm-4 control-label text-left"> 用户名 </label>
               <div class="col-sm-8">
-                <input type="text" class="form-control" id="username" ng-model="formValues.Username" placeholder="e.g. admin" data-cy="init-username" />
+                <input type="text" class="form-control" id="username" ng-model="formValues.Username" placeholder="例如 admin" data-cy="init-username" />
               </div>
             </div>
             <!-- !username-input -->
             <!-- new-password-input -->
             <div class="form-group">
-              <label for="password" class="col-sm-4 control-label text-left">Password</label>
+              <label for="password" class="col-sm-4 control-label text-left">密码</label>
               <div class="col-sm-8">
                 <input type="password" class="form-control" ng-model="formValues.Password" id="password" name="password" ng-minlength="requiredPasswordLength" auto-focus />
               </div>
@@ -53,7 +53,7 @@
             <!-- !new-password-input -->
             <!-- confirm-password-input -->
             <div class="form-group">
-              <label for="confirm_password" class="col-sm-4 control-label text-left">Confirm password</label>
+              <label for="confirm_password" class="col-sm-4 control-label text-left">确认密码</label>
               <div class="col-sm-8">
                 <div class="input-group">
                   <input type="password" class="form-control" ng-model="formValues.ConfirmPassword" id="confirm_password" />
@@ -68,8 +68,8 @@
             <!-- setup-token-input -->
             <div class="form-group" ng-if="requiresSetupToken">
               <label for="setup_token" class="col-sm-4 control-label text-left">
-                Setup token
-                <portainer-tooltip message="'Find this token in the Portainer server logs'"></portainer-tooltip>
+                设置令牌 (Setup token)
+                <portainer-tooltip message="'在 Portainer 服务端日志中可找到此令牌'"></portainer-tooltip>
               </label>
               <div class="col-sm-8">
                 <input type="text" class="form-control" ng-model="formValues.SetupToken" id="setup_token" data-cy="init-adminSetupToken" />
@@ -82,7 +82,7 @@
               <div class="col-sm-12 text-warning">
                 <p class="vertical-center">
                   <pr-icon icon="'alert-triangle'" mode="'warning'"></pr-icon>
-                  <span>The password must be at least {{ requiredPasswordLength }} characters long.</span>
+                  <span>密码长度至少需要 {{ requiredPasswordLength }} 个字符。</span>
                   <pr-icon mode="'success'" icon="'check'" ng-if="form.password.$valid && formValues.Password"></pr-icon>
                 </p>
               </div>
@@ -98,8 +98,8 @@
                   ng-click="createAdminUser()"
                   button-spinner="state.actionInProgress"
                 >
-                  <span ng-hide="state.actionInProgress">Create user</span>
-                  <span ng-show="state.actionInProgress">Creating user...</span>
+                  <span ng-hide="state.actionInProgress">创建用户</span>
+                  <span ng-show="state.actionInProgress">正在创建用户...</span>
                 </button>
               </div>
             </div>
@@ -120,7 +120,7 @@
                 ><pr-icon icon="'chevron-down'" ng-if="state.showRestorePortainer" size="'lg'" class-name="'icon-primary'"></pr-icon>
                 <pr-icon icon="'chevron-right'" ng-if="!state.showRestorePortainer" size="'lg'" class-name="'icon-primary'"></pr-icon
               ></span>
-              <span class="form-section-title">Restore Portainer from backup</span>
+              <span class="form-section-title">从备份恢复 Portainer</span>
             </a>
           </div>
           <!-- !toggle -->
@@ -131,7 +131,7 @@
             <div class="form-group">
               <div class="col-sm-9">
                 <span class="small text-muted">
-                  This will restore the Portainer metadata which contains information about the environments, stacks and applications, as well as the configured users.
+                  这将恢复包含环境、堆栈、应用以及已配置用户信息的 Portainer 元数据。
                 </span>
               </div>
             </div>
@@ -143,7 +143,7 @@
               <!-- note -->
               <div class="form-group">
                 <div class="col-sm-12">
-                  <span class="small text-muted"> You can upload a backup file from your computer. </span>
+                  <span class="small text-muted"> 您可以从本地计算机上传备份文件。 </span>
                 </div>
               </div>
               <!-- !note -->
@@ -158,7 +158,7 @@
                     ng-model="formValues.BackupFile"
                     auto-focus
                     data-cy="init-selectBackupFileButton"
-                    >Select file</button
+                    >选择文件</button
                   >
                   <span class="space-left vertical-center">
                     {{ formValues.BackupFile.name }}
@@ -169,9 +169,9 @@
               <!-- password-input -->
               <div class="form-group">
                 <label for="password" class="col-sm-3 control-label text-left">
-                  Password
+                  密码
                   <portainer-tooltip
-                    message="'If the backup is password protected, provide the password in order to extract the backup file, otherwise this field can be left empty.'"
+                    message="'若备份受密码保护，请输入密码以解压备份文件，否则可留空。'"
                   ></portainer-tooltip>
                 </label>
                 <div class="col-sm-4">
@@ -214,7 +214,7 @@
                     type="text"
                     data-cy="init-s3RegionInput"
                     class="form-control"
-                    placeholder="default region is us-east-1 if left empty"
+                    placeholder="留空时默认区域为 us-east-1"
                     id="backup-s3-region"
                     name="backup-s3-region"
                     ng-model="formValues.Region"
@@ -224,7 +224,7 @@
               <!-- !Region -->
               <!-- Bucket name -->
               <div class="form-group">
-                <label for="bucket_name" class="col-sm-3 control-label text-left">Bucket name</label>
+                <label for="bucket_name" class="col-sm-3 control-label text-left">Bucket 名称</label>
                 <div class="col-sm-9">
                   <input type="text" class="form-control" id="bucket_name" name="bucket_name" ng-model="formValues.BucketName" required data-cy="init-bucketNameInput" />
                 </div>
@@ -233,8 +233,8 @@
               <!-- S3 Compatible Host -->
               <div class="form-group">
                 <label for="s3-compatible-host" class="col-sm-3 control-label text-left">
-                  S3 Compatible Host
-                  <portainer-tooltip message="'Hostname of a S3 service'"></portainer-tooltip>
+                  S3 兼容主机
+                  <portainer-tooltip message="'S3 服务的主机名'"></portainer-tooltip>
                 </label>
                 <div class="col-sm-9">
                   <input
@@ -244,14 +244,14 @@
                     id="s3-compatible-host"
                     name="s3-compatible-host"
                     ng-model="formValues.S3CompatibleHost"
-                    placeholder="leave empty for AWS S3"
+                    placeholder="使用 AWS S3 时请留空"
                   />
                 </div>
               </div>
               <!-- !S3 Compatible Host -->
               <!-- Filename -->
               <div class="form-group">
-                <label for="backup-s3-filename" class="col-sm-3 control-label text-left">Filename</label>
+                <label for="backup-s3-filename" class="col-sm-3 control-label text-left">文件名</label>
                 <div class="col-sm-9">
                   <input
                     type="text"
@@ -268,9 +268,9 @@
               <!-- password-input -->
               <div class="form-group">
                 <label for="password" class="col-sm-3 control-label text-left">
-                  Password
+                  密码
                   <portainer-tooltip
-                    message="'If the backup is password protected, provide the password in order to extract the backup file, otherwise this field can be left empty.'"
+                    message="'若备份受密码保护，请输入密码以解压备份文件，否则可留空。'"
                   ></portainer-tooltip>
                 </label>
                 <div class="col-sm-4">
@@ -282,18 +282,18 @@
             <!-- note -->
             <div class="form-group">
               <div class="col-sm-12">
-                <span class="small text-muted"> You are about to restore Portainer from this backup. </span>
+                <span class="small text-muted"> 您即将从该备份恢复 Portainer。 </span>
               </div>
               <div class="col-sm-12">
-                <span class="small text-muted"> After restoring has completed, please log in as a user that was known by the Portainer that was restored. </span>
+                <span class="small text-muted"> 恢复完成后，请使用原备份中已配置的用户账户登录。 </span>
               </div>
             </div>
             <!-- !note -->
             <!-- setup-token-input -->
             <div class="form-group" ng-if="requiresSetupToken">
               <label for="restore_setup_token" class="col-sm-3 control-label text-left">
-                Setup token
-                <portainer-tooltip message="'Find this token in the Portainer server logs (docker logs &lt;container&gt;).'"></portainer-tooltip>
+                设置令牌 (Setup token)
+                <portainer-tooltip message="'在 Portainer 服务端日志中可找到此令牌 (docker logs &lt;container&gt;)。'"></portainer-tooltip>
               </label>
               <div class="col-sm-4">
                 <input type="text" class="form-control" ng-model="formValues.SetupToken" id="restore_setup_token" data-cy="init-restoreSetupToken" />
@@ -312,8 +312,8 @@
                   button-spinner="state.backupInProgress"
                   data-cy="init-restorePortainerButton"
                 >
-                  <span ng-hide="state.backupInProgress">Restore Portainer</span>
-                  <span ng-show="state.backupInProgress">Restoring Portainer...</span>
+                  <span ng-hide="state.backupInProgress">恢复 Portainer</span>
+                  <span ng-show="state.backupInProgress">正在恢复 Portainer...</span>
                 </button>
               </div>
             </div>

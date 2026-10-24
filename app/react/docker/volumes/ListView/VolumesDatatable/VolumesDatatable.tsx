@@ -54,7 +54,7 @@ export function VolumesDatatable({
 
   return (
     <Datatable
-      title="Volumes"
+      title="存储卷"
       titleIcon={Database}
       columns={columns}
       dataset={dataset || []}

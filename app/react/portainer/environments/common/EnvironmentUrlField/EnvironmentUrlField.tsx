@@ -18,21 +18,21 @@ export function EnvironmentUrlField({
 
   return (
     <FormControl
-      label={isAgent ? 'Environment address' : 'Environment URL'}
+      label={isAgent ? '环境地址' : '环境 URL'}
       errors={meta.error}
       required={optional}
       inputId="environment-url-field"
       tooltip={
         isAgent
-          ? 'The address for the Portainer agent in the format <HOST>:<PORT> or <IP>:<PORT>'
-          : 'URL or IP address of a Docker host. The Docker API must be exposed over a TCP port. Please refer to the Docker documentation to configure it.'
+          ? 'Portainer Agent 的地址，格式为 <HOST>:<PORT> 或 <IP>:<PORT>'
+          : 'Docker 主机的 URL 或 IP 地址。Docker API 必须通过 TCP 端口暴露。请参考 Docker 官方文档进行配置。'
       }
     >
       <Field
         id="environment-url-field"
         name="environmentUrl"
         as={Input}
-        placeholder={`e.g. 10.0.0.10:${placeholderPort} or tasks.portainer_agent:${placeholderPort}`}
+        placeholder={`例如 10.0.0.10:${placeholderPort} 或 tasks.portainer_agent:${placeholderPort}`}
         data-cy="endpointCreate-endpointUrlAgentInput"
         disabled={disabled}
       />

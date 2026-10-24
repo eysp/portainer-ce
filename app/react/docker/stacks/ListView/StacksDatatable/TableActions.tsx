@@ -1,4 +1,4 @@
-import { Authorized } from '@/react/hooks/useUser';
+﻿import { Authorized } from '@/react/hooks/useUser';
 
 import { AddButton } from '@@/buttons';
 import { DeleteButton } from '@@/buttons/DeleteButton';
@@ -18,14 +18,14 @@ export function TableActions({
         <DeleteButton
           disabled={selectedItems.length === 0}
           onConfirmed={() => onRemove(selectedItems)}
-          confirmMessage="Do you want to remove the selected stack(s)? Associated services will be removed as well."
+          confirmMessage="确认要删除选中的堆栈吗？关联的服务也将一并删除。"
           data-cy="stack-removeStackButton"
         />
       </Authorized>
 
       <Authorized authorizations="PortainerStackCreate">
         <AddButton data-cy="stack-addStackButton" to=".newstack">
-          Add stack
+          添加堆栈
         </AddButton>
       </Authorized>
     </div>

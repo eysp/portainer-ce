@@ -54,7 +54,7 @@ export function transformAutoUpdateViewModel(
   }
 
   if (!webhookId) {
-    throw new Error('Webhook ID is required');
+    throw new Error('Webhook ID 是必填项');
   }
 
   return {

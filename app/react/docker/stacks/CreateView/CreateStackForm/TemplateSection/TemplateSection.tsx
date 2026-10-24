@@ -101,7 +101,7 @@ export function TemplateSection({
 
   return (
     <>
-      <FormSection title="Template">
+      <FormSection title="模板">
         <CustomTemplateSelector
           value={values.template.selectedId}
           onChange={handleTemplateChange}
@@ -109,7 +109,7 @@ export function TemplateSection({
         />
 
         {!!values.template.selectedId && templateFileQuery.isLoading && (
-          <InlineLoader>Loading template...</InlineLoader>
+          <InlineLoader>正在加载模板...</InlineLoader>
         )}
       </FormSection>
 
@@ -130,20 +130,19 @@ export function TemplateSection({
             <TextTip color="orange">
               {isAdminOrEditor ? (
                 <>
-                  Custom template could not be loaded, please{' '}
+                  无法加载自定义模板，请{' '}
                   <Link
                     to="kubernetes.templates.custom.edit"
                     params={{ id: selectedTemplate.Id }}
                     data-cy="template-error-edit-link"
                   >
-                    click here
+                    点击此处
                   </Link>{' '}
-                  for configuration.
+                  进行配置。
                 </>
               ) : (
                 <>
-                  Custom template could not be loaded, please contact your
-                  administrator.
+                  无法加载自定义模板，请联系您的管理员。
                 </>
               )}
             </TextTip>

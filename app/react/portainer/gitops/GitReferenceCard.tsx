@@ -109,7 +109,7 @@ export function GitReferenceCard({
     <Card.Container variant="filled">
       <Card.Body>
         <div className="form-section-title !mt-0 flex items-center gap-2">
-          <Icon icon={GitMerge} /> Managed by Git
+          <Icon icon={GitMerge} /> 由 Git 管理
         </div>
         {hasError && (
           <>
@@ -149,7 +149,7 @@ export function GitReferenceCard({
           data-cy="git-reference-card-info"
         >
           <LineItem
-            label="Repo"
+            label="仓库"
             value={url || 'missing'}
             title={url || 'missing'}
             isLoading={isRefLoading}
@@ -158,7 +158,7 @@ export function GitReferenceCard({
             data-cy="git-url"
           />
           <LineItem
-            label="Ref"
+            label="分支/引用"
             value={reference || 'missing'}
             title={reference || 'missing'}
             isLoading={isRefLoading}
@@ -168,7 +168,7 @@ export function GitReferenceCard({
           />
           {enableFileCheck && (
             <LineItem
-              label="File"
+              label="文件"
               value={configFilePath || 'missing'}
               title={configFilePath || 'missing'}
               isLoading={isFileLoading}
@@ -181,7 +181,7 @@ export function GitReferenceCard({
           {!!sourceIdToShow && <SourceLineItem sourceId={sourceIdToShow} />}
           {!!commitId && (
             <LineItem
-              label="Commit"
+              label="提交"
               value={
                 <GitCommitLink baseURL={url || ''} commitHash={commitId} />
               }
@@ -231,7 +231,7 @@ function SourceLineItem({ sourceId }: { sourceId: number }) {
 
   return (
     <LineItem
-      label="Source"
+      label="凭据来源"
       value={
         sourceName ? (
           <Link
@@ -266,7 +266,7 @@ function AutoUpdateIntervalLineItem({ sourceId }: { sourceId: number }) {
 
   return (
     <LineItem
-      label="Polling"
+      label="轮询间隔"
       value={pollingInterval}
       title="polling-interval"
       data-cy="git-polling-interval"
@@ -292,7 +292,7 @@ function DivergenceAlert({
   return (
     <Alert color="info" className="mt-4">
       <div className="flex flex-col gap-1 text-sm">
-        <strong>Settings changed since last deploy</strong>
+        <strong>自上次部署以来设置已更改</strong>
         <div>
           Next: {urlChanged && <code>{gitConfig.URL ?? ''}</code>}{' '}
           {refChanged && <code>{gitConfig.ReferenceName ?? ''}</code>} Config:{' '}

@@ -11,34 +11,49 @@ import { multiple } from '@@/datatables/filter-types';
 
 import { columnHelper } from './helper';
 
-export const state = columnHelper.accessor('Status', {
-  header: 'State',
+const statusTranslation: Record<string, string> = {
+  [ContainerStatus.Paused]: '已暂停',
+  [ContainerStatus.Stopped]: '已停止',
+  [ContainerStatus.Created]: '已创建',
+  [ContainerStatus.Healthy]: '健康',
+  [ContainerStatus.Unhealthy]: '不健康',
+  [ContainerStatus.Starting]: '启动中',
+  [ContainerStatus.Running]: '运行中',
+  [ContainerStatus.Dead]: '死亡',
+  [ContainerStatus.Exited]: '已退出',
+  [ContainerStatus.Restarting]: '重启中',
+  [ContainerStatus.Removing]: '删除中',
+};
+
+export const state = columnHelper.accessor((row) => statusTranslation[row.Status] || row.Status, {
+  header: '状态',
   id: 'state',
   cell: StatusCell,
   enableColumnFilter: true,
   filterFn: multiple,
   meta: {
-    filter: filterHOC('Filter by state'),
+    filter: filterHOC('按状态过滤'),
   },
 });
 
 function StatusCell({
   getValue,
   row: { original: container },
-}: CellContext<ContainerListViewModel, ContainerStatus>) {
-  const status = getValue();
+}: CellContext<ContainerListViewModel, string>) {
+  const transformedStatusStr = getValue();
+  const originalStatus = container.Status;
 
   const hasHealthCheck = [
     ContainerStatus.Starting,
     ContainerStatus.Healthy,
     ContainerStatus.Unhealthy,
-  ].includes(status);
+  ].includes(originalStatus);
 
   const statusClassName = getClassName();
 
-  let transformedStatus: ContainerStatus | string = status;
-  if (transformedStatus === ContainerStatus.Exited) {
-    transformedStatus = `${transformedStatus} - code ${extractExitCode(
+  let finalStatus = transformedStatusStr;
+  if (originalStatus === ContainerStatus.Exited) {
+    finalStatus = `已退出 - 代码 ${extractExitCode(
       container.StatusText
     )}`;
   }
@@ -48,14 +63,14 @@ function StatusCell({
       className={clsx('label', `label-${statusClassName}`, {
         interactive: hasHealthCheck,
       })}
-      title={hasHealthCheck ? 'This container has a health check' : ''}
+      title={hasHealthCheck ? '该容器配置了健康检查' : ''}
     >
-      {transformedStatus}
+      {finalStatus}
     </span>
   );
 
   function getClassName() {
-    switch (status) {
+    switch (originalStatus) {
       case ContainerStatus.Paused:
       case ContainerStatus.Starting:
       case ContainerStatus.Unhealthy:

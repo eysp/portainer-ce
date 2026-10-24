@@ -54,21 +54,21 @@ export function ListView() {
   return (
     <>
       <PageHeader
-        title="Update & Rollback"
-        breadcrumbs="Update and rollback"
+        title="更新与回滚"
+        breadcrumbs="更新与回滚"
         reload
       />
 
       <BetaAlert
         className="mb-2 ml-[15px]"
-        message="Beta feature - currently limited to standalone Linux edge devices."
+        message="Beta 阶段功能 - 目前仅限于独立 Linux 边缘设备。"
       />
 
       <Datatable
         dataset={items}
         columns={columns}
         settingsManager={tableState}
-        title="Update & rollback"
+        title="更新与回滚"
         titleIcon={Clock}
         isLoading={listQuery.isLoading}
         renderTableActions={(selectedRows) => (
@@ -93,10 +93,10 @@ function TableActions({
         onConfirmed={() => handleRemove()}
         disabled={selectedRows.length === 0}
         data-cy="remove-update-schedules-button"
-        confirmMessage="Are you sure you want to remove these schedules?"
+        confirmMessage="确定要移除这些计划吗？"
       />
       <AddButton to=".create" data-cy="add-update-schedules-button">
-        Add update & rollback schedule
+        添加更新与回滚计划
       </AddButton>
     </>
   );
@@ -104,7 +104,7 @@ function TableActions({
   async function handleRemove() {
     removeMutation.mutate(selectedRows, {
       onSuccess: () => {
-        notifySuccess('Success', 'Schedules successfully removed');
+        notifySuccess('Success', '计划移除成功');
       },
     });
   }

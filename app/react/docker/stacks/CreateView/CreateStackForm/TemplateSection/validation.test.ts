@@ -29,7 +29,7 @@ describe('Template validation', () => {
     };
 
     await expect(schema.validate(invalidData)).rejects.toThrow(
-      'Template is required'
+      '模板是必填项'
     );
   });
 

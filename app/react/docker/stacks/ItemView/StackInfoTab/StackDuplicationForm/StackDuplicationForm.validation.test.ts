@@ -17,7 +17,7 @@ describe('getDuplicateValidationSchema', () => {
       {
         name: '',
         environmentId: 2,
-        error: 'Stack name is required',
+        error: '堆栈名称是必填项',
         scenario: 'should fail with empty name',
       },
       {
@@ -153,13 +153,13 @@ describe('getMigrateValidationSchema', () => {
       {
         name: '',
         environmentId: currentEnvironmentId,
-        error: 'Stack name is required when renaming',
+        error: '重命名时堆栈名称是必填项',
         scenario: 'should fail when renaming with empty name',
       },
       {
         name: undefined,
         environmentId: currentEnvironmentId,
-        error: 'Stack name is required when renaming',
+        error: '重命名时堆栈名称是必填项',
         scenario: 'should fail when renaming with undefined name',
       },
       {

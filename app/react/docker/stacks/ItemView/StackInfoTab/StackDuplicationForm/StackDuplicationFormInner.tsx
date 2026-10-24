@@ -51,15 +51,15 @@ export function StackDuplicationFormInner({
   return (
     <Form>
       <TextTip color="blue">
-        <p>This feature allows you to duplicate or migrate this stack. </p>
-        <p>To rename the stack, choose the same environment when migrating.</p>
+        <p>此功能允许您复制或迁移此堆栈。</p>
+        <p>如需重命名堆栈，请在迁移时选择相同的环境。</p>
       </TextTip>
 
       <div className="form-group">
         <Field
           as={Input}
           type="text"
-          placeholder="Stack name (optional for migration)"
+          placeholder="堆栈名称（迁移时可选）"
           aria-label="Stack name"
           name="newName"
           data-cy="stack-duplicate-name-input"
@@ -86,15 +86,15 @@ export function StackDuplicationFormInner({
           isLoading={isMigrateInProgress}
           loadingText={
             values.environmentId === currentEnvironmentId
-              ? 'Renaming in progress...'
-              : 'Migration in progress...'
+              ? '重命名中...'
+              : '迁移中...'
           }
           onClick={() => handleAction('migrate')}
           icon={ArrowRight}
           data-cy="stack-migrate-button"
           className="!ml-0"
         >
-          {values.environmentId === currentEnvironmentId ? 'Rename' : 'Migrate'}
+          {values.environmentId === currentEnvironmentId ? '重命名' : '迁移'}
         </LoadingButton>
 
         <LoadingButton
@@ -103,7 +103,7 @@ export function StackDuplicationFormInner({
           size="small"
           disabled={isDuplicateDisabled}
           isLoading={isDuplicateInProgress}
-          loadingText="Duplication in progress..."
+          loadingText="复制中..."
           onClick={() => handleAction('duplicate')}
           icon={Copy}
           data-cy="stack-duplicate-button"

@@ -1,4 +1,4 @@
-import {
+﻿import {
   ArrowRightIcon,
   PlayIcon,
   PlusIcon,
@@ -69,7 +69,7 @@ export function StackActions({
               disabled={isMutating}
               data-cy="stack-stop-btn"
             >
-              Stop this stack
+              停止此堆栈
             </Button>
           )}
           {status === StackStatus.Inactive && (
@@ -81,7 +81,7 @@ export function StackActions({
               disabled={isMutating}
               onClick={() => handleStart()}
             >
-              Start this stack
+              启动此堆栈
             </Button>
           )}
         </Authorized>
@@ -96,7 +96,7 @@ export function StackActions({
           disabled={isMutating || isDeploying}
           data-cy="stack-delete-btn"
         >
-          Delete this stack
+          删除此堆栈
         </Button>
       </Authorized>
 
@@ -115,7 +115,7 @@ export function StackActions({
             },
           }}
         >
-          Create template from stack
+          从堆栈创建模板
         </Button>
       )}
 
@@ -134,9 +134,9 @@ export function StackActions({
                 disabled={isMutating}
                 data-cy="stack-detach-git-btn"
                 isLoading={detachFromGitMutation.isLoading}
-                loadingText="Detachment in progress..."
+                loadingText="分离中..."
               >
-                Detach from Git
+                从 Git 分离
               </LoadingButton>
             </Authorized>
           )}
@@ -150,11 +150,11 @@ export function StackActions({
       { id: stackId, environmentId },
       {
         onError(err) {
-          notifyError('Failure', err as Error, 'Unable to start stack');
+          notifyError('失败', err as Error, '无法启动堆栈');
           router.stateService.reload();
         },
         onSuccess() {
-          notifySuccess('Success', `Stack ${stack.Name} started successfully`);
+          notifySuccess('成功', `堆栈 ${stack.Name} 启动成功`);
           router.stateService.reload();
         },
       }
@@ -163,10 +163,10 @@ export function StackActions({
 
   async function handleStop() {
     const confirmed = await confirm({
-      title: 'Are you sure?',
+      title: '您确定吗？',
       modalType: ModalType.Warn,
-      message: 'Are you sure you want to stop this stack?',
-      confirmButton: buildConfirmButton('Stop', 'danger'),
+      message: '您确定要停止此堆栈吗？',
+      confirmButton: buildConfirmButton('停止', 'danger'),
     });
 
     if (!confirmed) {
@@ -177,10 +177,10 @@ export function StackActions({
       { id: stackId, environmentId },
       {
         onError(err) {
-          notifyError('Failure', err as Error, 'Unable to stop stack');
+          notifyError('失败', err as Error, '无法停止堆栈');
         },
         onSuccess() {
-          notifySuccess('Success', `Stack ${stack.Name} stopped successfully`);
+          notifySuccess('成功', `堆栈 ${stack.Name} 停止成功`);
           router.stateService.reload();
         },
       }
@@ -189,7 +189,7 @@ export function StackActions({
 
   async function handleDelete() {
     const confirmed = await confirmDelete(
-      'Do you want to remove the stack? Associated services will be removed as well'
+      '您想删除此堆栈吗？关联的服务也将被删除'
     );
     if (!confirmed) {
       return;
@@ -210,7 +210,7 @@ export function StackActions({
           );
         },
         onSuccess() {
-          notifySuccess('Stack successfully removed', stack.Name);
+          notifySuccess('堆栈删除成功', stack.Name);
           router.stateService.go('^');
         },
       }
@@ -220,9 +220,9 @@ export function StackActions({
   async function handleDetachFromGit() {
     const confirmed = await confirm({
       modalType: ModalType.Warn,
-      title: 'Are you sure?',
-      message: 'Do you want to detach the stack from Git?',
-      confirmButton: buildConfirmButton('Detach', 'danger'),
+      title: '您确定吗？',
+      message: '您想将此堆栈与 Git 分离吗？',
+      confirmButton: buildConfirmButton('分离', 'danger'),
     });
 
     if (!confirmed) {

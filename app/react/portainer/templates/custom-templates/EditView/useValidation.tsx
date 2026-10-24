@@ -43,7 +43,7 @@ export function useValidation({
             StackType.Kubernetes,
           ])
           .default(StackType.DockerCompose),
-        FileContent: string().required('Template is required.'),
+        FileContent: string().required('模板是必填项。'),
 
         Git: isGit ? buildGitValidationSchema(deployMethod) : mixed(),
         Variables: variablesValidation(),

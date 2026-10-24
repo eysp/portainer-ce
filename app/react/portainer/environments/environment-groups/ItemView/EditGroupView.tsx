@@ -28,20 +28,20 @@ export function EditGroupView() {
     { size: true }
   );
   const group = groupQuery.data;
-  const groupName = group?.Name ?? 'Environment group';
+  const groupName = group?.Name ?? '环境分组';
 
   async function handleDeleteGroup() {
     const confirmed = await confirm({
-      title: 'Delete Environment Group',
+      title: '删除环境分组',
       modalType: ModalType.Destructive,
-      message: `Are you sure you want to delete the environment group "${groupName}"? This action cannot be undone.`,
-      confirmButton: buildConfirmButton('Delete', 'danger'),
+      message: `确定要删除环境分组 "${groupName}" 吗？此操作无法撤销。`,
+      confirmButton: buildConfirmButton('删除', 'danger'),
     });
 
     if (confirmed) {
       deleteMutation.mutate(groupId, {
         onSuccess() {
-          notifySuccess('Success', 'Environment group deleted');
+          notifySuccess('Success', '环境分组删除成功');
           router.stateService.go('portainer.groups');
         },
       });
@@ -51,7 +51,7 @@ export function EditGroupView() {
   const tabs: Array<Tab> = useMemo(
     () => [
       {
-        name: 'Environments',
+        name: '环境',
         icon: Box,
         widget: (
           <EnvironmentsTab
@@ -62,7 +62,7 @@ export function EditGroupView() {
         selectedTabParam: 'environments',
       },
       {
-        name: 'Access',
+        name: '访问',
         icon: UsersRound,
         widget: <AccessTab />,
         selectedTabParam: 'access',
@@ -76,7 +76,7 @@ export function EditGroupView() {
   return (
     <>
       <PageHeader
-        breadcrumbs={[{ label: 'Groups', link: 'portainer.groups' }, groupName]}
+        breadcrumbs={[{ label: '分组', link: 'portainer.groups' }, groupName]}
       />
       <div className="mx-4 space-y-4">
         <GroupHeader

@@ -21,9 +21,9 @@ export function StatusRow({
         mode={getIconColor(container.State)}
         className="lucide mr-1"
       />
-      {getStateText(container.State)} for {activityTime}
+      {getStateText(container.State)}（持续 {activityTime}）
       {!isRunning && !isCreated && (
-        <span> with exit code {container.State?.ExitCode}</span>
+        <span>（退出代码 {container.State?.ExitCode}）</span>
       )}
     </div>
   );
@@ -53,26 +53,26 @@ function getStateText(state: ContainerDetailsViewModel['State']): string {
   }
 
   if (state.Dead) {
-    return 'Dead';
+    return '已失效 (Dead)';
   }
 
   if ('Ghost' in state && state.Ghost && state.Running) {
-    return 'Ghost';
+    return '僵尸 (Ghost)';
   }
 
   if (state.Running && state.Paused) {
-    return 'Running (Paused)';
+    return '运行中 (已暂停)';
   }
 
   if (state.Running) {
-    return 'Running';
+    return '运行中';
   }
 
   if (state.Status === 'created') {
-    return 'Created';
+    return '已创建';
   }
 
-  return 'Stopped';
+  return '已停止';
 }
 
 function calculateActivityTime(container: ContainerDetailsViewModel): string {

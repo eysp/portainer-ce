@@ -21,8 +21,8 @@ const validationSchema = yup.object({
   name: yup
     .string()
     .trim()
-    .required('Container name is required')
-    .min(1, 'Container name cannot be empty'),
+    .required('容器名称为必填项')
+    .min(1, '容器名称不能为空'),
 });
 
 export function EditNameForm({
@@ -79,8 +79,8 @@ export function EditNameForm({
             onClick={() => onCancel()}
             type="button"
             data-cy="container-cancel-rename-button"
-            title="Cancel"
-            aria-label="Cancel Container name edit"
+            title="取消"
+            aria-label="取消容器名称修改"
           >
             <Icon icon={X} className="lucide" />
           </Button>
@@ -91,8 +91,8 @@ export function EditNameForm({
             type="submit"
             data-cy="container-confirm-rename-button"
             disabled={isSubmitting}
-            title="Rename"
-            aria-label="Rename container"
+            title="重命名"
+            aria-label="重命名容器"
           >
             <Icon icon={Check} className="lucide" />
           </Button>
@@ -117,8 +117,8 @@ export function EditNameForm({
       {
         onSuccess(_, variables) {
           notifySuccess(
-            'Success',
-            `Container successfully renamed to ${variables.name}`
+            '成功',
+            `容器已成功重命名为 ${variables.name}`
           );
           onSuccess();
         },

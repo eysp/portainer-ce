@@ -78,25 +78,25 @@ export function StackEditorTabInner({
         {stackType === StackType.DockerCompose &&
           composeSyntaxMaxVersion === 2 && (
             <span className="col-sm-12 text-muted small">
-              This stack will be deployed using the equivalent of{' '}
-              <code>docker compose</code>. Only Compose file format version{' '}
-              <b>2</b> is supported at the moment.
+              此堆栈将使用相当于{' '}
+              <code>docker compose</code>. 进行部署。目前仅支持 Compose 文件格式版本{' '}
+              <b>2</b> 。
             </span>
           )}
         {stackType === StackType.DockerCompose &&
           composeSyntaxMaxVersion > 2 && (
             <span className="col-sm-12 text-muted small">
-              This stack will be deployed using <code>docker compose</code>.
+              此堆栈将使用 <code>docker compose</code> 进行部署。
             </span>
           )}
         <span className="col-sm-12 text-muted small">
-          You can get more information about Compose file format in the{' '}
+          有关 Compose 文件格式的更多信息，请参阅{' '}
           <a
             href="https://docs.docker.com/reference/compose-file/"
             target="_blank"
             rel="noreferrer"
           >
-            official documentation
+            官方文档
           </a>
           .
         </span>
@@ -111,7 +111,7 @@ export function StackEditorTabInner({
         <div className="col-sm-12">
           <CodeEditor
             id="stack-editor"
-            textTip="Define or paste the content of your docker compose file here"
+            textTip="在此处定义或粘贴 docker compose 文件的内容"
             type="yaml"
             onChange={(value) => setFieldValue('stackFileContent', value)}
             value={values.stackFileContent}
@@ -152,8 +152,8 @@ export function StackEditorTabInner({
         <FormActions
           isValid={isValid && !isDeployDisabled}
           isLoading={isSubmitting}
-          loadingText="Deployment in progress..."
-          submitLabel="Update the stack"
+          loadingText="部署中..."
+          submitLabel="更新堆栈"
           data-cy="stack-deploy-button"
         />
       </Authorized>

@@ -18,8 +18,8 @@ export function ListView() {
   return (
     <>
       <PageHeader
-        title="Environments"
-        breadcrumbs="Environment management"
+        title="环境列表"
+        breadcrumbs="环境管理"
         reload
       />
 
@@ -29,7 +29,7 @@ export function ListView() {
 
   async function handleRemove(environmentsToDelete: Array<Environment>) {
     const confirmed = await confirmDelete(
-      'This action will remove all configurations associated to your environment(s). Continue?'
+      '此操作将删除与所选环境关联的所有配置。是否继续？'
     );
 
     if (!confirmed) {
@@ -51,7 +51,7 @@ export function ListView() {
       {
         onSuccess() {
           notifySuccess(
-            'Environments successfully removed',
+            '环境已成功删除',
             environmentsToDelete.map((e) => e.Name).join(', ')
           );
         },

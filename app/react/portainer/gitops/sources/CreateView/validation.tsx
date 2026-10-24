@@ -11,7 +11,7 @@ import { FormValues, FormValueTypes } from './type';
 
 export function validationSchema(): SchemaOf<FormValues> {
   return object({
-    name: string().required('Name is required.'),
+    name: string().required('名称是必填项。'),
     type: mixed<FormValues['type']>()
       .oneOf([...FormValueTypes])
       .required()
@@ -35,15 +35,15 @@ function validateGit(): SchemaOf<FormValues['git']> {
       authEnabled: bool().required().default(false),
       username: string().when('authEnabled', {
         is: true,
-        then: string().required('Username is required'),
+        then: string().required('用户名是必填项'),
       }),
       password: string().when('authEnabled', {
         is: true,
-        then: string().required('Password is required'),
+        then: string().required('密码是必填项'),
       }),
     }),
     url: string()
-      .required('Repository URL is required.')
+      .required('存储库 URL 是必填项。')
       .test(
         'valid repository URL',
         'The repository URL must be a valid URL (localhost cannot be used)',
