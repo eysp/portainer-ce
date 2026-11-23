@@ -84,7 +84,7 @@ export function getBaseValidationSchema() {
 
 export function getDuplicateValidationSchema() {
   return object({
-    name: baseNameValidation.required('Stack name is required'),
+    name: baseNameValidation.required('堆栈名称是必填项'),
     environmentId: baseEnvValidation,
   });
 }
@@ -97,7 +97,7 @@ export function getMigrateValidationSchema(
     name: baseNameValidation
       .test(
         'required-for-rename',
-        'Stack name is required when renaming',
+        '重命名时堆栈名称是必填项',
         function validate(value) {
           const { environmentId } = this.parent;
           // If renaming (same environment), name is required

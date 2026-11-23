@@ -36,13 +36,13 @@ export default class RegistryController {
     const type = this.registry.Type;
     switch (type) {
       case RegistryTypes.ECR:
-        return 'AWS Secret Access Key';
+        return 'AWS 秘密访问密钥 (Secret Access Key)';
       case RegistryTypes.DOCKERHUB:
-        return 'Access token';
+        return '访问令牌 (Access token)';
       case RegistryTypes.GITLAB:
-        return 'Personal Access Token';
+        return '个人访问令牌 (Personal Access Token)';
       default:
-        return 'Password';
+        return '密码';
     }
   }
 
@@ -54,10 +54,10 @@ export default class RegistryController {
         registry.Password = this.Password;
 
         await this.RegistryService.updateRegistry(registry);
-        this.Notifications.success('Success', 'Registry successfully updated');
+        this.Notifications.success('成功', '镜像仓库更新成功');
         this.$state.go('portainer.registries');
       } catch (err) {
-        this.Notifications.error('Failure', err, 'Unable to update registry');
+        this.Notifications.error('失败', err, '无法更新镜像仓库');
       } finally {
         this.state.actionInProgress = false;
       }
@@ -85,7 +85,7 @@ export default class RegistryController {
       case RegistryTypes.AZURE:
         return 'Azure';
       case RegistryTypes.CUSTOM:
-        return 'Custom';
+        return '自定义 (Custom)';
       case RegistryTypes.GITLAB:
         return 'Gitlab';
       case RegistryTypes.PROGET:
@@ -111,7 +111,7 @@ export default class RegistryController {
       _.pullAllBy(registries, [registry], 'Id');
       this.registriesNames = _.map(registries, 'Name');
     } catch (err) {
-      this.Notifications.error('Failure', err, 'Unable to retrieve registry details');
+      this.Notifications.error('失败', err, '无法获取镜像仓库详情');
     } finally {
       this.state.loading = false;
     }

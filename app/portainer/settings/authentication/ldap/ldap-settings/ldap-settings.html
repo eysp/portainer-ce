@@ -2,7 +2,7 @@
   <auto-user-provision-toggle
     value="$ctrl.settings.AutoCreateUsers"
     on-change="($ctrl.onAutoUserProvisionChange)"
-    description="'With automatic user provisioning enabled, Portainer will create user(s) automatically with standard user role and assign them to team(s) which matches to LDAP group name(s). If disabled, users must be created in Portainer beforehand.'"
+    description="'启用自动创建用户后，Portainer 将使用标准用户角色自动创建用户，并将其分配到与 LDAP 组名称匹配的团队。如果禁用，则必须事先在 Portainer 中创建用户。'"
   ></auto-user-provision-toggle>
 
   <box-selector
@@ -12,7 +12,7 @@
     options="$ctrl.boxSelectorOptions"
     on-change="($ctrl.onChangeServerType)"
     slim="true"
-    label="'Server Type'"
+    label="'服务器类型'"
   ></box-selector>
 
   <ldap-settings-custom

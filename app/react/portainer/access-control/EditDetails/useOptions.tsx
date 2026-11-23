@@ -15,9 +15,9 @@ function publicOption(
 ): BoxSelectorOption<ResourceControlOwnership> {
   return {
     value: ResourceControlOwnership.PUBLIC,
-    label: 'Public',
+    label: '公开',
     id: 'access_public',
-    description: `I want any user with access to this ${resourceName} to be able to manage this ${resourceName}`,
+    description: `我希望任何有权访问此 ${resourceName} 的用户都能管理此 ${resourceName}`,
     icon: <BadgeIcon icon={ownershipIcon(ResourceControlOwnership.PUBLIC)} />,
   };
 }
@@ -52,15 +52,15 @@ function adminOptions(resourceName: string) {
       <BadgeIcon
         icon={ownershipIcon(ResourceControlOwnership.ADMINISTRATORS)}
       />,
-      'Administrators',
-      `I want to restrict the management of this ${resourceName} to administrators only`,
+      '管理员',
+      `我希望将此 ${resourceName} 的管理权限限制为仅管理员`,
       ResourceControlOwnership.ADMINISTRATORS
     ),
     buildOption(
       'access_restricted',
       <BadgeIcon icon={ownershipIcon(ResourceControlOwnership.RESTRICTED)} />,
-      'Restricted',
-      `I want to restrict the management of this ${resourceName} to a set of users and/or teams`,
+      '受限',
+      `我希望将此 ${resourceName} 的管理权限限制为一组用户和/或团队`,
       ResourceControlOwnership.RESTRICTED
     ),
   ];
@@ -70,8 +70,8 @@ function nonAdminOptions(teams?: Team[], resourceName = 'resource') {
     buildOption(
       'access_private',
       <BadgeIcon icon={ownershipIcon(ResourceControlOwnership.PRIVATE)} />,
-      'Private',
-      `I want to restrict this ${resourceName} to be manageable by myself only`,
+      '私有',
+      `我希望将此 ${resourceName} 的管理权限限制为仅我自己`,
       ResourceControlOwnership.PRIVATE
     ),
     teams &&
@@ -79,16 +79,14 @@ function nonAdminOptions(teams?: Team[], resourceName = 'resource') {
       buildOption(
         'access_restricted',
         <BadgeIcon icon={ownershipIcon(ResourceControlOwnership.RESTRICTED)} />,
-        'Restricted',
+        '受限',
         teams.length === 1 ? (
           <>
-            I want any member of my team (<b>{teams[0].Name}</b>) to be able to
-            manage this {resourceName}
+            我希望我的团队 (<b>{teams[0].Name}</b>) 的任何成员都能管理此 {resourceName}
           </>
         ) : (
           <>
-            I want to restrict the management of this {resourceName} to one or
-            more of my teams
+            我希望将此 {resourceName} 的管理权限限制为我的一个或多个团队
           </>
         ),
         ResourceControlOwnership.RESTRICTED

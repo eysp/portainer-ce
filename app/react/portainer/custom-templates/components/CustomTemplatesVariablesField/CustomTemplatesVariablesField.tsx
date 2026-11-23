@@ -26,7 +26,7 @@ export function CustomTemplatesVariablesField({
   }
 
   return (
-    <FormSection title="Template Variables">
+    <FormSection title="模板变量">
       {definitions.map((definition, index) => (
         <VariableFieldItem
           key={definition.name}

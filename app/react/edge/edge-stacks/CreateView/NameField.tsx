@@ -43,7 +43,7 @@ export function nameValidation(
   isComposeStack: boolean | undefined
 ): SchemaOf<string> {
   let schema = string()
-    .required('Name is required')
+    .required('名称是必填项')
     .test('unique', 'Name should be unique', (value) =>
       stacks.every((s) => s.Name !== value)
     );

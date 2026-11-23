@@ -38,7 +38,7 @@ export function PullImageFormWidget({
 
   return (
     <Widget>
-      <Widget.Title icon={DownloadIcon} title="Pull image" />
+      <Widget.Title icon={DownloadIcon} title="拉取镜像" />
       <Widget.Body>
         <Formik
           initialValues={initialValues}
@@ -69,7 +69,7 @@ export function PullImageFormWidget({
       },
       {
         onSuccess() {
-          notifySuccess('Image successfully pulled', config.image);
+          notifySuccess('镜像拉取成功', config.image);
         },
       }
     );

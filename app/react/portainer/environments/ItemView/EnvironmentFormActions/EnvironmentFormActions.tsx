@@ -16,13 +16,13 @@ export function EnvironmentFormActions({ isLoading, isValid, isDirty }: Props) {
       <div className="col-sm-12">
         <LoadingButton
           className="wizard-connect-button !ml-0"
-          loadingText="Updating environment..."
+          loadingText="正在更新环境..."
           isLoading={isLoading}
           disabled={!isDirty || !isValid}
           icon={Save}
           data-cy="environment-update-button"
         >
-          Update environment
+          更新环境
         </LoadingButton>
 
         <Button
@@ -34,7 +34,7 @@ export function EnvironmentFormActions({ isLoading, isValid, isDirty }: Props) {
           data-cy="environment-cancel-button"
           className="!ml-2"
         >
-          Cancel
+          取消
         </Button>
       </div>
     </div>

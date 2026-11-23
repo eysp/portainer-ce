@@ -55,9 +55,9 @@ export function ItemView() {
   return (
     <>
       <PageHeader
-        title="Container details"
+        title="容器详情"
         breadcrumbs={[
-          { label: 'Containers', link: 'docker.containers' },
+          { label: '容器列表', link: 'docker.containers' },
           containerName,
         ]}
       />

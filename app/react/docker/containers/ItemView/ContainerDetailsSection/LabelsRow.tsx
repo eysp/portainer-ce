@@ -10,7 +10,7 @@ export function LabelsRow({ labels }: LabelsRowProps) {
   }
 
   return (
-    <DetailsTable.Row label="Labels">
+    <DetailsTable.Row label="标签 (Labels)">
       <table className="table-bordered table-condensed !m-0 table">
         <tbody>
           {Object.entries(labels).map(([key, value]) => (

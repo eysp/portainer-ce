@@ -40,20 +40,19 @@ export function KubeConfigInfo({
   }
 
   return (
-    <InformationPanel title="Kubernetes features configuration">
+    <InformationPanel title="Kubernetes 功能配置">
       <span className="small text-muted vertical-center">
         <Icon icon={Wrench} mode="primary" />
         <div>
-          You should configure the features available in this Kubernetes
-          environment in the{' '}
+          您可以在{' '}
           <Link
             to="kubernetes.cluster.setup"
             params={{ endpointId: environmentId }}
             data-cy="kubernetes-config-link"
           >
-            Kubernetes configuration
+            Kubernetes 配置
           </Link>{' '}
-          view.
+          视图中配置此 Kubernetes 环境中可用的功能。
         </div>
       </span>
     </InformationPanel>

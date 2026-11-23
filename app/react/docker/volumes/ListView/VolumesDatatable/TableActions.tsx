@@ -1,4 +1,4 @@
-import { Authorized } from '@/react/hooks/useUser';
+﻿import { Authorized } from '@/react/hooks/useUser';
 
 import { AddButton } from '@@/buttons';
 import { DeleteButton } from '@@/buttons/DeleteButton';
@@ -18,12 +18,12 @@ export function TableActions({
         <DeleteButton
           disabled={selectedItems.length === 0}
           onConfirmed={() => onRemove(selectedItems)}
-          confirmMessage="Do you want to remove the selected volume(s)?"
+          confirmMessage="确认要删除选中的存储卷吗？"
           data-cy="volume-removeVolumeButton"
         />
       </Authorized>
       <Authorized authorizations="DockerVolumeCreate">
-        <AddButton data-cy="volume-addVolumeButton">Add volume</AddButton>
+        <AddButton data-cy="volume-addVolumeButton">添加存储卷</AddButton>
       </Authorized>
     </div>
   );

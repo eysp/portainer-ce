@@ -63,12 +63,12 @@ export function AgentForm({
               <LoadingButton
                 className="wizard-connect-button vertical-center"
                 data-cy="agent-connect-environment-button"
-                loadingText="Connecting environment..."
+                loadingText="正在连接环境..."
                 isLoading={mutation.isLoading}
                 disabled={!dirty || !isValid}
                 icon={Plug2}
               >
-                Connect
+                连接
               </LoadingButton>
             </div>
           </div>
@@ -82,7 +82,7 @@ export function AgentForm({
       { ...values, containerEngine },
       {
         onSuccess(environment) {
-          notifySuccess('Environment created', environment.Name);
+          notifySuccess('环境已创建', environment.Name);
           clearForm();
           onCreate(environment);
         },

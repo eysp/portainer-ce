@@ -41,7 +41,7 @@ export function ContainerActionsSection({
   const isPortainer = container.IsPortainer || false;
   return (
     <Widget>
-      <Widget.Title icon="settings" title="Actions" />
+      <Widget.Title icon="settings" title="操作" />
       <WidgetBody>
         <div className="flex gap-2">
           <PrimaryActions

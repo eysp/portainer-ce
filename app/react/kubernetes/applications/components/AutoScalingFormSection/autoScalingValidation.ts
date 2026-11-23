@@ -16,8 +16,8 @@ export function autoScalingValidation(
     isUsed: boolean().required(),
     minReplicas: number().when('isUsed', (isUsed: boolean) =>
       isUsed
-        ? nanNumberSchema('Minimum instances is required.')
-            .required('Minimum instances is required.')
+        ? nanNumberSchema('最小实例数是必填项。')
+            .required('最小实例数是必填项。')
             .min(1, 'Minimum instances must be greater than 0.')
             .test(
               'maxReplicas',
@@ -35,8 +35,8 @@ export function autoScalingValidation(
     ),
     maxReplicas: number().when('isUsed', (isUsed: boolean) =>
       isUsed
-        ? nanNumberSchema('Maximum instances is required.')
-            .required('Maximum instances is required.')
+        ? nanNumberSchema('最大实例数是必填项。')
+            .required('最大实例数是必填项。')
             .test(
               'minReplicas',
               'Maximum instances must be greater than minimum instances.',
@@ -60,10 +60,10 @@ export function autoScalingValidation(
       'isUsed',
       (isUsed: boolean) =>
         isUsed
-          ? nanNumberSchema('Target CPU utilization percentage is required.')
+          ? nanNumberSchema('目标 CPU 利用率百分比是必填项。')
               .min(0, 'Target CPU usage must be greater than 0.')
               .max(100, 'Target CPU usage must be smaller than 100.')
-              .required('Target CPU utilization percentage is required.')
+              .required('目标 CPU 利用率百分比是必填项。')
           : number()
     ),
   });

@@ -15,19 +15,19 @@ export function TemplatesUrlSection() {
   const buildTemplateDocUrl = useDocsUrl('/advanced/app-templates/build');
 
   return (
-    <FormSection title="App Templates">
+    <FormSection title="应用模板 (App Templates)">
       <div className="form-group">
         <div className="col-sm-12 text-muted small">
           <p>
-            You can specify the URL to your own template definitions file here.
-            See{' '}
+            您可以在此指定自定义模板定义文件的 URL。
+            有关更多详细信息，请参阅{' '}
             <a href={buildTemplateDocUrl} target="_blank" rel="noreferrer">
-              Portainer documentation
+              Portainer 文档
             </a>{' '}
-            for more details.
+            。
           </p>
           <p>
-            The default value is <a href={DEFAULT_URL}>{DEFAULT_URL}</a>
+            默认值为 <a href={DEFAULT_URL}>{DEFAULT_URL}</a>
           </p>
         </div>
       </div>

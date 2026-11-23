@@ -37,7 +37,7 @@ export function ThemeSelector({ user }: { user: User }) {
 
   return (
     <SegmentedControl
-      label="Theme"
+      label="主题"
       items={themeSegmentItems}
       activeId={activeTheme}
       onChange={handleThemeSelect}

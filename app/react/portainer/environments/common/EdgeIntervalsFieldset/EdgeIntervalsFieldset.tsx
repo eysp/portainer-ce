@@ -34,7 +34,7 @@ export function EdgeIntervalsFieldset({
   onChange,
   asyncMode,
   readonly = false,
-  title = 'Check-in Intervals',
+  title = '签到间隔',
 }: Props) {
   return (
     <FormSection title={title}>

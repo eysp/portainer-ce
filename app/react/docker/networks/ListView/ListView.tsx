@@ -9,7 +9,7 @@ export function ListView() {
 
   return (
     <>
-      <PageHeader title="Network List" breadcrumbs={['Networks']} reload />
+      <PageHeader title="网络列表" breadcrumbs={['网络列表']} reload />
 
       <NetworksDatatable
         onRemove={(networks) => removeMutation.mutate({ networks })}

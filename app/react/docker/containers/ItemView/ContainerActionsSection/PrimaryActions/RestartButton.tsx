@@ -33,7 +33,7 @@ export function RestartButton({
       { environmentId, containerId, nodeName },
       {
         onSuccess() {
-          notifySuccess('Success', 'Container successfully restarted');
+          notifySuccess('成功', '容器已成功重启');
           onSuccess();
         },
       }
@@ -48,11 +48,11 @@ export function RestartButton({
         onClick={handleRestart}
         disabled={!isRunning || isPortainer}
         isLoading={restartMutation.isLoading}
-        loadingText="Restarting..."
+        loadingText="正在重启..."
         data-cy="restart-container-button"
         icon={RefreshCw}
       >
-        Restart
+        重启
       </LoadingButton>
     </Authorized>
   );

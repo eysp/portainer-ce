@@ -2,22 +2,22 @@ import { StackType } from '../types';
 
 const dockerTexts = {
   editor: {
-    placeholder: 'Define or paste the content of your docker compose file here',
+    placeholder: '在此处定义或粘贴 docker compose 文件的内容',
     description: (
       <p>
-        You can get more information about Compose file format in the{' '}
+        您可以在{' '}
         <a
           href="https://docs.docker.com/reference/compose-file/"
           target="_blank"
           rel="noreferrer"
         >
-          official documentation
+          官方文档
         </a>
-        .
+        {' '}中获取有关 Compose 文件格式的更多信息。
       </p>
     ),
   },
-  upload: 'You can upload a Compose file from your computer.',
+  upload: '您可以从计算机上传 Compose 文件。',
 } as const;
 
 export const textByType = {
@@ -25,27 +25,26 @@ export const textByType = {
   [StackType.DockerSwarm]: dockerTexts,
   [StackType.Kubernetes]: {
     editor: {
-      placeholder: 'Define or paste the content of your manifest file here',
+      placeholder: '在此处定义或粘贴 manifest 文件的内容',
       description: (
         <>
           <p>
-            Templates allow deploying any kind of Kubernetes resource
-            (Deployment, Secret, ConfigMap...)
+            模板允许部署任何类型的 Kubernetes 资源 (Deployment, Secret, ConfigMap...)
           </p>
           <p>
-            You can get more information about Kubernetes file format in the{' '}
+            您可以在{' '}
             <a
               href="https://kubernetes.io/docs/concepts/overview/working-with-objects/"
               target="_blank"
               rel="noreferrer"
             >
-              official documentation
+              官方文档
             </a>
-            .
+            {' '}中获取有关 Kubernetes 文件格式的更多信息。
           </p>
         </>
       ),
     },
-    upload: 'You can upload a Manifest file from your computer.',
+    upload: '您可以从计算机上传 Manifest 文件。',
   },
 } as const;

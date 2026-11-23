@@ -42,14 +42,14 @@ export function LoggerConfig({
   const isDisabled = !value.type || value.type === 'none';
 
   const pluginOptions = [
-    { label: 'Default logging driver', value: '' },
+    { label: '默认日志驱动 (Default)', value: '' },
     ...pluginsQuery.data.map((p) => ({ label: p, value: p })),
     { label: 'none', value: 'none' },
   ];
 
   return (
-    <FormSection title="Logging">
-      <FormControl label="Driver">
+    <FormSection title="日志驱动配置">
+      <FormControl label="日志驱动 (Driver)">
         <PortainerSelect
           value={value.type}
           onChange={(type) => onChange({ ...value, type: type || '' })}
@@ -59,26 +59,24 @@ export function LoggerConfig({
       </FormControl>
 
       <TextTip color="blue">
-        Logging driver that will override the default docker daemon driver.
-        Select Default logging driver if you don&apos;t want to override it.
-        Supported logging drivers can be found{' '}
+        用于覆盖 Docker 守护进程默认配置的日志驱动。如果您不想覆盖，请选择“默认日志驱动”。支持的日志驱动可查阅{' '}
         <a
           href="https://docs.docker.com/engine/logging/configure/#supported-logging-drivers"
           target="_blank"
           rel="noreferrer"
         >
-          in the Docker documentation
+          Docker 官方文档
         </a>
-        .
+        。
       </TextTip>
 
       <InputList
         tooltip={
           isDisabled
-            ? 'Add button is disabled unless a driver other than none or default is selected. Options are specific to the selected driver, refer to the driver documentation.'
+            ? '仅当选择了除 none 或默认以外的驱动时，添加按钮才可用。具体选项因所选驱动而异，请参阅驱动文档。'
             : ''
         }
-        label="Options"
+        label="驱动选项 (Options)"
         onChange={(options) => handleChange({ options })}
         value={value.options}
         item={Item}
@@ -105,7 +103,7 @@ function Item({
     <div>
       <div className="flex w-full gap-4">
         <InputGroup className="w-1/2">
-          <InputGroup.Addon>option</InputGroup.Addon>
+          <InputGroup.Addon>选项名 (option)</InputGroup.Addon>
           <InputGroup.Input
             value={option}
             onChange={(e) => handleChange({ option: e.target.value })}
@@ -114,7 +112,7 @@ function Item({
           />
         </InputGroup>
         <InputGroup className="w-1/2">
-          <InputGroup.Addon>value</InputGroup.Addon>
+          <InputGroup.Addon>选项值 (value)</InputGroup.Addon>
           <InputGroup.Input
             value={value}
             onChange={(e) => handleChange({ value: e.target.value })}
@@ -136,8 +134,8 @@ export function validation(): SchemaOf<LogConfig> {
   return object({
     options: array().of(
       object({
-        option: string().required('Option is required'),
-        value: string().required('Value is required'),
+        option: string().required('选项名不能为空'),
+        value: string().required('选项值不能为空'),
       })
     ),
     type: string().default(''),

@@ -9,23 +9,23 @@ import { Link } from '@@/Link';
 import { AccessLocation, AccessViewerPolicyModel } from './model';
 
 const ACCESS_LOCATION_LABELS: Record<AccessLocation, string> = {
-  [AccessLocation.Environment]: 'environment',
-  [AccessLocation.EnvironmentGroup]: 'environment group',
+  [AccessLocation.Environment]: '环境',
+  [AccessLocation.EnvironmentGroup]: '环境分组',
 };
 
 const helper = createColumnHelper<AccessViewerPolicyModel>();
 
 export const columns = [
   helper.accessor('endpointName', {
-    header: 'Environment',
+    header: '环境',
     id: 'Environment',
   }),
   helper.accessor('roleName', {
-    header: 'Role',
+    header: '角色',
     id: 'Role',
   }),
   helper.display({
-    header: 'Access Origin',
+    header: '权限来源',
     cell: AccessCell,
   }),
 ];
@@ -33,7 +33,7 @@ export const columns = [
 const manageAccessLabel = (
   <span className="inline-flex items-center gap-1">
     <Icon icon={Users} />
-    Manage access
+    管理权限
   </span>
 );
 
@@ -45,7 +45,7 @@ function AccessCell({
   if (item.roleId === 0) {
     return (
       <>
-        User access all environments
+        用户拥有所有环境的访问权限
         <div>
           <Link
             to="portainer.settings.edgeCompute"
@@ -60,7 +60,7 @@ function AccessCell({
 
   return (
     <>
-      {prefix(item.teamName)} access defined on{' '}
+      {prefix(item.teamName)} 权限定义在{' '}
       {ACCESS_LOCATION_LABELS[item.accessLocation]}{' '}
       {!!item.groupName && <code>{item.groupName}</code>}
       <div>{manageAccess(item, isPureAdmin)}</div>
@@ -70,11 +70,11 @@ function AccessCell({
 
 function prefix(teamName: string | undefined) {
   if (!teamName) {
-    return 'User';
+    return '用户';
   }
   return (
     <>
-      Team <code>{teamName}</code>
+      团队 <code>{teamName}</code>
     </>
   );
 }

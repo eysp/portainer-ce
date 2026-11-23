@@ -46,7 +46,7 @@ export function ActionLinksRow({ containerId }: Props) {
               color="link"
             >
               <Icon icon={FileText} className="lucide space-right" />
-              Logs
+              日志
             </Button>
           )}
           {canInspect && (
@@ -62,7 +62,7 @@ export function ActionLinksRow({ containerId }: Props) {
               color="link"
             >
               <Icon icon={Info} className="lucide space-right" />
-              Inspect
+              检查
             </Button>
           )}
           {canStats && (
@@ -78,7 +78,7 @@ export function ActionLinksRow({ containerId }: Props) {
               color="link"
             >
               <Icon icon={BarChart2} className="lucide space-right" />
-              Stats
+              统计
             </Button>
           )}
           {canExec && (
@@ -94,7 +94,7 @@ export function ActionLinksRow({ containerId }: Props) {
               color="link"
             >
               <Icon icon={Terminal} className="lucide space-right" />
-              Console
+              控制台
             </Button>
           )}
           {canAttach && (
@@ -110,7 +110,7 @@ export function ActionLinksRow({ containerId }: Props) {
               color="link"
             >
               <Icon icon={Paperclip} className="lucide space-right" />
-              Attach
+              附加
             </Button>
           )}
         </ButtonGroup>

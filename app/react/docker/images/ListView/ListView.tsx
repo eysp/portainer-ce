@@ -10,7 +10,7 @@ export function ListView() {
 
   return (
     <>
-      <PageHeader title="Image list" breadcrumbs="Images" reload />
+      <PageHeader title="镜像列表" breadcrumbs="镜像列表" reload />
 
       <div className="row">
         <div className="col-sm-12">

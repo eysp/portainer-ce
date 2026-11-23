@@ -8,14 +8,14 @@ export function relativePathValidation(): SchemaOf<RelativePathModel> {
     FilesystemPath: string()
       .when(['SupportRelativePath'], {
         is: true,
-        then: string().required('Local filesystem path is required'),
+        then: string().required('本地文件系统路径是必填项'),
       })
       .default(''),
     SupportPerDeviceConfigs: boolean().default(false),
     PerDeviceConfigsPath: string()
       .when('SupportPerDeviceConfigs', {
         is: true,
-        then: string().required('Directory is required'),
+        then: string().required('目录是必填项'),
       })
       .default(''),
     PerDeviceConfigsMatchType: mixed<PerDevConfigsFilterType>()

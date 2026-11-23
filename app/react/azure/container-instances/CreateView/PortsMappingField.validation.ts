@@ -7,5 +7,5 @@ export function validationSchema() {
       container: string().required('container is required'),
       protocol: string().oneOf(['TCP', 'UDP']),
     })
-  ).min(1, 'At least one port binding is required');
+  ).min(1, '至少需要一个端口绑定');
 }

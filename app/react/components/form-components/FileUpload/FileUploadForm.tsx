@@ -19,7 +19,7 @@ export interface Props {
 export function FileUploadForm({
   onChange,
   value,
-  title = 'Select a file',
+  title = '选择一个文件',
   required = false,
   description,
   error,
@@ -27,7 +27,7 @@ export function FileUploadForm({
 }: PropsWithChildren<Props> & AutomationTestingProps) {
   return (
     <div className="file-upload-form">
-      <FormSectionTitle htmlFor="file-upload-field">Upload</FormSectionTitle>
+      <FormSectionTitle htmlFor="file-upload-field">上传文件</FormSectionTitle>
       <div className="form-group">
         <span className="col-sm-12 text-muted small">{description}</span>
         {error && (

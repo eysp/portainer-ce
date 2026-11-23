@@ -50,22 +50,18 @@ export function InitEdgeView() {
       <div className="container">
         <div className="col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1">
           <Widget>
-            <WidgetTitle icon={Laptop} title="Set up Edge Compute" />
+            <WidgetTitle icon={Laptop} title="设置边缘计算 (Edge Compute)" />
 
             <WidgetBody loading={settingsQuery.isLoading}>
               <p className="text-muted">
-                Edge Compute lets Portainer manage environments that it cannot
-                reach directly — remote devices, environments behind NAT or a
-                firewall, or sites with intermittent connectivity.
+                边缘计算使 Portainer 能够管理无法直接访问的环境 —— 例如远程设备、NAT 或防火墙后的环境，或网络连接不稳定的站点。
               </p>
               <ul className="text-muted ml-4 list-disc">
                 <li>
-                  Onboard edge agents over a secure reverse tunnel, with no
-                  inbound ports to open on the remote side.
+                  通过安全的反向隧道接入边缘 Agent，无需在远程端开启任何入站端口。
                 </li>
                 <li>
-                  Deploy stacks and jobs to many edge environments from a single
-                  Portainer instance.
+                  从单一的 Portainer 实例将堆栈和任务(Jobs)部署到多个边缘环境。
                 </li>
               </ul>
 
@@ -79,7 +75,7 @@ export function InitEdgeView() {
                   <Form className="form-horizontal mt-4" noValidate>
                     <FormControl
                       inputId="edge_enable"
-                      label="Enable Edge Compute features"
+                      label="启用边缘计算功能"
                       size="small"
                       errors={errors.EnableEdgeComputeFeatures}
                     >
@@ -98,11 +94,7 @@ export function InitEdgeView() {
                     {values.EnableEdgeComputeFeatures && (
                       <>
                         <TextTip color="blue" className="mb-2">
-                          This is the URL that edge agents will use to reach
-                          this Portainer instance. It is prefilled from your
-                          browser — confirm it is reachable from where your
-                          agents run. You can change it later in Settings &gt;
-                          Edge Compute.
+                          这是边缘 Agent 用于访问此 Portainer 实例的 URL。它已通过浏览器预填 —— 请确认该地址在您的 Agent 运行环境中是可访问的。稍后您可以在 <b>设置</b> &gt; <b>边缘计算</b> 中修改。
                         </TextTip>
 
                         <PortainerUrlField
@@ -119,7 +111,7 @@ export function InitEdgeView() {
                               data-cy="init-edge-test-connectivity-button"
                               className="!ml-0"
                             >
-                              Test connectivity
+                              测试连通性
                             </Button>
                           </div>
                         </div>
@@ -134,10 +126,7 @@ export function InitEdgeView() {
                         <EnabledWaitingRoomSwitch />
 
                         <TextTip color="blue" className="mb-2">
-                          When enabled, new edge agents wait for manual approval
-                          in Edge Compute &gt; Waiting Room before they are
-                          associated. When disabled, agents are automatically
-                          trusted on first connect.
+                          启用后，新的边缘 Agent 需要在 <b>边缘计算</b> &gt; <b>等待室(Waiting Room)</b> 中进行手动批准才能关联。禁用后，Agent 在首次连接时将被自动信任。
                         </TextTip>
                       </>
                     )}
@@ -148,11 +137,11 @@ export function InitEdgeView() {
                           disabled={!isValid}
                           data-cy="init-edge-submit-button"
                           isLoading={updateSettingsMutation.isLoading}
-                          loadingText="Saving..."
+                          loadingText="保存中..."
                         >
                           {values.EnableEdgeComputeFeatures
-                            ? 'Enable and continue'
-                            : 'Continue'}
+                            ? '启用并继续'
+                            : '继续'}
                         </LoadingButton>
 
                         <Button
@@ -161,7 +150,7 @@ export function InitEdgeView() {
                           onClick={goToWizard}
                           data-cy="init-edge-skip-button"
                         >
-                          Skip
+                          跳过
                         </Button>
                       </div>
                     </div>
@@ -193,7 +182,7 @@ export function InitEdgeView() {
       },
       {
         onSuccess() {
-          notifySuccess('Success', 'Edge Compute enabled');
+          notifySuccess('成功', '边缘计算已启用');
           goToWizard();
         },
       }

@@ -41,8 +41,8 @@ export function InnerForm({
 }) {
   const environmentQuery = useEnvironment(environmentId);
   const title = stackName
-    ? `Edit stack settings — ${stackName}`
-    : 'Edit stack settings';
+    ? `编辑堆栈设置 — ${stackName}`
+    : '编辑堆栈设置';
   const platform = environmentQuery.data
     ? getPlatformType(environmentQuery.data.Type)
     : null;
@@ -85,8 +85,7 @@ export function InnerForm({
                     error={errors.kube?.name}
                   />
                   <TextTip color="blue" className="mb-4">
-                    Changing the stack name requires a redeploy to update the
-                    deployed resources.
+                    更改堆栈名称需要重新部署以更新已部署的资源。
                   </TextTip>
                 </>
               )}
@@ -147,7 +146,7 @@ export function InnerForm({
                 <span className="flex items-center">
                   <Checkbox
                     id="redeploy-checkbox"
-                    label="Redeploy"
+                    label="重新部署"
                     checked={values.redeployNow}
                     onChange={(e) =>
                       setFieldValue('redeployNow', e.target.checked)
@@ -161,7 +160,7 @@ export function InnerForm({
                   size="medium"
                   onClick={submitForm}
                   isLoading={isSubmitting}
-                  loadingText="Saving..."
+                  loadingText="保存中..."
                   data-cy="save-git-settings-button"
                 >
                   Save settings

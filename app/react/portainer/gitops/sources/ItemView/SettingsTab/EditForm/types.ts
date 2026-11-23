@@ -14,13 +14,13 @@ export interface SettingsFormValues {
 }
 
 export const validationSchema = object({
-  name: string().required('Name is required'),
-  url: string().required('Repository URL is required'),
+  name: string().required('名称是必填项'),
+  url: string().required('存储库 URL 是必填项'),
   tlsSkipVerify: yupBoolean().defined(),
   authEnabled: yupBoolean().defined(),
   username: string().when('authEnabled', {
     is: true,
-    then: (schema) => schema.required('Username is required'),
+    then: (schema) => schema.required('用户名是必填项'),
     otherwise: (schema) => schema.optional(),
   }),
   password: string().optional(),

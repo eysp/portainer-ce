@@ -42,8 +42,8 @@ export function DashboardView() {
   return (
     <>
       <PageHeader
-        title="Dashboard"
-        breadcrumbs={[{ label: 'Environment summary' }]}
+        title="仪表盘"
+        breadcrumbs={[{ label: '环境概览' }]}
         reload
         onReload={() =>
           queryClient.invalidateQueries(['environments', environmentId])
@@ -58,7 +58,8 @@ export function DashboardView() {
             isRefetching={namespacesCountQuery.isRefetching}
             icon={Layers}
             to="kubernetes.resourcePools"
-            type="Namespace"
+            type="命名空间"
+            pluralType="命名空间"
             data-cy="dashboard-namespace"
           />
           <DashboardItem
@@ -67,7 +68,8 @@ export function DashboardView() {
             isRefetching={applicationsCountQuery.isRefetching}
             icon={Box}
             to="kubernetes.applications"
-            type="Application"
+            type="应用"
+            pluralType="应用"
             data-cy="dashboard-application"
           />
           <DashboardItem
@@ -76,7 +78,8 @@ export function DashboardView() {
             isRefetching={servicesCountQuery.isRefetching}
             icon={Shuffle}
             to="kubernetes.services"
-            type="Service"
+            type="服务"
+            pluralType="服务"
             data-cy="dashboard-service"
           />
           <DashboardItem
@@ -85,8 +88,8 @@ export function DashboardView() {
             isRefetching={ingressesCountQuery.isRefetching}
             icon={Route}
             to="kubernetes.ingresses"
-            type="Ingress"
-            pluralType="Ingresses"
+            type="入口(Ingress)"
+            pluralType="入口(Ingress)"
             data-cy="dashboard-ingress"
           />
           <DashboardItem
@@ -97,6 +100,7 @@ export function DashboardView() {
             to="kubernetes.configurations"
             params={{ tab: 'configmaps' }}
             type="ConfigMap"
+            pluralType="ConfigMap"
             data-cy="dashboard-configmaps"
           />
           <DashboardItem
@@ -106,7 +110,8 @@ export function DashboardView() {
             icon={Lock}
             to="kubernetes.configurations"
             params={{ tab: 'secrets' }}
-            type="Secret"
+            type="保密字典(Secret)"
+            pluralType="保密字典(Secret)"
             data-cy="dashboard-secrets"
           />
           <DashboardItem
@@ -115,7 +120,8 @@ export function DashboardView() {
             isRefetching={volumesCountQuery.isRefetching}
             icon={Database}
             to="kubernetes.volumes"
-            type="Volume"
+            type="存储卷"
+            pluralType="存储卷"
             data-cy="dashboard-volume"
           />
         </DashboardGrid>

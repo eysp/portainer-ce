@@ -12,6 +12,12 @@ interface Props {
   value: { id: string; desc: boolean } | undefined;
 }
 
+const sortOptionLabels: Record<string, string> = {
+  Title: '标题',
+  Categories: '分类',
+  Description: '描述',
+};
+
 export function TemplateListSort({
   options,
   onChange,
@@ -23,7 +29,10 @@ export function TemplateListSort({
       <div className={styles.sortByElement}>
         <PortainerSelect
           placeholder={placeholder}
-          options={options.map((id) => ({ label: id, value: id }))}
+          options={options.map((id) => ({
+            label: sortOptionLabels[id] || id,
+            value: id,
+          }))}
           onChange={(id) =>
             onChange(id ? { id, desc: value?.desc ?? false } : undefined)
           }

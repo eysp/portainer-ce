@@ -14,17 +14,17 @@ const columnHelper = createColumnHelper<EventMessage>();
 
 export const columns = [
   columnHelper.accessor('time', {
-    header: 'Date',
+    header: '日期',
     cell: ({ getValue }) => {
       const value = getValue();
       return isoDateFromTimestamp(value);
     },
   }),
   columnHelper.accessor((c) => c.Type, {
-    header: 'Type',
+    header: '类型',
   }),
   columnHelper.accessor((c) => createEventDetails(c), {
-    header: 'Details',
+    header: '详情',
   }),
 ];
 
@@ -47,7 +47,7 @@ export function EventsDatatable({
       isLoading={!dataset}
       columns={columns}
       settingsManager={tableState}
-      title="Events"
+      title="事件"
       titleIcon={Clock}
       disableSelect
       data-cy="docker-events-datatable"

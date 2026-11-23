@@ -15,7 +15,7 @@ import { isUngoverned } from '../../utils/getPlatformLabel';
 
 import { EnvironmentGroupRow } from './EnvironmentGroupRow';
 
-const SORT_OPTIONS: SortOption[] = [{ key: 'Name', label: 'Name' }];
+const SORT_OPTIONS: SortOption[] = [{ key: 'Name', label: '名称' }];
 
 export function EnvironmentGroupsTable() {
   const groupsQuery = useGroups();
@@ -66,11 +66,11 @@ export function EnvironmentGroupsTable() {
       )}
       getItemKey={(group) => group.Id}
       isLoading={groupsQuery.isLoading}
-      searchPlaceholder="Filter groups..."
+      searchPlaceholder="过滤分组..."
       emptyMessage={
         tableState.search
-          ? 'No groups match your search'
-          : 'No environment groups found'
+          ? '未找到匹配的分组'
+          : '未找到环境分组'
       }
       data-cy="environment-groups-list"
     />
@@ -84,10 +84,10 @@ function buildGroups(
   const ungoverned = items.filter((g) => isUngoverned(g));
   const result: SortableGroup<EnvironmentGroup>[] = [];
   if (governed.length) {
-    result.push({ key: 'governed', label: 'Groups', items: governed });
+    result.push({ key: 'governed', label: '分组', items: governed });
   }
   if (ungoverned.length) {
-    result.push({ key: 'ungoverned', label: 'Ungoverned', items: ungoverned });
+    result.push({ key: 'ungoverned', label: '未接管', items: ungoverned });
   }
   return result;
 }

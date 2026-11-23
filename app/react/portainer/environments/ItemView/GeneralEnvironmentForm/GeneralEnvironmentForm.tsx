@@ -61,7 +61,7 @@ export function GeneralEnvironmentForm({ environment, onSuccess }: Props) {
         >
           {({ values, setFieldValue, errors, isValid, dirty }) => (
             <Form className="form-horizontal">
-              <FormSection title="Configuration">
+              <FormSection title="配置">
                 <NameField />
 
                 {!hasError && (

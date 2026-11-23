@@ -15,7 +15,7 @@ export function PortConfigurationRow({ ports }: PortConfigurationRowProps) {
   }
 
   return (
-    <DetailsTable.Row label="Port configuration">
+    <DetailsTable.Row label="端口配置">
       {bindings.map((binding, index) => (
         <div key={index} className="flex items-center gap-2">
           {binding.host} <ArrowRight size={13} />

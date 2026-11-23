@@ -30,7 +30,7 @@ describe('Swarm stack migration', () => {
         name: 'test-stack',
         fromSwarmId: undefined,
       })
-    ).rejects.toThrow('Original Swarm ID is required');
+    ).rejects.toThrow('Original Swarm ID 是必填项');
   });
 
   it('should call getSwarm with targetEnvId', async () => {

@@ -1,4 +1,4 @@
-import { Plus } from 'lucide-react';
+﻿import { Plus } from 'lucide-react';
 import { useState } from 'react';
 
 import { isLimitedToBE } from '@/react/portainer/feature-flags/feature-flags.service';
@@ -14,14 +14,14 @@ import { InputListActionButtons } from '@@/form-components/InputList/ActionButto
 import { DnEntry, validateDnEntryValue } from './ldap-dn-utils';
 
 const typeOptions = [
-  { label: 'OU Name', value: 'ou' },
-  { label: 'Folder Name', value: 'cn' },
+  { label: '组织单位 (OU)', value: 'ou' },
+  { label: '文件夹 (CN)', value: 'cn' },
 ] as const;
 
 export function DnEntriesField({
   value,
   onChange,
-  label = 'DN entries',
+  label = 'DN 记录',
   limitedFeatureId,
 }: {
   value: DnEntry[];

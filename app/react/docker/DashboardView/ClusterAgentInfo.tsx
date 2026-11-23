@@ -22,10 +22,10 @@ export function ClusterAgentInfo() {
 
   return (
     <Widget>
-      <Widget.Title icon={GaugeIcon} title="Cluster information" />
+      <Widget.Title icon={GaugeIcon} title="集群信息" />
       <Widget.Body className="!px-5 !py-0">
         <DetailsTable dataCy="cluster-agent-info">
-          <DetailsTable.Row label="Nodes in the cluster">
+          <DetailsTable.Row label="集群节点数">
             {nodesCountQuery.data}
           </DetailsTable.Row>
 

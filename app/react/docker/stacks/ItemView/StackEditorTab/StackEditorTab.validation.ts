@@ -12,7 +12,7 @@ export function getValidationSchema(
 ): SchemaOf<StackEditorFormValues> {
   return object({
     stackFileContent: string()
-      .required('Stack file content is required')
+      .required('堆栈文件内容是必填项')
       .min(1, 'Stack file content cannot be empty')
       .test('valid-yaml', 'Invalid YAML', function validateYamlTest(value) {
         if (!value) {

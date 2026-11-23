@@ -53,7 +53,7 @@ export function EnvironmentCard({
     <div className="relative border-0 border-b border-solid border-gray-5 th-highcontrast:border-white th-dark:border-gray-9">
       <BlocklistItem
         as={hasDashboardRoute ? Link : 'button'}
-        className="!m-0 flex flex-wrap gap-4 !border-none !pr-14 md:flex-nowrap"
+        className="!m-0 flex flex-wrap gap-4 !border-none !pr-14"
         onClick={hasDashboardRoute ? onClickBrowse : undefined}
         aria-disabled={!hasDashboardRoute}
         to={dashboardRoute.to}

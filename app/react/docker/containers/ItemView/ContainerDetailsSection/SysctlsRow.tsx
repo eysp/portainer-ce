@@ -10,7 +10,7 @@ export function SysctlsRow({ sysctls }: SysctlsRowProps) {
   }
 
   return (
-    <DetailsTable.Row label="Sysctls">
+    <DetailsTable.Row label="内核参数 (Sysctls)">
       <table className="table-bordered table-condensed !m-0 table">
         <tbody>
           {Object.entries(sysctls).map(([key, value]) => (

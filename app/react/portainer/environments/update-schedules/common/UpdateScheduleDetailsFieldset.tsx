@@ -34,12 +34,12 @@ export function UpdateScheduleDetailsFieldset({
       {environments.length > 0 ? (
         !!version && (
           <TextTip color="blue">
-            {environments.length} environment(s) will be updated to {version}
+            {environments.length} 个环境将更新到 {version} 版本
           </TextTip>
         )
       ) : (
         <TextTip color="orange">
-          No environments options for the selected edge groups
+          所选 edge 分组中没有可用的环境
         </TextTip>
       )}
       <VersionSelect minVersion={minVersion} />
@@ -47,8 +47,7 @@ export function UpdateScheduleDetailsFieldset({
       {hasTimeZone && hasGroupSelected && <ScheduledTimeField />}
       {hasNoTimeZone && (
         <TextTip>
-          These edge groups have older versions of the edge agent that do not
-          support scheduling, these will happen immediately
+          这些 edge 分组中的 edge agent 版本较旧，不支持计划更新，将会立即执行
         </TextTip>
       )}
     </>

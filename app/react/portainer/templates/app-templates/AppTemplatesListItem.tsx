@@ -25,7 +25,7 @@ export function AppTemplatesListItem({
     <TemplateItem
       template={template}
       typeLabel={
-        template.Type === TemplateType.Container ? 'container' : 'stack'
+        template.Type === TemplateType.Container ? '容器' : '栈'
       }
       linkParams={linkParams}
       onSelect={() => onSelect?.(template)}
@@ -48,7 +48,7 @@ export function AppTemplatesListItem({
                 },
               }}
             >
-              Copy as Custom
+              复制为自定义模板
             </Button>
           </div>
         )

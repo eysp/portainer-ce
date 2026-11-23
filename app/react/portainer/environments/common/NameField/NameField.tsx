@@ -17,7 +17,7 @@ interface Props {
 export function NameField({
   readonly,
   tooltip,
-  placeholder = 'e.g. docker-prod01 / kubernetes-cluster01',
+  placeholder = '例如 docker-prod01 / kubernetes-cluster01',
 }: Props) {
   const [{ value }, meta, { setValue }] = useField('name');
 
@@ -27,7 +27,7 @@ export function NameField({
 
   return (
     <FormControl
-      label="Name"
+      label="名称"
       required
       errors={meta.error}
       inputId={id}
@@ -72,6 +72,6 @@ export function useNameValidation(envId?: number) {
   );
 
   return string()
-    .required('Name is required')
-    .test('unique-name', 'Name should be unique', uniquenessTest);
+    .required('名称为必填项')
+    .test('unique-name', '环境名称必须唯一', uniquenessTest);
 }

@@ -10,11 +10,11 @@ export default function SettingsEdgeComputeController($q, $async, $state, Notifi
   this.onSubmitEdgeCompute = async function (settings) {
     try {
       await SettingsService.update(settings);
-      Notifications.success('Success', 'Settings updated');
+      Notifications.success('Success', '设置已更新');
       StateManager.updateEnableEdgeComputeFeatures(settings.EnableEdgeComputeFeatures);
       $state.reload();
     } catch (err) {
-      Notifications.error('Failure', err, 'Unable to update settings');
+      Notifications.error('Failure', err, '无法更新设置');
     }
   };
 
@@ -38,7 +38,7 @@ export default function SettingsEdgeComputeController($q, $async, $state, Notifi
           },
         };
       } catch (err) {
-        Notifications.error('Failure', err, 'Unable to retrieve application settings');
+        Notifications.error('Failure', err, '无法获取应用设置');
       }
     });
   }

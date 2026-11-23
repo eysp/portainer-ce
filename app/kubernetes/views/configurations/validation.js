@@ -18,16 +18,16 @@ export function isConfigurationFormValid(alreadyExist, isDataValid, formValues) 
         case KubernetesSecretTypeOptions.DOCKERCFG.value:
           // needs to contain a .dockercfg key
           isSecretDataValid = formValues.Data.some((entry) => entry.Key === '.dockercfg');
-          secretWarningMessage = isSecretDataValid ? '' : 'A data entry with a .dockercfg key is required.';
+          secretWarningMessage = isSecretDataValid ? '' : '必须提供带有 .dockercfg 键的数据条目。';
           break;
         case KubernetesSecretTypeOptions.DOCKERCONFIGJSON.value:
           // needs to contain a .dockerconfigjson key
           isSecretDataValid = formValues.Data.some((entry) => entry.Key === '.dockerconfigjson');
-          secretWarningMessage = isSecretDataValid ? '' : 'A data entry with a .dockerconfigjson key. is required.';
+          secretWarningMessage = isSecretDataValid ? '' : '必须提供带有 .dockerconfigjson 键的数据条目。';
           break;
         case KubernetesSecretTypeOptions.BASICAUTH.value:
           isSecretDataValid = formValues.Data.some((entry) => entry.Key === 'username' || entry.Key === 'password');
-          secretWarningMessage = isSecretDataValid ? '' : 'A data entry with a username or password key is required.';
+          secretWarningMessage = isSecretDataValid ? '' : '必须提供带有用户名或密码键的数据条目。';
           break;
         case KubernetesSecretTypeOptions.SSHAUTH.value:
           isSecretDataValid = formValues.Data.some((entry) => entry.Key === 'ssh-privatekey');

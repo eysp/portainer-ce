@@ -49,7 +49,7 @@ export async function migrateSwarmStack({
   name?: string;
 }) {
   if (!fromSwarmId) {
-    throw new Error('Original Swarm ID is required to migrate a Swarm stack');
+    throw new Error('迁移 Swarm 堆栈需要原 Swarm ID');
   }
 
   const targetSwarm = await getSwarm(targetEnvId);

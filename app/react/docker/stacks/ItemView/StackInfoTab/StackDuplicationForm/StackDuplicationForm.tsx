@@ -49,7 +49,7 @@ export function StackDuplicationForm({
 
   return (
     <Widget>
-      <WidgetTitle title="Stack duplication / migration" icon={Copy} />
+      <WidgetTitle title="堆栈复制 / 迁移" icon={Copy} />
       <WidgetBody>
         <Formik
           initialValues={initialValues}
@@ -88,9 +88,9 @@ export function StackDuplicationForm({
     const errors = await validateForm(() => schema, { environmentId, name });
     if (errors) {
       notifyError(
-        'Validation Error',
+        '验证错误',
         undefined,
-        'Please fix the errors and try again.'
+        '请修复错误后重试。'
       );
       return;
     }
@@ -105,11 +105,11 @@ export function StackDuplicationForm({
       },
       {
         onSuccess() {
-          notifySuccess('Success', 'Stack successfully duplicated');
+          notifySuccess('成功', '堆栈复制成功');
           router.stateService.go('docker.stacks', {}, { reload: true });
         },
         onError(error) {
-          notifyError('Failure', error as Error, 'Unable to duplicate stack');
+          notifyError('失败', error as Error, '无法复制堆栈');
         },
       }
     );
@@ -122,7 +122,7 @@ export function StackDuplicationForm({
     const isRename = environmentId === currentEnvironmentId;
 
     const confirmed = await confirm({
-      title: 'Are you sure?',
+      title: '您确定吗？',
       modalType: ModalType.Warn,
       message: isRename
         ? 'This action will deploy a new instance of this stack with the new name that will replace the current stack. Please note that this does NOT migrate the content of any persistent volumes that may be attached to this stack.'
@@ -163,11 +163,11 @@ export function StackDuplicationForm({
       },
       {
         onSuccess() {
-          notifySuccess('Stack successfully migrated', name || stack.Name);
+          notifySuccess('堆栈迁移成功', name || stack.Name);
           router.stateService.go('docker.stacks', {}, { reload: true });
         },
         onError(error) {
-          notifyError('Failure', error as Error, 'Unable to migrate stack');
+          notifyError('失败', error as Error, '无法迁移堆栈');
         },
       }
     );

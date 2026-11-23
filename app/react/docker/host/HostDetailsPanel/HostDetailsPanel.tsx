@@ -44,16 +44,16 @@ export function HostDetailsPanel({
     <div className="row">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <Widget>
-          <WidgetTitle title="Host Details" icon="code" />
+          <WidgetTitle title="主机详情" icon="code" />
           <WidgetBody className="no-padding">
             <DetailsTable dataCy="host-details" className="!mb-0">
               <tr>
-                <td>Hostname</td>
+                <td>主机名</td>
                 <td>{host.name}</td>
               </tr>
               {host.os && (
                 <tr>
-                  <td>OS Information</td>
+                  <td>操作系统信息</td>
                   <td>
                     {host.os.type} {host.os.arch} {host.os.name}
                   </td>
@@ -61,24 +61,24 @@ export function HostDetailsPanel({
               )}
               {host.kernelVersion && (
                 <tr>
-                  <td>Kernel Version</td>
+                  <td>内核版本</td>
                   <td>{host.kernelVersion}</td>
                 </tr>
               )}
               <tr>
-                <td>Total CPU</td>
+                <td>总 CPU</td>
                 <td>{host.totalCPU}</td>
               </tr>
               <tr>
-                <td>Total memory</td>
+                <td>总内存</td>
                 <td>{humanize(host.totalMemory)}</td>
               </tr>
               {endpointId && (
                 <tr>
                   <td>
                     <span className="flex items-center">
-                      Disk usage
-                      <Tooltip message="Disk usage on the partition backing Docker's data directory. Docker usage includes images, container layers, volumes, and build cache." />
+                      磁盘使用
+                      <Tooltip message="支持 Docker 数据目录的分区上的磁盘使用情况。Docker 使用量包括镜像、容器层、卷和构建缓存。" />
                     </span>
                   </td>
                   <td>
@@ -92,10 +92,10 @@ export function HostDetailsPanel({
                     <button
                       type="button"
                       className="btn btn-primary btn-sm"
-                      title="Browse"
+                      title="浏览"
                       onClick={() => router.stateService.go(browseUrl)}
                     >
-                      Browse
+                      浏览
                     </button>
                   </td>
                 </tr>

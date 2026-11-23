@@ -35,7 +35,7 @@ export function PauseButton({
       { environmentId, containerId, nodeName },
       {
         onSuccess() {
-          notifySuccess('Success', 'Container successfully paused');
+          notifySuccess('成功', '容器已成功暂停');
           onSuccess();
         },
       }
@@ -50,11 +50,11 @@ export function PauseButton({
         onClick={handlePause}
         disabled={!isRunning || isPaused || isPortainer}
         isLoading={pauseMutation.isLoading}
-        loadingText="Pausing..."
+        loadingText="正在暂停..."
         data-cy="pause-container-button"
         icon={Pause}
       >
-        Pause
+        暂停
       </LoadingButton>
     </Authorized>
   );

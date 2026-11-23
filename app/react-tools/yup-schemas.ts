@@ -13,7 +13,7 @@ import { NumberSchema, number } from 'yup';
  * @returns A Yup number schema with a custom type error message.
  */
 export function nanNumberSchema(
-  errorMessage = 'Value is required'
+  errorMessage = '值是必填项'
 ): NumberSchema {
   return number().typeError(errorMessage);
 }

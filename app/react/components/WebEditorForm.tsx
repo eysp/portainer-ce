@@ -20,7 +20,7 @@ interface Props extends CodeEditorProps {
 
 export function WebEditorForm({
   id,
-  titleContent = 'Web editor',
+  titleContent = 'Web 编辑器',
   hideTitle,
   children,
   error,

@@ -33,14 +33,14 @@ export function GroupHeader({
           onClick={() => onRefresh?.()}
           data-cy="group-header-refresh"
         >
-          Refresh
+          刷新
         </ActionBarButton>
         <ActionBarButton
           icon={Plus}
           onClick={() => onAddEnvironments?.()}
           data-cy="group-header-add-environments"
         >
-          Add environments
+          添加环境
         </ActionBarButton>
       </div>
       <div className="flex items-center gap-1">
@@ -50,7 +50,7 @@ export function GroupHeader({
           data-cy="group-header-delete"
           color="dangerlight"
         >
-          Delete
+          删除
         </ActionBarButton>
       </div>
     </ActionBarShell>
@@ -60,12 +60,12 @@ export function GroupHeader({
     <ResourceDetailHeader
       isLoading={isLoading}
       errorMessage={
-        !isLoading && !group ? 'Failed to load group details' : undefined
+        !isLoading && !group ? '无法加载分组详细信息' : undefined
       }
       icon={
         <LayoutGrid className="!text-group-accent-8 th-dark:!text-group-accent-2" />
       }
-      subtitleLabel="Environment Group"
+      subtitleLabel="环境分组"
       title={group?.Name || ''}
       badge={group && <PlatformBadge group={group} />}
       description={group?.Description}
@@ -73,7 +73,7 @@ export function GroupHeader({
         group && (
           <HeaderStats>
             <ResourceStatBlock>
-              <ResourceStatBlock.Label>Environments</ResourceStatBlock.Label>
+              <ResourceStatBlock.Label>环境</ResourceStatBlock.Label>
               <ResourceStatBlock.Value>
                 <EnvironmentTypeBreakdown group={group} />
               </ResourceStatBlock.Value>

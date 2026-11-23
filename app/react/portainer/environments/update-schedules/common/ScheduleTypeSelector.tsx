@@ -39,7 +39,7 @@ export function ScheduleTypeSelector() {
             options={[
               {
                 id: ScheduleType.Update,
-                label: 'Update',
+                label: '更新',
                 children: (
                   <UpdateScheduleDetailsFieldset
                     environments={environments}
@@ -52,7 +52,7 @@ export function ScheduleTypeSelector() {
               },
               {
                 id: ScheduleType.Rollback,
-                label: 'Rollback',
+                label: '回滚',
                 children: (
                   <RollbackScheduleDetailsFieldset
                     hasTimeZone={hasTimeZone}

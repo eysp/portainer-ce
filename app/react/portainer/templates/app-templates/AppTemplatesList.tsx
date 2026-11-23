@@ -73,7 +73,7 @@ export function AppTemplatesList({
       <DatatableHeader
         onSearchChange={handleSearchChange}
         searchValue={listState.search}
-        title="Templates"
+        title="应用模板"
         titleIcon={Edit}
         description={
           <Filters
@@ -97,9 +97,9 @@ export function AppTemplatesList({
             linkParams={templateLinkParams?.(template)}
           />
         ))}
-        {!templates && <div className="text-muted text-center">Loading...</div>}
+        {!templates && <div className="text-muted text-center">正在加载...</div>}
         {filteredTemplates.length === 0 && (
-          <div className="text-muted text-center">No templates available.</div>
+          <div className="text-muted text-center">暂无可用模板。</div>
         )}
       </div>
 

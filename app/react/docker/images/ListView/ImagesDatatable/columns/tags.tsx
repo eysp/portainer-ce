@@ -8,10 +8,10 @@ import { Tooltip } from '@@/Tip/Tooltip/Tooltip';
 import { columnHelper } from './helper';
 
 export const tags = columnHelper.accessor(
-  (item) => (isDangling(item.tags) ? 'Dangling' : item.tags?.join(',')),
+  (item) => (isDangling(item.tags) ? '虚悬 (Dangling)' : item.tags?.join(',')),
   {
     id: 'tags',
-    header: 'Tags',
+    header: '标签',
     cell: Cell,
   }
 );
@@ -25,8 +25,8 @@ function Cell({
   if (isDanglingImage) {
     return (
       <Badge type="muted">
-        Dangling
-        <Tooltip message="Dangling images are untagged and no longer referenced by any repository." />
+        虚悬 (Dangling)
+        <Tooltip message="虚悬镜像即未打标签且不再被任何镜像仓库引用的无用镜像。" />
       </Badge>
     );
   }

@@ -44,7 +44,7 @@ export function ContainerDetailsSection({
 
   return (
     <Widget>
-      <Widget.Title icon={List} title="Container details" />
+      <Widget.Title icon={List} title="容器配置详情" />
       <Widget.Body>
         <DetailsTable dataCy="container-details-table">
           <ImageRow
@@ -69,7 +69,7 @@ export function ContainerDetailsSection({
 
           <LabelsRow labels={config.Labels} />
 
-          <DetailsTable.Row label="Restart policies">
+          <DetailsTable.Row label="重启策略">
             <RestartPolicySection
               environmentId={environmentId}
               containerId={container.Id}

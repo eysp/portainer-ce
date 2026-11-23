@@ -15,7 +15,7 @@ export function LabelsTab({
 }) {
   return (
     <InputList
-      label="Labels"
+      label="标签 (Labels)"
       onChange={handleChange}
       errors={errors}
       value={values}

@@ -23,11 +23,11 @@ export function GitSourceSelector({
   return (
     <div className="form-group">
       <div className="col-sm-12">
-        <FormControl label="Source" inputId="source-selector" errors={error}>
+        <FormControl label="资源库" inputId="source-selector" errors={error}>
           <div className="flex items-center gap-2">
             <div className="flex-1">
               <Select
-                placeholder="Select a source"
+                placeholder="选择一个资源库"
                 value={selectedSource ?? null}
                 options={sources}
                 getOptionLabel={(s) => s.name}
@@ -35,7 +35,7 @@ export function GitSourceSelector({
                 onChange={onChange}
                 isClearable
                 isLoading={sourcesQuery.isLoading}
-                noOptionsMessage={() => 'No git sources available'}
+                noOptionsMessage={() => '没有可用的 Git 资源库'}
                 inputId="source-selector"
                 data-cy="source-selector"
                 isDisabled={readOnly}
@@ -45,7 +45,7 @@ export function GitSourceSelector({
               to="portainer.gitops.sources.new"
               data-cy="create-source-button"
             >
-              Create new source
+              创建新资源库
             </AddButton>
           </div>
         </FormControl>

@@ -33,37 +33,35 @@ export function ComposePathField({
       <span className="col-sm-12">
         <TextTip color="blue" className="mb-2">
           <span>
-            Indicate the path to the{' '}
+            指定从代码仓库根目录到{' '}
             {isCompose ? (
-              'Compose'
+              'Compose 文件'
             ) : (
               <a
                 href="https://kubernetes.io/docs/concepts/overview/working-with-objects/"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Kubernetes manifest file
+                Kubernetes manifest 文件
               </a>
             )}{' '}
-            from the root of your repository (requires a yaml, yml, json, or hcl
-            file extension).
+            的路径（需要 yaml, yml, json, 或 hcl 文件后缀）。
           </span>
           {isDockerStandalone && (
             <span className="ml-2">
-              To enable rebuilding of an image if already present on Docker
-              standalone environments, include
-              <code>pull_policy: build</code> in your compose file as per{' '}
+              如需在 Docker 独立环境中重新构建已存在的镜像，请在您的 compose 文件中包含 
+              <code>pull_policy: build</code>，参考{' '}
               <a href="https://docs.docker.com/reference/compose-file/services/#pull_policy">
-                Docker documentation
+                Docker 文档
               </a>
-              .
+              。
             </span>
           )}
         </TextTip>
       </span>
       <div className="col-sm-12">
         <FormControl
-          label={isCompose ? 'Compose path' : 'Manifest path'}
+          label={isCompose ? 'Compose 路径' : 'Manifest 路径'}
           inputId="stack_repository_path"
           required
           errors={errors}

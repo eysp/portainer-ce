@@ -42,7 +42,7 @@ export function StackFromCustomTemplateFormWidget({
         <div className="form-group">
           <div className="col-sm-12">
             <TextTip>
-              This template type cannot be deployed on this environment.
+              当前环境下无法部署此类型的模板。
             </TextTip>
           </div>
         </div>

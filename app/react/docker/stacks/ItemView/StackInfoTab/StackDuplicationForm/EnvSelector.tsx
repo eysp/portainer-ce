@@ -42,7 +42,7 @@ export function EnvSelector({
         value={value}
         onChange={onChange}
         options={environmentOptions}
-        placeholder="Select an environment"
+        placeholder="选择一个环境"
         data-cy="stack-duplicate-environment-select"
       />
       {error && (

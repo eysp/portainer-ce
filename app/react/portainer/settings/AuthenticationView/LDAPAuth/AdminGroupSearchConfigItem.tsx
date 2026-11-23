@@ -1,4 +1,4 @@
-import { Input } from '@@/form-components/Input';
+﻿import { Input } from '@@/form-components/Input';
 import { InputListActionButtons } from '@@/form-components/InputList/ActionButtons';
 import { FormControl } from '@@/form-components/FormControl';
 
@@ -27,8 +27,8 @@ export function AdminGroupSearchConfigItem({
         <FormControl
           size="large"
           className="w-1/2 flex-1"
-          label="Group Base DN"
-          tooltip="The distinguished name of the element from which the LDAP server will search for groups."
+          label="组基础 DN"
+          tooltip="LDAP 服务器将从中搜索组的元素的专有名称。"
           inputId={`ldap_admin_group_basedn_${index}`}
         >
           <Input
@@ -47,8 +47,8 @@ export function AdminGroupSearchConfigItem({
         <FormControl
           size="large"
           className="w-1/2 flex-1"
-          label="Group Membership Attribute"
-          tooltip="LDAP attribute which denotes the group membership."
+          label="组成员属性"
+          tooltip="表示组成员身份的 LDAP 属性。"
           inputId={`ldap_admin_group_att_${index}`}
         >
           <Input
@@ -69,8 +69,8 @@ export function AdminGroupSearchConfigItem({
         <FormControl
           size="small"
           className="w-full flex-1"
-          label="Group Filter"
-          tooltip="The LDAP search filter used to select group elements, optional."
+          label="组过滤"
+          tooltip="用于选择组元素的 LDAP 搜索过滤器，可选。"
           inputId={`ldap_admin_group_filter_${index}`}
         >
           <div className="vertical-center">

@@ -57,7 +57,7 @@ export function AccessTab() {
       createMutation,
       usersAndTeams.map((access) => ({ ...access, Role: { Id: roleId } })),
       'set',
-      'Access successfully updated',
+      '访问更新成功',
       onSuccess
     );
   }
@@ -70,7 +70,7 @@ export function AccessTab() {
       datatableMutation,
       [...updatedUsers, ...updatedTeams],
       'set',
-      'Access successfully updated'
+      '访问更新成功'
     );
   }
 
@@ -79,7 +79,7 @@ export function AccessTab() {
       datatableMutation,
       accesses,
       'delete',
-      'Access successfully removed'
+      '访问移除成功'
     );
   }
 

@@ -1,4 +1,4 @@
-import { Edit } from 'lucide-react';
+﻿import { Edit } from 'lucide-react';
 
 import { FeatureId } from '@/react/portainer/feature-flags/enums';
 import Openldap from '@/assets/ico/vendor/openldap.svg?c';
@@ -14,7 +14,7 @@ export const options = [
     id: 'ldap_custom',
     icon: Edit,
     iconType: 'badge',
-    label: 'Custom',
+    label: '自定义',
     value: SERVER_TYPES.CUSTOM,
   },
   {

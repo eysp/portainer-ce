@@ -23,7 +23,7 @@ export function useStack<T = Stack>(
 
 async function getStack(stackId?: StackId) {
   if (!stackId) {
-    throw new Error('Stack ID is required');
+    throw new Error('堆栈 ID 是必填项');
   }
   try {
     const { data } = await axios.get<Stack>(buildStackUrl(stackId));

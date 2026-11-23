@@ -88,7 +88,7 @@ export function CreateStackForm({ environmentId, isSwarm, swarmId }: Props) {
 
     createStackMutation.mutate(payload, {
       onSuccess: (stack) => {
-        notifySuccess('Success', 'Stack successfully created');
+        notifySuccess('Success', '堆栈创建成功');
         router.stateService.go('docker.stacks.stack', {
           name: stack.Name,
           id: stack.Id,
@@ -147,7 +147,7 @@ function buildCreateStackPayload({
 
     case 'upload':
       if (!values.upload.file) {
-        throw new Error('File is required for upload method');
+        throw new Error('对于上传方法，文件是必填项');
       }
       if (stackType === 'swarm') {
         return {

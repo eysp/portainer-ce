@@ -40,32 +40,32 @@ const NvidiaCapabilitiesOptions = [
   {
     value: 'compute',
     label: 'compute',
-    description: 'required for CUDA and OpenCL applications',
+    description: 'CUDA 和 OpenCL 应用程序所需',
   },
   {
     value: 'compat32',
     label: 'compat32',
-    description: 'required for running 32-bit applications',
+    description: '运行 32 位应用程序所需',
   },
   {
     value: 'graphics',
     label: 'graphics',
-    description: 'required for running OpenGL and Vulkan applications',
+    description: '运行 OpenGL 和 Vulkan 应用程序所需',
   },
   {
     value: 'utility',
     label: 'utility',
-    description: 'required for using nvidia-smi and NVML',
+    description: '使用 nvidia-smi 和 NVML 所需',
   },
   {
     value: 'video',
     label: 'video',
-    description: 'required for using the Video Codec SDK',
+    description: '使用视频编解码 SDK 所需',
   },
   {
     value: 'display',
     label: 'display',
-    description: 'required for leveraging X11 display',
+    description: '利用 X11 显示输出所需',
   },
 ] as const;
 
@@ -82,13 +82,13 @@ export function GpuFieldset({
       value: gpu.value,
       label:
         usedGpus.includes(gpu.value) || usedAllGpus
-          ? `${gpu.name} (in use)`
+          ? `${gpu.name} (使用中)`
           : gpu.name,
     }));
 
     options.unshift({
       value: 'all',
-      label: 'Use All GPUs',
+      label: '使用所有 GPU',
     });
 
     return options;
@@ -118,18 +118,18 @@ export function GpuFieldset({
   return (
     <div>
       <TextTip inline={false} color="blue">
-        <p>GPU support is currently limited to NVIDIA graphics cards only.</p>
+        <p>GPU 支持目前仅限于 NVIDIA 系列显卡。</p>
       </TextTip>
 
       {!enableGpuManagement && (
         <TextTip color="blue">
-          GPU in the UI is not currently enabled for this environment.
+          当前环境未在 UI 中启用 GPU 管理支持。
         </TextTip>
       )}
 
       <div className="form-group">
         <div className="col-sm-3 col-lg-2 control-label text-left">
-          Enable GPU
+          启用 GPU
           <Switch
             id="enabled"
             name="enabled"
@@ -163,8 +163,8 @@ export function GpuFieldset({
         <>
           <div className="form-group">
             <div className="col-sm-3 col-lg-2 control-label text-left">
-              Capabilities
-              <Tooltip message="‘compute’ and ‘utility’ capabilities are preselected by Portainer because they are used by default when you don’t explicitly specify capabilities with docker CLI ‘--gpus’ option." />
+              特性能力 (Capabilities)
+              <Tooltip message="Portainer 默认预选了“compute”和“utility”，因为当您未在 docker CLI 中明确指定 ‘--gpus’ 特性时，默认会使用这两项。" />
             </div>
             <div className="col-sm-9 col-lg-10 text-left">
               <Select<GpuOption, true>
@@ -182,8 +182,8 @@ export function GpuFieldset({
 
           <div className="form-group">
             <div className="col-sm-3 col-lg-2 control-label text-left">
-              Control
-              <Tooltip message="This is the generated equivalent of the '--gpus' docker CLI parameter based on your settings." />
+              生成的 Docker 参数
+              <Tooltip message="这是根据您的配置生成的等效 '--gpus' Docker 命令行参数。" />
             </div>
             <div className="col-sm-9 col-lg-10">
               <code>{gpuCmd}</code>

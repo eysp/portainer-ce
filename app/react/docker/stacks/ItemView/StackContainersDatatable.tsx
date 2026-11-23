@@ -28,11 +28,11 @@ const storageKey = 'stack-containers';
 const settingsStore = createStore(storageKey);
 
 const actions = [
-  buildAction('logs', 'Logs'),
-  buildAction('inspect', 'Inspect'),
-  buildAction('stats', 'Stats'),
-  buildAction('exec', 'Console'),
-  buildAction('attach', 'Attach'),
+  buildAction('logs', '日志'),
+  buildAction('inspect', '检查'),
+  buildAction('stats', '状态统计'),
+  buildAction('exec', '控制台'),
+  buildAction('attach', '附加'),
 ];
 
 export interface Props {
@@ -63,7 +63,7 @@ export function StackContainersDatatable({ stackName }: Props) {
     <RowProvider context={{ environment }}>
       <TableSettingsProvider settings={settingsStore}>
         <Datatable
-          title="Containers"
+          title="容器"
           titleIcon={Box}
           settingsManager={tableState}
           columns={columns}

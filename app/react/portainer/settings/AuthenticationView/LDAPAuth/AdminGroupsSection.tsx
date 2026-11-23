@@ -1,4 +1,4 @@
-import { PlusIcon } from 'lucide-react';
+﻿import { PlusIcon } from 'lucide-react';
 
 import { isLimitedToBE } from '@/react/portainer/feature-flags/feature-flags.service';
 import { FeatureId } from '@/react/portainer/feature-flags/enums';
@@ -76,8 +76,7 @@ export function AdminGroupsSection({
   limitedFeatureId,
   isLimitedFeatureSelfContained,
 }: AdminGroupsSectionProps) {
-  const isLimited =
-    (isLimitedFeatureSelfContained ?? false) || isLimitedToBE(limitedFeatureId);
+  const isLimited = isLimitedToBE(limitedFeatureId);
 
   const { handleAdd, handleRemoveItem, handleChangeItem } = useInputList({
     value: searchSettings,
@@ -90,49 +89,46 @@ export function AdminGroupsSection({
   });
 
   const enableAssignAdminGroup = groups !== null && groups.length > 0;
-  const groupOptions = (groups ?? []).map((g) => ({ label: g, value: g }));
+  const groupOptions = (groups || []).map((group) => ({
+    label: group,
+    value: group,
+  }));
 
   return (
     <FormSection
       title={
         <>
-          Auto-populate team admins
+          自动填充团队管理员
           {isLimitedFeatureSelfContained && limitedFeatureId && (
             <BEFeatureIndicator featureId={limitedFeatureId} className="ml-2" />
           )}
         </>
       }
     >
-      <div className="space-y-3">
-        {searchSettings.map((config, index) => (
-          <Widget
-            key={index}
-            aria-label={`Admin group search configuration ${index + 1}`}
-          >
-            <WidgetBody>
-              {index > 0 && (
-                <div className="form-group mt-2">
-                  <span className="col-sm-12 text-muted small">
-                    Extra search configuration
-                  </span>
-                </div>
-              )}
-
-              <AdminGroupSearchConfigItem
-                value={config}
-                index={index}
-                count={searchSettings.length}
-                isLimited={isLimited}
-                onChange={(value) => handleChangeItem(index, value)}
-                onRemove={() => handleRemoveItem(index, config)}
-              />
-            </WidgetBody>
-          </Widget>
-        ))}
+      <div className="form-group">
+        <span className="col-sm-12 text-muted small">
+          如果未添加组搜索配置，自动填充将使用您的默认组搜索配置。
+        </span>
       </div>
 
-      <div className="form-group mt-2">
-        <div className="col-sm-12">
+      <Widget>
+        <WidgetBody>
+          {searchSettings.map((item, index) => (
+            <AdminGroupSearchConfigItem
+              key={index}
+              value={item}
+              index={index}
+              count={searchSettings.length}
+              isLimited={isLimited}
+              onChange={(value) => handleChangeItem(value, index)}
+              onRemove={() => handleRemoveItem(index)}
+            />
+          ))}
+        </WidgetBody>
+      </Widget>
+
+      <div className="form-group">
+        <div className="col-sm-12 mt-2">
           <Button
             color="light"
             size="small"
@@ -141,7 +137,7 @@ export function AdminGroupsSection({
             data-cy="add-group-btn"
             icon={PlusIcon}
           >
-            Add group search configuration
+            添加组搜索配置
           </Button>
         </div>
 
@@ -152,15 +148,15 @@ export function AdminGroupsSection({
             type="button"
             disabled={isLimited}
             isLoading={isFetching}
-            loadingText="Fetching..."
+            loadingText="获取中..."
             onClick={onFetch}
             className={isLimited ? 'limited-be' : undefined}
             data-cy="ldap-fetch-admin-groups"
           >
-            Fetch Admin Group(s)
+            获取管理员组
           </LoadingButton>
           {!!groups && groups.length === 0 && (
-            <FormError>No groups found</FormError>
+            <FormError>未找到组</FormError>
           )}
         </div>
       </div>
@@ -168,7 +164,7 @@ export function AdminGroupsSection({
       <div className="form-group">
         <div className="col-sm-12">
           <SwitchField
-            label="Assign admin rights to group(s)"
+            label="分配管理员权限给组"
             checked={autoPopulate}
             onChange={onAutoPopulateChange}
             disabled={!enableAssignAdminGroup}
@@ -183,7 +179,7 @@ export function AdminGroupsSection({
             htmlFor="group-access"
             className="control-label col-sm-2 text-left"
           >
-            Select Group(s)
+            选择组
           </label>
           <div className="col-sm-8">
             <MultiSelect
@@ -191,7 +187,7 @@ export function AdminGroupsSection({
               value={selectedAdminGroups}
               onChange={onSelectedAdminGroupsChange}
               options={groupOptions}
-              placeholder="Select one or more groups"
+              placeholder="选择一个或多个组"
               data-cy="group-access-selector"
             />
           </div>
@@ -202,5 +198,5 @@ export function AdminGroupsSection({
 }
 
 function noop() {
-  // CE stub – admin group fetch is a BE-only feature
+  // CE stub — admin group fetch is a BE-only feature
 }

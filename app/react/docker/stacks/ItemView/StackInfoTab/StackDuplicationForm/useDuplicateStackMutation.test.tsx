@@ -84,7 +84,7 @@ describe('Swarm stack duplication', () => {
         targetEnvironmentId: 2,
         type: StackType.DockerSwarm,
       })
-    ).rejects.toThrow('Swarm ID is required');
+    ).rejects.toThrow('Swarm ID 是必填项');
   });
 
   it('should pass swarmID from getSwarm response', async () => {

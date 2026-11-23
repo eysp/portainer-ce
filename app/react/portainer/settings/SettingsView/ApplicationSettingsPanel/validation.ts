@@ -13,7 +13,7 @@ export function validation(): SchemaOf<Values> {
       .when('loginBannerEnabled', {
         is: true,
         then: (schema) =>
-          schema.required('Login banner is required when enabled'),
+          schema.required('启用后必须填写登录横幅'),
       }),
     logoEnabled: boolean().default(false),
     logo: string()
@@ -22,7 +22,7 @@ export function validation(): SchemaOf<Values> {
         is: true,
         then: (schema) =>
           schema
-            .required('Logo url is required when enabled')
+            .required('启用后必须填写 Logo URL')
             .test('valid-url', 'Must be a valid URL', (value) =>
               isValidUrl(value)
             ),

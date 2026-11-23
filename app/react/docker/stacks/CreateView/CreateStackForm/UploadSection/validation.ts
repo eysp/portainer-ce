@@ -11,7 +11,7 @@ export function getUploadValidationSchema({
 }): SchemaOf<UploadFormValues> {
   return object({
     file: mixed<File>()
-      .required('Stack file is required')
+      .required('堆栈文件是必填项')
       .test(
         'valid-yaml',
         'Invalid YAML',

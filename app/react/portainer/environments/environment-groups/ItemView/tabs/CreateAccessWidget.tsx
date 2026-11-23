@@ -51,12 +51,11 @@ export function CreateAccessWidget({
     }));
 
   return (
-    <Widget aria-label="Create access">
-      <WidgetTitle icon={UserPlus} title="Create access" />
+    <Widget aria-label="创建访问">
+      <WidgetTitle icon={UserPlus} title="创建访问" />
       <WidgetBody>
         <TextTip className="mb-4" childrenWrapperClassName="text-warning">
-          Adding user access will require the affected user(s) to logout and
-          login for the changes to be taken into account.
+          添加用户访问权限将需要受影响的用户注销并重新登录才能使更改生效。
         </TextTip>
 
         <form className="form-horizontal" onSubmit={handleSubmit}>
@@ -67,7 +66,7 @@ export function CreateAccessWidget({
             isLoading={isLoading}
           />
 
-          <FormControl label="Role" inputId="role-selector">
+          <FormControl label="角色" inputId="role-selector">
             <div className="flex items-center gap-2">
               <div className="flex-1">
                 <PortainerSelect
@@ -94,11 +93,11 @@ export function CreateAccessWidget({
                 className="!ml-0"
                 disabled={selectedUsersAndTeams.length === 0}
                 isLoading={isUpdating}
-                loadingText="Creating access..."
+                loadingText="正在创建访问..."
                 icon={Plus}
                 data-cy="access-createAccess"
               >
-                Create access
+                创建访问
               </LoadingButton>
             </div>
           </div>
@@ -124,7 +123,7 @@ export function CreateAccessWidget({
     }
 
     return isRoleLimited(roleId)
-      ? `${roleName} (Business Feature)`
-      : `${roleName} (Default)`;
+      ? `${roleName} (商业功能)`
+      : `${roleName} (默认)`;
   }
 }

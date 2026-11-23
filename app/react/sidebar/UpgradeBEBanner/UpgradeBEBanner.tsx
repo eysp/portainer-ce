@@ -45,10 +45,7 @@ function UpgradeBEBanner() {
 
   const systemInfo = systemInfoQuery.data;
 
-  if (
-    !enabledPlatforms.includes(systemInfo.platform) &&
-    process.env.FORCE_SHOW_UPGRADE_BANNER !== ''
-  ) {
+  {
     return null;
   }
 

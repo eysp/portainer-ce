@@ -31,7 +31,7 @@ export async function duplicateStack({
     const swarm = await getSwarm(targetEnvironmentId);
 
     if (!swarm.ID) {
-      throw new Error('Swarm ID is required to duplicate a Swarm stack');
+      throw new Error('复制 Swarm 堆栈需要 Swarm ID');
     }
 
     return createSwarmStackFromFileContent({

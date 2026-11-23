@@ -59,8 +59,8 @@ export function AuthorizedWebhook({
         checked={value}
         onChange={(checked) => onChange(checked)}
         labelClass="col-sm-2"
-        tooltip="Create a webhook (or callback URI) to automate the update of this stack. Sending a POST request to this callback URI (without requiring any authentication) will pull the most up-to-date version of the associated image and re-deploy this stack."
-        label="Create a Stack webhook"
+        tooltip="创建 webhook（或回调 URI）以自动更新此堆栈。向此回调 URI 发送 POST 请求（无需任何身份验证）将拉取相关镜像的最新版本并重新部署此堆栈。"
+        label="创建堆栈 webhook"
         featureId={FeatureId.STACK_WEBHOOK}
         data-cy="stack-webhook-switch"
         disabled={disabled}

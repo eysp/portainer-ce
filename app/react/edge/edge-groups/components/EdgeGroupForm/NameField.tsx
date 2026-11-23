@@ -28,7 +28,7 @@ export function useNameValidation(id?: EdgeGroup['Id']) {
   return useMemo(
     () =>
       string()
-        .required('Name is required')
+        .required('名称是必填项')
         .test({
           name: 'is-unique',
           test: (value) =>

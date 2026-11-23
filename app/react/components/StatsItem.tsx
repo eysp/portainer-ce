@@ -33,7 +33,7 @@ interface StatsProps {
 
 export function NodeStats({ value }: StatsProps) {
   return (
-    <StatsItem icon={LaptopMinimal} title="NODES">
+    <StatsItem icon={LaptopMinimal} title="节点">
       <span className="text-left">{value}</span>
     </StatsItem>
   );
@@ -41,7 +41,7 @@ export function NodeStats({ value }: StatsProps) {
 
 export function CPUStats({ value }: StatsProps) {
   return (
-    <StatsItem icon={Cpu} title="CORES">
+    <StatsItem icon={Cpu} title="核心">
       <span className="tabular-nums">{value}</span>
     </StatsItem>
   );
@@ -49,7 +49,7 @@ export function CPUStats({ value }: StatsProps) {
 
 export function MemoryStats({ value }: StatsProps) {
   return (
-    <StatsItem icon={MemoryStick} title="MEMORY">
+    <StatsItem icon={MemoryStick} title="内存">
       <span className="text-left">{value}</span>
     </StatsItem>
   );
@@ -57,7 +57,7 @@ export function MemoryStats({ value }: StatsProps) {
 
 export function GpuStats({ value }: StatsProps) {
   return (
-    <StatsItem icon={Gpu} title="GPUS">
+    <StatsItem icon={Gpu} title="GPU">
       <span className="text-left">{value}</span>
     </StatsItem>
   );
@@ -78,12 +78,12 @@ export function ContainerStats({
   const safeStopped = stopped || 0;
   const actualTotal = total || safeRunning + safeStopped;
   return (
-    <StatsItem title="CONTAINERS" icon={Box}>
+    <StatsItem title="容器" icon={Box}>
       <span aria-hidden="true">
         {safeRunning} / {actualTotal}
       </span>
       <span className="sr-only">
-        {safeRunning} of {actualTotal} containers running
+        {actualTotal} 个容器中有 {safeRunning} 个运行中
       </span>
     </StatsItem>
   );

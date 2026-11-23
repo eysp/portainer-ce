@@ -33,7 +33,7 @@ export function ImportExportButtons({
           }}
           aria-disabled={exportMutation.isLoading}
         >
-          Import
+          导入
         </Button>
       </Authorized>
       <Authorized authorizations="DockerImageGet">
@@ -42,12 +42,12 @@ export function ImportExportButtons({
           color="light"
           icon={Download}
           isLoading={exportMutation.isLoading}
-          loadingText="Export in progress..."
+          loadingText="正在导出..."
           data-cy="image-exportImageButton"
           onClick={() => handleExport()}
           disabled={selectedItems.length === 0}
         >
-          Export
+          导出
         </LoadingButton>
       </Authorized>
     </ButtonGroup>
@@ -78,7 +78,7 @@ function isValidToDownload(selectedItems: Array<ImagesListResponse>) {
     const untagged = image.tags?.find((item) => item.includes('<none>'));
 
     if (untagged) {
-      notifyWarning('', 'Cannot download an untagged image');
+      notifyWarning('', '无法下载未打标签的镜像');
       return false;
     }
   }
@@ -86,7 +86,7 @@ function isValidToDownload(selectedItems: Array<ImagesListResponse>) {
   if (_.uniqBy(selectedItems, 'nodeName').length > 1) {
     notifyWarning(
       '',
-      'Cannot download images from different nodes at the same time'
+      '无法同时从不同节点下载镜像'
     );
     return false;
   }

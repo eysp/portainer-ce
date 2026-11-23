@@ -46,7 +46,7 @@ export function EditResourcesForm({
 
   const updateMutation = useMutation(
     updateLimitsOrCreate,
-    mutationOptions(withError('Failed to update limits'))
+    mutationOptions(withError('更新资源限制失败'))
   );
 
   const environmentId = useEnvironmentId();
@@ -75,16 +75,15 @@ export function EditResourcesForm({
                 isLoading={updateMutation.isLoading}
                 data-cy="update-limits-button"
                 disabled={isImageInvalid || !dirty}
-                loadingText="Update in progress..."
+                loadingText="正在更新..."
                 type="button"
                 onClick={submitForm}
               >
-                Update Limits
+                更新资源限制
               </LoadingButton>
               {settingUnlimitedResources(values) && (
                 <TextTip>
-                  Updating any resource value to &apos;unlimited&apos; will
-                  redeploy this container.
+                  将任意资源限制值设为“无限制”将重新部署此容器。
                 </TextTip>
               )}
             </div>
@@ -98,7 +97,7 @@ export function EditResourcesForm({
     updateMutation.mutate(values, {
       onSuccess: (data) => {
         if (data) {
-          notifySuccess('Success', 'Limits updated');
+          notifySuccess('成功', '资源限制已更新');
           helper.resetForm({ values: initialValues });
           invalidateContainer(environmentId, containerId);
         }

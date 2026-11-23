@@ -527,7 +527,7 @@ async function renderComponent(
 
   const queries = render(<Wrapped onClickBrowse={vi.fn()} />);
 
-  await queries.findByText('SORT BY:');
+  await queries.findByText('排序方式：');
 
   return queries;
 }

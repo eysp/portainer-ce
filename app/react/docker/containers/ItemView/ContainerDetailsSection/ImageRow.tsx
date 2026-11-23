@@ -9,7 +9,7 @@ interface ImageRowProps {
 
 export function ImageRow({ image, imageHash, nodeName }: ImageRowProps) {
   return (
-    <DetailsTable.Row label="Image">
+    <DetailsTable.Row label="镜像">
       <Link
         data-cy="container-image-link"
         to="docker.images.image"

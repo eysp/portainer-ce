@@ -50,7 +50,7 @@ export function TimeWindowPicker({
       )}
       <Alert color="info" className="[&>div]:!text-xs">
         <span>
-          GitOps updates to stacks or applications outside{' '}
+          GitOps 对栈或应用的更新将不会在{' '}
           <span className="font-bold">{`${formatUTCTime(
             values.StartTime,
             summaryTimeFormat
@@ -62,9 +62,9 @@ export function TimeWindowPicker({
             timeZone,
             summaryTimeFormat
           )} - ${utcToTimeZone(values.EndTime, timeZone, summaryTimeFormat)} ${
-            moment().isDST() ? ' DST' : ''
+            moment().isDST() ? ' 夏令时' : ''
           } ${timeZone})`}</span>{' '}
-          will not occur.
+          范围外执行。
         </span>
       </Alert>
       {values.Enabled && (
@@ -76,7 +76,7 @@ export function TimeWindowPicker({
               className="!ml-0"
               onClick={() => setIsEditMode(true)}
             >
-              Edit Change Window
+              编辑变更窗口
             </Button>
           )}
           {isEditMode && (
@@ -90,7 +90,7 @@ export function TimeWindowPicker({
                 onChangeTimeZone(initialTimeZone || moment.tz.guess());
               }}
             >
-              Cancel
+              取消
             </Button>
           )}
         </div>

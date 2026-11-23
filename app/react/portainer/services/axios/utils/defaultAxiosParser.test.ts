@@ -8,14 +8,14 @@ describe('defaultErrorParser', () => {
     it('should extract from errors array format', () => {
       const axiosError = createMockAxiosError({
         errors: [
-          { message: 'Validation failed', details: 'Email is required' },
+          { message: 'Validation failed', details: '邮箱是必填项' },
         ],
       });
 
       const result = defaultErrorParser(axiosError);
 
       expect(result.error.message).toBe('Validation failed');
-      expect(result.details).toBe('Email is required');
+      expect(result.details).toBe('邮箱是必填项');
     });
 
     it('should use message as details fallback in errors array format', () => {

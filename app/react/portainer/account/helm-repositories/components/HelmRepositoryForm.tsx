@@ -59,9 +59,9 @@ export function HelmRepositoryForm({
                 disabled={!isValid || !dirty}
                 data-cy="helm-repository-save-button"
                 isLoading={isLoading}
-                loadingText="Saving Helm repository..."
+                loadingText="正在保存 Helm 仓库..."
               >
-                {isEditing ? 'Update Helm repository' : 'Save Helm repository'}
+                {isEditing ? '更新 Helm 仓库' : '保存 Helm 仓库'}
               </LoadingButton>
               {isEditing && (
                 <Button
@@ -69,7 +69,7 @@ export function HelmRepositoryForm({
                   data-cy="helm-repository-cancel-button"
                   onClick={() => router.stateService.go('portainer.account')}
                 >
-                  Cancel
+                  取消
                 </Button>
               )}
             </div>

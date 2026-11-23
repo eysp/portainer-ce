@@ -42,7 +42,7 @@ describe('Upload validation', () => {
     };
 
     await expect(schema.validate(invalidData)).rejects.toThrow(
-      'Stack file is required'
+      '堆栈文件是必填项'
     );
   });
 

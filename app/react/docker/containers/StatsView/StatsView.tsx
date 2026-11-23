@@ -156,30 +156,28 @@ export function StatsView() {
   return (
     <>
       <PageHeader
-        title="Container statistics"
+        title="容器实时统计"
         breadcrumbs={[
-          { label: 'Containers', link: 'docker.containers' },
+          { label: '容器列表', link: 'docker.containers' },
           {
             label: containerName || containerId,
             link: 'docker.containers.container',
             linkParams: { id: containerId },
           },
-          'Stats',
+          '统计',
         ]}
       />
 
       <div className="row">
         <div className="col-md-12">
           <Widget>
-            <WidgetTitle icon="info" title="About statistics" />
+            <WidgetTitle icon="info" title="关于实时统计" />
             <WidgetBody>
               <form className="form-horizontal">
                 <div className="form-group">
                   <div className="col-sm-12">
                     <span className="small text-muted">
-                      This view displays real-time statistics about the
-                      container <b>{containerName}</b> as well as a list of the
-                      running processes inside this container.
+                      此视图显示容器 <b>{containerName}</b> 的实时运行统计信息以及该容器内正在运行的进程列表。
                     </span>
                   </div>
                 </div>
@@ -188,7 +186,7 @@ export function StatsView() {
                     htmlFor="refreshRate"
                     className="col-sm-3 col-md-2 control-label text-left"
                   >
-                    Refresh rate
+                    刷新频率
                   </label>
                   <div className="col-sm-3 col-md-2">
                     <select
@@ -210,7 +208,7 @@ export function StatsView() {
                   <div className="form-group">
                     <div className="col-sm-12">
                       <span className="small text-muted">
-                        Network stats are unavailable for this container.
+                        此容器的网络统计不可用。
                       </span>
                     </div>
                   </div>
@@ -219,7 +217,7 @@ export function StatsView() {
                   <div className="form-group">
                     <div className="col-sm-12">
                       <span className="small text-muted">
-                        I/O stats are unavailable for this container.
+                        此容器的 I/O 读写统计不可用。
                       </span>
                     </div>
                   </div>
@@ -231,7 +229,7 @@ export function StatsView() {
       </div>
 
       {fetchError && (
-        <InformationPanel title="Unable to retrieve container statistics">
+        <InformationPanel title="无法获取容器统计信息">
           <span className="small text-danger">{fetchError}</span>
         </InformationPanel>
       )}
@@ -239,21 +237,21 @@ export function StatsView() {
       <div className="row">
         <div className="col-lg-6 col-md-6 col-sm-12">
           <Widget>
-            <WidgetTitle icon="bar-chart-2" title="Memory usage" />
+            <WidgetTitle icon="bar-chart-2" title="内存使用量" />
             <WidgetBody>
               <StatsLineChart
                 data={chartData}
                 series={[
                   {
                     dataKey: 'memory',
-                    name: 'Memory',
+                    name: '内存 (Memory)',
                     color: PRIMARY,
                     area: true,
                     stackId: 'mem',
                   },
                   {
                     dataKey: 'cache',
-                    name: 'Cache',
+                    name: '缓存 (Cache)',
                     color: SECONDARY,
                     area: true,
                     stackId: 'mem',
@@ -268,7 +266,7 @@ export function StatsView() {
 
         <div className="col-lg-6 col-md-6 col-sm-12">
           <Widget>
-            <WidgetTitle icon="bar-chart-2" title="CPU usage" />
+            <WidgetTitle icon="bar-chart-2" title="CPU 使用率" />
             <WidgetBody>
               <StatsLineChart
                 data={chartData}
@@ -291,14 +289,14 @@ export function StatsView() {
             <Widget>
               <WidgetTitle
                 icon="bar-chart-2"
-                title="Network usage (aggregate)"
+                title="网络流量统计 (聚合)"
               />
               <WidgetBody>
                 <StatsLineChart
                   data={chartData}
                   series={[
-                    { dataKey: 'rx', name: 'RX on eth0', color: PRIMARY },
-                    { dataKey: 'tx', name: 'TX on eth0', color: SECONDARY },
+                    { dataKey: 'rx', name: '接收 (RX)', color: PRIMARY },
+                    { dataKey: 'tx', name: '发送 (TX)', color: SECONDARY },
                   ]}
                   yAxisFormatter={formatBytes}
                 />
@@ -310,21 +308,21 @@ export function StatsView() {
         {!ioUnavailable && (
           <div className="col-lg-6 col-md-6 col-sm-12">
             <Widget>
-              <WidgetTitle icon="bar-chart-2" title="I/O usage (aggregate)" />
+              <WidgetTitle icon="bar-chart-2" title="I/O 读写统计 (聚合)" />
               <WidgetBody>
                 <StatsLineChart
                   data={chartData}
                   series={[
                     {
                       dataKey: 'ioRead',
-                      name: 'Read (Aggregate)',
+                      name: '读取 (聚合)',
                       color: PRIMARY,
                       area: true,
                       stackId: 'io',
                     },
                     {
                       dataKey: 'ioWrite',
-                      name: 'Write (Aggregate)',
+                      name: '写入 (聚合)',
                       color: SECONDARY,
                       area: true,
                       stackId: 'io',

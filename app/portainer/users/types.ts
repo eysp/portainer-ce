@@ -12,9 +12,9 @@ export enum Role {
 }
 
 export const RoleNames: { [key in Role]: string } = {
-  [Role.Admin]: 'administrator',
-  [Role.Standard]: 'user',
-  [Role.EdgeAdmin]: 'edge administrator',
+  [Role.Admin]: '管理员',
+  [Role.Standard]: '普通用户',
+  [Role.EdgeAdmin]: '边缘管理员',
 };
 
 export type ThemeColor = 'dark' | 'light' | 'highcontrast' | 'auto';

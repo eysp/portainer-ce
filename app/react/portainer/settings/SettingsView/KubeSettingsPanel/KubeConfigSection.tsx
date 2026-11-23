@@ -6,23 +6,23 @@ import { PortainerSelect } from '@@/form-components/PortainerSelect';
 
 const options = [
   {
-    label: '1 day',
+    label: '1 天',
     value: '24h',
   },
   {
-    label: '7 days',
+    label: '7 天',
     value: `${24 * 7}h`,
   },
   {
-    label: '30 days',
+    label: '30 天',
     value: `${24 * 30}h`,
   },
   {
-    label: '1 year',
+    label: '1 年',
     value: `${24 * 30 * 12}h`,
   },
   {
-    label: 'No expiry',
+    label: '永不过期',
     value: '0',
   },
 ] as const;
@@ -32,8 +32,8 @@ export function KubeConfigSection() {
     useField<string>('kubeconfigExpiry');
 
   return (
-    <FormSection title="Kubeconfig">
-      <FormControl label="Kubeconfig expiry" errors={error}>
+    <FormSection title="Kubeconfig (配置文件)">
+      <FormControl label="Kubeconfig 过期时间" errors={error}>
         <PortainerSelect
           value={value}
           options={options}

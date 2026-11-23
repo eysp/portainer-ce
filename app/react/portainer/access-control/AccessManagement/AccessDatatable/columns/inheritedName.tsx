@@ -1,6 +1,7 @@
 import { helper } from './helper';
 
 export const inheritedName = helper.accessor('Name', {
+  header: '名称',
   cell({ row: { original: item }, getValue }) {
     const name = getValue();
     return (

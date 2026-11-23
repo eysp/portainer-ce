@@ -47,7 +47,7 @@ export function EnvironmentDetailsForm({
   );
 
   function handleSuccess() {
-    notifySuccess('Environment updated', environment.Name);
+    notifySuccess('环境已更新', environment.Name);
     router.stateService.go(
       redirectTo || 'portainer.endpoints',
       {},

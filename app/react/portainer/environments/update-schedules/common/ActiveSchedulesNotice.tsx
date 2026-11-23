@@ -70,7 +70,7 @@ export function ActiveSchedulesNotice({
           schedules.map(
             ({ currentVersion, scheduleCount, targetVersion, type }) => (
               <ActiveSchedulesNoticeItem
-                currentVersion={currentVersion || 'unknown version'}
+                currentVersion={currentVersion || '未知版本'}
                 key={`${edgeGroupId}-${currentVersion}-${targetVersion}`}
                 name={edgeGroupName}
                 scheduleCount={scheduleCount}
@@ -101,9 +101,7 @@ function ActiveSchedulesNoticeItem({
   return (
     <div className="flex items-center gap-1 text-sm">
       <Clock className="lucide" />
-      {scheduleCount} edge devices in {name} are scheduled for{' '}
-      {scheduleType === ScheduleType.Rollback ? 'rollback' : 'update'} from{' '}
-      {currentVersion} to {version}
+      {name} 中的 {scheduleCount} 个边缘设备已计划从 {currentVersion} {scheduleType === ScheduleType.Rollback ? '回滚' : '更新'} 到 {version}
     </div>
   );
 }

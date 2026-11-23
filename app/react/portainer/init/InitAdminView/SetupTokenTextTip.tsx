@@ -3,15 +3,15 @@ import { TextTip } from '@@/Tip/TextTip';
 export function SetupTokenTextTip() {
   return (
     <TextTip color="blue">
-      Find this token in the Portainer server logs. See the{' '}
+      在 Portainer 服务端日志中可找到此令牌。查看相关{' '}
       <a
         href="https://docs.portainer.io/faqs/installing/setup-token"
         target="_blank"
         rel="noreferrer"
       >
-        setup token FAQ
+        设置令牌常见问题 (FAQ)
       </a>{' '}
-      for more information.
+      获取更多信息。
     </TextTip>
   );
 }

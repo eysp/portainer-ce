@@ -18,7 +18,7 @@ export function GpuRow({ deviceRequests }: GpuRowProps) {
     return null;
   }
 
-  return <DetailsTable.Row label="GPUS">{gpuCommand}</DetailsTable.Row>;
+  return <DetailsTable.Row label="GPU">{gpuCommand}</DetailsTable.Row>;
 }
 
 export function computeDockerGPUCommand(

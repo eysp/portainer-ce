@@ -32,7 +32,7 @@ export function DuplicateEditButton({
         },
       }}
     >
-      Duplicate/Edit
+      复制 / 编辑
     </Button>
   );
 }

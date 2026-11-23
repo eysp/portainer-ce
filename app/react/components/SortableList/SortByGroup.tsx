@@ -38,7 +38,7 @@ export function SortByGroup<TSortKey extends string>({
         className="text-xs font-semibold tracking-wider text-gray-11 th-highcontrast:text-white th-dark:text-white"
         data-cy="sort-by-label"
       >
-        SORT BY:
+        排序方式：
       </span>
       <div
         className={clsx(

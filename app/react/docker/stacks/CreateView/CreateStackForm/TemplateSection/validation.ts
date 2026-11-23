@@ -10,7 +10,7 @@ export function getTemplateValidationSchema({
   containerNames: Array<string> | undefined;
 }): SchemaOf<TemplateFormValues> {
   return object({
-    selectedId: number().required('Template is required'),
+    selectedId: number().required('模板是必填项'),
     variables: array(
       object({
         key: string().required(),

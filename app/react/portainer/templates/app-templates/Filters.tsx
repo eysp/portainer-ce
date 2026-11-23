@@ -8,9 +8,9 @@ import { TemplateListSort } from './TemplateListSort';
 
 const orderByFields = ['Title', 'Categories', 'Description'] as const;
 const typeFilters: ReadonlyArray<Option<TemplateType>> = [
-  { label: 'Container', value: TemplateType.Container },
-  { label: 'Swarm Stack', value: TemplateType.SwarmStack },
-  { label: 'Compose Stack', value: TemplateType.ComposeStack },
+  { label: '独立容器', value: TemplateType.Container },
+  { label: 'Swarm 栈', value: TemplateType.SwarmStack },
+  { label: 'Compose 栈', value: TemplateType.ComposeStack },
 ] as const;
 
 export function Filters({
@@ -51,11 +51,11 @@ export function Filters({
               listState.setCategory(category);
               onChange();
             }}
-            placeholder="Category"
+            placeholder="分类"
             value={listState.category}
             bindToBody
             isClearable
-            aria-label="Category filter"
+            aria-label="分类筛选"
             data-cy="app-templates-category-filter"
           />
         </div>
@@ -69,11 +69,11 @@ export function Filters({
               listState.setTypes(types);
               onChange();
             }}
-            placeholder="Type"
+            placeholder="类型"
             value={listState.types}
             bindToBody
             isClearable
-            aria-label="Type filter"
+            aria-label="类型筛选"
             data-cy="app-templates-type-filter"
           />
         </div>
@@ -85,9 +85,9 @@ export function Filters({
             onChange();
           }}
           options={orderByFields}
-          placeholder="Sort By"
+          placeholder="排序方式"
           value={listState.sortBy}
-          aria-label="Sort"
+          aria-label="排序"
         />
       </div>
     </div>
